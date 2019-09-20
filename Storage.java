@@ -544,7 +544,7 @@
         throw new RuntimeException("database failure");
       }
     }
-    public int DBAddCustomer(int[] u) throws RuntimeException {
+    public int DBAddRequest(int[] u) throws RuntimeException {
       try {
         uid += 1;
         PSClear(2, 3, 4, 5, 6, 7);
@@ -572,7 +572,7 @@
         throw new RuntimeException("database failure");
       }
     }
-    public int DBAddVehicle(int[] u, int[] route) throws RuntimeException {
+    public int DBAddServer(int[] u, int[] route) throws RuntimeException {
       try {
         int[] output;
         int se = u[1];

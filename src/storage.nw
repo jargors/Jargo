@@ -96,8 +96,8 @@ details.}.  The code itself consists of the \emph{preamble}
 \hi{Write Methods}
 <<[[Storage]] public methods>>=
 <<Update edge speed>>
-<<Add customer>>
-<<Add vehicle>>
+<<Add request>>
+<<Add server>>
 <<Update route>>
 <<Rearrange jobs>>
 <<Add jobs>>
@@ -2126,8 +2126,9 @@ public void DBUpdateEdgeSpeed(int v1, int v2, int nu) throws RuntimeException {
   <<Catch and print [[SQLException]]>>
 }
 @ %def DBUpdateEdgeSpeed
-\subsubsection{[[DBAddCustomer]](1)}
-\label{sec:add-customer}
+
+\subsubsection{[[DBAddRequest]](1)}
+\label{sec:add-request}
 Array [[u]] =
 
 \begin{tikzpicture}
@@ -2137,11 +2138,11 @@ Array [[u]] =
 };
 \end{tikzpicture}
 
-\noindent for user $u$. In order to use [[DBAddCustomer]], $u_q$ must be
+\noindent for user $u$. In order to use [[DBAddRequest]], $u_q$ must be
 greater than 0, otherwise constraint C48 will be violated.
 
-<<Add customer>>=
-public int DBAddCustomer(int[] u) throws RuntimeException {
+<<Add request>>=
+public int DBAddRequest(int[] u) throws RuntimeException {
   try {
     uid += 1;
     <<..insert new user into user tables>>
@@ -2151,7 +2152,7 @@ public int DBAddCustomer(int[] u) throws RuntimeException {
   }
   <<Catch and print [[SQLException]]>>
 }
-@ %def DBAddCustomer
+@ %def DBAddRequest
 <<..insert new user into user tables>>=
 PSClear(2, 3, 4, 5, 6, 7);
 PSAdd(2, uid, u[0]);
@@ -2167,7 +2168,7 @@ PSClear(9);
 PSAdd(9, uid, u[0], u[1], u[2], u[3], u[4], u[5]);
 PSSubmit(9);
 @
-\subsubsection{[[DBAddVehicle]](2)}
+\subsubsection{[[DBAddServer]](2)}
 \label{sec:add-vehicle}
 Array [[u]] =
 
@@ -2178,7 +2179,7 @@ Array [[u]] =
 };
 \end{tikzpicture}
 
-\noindent for user $u$. In order to use [[DBAddVehicle]], $u_q$ must be less
+\noindent for user $u$. In order to use [[DBAddServer]], $u_q$ must be less
 than 0, otherwise constraint C40 will be violated. Use [[route]] to provide the
 initial route. Array [[route]] =
 
@@ -2192,8 +2193,8 @@ initial route. Array [[route]] =
 
 \noindent for route $w$.
 
-<<Add vehicle>>=
-public int DBAddVehicle(int[] u, int[] route) throws RuntimeException {
+<<Add server>>=
+public int DBAddServer(int[] u, int[] route) throws RuntimeException {
   try {
     int[] output;
     int se = u[1];
@@ -2208,7 +2209,7 @@ public int DBAddVehicle(int[] u, int[] route) throws RuntimeException {
   }
   <<Catch and print [[SQLException]]>>
 }
-@ %def DBAddVehicle
+@ %def DBAddServer
 <<..insert new server into Table S>>=
 PSClear(8);
 PSAdd(8, uid, u[0], u[1], u[2], u[3], u[4], u[5]);
