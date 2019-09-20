@@ -28,8 +28,8 @@
 \newtheorem{example}{Example}
 
 % Define colors for tables
-\definecolor{TableTitle} {rgb}{0.900,   0.900,   0.900}
-\definecolor{TableHeader}{rgb}{0.900,   0.900,   0.900}
+\definecolor{TableTitle}{rgb}{0.900, 0.900, 0.900}
+\definecolor{TableHeader}{rgb}{0.900, 0.900, 0.900}
 
 \title{Jargo's Storage Interface
   and Data Model\footnote{\url{https://github.com/jargors/Storage}}}
@@ -68,10 +68,10 @@ can communicate with Derby using JDBC.
 The storage interface is developed using the
 Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
 programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
-([[src/storage.nw]]) is the source for both the documentation ([[doc/storage.tex]])
-and the Java code (Storage.java)\footnote{See the [[Makefile]] for build
-details.}.  The code itself consists of the \emph{preamble}
-(\S\ref{sec:preamble}) and the \emph{class definition}
+([[src/storage.nw]]) is the source for both the documentation
+([[doc/storage.tex]]) and the Java code (Storage.java)\footnote{See the
+[[Makefile]] for build details.}.  The code itself consists of the
+\emph{preamble} (\S\ref{sec:preamble}) and the \emph{class definition}
 (\S\ref{sec:class-definition}).
 <<Storage.java>>=
   <<Storage.java preamble>>
@@ -96,12 +96,12 @@ details.}.  The code itself consists of the \emph{preamble}
 \hi{Write Methods}
 <<[[Storage]] public methods>>=
 <<Update edge speed>>
-<<Add request>>
-<<Add server>>
-<<Update route>>
-<<Rearrange jobs>>
-<<Add jobs>>
-<<Remove jobs>>
+<<Add new request>>
+<<Add new server>>
+<<Update server route>>
+<<Update server schedule>>
+<<Update server add to schedule>>
+<<Update server remove from schedule>>
 @
 \end{minipage}
 \begin{minipage}[t]{0.40\textwidth}
@@ -2127,8 +2127,7 @@ public void DBUpdateEdgeSpeed(int v1, int v2, int nu) throws RuntimeException {
 }
 @ %def DBUpdateEdgeSpeed
 
-\subsubsection{[[DBAddRequest]](1)}
-\label{sec:add-request}
+\subsubsection{[[DBAddNewRequest]](1)}
 Array [[u]] =
 
 \begin{tikzpicture}
@@ -2141,8 +2140,8 @@ Array [[u]] =
 \noindent for user $u$. In order to use [[DBAddRequest]], $u_q$ must be
 greater than 0, otherwise constraint C48 will be violated.
 
-<<Add request>>=
-public int DBAddRequest(int[] u) throws RuntimeException {
+<<Add new request>>=
+public int DBAddNewRequest(int[] u) throws RuntimeException {
   try {
     uid += 1;
     <<..insert new user into user tables>>
@@ -2152,7 +2151,7 @@ public int DBAddRequest(int[] u) throws RuntimeException {
   }
   <<Catch and print [[SQLException]]>>
 }
-@ %def DBAddRequest
+@ %def DBAddNewRequest
 <<..insert new user into user tables>>=
 PSClear(2, 3, 4, 5, 6, 7);
 PSAdd(2, uid, u[0]);
@@ -2168,8 +2167,7 @@ PSClear(9);
 PSAdd(9, uid, u[0], u[1], u[2], u[3], u[4], u[5]);
 PSSubmit(9);
 @
-\subsubsection{[[DBAddServer]](2)}
-\label{sec:add-vehicle}
+\subsubsection{[[DBAddNewServer]](2)}
 Array [[u]] =
 
 \begin{tikzpicture}
@@ -2193,8 +2191,8 @@ initial route. Array [[route]] =
 
 \noindent for route $w$.
 
-<<Add server>>=
-public int DBAddServer(int[] u, int[] route) throws RuntimeException {
+<<Add new server>>=
+public int DBAddNewServer(int[] u, int[] route) throws RuntimeException {
   try {
     int[] output;
     int se = u[1];
@@ -2209,7 +2207,7 @@ public int DBAddServer(int[] u, int[] route) throws RuntimeException {
   }
   <<Catch and print [[SQLException]]>>
 }
-@ %def DBAddServer
+@ %def DBAddNewServer
 <<..insert new server into Table S>>=
 PSClear(8);
 PSAdd(8, uid, u[0], u[1], u[2], u[3], u[4], u[5]);
@@ -2218,6 +2216,8 @@ PSSubmit(8);
 <<..insert new server route into Table W>>=
 <<Procedure to insert [[route]] into Table W>>
 @
+The procedure to insert [[route]] into Table W is written into its own chunk so
+we can re-use it later.
 <<Procedure to insert [[route]] into Table W>>=
 PSClear(10);
 for (int i = 0; i < (route.length - 3); i += 2) {
@@ -2257,7 +2257,7 @@ Array [[route]] =
 \end{tikzpicture}
 
 \noindent for route $w$.
-<<Update route>>=
+<<Update server route>>=
 public void DBUpdateServerRoute(int sid, int[] route)
 throws RuntimeException {
   int[] output;
@@ -2296,9 +2296,7 @@ PSAdd(77, te, ve, sid);
 PSSubmit(77);
 @
 
-\subsubsection{[[DBRearrangeJobs]](3)}
-\label{sec:rearrange-jobs}
-
+\subsubsection{[[DBUpdateServerSchedule]](3)}
 Array [[sched]] =
 
 \begin{tikzpicture}
@@ -2324,11 +2322,13 @@ $L_{i_j}$ is the label. Array [[route]] =
 
 \noindent for route $w$.
 
-Method [[DBRearrangeJobs]] updates the \emph{remaining} route and schedule.
-No new stops must appear in the new schedule, otherwise foreign key
-violations may occur.
-<<Rearrange jobs>>=
-public void DBRearrangeJobs(int sid, int[] sched, int[] route)
+Method [[DBUpdateServerSchedule]] updates the \emph{remaining} route and
+schedule.  No new stops should appear in the new schedule, otherwise foreign
+key violations may occur. The point of the [[cache]] is to store the
+pick-up and drop-off times for each request in the schedule so that we
+can use these values when we are inserting into Table CQ.
+<<Update server schedule>>=
+public void DBUpdateServerSchedule(int sid, int[] sched, int[] route)
 throws RuntimeException {
   int[] output;
   int se, sq;
@@ -2341,7 +2341,7 @@ throws RuntimeException {
   }
   <<Catch and print [[SQLException]]>>
 }
-@ %def DBRearrangeJobs
+@ %def DBUpdateServerSchedule
 Adding the [[-1]] to the upper bound of [[j]] skips over the last element
 in the schedule, which is expected to be the server's destination.
 <<..update schedule>>=
@@ -2401,10 +2401,12 @@ for (int j = 0; j < bound; j++) {
 PSSubmit(14);
 @
 
-\subsubsection{[[DBAddJobs]](4)}
-\label{sec:add-jobs}
-<<Add jobs>>=
-public void DBAddJobs(int sid, int[] rid, int[] sched, int[] route)
+\subsubsection{[[DBUpdateServerAddToSchedule]](4)}
+A second cache, [[cache2]], is introduced to store the pick-up an drop-off
+vertices so that we can use them when we insert into Table PD and CPD.
+<<Update server add to schedule>>=
+public void DBUpdateServerAddToSchedule(
+    int sid, int[] rid, int[] sched, int[] route)
 throws RuntimeException {
   int[] output;
   int se, sq;
@@ -2418,7 +2420,7 @@ throws RuntimeException {
   }
   <<Catch and print [[SQLException]]>>
 }
-@ %def DBAddJobs
+@ %def DBUpdateServerAddToSchedule
 <<..update and add to schedule>>=
 int bound = ((sched.length/3) - 1);
 <<....update times in pd and cpd>>
@@ -2487,10 +2489,10 @@ for (int r : rid) {
 PSSubmit(12, 13);
 @
 
-\subsubsection{[[DBRemoveJobs]](4)}
-\label{sec:remove-jobs}
-<<Remove jobs>>=
-public void DBRemoveJobs(int sid, int[] rid, int[] sched, int[] route)
+\subsubsection{[[DBUpdateServerRemoveFromSchedule]](4)}
+<<Update server remove from schedule>>=
+public void DBUpdateServerRemoveFromSchedule(
+    int sid, int[] rid, int[] sched, int[] route)
 throws RuntimeException {
   int[] output;
   int se, sq;
@@ -2504,7 +2506,7 @@ throws RuntimeException {
   }
   <<Catch and print [[SQLException]]>>
 }
-@ %def DBRemoveJobs
+@ %def DBUpdateServerRemoveFromSchedule
 <<..remove jobs from pd, cpd>>=
 PSClear(42, 43);
 for (int r : rid) {
@@ -2535,6 +2537,7 @@ public int[] DBQuery(String sql, int ncols) throws RuntimeException {
   return output;
 }
 @ % def DBQuery
+
 \subsubsection{[[DBQueryVehicle]](1)}
 <<Query ridesharing user>>=
 public int[] DBQueryVehicle(int sid) throws RuntimeException {
@@ -2546,6 +2549,7 @@ public int[] DBQueryVehicle(int sid) throws RuntimeException {
   return output;
 }
 @ %def DBQueryVehicle
+
 \subsubsection{[[DBQueryCustomer]](1)}
 <<Query ridesharing user>>=
 public int[] DBQueryCustomer(int rid) throws RuntimeException {
@@ -2557,6 +2561,7 @@ public int[] DBQueryCustomer(int rid) throws RuntimeException {
   return output;
 }
 @ %def DBQueryCustomer
+
 \subsubsection{[[DBQueryUnassignedCustomers]](1)}
 <<Query unassigned customers>>=
 public int[] DBQueryUnassignedCustomers(int t) throws RuntimeException {
@@ -2605,6 +2610,7 @@ public int[] DBQueryRoute(int sid) throws RuntimeException {
   return output;
 }
 @ %def DBQueryRoute
+
 \subsubsection{[[DBQuerySchedule]](1)}
 Similarly, a vehicle's schedule can be retrieved.
 \footnote{Schedules may contain [[null]] values in the labels. A null is recorded
@@ -2619,9 +2625,10 @@ public int[] DBQuerySchedule(int sid) throws RuntimeException {
   return output;
 }
 @ %def DBQuerySchedule
-Given a time $t$, the \emph{remaining} schedule can be retrieved.
+
+\subsubsection{[[DBQueryScheduleRemaining]](2)}
 <<Query schedules>>=
-public int[] DBQueryScheduleRem(int sid, int t) throws RuntimeException {
+public int[] DBQueryScheduleRemaining(int sid, int t) throws RuntimeException {
   int[] output = null;
   try {
     output = DBFetch(69, 4, sid, t);
@@ -2629,7 +2636,8 @@ public int[] DBQueryScheduleRem(int sid, int t) throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@ %def DBQueryScheduleRem
+@ %def DBQueryScheduleRemaining
+
 \subsubsection{[[DBQueryCurrentLoad]](2)}
 <<Query current load>>=
 public int[] DBQueryCurrentLoad(int sid, int t) throws RuntimeException {
@@ -2720,9 +2728,9 @@ public int[] DBQueryCountRequests() throws RuntimeException {
 }
 @ %def DBQueryCountRequests
 
-\subsubsection{[[DBQueryServerRemainingAssignments]](2)}
+\subsubsection{[[DBQueryServerPendingAssignments]](2)}
 <<Query various metrics>>=
-public int[] DBQueryServerRemainingAssignments(int t, int sid)
+public int[] DBQueryServerPendingAssignments(int sid, int t)
 throws RuntimeException {
   int[] output = null;
   try {
@@ -2731,11 +2739,11 @@ throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryServerPendingAssignments
 
 \subsubsection{[[DBQueryServerCompletedAssignments]](2)}
 <<Query various metrics>>=
-public int[] DBQueryServerCompletedAssignments(int t, int sid)
+public int[] DBQueryServerCompletedAssignments(int sid, int t)
 throws RuntimeException {
   int[] output = null;
   try {
@@ -2744,7 +2752,7 @@ throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryServerCompletedAssignments
 
 \subsubsection{[[DBQueryServiceRate]](0)}
 <<Query various metrics>>=
@@ -2756,7 +2764,7 @@ public int[] DBQueryServiceRate() throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryServiceRate
 
 \subsubsection{[[DBQueryBaseDistanceTotal]](0)}
 <<Query various metrics>>=
@@ -2768,7 +2776,7 @@ public int[] DBQueryBaseDistanceTotal() throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryBaseDistanceTotal
 
 \subsubsection{[[DBQueryServerBaseDistanceTotal]](0)}
 <<Query various metrics>>=
@@ -2780,7 +2788,7 @@ public int[] DBQueryServerBaseDistanceTotal() throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryServerBaseDistanceTotal
 
 \subsubsection{[[DBQueryRequestBaseDistanceTotal]](0)}
 <<Query various metrics>>=
@@ -2792,7 +2800,7 @@ public int[] DBQueryRequestBaseDistanceTotal() throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryRequestBaseDistanceTotal
 
 \subsubsection{[[DBQueryServerTravelDistance]](1)}
 <<Query various metrics>>=
@@ -2804,7 +2812,7 @@ public int[] DBQueryServerTravelDistance(int sid) throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryServerTravelDistance
 
 \subsubsection{[[DBQueryServerTravelDistanceTotal]](0)}
 <<Query various metrics>>=
@@ -2816,7 +2824,7 @@ public int[] DBQueryServerTravelDistanceTotal() throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryServerTravelDistanceTotal
 
 \subsubsection{[[DBQueryServerCruisingDistance]](1)}
 <<Query various metrics>>=
@@ -2828,7 +2836,7 @@ public int[] DBQueryServerCruisingDistance(int sid) throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryServerCruisingDistance
 
 \subsubsection{[[DBQueryServerCruisingDistanceTotal]](0)}
 <<Query various metrics>>=
@@ -2840,7 +2848,7 @@ public int[] DBQueryServerCruisingDistanceTotal() throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryServerCruisingDistanceTotal
 
 \subsubsection{[[DBQueryServerServiceDistance]](1)}
 <<Query various metrics>>=
@@ -2852,7 +2860,7 @@ public int[] DBQueryServerServiceDistance(int sid) throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryServerServiceDistance
 
 \subsubsection{[[DBQueryServerServiceDistanceTotal]](0)}
 <<Query various metrics>>=
@@ -2864,7 +2872,7 @@ public int[] DBQueryServerServiceDistanceTotal() throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryServerServiceDistanceTotal
 
 \subsubsection{[[DBQueryRequestDetourDistance]](1)}
 <<Query various metrics>>=
@@ -2876,7 +2884,7 @@ public int[] DBQueryRequestDetourDistance(int rid) throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryRequestDetourDistance
 
 \subsubsection{[[DBQueryRequestDetourDistanceTotal]](0)}
 <<Query various metrics>>=
@@ -2888,7 +2896,7 @@ public int[] DBQueryRequestDetourDistanceTotal() throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryRequestDetourDistanceTotal
 
 \subsubsection{[[DBQueryRequestTransitDistance]](1)}
 <<Query various metrics>>=
@@ -2900,7 +2908,7 @@ public int[] DBQueryRequestTransitDistance(int rid) throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryRequestTransitDistance
 
 \subsubsection{[[DBQueryRequestTransitDistanceTotal]](0)}
 <<Query various metrics>>=
@@ -2912,7 +2920,7 @@ public int[] DBQueryRequestTransitDistanceTotal() throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryRequestTransitDistanceTotal
 
 \subsubsection{[[DBQueryServerTravelDuration]](1)}
 <<Query various metrics>>=
@@ -2924,7 +2932,7 @@ public int[] DBQueryServerTravelDuration(int sid) throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryServerTravelDuration
 
 \subsubsection{[[DBQueryServerTravelDurationTotal]](0)}
 <<Query various metrics>>=
@@ -2936,7 +2944,7 @@ public int[] DBQueryServerTravelDurationTotal() throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryServerTravelDurationTotal
 
 \subsubsection{[[DBQueryRequestPickupDuration]](1)}
 <<Query various metrics>>=
@@ -2948,7 +2956,7 @@ public int[] DBQueryRequestPickupDuration(int rid) throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryRequestPickupDuration
 
 \subsubsection{[[DBQueryRequestPickupDurationTotal]](0)}
 <<Query various metrics>>=
@@ -2960,7 +2968,7 @@ public int[] DBQueryRequestPickupDurationTotal() throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryRequestPickupDurationTotal
 
 \subsubsection{[[DBQueryRequestTransitDuration]](1)}
 <<Query various metrics>>=
@@ -2972,7 +2980,7 @@ public int[] DBQueryRequestTransitDuration(int rid) throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryRequestTransitDuration
 
 \subsubsection{[[DBQueryRequestTransitDurationTotal]](0)}
 <<Query various metrics>>=
@@ -2984,7 +2992,7 @@ public int[] DBQueryRequestTransitDurationTotal() throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryRequestTransitDurationTotal
 
 \subsubsection{[[DBQueryRequestTravelDuration]](1)}
 <<Query various metrics>>=
@@ -2996,7 +3004,7 @@ public int[] DBQueryRequestTravelDuration(int rid) throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryRequestTravelDuration
 
 \subsubsection{[[DBQueryRequestTravelDurationTotal]](0)}
 <<Query various metrics>>=
@@ -3008,7 +3016,7 @@ public int[] DBQueryRequestTravelDurationTotal() throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryRequestTravelDurationTotal
 
 \subsubsection{[[DBQueryRequestDepartureTime]](1)}
 <<Query various metrics>>=
@@ -3020,7 +3028,7 @@ public int[] DBQueryRequestDepartureTime(int rid) throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryRequestDepartureTime
 
 \subsubsection{[[DBQueryServerDepartureTime]](1)}
 <<Query various metrics>>=
@@ -3032,7 +3040,7 @@ public int[] DBQueryServerDepartureTime(int sid) throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryServerDepartureTime
 
 \subsubsection{[[DBQueryRequestArrivalTime]](1)}
 <<Query various metrics>>=
@@ -3044,7 +3052,7 @@ public int[] DBQueryRequestArrivalTime(int rid) throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryRequestArrivalTime
 
 \subsubsection{[[DBQueryServerArrivalTime]](1)}
 <<Query various metrics>>=
@@ -3056,7 +3064,7 @@ public int[] DBQueryServerArrivalTime(int sid) throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@
+@ %def DBQueryServerArrivalTime
 
 \section{Private Methods}
 \label{sec:private}

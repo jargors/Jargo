@@ -544,7 +544,7 @@
         throw new RuntimeException("database failure");
       }
     }
-    public int DBAddRequest(int[] u) throws RuntimeException {
+    public int DBAddNewRequest(int[] u) throws RuntimeException {
       try {
         uid += 1;
         PSClear(2, 3, 4, 5, 6, 7);
@@ -572,7 +572,7 @@
         throw new RuntimeException("database failure");
       }
     }
-    public int DBAddServer(int[] u, int[] route) throws RuntimeException {
+    public int DBAddNewServer(int[] u, int[] route) throws RuntimeException {
       try {
         int[] output;
         int se = u[1];
@@ -663,7 +663,7 @@
         throw new RuntimeException("database failure");
       }
     }
-    public void DBRearrangeJobs(int sid, int[] sched, int[] route)
+    public void DBUpdateServerSchedule(int sid, int[] sched, int[] route)
     throws RuntimeException {
       int[] output;
       int se, sq;
@@ -750,7 +750,8 @@
         throw new RuntimeException("database failure");
       }
     }
-    public void DBAddJobs(int sid, int[] rid, int[] sched, int[] route)
+    public void DBUpdateServerAddToSchedule(
+        int sid, int[] rid, int[] sched, int[] route)
     throws RuntimeException {
       int[] output;
       int se, sq;
@@ -877,7 +878,8 @@
         throw new RuntimeException("database failure");
       }
     }
-    public void DBRemoveJobs(int sid, int[] rid, int[] sched, int[] route)
+    public void DBUpdateServerRemoveFromSchedule(
+        int sid, int[] rid, int[] sched, int[] route)
     throws RuntimeException {
       int[] output;
       int se, sq;
@@ -1089,7 +1091,7 @@
       }
       return output;
     }
-    public int[] DBQueryScheduleRem(int sid, int t) throws RuntimeException {
+    public int[] DBQueryScheduleRemaining(int sid, int t) throws RuntimeException {
       int[] output = null;
       try {
         output = DBFetch(69, 4, sid, t);
@@ -1225,7 +1227,7 @@
       }
       return output;
     }
-    public int[] DBQueryServerRemainingAssignments(int t, int sid)
+    public int[] DBQueryServerPendingAssignments(int sid, int t)
     throws RuntimeException {
       int[] output = null;
       try {
@@ -1243,7 +1245,7 @@
       }
       return output;
     }
-    public int[] DBQueryServerCompletedAssignments(int t, int sid)
+    public int[] DBQueryServerCompletedAssignments(int sid, int t)
     throws RuntimeException {
       int[] output = null;
       try {
