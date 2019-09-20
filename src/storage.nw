@@ -98,6 +98,7 @@ details.}.  The code itself consists of the \emph{preamble}
 <<Update edge speed>>
 <<Add customer>>
 <<Add vehicle>>
+<<Update route>>
 <<Rearrange jobs>>
 <<Add jobs>>
 <<Remove jobs>>
@@ -2242,6 +2243,58 @@ PSAdd(14, uid, u[0], u[1], null, u[1], u[3], null, u[0],
     null, null, null, null, null, 1);
 PSSubmit(14);
 @
+
+\subsubsection{[[DBUpdateServerRoute]](2)}
+Array [[route]] =
+
+\begin{tikzpicture}
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:t_1$}; & \node {$1:v_1$};
+ &\node[minimum width=12mm] {...};
+ &\node {$(2|w|-2):t_{|w|}$}; & \node {$(2|w|-1):v_{|w|}$};\\
+};
+\end{tikzpicture}
+
+\noindent for route $w$.
+<<Update route>>=
+public void DBUpdateServerRoute(int sid, int[] route)
+throws RuntimeException {
+  int[] output;
+  int se, sq;
+  try {
+    <<..fetch [[se]] and [[sq]]>>
+    <<..update route>>
+    conn.commit();
+  }
+  <<Catch and print [[SQLException]]>>
+}
+@ %def DBUpdateServerRoute
+<<..fetch [[se]] and [[sq]]>>=
+output = DBFetch(48, 2, sid);
+se = output[0];
+sq = output[1];
+@
+<<..update route>>=
+<<....delete remaining route>>
+<<....insert new remaining route>>
+<<....update route endpoint>>
+@
+<<....delete remaining route>>=
+PSClear(76);
+PSAdd(76, sid, route[0]);
+PSSubmit(76);
+@
+<<....insert new remaining route>>=
+<<Procedure to insert [[route]] into Table W>>
+@
+<<....update route endpoint>>=
+PSClear(77);
+int te = route[(route.length - 2)];
+int ve = route[(route.length - 1)];
+PSAdd(77, te, ve, sid);
+PSSubmit(77);
+@
+
 \subsubsection{[[DBRearrangeJobs]](3)}
 \label{sec:rearrange-jobs}
 
@@ -2288,31 +2341,6 @@ throws RuntimeException {
   <<Catch and print [[SQLException]]>>
 }
 @ %def DBRearrangeJobs
-<<..fetch [[se]] and [[sq]]>>=
-output = DBFetch(48, 2, sid);
-se = output[0];
-sq = output[1];
-@
-<<..update route>>=
-<<....delete remaining route>>
-<<....insert new remaining route>>
-<<....update route endpoint>>
-@
-<<....delete remaining route>>=
-PSClear(76);
-PSAdd(76, sid, route[0]);
-PSSubmit(76);
-@
-<<....insert new remaining route>>=
-<<Procedure to insert [[route]] into Table W>>
-@
-<<....update route endpoint>>=
-PSClear(77);
-int te = sched[(sched.length - 3)];
-int ve = sched[(sched.length - 2)];
-PSAdd(77, te, ve, sid);
-PSSubmit(77);
-@
 Adding the [[-1]] to the upper bound of [[j]] skips over the last element
 in the schedule, which is expected to be the server's destination.
 <<..update schedule>>=
