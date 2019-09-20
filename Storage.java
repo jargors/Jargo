@@ -980,10 +980,27 @@
       }
       return output;
     }
-    public int[] DBQueryLocations(int t) throws RuntimeException {
+    public int[] DBQueryServerLocationsAll(int t) throws RuntimeException {
       int[] output = null;
       try {
         output = DBFetch(59, 3, t, t, t, t);
+      }
+      catch (SQLException e1) {
+        printSQLException(e1);
+        try {
+          conn.rollback();
+        } catch (SQLException e2) {
+          printSQLException(e2);
+        }
+        DBSaveBackup("db-lastgood");
+        throw new RuntimeException("database failure");
+      }
+      return output;
+    }
+    public int[] DBQueryServerLocationsActive(int t) throws RuntimeException {
+      int[] output = null;
+      try {
+        output = DBFetch(128, 3, t, t, t, t, t);
       }
       catch (SQLException e1) {
         printSQLException(e1);
@@ -1812,8 +1829,13 @@
         pstr.put(59, SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
             + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
             + "GROUP BY sid"
-            + ") as b ON a.sid=b.sid AND ABS(a.t2-?)=b.tdiff "
-            + "AND a.t2<=?");
+            + ") as b ON a.sid=b.sid AND ABS(a.t2-?)=b.tdiff AND a.t2<=?");
+        pstr.put(128, SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
+            + "SELECT sid FROM CW WHERE te>?"
+            + ") as b ON a.sid=b.sid INNER JOIN ("
+            + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
+            + "GROUP BY sid"
+            + ") as c ON a.sid=c.sid AND ABS(a.t2-?)=c.tdiff AND a.t2<=?");
         pstr.put(60, SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC");
         pstr.put(61, SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
             + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC");

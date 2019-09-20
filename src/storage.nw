@@ -108,7 +108,8 @@ details.}.  The code itself consists of the \emph{preamble}
 <<[[Storage]] public methods>>=
 <<Query ridesharing user>>
 <<Query unassigned customers>>
-<<Query locations>>
+<<Query all server locations>>
+<<Query active server locations>>
 <<Query routes>>
 <<Query schedules>>
 <<Query current load>>
@@ -2538,9 +2539,10 @@ public int[] DBQueryUnassignedCustomers(int t) throws RuntimeException {
   return output;
 }
 @ %def DBQueryUnassignedCustomers
-\subsubsection{[[DBQueryLocations]](1)}
-<<Query locations>>=
-public int[] DBQueryLocations(int t) throws RuntimeException {
+
+\subsubsection{[[DBQueryServerLocationsAll]](1)}
+<<Query all server locations>>=
+public int[] DBQueryServerLocationsAll(int t) throws RuntimeException {
   int[] output = null;
   try {
     output = DBFetch(59, 3, t, t, t, t);
@@ -2548,7 +2550,20 @@ public int[] DBQueryLocations(int t) throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@ %def DBQueryLocations
+@ %def DBQueryServerLocationsAll
+
+\subsubsection{[[DBQueryServerLocationsActive]](1)}
+<<Query active server locations>>=
+public int[] DBQueryServerLocationsActive(int t) throws RuntimeException {
+  int[] output = null;
+  try {
+    output = DBFetch(128, 3, t, t, t, t, t);
+  }
+  <<Catch and print [[SQLException]]>>
+  return output;
+}
+@ %def DBQueryServerLocationsActive
+
 \subsubsection{[[DBQueryRoute]](1)}
 A vehicle's route can be retrieved if its corresponding [[sid]] is known.
 <<Query routes>>=
@@ -3176,8 +3191,13 @@ private void PSInit() throws RuntimeException {
   pstr.put(59, SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
       + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
       + "GROUP BY sid"
-      + ") as b ON a.sid=b.sid AND ABS(a.t2-?)=b.tdiff "
-      + "AND a.t2<=?");
+      + ") as b ON a.sid=b.sid AND ABS(a.t2-?)=b.tdiff AND a.t2<=?");
+  pstr.put(128, SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
+      + "SELECT sid FROM CW WHERE te>?"
+      + ") as b ON a.sid=b.sid INNER JOIN ("
+      + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
+      + "GROUP BY sid"
+      + ") as c ON a.sid=c.sid AND ABS(a.t2-?)=c.tdiff AND a.t2<=?");
   pstr.put(60, SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC");
   pstr.put(61, SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
       + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC");
