@@ -512,7 +512,7 @@
                        c2[0]/CSHIFT, c2[1]/CSHIFT);
     }
     public void printUser(int[] u) {
-      System.out.println("User {sid="+u[0]+", q="+u[1]+", e="+u[2]+", l="+u[3]
+      System.out.println("User {uid="+u[0]+", q="+u[1]+", e="+u[2]+", l="+u[3]
         +", o="+u[4]+", d="+u[5]+", b="+u[6]+"}");
     }
     public void printPath(int[] path) {
