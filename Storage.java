@@ -371,7 +371,7 @@
         throw new RuntimeException("database failure");
       }
       PSInit();
-      Print("Loading roadnet from "+f_rnet+"...");
+      Print("Loading road network ("+f_rnet+")");
       try {
         PSClear(0, 1);
         int[] col = new int[7];
@@ -423,6 +423,7 @@
       }
     }
     public void DBLoadBackup(String filepath) throws RuntimeException {
+      Print("Loading database backup ("+filepath+")");
       try {
         if (!conn.isClosed()) {
           conn.close();
@@ -448,7 +449,6 @@
           throw new RuntimeException("database failure");
         }
         PSInit();
-        Print("Connected to database backup");
       }
       catch (SQLException e1) {
         printSQLException(e1);

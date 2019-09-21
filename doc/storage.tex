@@ -1871,7 +1871,7 @@ PSInit();
 \subsubsection{Initializing the Road Network}
 \label{sec:initializing-the-road-network}
 \nwenddocs{}\nwbegincode{123}\sublabel{NW15FRcE-1tcQJD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-1tcQJD-1}}}\moddef{..initialize road network~{\nwtagstyle{}\subpageref{NW15FRcE-1tcQJD-1}}}\endmoddef\nwused{\\{NW15FRcE-36NvOs-1}}
-Print("Loading roadnet from "+f_rnet+"...");
+Print("Loading road network ("+f_rnet+")");
 try \{
   PSClear(0, 1);
   int[] col = new int[7];
@@ -2005,6 +2005,7 @@ catch (SQLException e1) \{
 To load a database backup:
 \nwenddocs{}\nwbegincode{143}\sublabel{NW15FRcE-b3Hn1-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-b3Hn1-1}}}\moddef{Load backup~{\nwtagstyle{}\subpageref{NW15FRcE-b3Hn1-1}}}\endmoddef\nwused{\\{NW15FRcE-4PbjF-1}}
 public void DBLoadBackup(String filepath) throws RuntimeException \{
+  Print("Loading database backup ("+filepath+")");
   try \{
     if (!conn.isClosed()) \{
       conn.close();
@@ -2012,7 +2013,6 @@ public void DBLoadBackup(String filepath) throws RuntimeException \{
     conn = DriverManager.getConnection("jdbc:derby:memory:jargobak;createFrom="+filepath);
     \LA{}....configure database properties~{\nwtagstyle{}\subpageref{NW15FRcE-1oq4K7-1}}\RA{}
     \LA{}..initialize prepared statements~{\nwtagstyle{}\subpageref{NW15FRcE-1uI1uN-1}}\RA{}
-    Print("Connected to database backup");
   \}
   \LA{}Catch and print \code{}SQLException\edoc{}~{\nwtagstyle{}\subpageref{NW15FRcE-4P0tKA-1}}\RA{}
 \}

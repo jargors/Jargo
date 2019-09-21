@@ -1871,7 +1871,7 @@ PSInit();
 \subsubsection{Initializing the Road Network}
 \label{sec:initializing-the-road-network}
 <<..initialize road network>>=
-Print("Loading roadnet from "+f_rnet+"...");
+Print("Loading road network ("+f_rnet+")");
 try {
   PSClear(0, 1);
   int[] col = new int[7];
@@ -2005,6 +2005,7 @@ catch (SQLException e1) {
 To load a database backup:
 <<Load backup>>=
 public void DBLoadBackup(String filepath) throws RuntimeException {
+  Print("Loading database backup ("+filepath+")");
   try {
     if (!conn.isClosed()) {
       conn.close();
@@ -2012,7 +2013,6 @@ public void DBLoadBackup(String filepath) throws RuntimeException {
     conn = DriverManager.getConnection("jdbc:derby:memory:jargobak;createFrom="+filepath);
     <<....configure database properties>>
     <<..initialize prepared statements>>
-    Print("Connected to database backup");
   }
   <<Catch and print [[SQLException]]>>
 }
