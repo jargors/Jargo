@@ -5,7 +5,7 @@ jargors-storage-1.0.0.jar : com/github/jargors/Storage.class
 	jar cvf jargors-storage-1.0.0.jar com
 
 com/github/jargors/Storage.class : Storage.java
-	javac -d . -cp .:lib/jargors-gtreeJNI-1.0.0.jar Storage.java
+	javac -d . -cp . Storage.java
 
 Storage.java : src/storage.nw
 	notangle -RStorage.java src/storage.nw > Storage.java
@@ -20,7 +20,7 @@ clean : cleanjava cleanclass cleantex cleandoc
 	rm -f storage.pdf
 
 cleanjava :
-	rm -f Storage.ja*
+	rm -f Storage.ja* jargors-storage-*.jar
 
 cleanclass :
 	rm -rf com/
