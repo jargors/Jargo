@@ -102,7 +102,7 @@ programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
 \hi{Read Methods}
 <<[[Storage]] public methods>>=
 <<Query ridesharing user>>
-<<Query unassigned customers>>
+<<Query unassigned requests>>
 <<Query all server locations>>
 <<Query active server locations>>
 <<Query routes>>
@@ -2546,9 +2546,9 @@ public int[] DBQuery(String sql, int ncols) throws RuntimeException {
 }
 @ % def DBQuery
 
-\subsubsection{[[DBQueryVehicle]](1)}
+\subsubsection{[[DBQueryServer]](1)}
 <<Query ridesharing user>>=
-public int[] DBQueryVehicle(int sid) throws RuntimeException {
+public int[] DBQueryServer(int sid) throws RuntimeException {
   int[] output = null;
   try {
     output = DBFetch(70, 7, sid);
@@ -2556,11 +2556,11 @@ public int[] DBQueryVehicle(int sid) throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@ %def DBQueryVehicle
+@ %def DBQueryServer
 
-\subsubsection{[[DBQueryCustomer]](1)}
+\subsubsection{[[DBQueryRequest]](1)}
 <<Query ridesharing user>>=
-public int[] DBQueryCustomer(int rid) throws RuntimeException {
+public int[] DBQueryRequest(int rid) throws RuntimeException {
   int[] output = null;
   try {
     output = DBFetch(75, 7, rid);
@@ -2568,11 +2568,11 @@ public int[] DBQueryCustomer(int rid) throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@ %def DBQueryCustomer
+@ %def DBQueryRequest
 
-\subsubsection{[[DBQueryUnassignedCustomers]](1)}
-<<Query unassigned customers>>=
-public int[] DBQueryUnassignedCustomers(int t) throws RuntimeException {
+\subsubsection{[[DBQueryUnassignedRequests]](1)}
+<<Query unassigned requests>>=
+public int[] DBQueryUnassignedRequests(int t) throws RuntimeException {
   int[] output = null;
   try {
     output = DBFetch(68, 7, t, t);
@@ -2580,7 +2580,7 @@ public int[] DBQueryUnassignedCustomers(int t) throws RuntimeException {
   <<Catch and print [[SQLException]]>>
   return output;
 }
-@ %def DBQueryUnassignedCustomers
+@ %def DBQueryUnassignedRequests
 
 \subsubsection{[[DBQueryServerLocationsAll]](1)}
 <<Query all server locations>>=

@@ -973,7 +973,7 @@
         throw new RuntimeException("database failure");
       }
     }
-    public int[] DBQueryVehicle(int sid) throws RuntimeException {
+    public int[] DBQueryServer(int sid) throws RuntimeException {
       int[] output = null;
       try {
         output = DBFetch(70, 7, sid);
@@ -990,7 +990,7 @@
       }
       return output;
     }
-    public int[] DBQueryCustomer(int rid) throws RuntimeException {
+    public int[] DBQueryRequest(int rid) throws RuntimeException {
       int[] output = null;
       try {
         output = DBFetch(75, 7, rid);
@@ -1007,7 +1007,7 @@
       }
       return output;
     }
-    public int[] DBQueryUnassignedCustomers(int t) throws RuntimeException {
+    public int[] DBQueryUnassignedRequests(int t) throws RuntimeException {
       int[] output = null;
       try {
         output = DBFetch(68, 7, t, t);
