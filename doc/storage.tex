@@ -1817,6 +1817,7 @@ try \{
 \nwenddocs{}\nwbegincode{119}\sublabel{NW15FRcE-1b3IMM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-1b3IMM-1}}}\moddef{....initialize data model~{\nwtagstyle{}\subpageref{NW15FRcE-1b3IMM-1}}}\endmoddef\nwused{\\{NW15FRcE-47jz5t-1}}
 Statement stmt = conn.createStatement();
 Print("Creating tables and views...");
+stmt.clearBatch();
 stmt.addBatch(\LA{}Create Table V statement~{\nwtagstyle{}\subpageref{NW15FRcE-RzwV3-1}}\RA{});
 stmt.addBatch(\LA{}Create Table E statement~{\nwtagstyle{}\subpageref{NW15FRcE-2WHSWQ-1}}\RA{});
 stmt.addBatch(\LA{}Create Table UQ statement~{\nwtagstyle{}\subpageref{NW15FRcE-llmAG-1}}\RA{});
@@ -1845,8 +1846,8 @@ stmt.addBatch(\LA{}Create View dist\_s\_cruising statement (Eq.~\ref{eq:cruising
 stmt.addBatch(\LA{}Create View dist\_s\_service statement (Eq.~\ref{eq:service-distance})~{\nwtagstyle{}\subpageref{NW15FRcE-21lyOa-1}}\RA{});
 stmt.addBatch(\LA{}Create View dist\_s\_base statement~{\nwtagstyle{}\subpageref{NW15FRcE-15VZds-1}}\RA{});
 stmt.addBatch(\LA{}Create View dist\_r\_base statement~{\nwtagstyle{}\subpageref{NW15FRcE-2qZ1kZ-1}}\RA{});
-stmt.addBatch(\LA{}Create View dist\_r\_detour statement (Eq.~\ref{eq:detour-distance})~{\nwtagstyle{}\subpageref{NW15FRcE-4OnMrk-1}}\RA{});
 stmt.addBatch(\LA{}Create View dist\_r\_transit statement (Eq.~\ref{eq:transit-distance})~{\nwtagstyle{}\subpageref{NW15FRcE-eXH6J-1}}\RA{});
+stmt.addBatch(\LA{}Create View dist\_r\_detour statement (Eq.~\ref{eq:detour-distance})~{\nwtagstyle{}\subpageref{NW15FRcE-4OnMrk-1}}\RA{});
 stmt.addBatch(\LA{}Create View dur\_s\_travel statement~{\nwtagstyle{}\subpageref{NW15FRcE-3sQlba-1}}\RA{});
 stmt.addBatch(\LA{}Create View dur\_r\_pickup statement (Eq.~\ref{eq:pick-up delay})~{\nwtagstyle{}\subpageref{NW15FRcE-34NkTM-1}}\RA{});
 stmt.addBatch(\LA{}Create View dur\_r\_transit statement (Eq.~\ref{eq:transit-duration})~{\nwtagstyle{}\subpageref{NW15FRcE-Puojq-1}}\RA{});
@@ -3212,12 +3213,12 @@ private void PSInit() throws RuntimeException \{
   pstr.put(15, UPD+"E SET nu=? WHERE v1=? AND v2=?");
   pstr.put(77, UPD+"CW SET te=?, ve=? WHERE sid=?");
   pstr.put(84, UPD+"PD SET t2=? WHERE v2=? AND rid=?");
-  pstr.put(82, UPD+"CPD SET tp=? WHERE v2=? AND rid=?");
-  pstr.put(83, UPD+"CPD SET td=? WHERE v2=? AND rid=?");
+  pstr.put(82, UPD+"CPD SET tp=? WHERE vp=? AND rid=?");
+  pstr.put(83, UPD+"CPD SET td=? WHERE vd=? AND rid=?");
   pstr.put(76, DEL+"W WHERE sid=? AND t2>?");
   pstr.put(42, DEL+"PD WHERE rid=?");
   pstr.put(43, DEL+"CPD WHERE rid=?");
-  pstr.put(80, DEL+"CQ WHERE sid=? AND t2=>?");
+  pstr.put(80, DEL+"CQ WHERE sid=? AND t2>=?");
   pstr.put(62, SEL+"COUNT (*) FROM V WHERE v<>0");
   pstr.put(64, SEL+"MIN (lng), MAX (lng), MIN (lat), MAX (lat) "
       + "FROM V WHERE v<>0");
@@ -3252,7 +3253,7 @@ private void PSInit() throws RuntimeException \{
   // A "timeout" of 30 seconds is hard-coded here
   pstr.put(68, SEL+"* FROM R WHERE re<=? AND ?<=re+30 AND rid NOT IN  "
       + "(SELECT rid FROM assignments_r)");
-  pstr.put(85, SEL+"uq FROM UQ WHERE rid=?");
+  pstr.put(85, SEL+"uq FROM UQ WHERE uid=?");
   pstr.put(86, SEL+"tp, td FROM CPD WHERE rid=?");
   pstr.put(73, SEL+"q2 FROM CQ WHERE sid=? AND t2<=? "
       + "ORDER BY t2 DESC FETCH FIRST ROW ONLY");
@@ -3294,7 +3295,7 @@ private void PSInit() throws RuntimeException \{
   \LA{}Catch and print \code{}SQLException\edoc{}~{\nwtagstyle{}\subpageref{NW15FRcE-4P0tKA-1}}\RA{}
 \}
 \nosublabel{NW15FRcE-1g2xnv-1-u1}\nwindexdefn{PSInit}{PSInit}{NW15FRcE-1g2xnv-1}\eatline
-\nwidentdefs{\\{{PSInit}{PSInit}}}\nwidentuses{\\{{PS}{PS}}\\{{pstmt}{pstmt}}\\{{pstr}{pstr}}}\nwindexuse{PS}{PS}{NW15FRcE-1g2xnv-1}\nwindexuse{pstmt}{pstmt}{NW15FRcE-1g2xnv-1}\nwindexuse{pstr}{pstr}{NW15FRcE-1g2xnv-1}\nwendcode{}
+\nwidentdefs{\\{{PSInit}{PSInit}}}\nwidentuses{\\{{PS}{PS}}\\{{pstmt}{pstmt}}\\{{pstr}{pstr}}\\{{uid}{uid}}}\nwindexuse{PS}{PS}{NW15FRcE-1g2xnv-1}\nwindexuse{pstmt}{pstmt}{NW15FRcE-1g2xnv-1}\nwindexuse{pstr}{pstr}{NW15FRcE-1g2xnv-1}\nwindexuse{uid}{uid}{NW15FRcE-1g2xnv-1}\nwendcode{}
 
 \nwixlogsorted{c}{{......check if new job}{NW15FRcE-2Hq38w-1}{\nwixu{NW15FRcE-10xBjT-1}\nwixd{NW15FRcE-2Hq38w-1}}}%
 \nwixlogsorted{c}{{......get tp, vp, td, vd of new job}{NW15FRcE-pddDf-1}{\nwixu{NW15FRcE-10xBjT-1}\nwixd{NW15FRcE-pddDf-1}}}%

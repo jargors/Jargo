@@ -45,6 +45,7 @@
         }
         Statement stmt = conn.createStatement();
         Print("Creating tables and views...");
+        stmt.clearBatch();
         stmt.addBatch("CREATE TABLE V ("
                         + "v   int  CONSTRAINT P1 PRIMARY KEY,"
                         + "lng int  CONSTRAINT C1 NOT NULL,"
@@ -322,12 +323,12 @@
                         + "SELECT SUM (sb) FROM S");
         stmt.addBatch("CREATE VIEW dist_r_base (val) AS "
                         + "SELECT SUM (rb) FROM R");
-        stmt.addBatch("CREATE VIEW dist_r_detour (rid, val) AS "
-                        + "SELECT rid, val-ub FROM UB JOIN dist_r_transit ON uid = rid");
         stmt.addBatch("CREATE VIEW dist_r_transit (rid, val) AS "
                         + "SELECT rid, SUM (COALESCE (dd, 0)) "
                         + "FROM CPD JOIN W ON CPD.sid = W.sid AND W.t2 BETWEEN CPD.tp AND CPD.td "
                         + "GROUP BY rid");
+        stmt.addBatch("CREATE VIEW dist_r_detour (rid, val) AS "
+                        + "SELECT rid, val-ub FROM UB JOIN dist_r_transit ON uid = rid");
         stmt.addBatch("CREATE VIEW dur_s_travel (sid, val) AS "
                         + "SELECT sid, te - ts FROM CW");
         stmt.addBatch("CREATE VIEW dur_r_pickup (rid, val) AS "
@@ -1849,12 +1850,12 @@
         pstr.put(15, UPD+"E SET nu=? WHERE v1=? AND v2=?");
         pstr.put(77, UPD+"CW SET te=?, ve=? WHERE sid=?");
         pstr.put(84, UPD+"PD SET t2=? WHERE v2=? AND rid=?");
-        pstr.put(82, UPD+"CPD SET tp=? WHERE v2=? AND rid=?");
-        pstr.put(83, UPD+"CPD SET td=? WHERE v2=? AND rid=?");
+        pstr.put(82, UPD+"CPD SET tp=? WHERE vp=? AND rid=?");
+        pstr.put(83, UPD+"CPD SET td=? WHERE vd=? AND rid=?");
         pstr.put(76, DEL+"W WHERE sid=? AND t2>?");
         pstr.put(42, DEL+"PD WHERE rid=?");
         pstr.put(43, DEL+"CPD WHERE rid=?");
-        pstr.put(80, DEL+"CQ WHERE sid=? AND t2=>?");
+        pstr.put(80, DEL+"CQ WHERE sid=? AND t2>=?");
         pstr.put(62, SEL+"COUNT (*) FROM V WHERE v<>0");
         pstr.put(64, SEL+"MIN (lng), MAX (lng), MIN (lat), MAX (lat) "
             + "FROM V WHERE v<>0");
@@ -1889,7 +1890,7 @@
         // A "timeout" of 30 seconds is hard-coded here
         pstr.put(68, SEL+"* FROM R WHERE re<=? AND ?<=re+30 AND rid NOT IN  "
             + "(SELECT rid FROM assignments_r)");
-        pstr.put(85, SEL+"uq FROM UQ WHERE rid=?");
+        pstr.put(85, SEL+"uq FROM UQ WHERE uid=?");
         pstr.put(86, SEL+"tp, td FROM CPD WHERE rid=?");
         pstr.put(73, SEL+"q2 FROM CQ WHERE sid=? AND t2<=? "
             + "ORDER BY t2 DESC FETCH FIRST ROW ONLY");
