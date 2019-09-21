@@ -42,7 +42,6 @@
 \pagestyle{noweb}
 
 \tableofcontents
-\newpage
 
 \section{Introduction}
 \label{sec:introduction}
@@ -56,7 +55,8 @@ transaction\footnote{...as specified by the SQL standard!}.  This ability is
 needed during some write operations that may temporarily cause the simulation
 to be in an invalid state. Jargo's data model guarantees the integrity of the
 simulation at all other times. The storage interface is written in Java so it
-can communicate with Derby using JDBC.
+can communicate with Derby using JDBC. A listing of the public methods is
+shown in Figure~\ref{fig:methods}.
 
 \begin{figure}[h]
 \centering
@@ -70,19 +70,13 @@ Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
 programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
 ({\tt{}src/storage.nw}) is the source for both the documentation
 ({\tt{}doc/storage.tex}) and the Java code (Storage.java)\footnote{See the
-{\tt{}Makefile} for build details.}.  The code itself consists of the
-\emph{preamble} (\S\ref{sec:preamble}) and the \emph{class definition}
-(\S\ref{sec:class-definition}).
-\nwfilename{src/storage.nw}\nwbegincode{1}\sublabel{NW15FRcE-203Bbj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-203Bbj-1}}}\moddef{Storage.java~{\nwtagstyle{}\subpageref{NW15FRcE-203Bbj-1}}}\endmoddef\nwnotused{Storage.java}
-  \LA{}Storage.java preamble~{\nwtagstyle{}\subpageref{NW15FRcE-FkGTW-1}}\RA{}
-  \LA{}\code{}Storage\edoc{} definition~{\nwtagstyle{}\subpageref{NW15FRcE-3TAldU-1}}\RA{}
-\nwendcode{}\nwbegindocs{2}Here is a listing of the public methods.
-\vspace{0.5em}
+{\tt{}Makefile} for build details.}.
 
+\begin{figure}
 \adjustbox{scale=0.85}{
 \begin{minipage}[t]{0.40\textwidth}
 \hi{Utilities}
-\nwenddocs{}\nwbegincode{3}\sublabel{NW15FRcE-4PbjF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-4PbjF-1}}}\moddef{\code{}Storage\edoc{} public methods~{\nwtagstyle{}\subpageref{NW15FRcE-4PbjF-1}}}\endmoddef\nwalsodefined{\\{NW15FRcE-4PbjF-2}\\{NW15FRcE-4PbjF-3}}\nwused{\\{NW15FRcE-3TAldU-1}}
+\nwfilename{src/storage.nw}\nwbegincode{1}\sublabel{NW15FRcE-4PbjF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-4PbjF-1}}}\moddef{\code{}Storage\edoc{} public methods~{\nwtagstyle{}\subpageref{NW15FRcE-4PbjF-1}}}\endmoddef\nwalsodefined{\\{NW15FRcE-4PbjF-2}\\{NW15FRcE-4PbjF-3}}\nwused{\\{NW15FRcE-3TAldU-1}}
 \LA{}Load backup~{\nwtagstyle{}\subpageref{NW15FRcE-b3Hn1-1}}\RA{}
 \LA{}Save backup~{\nwtagstyle{}\subpageref{NW15FRcE-2OKmqF-1}}\RA{}
 \LA{}Print SQL exception~{\nwtagstyle{}\subpageref{NW15FRcE-31QNBg-1}}\RA{}
@@ -90,11 +84,11 @@ programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
 \LA{}Print user~{\nwtagstyle{}\subpageref{NW15FRcE-3sWW32-1}}\RA{}
 \LA{}Print path~{\nwtagstyle{}\subpageref{NW15FRcE-3QvbXQ-1}}\RA{}
 \LA{}Print route~{\nwtagstyle{}\subpageref{NW15FRcE-2sTsm3-1}}\RA{}
-\nwendcode{}\nwbegindocs{4}\nwdocspar
+\nwendcode{}\nwbegindocs{2}\nwdocspar
 \end{minipage}
 \begin{minipage}[t]{0.40\textwidth}
 \hi{Write Methods}
-\nwenddocs{}\nwbegincode{5}\sublabel{NW15FRcE-4PbjF-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-4PbjF-2}}}\moddef{\code{}Storage\edoc{} public methods~{\nwtagstyle{}\subpageref{NW15FRcE-4PbjF-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{3}\sublabel{NW15FRcE-4PbjF-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-4PbjF-2}}}\moddef{\code{}Storage\edoc{} public methods~{\nwtagstyle{}\subpageref{NW15FRcE-4PbjF-1}}}\plusendmoddef
 \LA{}Update edge speed~{\nwtagstyle{}\subpageref{NW15FRcE-3SpUqj-1}}\RA{}
 \LA{}Add new request~{\nwtagstyle{}\subpageref{NW15FRcE-4ISWm4-1}}\RA{}
 \LA{}Add new server~{\nwtagstyle{}\subpageref{NW15FRcE-IYVQQ-1}}\RA{}
@@ -102,11 +96,11 @@ programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
 \LA{}Update server schedule~{\nwtagstyle{}\subpageref{NW15FRcE-43w3hJ-1}}\RA{}
 \LA{}Update server add to schedule~{\nwtagstyle{}\subpageref{NW15FRcE-y828a-1}}\RA{}
 \LA{}Update server remove from schedule~{\nwtagstyle{}\subpageref{NW15FRcE-lMiTm-1}}\RA{}
-\nwendcode{}\nwbegindocs{6}\nwdocspar
+\nwendcode{}\nwbegindocs{4}\nwdocspar
 \end{minipage}
 \begin{minipage}[t]{0.40\textwidth}
 \hi{Read Methods}
-\nwenddocs{}\nwbegincode{7}\sublabel{NW15FRcE-4PbjF-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-4PbjF-3}}}\moddef{\code{}Storage\edoc{} public methods~{\nwtagstyle{}\subpageref{NW15FRcE-4PbjF-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{5}\sublabel{NW15FRcE-4PbjF-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-4PbjF-3}}}\moddef{\code{}Storage\edoc{} public methods~{\nwtagstyle{}\subpageref{NW15FRcE-4PbjF-1}}}\plusendmoddef
 \LA{}Query ridesharing user~{\nwtagstyle{}\subpageref{NW15FRcE-3isdeu-1}}\RA{}
 \LA{}Query unassigned customers~{\nwtagstyle{}\subpageref{NW15FRcE-1kcnyl-1}}\RA{}
 \LA{}Query all server locations~{\nwtagstyle{}\subpageref{NW15FRcE-rvb17-1}}\RA{}
@@ -116,9 +110,12 @@ programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
 \LA{}Query current load~{\nwtagstyle{}\subpageref{NW15FRcE-aKbeg-1}}\RA{}
 \LA{}Query various metrics~{\nwtagstyle{}\subpageref{NW15FRcE-1Ang64-1}}\RA{}
 \LA{}Query custom statement~{\nwtagstyle{}\subpageref{NW15FRcE-2FtqIZ-1}}\RA{}
-\nwendcode{}\nwbegindocs{8}\nwdocspar
+\nwendcode{}\nwbegindocs{6}\nwdocspar
 \end{minipage}
 }
+\caption{Storage interface public methods.}
+\label{fig:methods}
+\end{figure}
 
 \subsection{Motivation}
 \label{sec:motivation}
@@ -825,7 +822,7 @@ code extensions while staying faithful to the model.  In this schema,
 into \emph{property}, \emph{solution}, and \emph{constraint} tables.  Property
 tables store the road network $\mathcal{G}$ (\S\ref{sec:setting}) and the user
 relation $\mathcal{U}$ (\S\ref{sec:requests-and-servers}).  Solution tables
-store the server relation $\mathcal{X}$ (\S\ref{sec:requests-and-servers}
+store the server relation $\mathcal{X}$ (\S\ref{sec:requests-and-servers}).
 Constraint tables store copies of data from other tables for validation
 purposes.  The views are mostly defined on the constraint tables.
 
@@ -840,19 +837,22 @@ are included for illustrating the foreign key relationships, but in practice
 the duplicates are implemented as single columns participating in multiple
 foreign keys.
 
-Actual SQL statements used by the storage interface are also shown.
+Actual SQL statements used by the storage interface are also shown. References
+in the text to named constraints in the SQL will be written in {\tt{}typewriter}
+script.
 
 \subsubsection{Table V and E (Road Network Tables)}
 Each vertex $v\in\mathcal{V}$ is stored in Table V along with its coordinates
 $V(v)$ while each edge $(a,b)\in\mathcal{E}$ is stored in Table E along with
 its weight $d(a,b)$ and speed limit $\nu^\textrm{max}(a,b)$.  Table V thus has
-three columns, storing $v$ in primary key column \textsf{v} and its coordinates
-in column \textsf{lng} and \textsf{lat}.  Likewise, Table E has four columns,
-storing $a$ and $b$ in column \textsf{v1} and \textsf{v2}, $d(a,b)$ in column
-\textsf{dd}, and $\nu^\textrm{max}(a,b)$ in column \textsf{nu}.  The four
-columns together form the primary key in order to be referenced by later
-tables.  Foreign keys on \textsf{v1} and \textsf{v2} referencing Table V
-validate that $a$ and $b$ are actual vertices.
+three columns, storing $v$ in primary key column \textsf{v} ({\tt{}P1}) and its
+coordinates in column \textsf{lng} and \textsf{lat}.  Likewise, Table E has
+four columns, storing $a$ and $b$ in column \textsf{v1} and \textsf{v2},
+$d(a,b)$ in column \textsf{dd}, and $\nu^\textrm{max}(a,b)$ in column
+\textsf{nu}.  The four columns together form the primary key ({\tt{}P2}) in order
+to be referenced by later tables.  Foreign keys on \textsf{v1} ({\tt{}F1}) and
+\textsf{v2} ({\tt{}F2}) referencing Table V validate that $a$ and $b$ are actual
+vertices.
 \begin{table}[h]
 \centering
 \small
@@ -888,7 +888,7 @@ Column & Parent & Description\\
 \hline
 \end{tabular}
 \end{table}
-\nwenddocs{}\nwbegincode{9}\sublabel{NW15FRcE-RzwV3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-RzwV3-1}}}\moddef{Create Table V statement~{\nwtagstyle{}\subpageref{NW15FRcE-RzwV3-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{7}\sublabel{NW15FRcE-RzwV3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-RzwV3-1}}}\moddef{Create Table V statement~{\nwtagstyle{}\subpageref{NW15FRcE-RzwV3-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE TABLE V ("
   + "v   int  CONSTRAINT P1 PRIMARY KEY,"
   + "lng int  CONSTRAINT C1 NOT NULL,"
@@ -896,11 +896,10 @@ Column & Parent & Description\\
   + "CONSTRAINT C3 CHECK (lng BETWEEN -1800000000 AND 1800000000),"
   + "CONSTRAINT C4 CHECK (lat BETWEEN  -900000000 AND  900000000)"
   + ")"
-\nwendcode{}\nwbegindocs{10}\nwdocspar
-We consider vertex 0 to be a dummy vertex where any edged formed by
-0 has no weight. To implement the dummy vertex, we add a constraint (C11)
-that \textsf{dd} must be 0 if either \textsf{v1} or \textsf{v2} is 0.
-\nwenddocs{}\nwbegincode{11}\sublabel{NW15FRcE-2WHSWQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-2WHSWQ-1}}}\moddef{Create Table E statement~{\nwtagstyle{}\subpageref{NW15FRcE-2WHSWQ-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwendcode{}\nwbegindocs{8}We consider vertex 0 to be a dummy vertex where any edged formed by 0 has no
+weight. To implement the dummy vertex, we add a constraint ({\tt{}C11}) that
+\textsf{dd} must be 0 if either \textsf{v1} or \textsf{v2} is 0.
+\nwenddocs{}\nwbegincode{9}\sublabel{NW15FRcE-2WHSWQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-2WHSWQ-1}}}\moddef{Create Table E statement~{\nwtagstyle{}\subpageref{NW15FRcE-2WHSWQ-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE TABLE E ("
   + "v1  int  CONSTRAINT C5 NOT NULL,"
   + "v2  int  CONSTRAINT C6 NOT NULL,"
@@ -918,7 +917,7 @@ that \textsf{dd} must be 0 if either \textsf{v1} or \textsf{v2} is 0.
   + "  END"
   + ")"
   + ")"
-\nwendcode{}\nwbegindocs{12}\nwdocspar
+\nwendcode{}\nwbegindocs{10}\nwdocspar
 
 \subsubsection{Table UQ, UE, UL, UO, UD, and UB (User Tables)}
 To allow other tables to reference specific user components,
@@ -930,7 +929,8 @@ and each row is also its own primary key.
 A sixth table UB is introduced to store base costs for computing
 $D^\textrm{base}$ and $\rho^\textrm{distance}$
 (\S\ref{sec:ridesharing-metrics}).
-Table UO and UD can be referenced to Table V to validate against P2 and P4.
+Table UO and UD can be referenced to Table V to validate against
+property P2 and rule P4.
 \begin{table}[h]
 \centering
 \small
@@ -951,7 +951,7 @@ UB & \textit{uid}, \textit{val} & User base cost $d_u$ \\
 \hline
 \end{tabular}
 \end{table}
-\nwenddocs{}\nwbegincode{13}\sublabel{NW15FRcE-llmAG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-llmAG-1}}}\moddef{Create Table UQ statement~{\nwtagstyle{}\subpageref{NW15FRcE-llmAG-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{11}\sublabel{NW15FRcE-llmAG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-llmAG-1}}}\moddef{Create Table UQ statement~{\nwtagstyle{}\subpageref{NW15FRcE-llmAG-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE TABLE UQ ("
   + "uid int  CONSTRAINT C12 NOT NULL,"
   + "uq  int  CONSTRAINT C13 NOT NULL,"
@@ -959,8 +959,8 @@ UB & \textit{uid}, \textit{val} & User base cost $d_u$ \\
   + "CONSTRAINT C15 CHECK (uq != 0),"
   + "CONSTRAINT P3 PRIMARY KEY (uid, uq)"
   + ")"
-\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-llmAG-1}\nwendcode{}\nwbegindocs{14}\nwdocspar
-\nwenddocs{}\nwbegincode{15}\sublabel{NW15FRcE-sBCgz-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-sBCgz-1}}}\moddef{Create Table UE statement~{\nwtagstyle{}\subpageref{NW15FRcE-sBCgz-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-llmAG-1}\nwendcode{}\nwbegindocs{12}\nwdocspar
+\nwenddocs{}\nwbegincode{13}\sublabel{NW15FRcE-sBCgz-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-sBCgz-1}}}\moddef{Create Table UE statement~{\nwtagstyle{}\subpageref{NW15FRcE-sBCgz-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE TABLE UE ("
   + "uid int  CONSTRAINT C16 NOT NULL,"
   + "ue  int  CONSTRAINT C17 NOT NULL,"
@@ -968,8 +968,8 @@ UB & \textit{uid}, \textit{val} & User base cost $d_u$ \\
   + "CONSTRAINT C19 UNIQUE (uid),"
   + "CONSTRAINT P4 PRIMARY KEY (uid, ue)"
   + ")"
-\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-sBCgz-1}\nwendcode{}\nwbegindocs{16}\nwdocspar
-\nwenddocs{}\nwbegincode{17}\sublabel{NW15FRcE-3Q8NSk-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-3Q8NSk-1}}}\moddef{Create Table UL statement~{\nwtagstyle{}\subpageref{NW15FRcE-3Q8NSk-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-sBCgz-1}\nwendcode{}\nwbegindocs{14}\nwdocspar
+\nwenddocs{}\nwbegincode{15}\sublabel{NW15FRcE-3Q8NSk-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-3Q8NSk-1}}}\moddef{Create Table UL statement~{\nwtagstyle{}\subpageref{NW15FRcE-3Q8NSk-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE TABLE UL ("
   + "uid int  CONSTRAINT C20 NOT NULL,"
   + "ul  int  CONSTRAINT C21 NOT NULL,"
@@ -977,8 +977,8 @@ UB & \textit{uid}, \textit{val} & User base cost $d_u$ \\
   + "CONSTRAINT C23 CHECK (ul BETWEEN 0 AND 86400000),"
   + "CONSTRAINT P5 PRIMARY KEY (uid, ul)"
   + ")"
-\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-3Q8NSk-1}\nwendcode{}\nwbegindocs{18}\nwdocspar
-\nwenddocs{}\nwbegincode{19}\sublabel{NW15FRcE-qCW00-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-qCW00-1}}}\moddef{Create Table UO statement~{\nwtagstyle{}\subpageref{NW15FRcE-qCW00-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-3Q8NSk-1}\nwendcode{}\nwbegindocs{16}\nwdocspar
+\nwenddocs{}\nwbegincode{17}\sublabel{NW15FRcE-qCW00-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-qCW00-1}}}\moddef{Create Table UO statement~{\nwtagstyle{}\subpageref{NW15FRcE-qCW00-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE TABLE UO ("
   + "uid int  CONSTRAINT C24 NOT NULL,"
   + "uo  int  CONSTRAINT C25 NOT NULL,"
@@ -986,8 +986,8 @@ UB & \textit{uid}, \textit{val} & User base cost $d_u$ \\
   + "CONSTRAINT C26 UNIQUE (uid),"
   + "CONSTRAINT P6 PRIMARY KEY (uid, uo)"
   + ")"
-\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-qCW00-1}\nwendcode{}\nwbegindocs{20}\nwdocspar
-\nwenddocs{}\nwbegincode{21}\sublabel{NW15FRcE-1OVMyH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-1OVMyH-1}}}\moddef{Create Table UD statement~{\nwtagstyle{}\subpageref{NW15FRcE-1OVMyH-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-qCW00-1}\nwendcode{}\nwbegindocs{18}\nwdocspar
+\nwenddocs{}\nwbegincode{19}\sublabel{NW15FRcE-1OVMyH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-1OVMyH-1}}}\moddef{Create Table UD statement~{\nwtagstyle{}\subpageref{NW15FRcE-1OVMyH-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE TABLE UD ("
   + "uid int  CONSTRAINT C27 NOT NULL,"
   + "ud  int  CONSTRAINT C28 NOT NULL,"
@@ -995,8 +995,8 @@ UB & \textit{uid}, \textit{val} & User base cost $d_u$ \\
   + "CONSTRAINT C29 UNIQUE (uid),"
   + "CONSTRAINT P7 PRIMARY KEY (uid, ud)"
   + ")"
-\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-1OVMyH-1}\nwendcode{}\nwbegindocs{22}\nwdocspar
-\nwenddocs{}\nwbegincode{23}\sublabel{NW15FRcE-3QSM5L-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-3QSM5L-1}}}\moddef{Create Table UB statement~{\nwtagstyle{}\subpageref{NW15FRcE-3QSM5L-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-1OVMyH-1}\nwendcode{}\nwbegindocs{20}\nwdocspar
+\nwenddocs{}\nwbegincode{21}\sublabel{NW15FRcE-3QSM5L-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-3QSM5L-1}}}\moddef{Create Table UB statement~{\nwtagstyle{}\subpageref{NW15FRcE-3QSM5L-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE TABLE UB ("
   + "uid int  CONSTRAINT C30 NOT NULL,"
   + "ub  int  CONSTRAINT C31 NOT NULL,"
@@ -1004,7 +1004,7 @@ UB & \textit{uid}, \textit{val} & User base cost $d_u$ \\
   + "CONSTRAINT C33 UNIQUE (uid),"
   + "CONSTRAINT P8 PRIMARY KEY (uid, ub)"
   + ")"
-\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-3QSM5L-1}\nwendcode{}\nwbegindocs{24}\nwdocspar
+\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-3QSM5L-1}\nwendcode{}\nwbegindocs{22}\nwdocspar
 
 \subsubsection{Table W (Routes Table)}
 Table W has eight columns, \textsf{sid}, \textsf{se}, \textsf{t1}, \textsf{v1},
@@ -1017,10 +1017,10 @@ cannot exceed the limit $\nu^\textrm{max}$.  To enforce these rules, the
 \textsf{v1}) columns.  The (\textsf{v1}, \textsf{v2}) columns can thus identify
 an edge. Columns \textsf{dd} and \textsf{nu} are added to store the weight and
 speed limit on the edge, and (\textsf{v1}, \textsf{v2}, \textsf{dd},
-\textsf{nu}) is referenced by foreign key to Table E to validate the values. A
-row-level \texttt{CHECK} constraint validates that the quantity
-$\textsf{dd}/(\textsf{t2}-\textsf{t1})$ is not greater than the value in
-\textsf{nu}.
+\textsf{nu}) is referenced by foreign key to Table E ({\tt{}F19}) to validate the
+values. A row-level \texttt{CHECK} constraint ({\tt{}C56}) validates that the
+speed $\textsf{dd}/(\textsf{t2}-\textsf{t1})$ is not greater than the maximum
+free-flow speed, \textsf{nu}.
 \begin{table}[h]
 \centering
 \small
@@ -1051,31 +1051,29 @@ nu & & \\
 \hline
 \end{tabular}
 \end{table}
-
-The below constraints are
-easily implemented in SQL and establish that each (\textsf{sid},
-\textsf{t1}, \textsf{v1}) is indeed the predecessor to
+The below items are easily implemented in SQL and establish that each
+(\textsf{sid}, \textsf{t1}, \textsf{v1}) is indeed the predecessor to
 (\textsf{sid}, \textsf{t2}, \textsf{v2}) in the same row:
-% For a proof, see Appendix~\ref{ap:proofs}.
 \begin{enumerate}
-\item The predecessor (\textsf{sid}, \textsf{t1}, \textsf{v1}) must
-reference an existing waypoint (\textsf{sid}, \textsf{t2}, \textsf{v2}) from the table (F20);
-\item Out of all rows, (\textsf{sid}, \textsf{t1})
-must be unique and (\textsf{sid}, \textsf{t2}) must be unique (C54, C55);
-\item Column \textsf{t2} and \textsf{v2} cannot be null (C52, C53);
+\item The predecessor (\textsf{sid}, \textsf{t1}, \textsf{v1}) must reference
+an existing waypoint (\textsf{sid}, \textsf{t2}, \textsf{v2}) from the table
+({\tt{}F20});
+\item Out of all rows, (\textsf{sid}, \textsf{t1}) must be unique and
+(\textsf{sid}, \textsf{t2}) must be unique ({\tt{}C54}, {\tt{}C55});
+\item Column \textsf{t2} and \textsf{v2} cannot be null ({\tt{}C52}, {\tt{}C53});
 \item Unless \textsf{t2} is equal to the server's early time, \textsf{t1}
 cannot be null and it must be less than \textsf{t2}, otherwise \textsf{t1},
-\textsf{v1}, \textsf{dd}, and \textsf{nu} must all be null (C56).
+\textsf{v1}, \textsf{dd}, and \textsf{nu} must all be null ({\tt{}C56}).
 \end{enumerate}
-The (\textsf{sid}, \textsf{t2}, \textsf{v2}) columns are the primary key in
-order to allow the self-referencing foreign key in the first constraint.
-The last constraint handles the case where the first waypoint in a server's route has
+The (\textsf{sid}, \textsf{t2}, \textsf{v2}) columns are the primary key
+({\tt{}P11}) in order to allow the self-referencing foreign key in the first item.
+The last item handles the case where the first waypoint in a server's route has
 no predecessor. Only in this case are \textsf{t1}, \textsf{v1}, \textsf{dd},
-and \textsf{nu} are allowed to be null.  From R1, the first waypoint is
+and \textsf{nu} are allowed to be null.  From rule R1, the first waypoint is
 detected by checking if \textsf{t2} is equal to the server's early time, stored
 in column \textsf{se}. The (\textsf{sid}, \textsf{se}) columns are referenced
-to UE to validate the early time.
-\nwenddocs{}\nwbegincode{25}\sublabel{NW15FRcE-2FnbXJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-2FnbXJ-1}}}\moddef{Create Table W statement~{\nwtagstyle{}\subpageref{NW15FRcE-2FnbXJ-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+to UE to validate the early time ({\tt{}F18}).
+\nwenddocs{}\nwbegincode{23}\sublabel{NW15FRcE-2FnbXJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-2FnbXJ-1}}}\moddef{Create Table W statement~{\nwtagstyle{}\subpageref{NW15FRcE-2FnbXJ-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE TABLE W ("
   + "sid int  CONSTRAINT C50 NOT NULL,"
   + "se  int  CONSTRAINT C51 NOT NULL,"
@@ -1099,16 +1097,16 @@ to UE to validate the early time.
   + "  END"
   + ") INITIALLY DEFERRED"
   + ")"
-\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-2FnbXJ-1}\nwendcode{}\nwbegindocs{26}\nwdocspar
+\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-2FnbXJ-1}\nwendcode{}\nwbegindocs{24}\nwdocspar
 
 \subsubsection{Table PD (Labels Table)}
-Table PD (for ``pick-ups and drop-offs'') contains four columns,
-\textsf{sid}, \textsf{t2}, \textsf{v2}, and \textsf{rid}.
-The (\textsf{sid}, \textsf{t2}, \textsf{v2}) columns reference
-Table W, and the \textsf{rid} column indicates the label on that waypoint.
-Each row is its own primary key in order to be referenced by the CPD constraint table.
-A waypoint can have multiple labels simply by listing the waypoint
-multiple times with different values of \textsf{rid}.
+Table PD (for ``pick-ups and drop-offs'') contains four columns, \textsf{sid},
+\textsf{t2}, \textsf{v2}, and \textsf{rid}.  The (\textsf{sid}, \textsf{t2},
+\textsf{v2}) columns reference Table W ({\tt{}F23}), and the \textsf{rid} column
+indicates the label on that waypoint.  Each row is its own primary key
+({\tt{}P12}) in order to be referenced by the CPD constraint table.  A waypoint
+can have multiple labels simply by listing the waypoint multiple times with
+different values of \textsf{rid}.
 \begin{table}[h]
 \centering
 \small
@@ -1128,7 +1126,7 @@ Col. & Parent & Description \\
 \hline
 \end{tabular}
 \end{table}
-\nwenddocs{}\nwbegincode{27}\sublabel{NW15FRcE-1aGcZB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-1aGcZB-1}}}\moddef{Create Table PD statement~{\nwtagstyle{}\subpageref{NW15FRcE-1aGcZB-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{25}\sublabel{NW15FRcE-1aGcZB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-1aGcZB-1}}}\moddef{Create Table PD statement~{\nwtagstyle{}\subpageref{NW15FRcE-1aGcZB-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE TABLE PD ("
   + "sid int  CONSTRAINT C57 NOT NULL,"
   + "t2  int  CONSTRAINT C58 NOT NULL,"
@@ -1139,7 +1137,7 @@ Col. & Parent & Description \\
   + "CONSTRAINT F22 FOREIGN KEY (rid) REFERENCES R,"
   + "CONSTRAINT F23 FOREIGN KEY (sid, t2, v2) REFERENCES W INITIALLY DEFERRED"
   + ")"
-\nwendcode{}\nwbegindocs{28}\nwdocspar
+\nwendcode{}\nwbegindocs{26}\nwdocspar
 
 \subsubsection{Table S and R (User Constraint Tables)}
 Table S and Table R enforce the remaining user constraints.  Both tables have
@@ -1152,13 +1150,14 @@ corresponding user property table, for example (\textsf{sid}, \textsf{uq})
 references Table UQ.
 % An application must populate S and R for the \textsf{sid} and \textsf{rid} foreign keys in W and PD.
 
-The P1 and P3 properties that could not be enforced in the user tables are now
+Properties P1 and P3 that could not be enforced in the user tables are now
 enforced through simple constraints on S and R.  A \texttt{CHECK} constraint
-validates that \textsf{uq} is less than 0 in Table S and greater
-than 0 in Table R, corresponding to servers and requests (P1). Likewise, a
-\texttt{CHECK} constraint validates that \textsf{ue} is less than
-\textsf{ul} (P3). None of the columns can be null to prevent
-incomplete users.
+validates that \textsf{uq} is less than 0 in Table S ({\tt{}C40}), and another
+\texttt{CHECK} constraint validates it is greater than 0 in Table R ({\tt{}C48}),
+corresponding to servers and requests (property P1). Likewise, a \texttt{CHECK}
+constraint validates that \textsf{ue} is less than \textsf{ul} ({\tt{}C41},
+{\tt{}C49}) (property P3). None of the columns can be null to prevent incomplete
+users.
 \begin{table}[h]
 \centering
 \small
@@ -1175,7 +1174,7 @@ Table R & \textit{rid}, rq, re, rl, ro, rd, rb \\
 \hline
 \end{tabular}
 \end{table}
-\nwenddocs{}\nwbegincode{29}\sublabel{NW15FRcE-2D0DN7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-2D0DN7-1}}}\moddef{Create Table S statement~{\nwtagstyle{}\subpageref{NW15FRcE-2D0DN7-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{27}\sublabel{NW15FRcE-2D0DN7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-2D0DN7-1}}}\moddef{Create Table S statement~{\nwtagstyle{}\subpageref{NW15FRcE-2D0DN7-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE TABLE S ("
   + "sid int  CONSTRAINT P9 PRIMARY KEY,"
   + "sq  int  CONSTRAINT C34 NOT NULL,"
@@ -1193,8 +1192,8 @@ Table R & \textit{rid}, rq, re, rl, ro, rd, rb \\
   + "CONSTRAINT F10 FOREIGN KEY (sid, sb) REFERENCES UB (uid, ub),"
   + "CONSTRAINT C41 CHECK (se < sl)"
   + ")"
-\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-2D0DN7-1}\nwendcode{}\nwbegindocs{30}\nwdocspar
-\nwenddocs{}\nwbegincode{31}\sublabel{NW15FRcE-Uo9HJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-Uo9HJ-1}}}\moddef{Create Table R statement~{\nwtagstyle{}\subpageref{NW15FRcE-Uo9HJ-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-2D0DN7-1}\nwendcode{}\nwbegindocs{28}\nwdocspar
+\nwenddocs{}\nwbegincode{29}\sublabel{NW15FRcE-Uo9HJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-Uo9HJ-1}}}\moddef{Create Table R statement~{\nwtagstyle{}\subpageref{NW15FRcE-Uo9HJ-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE TABLE R ("
   + "rid int  CONSTRAINT P10 PRIMARY KEY,"
   + "rq  int  CONSTRAINT C42 NOT NULL,"
@@ -1212,27 +1211,28 @@ Table R & \textit{rid}, rq, re, rl, ro, rd, rb \\
   + "CONSTRAINT F16 FOREIGN KEY (rid, rb) REFERENCES UB (uid, ub),"
   + "CONSTRAINT C49 CHECK (re < rl)"
   + ")"
-\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-Uo9HJ-1}\nwendcode{}\nwbegindocs{32}\nwdocspar
+\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-Uo9HJ-1}\nwendcode{}\nwbegindocs{30}\nwdocspar
 
 \subsubsection{Table CW (Route Endpoint Constraints Table)}
-Table CW stores the start and end waypoints of each server route.
-The table has nine columns,
-\textsf{sid}, \textsf{se}, \textsf{sl}, \textsf{so}, \textsf{sd}, \textsf{ts}, \textsf{vs}, \textsf{te}, and \textsf{ve}.
-The start waypoint is stored in (\textsf{sid}, \textsf{ts}, \textsf{vs}) and the end waypoint is stored
-in (\textsf{sid}, \textsf{te}, \textsf{ve}). Both of these groups reference the
-(\textsf{sid}, \textsf{t2}, \textsf{v2}) columns in Table W.
-The \textsf{sid} column is set to be \texttt{UNIQUE} to prevent a server from
-being listed multiple times and having ``multiple'' start and end waypoints.
-Rule R1 is enforced by adding the server's early and late times into columns
-\textsf{se} and \textsf{sl}, referencing (\textsf{sid}, \textsf{se}) to UE and
-(\textsf{sid}, \textsf{sl}) to UL.  A \texttt{CHECK} constraint validates the
-start time \textsf{ts} equals \textsf{se} and the end time \textsf{te} is not
-beyond \textsf{sl}.
-Rule 2 is enforced by adding the server's origin and destination into columns
-\textsf{so} and \textsf{sd}, referencing (\textsf{sid}, \textsf{so}) to UO and
-(\textsf{sid}, \textsf{sd}) to UD.  Likewise, a \texttt{CHECK} constraint
-validates the start location \textsf{vs} equals \textsf{so} and the end location
-\textsf{ve} equals \textsf{sd}.
+Table CW stores the start and end waypoints of each server route.  The table
+has nine columns, \textsf{sid}, \textsf{se}, \textsf{sl}, \textsf{so},
+\textsf{sd}, \textsf{ts}, \textsf{vs}, \textsf{te}, and \textsf{ve}.  The start
+waypoint is stored in (\textsf{sid}, \textsf{ts}, \textsf{vs}) and the end
+waypoint is stored in (\textsf{sid}, \textsf{te}, \textsf{ve}). Both of these
+groups reference the (\textsf{sid}, \textsf{t2}, \textsf{v2}) columns in Table
+W ({\tt{}F29}, {\tt{}F30}).  The \textsf{sid} column is set to be \texttt{UNIQUE}
+({\tt{}C70}) to prevent a server from being listed multiple times and having
+``multiple'' start and end waypoints.  Rule R1 is enforced by adding the
+server's early and late times into columns \textsf{se} and \textsf{sl},
+referencing (\textsf{sid}, \textsf{se}) to UE ({\tt{}F25}) and (\textsf{sid},
+\textsf{sl}) to UL ({\tt{}F26}).  A \texttt{CHECK} constraint validates the start
+time \textsf{ts} equals \textsf{se} ({\tt{}C71}) and another one validates the end
+time \textsf{te} is not beyond \textsf{sl} ({\tt{}C72}).  Rule 2 is enforced by
+adding the server's origin and destination into columns \textsf{so} and
+\textsf{sd}, referencing (\textsf{sid}, \textsf{so}) to UO ({\tt{}F27}) and
+(\textsf{sid}, \textsf{sd}) to UD ({\tt{}F28}).  Likewise, constraint {\tt{}C71}
+validates the start location \textsf{vs} equals \textsf{so} and {\tt{}C72}
+validates the end location \textsf{ve} equals \textsf{sd}.
 \begin{table}[h]
 \centering
 \small
@@ -1266,7 +1266,7 @@ ve & & \\
 \hline
 \end{tabular}
 \end{table}
-\nwenddocs{}\nwbegincode{33}\sublabel{NW15FRcE-2HehGp-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-2HehGp-1}}}\moddef{Create Table CW statement~{\nwtagstyle{}\subpageref{NW15FRcE-2HehGp-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{31}\sublabel{NW15FRcE-2HehGp-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-2HehGp-1}}}\moddef{Create Table CW statement~{\nwtagstyle{}\subpageref{NW15FRcE-2HehGp-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE TABLE CW ("
   + "sid int  CONSTRAINT C61 NOT NULL,"
   + "se  int  CONSTRAINT C62 NOT NULL,"
@@ -1290,36 +1290,35 @@ ve & & \\
   + "CONSTRAINT C72 CHECK (te <= sl AND ve = sd),"
   + "CONSTRAINT C73 CHECK (ts < te)"
   + ")"
-\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-2HehGp-1}\nwendcode{}\nwbegindocs{34}\nwdocspar
+\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-2HehGp-1}\nwendcode{}\nwbegindocs{32}\nwdocspar
 
 \subsubsection{Table CPD (Label Constraints Table)}
 Table CPD enforces the pick-up and drop-off rules R5--R9. It contains twelve
 columns, \textsf{sid}, \textsf{ts}, \textsf{te}, \textsf{tp}, \textsf{vp},
 \textsf{td}, \textsf{vd}, \textsf{rid}, \textsf{re}, \textsf{rl}, \textsf{ro},
-and \textsf{rd}.
-The (\textsf{sid}, \textsf{tp}, \textsf{vp}, \textsf{rid}) and (\textsf{sid},
-\textsf{td}, \textsf{vd}, \textsf{rid}) groups reference rows in Table PD and
-represent pick-up and drop-off waypoints, respectively.
-Rules R5 and R9 are enforced by setting \textsf{rid} to \texttt{UNIQUE}, in
-other words any request identified in \textsf{rid} has only one pick-up
-and drop-off pair.
-Rule R6 is enforced by adding columns for the request origin
-\textsf{ro} and destination \textsf{rd} and validating that
-pick-up vertex \textsf{vp} equals \textsf{ro} and drop-off vertex \textsf{vd} equals
-\textsf{rd}. The (\textsf{rid}, \textsf{ro}) columns are referenced to UO and
-(\textsf{rid}, \textsf{rd}) are referenced to UD.
-Rules R7 and R8 are enforced by simple \texttt{CHECK} constraints. First,
-pick-up time \textsf{tp} is validated to be less than drop-off time \textsf{td},
-and then both
-\textsf{tp} and \textsf{td} are validated to be between request early time \textsf{re} and
-late time \textsf{rl}. The (\textsf{rid}, \textsf{re}) and (\textsf{rid}, \textsf{rl})
-columns are added and referenced to UE and UL for this purpose.
+and \textsf{rd}.  The (\textsf{sid}, \textsf{tp}, \textsf{vp}, \textsf{rid})
+and (\textsf{sid}, \textsf{td}, \textsf{vd}, \textsf{rid}) groups reference
+rows in Table PD ({\tt{}F34}, {\tt{}F35}) and represent pick-up and drop-off
+waypoints, respectively.  Rules R5 and R9 are enforced by setting \textsf{rid}
+to \texttt{UNIQUE} ({\tt{}C86}), in other words any request identified in
+\textsf{rid} has only one pick-up and drop-off pair.  Rule R6 is enforced by
+adding columns for the request origin \textsf{ro} and destination \textsf{rd}
+and validating that pick-up vertex \textsf{vp} equals \textsf{ro} ({\tt{}C89}) and
+drop-off vertex \textsf{vd} equals \textsf{rd} ({\tt{}C90}). The (\textsf{rid},
+\textsf{ro}) columns are referenced to UO ({\tt{}F38}) and (\textsf{rid},
+\textsf{rd}) are referenced to UD ({\tt{}F39}).  Rules R7 and R8 are enforced by
+simple \texttt{CHECK} constraints. Both \textsf{tp} and \textsf{td} are
+validated to be between request early time \textsf{re} and late time
+\textsf{rl} ({\tt{}C89}, {\tt{}C90}). The (\textsf{rid}, \textsf{re}) and
+(\textsf{rid}, \textsf{rl}) columns are added and referenced to UE and UL
+({\tt{}F36}, {\tt{}F37}) for this purpose.
 
-So far, nothing prevents \textsf{tp} and \textsf{td} from falling outside
-the server's start and end times. These times are thus added
-into (\textsf{sid}, \textsf{ts}, \textsf{te}) columns, referenced to Table CW.
-Then, \texttt{CHECK} constraints can validate that \textsf{tp} and \textsf{td} are within
-the start time \textsf{ts} and the end time \textsf{te}.
+So far, nothing prevents \textsf{tp} and \textsf{td} from falling outside the
+server's start and end times. These times are thus added into (\textsf{sid},
+\textsf{ts}, \textsf{te}) columns, referenced to Table CW ({\tt{}F33}).  Then,
+\texttt{CHECK} constraints can validate that \textsf{tp} and \textsf{td} are
+within the start time \textsf{ts} and the end time \textsf{te} ({\tt{}C87},
+{\tt{}C88}).
 \begin{table}[t]
 \centering
 \small
@@ -1359,7 +1358,7 @@ rd & & \\
 \hline
 \end{tabular}
 \end{table}
-\nwenddocs{}\nwbegincode{35}\sublabel{NW15FRcE-q5ofx-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-q5ofx-1}}}\moddef{Create Table CPD statement~{\nwtagstyle{}\subpageref{NW15FRcE-q5ofx-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{33}\sublabel{NW15FRcE-q5ofx-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-q5ofx-1}}}\moddef{Create Table CPD statement~{\nwtagstyle{}\subpageref{NW15FRcE-q5ofx-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE TABLE CPD ("
   + "sid int  CONSTRAINT C74 NOT NULL,"
   + "ts  int  CONSTRAINT C75 NOT NULL,"
@@ -1392,41 +1391,43 @@ rd & & \\
   + "CONSTRAINT C89 CHECK (tp >= re AND vp = ro) INITIALLY DEFERRED,"
   + "CONSTRAINT C90 CHECK (td <= rl AND vd = rd) INITIALLY DEFERRED"
   + ")"
-\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-q5ofx-1}\nwendcode{}\nwbegindocs{36}\nwdocspar
+\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-q5ofx-1}\nwendcode{}\nwbegindocs{34}\nwdocspar
 
 \subsubsection{Table CQ (Load Constraints Table)}
 Table CQ enforces the load rule R11. It has fourteen columns, \textsf{sid},
 \textsf{sq}, \textsf{se}, \textsf{t1}, \textsf{t2}, \textsf{v2}, \textsf{q1},
-\textsf{q2}, \textsf{rid}, \textsf{rq}, \textsf{tp}, \textsf{td}, \textsf{o1}, and \textsf{o2}.
-From Eq.~\ref{eq:load}, the load burden only changes at the times of waypoints
-labeled with a request. It increases when a waypoint
+\textsf{q2}, \textsf{rid}, \textsf{rq}, \textsf{tp}, \textsf{td}, \textsf{o1},
+and \textsf{o2}.  From Eq.~\ref{eq:load}, the load burden only changes at the
+times of waypoints labeled with a request. It increases when a waypoint
 corresponds to a customer pick-up and decreases when the waypoint corresponds
-to a customer drop-off. Each load-changing waypoint is stored in
-(\textsf{sid}, \textsf{t2}, \textsf{v2}, \textsf{rid}) and referenced to PD.
-To determine if the waypoint is a customer pick-up or drop-off,
-the pick-up and drop-off times for \textsf{rid} are stored in
-(\textsf{sid}, \textsf{tp}, \textsf{td}, \textsf{rid}) and referenced to CPD.
-If $\textsf{t2}=\textsf{tp}$, then the waypoint represents a pick-up, otherwise it
-represents a drop-off. The load of the
-server and request are stored in (\textsf{sid}, \textsf{sq}) and
-(\textsf{rid}, \textsf{rq}), referenced to UQ.
+to a customer drop-off. Each load-changing waypoint is stored in (\textsf{sid},
+\textsf{t2}, \textsf{v2}, \textsf{rid}) and referenced to PD ({\tt{}F46}).  To
+determine if the waypoint is a customer pick-up or drop-off, the pick-up and
+drop-off times for \textsf{rid} are stored in (\textsf{sid}, \textsf{tp},
+\textsf{td}, \textsf{rid}) and referenced to CPD ({\tt{}F47}).  If
+$\textsf{t2}=\textsf{tp}$, then the waypoint represents a pick-up, otherwise it
+represents a drop-off. The load of the server and request are stored in
+(\textsf{sid}, \textsf{sq}) and (\textsf{rid}, \textsf{rq}), referenced to UQ
+({\tt{}F44}, {\tt{}F45}).
 
-To validate if the load burden is always within a server's capacity,
-CQ must keep track of every load change. It does so by storing the
-\emph{predecessor} load in columns (\textsf{sid}, \textsf{t1}, \textsf{q1}, \textsf{o1})
-next to the current load in columns (\textsf{sid}, \textsf{t2}, \textsf{q2}, \textsf{o2}).
-If the waypoint in the row is a pick-up, CQ validates that $\textsf{q1}+\textsf{rq}=\textsf{q2}$,
-otherwise that $\textsf{q1}-\textsf{rq}=\textsf{q2}$. As repetitive load changes
-can occur at a single waypoint due to multiple pick-ups and drop-offs, the \textsf{o1} and \textsf{o2} columns are introduced to store
-a unique \emph{order number}. This number increments by 1 for each pick-up or
-drop-off per server and can be handled by the application. Similar rules for
+To validate if the load burden is always within a server's capacity, CQ must
+keep track of every load change. It does so by storing the \emph{predecessor}
+load in columns (\textsf{sid}, \textsf{t1}, \textsf{q1}, \textsf{o1}) next to
+the current load in columns (\textsf{sid}, \textsf{t2}, \textsf{q2},
+\textsf{o2}).  If the waypoint in the row is a pick-up, CQ validates that
+$\textsf{q1}+\textsf{rq}=\textsf{q2}$, otherwise that
+$\textsf{q1}-\textsf{rq}=\textsf{q2}$ ({\tt{}C98}). As repetitive load changes can
+occur at a single waypoint due to multiple pick-ups and drop-offs, the
+\textsf{o1} and \textsf{o2} columns are introduced to store a unique
+\emph{order number}. This number increments by 1 for each pick-up or drop-off
+per server and can be handled by the application. Similar rules for
 establishing predecessor waypoints in Table W can be used to establish
-predecessor loads in CQ. Subsequently,
-(\textsf{sid}, \textsf{t2}, \textsf{q2}, \textsf{o2}) is set to be the primary
-key in order to allow a self-referencing foreign key on
-(\textsf{sid}, \textsf{t1}, \textsf{q1}, \textsf{o1}),
-and the server early time is stored in (\textsf{sid}, \textsf{se}) and
-referenced to UE in order to detect the first load change.
+predecessor loads in CQ.  Subsequently, (\textsf{sid}, \textsf{t2},
+\textsf{q2}, \textsf{o2}) is set to be the primary key ({\tt{}P15}) in order to
+allow a self-referencing foreign key on (\textsf{sid}, \textsf{t1},
+\textsf{q1}, \textsf{o1}) ({\tt{}F42}), and the server early time is stored in
+(\textsf{sid}, \textsf{se}) and referenced to UE ({\tt{}F43}) in order to detect
+the first load change.
 \begin{table}[t]
 \centering
 \small
@@ -1469,7 +1470,7 @@ rq & & \\
 \hline
 \end{tabular}
 \end{table}
-\nwenddocs{}\nwbegincode{37}\sublabel{NW15FRcE-2YsMAX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-2YsMAX-1}}}\moddef{Create Table CQ statement~{\nwtagstyle{}\subpageref{NW15FRcE-2YsMAX-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{35}\sublabel{NW15FRcE-2YsMAX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-2YsMAX-1}}}\moddef{Create Table CQ statement~{\nwtagstyle{}\subpageref{NW15FRcE-2YsMAX-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE TABLE CQ ("
   + "sid int  CONSTRAINT C91 NOT NULL,"
   + "sq  int  CONSTRAINT C92 NOT NULL,"
@@ -1508,24 +1509,24 @@ rq & & \\
   + "  END"
   + ") INITIALLY DEFERRED"
   + ")"
-\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-2YsMAX-1}\nwendcode{}\nwbegindocs{38}\nwdocspar
+\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-2YsMAX-1}\nwendcode{}\nwbegindocs{36}\nwdocspar
 
 \subsubsection{View r\_user (User Relation)}
 The user relation $\mathcal{U}$ can be formed by a union of Table S and R.
-\nwenddocs{}\nwbegincode{39}\sublabel{NW15FRcE-35s8QT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-35s8QT-1}}}\moddef{Create View r\_user statement~{\nwtagstyle{}\subpageref{NW15FRcE-35s8QT-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{37}\sublabel{NW15FRcE-35s8QT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-35s8QT-1}}}\moddef{Create View r\_user statement~{\nwtagstyle{}\subpageref{NW15FRcE-35s8QT-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE VIEW r_user (uid, uq, ue, ul, uo, ud, ub) AS "
   + "SELECT * from S UNION SELECT * from R"
-\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-35s8QT-1}\nwendcode{}\nwbegindocs{40}\nwdocspar
+\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-35s8QT-1}\nwendcode{}\nwbegindocs{38}\nwdocspar
 
 \subsubsection{View r\_server (Server Relation)}
 The server relation $\mathcal{X}$ can be constructed by joining the routes in
 Table W with the labels in CW and PD.
-\nwenddocs{}\nwbegincode{41}\sublabel{NW15FRcE-3E22nZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-3E22nZ-1}}}\moddef{Create View r\_server statement~{\nwtagstyle{}\subpageref{NW15FRcE-3E22nZ-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{39}\sublabel{NW15FRcE-3E22nZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-3E22nZ-1}}}\moddef{Create View r\_server statement~{\nwtagstyle{}\subpageref{NW15FRcE-3E22nZ-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE VIEW r_server (sid, t, v, Ls, Lr) AS "
   + "SELECT W.sid, W.t2, W.v2, CW.sid, PD.rid "
   + "FROM W LEFT OUTER JOIN CW ON W.sid = CW.sid AND (W.t2 = CW.ts OR W.t2 = CW.te) "
   + "  LEFT OUTER JOIN PD ON W.sid = PD.sid AND W.t2 = PD.t2"
-\nwendcode{}\nwbegindocs{42}\nwdocspar
+\nwendcode{}\nwbegindocs{40}\nwdocspar
 
 \subsubsection{View f\_distance\_blocks (Distance Partitions)}
 The cruising and service distances $D^\textrm{cruise}$ and $D^\textrm{service}$
@@ -1533,7 +1534,7 @@ require an auxilliary view. This view joins Table W with
 CQ in such a way that the distances in column \textsf{dd} of W
 can be aggregated based on whether there is load burden at the time of the
 waypoint.
-\nwenddocs{}\nwbegincode{43}\sublabel{NW15FRcE-2SQlWK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-2SQlWK-1}}}\moddef{Create View f\_distance\_blocks statement~{\nwtagstyle{}\subpageref{NW15FRcE-2SQlWK-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{41}\sublabel{NW15FRcE-2SQlWK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-2SQlWK-1}}}\moddef{Create View f\_distance\_blocks statement~{\nwtagstyle{}\subpageref{NW15FRcE-2SQlWK-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE VIEW f_distance_blocks (sid, val, dtype) AS "
   + "SELECT d.sid, SUM (d.dd), d.dtype FROM ("
   + "  SELECT c.sid, c.dd, c.q2=c.sq as dtype FROM ("
@@ -1549,7 +1550,7 @@ waypoint.
   + "  ) AS c"
   + ") AS d "
   + "GROUP BY d.sid, d.dtype"
-\nwendcode{}\nwbegindocs{44}Cruising and service distances are obtained by querying
+\nwendcode{}\nwbegindocs{42}Cruising and service distances are obtained by querying
 f\_distance\_blocks where \textsf{dtype} is true or false, respectively.
 
 \subsubsection{View f\_status (Request Status)}
@@ -1558,30 +1559,30 @@ the count of occurrences of a request in column \textsf{rid} of CQ,
 corresponding to the request status.  Table CQ is used to get the counts over
 time.  If the count is 0, it will not appear in the aggregation and the status
 for the request is ``waiting''.
-\nwenddocs{}\nwbegincode{45}\sublabel{NW15FRcE-qqtLb-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-qqtLb-1}}}\moddef{Create View f\_status statement (Eq.~\ref{eq:status})~{\nwtagstyle{}\subpageref{NW15FRcE-qqtLb-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{43}\sublabel{NW15FRcE-qqtLb-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-qqtLb-1}}}\moddef{Create View f\_status statement (Eq.~\ref{eq:status})~{\nwtagstyle{}\subpageref{NW15FRcE-qqtLb-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE VIEW f_status (t, sid, rid, val) AS "
   + "SELECT a.t2, a.sid, a.rid, COUNT (b.rid) "
   + "FROM CQ AS a INNER JOIN CQ AS b ON a.t2 >= b.t2 "
   + "WHERE a.rid IS NOT NULL AND b.rid IS NOT NULL AND a.rid = b.rid "
   + "GROUP BY a.t2, a.sid, a.rid"
-\nwendcode{}\nwbegindocs{46}\nwdocspar
+\nwendcode{}\nwbegindocs{44}\nwdocspar
 
 \subsubsection{Analytical Views}
 Most of the analytical measures in \S\ref{sec:ridesharing-metrics} can
 be expressed using simple statements.
 
 To list all assignments $\mathcal{A}$:
-\nwenddocs{}\nwbegincode{47}\sublabel{NW15FRcE-4DFJnJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-4DFJnJ-1}}}\moddef{Create View assignments statement (Eq.~\ref{eq:assignments})~{\nwtagstyle{}\subpageref{NW15FRcE-4DFJnJ-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{45}\sublabel{NW15FRcE-4DFJnJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-4DFJnJ-1}}}\moddef{Create View assignments statement (Eq.~\ref{eq:assignments})~{\nwtagstyle{}\subpageref{NW15FRcE-4DFJnJ-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE VIEW assignments (t, sid, rid) AS "
   + "SELECT t, sid, rid FROM f_status WHERE val = 2 ORDER BY t ASC"
-\nwendcode{}\nwbegindocs{48}\nwdocspar
+\nwendcode{}\nwbegindocs{46}\nwdocspar
 To list assigned requests $\mathcal{R^\textrm{ok}}$:
-\nwenddocs{}\nwbegincode{49}\sublabel{NW15FRcE-4Me5rv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-4Me5rv-1}}}\moddef{Create View assignments\_r statement (Eq.~\ref{eq:assigned-requests})~{\nwtagstyle{}\subpageref{NW15FRcE-4Me5rv-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{47}\sublabel{NW15FRcE-4Me5rv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-4Me5rv-1}}}\moddef{Create View assignments\_r statement (Eq.~\ref{eq:assigned-requests})~{\nwtagstyle{}\subpageref{NW15FRcE-4Me5rv-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE VIEW assignments_r (t, rid) AS "
   + "SELECT t, rid FROM assignments"
-\nwendcode{}\nwbegindocs{50}\nwdocspar
+\nwendcode{}\nwbegindocs{48}\nwdocspar
 To list service rate $\mu$:
-\nwenddocs{}\nwbegincode{51}\sublabel{NW15FRcE-3taWHj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-3taWHj-1}}}\moddef{Create View service\_rate statement (Eq.~\ref{eq:service-rate})~{\nwtagstyle{}\subpageref{NW15FRcE-3taWHj-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{49}\sublabel{NW15FRcE-3taWHj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-3taWHj-1}}}\moddef{Create View service\_rate statement (Eq.~\ref{eq:service-rate})~{\nwtagstyle{}\subpageref{NW15FRcE-3taWHj-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE VIEW service_rate (val) AS "
   + "SELECT CAST(A.NUM AS FLOAT) / CAST(A.DENOM AS FLOAT) "
   + "FROM ( "
@@ -1589,95 +1590,101 @@ To list service rate $\mu$:
   + "       (SELECT COUNT(*) FROM R) AS DENOM "
   + "       FROM assignments_r FETCH FIRST ROW ONLY "
   + ") A"
-\nwendcode{}\nwbegindocs{52}\nwdocspar
+\nwendcode{}\nwbegindocs{50}\nwdocspar
 To list base distance $D^\textrm{base}$:
-\nwenddocs{}\nwbegincode{53}\sublabel{NW15FRcE-Xwf4i-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-Xwf4i-1}}}\moddef{Create View dist\_base statement (Eq.~\ref{eq:base-distance})~{\nwtagstyle{}\subpageref{NW15FRcE-Xwf4i-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{51}\sublabel{NW15FRcE-Xwf4i-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-Xwf4i-1}}}\moddef{Create View dist\_base statement (Eq.~\ref{eq:base-distance})~{\nwtagstyle{}\subpageref{NW15FRcE-Xwf4i-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE VIEW dist_base (val) AS "
   + "SELECT SUM (ub) FROM UB"
-\nwendcode{}\nwbegindocs{54}\nwdocspar
+\nwendcode{}\nwbegindocs{52}\nwdocspar
 To list travel distances $D$ of all servers:
-\nwenddocs{}\nwbegincode{55}\sublabel{NW15FRcE-I0bnu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-I0bnu-1}}}\moddef{Create View dist\_s\_travel statement~{\nwtagstyle{}\subpageref{NW15FRcE-I0bnu-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{53}\sublabel{NW15FRcE-I0bnu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-I0bnu-1}}}\moddef{Create View dist\_s\_travel statement~{\nwtagstyle{}\subpageref{NW15FRcE-I0bnu-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE VIEW dist_s_travel (sid, val) AS "
   + "SELECT W.sid, SUM (COALESCE (dd, 0)) "
   + "FROM W JOIN CW ON w.sid = cw.sid AND (t2 BETWEEN ts AND te) "
   + "GROUP BY W.sid"
-\nwendcode{}\nwbegindocs{56}\nwdocspar
+\nwendcode{}\nwbegindocs{54}\nwdocspar
 To list cruising distances $D^\textrm{cruise}$ of all servers:
-\nwenddocs{}\nwbegincode{57}\sublabel{NW15FRcE-sPBsa-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-sPBsa-1}}}\moddef{Create View dist\_s\_cruising statement (Eq.~\ref{eq:cruising-distance})~{\nwtagstyle{}\subpageref{NW15FRcE-sPBsa-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{55}\sublabel{NW15FRcE-sPBsa-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-sPBsa-1}}}\moddef{Create View dist\_s\_cruising statement (Eq.~\ref{eq:cruising-distance})~{\nwtagstyle{}\subpageref{NW15FRcE-sPBsa-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE VIEW dist_s_cruising (sid, val) AS "
   + "SELECT sid, val FROM f_distance_blocks WHERE dtype = true"
-\nwendcode{}\nwbegindocs{58}\nwdocspar
+\nwendcode{}\nwbegindocs{56}\nwdocspar
 To list service distances $D^\textrm{service}$ of all servers:
-\nwenddocs{}\nwbegincode{59}\sublabel{NW15FRcE-21lyOa-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-21lyOa-1}}}\moddef{Create View dist\_s\_service statement (Eq.~\ref{eq:service-distance})~{\nwtagstyle{}\subpageref{NW15FRcE-21lyOa-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{57}\sublabel{NW15FRcE-21lyOa-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-21lyOa-1}}}\moddef{Create View dist\_s\_service statement (Eq.~\ref{eq:service-distance})~{\nwtagstyle{}\subpageref{NW15FRcE-21lyOa-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE VIEW dist_s_service (sid, val) AS "
   + "SELECT sid, val FROM f_distance_blocks WHERE dtype = false"
-\nwendcode{}\nwbegindocs{60}\nwdocspar
+\nwendcode{}\nwbegindocs{58}\nwdocspar
 To list base distances $d$ of all servers:
-\nwenddocs{}\nwbegincode{61}\sublabel{NW15FRcE-15VZds-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-15VZds-1}}}\moddef{Create View dist\_s\_base statement~{\nwtagstyle{}\subpageref{NW15FRcE-15VZds-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{59}\sublabel{NW15FRcE-15VZds-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-15VZds-1}}}\moddef{Create View dist\_s\_base statement~{\nwtagstyle{}\subpageref{NW15FRcE-15VZds-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE VIEW dist_s_base (val) AS "
   + "SELECT SUM (sb) FROM S"
-\nwendcode{}\nwbegindocs{62}\nwdocspar
+\nwendcode{}\nwbegindocs{60}\nwdocspar
 To list base distances $d$ of all requests:
-\nwenddocs{}\nwbegincode{63}\sublabel{NW15FRcE-2qZ1kZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-2qZ1kZ-1}}}\moddef{Create View dist\_r\_base statement~{\nwtagstyle{}\subpageref{NW15FRcE-2qZ1kZ-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{61}\sublabel{NW15FRcE-2qZ1kZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-2qZ1kZ-1}}}\moddef{Create View dist\_r\_base statement~{\nwtagstyle{}\subpageref{NW15FRcE-2qZ1kZ-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE VIEW dist_r_base (val) AS "
   + "SELECT SUM (rb) FROM R"
-\nwendcode{}\nwbegindocs{64}\nwdocspar
+\nwendcode{}\nwbegindocs{62}\nwdocspar
 To list detour distances $D^\textrm{detour}$ of all requests:
-\nwenddocs{}\nwbegincode{65}\sublabel{NW15FRcE-4OnMrk-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-4OnMrk-1}}}\moddef{Create View dist\_r\_detour statement (Eq.~\ref{eq:detour-distance})~{\nwtagstyle{}\subpageref{NW15FRcE-4OnMrk-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{63}\sublabel{NW15FRcE-4OnMrk-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-4OnMrk-1}}}\moddef{Create View dist\_r\_detour statement (Eq.~\ref{eq:detour-distance})~{\nwtagstyle{}\subpageref{NW15FRcE-4OnMrk-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE VIEW dist_r_detour (rid, val) AS "
   + "SELECT rid, val-ub FROM UB JOIN dist_r_transit ON uid = rid"
-\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-4OnMrk-1}\nwendcode{}\nwbegindocs{66}\nwdocspar
+\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW15FRcE-4OnMrk-1}\nwendcode{}\nwbegindocs{64}\nwdocspar
 To list transit distances $D^\textrm{transit}$ of all requests:
-\nwenddocs{}\nwbegincode{67}\sublabel{NW15FRcE-eXH6J-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-eXH6J-1}}}\moddef{Create View dist\_r\_transit statement (Eq.~\ref{eq:transit-distance})~{\nwtagstyle{}\subpageref{NW15FRcE-eXH6J-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{65}\sublabel{NW15FRcE-eXH6J-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-eXH6J-1}}}\moddef{Create View dist\_r\_transit statement (Eq.~\ref{eq:transit-distance})~{\nwtagstyle{}\subpageref{NW15FRcE-eXH6J-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE VIEW dist_r_transit (rid, val) AS "
   + "SELECT rid, SUM (COALESCE (dd, 0)) "
   + "FROM CPD JOIN W ON CPD.sid = W.sid AND W.t2 BETWEEN CPD.tp AND CPD.td "
   + "GROUP BY rid"
-\nwendcode{}\nwbegindocs{68}\nwdocspar
+\nwendcode{}\nwbegindocs{66}\nwdocspar
 To list travel duration $\delta$ of all servers:
-\nwenddocs{}\nwbegincode{69}\sublabel{NW15FRcE-3sQlba-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-3sQlba-1}}}\moddef{Create View dur\_s\_travel statement~{\nwtagstyle{}\subpageref{NW15FRcE-3sQlba-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{67}\sublabel{NW15FRcE-3sQlba-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-3sQlba-1}}}\moddef{Create View dur\_s\_travel statement~{\nwtagstyle{}\subpageref{NW15FRcE-3sQlba-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE VIEW dur_s_travel (sid, val) AS "
   + "SELECT sid, te - ts FROM CW"
-\nwendcode{}\nwbegindocs{70}\nwdocspar
+\nwendcode{}\nwbegindocs{68}\nwdocspar
 To list pick-up delay $\delta^\textrm{pickup}$ of all requests:
-\nwenddocs{}\nwbegincode{71}\sublabel{NW15FRcE-34NkTM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-34NkTM-1}}}\moddef{Create View dur\_r\_pickup statement (Eq.~\ref{eq:pick-up delay})~{\nwtagstyle{}\subpageref{NW15FRcE-34NkTM-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{69}\sublabel{NW15FRcE-34NkTM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-34NkTM-1}}}\moddef{Create View dur\_r\_pickup statement (Eq.~\ref{eq:pick-up delay})~{\nwtagstyle{}\subpageref{NW15FRcE-34NkTM-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE VIEW dur_r_pickup (rid, val) AS "
   + "SELECT rid, tp - re FROM CPD"
-\nwendcode{}\nwbegindocs{72}\nwdocspar
+\nwendcode{}\nwbegindocs{70}\nwdocspar
 To list transit durations $\delta^\textrm{transit}$ of all requests:
-\nwenddocs{}\nwbegincode{73}\sublabel{NW15FRcE-Puojq-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-Puojq-1}}}\moddef{Create View dur\_r\_transit statement (Eq.~\ref{eq:transit-duration})~{\nwtagstyle{}\subpageref{NW15FRcE-Puojq-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{71}\sublabel{NW15FRcE-Puojq-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-Puojq-1}}}\moddef{Create View dur\_r\_transit statement (Eq.~\ref{eq:transit-duration})~{\nwtagstyle{}\subpageref{NW15FRcE-Puojq-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE VIEW dur_r_transit (rid, val) AS "
   + "SELECT rid, td - tp FROM CPD"
-\nwendcode{}\nwbegindocs{74}\nwdocspar
+\nwendcode{}\nwbegindocs{72}\nwdocspar
 To list travel durations $\delta^\textrm{travel}$ of all requests:
-\nwenddocs{}\nwbegincode{75}\sublabel{NW15FRcE-3a0WDv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-3a0WDv-1}}}\moddef{Create View dur\_r\_travel statement (Eq.~\ref{eq:travel-duration})~{\nwtagstyle{}\subpageref{NW15FRcE-3a0WDv-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{73}\sublabel{NW15FRcE-3a0WDv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-3a0WDv-1}}}\moddef{Create View dur\_r\_travel statement (Eq.~\ref{eq:travel-duration})~{\nwtagstyle{}\subpageref{NW15FRcE-3a0WDv-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE VIEW dur_r_travel (rid, val) AS "
   + "SELECT rid, td - re FROM CPD"
-\nwendcode{}\nwbegindocs{76}\nwdocspar
+\nwendcode{}\nwbegindocs{74}\nwdocspar
 To list departure times $t^\textrm{depart}$ of all requests:
-\nwenddocs{}\nwbegincode{77}\sublabel{NW15FRcE-45SyYZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-45SyYZ-1}}}\moddef{Create View t\_r\_depart statement (Eq.~\ref{eq:departure-time})~{\nwtagstyle{}\subpageref{NW15FRcE-45SyYZ-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{75}\sublabel{NW15FRcE-45SyYZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-45SyYZ-1}}}\moddef{Create View t\_r\_depart statement (Eq.~\ref{eq:departure-time})~{\nwtagstyle{}\subpageref{NW15FRcE-45SyYZ-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE VIEW t_r_depart (rid, val) AS "
   + "SELECT rid, tp FROM CPD"
-\nwendcode{}\nwbegindocs{78}\nwdocspar
+\nwendcode{}\nwbegindocs{76}\nwdocspar
 To list departure times $t^\textrm{depart}$ of all servers:
-\nwenddocs{}\nwbegincode{79}\sublabel{NW15FRcE-2riY0r-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-2riY0r-1}}}\moddef{Create View t\_s\_depart statement (Eq.~\ref{eq:departure-time})~{\nwtagstyle{}\subpageref{NW15FRcE-2riY0r-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{77}\sublabel{NW15FRcE-2riY0r-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-2riY0r-1}}}\moddef{Create View t\_s\_depart statement (Eq.~\ref{eq:departure-time})~{\nwtagstyle{}\subpageref{NW15FRcE-2riY0r-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE VIEW t_s_depart (sid, val) AS "
   + "SELECT sid, ts FROM CW"
-\nwendcode{}\nwbegindocs{80}\nwdocspar
+\nwendcode{}\nwbegindocs{78}\nwdocspar
 To list arrival times $t^\textrm{arrive}$ of all requests:
-\nwenddocs{}\nwbegincode{81}\sublabel{NW15FRcE-28E5sQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-28E5sQ-1}}}\moddef{Create View t\_r\_arrive statement (Eq.~\ref{eq:arrival-time})~{\nwtagstyle{}\subpageref{NW15FRcE-28E5sQ-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{79}\sublabel{NW15FRcE-28E5sQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-28E5sQ-1}}}\moddef{Create View t\_r\_arrive statement (Eq.~\ref{eq:arrival-time})~{\nwtagstyle{}\subpageref{NW15FRcE-28E5sQ-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE VIEW t_r_arrive (rid, val) AS "
   + "SELECT rid, td FROM CPD"
-\nwendcode{}\nwbegindocs{82}\nwdocspar
+\nwendcode{}\nwbegindocs{80}\nwdocspar
 To list arrival times $t^\textrm{arrive}$ of all servers:
-\nwenddocs{}\nwbegincode{83}\sublabel{NW15FRcE-3oL4CY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-3oL4CY-1}}}\moddef{Create View t\_s\_arrive statement (Eq.~\ref{eq:arrival-time})~{\nwtagstyle{}\subpageref{NW15FRcE-3oL4CY-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
+\nwenddocs{}\nwbegincode{81}\sublabel{NW15FRcE-3oL4CY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-3oL4CY-1}}}\moddef{Create View t\_s\_arrive statement (Eq.~\ref{eq:arrival-time})~{\nwtagstyle{}\subpageref{NW15FRcE-3oL4CY-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE VIEW t_s_arrive (sid, val) AS "
   + "SELECT sid, te FROM CW"
-\nwendcode{}\nwbegindocs{84}\nwdocspar
+\nwendcode{}\nwbegindocs{82}\nwdocspar
 
 \section{Implementation Overview}
 \label{sec:implementation-overview}
-The remaining sections are concerned with producing the Java code.
+The remaining sections are concerned with producing the Java code.  The code
+consists of the \emph{preamble} (\S\ref{sec:preamble}) and the \emph{class
+definition} (\S\ref{sec:class-definition}).
+\nwenddocs{}\nwbegincode{83}\sublabel{NW15FRcE-203Bbj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-203Bbj-1}}}\moddef{Storage.java~{\nwtagstyle{}\subpageref{NW15FRcE-203Bbj-1}}}\endmoddef\nwnotused{Storage.java}
+  \LA{}Storage.java preamble~{\nwtagstyle{}\subpageref{NW15FRcE-FkGTW-1}}\RA{}
+  \LA{}\code{}Storage\edoc{} definition~{\nwtagstyle{}\subpageref{NW15FRcE-3TAldU-1}}\RA{}
+\nwendcode{}\nwbegindocs{84}\nwdocspar
 \subsection{Preamble}
 \label{sec:preamble}
 The preamble declares the package and imports dependencies.
