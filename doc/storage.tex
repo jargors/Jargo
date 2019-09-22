@@ -1633,7 +1633,7 @@ To list transit distances $D^\textrm{transit}$ of all requests:
 \nwenddocs{}\nwbegincode{65}\sublabel{NW15FRcE-eXH6J-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-eXH6J-1}}}\moddef{Create View dist\_r\_transit statement (Eq.~\ref{eq:transit-distance})~{\nwtagstyle{}\subpageref{NW15FRcE-eXH6J-1}}}\endmoddef\nwused{\\{NW15FRcE-1b3IMM-1}}
 "CREATE VIEW dist_r_transit (rid, val) AS "
   + "SELECT rid, SUM (COALESCE (dd, 0)) "
-  + "FROM CPD JOIN W ON CPD.sid = W.sid AND W.t2 BETWEEN CPD.tp AND CPD.td "
+  + "FROM CPD JOIN W ON CPD.sid = W.sid AND CPD.tp < W.t2 AND W.t2 <= CPD.td "
   + "GROUP BY rid"
 \nwendcode{}\nwbegindocs{66}\nwdocspar
 To list travel duration $\delta$ of all servers:

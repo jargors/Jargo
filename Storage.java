@@ -325,7 +325,7 @@
                         + "SELECT SUM (rb) FROM R");
         stmt.addBatch("CREATE VIEW dist_r_transit (rid, val) AS "
                         + "SELECT rid, SUM (COALESCE (dd, 0)) "
-                        + "FROM CPD JOIN W ON CPD.sid = W.sid AND W.t2 BETWEEN CPD.tp AND CPD.td "
+                        + "FROM CPD JOIN W ON CPD.sid = W.sid AND CPD.tp < W.t2 AND W.t2 <= CPD.td "
                         + "GROUP BY rid");
         stmt.addBatch("CREATE VIEW dist_r_detour (rid, val) AS "
                         + "SELECT rid, val-ub FROM UB JOIN dist_r_transit ON uid = rid");
