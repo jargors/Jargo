@@ -1393,7 +1393,7 @@
     public int[] DBQueryServerCruisingDistance(int sid) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(106, 1);
+        output = DBFetch(106, 1, sid);
       }
       catch (SQLException e1) {
         printSQLException(e1);
