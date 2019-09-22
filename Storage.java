@@ -303,7 +303,7 @@
         stmt.addBatch("CREATE VIEW assignments_r (t, rid) AS "
                         + "SELECT t, rid FROM assignments");
         stmt.addBatch("CREATE VIEW service_rate (val) AS "
-                        + "SELECT CAST(A.NUM AS FLOAT) / CAST(A.DENOM AS FLOAT) "
+                        + "SELECT CAST(CAST(A.NUM AS FLOAT) / CAST(A.DENOM AS FLOAT) * 100 as INT)"
                         + "FROM ( "
                         + "SELECT (SELECT COUNT(*) FROM assignments_r) AS NUM, "
                         + "       (SELECT COUNT(*) FROM R) AS DENOM "
