@@ -1075,6 +1075,23 @@
       }
       return output;
     }
+    public int[] DBQueryRouteRemaining(int sid) throws RuntimeException {
+      int[] output = new int[] { };
+      try {
+        output = DBFetch(129, 2, sid);
+      }
+      catch (SQLException e1) {
+        printSQLException(e1);
+        try {
+          conn.rollback();
+        } catch (SQLException e2) {
+          printSQLException(e2);
+        }
+        DBSaveBackup("db-lastgood");
+        throw new RuntimeException("database failure");
+      }
+      return output;
+    }
     public int[] DBQuerySchedule(int sid) throws RuntimeException {
       int[] output = new int[] { };
       try {
@@ -1881,6 +1898,7 @@
             + "GROUP BY sid"
             + ") as c ON a.sid=c.sid AND ABS(a.t2-?)=c.tdiff AND a.t2<=?");
         pstr.put(60, SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC");
+        pstr.put(129, SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC");
         pstr.put(61, SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
             + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC");
         // Always return a dummy destination
