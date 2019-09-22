@@ -527,6 +527,13 @@
       }
       System.out.println();
     }
+    public void printSchedule(int[] sched) {
+      for (int i = 0; i < (sched.length - 3); i += 4) {
+        System.out.print("("+sched[i]+", "+sched[(i + 1)]
+          + ", "+sched[(i + 2)]+", "+sched[(i + 3)]+") ");
+      }
+      System.out.println();
+    }
     public void DBUpdateEdgeSpeed(int v1, int v2, int nu) throws RuntimeException {
       try {
         PSClear(15);
