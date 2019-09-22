@@ -2202,7 +2202,7 @@ initial route. Array [[route]] =
 <<Add new server>>=
 public int DBAddNewServer(int[] u, int[] route) throws RuntimeException {
   try {
-    int[] output;
+    int[] output = new int[] { };
     int se = u[1];
     uid += 1;
     <<..insert new user into user tables>>
@@ -2268,7 +2268,7 @@ Array [[route]] =
 <<Update server route>>=
 public void DBUpdateServerRoute(int sid, int[] route)
 throws RuntimeException {
-  int[] output;
+  int[] output = new int[] { };
   int se, sq;
   try {
     <<..fetch [[se]] and [[sq]]>>
@@ -2338,7 +2338,7 @@ can use these values when we are inserting into Table CQ.
 <<Update server schedule>>=
 public void DBUpdateServerSchedule(int sid, int[] sched, int[] route)
 throws RuntimeException {
-  int[] output;
+  int[] output = new int[] { };
   int se, sq;
   Map<Integer, int[]> cache = new HashMap<>();
   try {
@@ -2416,7 +2416,7 @@ vertices so that we can use them when we insert into Table PD and CPD.
 public void DBUpdateServerAddToSchedule(
     int sid, int[] rid, int[] sched, int[] route)
 throws RuntimeException {
-  int[] output;
+  int[] output = new int[] { };
   int se, sq;
   Map<Integer, int[]> cache = new HashMap<>();
   Map<Integer, int[]> cache2 = new HashMap<>();
@@ -2502,7 +2502,7 @@ PSSubmit(12, 13);
 public void DBUpdateServerRemoveFromSchedule(
     int sid, int[] rid, int[] sched, int[] route)
 throws RuntimeException {
-  int[] output;
+  int[] output = new int[] { };
   int se, sq;
   Map<Integer, int[]> cache = new HashMap<>();
   try {
@@ -2532,7 +2532,7 @@ Run custom [[SELECT]] queries against the database using
 [[SELECT]] statement.
 <<Query custom statement>>=
 public int[] DBQuery(String sql, int ncols) throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     Statement stmt = conn.createStatement(
       ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
@@ -2549,7 +2549,7 @@ public int[] DBQuery(String sql, int ncols) throws RuntimeException {
 \subsubsection{[[DBQueryServer]](1)}
 <<Query ridesharing user>>=
 public int[] DBQueryServer(int sid) throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(70, 7, sid);
   }
@@ -2561,7 +2561,7 @@ public int[] DBQueryServer(int sid) throws RuntimeException {
 \subsubsection{[[DBQueryRequest]](1)}
 <<Query ridesharing user>>=
 public int[] DBQueryRequest(int rid) throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(75, 7, rid);
   }
@@ -2573,7 +2573,7 @@ public int[] DBQueryRequest(int rid) throws RuntimeException {
 \subsubsection{[[DBQueryQueuedRequests]](1)}
 <<Query queued requests>>=
 public int[] DBQueryQueuedRequests(int t) throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(68, 7, t, t);
   }
@@ -2585,7 +2585,7 @@ public int[] DBQueryQueuedRequests(int t) throws RuntimeException {
 \subsubsection{[[DBQueryServerLocationsAll]](1)}
 <<Query all server locations>>=
 public int[] DBQueryServerLocationsAll(int t) throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(59, 3, t, t, t, t);
   }
@@ -2597,7 +2597,7 @@ public int[] DBQueryServerLocationsAll(int t) throws RuntimeException {
 \subsubsection{[[DBQueryServerLocationsActive]](1)}
 <<Query active server locations>>=
 public int[] DBQueryServerLocationsActive(int t) throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(128, 3, t, t, t, t, t);
   }
@@ -2610,7 +2610,7 @@ public int[] DBQueryServerLocationsActive(int t) throws RuntimeException {
 A vehicle's route can be retrieved if its corresponding [[sid]] is known.
 <<Query routes>>=
 public int[] DBQueryRoute(int sid) throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(60, 2, sid);
   }
@@ -2625,7 +2625,7 @@ Similarly, a vehicle's schedule can be retrieved.
 as a 0 in the output array due to [[getInt]] in [[DBFetch]].}
 <<Query schedules>>=
 public int[] DBQuerySchedule(int sid) throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(61, 4, sid);
   }
@@ -2637,7 +2637,7 @@ public int[] DBQuerySchedule(int sid) throws RuntimeException {
 \subsubsection{[[DBQueryScheduleRemaining]](2)}
 <<Query schedules>>=
 public int[] DBQueryScheduleRemaining(int sid, int t) throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(69, 4, sid, t);
   }
@@ -2649,7 +2649,7 @@ public int[] DBQueryScheduleRemaining(int sid, int t) throws RuntimeException {
 \subsubsection{[[DBQueryCurrentLoad]](2)}
 <<Query current load>>=
 public int[] DBQueryCurrentLoad(int sid, int t) throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(73, 1, sid, t);
   }
@@ -2661,7 +2661,7 @@ public int[] DBQueryCurrentLoad(int sid, int t) throws RuntimeException {
 \subsubsection{[[DBQueryCountVertices]](0)}
 <<Query various metrics>>=
 public int[] DBQueryCountVertices() throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(62, 1);
   }
@@ -2673,7 +2673,7 @@ public int[] DBQueryCountVertices() throws RuntimeException {
 \subsubsection{[[DBQueryCountEdges]](0)}
 <<Query various metrics>>=
 public int[] DBQueryCountEdges() throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(63, 1);
   }
@@ -2688,7 +2688,7 @@ maximum edge weight, average edge weight, minimum edge speed, maximum edge speed
 average edge speed.
 <<Query various metrics>>=
 public int[] DBQueryStatisticsEdges() throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(65, 6);
   }
@@ -2703,7 +2703,7 @@ returned as four numbers: minimum longitude, maximum longitude, minimum
 latitude, maximum latitude.
 <<Query various metrics>>=
 public int[] DBQueryMBR() throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(64, 4);
   }
@@ -2715,7 +2715,7 @@ public int[] DBQueryMBR() throws RuntimeException {
 \subsubsection{[[DBQueryCountServers]](0)}
 <<Query various metrics>>=
 public int[] DBQueryCountServers() throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(66, 1);
   }
@@ -2727,7 +2727,7 @@ public int[] DBQueryCountServers() throws RuntimeException {
 \subsubsection{[[DBQueryCountRequests]](0)}
 <<Query various metrics>>=
 public int[] DBQueryCountRequests() throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(67, 1);
   }
@@ -2740,7 +2740,7 @@ public int[] DBQueryCountRequests() throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryServerPendingAssignments(int sid, int t)
 throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(100, 1, t, sid);
   }
@@ -2753,7 +2753,7 @@ throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryServerCompletedAssignments(int sid, int t)
 throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(101, 1, t, sid);
   }
@@ -2765,7 +2765,7 @@ throws RuntimeException {
 \subsubsection{[[DBQueryServiceRate]](0)}
 <<Query various metrics>>=
 public int[] DBQueryServiceRate() throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(102, 1);
   }
@@ -2777,7 +2777,7 @@ public int[] DBQueryServiceRate() throws RuntimeException {
 \subsubsection{[[DBQueryBaseDistanceTotal]](0)}
 <<Query various metrics>>=
 public int[] DBQueryBaseDistanceTotal() throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(103, 1);
   }
@@ -2789,7 +2789,7 @@ public int[] DBQueryBaseDistanceTotal() throws RuntimeException {
 \subsubsection{[[DBQueryServerBaseDistanceTotal]](0)}
 <<Query various metrics>>=
 public int[] DBQueryServerBaseDistanceTotal() throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(110, 1);
   }
@@ -2801,7 +2801,7 @@ public int[] DBQueryServerBaseDistanceTotal() throws RuntimeException {
 \subsubsection{[[DBQueryRequestBaseDistanceTotal]](0)}
 <<Query various metrics>>=
 public int[] DBQueryRequestBaseDistanceTotal() throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(111, 1);
   }
@@ -2813,7 +2813,7 @@ public int[] DBQueryRequestBaseDistanceTotal() throws RuntimeException {
 \subsubsection{[[DBQueryServerTravelDistance]](1)}
 <<Query various metrics>>=
 public int[] DBQueryServerTravelDistance(int sid) throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(104, 1, sid);
   }
@@ -2825,7 +2825,7 @@ public int[] DBQueryServerTravelDistance(int sid) throws RuntimeException {
 \subsubsection{[[DBQueryServerTravelDistanceTotal]](0)}
 <<Query various metrics>>=
 public int[] DBQueryServerTravelDistanceTotal() throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(105, 1);
   }
@@ -2837,7 +2837,7 @@ public int[] DBQueryServerTravelDistanceTotal() throws RuntimeException {
 \subsubsection{[[DBQueryServerCruisingDistance]](1)}
 <<Query various metrics>>=
 public int[] DBQueryServerCruisingDistance(int sid) throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(106, 1);
   }
@@ -2849,7 +2849,7 @@ public int[] DBQueryServerCruisingDistance(int sid) throws RuntimeException {
 \subsubsection{[[DBQueryServerCruisingDistanceTotal]](0)}
 <<Query various metrics>>=
 public int[] DBQueryServerCruisingDistanceTotal() throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(107, 1);
   }
@@ -2861,7 +2861,7 @@ public int[] DBQueryServerCruisingDistanceTotal() throws RuntimeException {
 \subsubsection{[[DBQueryServerServiceDistance]](1)}
 <<Query various metrics>>=
 public int[] DBQueryServerServiceDistance(int sid) throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(108, 1, sid);
   }
@@ -2873,7 +2873,7 @@ public int[] DBQueryServerServiceDistance(int sid) throws RuntimeException {
 \subsubsection{[[DBQueryServerServiceDistanceTotal]](0)}
 <<Query various metrics>>=
 public int[] DBQueryServerServiceDistanceTotal() throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(109, 1);
   }
@@ -2885,7 +2885,7 @@ public int[] DBQueryServerServiceDistanceTotal() throws RuntimeException {
 \subsubsection{[[DBQueryRequestDetourDistance]](1)}
 <<Query various metrics>>=
 public int[] DBQueryRequestDetourDistance(int rid) throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(112, 1, rid);
   }
@@ -2897,7 +2897,7 @@ public int[] DBQueryRequestDetourDistance(int rid) throws RuntimeException {
 \subsubsection{[[DBQueryRequestDetourDistanceTotal]](0)}
 <<Query various metrics>>=
 public int[] DBQueryRequestDetourDistanceTotal() throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(113, 1);
   }
@@ -2909,7 +2909,7 @@ public int[] DBQueryRequestDetourDistanceTotal() throws RuntimeException {
 \subsubsection{[[DBQueryRequestTransitDistance]](1)}
 <<Query various metrics>>=
 public int[] DBQueryRequestTransitDistance(int rid) throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(114, 1, rid);
   }
@@ -2921,7 +2921,7 @@ public int[] DBQueryRequestTransitDistance(int rid) throws RuntimeException {
 \subsubsection{[[DBQueryRequestTransitDistanceTotal]](0)}
 <<Query various metrics>>=
 public int[] DBQueryRequestTransitDistanceTotal() throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(115, 1);
   }
@@ -2933,7 +2933,7 @@ public int[] DBQueryRequestTransitDistanceTotal() throws RuntimeException {
 \subsubsection{[[DBQueryServerTravelDuration]](1)}
 <<Query various metrics>>=
 public int[] DBQueryServerTravelDuration(int sid) throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(116, 1, sid);
   }
@@ -2945,7 +2945,7 @@ public int[] DBQueryServerTravelDuration(int sid) throws RuntimeException {
 \subsubsection{[[DBQueryServerTravelDurationTotal]](0)}
 <<Query various metrics>>=
 public int[] DBQueryServerTravelDurationTotal() throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(117, 1);
   }
@@ -2957,7 +2957,7 @@ public int[] DBQueryServerTravelDurationTotal() throws RuntimeException {
 \subsubsection{[[DBQueryRequestPickupDuration]](1)}
 <<Query various metrics>>=
 public int[] DBQueryRequestPickupDuration(int rid) throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(118, 1, rid);
   }
@@ -2969,7 +2969,7 @@ public int[] DBQueryRequestPickupDuration(int rid) throws RuntimeException {
 \subsubsection{[[DBQueryRequestPickupDurationTotal]](0)}
 <<Query various metrics>>=
 public int[] DBQueryRequestPickupDurationTotal() throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(119, 1);
   }
@@ -2981,7 +2981,7 @@ public int[] DBQueryRequestPickupDurationTotal() throws RuntimeException {
 \subsubsection{[[DBQueryRequestTransitDuration]](1)}
 <<Query various metrics>>=
 public int[] DBQueryRequestTransitDuration(int rid) throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(120, 1, rid);
   }
@@ -2993,7 +2993,7 @@ public int[] DBQueryRequestTransitDuration(int rid) throws RuntimeException {
 \subsubsection{[[DBQueryRequestTransitDurationTotal]](0)}
 <<Query various metrics>>=
 public int[] DBQueryRequestTransitDurationTotal() throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(121, 1);
   }
@@ -3005,7 +3005,7 @@ public int[] DBQueryRequestTransitDurationTotal() throws RuntimeException {
 \subsubsection{[[DBQueryRequestTravelDuration]](1)}
 <<Query various metrics>>=
 public int[] DBQueryRequestTravelDuration(int rid) throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(122, 1, rid);
   }
@@ -3017,7 +3017,7 @@ public int[] DBQueryRequestTravelDuration(int rid) throws RuntimeException {
 \subsubsection{[[DBQueryRequestTravelDurationTotal]](0)}
 <<Query various metrics>>=
 public int[] DBQueryRequestTravelDurationTotal() throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(123, 1);
   }
@@ -3029,7 +3029,7 @@ public int[] DBQueryRequestTravelDurationTotal() throws RuntimeException {
 \subsubsection{[[DBQueryRequestDepartureTime]](1)}
 <<Query various metrics>>=
 public int[] DBQueryRequestDepartureTime(int rid) throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(124, 1, rid);
   }
@@ -3041,7 +3041,7 @@ public int[] DBQueryRequestDepartureTime(int rid) throws RuntimeException {
 \subsubsection{[[DBQueryServerDepartureTime]](1)}
 <<Query various metrics>>=
 public int[] DBQueryServerDepartureTime(int sid) throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(125, 1, sid);
   }
@@ -3053,7 +3053,7 @@ public int[] DBQueryServerDepartureTime(int sid) throws RuntimeException {
 \subsubsection{[[DBQueryRequestArrivalTime]](1)}
 <<Query various metrics>>=
 public int[] DBQueryRequestArrivalTime(int rid) throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(126, 1, rid);
   }
@@ -3065,7 +3065,7 @@ public int[] DBQueryRequestArrivalTime(int rid) throws RuntimeException {
 \subsubsection{[[DBQueryServerArrivalTime]](1)}
 <<Query various metrics>>=
 public int[] DBQueryServerArrivalTime(int sid) throws RuntimeException {
-  int[] output = null;
+  int[] output = new int[] { };
   try {
     output = DBFetch(127, 1, sid);
   }
@@ -3110,7 +3110,7 @@ private PreparedStatement PS(String sql) throws SQLException {
 \label{sec:fetch}
 <<Fetch items from database>>=
 private int[] DBFetch(int k, int ncols, Integer... values) throws SQLException {
-  int[] output = null;
+  int[] output = new int[] { };
   pstmt.get(k).clearParameters();
   <<..set values for [[pstmt[k]]]>>
   try {

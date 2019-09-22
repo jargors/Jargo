@@ -575,7 +575,7 @@
     }
     public int DBAddNewServer(int[] u, int[] route) throws RuntimeException {
       try {
-        int[] output;
+        int[] output = new int[] { };
         int se = u[1];
         uid += 1;
         PSClear(2, 3, 4, 5, 6, 7);
@@ -625,7 +625,7 @@
     }
     public void DBUpdateServerRoute(int sid, int[] route)
     throws RuntimeException {
-      int[] output;
+      int[] output = new int[] { };
       int se, sq;
       try {
         output = DBFetch(48, 2, sid);
@@ -666,7 +666,7 @@
     }
     public void DBUpdateServerSchedule(int sid, int[] sched, int[] route)
     throws RuntimeException {
-      int[] output;
+      int[] output = new int[] { };
       int se, sq;
       Map<Integer, int[]> cache = new HashMap<>();
       try {
@@ -754,7 +754,7 @@
     public void DBUpdateServerAddToSchedule(
         int sid, int[] rid, int[] sched, int[] route)
     throws RuntimeException {
-      int[] output;
+      int[] output = new int[] { };
       int se, sq;
       Map<Integer, int[]> cache = new HashMap<>();
       Map<Integer, int[]> cache2 = new HashMap<>();
@@ -882,7 +882,7 @@
     public void DBUpdateServerRemoveFromSchedule(
         int sid, int[] rid, int[] sched, int[] route)
     throws RuntimeException {
-      int[] output;
+      int[] output = new int[] { };
       int se, sq;
       Map<Integer, int[]> cache = new HashMap<>();
       try {
@@ -974,7 +974,7 @@
       }
     }
     public int[] DBQueryServer(int sid) throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(70, 7, sid);
       }
@@ -991,7 +991,7 @@
       return output;
     }
     public int[] DBQueryRequest(int rid) throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(75, 7, rid);
       }
@@ -1008,7 +1008,7 @@
       return output;
     }
     public int[] DBQueryQueuedRequests(int t) throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(68, 7, t, t);
       }
@@ -1025,7 +1025,7 @@
       return output;
     }
     public int[] DBQueryServerLocationsAll(int t) throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(59, 3, t, t, t, t);
       }
@@ -1042,7 +1042,7 @@
       return output;
     }
     public int[] DBQueryServerLocationsActive(int t) throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(128, 3, t, t, t, t, t);
       }
@@ -1059,7 +1059,7 @@
       return output;
     }
     public int[] DBQueryRoute(int sid) throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(60, 2, sid);
       }
@@ -1076,7 +1076,7 @@
       return output;
     }
     public int[] DBQuerySchedule(int sid) throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(61, 4, sid);
       }
@@ -1093,7 +1093,7 @@
       return output;
     }
     public int[] DBQueryScheduleRemaining(int sid, int t) throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(69, 4, sid, t);
       }
@@ -1110,7 +1110,7 @@
       return output;
     }
     public int[] DBQueryCurrentLoad(int sid, int t) throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(73, 1, sid, t);
       }
@@ -1127,7 +1127,7 @@
       return output;
     }
     public int[] DBQueryCountVertices() throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(62, 1);
       }
@@ -1144,7 +1144,7 @@
       return output;
     }
     public int[] DBQueryCountEdges() throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(63, 1);
       }
@@ -1161,7 +1161,7 @@
       return output;
     }
     public int[] DBQueryStatisticsEdges() throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(65, 6);
       }
@@ -1178,7 +1178,7 @@
       return output;
     }
     public int[] DBQueryMBR() throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(64, 4);
       }
@@ -1195,7 +1195,7 @@
       return output;
     }
     public int[] DBQueryCountServers() throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(66, 1);
       }
@@ -1212,7 +1212,7 @@
       return output;
     }
     public int[] DBQueryCountRequests() throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(67, 1);
       }
@@ -1230,7 +1230,7 @@
     }
     public int[] DBQueryServerPendingAssignments(int sid, int t)
     throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(100, 1, t, sid);
       }
@@ -1248,7 +1248,7 @@
     }
     public int[] DBQueryServerCompletedAssignments(int sid, int t)
     throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(101, 1, t, sid);
       }
@@ -1265,7 +1265,7 @@
       return output;
     }
     public int[] DBQueryServiceRate() throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(102, 1);
       }
@@ -1282,7 +1282,7 @@
       return output;
     }
     public int[] DBQueryBaseDistanceTotal() throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(103, 1);
       }
@@ -1299,7 +1299,7 @@
       return output;
     }
     public int[] DBQueryServerBaseDistanceTotal() throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(110, 1);
       }
@@ -1316,7 +1316,7 @@
       return output;
     }
     public int[] DBQueryRequestBaseDistanceTotal() throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(111, 1);
       }
@@ -1333,7 +1333,7 @@
       return output;
     }
     public int[] DBQueryServerTravelDistance(int sid) throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(104, 1, sid);
       }
@@ -1350,7 +1350,7 @@
       return output;
     }
     public int[] DBQueryServerTravelDistanceTotal() throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(105, 1);
       }
@@ -1367,7 +1367,7 @@
       return output;
     }
     public int[] DBQueryServerCruisingDistance(int sid) throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(106, 1);
       }
@@ -1384,7 +1384,7 @@
       return output;
     }
     public int[] DBQueryServerCruisingDistanceTotal() throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(107, 1);
       }
@@ -1401,7 +1401,7 @@
       return output;
     }
     public int[] DBQueryServerServiceDistance(int sid) throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(108, 1, sid);
       }
@@ -1418,7 +1418,7 @@
       return output;
     }
     public int[] DBQueryServerServiceDistanceTotal() throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(109, 1);
       }
@@ -1435,7 +1435,7 @@
       return output;
     }
     public int[] DBQueryRequestDetourDistance(int rid) throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(112, 1, rid);
       }
@@ -1452,7 +1452,7 @@
       return output;
     }
     public int[] DBQueryRequestDetourDistanceTotal() throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(113, 1);
       }
@@ -1469,7 +1469,7 @@
       return output;
     }
     public int[] DBQueryRequestTransitDistance(int rid) throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(114, 1, rid);
       }
@@ -1486,7 +1486,7 @@
       return output;
     }
     public int[] DBQueryRequestTransitDistanceTotal() throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(115, 1);
       }
@@ -1503,7 +1503,7 @@
       return output;
     }
     public int[] DBQueryServerTravelDuration(int sid) throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(116, 1, sid);
       }
@@ -1520,7 +1520,7 @@
       return output;
     }
     public int[] DBQueryServerTravelDurationTotal() throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(117, 1);
       }
@@ -1537,7 +1537,7 @@
       return output;
     }
     public int[] DBQueryRequestPickupDuration(int rid) throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(118, 1, rid);
       }
@@ -1554,7 +1554,7 @@
       return output;
     }
     public int[] DBQueryRequestPickupDurationTotal() throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(119, 1);
       }
@@ -1571,7 +1571,7 @@
       return output;
     }
     public int[] DBQueryRequestTransitDuration(int rid) throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(120, 1, rid);
       }
@@ -1588,7 +1588,7 @@
       return output;
     }
     public int[] DBQueryRequestTransitDurationTotal() throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(121, 1);
       }
@@ -1605,7 +1605,7 @@
       return output;
     }
     public int[] DBQueryRequestTravelDuration(int rid) throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(122, 1, rid);
       }
@@ -1622,7 +1622,7 @@
       return output;
     }
     public int[] DBQueryRequestTravelDurationTotal() throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(123, 1);
       }
@@ -1639,7 +1639,7 @@
       return output;
     }
     public int[] DBQueryRequestDepartureTime(int rid) throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(124, 1, rid);
       }
@@ -1656,7 +1656,7 @@
       return output;
     }
     public int[] DBQueryServerDepartureTime(int sid) throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(125, 1, sid);
       }
@@ -1673,7 +1673,7 @@
       return output;
     }
     public int[] DBQueryRequestArrivalTime(int rid) throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(126, 1, rid);
       }
@@ -1690,7 +1690,7 @@
       return output;
     }
     public int[] DBQueryServerArrivalTime(int sid) throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         output = DBFetch(127, 1, sid);
       }
@@ -1707,7 +1707,7 @@
       return output;
     }
     public int[] DBQuery(String sql, int ncols) throws RuntimeException {
-      int[] output = null;
+      int[] output = new int[] { };
       try {
         Statement stmt = conn.createStatement(
           ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
@@ -1749,7 +1749,7 @@
         return ps;
       }
       private int[] DBFetch(int k, int ncols, Integer... values) throws SQLException {
-        int[] output = null;
+        int[] output = new int[] { };
         pstmt.get(k).clearParameters();
         for (int i = 0; i < values.length; i++) {
           if (values[i] == null) {
