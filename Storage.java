@@ -1075,10 +1075,10 @@
       }
       return output;
     }
-    public int[] DBQueryRouteRemaining(int sid) throws RuntimeException {
+    public int[] DBQueryRouteRemaining(int sid, int t) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(129, 2, sid);
+        output = DBFetch(129, 2, sid, t);
       }
       catch (SQLException e1) {
         printSQLException(e1);
