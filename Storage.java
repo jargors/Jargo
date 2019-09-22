@@ -522,8 +522,8 @@
       System.out.println();
     }
     public void printRoute(int[] route) {
-      for (int i = 0; i < route.length - 1; i++) {
-        System.out.print("("+route[i]+", "+route[i+1]+") ");
+      for (int i = 0; i < (route.length - 1); i += 2) {
+        System.out.print("("+route[i]+", "+route[(i + 1)]+") ");
       }
       System.out.println();
     }
