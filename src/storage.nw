@@ -2234,15 +2234,17 @@ PSClear(8);
 PSAdd(8, uid, u[0], u[1], u[2], u[3], u[4], u[5]);
 PSSubmit(8);
 @
-<<..insert new server route into Table W>>=
-<<Procedure to insert [[route]] into Table W>>
-@
 The procedure to insert [[route]] into Table W is written into its own chunk so
 we can re-use it later. The first step is to add the first waypoint with
 [[null]] as its predecessor. Then we loop through the remaining waypoints.
-<<Procedure to insert [[route]] into Table W>>=
+<<..insert new server route into Table W>>=
 PSClear(10);
 PSAdd(10, uid, se, null, null, route[0], route[1], null, null);
+PSSubmit(10);
+<<Procedure to insert [[route]] into Table W>>
+@
+<<Procedure to insert [[route]] into Table W>>=
+PSClear(10);
 for (int i = 0; i < (route.length - 3); i += 2) {
   int t1 = route[i];
   int v1 = route[(i + 1)];
@@ -2286,17 +2288,17 @@ throws RuntimeException {
   int[] output = new int[] { };
   int se, sq;
   try {
-    <<..fetch [[se]] and [[sq]]>>
+    <<..fetch [[sq]] and [[se]]>>
     <<..update route>>
     conn.commit();
   }
   <<Catch and print [[SQLException]]>>
 }
 @ %def DBUpdateServerRoute
-<<..fetch [[se]] and [[sq]]>>=
+<<..fetch [[sq]] and [[se]]>>=
 output = DBFetch(48, 2, sid);
-se = output[0];
-sq = output[1];
+sq = output[0];
+se = output[1];
 @
 <<..update route>>=
 <<....delete remaining route>>
@@ -2357,7 +2359,7 @@ throws RuntimeException {
   int se, sq;
   Map<Integer, int[]> cache = new HashMap<>();
   try {
-    <<..fetch [[se]] and [[sq]]>>
+    <<..fetch [[sq]] and [[se]]>>
     <<..update route>>
     <<..update schedule>>
     conn.commit();
@@ -2403,7 +2405,7 @@ PSClear(80);
 PSAdd(80, sid, route[0]);
 PSSubmit(80);
 int t1, q1, o1;
-output = DBFetch(87, 3, sched[0]);
+output = DBFetch(87, 3, sid, sched[0]);
 t1 = output[0];
 q1 = output[1];
 o1 = output[2];
@@ -2436,7 +2438,7 @@ throws RuntimeException {
   Map<Integer, int[]> cache = new HashMap<>();
   Map<Integer, int[]> cache2 = new HashMap<>();
   try {
-    <<..fetch [[se]] and [[sq]]>>
+    <<..fetch [[sq]] and [[se]]>>
     <<..update route>>
     <<..update and add to schedule>>
     conn.commit();
@@ -2507,7 +2509,7 @@ for (int r : rid) {
   PSAdd(12, sid, qpd[1], pd[0], r);
   PSAdd(12, sid, qpd[2], pd[1], r);
   PSAdd(13, sid, se, route[(route.length - 2)], qpd[1], pd[0], qpd[2], pd[1],
-        r, rl, ro, rd);
+        r, re, rl, ro, rd);
 }
 PSSubmit(12, 13);
 @
@@ -2521,7 +2523,7 @@ throws RuntimeException {
   int se, sq;
   Map<Integer, int[]> cache = new HashMap<>();
   try {
-    <<..fetch [[se]] and [[sq]]>>
+    <<..fetch [[sq]] and [[se]]>>
     <<..update route>>
     <<..update schedule>>
     <<..remove jobs from pd, cpd>>

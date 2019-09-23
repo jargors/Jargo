@@ -600,6 +600,8 @@
         PSSubmit(8);
         PSClear(10);
         PSAdd(10, uid, se, null, null, route[0], route[1], null, null);
+        PSSubmit(10);
+        PSClear(10);
         for (int i = 0; i < (route.length - 3); i += 2) {
           int t1 = route[i];
           int v1 = route[(i + 1)];
@@ -639,13 +641,12 @@
       int se, sq;
       try {
         output = DBFetch(48, 2, sid);
-        se = output[0];
-        sq = output[1];
+        sq = output[0];
+        se = output[1];
         PSClear(76);
         PSAdd(76, sid, route[0]);
         PSSubmit(76);
         PSClear(10);
-        PSAdd(10, uid, se, null, null, route[0], route[1], null, null);
         for (int i = 0; i < (route.length - 3); i += 2) {
           int t1 = route[i];
           int v1 = route[(i + 1)];
@@ -682,13 +683,12 @@
       Map<Integer, int[]> cache = new HashMap<>();
       try {
         output = DBFetch(48, 2, sid);
-        se = output[0];
-        sq = output[1];
+        sq = output[0];
+        se = output[1];
         PSClear(76);
         PSAdd(76, sid, route[0]);
         PSSubmit(76);
         PSClear(10);
-        PSAdd(10, uid, se, null, null, route[0], route[1], null, null);
         for (int i = 0; i < (route.length - 3); i += 2) {
           int t1 = route[i];
           int v1 = route[(i + 1)];
@@ -731,7 +731,7 @@
         PSAdd(80, sid, route[0]);
         PSSubmit(80);
         int t1, q1, o1;
-        output = DBFetch(87, 3, sched[0]);
+        output = DBFetch(87, 3, sid, sched[0]);
         t1 = output[0];
         q1 = output[1];
         o1 = output[2];
@@ -772,13 +772,12 @@
       Map<Integer, int[]> cache2 = new HashMap<>();
       try {
         output = DBFetch(48, 2, sid);
-        se = output[0];
-        sq = output[1];
+        sq = output[0];
+        se = output[1];
         PSClear(76);
         PSAdd(76, sid, route[0]);
         PSSubmit(76);
         PSClear(10);
-        PSAdd(10, uid, se, null, null, route[0], route[1], null, null);
         for (int i = 0; i < (route.length - 3); i += 2) {
           int t1 = route[i];
           int v1 = route[(i + 1)];
@@ -842,7 +841,7 @@
         PSAdd(80, sid, route[0]);
         PSSubmit(80);
         int t1, q1, o1;
-        output = DBFetch(87, 3, sched[0]);
+        output = DBFetch(87, 3, sid, sched[0]);
         t1 = output[0];
         q1 = output[1];
         o1 = output[2];
@@ -876,7 +875,7 @@
           PSAdd(12, sid, qpd[1], pd[0], r);
           PSAdd(12, sid, qpd[2], pd[1], r);
           PSAdd(13, sid, se, route[(route.length - 2)], qpd[1], pd[0], qpd[2], pd[1],
-                r, rl, ro, rd);
+                r, re, rl, ro, rd);
         }
         PSSubmit(12, 13);
         conn.commit();
@@ -900,13 +899,12 @@
       Map<Integer, int[]> cache = new HashMap<>();
       try {
         output = DBFetch(48, 2, sid);
-        se = output[0];
-        sq = output[1];
+        sq = output[0];
+        se = output[1];
         PSClear(76);
         PSAdd(76, sid, route[0]);
         PSSubmit(76);
         PSClear(10);
-        PSAdd(10, uid, se, null, null, route[0], route[1], null, null);
         for (int i = 0; i < (route.length - 3); i += 2) {
           int t1 = route[i];
           int v1 = route[(i + 1)];
@@ -949,7 +947,7 @@
         PSAdd(80, sid, route[0]);
         PSSubmit(80);
         int t1, q1, o1;
-        output = DBFetch(87, 3, sched[0]);
+        output = DBFetch(87, 3, sid, sched[0]);
         t1 = output[0];
         q1 = output[1];
         o1 = output[2];
