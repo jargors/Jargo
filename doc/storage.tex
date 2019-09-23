@@ -2238,9 +2238,11 @@ PSSubmit(8);
 \LA{}Procedure to insert \code{}route\edoc{} into Table W~{\nwtagstyle{}\subpageref{NW15FRcE-1EP7t-1}}\RA{}
 \nwendcode{}\nwbegindocs{172}\nwdocspar
 The procedure to insert {\tt{}route} into Table W is written into its own chunk so
-we can re-use it later.
+we can re-use it later. The first step is to add the first waypoint with
+{\tt{}null} as its predecessor. Then we loop through the remaining waypoints.
 \nwenddocs{}\nwbegincode{173}\sublabel{NW15FRcE-1EP7t-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-1EP7t-1}}}\moddef{Procedure to insert \code{}route\edoc{} into Table W~{\nwtagstyle{}\subpageref{NW15FRcE-1EP7t-1}}}\endmoddef\nwused{\\{NW15FRcE-2JTZnV-1}\\{NW15FRcE-1cGW7n-1}}
 PSClear(10);
+PSAdd(10, uid, se, null, null, route[0], route[1], null, null);
 for (int i = 0; i < (route.length - 3); i += 2) \{
   int t1 = route[i];
   int v1 = route[(i + 1)];

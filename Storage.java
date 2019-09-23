@@ -599,6 +599,7 @@
         PSAdd(8, uid, u[0], u[1], u[2], u[3], u[4], u[5]);
         PSSubmit(8);
         PSClear(10);
+        PSAdd(10, uid, se, null, null, route[0], route[1], null, null);
         for (int i = 0; i < (route.length - 3); i += 2) {
           int t1 = route[i];
           int v1 = route[(i + 1)];
@@ -644,6 +645,7 @@
         PSAdd(76, sid, route[0]);
         PSSubmit(76);
         PSClear(10);
+        PSAdd(10, uid, se, null, null, route[0], route[1], null, null);
         for (int i = 0; i < (route.length - 3); i += 2) {
           int t1 = route[i];
           int v1 = route[(i + 1)];
@@ -686,6 +688,7 @@
         PSAdd(76, sid, route[0]);
         PSSubmit(76);
         PSClear(10);
+        PSAdd(10, uid, se, null, null, route[0], route[1], null, null);
         for (int i = 0; i < (route.length - 3); i += 2) {
           int t1 = route[i];
           int v1 = route[(i + 1)];
@@ -775,6 +778,7 @@
         PSAdd(76, sid, route[0]);
         PSSubmit(76);
         PSClear(10);
+        PSAdd(10, uid, se, null, null, route[0], route[1], null, null);
         for (int i = 0; i < (route.length - 3); i += 2) {
           int t1 = route[i];
           int v1 = route[(i + 1)];
@@ -902,6 +906,7 @@
         PSAdd(76, sid, route[0]);
         PSSubmit(76);
         PSClear(10);
+        PSAdd(10, uid, se, null, null, route[0], route[1], null, null);
         for (int i = 0; i < (route.length - 3); i += 2) {
           int t1 = route[i];
           int v1 = route[(i + 1)];

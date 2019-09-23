@@ -2238,9 +2238,11 @@ PSSubmit(8);
 <<Procedure to insert [[route]] into Table W>>
 @
 The procedure to insert [[route]] into Table W is written into its own chunk so
-we can re-use it later.
+we can re-use it later. The first step is to add the first waypoint with
+[[null]] as its predecessor. Then we loop through the remaining waypoints.
 <<Procedure to insert [[route]] into Table W>>=
 PSClear(10);
+PSAdd(10, uid, se, null, null, route[0], route[1], null, null);
 for (int i = 0; i < (route.length - 3); i += 2) {
   int t1 = route[i];
   int v1 = route[(i + 1)];
