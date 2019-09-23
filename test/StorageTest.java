@@ -528,6 +528,32 @@
         }
       }
       {
+        int output[] = storage.DBQueryVertex(22);
+        if (!(output[0] == 1040750029)
+          && (output[1] == 306639030)) {
+          Print("[FAIL] DBQueryVertex(1)");
+          Print("\tExpected {1040750029, 306639030}; got "
+            + "{"+output[0]+", "+output[1]+"}");
+          count_failed++;
+        } else {
+          Print("[PASS] DBQueryVertex(1)");
+          count_passed++;
+        }
+      }
+      {
+        int output[] = storage.DBQueryEdge(22, 1);
+        if (!(output[0] == 71)
+          && (output[1] == 10)) {
+          Print("[FAIL] DBQueryEdge(2)");
+          Print("\tExpected {71, 10}; got "
+            + "{"+output[0]+", "+output[1]+"}");
+          count_failed++;
+        } else {
+          Print("[PASS] DBQueryEdge(2)");
+          count_passed++;
+        }
+      }
+      {
         int output[] = storage.DBQueryStatisticsEdges();
         if (!(output[0] == 46)
           && (output[1] == 83)
@@ -945,6 +971,12 @@
           count_passed++;
         }
       }
+      
+      
+      
+      
+      
+      
       
       Print("Complete! Passed: "+count_passed+"; Failed: "+count_failed);
     }

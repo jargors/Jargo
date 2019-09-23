@@ -130,6 +130,8 @@ private static void Print(String msg) {
 <<....test [[DBQueryCurrentLoad]](2)>>
 <<....test [[DBQueryCountVertices]](0)>>
 <<....test [[DBQueryCountEdges]](0)>>
+<<....test [[DBQueryVertex]](1)>>
+<<....test [[DBQueryEdge]](2)>>
 <<....test [[DBQueryStatisticsEdges]](0)>>
 <<....test [[DBQueryMBR]](0)>>
 <<....test [[DBQueryCountServers]](0)>>
@@ -837,6 +839,38 @@ its count.
   }
 }
 @
+\subsubsection{[[DBQueryVertex]](1)}
+<<....test [[DBQueryVertex]](1)>>=
+{
+  int output[] = storage.DBQueryVertex(22);
+  if (!(output[0] == 1040750029)
+    && (output[1] == 306639030)) {
+    Print("[FAIL] DBQueryVertex(1)");
+    Print("\tExpected {1040750029, 306639030}; got "
+      + "{"+output[0]+", "+output[1]+"}");
+    count_failed++;
+  } else {
+    Print("[PASS] DBQueryVertex(1)");
+    count_passed++;
+  }
+}
+@
+\subsubsection{[[DBQueryEdge]](2)}
+<<....test [[DBQueryEdge]](2)>>=
+{
+  int output[] = storage.DBQueryEdge(22, 1);
+  if (!(output[0] == 71)
+    && (output[1] == 10)) {
+    Print("[FAIL] DBQueryEdge(2)");
+    Print("\tExpected {71, 10}; got "
+      + "{"+output[0]+", "+output[1]+"}");
+    count_failed++;
+  } else {
+    Print("[PASS] DBQueryEdge(2)");
+    count_passed++;
+  }
+}
+@
 \subsubsection{[[DBQueryStatisticsEdges]](0)}
 <<....test [[DBQueryStatisticsEdges]](0)>>=
 {
@@ -1380,6 +1414,34 @@ travel duration is $44-0=44$.
 \subsection{Write Tests}
 \label{sec:write-tests}
 <<..run write tests>>=
+<<....test [[DBUpdateEdgeSpeed]](3)>>
+<<....test [[DBAddNewRequest]](1)>>
+<<....test [[DBAddNewServer]](2)>>
+<<....test [[DBUpdateServerRoute]](2)>>
+<<....test [[DBUpdateServerSchedule]](3)>>
+<<....test [[DBUpdateServerAddToSchedule]](4)>>
+<<....test [[DBUpdateServerRemoveFromSchedule]](4)>>
+@
+\subsubsection{[[DBUpdateEdgeSpeed]](3)}
+<<....test [[DBUpdateEdgeSpeed]](3)>>=
+@
+\subsubsection{[[DBAddNewRequest]](1)}
+<<....test [[DBAddNewRequest]](1)>>=
+@
+\subsubsection{[[DBAddNewServer]](2)}
+<<....test [[DBAddNewServer]](2)>>=
+@
+\subsubsection{[[DBUpdateServerRoute]](2)}
+<<....test [[DBUpdateServerRoute]](2)>>=
+@
+\subsubsection{[[DBUpdateServerSchedule]](3)}
+<<....test [[DBUpdateServerSchedule]](3)>>=
+@
+\subsubsection{[[DBUpdateServerAddToSchedule]](4)}
+<<....test [[DBUpdateServerAddToSchedule]](4)>>=
+@
+\subsubsection{[[DBUpdateServerRemoveFromSchedule]](4)}
+<<....test [[DBUpdateServerRemoveFromSchedule]](4)>>=
 @
 
 \appendix

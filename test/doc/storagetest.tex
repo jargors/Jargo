@@ -130,6 +130,8 @@ private static void Print(String msg) \{
 \LA{}....test \code{}DBQueryCurrentLoad\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2VbIVs-2jSLg0-1}}\RA{}
 \LA{}....test \code{}DBQueryCountVertices\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-2FbhMk-1}}\RA{}
 \LA{}....test \code{}DBQueryCountEdges\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-fMEma-1}}\RA{}
+\LA{}....test \code{}DBQueryVertex\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-HmHFv-1}}\RA{}
+\LA{}....test \code{}DBQueryEdge\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2VbIVs-4e874K-1}}\RA{}
 \LA{}....test \code{}DBQueryStatisticsEdges\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-3wfpeD-1}}\RA{}
 \LA{}....test \code{}DBQueryMBR\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-2Yf5B8-1}}\RA{}
 \LA{}....test \code{}DBQueryCountServers\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-2qdA7h-1}}\RA{}
@@ -837,8 +839,40 @@ its count.
   \}
 \}
 \nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-fMEma-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-fMEma-1}\nwendcode{}\nwbegindocs{89}\nwdocspar
+\subsubsection{{\tt{}DBQueryVertex}(1)}
+\nwenddocs{}\nwbegincode{90}\sublabel{NW2VbIVs-HmHFv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-HmHFv-1}}}\moddef{....test \code{}DBQueryVertex\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-HmHFv-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryVertex(22);
+  if (!(output[0] == 1040750029)
+    && (output[1] == 306639030)) \{
+    Print("[FAIL] DBQueryVertex(1)");
+    Print("\\tExpected \{1040750029, 306639030\}; got "
+      + "\{"+output[0]+", "+output[1]+"\}");
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryVertex(1)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-HmHFv-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-HmHFv-1}\nwendcode{}\nwbegindocs{91}\nwdocspar
+\subsubsection{{\tt{}DBQueryEdge}(2)}
+\nwenddocs{}\nwbegincode{92}\sublabel{NW2VbIVs-4e874K-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-4e874K-1}}}\moddef{....test \code{}DBQueryEdge\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2VbIVs-4e874K-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryEdge(22, 1);
+  if (!(output[0] == 71)
+    && (output[1] == 10)) \{
+    Print("[FAIL] DBQueryEdge(2)");
+    Print("\\tExpected \{71, 10\}; got "
+      + "\{"+output[0]+", "+output[1]+"\}");
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryEdge(2)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-4e874K-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-4e874K-1}\nwendcode{}\nwbegindocs{93}\nwdocspar
 \subsubsection{{\tt{}DBQueryStatisticsEdges}(0)}
-\nwenddocs{}\nwbegincode{90}\sublabel{NW2VbIVs-3wfpeD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-3wfpeD-1}}}\moddef{....test \code{}DBQueryStatisticsEdges\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-3wfpeD-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{94}\sublabel{NW2VbIVs-3wfpeD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-3wfpeD-1}}}\moddef{....test \code{}DBQueryStatisticsEdges\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-3wfpeD-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryStatisticsEdges();
   if (!(output[0] == 46)
@@ -856,9 +890,9 @@ its count.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-3wfpeD-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-3wfpeD-1}\nwendcode{}\nwbegindocs{91}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-3wfpeD-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-3wfpeD-1}\nwendcode{}\nwbegindocs{95}\nwdocspar
 \subsubsection{{\tt{}DBQueryMBR}(0)}
-\nwenddocs{}\nwbegincode{92}\sublabel{NW2VbIVs-2Yf5B8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-2Yf5B8-1}}}\moddef{....test \code{}DBQueryMBR\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-2Yf5B8-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{96}\sublabel{NW2VbIVs-2Yf5B8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-2Yf5B8-1}}}\moddef{....test \code{}DBQueryMBR\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-2Yf5B8-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryMBR();
   if (!(output[0] == 1040738577)
@@ -874,9 +908,9 @@ its count.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-2Yf5B8-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-2Yf5B8-1}\nwendcode{}\nwbegindocs{93}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-2Yf5B8-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-2Yf5B8-1}\nwendcode{}\nwbegindocs{97}\nwdocspar
 \subsubsection{{\tt{}DBQueryCountServers}(0)}
-\nwenddocs{}\nwbegincode{94}\sublabel{NW2VbIVs-2qdA7h-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-2qdA7h-1}}}\moddef{....test \code{}DBQueryCountServers\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-2qdA7h-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{98}\sublabel{NW2VbIVs-2qdA7h-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-2qdA7h-1}}}\moddef{....test \code{}DBQueryCountServers\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-2qdA7h-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryCountServers();
   if (!(output[0] == 2)) \{
@@ -888,9 +922,9 @@ its count.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-2qdA7h-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-2qdA7h-1}\nwendcode{}\nwbegindocs{95}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-2qdA7h-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-2qdA7h-1}\nwendcode{}\nwbegindocs{99}\nwdocspar
 \subsubsection{{\tt{}DBQueryCountRequests}(0)}
-\nwenddocs{}\nwbegincode{96}\sublabel{NW2VbIVs-3azEeu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-3azEeu-1}}}\moddef{....test \code{}DBQueryCountRequests\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-3azEeu-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{100}\sublabel{NW2VbIVs-3azEeu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-3azEeu-1}}}\moddef{....test \code{}DBQueryCountRequests\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-3azEeu-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryCountRequests();
   if (!(output[0] == 2)) \{
@@ -902,17 +936,17 @@ its count.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-3azEeu-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-3azEeu-1}\nwendcode{}\nwbegindocs{97}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-3azEeu-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-3azEeu-1}\nwendcode{}\nwbegindocs{101}\nwdocspar
 \subsubsection{{\tt{}DBQueryServerPendingAssignments}(2)}
 The {\tt{}DBQueryServerPendingAssignments} method gives the number of requests that
 a server still needs to drop-off (or pick-up and drop-off) at a given time.
 Server 1 makes its drop-off at $t=44$.
-\nwenddocs{}\nwbegincode{98}\sublabel{NW2VbIVs-g6QHQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-g6QHQ-1}}}\moddef{....test \code{}DBQueryServerPendingAssignments\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2VbIVs-g6QHQ-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{102}\sublabel{NW2VbIVs-g6QHQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-g6QHQ-1}}}\moddef{....test \code{}DBQueryServerPendingAssignments\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2VbIVs-g6QHQ-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
   \LA{}......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=43$~{\nwtagstyle{}\subpageref{NW2VbIVs-Fmx82-1}}\RA{}
   \LA{}......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=44$~{\nwtagstyle{}\subpageref{NW2VbIVs-FA6yE-1}}\RA{}
   \LA{}......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=45$~{\nwtagstyle{}\subpageref{NW2VbIVs-FXU7y-1}}\RA{}
-\nwendcode{}\nwbegindocs{99}\nwdocspar
-\nwenddocs{}\nwbegincode{100}\sublabel{NW2VbIVs-Fmx82-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-Fmx82-1}}}\moddef{......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=43$~{\nwtagstyle{}\subpageref{NW2VbIVs-Fmx82-1}}}\endmoddef\nwused{\\{NW2VbIVs-g6QHQ-1}}
+\nwendcode{}\nwbegindocs{103}\nwdocspar
+\nwenddocs{}\nwbegincode{104}\sublabel{NW2VbIVs-Fmx82-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-Fmx82-1}}}\moddef{......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=43$~{\nwtagstyle{}\subpageref{NW2VbIVs-Fmx82-1}}}\endmoddef\nwused{\\{NW2VbIVs-g6QHQ-1}}
 \{
   int output[] = storage.DBQueryServerPendingAssignments(1, 43);
   if (!(output.length == 1)) \{
@@ -928,8 +962,8 @@ Server 1 makes its drop-off at $t=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-Fmx82-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-Fmx82-1}\nwendcode{}\nwbegindocs{101}\nwdocspar
-\nwenddocs{}\nwbegincode{102}\sublabel{NW2VbIVs-FA6yE-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-FA6yE-1}}}\moddef{......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=44$~{\nwtagstyle{}\subpageref{NW2VbIVs-FA6yE-1}}}\endmoddef\nwused{\\{NW2VbIVs-g6QHQ-1}}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-Fmx82-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-Fmx82-1}\nwendcode{}\nwbegindocs{105}\nwdocspar
+\nwenddocs{}\nwbegincode{106}\sublabel{NW2VbIVs-FA6yE-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-FA6yE-1}}}\moddef{......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=44$~{\nwtagstyle{}\subpageref{NW2VbIVs-FA6yE-1}}}\endmoddef\nwused{\\{NW2VbIVs-g6QHQ-1}}
 \{
   int output[] = storage.DBQueryServerPendingAssignments(1,44);
   if (!(output.length == 0)) \{
@@ -941,8 +975,8 @@ Server 1 makes its drop-off at $t=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-FA6yE-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-FA6yE-1}\nwendcode{}\nwbegindocs{103}\nwdocspar
-\nwenddocs{}\nwbegincode{104}\sublabel{NW2VbIVs-FXU7y-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-FXU7y-1}}}\moddef{......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=45$~{\nwtagstyle{}\subpageref{NW2VbIVs-FXU7y-1}}}\endmoddef\nwused{\\{NW2VbIVs-g6QHQ-1}}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-FA6yE-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-FA6yE-1}\nwendcode{}\nwbegindocs{107}\nwdocspar
+\nwenddocs{}\nwbegincode{108}\sublabel{NW2VbIVs-FXU7y-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-FXU7y-1}}}\moddef{......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=45$~{\nwtagstyle{}\subpageref{NW2VbIVs-FXU7y-1}}}\endmoddef\nwused{\\{NW2VbIVs-g6QHQ-1}}
 \{
   int output[] = storage.DBQueryServerPendingAssignments(1,45);
   if (!(output.length == 0)) \{
@@ -954,14 +988,14 @@ Server 1 makes its drop-off at $t=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-FXU7y-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-FXU7y-1}\nwendcode{}\nwbegindocs{105}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-FXU7y-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-FXU7y-1}\nwendcode{}\nwbegindocs{109}\nwdocspar
 \subsubsection{{\tt{}DBQueryServerCompletedAssignments}(2)}
-\nwenddocs{}\nwbegincode{106}\sublabel{NW2VbIVs-1HkuSf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-1HkuSf-1}}}\moddef{....test \code{}DBQueryServerCompletedAssignments\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2VbIVs-1HkuSf-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{110}\sublabel{NW2VbIVs-1HkuSf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-1HkuSf-1}}}\moddef{....test \code{}DBQueryServerCompletedAssignments\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2VbIVs-1HkuSf-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
   \LA{}......test \code{}DBQueryServerCompletedAssignments\edoc{}(2) when $t=43$~{\nwtagstyle{}\subpageref{NW2VbIVs-29NaUg-1}}\RA{}
   \LA{}......test \code{}DBQueryServerCompletedAssignments\edoc{}(2) when $t=44$~{\nwtagstyle{}\subpageref{NW2VbIVs-29kLI6-1}}\RA{}
   \LA{}......test \code{}DBQueryServerCompletedAssignments\edoc{}(2) when $t=45$~{\nwtagstyle{}\subpageref{NW2VbIVs-297ZOY-1}}\RA{}
-\nwendcode{}\nwbegindocs{107}\nwdocspar
-\nwenddocs{}\nwbegincode{108}\sublabel{NW2VbIVs-29NaUg-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-29NaUg-1}}}\moddef{......test \code{}DBQueryServerCompletedAssignments\edoc{}(2) when $t=43$~{\nwtagstyle{}\subpageref{NW2VbIVs-29NaUg-1}}}\endmoddef\nwused{\\{NW2VbIVs-1HkuSf-1}}
+\nwendcode{}\nwbegindocs{111}\nwdocspar
+\nwenddocs{}\nwbegincode{112}\sublabel{NW2VbIVs-29NaUg-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-29NaUg-1}}}\moddef{......test \code{}DBQueryServerCompletedAssignments\edoc{}(2) when $t=43$~{\nwtagstyle{}\subpageref{NW2VbIVs-29NaUg-1}}}\endmoddef\nwused{\\{NW2VbIVs-1HkuSf-1}}
 \{
   int output[] = storage.DBQueryServerCompletedAssignments(1, 43);
   if (!(output.length == 0)) \{
@@ -973,8 +1007,8 @@ Server 1 makes its drop-off at $t=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-29NaUg-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-29NaUg-1}\nwendcode{}\nwbegindocs{109}\nwdocspar
-\nwenddocs{}\nwbegincode{110}\sublabel{NW2VbIVs-29kLI6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-29kLI6-1}}}\moddef{......test \code{}DBQueryServerCompletedAssignments\edoc{}(2) when $t=44$~{\nwtagstyle{}\subpageref{NW2VbIVs-29kLI6-1}}}\endmoddef\nwused{\\{NW2VbIVs-1HkuSf-1}}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-29NaUg-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-29NaUg-1}\nwendcode{}\nwbegindocs{113}\nwdocspar
+\nwenddocs{}\nwbegincode{114}\sublabel{NW2VbIVs-29kLI6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-29kLI6-1}}}\moddef{......test \code{}DBQueryServerCompletedAssignments\edoc{}(2) when $t=44$~{\nwtagstyle{}\subpageref{NW2VbIVs-29kLI6-1}}}\endmoddef\nwused{\\{NW2VbIVs-1HkuSf-1}}
 \{
   int output[] = storage.DBQueryServerCompletedAssignments(1, 44);
   if (!(output.length == 1)) \{
@@ -990,8 +1024,8 @@ Server 1 makes its drop-off at $t=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-29kLI6-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-29kLI6-1}\nwendcode{}\nwbegindocs{111}\nwdocspar
-\nwenddocs{}\nwbegincode{112}\sublabel{NW2VbIVs-297ZOY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-297ZOY-1}}}\moddef{......test \code{}DBQueryServerCompletedAssignments\edoc{}(2) when $t=45$~{\nwtagstyle{}\subpageref{NW2VbIVs-297ZOY-1}}}\endmoddef\nwused{\\{NW2VbIVs-1HkuSf-1}}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-29kLI6-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-29kLI6-1}\nwendcode{}\nwbegindocs{115}\nwdocspar
+\nwenddocs{}\nwbegincode{116}\sublabel{NW2VbIVs-297ZOY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-297ZOY-1}}}\moddef{......test \code{}DBQueryServerCompletedAssignments\edoc{}(2) when $t=45$~{\nwtagstyle{}\subpageref{NW2VbIVs-297ZOY-1}}}\endmoddef\nwused{\\{NW2VbIVs-1HkuSf-1}}
 \{
   int output[] = storage.DBQueryServerCompletedAssignments(1, 45);
   if (!(output.length == 1)) \{
@@ -1007,9 +1041,9 @@ Server 1 makes its drop-off at $t=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-297ZOY-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-297ZOY-1}\nwendcode{}\nwbegindocs{113}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-297ZOY-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-297ZOY-1}\nwendcode{}\nwbegindocs{117}\nwdocspar
 \subsubsection{{\tt{}DBQueryServiceRate}(0)}
-\nwenddocs{}\nwbegincode{114}\sublabel{NW2VbIVs-3JCT8W-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-3JCT8W-1}}}\moddef{....test \code{}DBQueryServiceRate\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-3JCT8W-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{118}\sublabel{NW2VbIVs-3JCT8W-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-3JCT8W-1}}}\moddef{....test \code{}DBQueryServiceRate\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-3JCT8W-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryServiceRate();
   if (!(output[0] == 50)) \{
@@ -1021,9 +1055,9 @@ Server 1 makes its drop-off at $t=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-3JCT8W-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-3JCT8W-1}\nwendcode{}\nwbegindocs{115}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-3JCT8W-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-3JCT8W-1}\nwendcode{}\nwbegindocs{119}\nwdocspar
 \subsubsection{{\tt{}DBQueryBaseDistanceTotal}(0)}
-\nwenddocs{}\nwbegincode{116}\sublabel{NW2VbIVs-3FE8t4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-3FE8t4-1}}}\moddef{....test \code{}DBQueryBaseDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-3FE8t4-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{120}\sublabel{NW2VbIVs-3FE8t4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-3FE8t4-1}}}\moddef{....test \code{}DBQueryBaseDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-3FE8t4-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryBaseDistanceTotal();
   if (!(output[0] == 532)) \{
@@ -1035,9 +1069,9 @@ Server 1 makes its drop-off at $t=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-3FE8t4-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-3FE8t4-1}\nwendcode{}\nwbegindocs{117}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-3FE8t4-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-3FE8t4-1}\nwendcode{}\nwbegindocs{121}\nwdocspar
 \subsubsection{{\tt{}DBQueryServerBaseDistanceTotal}(0)}
-\nwenddocs{}\nwbegincode{118}\sublabel{NW2VbIVs-1BF5dX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-1BF5dX-1}}}\moddef{....test \code{}DBQueryServerBaseDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-1BF5dX-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{122}\sublabel{NW2VbIVs-1BF5dX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-1BF5dX-1}}}\moddef{....test \code{}DBQueryServerBaseDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-1BF5dX-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryServerBaseDistanceTotal();
   if (!(output[0] == 166)) \{
@@ -1049,9 +1083,9 @@ Server 1 makes its drop-off at $t=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-1BF5dX-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-1BF5dX-1}\nwendcode{}\nwbegindocs{119}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-1BF5dX-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-1BF5dX-1}\nwendcode{}\nwbegindocs{123}\nwdocspar
 \subsubsection{{\tt{}DBQueryRequestBaseDistanceTotal}(0)}
-\nwenddocs{}\nwbegincode{120}\sublabel{NW2VbIVs-38E973-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-38E973-1}}}\moddef{....test \code{}DBQueryRequestBaseDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-38E973-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{124}\sublabel{NW2VbIVs-38E973-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-38E973-1}}}\moddef{....test \code{}DBQueryRequestBaseDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-38E973-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryRequestBaseDistanceTotal();
   if (!(output[0] == 366)) \{
@@ -1063,9 +1097,9 @@ Server 1 makes its drop-off at $t=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-38E973-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-38E973-1}\nwendcode{}\nwbegindocs{121}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-38E973-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-38E973-1}\nwendcode{}\nwbegindocs{125}\nwdocspar
 \subsubsection{{\tt{}DBQueryServerTravelDistance}(1)}
-\nwenddocs{}\nwbegincode{122}\sublabel{NW2VbIVs-R0me6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-R0me6-1}}}\moddef{....test \code{}DBQueryServerTravelDistance\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-R0me6-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{126}\sublabel{NW2VbIVs-R0me6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-R0me6-1}}}\moddef{....test \code{}DBQueryServerTravelDistance\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-R0me6-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryServerTravelDistance(1);
   if (!(output[0] == 387)) \{
@@ -1077,9 +1111,9 @@ Server 1 makes its drop-off at $t=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-R0me6-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-R0me6-1}\nwendcode{}\nwbegindocs{123}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-R0me6-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-R0me6-1}\nwendcode{}\nwbegindocs{127}\nwdocspar
 \subsubsection{{\tt{}DBQueryServerTravelDistanceTotal}(0)}
-\nwenddocs{}\nwbegincode{124}\sublabel{NW2VbIVs-2cvcHE-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-2cvcHE-1}}}\moddef{....test \code{}DBQueryServerTravelDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-2cvcHE-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{128}\sublabel{NW2VbIVs-2cvcHE-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-2cvcHE-1}}}\moddef{....test \code{}DBQueryServerTravelDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-2cvcHE-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryServerTravelDistanceTotal();
   if (!(output[0] == 553)) \{
@@ -1091,9 +1125,9 @@ Server 1 makes its drop-off at $t=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-2cvcHE-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-2cvcHE-1}\nwendcode{}\nwbegindocs{125}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-2cvcHE-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-2cvcHE-1}\nwendcode{}\nwbegindocs{129}\nwdocspar
 \subsubsection{{\tt{}DBQueryServerCruisingDistance}(1)}
-\nwenddocs{}\nwbegincode{126}\sublabel{NW2VbIVs-okQ1Q-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-okQ1Q-1}}}\moddef{....test \code{}DBQueryServerCruisingDistance\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-okQ1Q-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{130}\sublabel{NW2VbIVs-okQ1Q-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-okQ1Q-1}}}\moddef{....test \code{}DBQueryServerCruisingDistance\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-okQ1Q-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryServerCruisingDistance(1);
   if (!(output[0] == 213)) \{
@@ -1105,9 +1139,9 @@ Server 1 makes its drop-off at $t=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-okQ1Q-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-okQ1Q-1}\nwendcode{}\nwbegindocs{127}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-okQ1Q-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-okQ1Q-1}\nwendcode{}\nwbegindocs{131}\nwdocspar
 \subsubsection{{\tt{}DBQueryServerCruisingDistanceTotal}(0)}
-\nwenddocs{}\nwbegincode{128}\sublabel{NW2VbIVs-1RB1yH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-1RB1yH-1}}}\moddef{....test \code{}DBQueryServerCruisingDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-1RB1yH-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{132}\sublabel{NW2VbIVs-1RB1yH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-1RB1yH-1}}}\moddef{....test \code{}DBQueryServerCruisingDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-1RB1yH-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryServerCruisingDistanceTotal();
   if (!(output[0] == 379)) \{
@@ -1119,9 +1153,9 @@ Server 1 makes its drop-off at $t=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-1RB1yH-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-1RB1yH-1}\nwendcode{}\nwbegindocs{129}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-1RB1yH-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-1RB1yH-1}\nwendcode{}\nwbegindocs{133}\nwdocspar
 \subsubsection{{\tt{}DBQueryServerServiceDistance}(1)}
-\nwenddocs{}\nwbegincode{130}\sublabel{NW2VbIVs-3T7Ecl-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-3T7Ecl-1}}}\moddef{....test \code{}DBQueryServerServiceDistance\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-3T7Ecl-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{134}\sublabel{NW2VbIVs-3T7Ecl-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-3T7Ecl-1}}}\moddef{....test \code{}DBQueryServerServiceDistance\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-3T7Ecl-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryServerServiceDistance(1);
   if (!(output[0] == 174)) \{
@@ -1133,9 +1167,9 @@ Server 1 makes its drop-off at $t=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-3T7Ecl-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-3T7Ecl-1}\nwendcode{}\nwbegindocs{131}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-3T7Ecl-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-3T7Ecl-1}\nwendcode{}\nwbegindocs{135}\nwdocspar
 \subsubsection{{\tt{}DBQueryServerServiceDistanceTotal}(0)}
-\nwenddocs{}\nwbegincode{132}\sublabel{NW2VbIVs-2c14Sj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-2c14Sj-1}}}\moddef{....test \code{}DBQueryServerServiceDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-2c14Sj-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{136}\sublabel{NW2VbIVs-2c14Sj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-2c14Sj-1}}}\moddef{....test \code{}DBQueryServerServiceDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-2c14Sj-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryServerServiceDistanceTotal();
   if (!(output[0] == 174)) \{
@@ -1147,9 +1181,9 @@ Server 1 makes its drop-off at $t=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-2c14Sj-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-2c14Sj-1}\nwendcode{}\nwbegindocs{133}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-2c14Sj-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-2c14Sj-1}\nwendcode{}\nwbegindocs{137}\nwdocspar
 \subsubsection{{\tt{}DBQueryRequestDetourDistance}(1)}
-\nwenddocs{}\nwbegincode{134}\sublabel{NW2VbIVs-sBkzR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-sBkzR-1}}}\moddef{....test \code{}DBQueryRequestDetourDistance\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-sBkzR-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{138}\sublabel{NW2VbIVs-sBkzR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-sBkzR-1}}}\moddef{....test \code{}DBQueryRequestDetourDistance\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-sBkzR-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryRequestDetourDistance(10);
   if (!(output[0] == 2)) \{
@@ -1161,9 +1195,9 @@ Server 1 makes its drop-off at $t=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-sBkzR-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-sBkzR-1}\nwendcode{}\nwbegindocs{135}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-sBkzR-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-sBkzR-1}\nwendcode{}\nwbegindocs{139}\nwdocspar
 \subsubsection{{\tt{}DBQueryRequestDetourDistanceTotal}(0)}
-\nwenddocs{}\nwbegincode{136}\sublabel{NW2VbIVs-1qIOK3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-1qIOK3-1}}}\moddef{....test \code{}DBQueryRequestDetourDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-1qIOK3-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{140}\sublabel{NW2VbIVs-1qIOK3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-1qIOK3-1}}}\moddef{....test \code{}DBQueryRequestDetourDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-1qIOK3-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryRequestDetourDistanceTotal();
   if (!(output[0] == 2)) \{
@@ -1175,9 +1209,9 @@ Server 1 makes its drop-off at $t=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-1qIOK3-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-1qIOK3-1}\nwendcode{}\nwbegindocs{137}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-1qIOK3-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-1qIOK3-1}\nwendcode{}\nwbegindocs{141}\nwdocspar
 \subsubsection{{\tt{}DBQueryRequestTransitDistance}(1)}
-\nwenddocs{}\nwbegincode{138}\sublabel{NW2VbIVs-3yzPUp-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-3yzPUp-1}}}\moddef{....test \code{}DBQueryRequestTransitDistance\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-3yzPUp-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{142}\sublabel{NW2VbIVs-3yzPUp-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-3yzPUp-1}}}\moddef{....test \code{}DBQueryRequestTransitDistance\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-3yzPUp-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryRequestTransitDistance(10);
   if (!(output[0] == 174)) \{
@@ -1189,9 +1223,9 @@ Server 1 makes its drop-off at $t=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-3yzPUp-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-3yzPUp-1}\nwendcode{}\nwbegindocs{139}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-3yzPUp-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-3yzPUp-1}\nwendcode{}\nwbegindocs{143}\nwdocspar
 \subsubsection{{\tt{}DBQueryRequestTransitDistanceTotal}(0)}
-\nwenddocs{}\nwbegincode{140}\sublabel{NW2VbIVs-NiwSo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-NiwSo-1}}}\moddef{....test \code{}DBQueryRequestTransitDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-NiwSo-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{144}\sublabel{NW2VbIVs-NiwSo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-NiwSo-1}}}\moddef{....test \code{}DBQueryRequestTransitDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-NiwSo-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryRequestTransitDistanceTotal();
   if (!(output[0] == 174)) \{
@@ -1203,9 +1237,9 @@ Server 1 makes its drop-off at $t=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-NiwSo-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-NiwSo-1}\nwendcode{}\nwbegindocs{141}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-NiwSo-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-NiwSo-1}\nwendcode{}\nwbegindocs{145}\nwdocspar
 \subsubsection{{\tt{}DBQueryServerTravelDuration}(1)}
-\nwenddocs{}\nwbegincode{142}\sublabel{NW2VbIVs-1TZ4V8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-1TZ4V8-1}}}\moddef{....test \code{}DBQueryServerTravelDuration\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-1TZ4V8-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{146}\sublabel{NW2VbIVs-1TZ4V8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-1TZ4V8-1}}}\moddef{....test \code{}DBQueryServerTravelDuration\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-1TZ4V8-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryServerTravelDuration(1);
   if (!(output[0] == 44)) \{
@@ -1217,9 +1251,9 @@ Server 1 makes its drop-off at $t=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-1TZ4V8-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-1TZ4V8-1}\nwendcode{}\nwbegindocs{143}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-1TZ4V8-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-1TZ4V8-1}\nwendcode{}\nwbegindocs{147}\nwdocspar
 \subsubsection{{\tt{}DBQueryServerTravelDurationTotal}(0)}
-\nwenddocs{}\nwbegincode{144}\sublabel{NW2VbIVs-2bE0DP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-2bE0DP-1}}}\moddef{....test \code{}DBQueryServerTravelDurationTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-2bE0DP-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{148}\sublabel{NW2VbIVs-2bE0DP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-2bE0DP-1}}}\moddef{....test \code{}DBQueryServerTravelDurationTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-2bE0DP-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryServerTravelDurationTotal();
   if (!(output[0] == 62)) \{
@@ -1231,10 +1265,10 @@ Server 1 makes its drop-off at $t=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-2bE0DP-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-2bE0DP-1}\nwendcode{}\nwbegindocs{145}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-2bE0DP-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-2bE0DP-1}\nwendcode{}\nwbegindocs{149}\nwdocspar
 \subsubsection{{\tt{}DBQueryRequestPickupDuration}(1)}
 Request 10 gets picked up at $t=25$, but appears on the road network at $t=0$.
-\nwenddocs{}\nwbegincode{146}\sublabel{NW2VbIVs-2weSRk-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-2weSRk-1}}}\moddef{....test \code{}DBQueryRequestPickupDuration\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-2weSRk-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{150}\sublabel{NW2VbIVs-2weSRk-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-2weSRk-1}}}\moddef{....test \code{}DBQueryRequestPickupDuration\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-2weSRk-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryRequestPickupDuration(10);
   if (!(output[0] == 25)) \{
@@ -1246,9 +1280,9 @@ Request 10 gets picked up at $t=25$, but appears on the road network at $t=0$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-2weSRk-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-2weSRk-1}\nwendcode{}\nwbegindocs{147}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-2weSRk-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-2weSRk-1}\nwendcode{}\nwbegindocs{151}\nwdocspar
 \subsubsection{{\tt{}DBQueryRequestPickupDurationTotal}(0)}
-\nwenddocs{}\nwbegincode{148}\sublabel{NW2VbIVs-PC7q9-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-PC7q9-1}}}\moddef{....test \code{}DBQueryRequestPickupDurationTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-PC7q9-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{152}\sublabel{NW2VbIVs-PC7q9-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-PC7q9-1}}}\moddef{....test \code{}DBQueryRequestPickupDurationTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-PC7q9-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryRequestPickupDurationTotal();
   if (!(output[0] == 25)) \{
@@ -1260,10 +1294,10 @@ Request 10 gets picked up at $t=25$, but appears on the road network at $t=0$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-PC7q9-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-PC7q9-1}\nwendcode{}\nwbegindocs{149}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-PC7q9-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-PC7q9-1}\nwendcode{}\nwbegindocs{153}\nwdocspar
 \subsubsection{{\tt{}DBQueryRequestTransitDuration}(1)}
 Request 10 is picked up at $t=25$ and dropped off at $t=44$.
-\nwenddocs{}\nwbegincode{150}\sublabel{NW2VbIVs-2uQ1SB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-2uQ1SB-1}}}\moddef{....test \code{}DBQueryRequestTransitDuration\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-2uQ1SB-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{154}\sublabel{NW2VbIVs-2uQ1SB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-2uQ1SB-1}}}\moddef{....test \code{}DBQueryRequestTransitDuration\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-2uQ1SB-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryRequestTransitDuration(10);
   if (!(output[0] == 19)) \{
@@ -1275,9 +1309,9 @@ Request 10 is picked up at $t=25$ and dropped off at $t=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-2uQ1SB-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-2uQ1SB-1}\nwendcode{}\nwbegindocs{151}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-2uQ1SB-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-2uQ1SB-1}\nwendcode{}\nwbegindocs{155}\nwdocspar
 \subsubsection{{\tt{}DBQueryRequestTransitDurationTotal}(0)}
-\nwenddocs{}\nwbegincode{152}\sublabel{NW2VbIVs-PQhaD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-PQhaD-1}}}\moddef{....test \code{}DBQueryRequestTransitDurationTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-PQhaD-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{156}\sublabel{NW2VbIVs-PQhaD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-PQhaD-1}}}\moddef{....test \code{}DBQueryRequestTransitDurationTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-PQhaD-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryRequestTransitDurationTotal();
   if (!(output[0] == 19)) \{
@@ -1289,11 +1323,11 @@ Request 10 is picked up at $t=25$ and dropped off at $t=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-PQhaD-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-PQhaD-1}\nwendcode{}\nwbegindocs{153}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-PQhaD-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-PQhaD-1}\nwendcode{}\nwbegindocs{157}\nwdocspar
 \subsubsection{{\tt{}DBQueryRequestTravelDuration}(1)}
 Request 11 appeared at time $t=0$ and was finally dropped off at $t=44$. Its
 travel duration is $44-0=44$.
-\nwenddocs{}\nwbegincode{154}\sublabel{NW2VbIVs-4MzTFA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-4MzTFA-1}}}\moddef{....test \code{}DBQueryRequestTravelDuration\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-4MzTFA-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{158}\sublabel{NW2VbIVs-4MzTFA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-4MzTFA-1}}}\moddef{....test \code{}DBQueryRequestTravelDuration\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-4MzTFA-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryRequestTravelDuration(10);
   if (!(output[0] == 44)) \{
@@ -1305,9 +1339,9 @@ travel duration is $44-0=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-4MzTFA-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-4MzTFA-1}\nwendcode{}\nwbegindocs{155}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-4MzTFA-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-4MzTFA-1}\nwendcode{}\nwbegindocs{159}\nwdocspar
 \subsubsection{{\tt{}DBQueryRequestTravelDurationTotal}(0)}
-\nwenddocs{}\nwbegincode{156}\sublabel{NW2VbIVs-ALSer-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-ALSer-1}}}\moddef{....test \code{}DBQueryRequestTravelDurationTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-ALSer-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{160}\sublabel{NW2VbIVs-ALSer-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-ALSer-1}}}\moddef{....test \code{}DBQueryRequestTravelDurationTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2VbIVs-ALSer-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryRequestTravelDurationTotal();
   if (!(output[0] == 44)) \{
@@ -1319,9 +1353,9 @@ travel duration is $44-0=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-ALSer-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-ALSer-1}\nwendcode{}\nwbegindocs{157}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-ALSer-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-ALSer-1}\nwendcode{}\nwbegindocs{161}\nwdocspar
 \subsubsection{{\tt{}DBQueryRequestDepartureTime}(1)}
-\nwenddocs{}\nwbegincode{158}\sublabel{NW2VbIVs-XFEEZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-XFEEZ-1}}}\moddef{....test \code{}DBQueryRequestDepartureTime\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-XFEEZ-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{162}\sublabel{NW2VbIVs-XFEEZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-XFEEZ-1}}}\moddef{....test \code{}DBQueryRequestDepartureTime\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-XFEEZ-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryRequestDepartureTime(10);
   if (!(output[0] == 25)) \{
@@ -1333,9 +1367,9 @@ travel duration is $44-0=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-XFEEZ-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-XFEEZ-1}\nwendcode{}\nwbegindocs{159}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-XFEEZ-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-XFEEZ-1}\nwendcode{}\nwbegindocs{163}\nwdocspar
 \subsubsection{{\tt{}DBQueryServerDepartureTime}(1)}
-\nwenddocs{}\nwbegincode{160}\sublabel{NW2VbIVs-1TCj44-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-1TCj44-1}}}\moddef{....test \code{}DBQueryServerDepartureTime\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-1TCj44-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{164}\sublabel{NW2VbIVs-1TCj44-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-1TCj44-1}}}\moddef{....test \code{}DBQueryServerDepartureTime\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-1TCj44-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryServerDepartureTime(1);
   if (!(output[0] == 1)) \{
@@ -1347,9 +1381,9 @@ travel duration is $44-0=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-1TCj44-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-1TCj44-1}\nwendcode{}\nwbegindocs{161}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-1TCj44-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-1TCj44-1}\nwendcode{}\nwbegindocs{165}\nwdocspar
 \subsubsection{{\tt{}DBQueryRequestArrivalTime}(1)}
-\nwenddocs{}\nwbegincode{162}\sublabel{NW2VbIVs-1dQ6qD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-1dQ6qD-1}}}\moddef{....test \code{}DBQueryRequestArrivalTime\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-1dQ6qD-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{166}\sublabel{NW2VbIVs-1dQ6qD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-1dQ6qD-1}}}\moddef{....test \code{}DBQueryRequestArrivalTime\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-1dQ6qD-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryRequestArrivalTime(10);
   if (!(output[0] == 44)) \{
@@ -1361,9 +1395,9 @@ travel duration is $44-0=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-1dQ6qD-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-1dQ6qD-1}\nwendcode{}\nwbegindocs{163}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-1dQ6qD-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-1dQ6qD-1}\nwendcode{}\nwbegindocs{167}\nwdocspar
 \subsubsection{{\tt{}DBQueryServerArrivalTime}(1)}
-\nwenddocs{}\nwbegincode{164}\sublabel{NW2VbIVs-1angPN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-1angPN-1}}}\moddef{....test \code{}DBQueryServerArrivalTime\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-1angPN-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{168}\sublabel{NW2VbIVs-1angPN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-1angPN-1}}}\moddef{....test \code{}DBQueryServerArrivalTime\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-1angPN-1}}}\endmoddef\nwused{\\{NW2VbIVs-2w6SyW-1}}
 \{
   int output[] = storage.DBQueryServerArrivalTime(1);
   if (!(output[0] == 45)) \{
@@ -1375,11 +1409,39 @@ travel duration is $44-0=44$.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-1angPN-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-1angPN-1}\nwendcode{}\nwbegindocs{165}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-1angPN-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-1angPN-1}\nwendcode{}\nwbegindocs{169}\nwdocspar
 
 \subsection{Write Tests}
 \label{sec:write-tests}
-\nwenddocs{}\nwbegincode{166}\sublabel{NW2VbIVs-4HcfWS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-4HcfWS-1}}}\moddef{..run write tests~{\nwtagstyle{}\subpageref{NW2VbIVs-4HcfWS-1}}}\endmoddef\nwused{\\{NW2VbIVs-2NJ9Wq-1}}
+\nwenddocs{}\nwbegincode{170}\sublabel{NW2VbIVs-4HcfWS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-4HcfWS-1}}}\moddef{..run write tests~{\nwtagstyle{}\subpageref{NW2VbIVs-4HcfWS-1}}}\endmoddef\nwused{\\{NW2VbIVs-2NJ9Wq-1}}
+\LA{}....test \code{}DBUpdateEdgeSpeed\edoc{}(3)~{\nwtagstyle{}\subpageref{NW2VbIVs-4FqPVU-1}}\RA{}
+\LA{}....test \code{}DBAddNewRequest\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-BAsgV-1}}\RA{}
+\LA{}....test \code{}DBAddNewServer\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2VbIVs-3pzOz8-1}}\RA{}
+\LA{}....test \code{}DBUpdateServerRoute\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2VbIVs-1e7qm0-1}}\RA{}
+\LA{}....test \code{}DBUpdateServerSchedule\edoc{}(3)~{\nwtagstyle{}\subpageref{NW2VbIVs-3RwmVY-1}}\RA{}
+\LA{}....test \code{}DBUpdateServerAddToSchedule\edoc{}(4)~{\nwtagstyle{}\subpageref{NW2VbIVs-3t5oWt-1}}\RA{}
+\LA{}....test \code{}DBUpdateServerRemoveFromSchedule\edoc{}(4)~{\nwtagstyle{}\subpageref{NW2VbIVs-2DOHvZ-1}}\RA{}
+\nwendcode{}\nwbegindocs{171}\nwdocspar
+\subsubsection{{\tt{}DBUpdateEdgeSpeed}(3)}
+\nwenddocs{}\nwbegincode{172}\sublabel{NW2VbIVs-4FqPVU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-4FqPVU-1}}}\moddef{....test \code{}DBUpdateEdgeSpeed\edoc{}(3)~{\nwtagstyle{}\subpageref{NW2VbIVs-4FqPVU-1}}}\endmoddef\nwused{\\{NW2VbIVs-4HcfWS-1}}
+\nwendcode{}\nwbegindocs{173}\nwdocspar
+\subsubsection{{\tt{}DBAddNewRequest}(1)}
+\nwenddocs{}\nwbegincode{174}\sublabel{NW2VbIVs-BAsgV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-BAsgV-1}}}\moddef{....test \code{}DBAddNewRequest\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-BAsgV-1}}}\endmoddef\nwused{\\{NW2VbIVs-4HcfWS-1}}
+\nwendcode{}\nwbegindocs{175}\nwdocspar
+\subsubsection{{\tt{}DBAddNewServer}(2)}
+\nwenddocs{}\nwbegincode{176}\sublabel{NW2VbIVs-3pzOz8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-3pzOz8-1}}}\moddef{....test \code{}DBAddNewServer\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2VbIVs-3pzOz8-1}}}\endmoddef\nwused{\\{NW2VbIVs-4HcfWS-1}}
+\nwendcode{}\nwbegindocs{177}\nwdocspar
+\subsubsection{{\tt{}DBUpdateServerRoute}(2)}
+\nwenddocs{}\nwbegincode{178}\sublabel{NW2VbIVs-1e7qm0-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-1e7qm0-1}}}\moddef{....test \code{}DBUpdateServerRoute\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2VbIVs-1e7qm0-1}}}\endmoddef\nwused{\\{NW2VbIVs-4HcfWS-1}}
+\nwendcode{}\nwbegindocs{179}\nwdocspar
+\subsubsection{{\tt{}DBUpdateServerSchedule}(3)}
+\nwenddocs{}\nwbegincode{180}\sublabel{NW2VbIVs-3RwmVY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-3RwmVY-1}}}\moddef{....test \code{}DBUpdateServerSchedule\edoc{}(3)~{\nwtagstyle{}\subpageref{NW2VbIVs-3RwmVY-1}}}\endmoddef\nwused{\\{NW2VbIVs-4HcfWS-1}}
+\nwendcode{}\nwbegindocs{181}\nwdocspar
+\subsubsection{{\tt{}DBUpdateServerAddToSchedule}(4)}
+\nwenddocs{}\nwbegincode{182}\sublabel{NW2VbIVs-3t5oWt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-3t5oWt-1}}}\moddef{....test \code{}DBUpdateServerAddToSchedule\edoc{}(4)~{\nwtagstyle{}\subpageref{NW2VbIVs-3t5oWt-1}}}\endmoddef\nwused{\\{NW2VbIVs-4HcfWS-1}}
+\nwendcode{}\nwbegindocs{183}\nwdocspar
+\subsubsection{{\tt{}DBUpdateServerRemoveFromSchedule}(4)}
+\nwenddocs{}\nwbegincode{184}\sublabel{NW2VbIVs-2DOHvZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-2DOHvZ-1}}}\moddef{....test \code{}DBUpdateServerRemoveFromSchedule\edoc{}(4)~{\nwtagstyle{}\subpageref{NW2VbIVs-2DOHvZ-1}}}\endmoddef\nwused{\\{NW2VbIVs-4HcfWS-1}}
 \nwendcode{}
 
 \nwixlogsorted{c}{{......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=0$}{NW2VbIVs-GriL0-1}{\nwixu{NW2VbIVs-2jSLg0-1}\nwixd{NW2VbIVs-GriL0-1}}}%
@@ -1412,6 +1474,8 @@ travel duration is $44-0=44$.
 \nwixlogsorted{c}{{......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=43$}{NW2VbIVs-Fmx82-1}{\nwixu{NW2VbIVs-g6QHQ-1}\nwixd{NW2VbIVs-Fmx82-1}}}%
 \nwixlogsorted{c}{{......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=44$}{NW2VbIVs-FA6yE-1}{\nwixu{NW2VbIVs-g6QHQ-1}\nwixd{NW2VbIVs-FA6yE-1}}}%
 \nwixlogsorted{c}{{......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=45$}{NW2VbIVs-FXU7y-1}{\nwixu{NW2VbIVs-g6QHQ-1}\nwixd{NW2VbIVs-FXU7y-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBAddNewRequest\edoc{}(1)}{NW2VbIVs-BAsgV-1}{\nwixu{NW2VbIVs-4HcfWS-1}\nwixd{NW2VbIVs-BAsgV-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBAddNewServer\edoc{}(2)}{NW2VbIVs-3pzOz8-1}{\nwixu{NW2VbIVs-4HcfWS-1}\nwixd{NW2VbIVs-3pzOz8-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQuery\edoc{}(2)}{NW2VbIVs-RMkGl-1}{\nwixu{NW2VbIVs-2w6SyW-1}\nwixd{NW2VbIVs-RMkGl-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryBaseDistanceTotal\edoc{}(0)}{NW2VbIVs-3FE8t4-1}{\nwixu{NW2VbIVs-2w6SyW-1}\nwixd{NW2VbIVs-3FE8t4-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryCountEdges\edoc{}(0)}{NW2VbIVs-fMEma-1}{\nwixu{NW2VbIVs-2w6SyW-1}\nwixd{NW2VbIVs-fMEma-1}}}%
@@ -1419,6 +1483,7 @@ travel duration is $44-0=44$.
 \nwixlogsorted{c}{{....test \code{}DBQueryCountServers\edoc{}(0)}{NW2VbIVs-2qdA7h-1}{\nwixu{NW2VbIVs-2w6SyW-1}\nwixd{NW2VbIVs-2qdA7h-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryCountVertices\edoc{}(0)}{NW2VbIVs-2FbhMk-1}{\nwixu{NW2VbIVs-2w6SyW-1}\nwixd{NW2VbIVs-2FbhMk-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryCurrentLoad\edoc{}(2)}{NW2VbIVs-2jSLg0-1}{\nwixu{NW2VbIVs-2w6SyW-1}\nwixd{NW2VbIVs-2jSLg0-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryEdge\edoc{}(2)}{NW2VbIVs-4e874K-1}{\nwixu{NW2VbIVs-2w6SyW-1}\nwixd{NW2VbIVs-4e874K-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryMBR\edoc{}(0)}{NW2VbIVs-2Yf5B8-1}{\nwixu{NW2VbIVs-2w6SyW-1}\nwixd{NW2VbIVs-2Yf5B8-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryQueuedRequests\edoc{}(1)}{NW2VbIVs-1Ao9lm-1}{\nwixu{NW2VbIVs-2w6SyW-1}\nwixd{NW2VbIVs-1Ao9lm-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryRequest\edoc{}(1)}{NW2VbIVs-1C0pk3-1}{\nwixu{NW2VbIVs-2w6SyW-1}\nwixd{NW2VbIVs-1C0pk3-1}}}%
@@ -1457,6 +1522,12 @@ travel duration is $44-0=44$.
 \nwixlogsorted{c}{{....test \code{}DBQueryServerTravelDurationTotal\edoc{}(0)}{NW2VbIVs-2bE0DP-1}{\nwixu{NW2VbIVs-2w6SyW-1}\nwixd{NW2VbIVs-2bE0DP-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryServiceRate\edoc{}(0)}{NW2VbIVs-3JCT8W-1}{\nwixu{NW2VbIVs-2w6SyW-1}\nwixd{NW2VbIVs-3JCT8W-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryStatisticsEdges\edoc{}(0)}{NW2VbIVs-3wfpeD-1}{\nwixu{NW2VbIVs-2w6SyW-1}\nwixd{NW2VbIVs-3wfpeD-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryVertex\edoc{}(1)}{NW2VbIVs-HmHFv-1}{\nwixu{NW2VbIVs-2w6SyW-1}\nwixd{NW2VbIVs-HmHFv-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBUpdateEdgeSpeed\edoc{}(3)}{NW2VbIVs-4FqPVU-1}{\nwixu{NW2VbIVs-4HcfWS-1}\nwixd{NW2VbIVs-4FqPVU-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBUpdateServerAddToSchedule\edoc{}(4)}{NW2VbIVs-3t5oWt-1}{\nwixu{NW2VbIVs-4HcfWS-1}\nwixd{NW2VbIVs-3t5oWt-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBUpdateServerRemoveFromSchedule\edoc{}(4)}{NW2VbIVs-2DOHvZ-1}{\nwixu{NW2VbIVs-4HcfWS-1}\nwixd{NW2VbIVs-2DOHvZ-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBUpdateServerRoute\edoc{}(2)}{NW2VbIVs-1e7qm0-1}{\nwixu{NW2VbIVs-4HcfWS-1}\nwixd{NW2VbIVs-1e7qm0-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBUpdateServerSchedule\edoc{}(3)}{NW2VbIVs-3RwmVY-1}{\nwixu{NW2VbIVs-4HcfWS-1}\nwixd{NW2VbIVs-3RwmVY-1}}}%
 \nwixlogsorted{c}{{..load test database}{NW2VbIVs-11CmW8-1}{\nwixu{NW2VbIVs-2NJ9Wq-1}\nwixd{NW2VbIVs-11CmW8-1}}}%
 \nwixlogsorted{c}{{..run read tests}{NW2VbIVs-2w6SyW-1}{\nwixu{NW2VbIVs-2NJ9Wq-1}\nwixd{NW2VbIVs-2w6SyW-1}}}%
 \nwixlogsorted{c}{{..run write tests}{NW2VbIVs-4HcfWS-1}{\nwixu{NW2VbIVs-2NJ9Wq-1}\nwixd{NW2VbIVs-4HcfWS-1}}}%
@@ -1469,7 +1540,7 @@ travel duration is $44-0=44$.
 \nwixlogsorted{i}{{count{\char95}failed}{count:unfailed}}%
 \nwixlogsorted{i}{{count{\char95}passed}{count:unpassed}}%
 \nwixlogsorted{i}{{main}{main}}%
-\nwbegindocs{167}\nwdocspar
+\nwbegindocs{185}\nwdocspar
 
 \appendix
 
