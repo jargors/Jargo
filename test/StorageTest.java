@@ -1079,33 +1079,38 @@
           storage.printRoute(output);
           count_failed++;
         } else {
-          Print("[PASS] DBupdateServerRoute(2)");
+          Print("[PASS] DBUpdateServerRoute(2)");
           count_passed++;
         }
       }
-      
-      {
-        storage.DBUpdateServerAddToSchedule(13,
-          new int[] { 12 },
-          new int[] { 14, 45, 12, 21, 24, 12, 22, 0, 13 },
-          new int[] { 7, 44, 14, 45, 21, 24, 22, 0 });
-        int[] output = storage.DBQueryRoute(13);
-        if (!(output[0] == 0
-          && output[1] == 27
-          && output[2] == 7
-          && output[3] == 44
-          && output[4] == 14
-          && output[5] == 45
-          && output[6] == 21
-          && output[7] == 24
-          && output[8] == 22
-          && output[9] == 0)) {
-          Print("[FAIL] DBUpdateServerAddToSchedule(4)");
-          Print("\tExpected (0, 27) (7, 44) (14, 45) (21, 24) (22, 0); got ");
-          storage.printRoute(output);
-          count_failed++;
-        } else {
-          output = storage.DBQuerySchedule(13);
+      //TODO
+        {
+          storage.DBUpdateServerAddToSchedule(13,
+            new int[] { 12 },
+            new int[] { 14, 45, 12, 21, 24, 12, 22, 0, 13 },
+            new int[] { 7, 44, 14, 45, 21, 24, 22, 0 });
+          int[] output = storage.DBQueryRoute(13);
+          if (!(output[0] == 0
+            && output[1] == 27
+            && output[2] == 7
+            && output[3] == 44
+            && output[4] == 14
+            && output[5] == 45
+            && output[6] == 21
+            && output[7] == 24
+            && output[8] == 22
+            && output[9] == 0)) {
+            Print("[FAIL] DBUpdateServerAddToSchedule(4) (1/5)");
+            Print("\tExpected (0, 27) (7, 44) (14, 45) (21, 24) (22, 0); got ");
+            storage.printRoute(output);
+            count_failed++;
+          } else {
+            Print("[PASS] DBUpdateServerAddToSchedule(4) (1/5)");
+            count_passed++;
+          }
+        }
+        {
+          int[] output = storage.DBQuerySchedule(13);
           if (!(output[0] == 0
             && output[1] == 27
             && output[2] == 13
@@ -1122,17 +1127,49 @@
             && output[13] == 0
             && output[14] == 13
             && output[15] == 0)) {
-            Print("[FAIL] DBAddNewServer(2)");
+            Print("[FAIL] DBAddNewServer(2) (2/5)");
             Print("\tExpected (0, 27, 13, 0) (14, 45, 0, 12) (21, 24, 0, 12) "
               + "(22, 0, 13, 0); got ");
             storage.printSchedule(output);
             count_failed++;
           } else {
-            Print("[PASS] DBupdateServerAddToSchedule(4)");
+            Print("[PASS] DBUpdateServerAddToSchedule(4) (2/5)");
             count_passed++;
           }
         }
-      }
+        {
+          int[] output = storage.DBQueryRequestStatus(12, 13);
+          if (!(output.length == 0)) {
+            Print("[FAIL] DBUpdateServerAddToSchedule(4) (3/5)");
+            Print("\tExpected 0; got "+output.length);
+            count_failed++;
+          } else {
+            Print("[PASS] DBUpdateServerAddToSchedule(4) (3/5)");
+            count_passed++;
+          }
+        }
+        {
+          int[] output = storage.DBQueryRequestStatus(12, 14);
+          if (!(output[0] == 1)) {
+            Print("[FAIL] DBUpdateServerAddToSchedule(4) (4/5)");
+            Print("\tExpected 1; got "+output[0]);
+            count_failed++;
+          } else {
+            Print("[PASS] DBUpdateServerAddToSchedule(4) (4/5)");
+            count_passed++;
+          }
+        }
+        {
+          int[] output = storage.DBQueryRequestStatus(12, 21);
+          if (!(output[0] == 2)) {
+            Print("[FAIL] DBUpdateServerAddToSchedule(4) (5/5)");
+            Print("\tExpected 2; got "+output[0]);
+            count_failed++;
+          } else {
+            Print("[PASS] DBUpdateServerAddToSchedule(4) (5/5)");
+            count_passed++;
+          }
+        }
       
       Print("Complete! Passed: "+count_passed+"; Failed: "+count_failed);
     }

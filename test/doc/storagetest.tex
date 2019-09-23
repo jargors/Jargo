@@ -1546,17 +1546,26 @@ We try to update the route for newly-inserted Server 13.
     storage.printRoute(output);
     count_failed++;
   \} else \{
-    Print("[PASS] DBupdateServerRoute(2)");
+    Print("[PASS] DBUpdateServerRoute(2)");
     count_passed++;
   \}
 \}
 \nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-1e7qm0-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-1e7qm0-1}\nwendcode{}\nwbegindocs{179}\nwdocspar
 \subsubsection{{\tt{}DBUpdateServerSchedule}(3)}
 \nwenddocs{}\nwbegincode{180}\sublabel{NW2VbIVs-3RwmVY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-3RwmVY-1}}}\moddef{....test \code{}DBUpdateServerSchedule\edoc{}(3)~{\nwtagstyle{}\subpageref{NW2VbIVs-3RwmVY-1}}}\endmoddef\nwused{\\{NW2VbIVs-4HcfWS-1}}
+//TODO
 \nwendcode{}\nwbegindocs{181}\nwdocspar
 \subsubsection{{\tt{}DBUpdateServerAddToSchedule}(4)}
-We try to add Request 12 to Server 13's schedule.
+We try to add Request 12 to Server 13's schedule. Then we check the route,
+schedule, and status of Request 12.
 \nwenddocs{}\nwbegincode{182}\sublabel{NW2VbIVs-3t5oWt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-3t5oWt-1}}}\moddef{....test \code{}DBUpdateServerAddToSchedule\edoc{}(4)~{\nwtagstyle{}\subpageref{NW2VbIVs-3t5oWt-1}}}\endmoddef\nwused{\\{NW2VbIVs-4HcfWS-1}}
+  \LA{}......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) route~{\nwtagstyle{}\subpageref{NW2VbIVs-3GEMZN-1}}\RA{}
+  \LA{}......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) schedule~{\nwtagstyle{}\subpageref{NW2VbIVs-2MZ5fS-1}}\RA{}
+  \LA{}......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) request status when $t=13$~{\nwtagstyle{}\subpageref{NW2VbIVs-1AIKSX-1}}\RA{}
+  \LA{}......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) request status when $t=14$~{\nwtagstyle{}\subpageref{NW2VbIVs-19fLmD-1}}\RA{}
+  \LA{}......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) request status when $t=21$~{\nwtagstyle{}\subpageref{NW2VbIVs-1ATroX-1}}\RA{}
+\nwendcode{}\nwbegindocs{183}\nwdocspar
+\nwenddocs{}\nwbegincode{184}\sublabel{NW2VbIVs-3GEMZN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-3GEMZN-1}}}\moddef{......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) route~{\nwtagstyle{}\subpageref{NW2VbIVs-3GEMZN-1}}}\endmoddef\nwused{\\{NW2VbIVs-3t5oWt-1}}
 \{
   storage.DBUpdateServerAddToSchedule(13,
     new int[] \{ 12 \},
@@ -1573,42 +1582,87 @@ We try to add Request 12 to Server 13's schedule.
     && output[7] == 24
     && output[8] == 22
     && output[9] == 0)) \{
-    Print("[FAIL] DBUpdateServerAddToSchedule(4)");
+    Print("[FAIL] DBUpdateServerAddToSchedule(4) (1/5)");
     Print("\\tExpected (0, 27) (7, 44) (14, 45) (21, 24) (22, 0); got ");
     storage.printRoute(output);
     count_failed++;
   \} else \{
-    output = storage.DBQuerySchedule(13);
-    if (!(output[0] == 0
-      && output[1] == 27
-      && output[2] == 13
-      && output[3] == 0
-      && output[4] == 14
-      && output[5] == 45
-      && output[6] == 0
-      && output[7] == 12
-      && output[8] == 21
-      && output[9] == 24
-      && output[10] == 0
-      && output[11] == 12
-      && output[12] == 22
-      && output[13] == 0
-      && output[14] == 13
-      && output[15] == 0)) \{
-      Print("[FAIL] DBAddNewServer(2)");
-      Print("\\tExpected (0, 27, 13, 0) (14, 45, 0, 12) (21, 24, 0, 12) "
-        + "(22, 0, 13, 0); got ");
-      storage.printSchedule(output);
-      count_failed++;
-    \} else \{
-      Print("[PASS] DBupdateServerAddToSchedule(4)");
-      count_passed++;
-    \}
+    Print("[PASS] DBUpdateServerAddToSchedule(4) (1/5)");
+    count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-3t5oWt-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-3t5oWt-1}\nwendcode{}\nwbegindocs{183}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-3GEMZN-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-3GEMZN-1}\nwendcode{}\nwbegindocs{185}\nwdocspar
+\nwenddocs{}\nwbegincode{186}\sublabel{NW2VbIVs-2MZ5fS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-2MZ5fS-1}}}\moddef{......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) schedule~{\nwtagstyle{}\subpageref{NW2VbIVs-2MZ5fS-1}}}\endmoddef\nwused{\\{NW2VbIVs-3t5oWt-1}}
+\{
+  int[] output = storage.DBQuerySchedule(13);
+  if (!(output[0] == 0
+    && output[1] == 27
+    && output[2] == 13
+    && output[3] == 0
+    && output[4] == 14
+    && output[5] == 45
+    && output[6] == 0
+    && output[7] == 12
+    && output[8] == 21
+    && output[9] == 24
+    && output[10] == 0
+    && output[11] == 12
+    && output[12] == 22
+    && output[13] == 0
+    && output[14] == 13
+    && output[15] == 0)) \{
+    Print("[FAIL] DBAddNewServer(2) (2/5)");
+    Print("\\tExpected (0, 27, 13, 0) (14, 45, 0, 12) (21, 24, 0, 12) "
+      + "(22, 0, 13, 0); got ");
+    storage.printSchedule(output);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBUpdateServerAddToSchedule(4) (2/5)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-2MZ5fS-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-2MZ5fS-1}\nwendcode{}\nwbegindocs{187}\nwdocspar
+\nwenddocs{}\nwbegincode{188}\sublabel{NW2VbIVs-1AIKSX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-1AIKSX-1}}}\moddef{......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) request status when $t=13$~{\nwtagstyle{}\subpageref{NW2VbIVs-1AIKSX-1}}}\endmoddef\nwused{\\{NW2VbIVs-3t5oWt-1}}
+\{
+  int[] output = storage.DBQueryRequestStatus(12, 13);
+  if (!(output.length == 0)) \{
+    Print("[FAIL] DBUpdateServerAddToSchedule(4) (3/5)");
+    Print("\\tExpected 0; got "+output.length);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBUpdateServerAddToSchedule(4) (3/5)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-1AIKSX-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-1AIKSX-1}\nwendcode{}\nwbegindocs{189}\nwdocspar
+\nwenddocs{}\nwbegincode{190}\sublabel{NW2VbIVs-19fLmD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-19fLmD-1}}}\moddef{......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) request status when $t=14$~{\nwtagstyle{}\subpageref{NW2VbIVs-19fLmD-1}}}\endmoddef\nwused{\\{NW2VbIVs-3t5oWt-1}}
+\{
+  int[] output = storage.DBQueryRequestStatus(12, 14);
+  if (!(output[0] == 1)) \{
+    Print("[FAIL] DBUpdateServerAddToSchedule(4) (4/5)");
+    Print("\\tExpected 1; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBUpdateServerAddToSchedule(4) (4/5)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-19fLmD-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-19fLmD-1}\nwendcode{}\nwbegindocs{191}\nwdocspar
+\nwenddocs{}\nwbegincode{192}\sublabel{NW2VbIVs-1ATroX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-1ATroX-1}}}\moddef{......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) request status when $t=21$~{\nwtagstyle{}\subpageref{NW2VbIVs-1ATroX-1}}}\endmoddef\nwused{\\{NW2VbIVs-3t5oWt-1}}
+\{
+  int[] output = storage.DBQueryRequestStatus(12, 21);
+  if (!(output[0] == 2)) \{
+    Print("[FAIL] DBUpdateServerAddToSchedule(4) (5/5)");
+    Print("\\tExpected 2; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBUpdateServerAddToSchedule(4) (5/5)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-1ATroX-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-1ATroX-1}\nwendcode{}\nwbegindocs{193}\nwdocspar
 \subsubsection{{\tt{}DBUpdateServerRemoveFromSchedule}(4)}
-\nwenddocs{}\nwbegincode{184}\sublabel{NW2VbIVs-2DOHvZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-2DOHvZ-1}}}\moddef{....test \code{}DBUpdateServerRemoveFromSchedule\edoc{}(4)~{\nwtagstyle{}\subpageref{NW2VbIVs-2DOHvZ-1}}}\endmoddef\nwused{\\{NW2VbIVs-4HcfWS-1}}
+\nwenddocs{}\nwbegincode{194}\sublabel{NW2VbIVs-2DOHvZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-2DOHvZ-1}}}\moddef{....test \code{}DBUpdateServerRemoveFromSchedule\edoc{}(4)~{\nwtagstyle{}\subpageref{NW2VbIVs-2DOHvZ-1}}}\endmoddef\nwused{\\{NW2VbIVs-4HcfWS-1}}
 \nwendcode{}
 
 \nwixlogsorted{c}{{......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=0$}{NW2VbIVs-GriL0-1}{\nwixu{NW2VbIVs-2jSLg0-1}\nwixd{NW2VbIVs-GriL0-1}}}%
@@ -1641,6 +1695,11 @@ We try to add Request 12 to Server 13's schedule.
 \nwixlogsorted{c}{{......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=43$}{NW2VbIVs-Fmx82-1}{\nwixu{NW2VbIVs-g6QHQ-1}\nwixd{NW2VbIVs-Fmx82-1}}}%
 \nwixlogsorted{c}{{......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=44$}{NW2VbIVs-FA6yE-1}{\nwixu{NW2VbIVs-g6QHQ-1}\nwixd{NW2VbIVs-FA6yE-1}}}%
 \nwixlogsorted{c}{{......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=45$}{NW2VbIVs-FXU7y-1}{\nwixu{NW2VbIVs-g6QHQ-1}\nwixd{NW2VbIVs-FXU7y-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) request status when $t=13$}{NW2VbIVs-1AIKSX-1}{\nwixu{NW2VbIVs-3t5oWt-1}\nwixd{NW2VbIVs-1AIKSX-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) request status when $t=14$}{NW2VbIVs-19fLmD-1}{\nwixu{NW2VbIVs-3t5oWt-1}\nwixd{NW2VbIVs-19fLmD-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) request status when $t=21$}{NW2VbIVs-1ATroX-1}{\nwixu{NW2VbIVs-3t5oWt-1}\nwixd{NW2VbIVs-1ATroX-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) route}{NW2VbIVs-3GEMZN-1}{\nwixu{NW2VbIVs-3t5oWt-1}\nwixd{NW2VbIVs-3GEMZN-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) schedule}{NW2VbIVs-2MZ5fS-1}{\nwixu{NW2VbIVs-3t5oWt-1}\nwixd{NW2VbIVs-2MZ5fS-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBAddNewRequest\edoc{}(1)}{NW2VbIVs-BAsgV-1}{\nwixu{NW2VbIVs-4HcfWS-1}\nwixd{NW2VbIVs-BAsgV-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBAddNewServer\edoc{}(2)}{NW2VbIVs-3pzOz8-1}{\nwixu{NW2VbIVs-4HcfWS-1}\nwixd{NW2VbIVs-3pzOz8-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQuery\edoc{}(2)}{NW2VbIVs-RMkGl-1}{\nwixu{NW2VbIVs-2w6SyW-1}\nwixd{NW2VbIVs-RMkGl-1}}}%
@@ -1707,7 +1766,7 @@ We try to add Request 12 to Server 13's schedule.
 \nwixlogsorted{i}{{count{\char95}failed}{count:unfailed}}%
 \nwixlogsorted{i}{{count{\char95}passed}{count:unpassed}}%
 \nwixlogsorted{i}{{main}{main}}%
-\nwbegindocs{185}\nwdocspar
+\nwbegindocs{195}\nwdocspar
 
 \appendix
 
