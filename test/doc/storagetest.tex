@@ -1470,8 +1470,62 @@ expect the identifier to return 12.
 \}
 \nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-BAsgV-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-BAsgV-1}\nwendcode{}\nwbegindocs{175}\nwdocspar
 \subsubsection{{\tt{}DBAddNewServer}(2)}
+Now we expect the identifier to be 13 when we add a new server.
 \nwenddocs{}\nwbegincode{176}\sublabel{NW2VbIVs-3pzOz8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-3pzOz8-1}}}\moddef{....test \code{}DBAddNewServer\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2VbIVs-3pzOz8-1}}}\endmoddef\nwused{\\{NW2VbIVs-4HcfWS-1}}
-\nwendcode{}\nwbegindocs{177}\nwdocspar
+\{
+  int uid = storage.DBAddNewServer(
+    new int[] \{ -1, 0, 200, 27, 0, 0 \},
+    new int[] \{ 0, 27, 1, 0 \});
+  if (!(uid == 13)) \{
+    Print("[FAIL] DBAddNewServer(2)");
+    Print("\\tExpected 13; got "+uid);
+    count_failed++;
+  \} else \{
+    int[] output = storage.DBQueryServer(uid);
+    if (!(output[0] == uid
+      && output[1] == -1
+      && output[2] == 0
+      && output[3] == 200
+      && output[4] == 27
+      && output[5] == 0
+      && output[6] == 0)) \{
+      Print("[FAIL] DBAddNewServer(2)");
+      Print("\\tExpected \{ 13, -1, 0, 200, 27, 0, 0 \}; got ");
+      storage.printUser(output);
+      count_failed++;
+    \} else \{
+      output = storage.DBQueryRoute(uid);
+      if (!(output[0] == 0
+        && output[1] == 27
+        && output[2] == 1
+        && output[3] == 0)) \{
+        Print("[FAIL] DBAddNewServer(2)");
+        Print("\\tExpected \{ 0, 27, 1, 0 \}; got ");
+        storage.printRoute(output);
+        count_failed++;
+      \} else \{
+        output = storage.DBQuerySchedule(uid);
+        if (!(output[0] == 0
+          && output[1] == 27
+          && output[2] == uid
+          && output[3] == 0
+          && output[4] == 1
+          && output[5] == 0
+          && output[6] == uid
+          && output[7] == 0)) \{
+          Print("[FAIL] DBAddNewServer(2)");
+          Print("\\tExpected (0, 27, 13, 0) (1, 0, 13, 0); got ");
+          storage.printSchedule(output);
+          count_failed++;
+        \} else \{
+          Print("[PASS] DBAddNewServer(2)");
+          count_passed++;
+        \}
+      \}
+    \}
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-3pzOz8-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-3pzOz8-1}\nwendcode{}\nwbegindocs{177}\nwdocspar
 \subsubsection{{\tt{}DBUpdateServerRoute}(2)}
 \nwenddocs{}\nwbegincode{178}\sublabel{NW2VbIVs-1e7qm0-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-1e7qm0-1}}}\moddef{....test \code{}DBUpdateServerRoute\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2VbIVs-1e7qm0-1}}}\endmoddef\nwused{\\{NW2VbIVs-4HcfWS-1}}
 \nwendcode{}\nwbegindocs{179}\nwdocspar

@@ -1009,7 +1009,59 @@
           }
         }
       }
-      
+      {
+        int uid = storage.DBAddNewServer(
+          new int[] { -1, 0, 200, 27, 0, 0 },
+          new int[] { 0, 27, 1, 0 });
+        if (!(uid == 13)) {
+          Print("[FAIL] DBAddNewServer(2)");
+          Print("\tExpected 13; got "+uid);
+          count_failed++;
+        } else {
+          int[] output = storage.DBQueryServer(uid);
+          if (!(output[0] == uid
+            && output[1] == -1
+            && output[2] == 0
+            && output[3] == 200
+            && output[4] == 27
+            && output[5] == 0
+            && output[6] == 0)) {
+            Print("[FAIL] DBAddNewServer(2)");
+            Print("\tExpected { 13, -1, 0, 200, 27, 0, 0 }; got ");
+            storage.printUser(output);
+            count_failed++;
+          } else {
+            output = storage.DBQueryRoute(uid);
+            if (!(output[0] == 0
+              && output[1] == 27
+              && output[2] == 1
+              && output[3] == 0)) {
+              Print("[FAIL] DBAddNewServer(2)");
+              Print("\tExpected { 0, 27, 1, 0 }; got ");
+              storage.printRoute(output);
+              count_failed++;
+            } else {
+              output = storage.DBQuerySchedule(uid);
+              if (!(output[0] == 0
+                && output[1] == 27
+                && output[2] == uid
+                && output[3] == 0
+                && output[4] == 1
+                && output[5] == 0
+                && output[6] == uid
+                && output[7] == 0)) {
+                Print("[FAIL] DBAddNewServer(2)");
+                Print("\tExpected (0, 27, 13, 0) (1, 0, 13, 0); got ");
+                storage.printSchedule(output);
+                count_failed++;
+              } else {
+                Print("[PASS] DBAddNewServer(2)");
+                count_passed++;
+              }
+            }
+          }
+        }
+      }
       
       
       
