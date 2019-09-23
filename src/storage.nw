@@ -103,6 +103,7 @@ programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
 \hi{Read Methods}
 <<[[Storage]] public methods>>=
 <<Query ridesharing user>>
+<<Query request status>>
 <<Query queued requests>>
 <<Query all server locations>>
 <<Query active server locations>>
@@ -2587,6 +2588,18 @@ public int[] DBQueryRequest(int rid) throws RuntimeException {
 }
 @ %def DBQueryRequest
 
+\subsubsection{[[DBQueryRequestStatus]](2)}
+<<Query request status>>=
+public int[] DBQueryRequestStatus(int rid, int t) throws RuntimeException {
+  int[] output = new int[] { };
+  try {
+    output = DBFetch(133, 1, rid, t);
+  }
+  <<Catch and print [[SQLException]]>>
+  return output;
+}
+@ %def DBQueryRequestStatus
+
 \subsubsection{[[DBQueryQueuedRequests]](1)}
 <<Query queued requests>>=
 public int[] DBQueryQueuedRequests(int t) throws RuntimeException {
@@ -3364,6 +3377,8 @@ private void PSInit() throws RuntimeException {
   pstr.put(125, SEL+"val FROM t_s_depart WHERE sid=?");
   pstr.put(126, SEL+"val FROM t_r_arrive WHERE rid=?");
   pstr.put(127, SEL+"val FROM t_s_arrive WHERE sid=?");
+  pstr.put(133, SEL+"val FROM f_status WHERE rid=? AND t<=? "
+    + "ORDER BY t DESC FETCH FIRST ROW ONLY");
   try {
     for (Map.Entry<Integer, String> kv : pstr.entrySet()) {
       pstmt.put(kv.getKey(), PS(kv.getValue()));

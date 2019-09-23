@@ -1019,6 +1019,23 @@
       }
       return output;
     }
+    public int[] DBQueryRequestStatus(int rid, int t) throws RuntimeException {
+      int[] output = new int[] { };
+      try {
+        output = DBFetch(133, 1, rid, t);
+      }
+      catch (SQLException e1) {
+        printSQLException(e1);
+        try {
+          conn.rollback();
+        } catch (SQLException e2) {
+          printSQLException(e2);
+        }
+        DBSaveBackup("db-lastgood");
+        throw new RuntimeException("database failure");
+      }
+      return output;
+    }
     public int[] DBQueryQueuedRequests(int t) throws RuntimeException {
       int[] output = new int[] { };
       try {
@@ -1991,6 +2008,8 @@
         pstr.put(125, SEL+"val FROM t_s_depart WHERE sid=?");
         pstr.put(126, SEL+"val FROM t_r_arrive WHERE rid=?");
         pstr.put(127, SEL+"val FROM t_s_arrive WHERE sid=?");
+        pstr.put(133, SEL+"val FROM f_status WHERE rid=? AND t<=? "
+          + "ORDER BY t DESC FETCH FIRST ROW ONLY");
         try {
           for (Map.Entry<Integer, String> kv : pstr.entrySet()) {
             pstmt.put(kv.getKey(), PS(kv.getValue()));
