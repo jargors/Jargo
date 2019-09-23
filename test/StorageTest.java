@@ -1037,7 +1037,7 @@
               && output[2] == 1
               && output[3] == 0)) {
               Print("[FAIL] DBAddNewServer(2)");
-              Print("\tExpected { 0, 27, 1, 0 }; got ");
+              Print("\tExpected (0, 27) (1, 0); got ");
               storage.printRoute(output);
               count_failed++;
             } else {
@@ -1062,9 +1062,77 @@
           }
         }
       }
+      {
+        storage.DBUpdateServerRoute(13,
+          new int[] { 0, 27, 7, 44, 14, 45, 15, 0 });
+        int[] output = storage.DBQueryRoute(13);
+        if (!(output[0] == 0
+          && output[1] == 27
+          && output[2] == 7
+          && output[3] == 44
+          && output[4] == 14
+          && output[5] == 45
+          && output[6] == 15
+          && output[7] == 0)) {
+          Print("[FAIL] DBUpdateServerRoute(2)");
+          Print("\tExpected (0, 27) (7, 44) (14, 45) (15, 0); got ");
+          storage.printRoute(output);
+          count_failed++;
+        } else {
+          Print("[PASS] DBupdateServerRoute(2)");
+          count_passed++;
+        }
+      }
       
-      
-      
+      {
+        storage.DBUpdateServerAddToSchedule(13,
+          new int[] { 12 },
+          new int[] { 14, 45, 12, 21, 24, 12, 22, 0, 13 },
+          new int[] { 7, 44, 14, 45, 21, 24, 22, 0 });
+        int[] output = storage.DBQueryRoute(13);
+        if (!(output[0] == 0
+          && output[1] == 27
+          && output[2] == 7
+          && output[3] == 44
+          && output[4] == 14
+          && output[5] == 45
+          && output[6] == 21
+          && output[7] == 24
+          && output[8] == 22
+          && output[9] == 0)) {
+          Print("[FAIL] DBUpdateServerAddToSchedule(4)");
+          Print("\tExpected (0, 27) (7, 44) (14, 45) (21, 24) (22, 0); got ");
+          storage.printRoute(output);
+          count_failed++;
+        } else {
+          output = storage.DBQuerySchedule(13);
+          if (!(output[0] == 0
+            && output[1] == 27
+            && output[2] == 13
+            && output[3] == 0
+            && output[4] == 14
+            && output[5] == 45
+            && output[6] == 0
+            && output[7] == 12
+            && output[8] == 21
+            && output[9] == 24
+            && output[10] == 0
+            && output[11] == 12
+            && output[12] == 22
+            && output[13] == 0
+            && output[14] == 13
+            && output[15] == 0)) {
+            Print("[FAIL] DBAddNewServer(2)");
+            Print("\tExpected (0, 27, 13, 0) (14, 45, 0, 12) (21, 24, 0, 12) "
+              + "(22, 0, 13, 0); got ");
+            storage.printSchedule(output);
+            count_failed++;
+          } else {
+            Print("[PASS] DBupdateServerAddToSchedule(4)");
+            count_passed++;
+          }
+        }
+      }
       
       Print("Complete! Passed: "+count_passed+"; Failed: "+count_failed);
     }
