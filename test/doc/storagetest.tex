@@ -1438,8 +1438,37 @@ travel duration is $44-0=44$.
 \}
 \nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-4FqPVU-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-4FqPVU-1}\nwendcode{}\nwbegindocs{173}\nwdocspar
 \subsubsection{{\tt{}DBAddNewRequest}(1)}
+There are already four users in the test database,
+and the largest {\tt{}uid} is 11; when we add a new request, we
+expect the identifier to return 12.
 \nwenddocs{}\nwbegincode{174}\sublabel{NW2VbIVs-BAsgV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-BAsgV-1}}}\moddef{....test \code{}DBAddNewRequest\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2VbIVs-BAsgV-1}}}\endmoddef\nwused{\\{NW2VbIVs-4HcfWS-1}}
-\nwendcode{}\nwbegindocs{175}\nwdocspar
+\{
+  int uid = storage.DBAddNewRequest(
+    new int[] \{ 1, 0, 200, 45, 24, 63 \});
+  if (!(uid == 12)) \{
+    Print("[FAIL] DBAddNewRequest(1)");
+    Print("\\tExpected 12; got "+uid);
+    count_failed++;
+  \} else \{
+    int[] output = storage.DBQueryRequest(uid);
+    if (!(output[0] == uid
+      && output[1] == 1
+      && output[2] == 0
+      && output[3] == 200
+      && output[4] == 45
+      && output[5] == 24
+      && output[6] == 63)) \{
+      Print("[FAIL] DBAddNewRequest(1)");
+      Print("\\tExpected \{ 12, 1, 0, 200, 45, 24, 63 \}; got ");
+      storage.printUser(output);
+      count_failed++;
+    \} else \{
+      Print("[PASS] DBAddNewRequest(1)");
+      count_passed++;
+    \}
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2VbIVs-BAsgV-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2VbIVs-BAsgV-1}\nwendcode{}\nwbegindocs{175}\nwdocspar
 \subsubsection{{\tt{}DBAddNewServer}(2)}
 \nwenddocs{}\nwbegincode{176}\sublabel{NW2VbIVs-3pzOz8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2VbIVs-3pzOz8-1}}}\moddef{....test \code{}DBAddNewServer\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2VbIVs-3pzOz8-1}}}\endmoddef\nwused{\\{NW2VbIVs-4HcfWS-1}}
 \nwendcode{}\nwbegindocs{177}\nwdocspar

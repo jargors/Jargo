@@ -1438,7 +1438,36 @@ travel duration is $44-0=44$.
 }
 @
 \subsubsection{[[DBAddNewRequest]](1)}
+There are already four users in the test database,
+and the largest [[uid]] is 11; when we add a new request, we
+expect the identifier to return 12.
 <<....test [[DBAddNewRequest]](1)>>=
+{
+  int uid = storage.DBAddNewRequest(
+    new int[] { 1, 0, 200, 45, 24, 63 });
+  if (!(uid == 12)) {
+    Print("[FAIL] DBAddNewRequest(1)");
+    Print("\tExpected 12; got "+uid);
+    count_failed++;
+  } else {
+    int[] output = storage.DBQueryRequest(uid);
+    if (!(output[0] == uid
+      && output[1] == 1
+      && output[2] == 0
+      && output[3] == 200
+      && output[4] == 45
+      && output[5] == 24
+      && output[6] == 63)) {
+      Print("[FAIL] DBAddNewRequest(1)");
+      Print("\tExpected { 12, 1, 0, 200, 45, 24, 63 }; got ");
+      storage.printUser(output);
+      count_failed++;
+    } else {
+      Print("[PASS] DBAddNewRequest(1)");
+      count_passed++;
+    }
+  }
+}
 @
 \subsubsection{[[DBAddNewServer]](2)}
 <<....test [[DBAddNewServer]](2)>>=

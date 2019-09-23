@@ -983,7 +983,32 @@
           count_passed++;
         }
       }
-      
+      {
+        int uid = storage.DBAddNewRequest(
+          new int[] { 1, 0, 200, 45, 24, 63 });
+        if (!(uid == 12)) {
+          Print("[FAIL] DBAddNewRequest(1)");
+          Print("\tExpected 12; got "+uid);
+          count_failed++;
+        } else {
+          int[] output = storage.DBQueryRequest(uid);
+          if (!(output[0] == uid
+            && output[1] == 1
+            && output[2] == 0
+            && output[3] == 200
+            && output[4] == 45
+            && output[5] == 24
+            && output[6] == 63)) {
+            Print("[FAIL] DBAddNewRequest(1)");
+            Print("\tExpected { 12, 1, 0, 200, 45, 24, 63 }; got ");
+            storage.printUser(output);
+            count_failed++;
+          } else {
+            Print("[PASS] DBAddNewRequest(1)");
+            count_passed++;
+          }
+        }
+      }
       
       
       
