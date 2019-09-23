@@ -1424,6 +1424,18 @@ travel duration is $44-0=44$.
 @
 \subsubsection{[[DBUpdateEdgeSpeed]](3)}
 <<....test [[DBUpdateEdgeSpeed]](3)>>=
+{
+  storage.DBUpdateEdgeSpeed(22, 1, 11);
+  int[] output = storage.DBQueryEdge(22, 1);
+  if (!(output[1] == 11)) {
+    Print("[FAIL] DBUpdateEdgeSpeed(3)");
+    Print("\tExpected 11; got "+output[1]);
+    count_failed++;
+  } else {
+    Print("[PASS] DBUpdateEdgeSpeed(3)");
+    count_passed++;
+  }
+}
 @
 \subsubsection{[[DBAddNewRequest]](1)}
 <<....test [[DBAddNewRequest]](1)>>=
