@@ -2705,6 +2705,50 @@ public int[] DBQueryCountEdges() throws RuntimeException {
 }
 @ %def DBQueryCountEdges
 
+\subsubsection{[[DBQueryVertex]](1)}
+Returned array =
+
+\begin{tikzpicture}
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{longitude of }v$};
+& \node {$1:\textrm{latitude of }v$}; \\
+};
+\end{tikzpicture}
+
+\noindent where parameter [[v]] provides $v$.
+<<Query various metrics>>=
+public int[] DBQueryVertex(int v) throws RuntimeException {
+  int[] output = new int[] { };
+  try {
+    output = DBFetch(130, 2, v);
+  }
+  <<Catch and print [[SQLException]]>>
+  return output;
+}
+@ %def DBQueryVertex
+
+\subsubsection{[[DBQueryEdge]](2)}
+Returned array =
+
+\begin{tikzpicture}
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:d(v_1,v_2)$}; & \node {$1:v^\textrm{max}(v_1,v_2)$}; \\
+};
+\end{tikzpicture}
+
+\noindent where parameter [[v1]] provides $v_1$ and parameter
+[[v2]] provides $v_2$.
+<<Query various metrics>>=
+public int[] DBQueryEdge(int v1, int v2) throws RuntimeException {
+  int[] output = new int[] { };
+  try {
+    output = DBFetch(46, 2, v1, v2);
+  }
+  <<Catch and print [[SQLException]]>>
+  return output;
+}
+@ %def DBQueryEdge
+
 \subsubsection{[[DBQueryStatisticsEdges]](0)}
 The following method returns six statistics: minimum edge weight,
 maximum edge weight, average edge weight, minimum edge speed, maximum edge speed,
@@ -3250,6 +3294,7 @@ private void PSInit() throws RuntimeException {
       + "MIN (nu), MAX (nu), SUM (nu) / COUNT (nu) "
       + "FROM E WHERE v1<>0 AND v2<>0");
   pstr.put(46, SEL+"dd, nu FROM E WHERE v1=? AND v2=?");
+  pstr.put(130, SEL+"lng, lat FROM V WHERE v=?");
   pstr.put(70, SEL+"sid, sq, se, sl, so, sd, sb FROM S WHERE sid=?");
   pstr.put(48, SEL+"sq, se FROM S WHERE sid=?");
   pstr.put(66, SEL+"COUNT (*) FROM S");

@@ -1184,6 +1184,40 @@
       }
       return output;
     }
+    public int[] DBQueryVertex(int v) throws RuntimeException {
+      int[] output = new int[] { };
+      try {
+        output = DBFetch(130, 2, v);
+      }
+      catch (SQLException e1) {
+        printSQLException(e1);
+        try {
+          conn.rollback();
+        } catch (SQLException e2) {
+          printSQLException(e2);
+        }
+        DBSaveBackup("db-lastgood");
+        throw new RuntimeException("database failure");
+      }
+      return output;
+    }
+    public int[] DBQueryEdge(int v1, int v2) throws RuntimeException {
+      int[] output = new int[] { };
+      try {
+        output = DBFetch(46, 2, v1, v2);
+      }
+      catch (SQLException e1) {
+        printSQLException(e1);
+        try {
+          conn.rollback();
+        } catch (SQLException e2) {
+          printSQLException(e2);
+        }
+        DBSaveBackup("db-lastgood");
+        throw new RuntimeException("database failure");
+      }
+      return output;
+    }
     public int[] DBQueryStatisticsEdges() throws RuntimeException {
       int[] output = new int[] { };
       try {
@@ -1888,6 +1922,7 @@
             + "MIN (nu), MAX (nu), SUM (nu) / COUNT (nu) "
             + "FROM E WHERE v1<>0 AND v2<>0");
         pstr.put(46, SEL+"dd, nu FROM E WHERE v1=? AND v2=?");
+        pstr.put(130, SEL+"lng, lat FROM V WHERE v=?");
         pstr.put(70, SEL+"sid, sq, se, sl, so, sd, sb FROM S WHERE sid=?");
         pstr.put(48, SEL+"sq, se FROM S WHERE sid=?");
         pstr.put(66, SEL+"COUNT (*) FROM S");
