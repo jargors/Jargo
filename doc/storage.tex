@@ -2003,7 +2003,7 @@ catch (SQLException e1) \{
 \end{itemize}
 \subsubsection{{\tt{}DBLoadBackup}(1)}
 \label{sec:load-database-backup}
-To load a database backup:
+We update {\tt{}\protect\nwindexuse{uid}{uid}{NW15FRcE-s0Hgq-3}uid} to be the current largest {\tt{}\protect\nwindexuse{uid}{uid}{NW15FRcE-s0Hgq-3}uid} in the backup.
 \nwenddocs{}\nwbegincode{143}\sublabel{NW15FRcE-b3Hn1-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-b3Hn1-1}}}\moddef{Load backup~{\nwtagstyle{}\subpageref{NW15FRcE-b3Hn1-1}}}\endmoddef\nwused{\\{NW15FRcE-4PbjF-1}}
 public void DBLoadBackup(String filepath) throws RuntimeException \{
   Print("Loading database backup ("+filepath+")");
@@ -2014,10 +2014,11 @@ public void DBLoadBackup(String filepath) throws RuntimeException \{
     conn = DriverManager.getConnection("jdbc:derby:memory:jargobak;createFrom="+filepath);
     \LA{}....configure database properties~{\nwtagstyle{}\subpageref{NW15FRcE-1oq4K7-1}}\RA{}
     \LA{}..initialize prepared statements~{\nwtagstyle{}\subpageref{NW15FRcE-1uI1uN-1}}\RA{}
+    uid = DBFetch(132, 1)[0];
   \}
   \LA{}Catch and print \code{}SQLException\edoc{}~{\nwtagstyle{}\subpageref{NW15FRcE-4P0tKA-1}}\RA{}
 \}
-\nwidentuses{\\{{conn}{conn}}\\{{Print}{Print}}}\nwindexuse{conn}{conn}{NW15FRcE-b3Hn1-1}\nwindexuse{Print}{Print}{NW15FRcE-b3Hn1-1}\nwendcode{}\nwbegindocs{144}\nwdocspar
+\nwidentuses{\\{{conn}{conn}}\\{{DBFetch}{DBFetch}}\\{{Print}{Print}}\\{{uid}{uid}}}\nwindexuse{conn}{conn}{NW15FRcE-b3Hn1-1}\nwindexuse{DBFetch}{DBFetch}{NW15FRcE-b3Hn1-1}\nwindexuse{Print}{Print}{NW15FRcE-b3Hn1-1}\nwindexuse{uid}{uid}{NW15FRcE-b3Hn1-1}\nwendcode{}\nwbegindocs{144}\nwdocspar
 \subsubsection{{\tt{}DBSaveBackup}(1)}
 \label{sec:save-database-backup}
 To save a database backup:
@@ -3288,6 +3289,7 @@ private void PSInit() throws RuntimeException \{
   pstr.put(42, DEL+"PD WHERE rid=?");
   pstr.put(43, DEL+"CPD WHERE rid=?");
   pstr.put(80, DEL+"CQ WHERE sid=? AND t2>=?");
+  pstr.put(132, SEL+"MAX (uid) FROM UQ");
   pstr.put(62, SEL+"COUNT (*) FROM V WHERE v<>0");
   pstr.put(64, SEL+"MIN (lng), MAX (lng), MIN (lat), MAX (lat) "
       + "FROM V WHERE v<>0");

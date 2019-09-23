@@ -449,6 +449,7 @@
           throw new RuntimeException("database failure");
         }
         PSInit();
+        uid = DBFetch(132, 1)[0];
       }
       catch (SQLException e1) {
         printSQLException(e1);
@@ -1916,6 +1917,7 @@
         pstr.put(42, DEL+"PD WHERE rid=?");
         pstr.put(43, DEL+"CPD WHERE rid=?");
         pstr.put(80, DEL+"CQ WHERE sid=? AND t2>=?");
+        pstr.put(132, SEL+"MAX (uid) FROM UQ");
         pstr.put(62, SEL+"COUNT (*) FROM V WHERE v<>0");
         pstr.put(64, SEL+"MIN (lng), MAX (lng), MIN (lat), MAX (lat) "
             + "FROM V WHERE v<>0");

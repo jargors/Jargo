@@ -2003,7 +2003,7 @@ catch (SQLException e1) {
 \end{itemize}
 \subsubsection{[[DBLoadBackup]](1)}
 \label{sec:load-database-backup}
-To load a database backup:
+We update [[uid]] to be the current largest [[uid]] in the backup.
 <<Load backup>>=
 public void DBLoadBackup(String filepath) throws RuntimeException {
   Print("Loading database backup ("+filepath+")");
@@ -2014,6 +2014,7 @@ public void DBLoadBackup(String filepath) throws RuntimeException {
     conn = DriverManager.getConnection("jdbc:derby:memory:jargobak;createFrom="+filepath);
     <<....configure database properties>>
     <<..initialize prepared statements>>
+    uid = DBFetch(132, 1)[0];
   }
   <<Catch and print [[SQLException]]>>
 }
@@ -3288,6 +3289,7 @@ private void PSInit() throws RuntimeException {
   pstr.put(42, DEL+"PD WHERE rid=?");
   pstr.put(43, DEL+"CPD WHERE rid=?");
   pstr.put(80, DEL+"CQ WHERE sid=? AND t2>=?");
+  pstr.put(132, SEL+"MAX (uid) FROM UQ");
   pstr.put(62, SEL+"COUNT (*) FROM V WHERE v<>0");
   pstr.put(64, SEL+"MIN (lng), MAX (lng), MIN (lat), MAX (lat) "
       + "FROM V WHERE v<>0");
