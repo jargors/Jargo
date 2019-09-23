@@ -158,7 +158,7 @@
                         + "CONSTRAINT P11 PRIMARY KEY (sid, t2, v2),"
                         + "CONSTRAINT F17 FOREIGN KEY (sid) REFERENCES S,"
                         + "CONSTRAINT F18 FOREIGN KEY (sid, se) REFERENCES UE (uid, ue),"
-                        + "CONSTRAINT F19 FOREIGN KEY (v1, v2, dd, nu) REFERENCES E,"
+                        + "CONSTRAINT F19 FOREIGN KEY (v1, v2, dd, nu) REFERENCES E INITIALLY DEFERRED,"
                         + "CONSTRAINT F20 FOREIGN KEY (sid, t1, v1) REFERENCES W (sid, t2, v2) INITIALLY DEFERRED,"
                         + "CONSTRAINT C54 UNIQUE (sid, t1),"
                         + "CONSTRAINT C55 UNIQUE (sid, t2),"
@@ -536,9 +536,10 @@
     }
     public void DBUpdateEdgeSpeed(int v1, int v2, int nu) throws RuntimeException {
       try {
-        PSClear(15);
+        PSClear(15, 131);
         PSAdd(15, nu, v1, v2);
-        PSSubmit(15);
+        PSAdd(131, nu, v1, v2);
+        PSSubmit(15, 131);
         conn.commit();
       }
       catch (SQLException e1) {
@@ -1906,6 +1907,7 @@
         pstr.put(13, INS+"CPD VALUES "+q12);
         pstr.put(14, INS+"CQ VALUES "+q14);
         pstr.put(15, UPD+"E SET nu=? WHERE v1=? AND v2=?");
+        pstr.put(131, UPD+"W SET nu=? WHERE v1=? AND v2=?");
         pstr.put(77, UPD+"CW SET te=?, ve=? WHERE sid=?");
         pstr.put(84, UPD+"PD SET t2=? WHERE v2=? AND rid=?");
         pstr.put(82, UPD+"CPD SET tp=? WHERE vp=? AND rid=?");
