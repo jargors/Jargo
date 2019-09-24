@@ -1064,7 +1064,8 @@
       }
       {
         storage.DBUpdateServerRoute(13,
-          new int[] { 0, 27, 7, 44, 14, 45, 15, 0 });
+          new int[] { 0, 27, 7, 44, 14, 45, 15, 0 },
+          new int[] { });
         int[] output = storage.DBQueryRoute(13);
         if (!(output[0] == 0
           && output[1] == 27
@@ -1170,7 +1171,29 @@
             count_passed++;
           }
         }
-      
+        {
+          storage.DBUpdateServerRemoveFromSchedule(13,
+            new int[] { 12 },
+            new int[] { 1, 0, 13 },
+            new int[] { 1, 0 });
+          int[] output = storage.DBQueryRoute(13);
+          if (!(output[0] == 0
+            && output[1] == 27
+            && output[2] == 1
+            && output[3] == 0)) {
+            Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (1/5)");
+            Print("\tExpected (0, 27) (1, 0); got ");
+            storage.printRoute(output);
+            count_failed++;
+          } else {
+            Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (1/5)");
+            count_passed++;
+          }
+        }
+        
+        
+        
+        
       Print("Complete! Passed: "+count_passed+"; Failed: "+count_failed);
     }
     private static void Print(String msg) {
