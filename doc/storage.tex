@@ -2376,10 +2376,8 @@ int ve = route[(route.length - 1)];
 PSAdd(77, te, ve, sid);
 PSSubmit(77);
 \nwidentuses{\\{{PSAdd}{PSAdd}}\\{{PSClear}{PSClear}}\\{{PSSubmit}{PSSubmit}}}\nwindexuse{PSAdd}{PSAdd}{NW15FRcE-2JeImF-1}\nwindexuse{PSClear}{PSClear}{NW15FRcE-2JeImF-1}\nwindexuse{PSSubmit}{PSSubmit}{NW15FRcE-2JeImF-1}\nwendcode{}\nwbegindocs{189}\nwdocspar
-Adding the {\tt{}-1} to the upper bound of {\tt{}j} skips over the last element
-in the schedule, which is expected to be the server's destination.
 \nwenddocs{}\nwbegincode{190}\sublabel{NW15FRcE-2NqWTJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-2NqWTJ-1}}}\moddef{..update schedule~{\nwtagstyle{}\subpageref{NW15FRcE-2NqWTJ-1}}}\endmoddef\nwused{\\{NW15FRcE-4VFddh-1}\\{NW15FRcE-lMiTm-1}}
-int bound = ((sched.length/3) - 1);
+int bound = (sched.length/3);
 \LA{}....update times in pd and cpd~{\nwtagstyle{}\subpageref{NW15FRcE-1cwA5Z-1}}\RA{}
 \LA{}....populate the tp, td cache~{\nwtagstyle{}\subpageref{NW15FRcE-2G68mE-1}}\RA{}
 \LA{}....delete remaining schedule from cq~{\nwtagstyle{}\subpageref{NW15FRcE-4AIXfi-1}}\RA{}
@@ -2391,22 +2389,26 @@ for (int j = 0; j < bound; j++) \{
   int tj = sched[(3*j)];
   int vj = sched[(3*j + 1)];
   int Lj = sched[(3*j + 2)];
-  PSAdd(82, tj, vj, Lj);
-  PSAdd(83, tj, vj, Lj);
-  PSAdd(84, tj, vj, Lj);
+  if (Lj != sid) \{
+    PSAdd(82, tj, vj, Lj);
+    PSAdd(83, tj, vj, Lj);
+    PSAdd(84, tj, vj, Lj);
+  \}
 \}
 PSSubmit(82, 83, 84);
 \nwidentuses{\\{{PSAdd}{PSAdd}}\\{{PSClear}{PSClear}}\\{{PSSubmit}{PSSubmit}}}\nwindexuse{PSAdd}{PSAdd}{NW15FRcE-1cwA5Z-1}\nwindexuse{PSClear}{PSClear}{NW15FRcE-1cwA5Z-1}\nwindexuse{PSSubmit}{PSSubmit}{NW15FRcE-1cwA5Z-1}\nwendcode{}\nwbegindocs{193}\nwdocspar
 \nwenddocs{}\nwbegincode{194}\sublabel{NW15FRcE-2G68mE-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-2G68mE-1}}}\moddef{....populate the tp, td cache~{\nwtagstyle{}\subpageref{NW15FRcE-2G68mE-1}}}\endmoddef\nwused{\\{NW15FRcE-2NqWTJ-1}}
 for (int j = 0; j < bound; j++) \{
   int Lj = sched[(3*j + 2)];
-  int rq, tp, td;
-  if (!cache.containsKey(Lj)) \{
-    rq = DBFetch(85, 1, Lj)[0];
-    output = DBFetch(86, 2, Lj);
-    tp = output[0];
-    td = output[1];
-    cache.put(Lj, new int[] \{ rq, tp, td \});
+  if (Lj != sid) \{
+    int rq, tp, td;
+    if (!cache.containsKey(Lj)) \{
+      rq = DBFetch(85, 1, Lj)[0];
+      output = DBFetch(86, 2, Lj);
+      tp = output[0];
+      td = output[1];
+      cache.put(Lj, new int[] \{ rq, tp, td \});
+    \}
   \}
 \}
 \nwidentuses{\\{{DBFetch}{DBFetch}}}\nwindexuse{DBFetch}{DBFetch}{NW15FRcE-2G68mE-1}\nwendcode{}\nwbegindocs{195}\nwdocspar
@@ -2426,14 +2428,16 @@ for (int j = 0; j < bound; j++) \{
   int t2 = sched[(3*j)];
   int v2 = sched[(3*j + 1)];
   int Lj = sched[(3*j + 2)];
-  int[] qpd = cache.get(Lj);
-  int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
-  int o2 = o1 + 1;
-  PSAdd(14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
-        qpd[0], qpd[1], qpd[2], o1, o2);
-  t1 = t2;
-  q1 = q2;
-  o1 = o2;
+  if (Lj != sid) \{
+    int[] qpd = cache.get(Lj);
+    int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
+    int o2 = o1 + 1;
+    PSAdd(14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
+          qpd[0], qpd[1], qpd[2], o1, o2);
+    t1 = t2;
+    q1 = q2;
+    o1 = o2;
+  \}
 \}
 PSSubmit(14);
 \nwidentuses{\\{{DBFetch}{DBFetch}}\\{{PSAdd}{PSAdd}}\\{{PSClear}{PSClear}}\\{{PSSubmit}{PSSubmit}}}\nwindexuse{DBFetch}{DBFetch}{NW15FRcE-2Ir9Yx-1}\nwindexuse{PSAdd}{PSAdd}{NW15FRcE-2Ir9Yx-1}\nwindexuse{PSClear}{PSClear}{NW15FRcE-2Ir9Yx-1}\nwindexuse{PSSubmit}{PSSubmit}{NW15FRcE-2Ir9Yx-1}\nwendcode{}\nwbegindocs{199}\nwdocspar
@@ -2522,7 +2526,7 @@ throws RuntimeException \{
 \}
 \nosublabel{NW15FRcE-y828a-1-u4}\nwindexdefn{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}{NW15FRcE-y828a-1}\eatline
 \nwidentdefs{\\{{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}}}\nwidentuses{\\{{conn}{conn}}}\nwindexuse{conn}{conn}{NW15FRcE-y828a-1}\nwendcode{}\nwbegincode{201}\sublabel{NW15FRcE-2VQLMF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-2VQLMF-1}}}\moddef{..update and add to schedule~{\nwtagstyle{}\subpageref{NW15FRcE-2VQLMF-1}}}\endmoddef\nwused{\\{NW15FRcE-y828a-1}}
-int bound = ((sched.length/3) - 1);
+int bound = (sched.length/3);
 \LA{}....update times in pd and cpd~{\nwtagstyle{}\subpageref{NW15FRcE-1cwA5Z-1}}\RA{}
 \LA{}....populate the tp, td cache and vp, vd cache~{\nwtagstyle{}\subpageref{NW15FRcE-10xBjT-1}}\RA{}
 \LA{}....delete remaining schedule from cq~{\nwtagstyle{}\subpageref{NW15FRcE-4AIXfi-1}}\RA{}
@@ -2532,21 +2536,23 @@ int bound = ((sched.length/3) - 1);
 \nwenddocs{}\nwbegincode{203}\sublabel{NW15FRcE-10xBjT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-10xBjT-1}}}\moddef{....populate the tp, td cache and vp, vd cache~{\nwtagstyle{}\subpageref{NW15FRcE-10xBjT-1}}}\endmoddef\nwused{\\{NW15FRcE-2VQLMF-1}}
 for (int j = 0; j < bound; j++) \{
   int Lj = sched[(3*j + 2)];
-  int rq, tp, vp;
-  int td = -1;
-  int vd = -1;
-  if (!cache.containsKey(Lj)) \{
-    rq = DBFetch(85, 1, Lj)[0];
-    boolean flagged = false;
-    \LA{}......check if new job~{\nwtagstyle{}\subpageref{NW15FRcE-2Hq38w-1}}\RA{}
-    if (flagged) \{
-      \LA{}......get tp, vp, td, vd of new job~{\nwtagstyle{}\subpageref{NW15FRcE-pddDf-1}}\RA{}
-    \} else \{
-      output = DBFetch(86, 2, Lj);
-      tp = output[0];
-      td = output[1];
+  if (Lj != sid) \{
+    int rq, tp, vp;
+    int td = -1;
+    int vd = -1;
+    if (!cache.containsKey(Lj)) \{
+      rq = DBFetch(85, 1, Lj)[0];
+      boolean flagged = false;
+      \LA{}......check if new job~{\nwtagstyle{}\subpageref{NW15FRcE-2Hq38w-1}}\RA{}
+      if (flagged) \{
+        \LA{}......get tp, vp, td, vd of new job~{\nwtagstyle{}\subpageref{NW15FRcE-pddDf-1}}\RA{}
+      \} else \{
+        output = DBFetch(86, 2, Lj);
+        tp = output[0];
+        td = output[1];
+      \}
+      cache.put(Lj, new int[] \{ rq, tp, td \});
     \}
-    cache.put(Lj, new int[] \{ rq, tp, td \});
   \}
 \}
 \nwidentuses{\\{{DBFetch}{DBFetch}}}\nwindexuse{DBFetch}{DBFetch}{NW15FRcE-10xBjT-1}\nwendcode{}\nwbegindocs{204}\nwdocspar

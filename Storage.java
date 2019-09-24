@@ -665,26 +665,30 @@
         PSSubmit(77);
         if (sched.length > 0) {
           Map<Integer, int[]> cache = new HashMap<>();
-          int bound = ((sched.length/3) - 1);
+          int bound = (sched.length/3);
           PSClear(82, 83, 84);
           for (int j = 0; j < bound; j++) {
             int tj = sched[(3*j)];
             int vj = sched[(3*j + 1)];
             int Lj = sched[(3*j + 2)];
-            PSAdd(82, tj, vj, Lj);
-            PSAdd(83, tj, vj, Lj);
-            PSAdd(84, tj, vj, Lj);
+            if (Lj != sid) {
+              PSAdd(82, tj, vj, Lj);
+              PSAdd(83, tj, vj, Lj);
+              PSAdd(84, tj, vj, Lj);
+            }
           }
           PSSubmit(82, 83, 84);
           for (int j = 0; j < bound; j++) {
             int Lj = sched[(3*j + 2)];
-            int rq, tp, td;
-            if (!cache.containsKey(Lj)) {
-              rq = DBFetch(85, 1, Lj)[0];
-              output = DBFetch(86, 2, Lj);
-              tp = output[0];
-              td = output[1];
-              cache.put(Lj, new int[] { rq, tp, td });
+            if (Lj != sid) {
+              int rq, tp, td;
+              if (!cache.containsKey(Lj)) {
+                rq = DBFetch(85, 1, Lj)[0];
+                output = DBFetch(86, 2, Lj);
+                tp = output[0];
+                td = output[1];
+                cache.put(Lj, new int[] { rq, tp, td });
+              }
             }
           }
           PSClear(80);
@@ -700,14 +704,16 @@
             int t2 = sched[(3*j)];
             int v2 = sched[(3*j + 1)];
             int Lj = sched[(3*j + 2)];
-            int[] qpd = cache.get(Lj);
-            int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
-            int o2 = o1 + 1;
-            PSAdd(14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
-                  qpd[0], qpd[1], qpd[2], o1, o2);
-            t1 = t2;
-            q1 = q2;
-            o1 = o2;
+            if (Lj != sid) {
+              int[] qpd = cache.get(Lj);
+              int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
+              int o2 = o1 + 1;
+              PSAdd(14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
+                    qpd[0], qpd[1], qpd[2], o1, o2);
+              t1 = t2;
+              q1 = q2;
+              o1 = o2;
+            }
           }
           PSSubmit(14);
         }
@@ -755,47 +761,51 @@
         int ve = route[(route.length - 1)];
         PSAdd(77, te, ve, sid);
         PSSubmit(77);
-        int bound = ((sched.length/3) - 1);
+        int bound = (sched.length/3);
         PSClear(82, 83, 84);
         for (int j = 0; j < bound; j++) {
           int tj = sched[(3*j)];
           int vj = sched[(3*j + 1)];
           int Lj = sched[(3*j + 2)];
-          PSAdd(82, tj, vj, Lj);
-          PSAdd(83, tj, vj, Lj);
-          PSAdd(84, tj, vj, Lj);
+          if (Lj != sid) {
+            PSAdd(82, tj, vj, Lj);
+            PSAdd(83, tj, vj, Lj);
+            PSAdd(84, tj, vj, Lj);
+          }
         }
         PSSubmit(82, 83, 84);
         for (int j = 0; j < bound; j++) {
           int Lj = sched[(3*j + 2)];
-          int rq, tp, vp;
-          int td = -1;
-          int vd = -1;
-          if (!cache.containsKey(Lj)) {
-            rq = DBFetch(85, 1, Lj)[0];
-            boolean flagged = false;
-            for (int r : rid) {
-              if (Lj == r) {
-                flagged = true;
-                break;
-              }
-            }
-            if (flagged) {
-              tp = sched[(3*j)];
-              vp = sched[(3*j + 1)];
-              for (int k = (j + 1); k < bound; k++) {
-                if (Lj == sched[(3*k + 2)]) {
-                  td = sched[(3*k)];
-                  vd = sched[(3*k + 1)];
+          if (Lj != sid) {
+            int rq, tp, vp;
+            int td = -1;
+            int vd = -1;
+            if (!cache.containsKey(Lj)) {
+              rq = DBFetch(85, 1, Lj)[0];
+              boolean flagged = false;
+              for (int r : rid) {
+                if (Lj == r) {
+                  flagged = true;
+                  break;
                 }
               }
-              cache2.put(Lj, new int[] { vp, vd });
-            } else {
-              output = DBFetch(86, 2, Lj);
-              tp = output[0];
-              td = output[1];
+              if (flagged) {
+                tp = sched[(3*j)];
+                vp = sched[(3*j + 1)];
+                for (int k = (j + 1); k < bound; k++) {
+                  if (Lj == sched[(3*k + 2)]) {
+                    td = sched[(3*k)];
+                    vd = sched[(3*k + 1)];
+                  }
+                }
+                cache2.put(Lj, new int[] { vp, vd });
+              } else {
+                output = DBFetch(86, 2, Lj);
+                tp = output[0];
+                td = output[1];
+              }
+              cache.put(Lj, new int[] { rq, tp, td });
             }
-            cache.put(Lj, new int[] { rq, tp, td });
           }
         }
         PSClear(80);
@@ -811,14 +821,16 @@
           int t2 = sched[(3*j)];
           int v2 = sched[(3*j + 1)];
           int Lj = sched[(3*j + 2)];
-          int[] qpd = cache.get(Lj);
-          int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
-          int o2 = o1 + 1;
-          PSAdd(14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
-                qpd[0], qpd[1], qpd[2], o1, o2);
-          t1 = t2;
-          q1 = q2;
-          o1 = o2;
+          if (Lj != sid) {
+            int[] qpd = cache.get(Lj);
+            int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
+            int o2 = o1 + 1;
+            PSAdd(14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
+                  qpd[0], qpd[1], qpd[2], o1, o2);
+            t1 = t2;
+            q1 = q2;
+            o1 = o2;
+          }
         }
         PSSubmit(14);
         PSClear(12, 13);
@@ -882,26 +894,30 @@
         int ve = route[(route.length - 1)];
         PSAdd(77, te, ve, sid);
         PSSubmit(77);
-        int bound = ((sched.length/3) - 1);
+        int bound = (sched.length/3);
         PSClear(82, 83, 84);
         for (int j = 0; j < bound; j++) {
           int tj = sched[(3*j)];
           int vj = sched[(3*j + 1)];
           int Lj = sched[(3*j + 2)];
-          PSAdd(82, tj, vj, Lj);
-          PSAdd(83, tj, vj, Lj);
-          PSAdd(84, tj, vj, Lj);
+          if (Lj != sid) {
+            PSAdd(82, tj, vj, Lj);
+            PSAdd(83, tj, vj, Lj);
+            PSAdd(84, tj, vj, Lj);
+          }
         }
         PSSubmit(82, 83, 84);
         for (int j = 0; j < bound; j++) {
           int Lj = sched[(3*j + 2)];
-          int rq, tp, td;
-          if (!cache.containsKey(Lj)) {
-            rq = DBFetch(85, 1, Lj)[0];
-            output = DBFetch(86, 2, Lj);
-            tp = output[0];
-            td = output[1];
-            cache.put(Lj, new int[] { rq, tp, td });
+          if (Lj != sid) {
+            int rq, tp, td;
+            if (!cache.containsKey(Lj)) {
+              rq = DBFetch(85, 1, Lj)[0];
+              output = DBFetch(86, 2, Lj);
+              tp = output[0];
+              td = output[1];
+              cache.put(Lj, new int[] { rq, tp, td });
+            }
           }
         }
         PSClear(80);
@@ -917,14 +933,16 @@
           int t2 = sched[(3*j)];
           int v2 = sched[(3*j + 1)];
           int Lj = sched[(3*j + 2)];
-          int[] qpd = cache.get(Lj);
-          int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
-          int o2 = o1 + 1;
-          PSAdd(14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
-                qpd[0], qpd[1], qpd[2], o1, o2);
-          t1 = t2;
-          q1 = q2;
-          o1 = o2;
+          if (Lj != sid) {
+            int[] qpd = cache.get(Lj);
+            int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
+            int o2 = o1 + 1;
+            PSAdd(14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
+                  qpd[0], qpd[1], qpd[2], o1, o2);
+            t1 = t2;
+            q1 = q2;
+            o1 = o2;
+          }
         }
         PSSubmit(14);
         PSClear(42, 43);
