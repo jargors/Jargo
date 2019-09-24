@@ -94,7 +94,6 @@ programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
 <<Add new request>>
 <<Add new server>>
 <<Update server route>>
-<<Update server schedule>>
 <<Update server add to schedule>>
 <<Update server remove from schedule>>
 @
@@ -2271,7 +2270,7 @@ PSAdd(14, uid, u[0], u[1], null, u[1], u[3], null, u[0],
 PSSubmit(14);
 @
 
-\subsubsection{[[DBUpdateServerRoute]](2)}
+\subsubsection{[[DBUpdateServerRoute]](3)}
 Array [[route]] =
 
 \begin{tikzpicture}
@@ -2282,15 +2281,33 @@ Array [[route]] =
 };
 \end{tikzpicture}
 
-\noindent for route $w$.
+\noindent for route $w$. Array [[sched]] =
+
+\begin{tikzpicture}
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:t_{i_1}$}; & \node {$1:v_{i_1}$}; & \node {$2:L_{i_1}$};
+ &\node[minimum width=12mm] {...};
+ &\node {$(3|b|-3):t_{i_{|b|}}$};
+ &\node {$(3|b|-2):v_{i_{|b|}}$};
+ &\node {$(3|b|-1):L_{i_{|b|}}$}; \\
+};
+\end{tikzpicture}
+
+\noindent for schedule $b$, where $(t_{i_j},v_{i_j})$ make up a waypoint and
+$L_{i_j}$ is the label.
+
 <<Update server route>>=
-public void DBUpdateServerRoute(int sid, int[] route)
+public void DBUpdateServerRoute(int sid, int[] route, int[] sched)
 throws RuntimeException {
   int[] output = new int[] { };
   int se, sq;
   try {
     <<..fetch [[sq]] and [[se]]>>
     <<..update route>>
+    if (sched.length > 0) {
+      Map<Integer, int[]> cache = new HashMap<>();
+      <<..update schedule>>
+    }
     conn.commit();
   }
   <<Catch and print [[SQLException]]>>
@@ -2321,53 +2338,6 @@ int ve = route[(route.length - 1)];
 PSAdd(77, te, ve, sid);
 PSSubmit(77);
 @
-
-\subsubsection{[[DBUpdateServerSchedule]](3)}
-Array [[sched]] =
-
-\begin{tikzpicture}
-\matrix[nodes={draw,minimum size=6mm}] {
-  \node {$0:t_{i_1}$}; & \node {$1:v_{i_1}$}; & \node {$2:L_{i_1}$};
- &\node[minimum width=12mm] {...};
- &\node {$(3|b|-3):t_{i_{|b|}}$};
- &\node {$(3|b|-2):v_{i_{|b|}}$};
- &\node {$(3|b|-1):L_{i_{|b|}}$}; \\
-};
-\end{tikzpicture}
-
-\noindent for schedule $b$, where $(t_{i_j},v_{i_j})$ make up a waypoint and
-$L_{i_j}$ is the label. Array [[route]] =
-
-\begin{tikzpicture}
-\matrix[nodes={draw,minimum size=6mm}] {
-  \node {$0:t_1$}; & \node {$1:v_1$};
- &\node[minimum width=12mm] {...};
- &\node {$(2|w|-2):t_{|w|}$}; & \node {$(2|w|-1):v_{|w|}$};\\
-};
-\end{tikzpicture}
-
-\noindent for route $w$.
-
-Method [[DBUpdateServerSchedule]] updates the \emph{remaining} route and
-schedule.  No new stops should appear in the new schedule, otherwise foreign
-key violations may occur. The point of the [[cache]] is to store the
-pick-up and drop-off times for each request in the schedule so that we
-can use these values when we are inserting into Table CQ.
-<<Update server schedule>>=
-public void DBUpdateServerSchedule(int sid, int[] sched, int[] route)
-throws RuntimeException {
-  int[] output = new int[] { };
-  int se, sq;
-  Map<Integer, int[]> cache = new HashMap<>();
-  try {
-    <<..fetch [[sq]] and [[se]]>>
-    <<..update route>>
-    <<..update schedule>>
-    conn.commit();
-  }
-  <<Catch and print [[SQLException]]>>
-}
-@ %def DBUpdateServerSchedule
 Adding the [[-1]] to the upper bound of [[j]] skips over the last element
 in the schedule, which is expected to be the server's destination.
 <<..update schedule>>=

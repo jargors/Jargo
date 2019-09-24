@@ -635,7 +635,7 @@
         throw new RuntimeException("database failure");
       }
     }
-    public void DBUpdateServerRoute(int sid, int[] route)
+    public void DBUpdateServerRoute(int sid, int[] route, int[] sched)
     throws RuntimeException {
       int[] output = new int[] { };
       int se, sq;
@@ -663,93 +663,54 @@
         int ve = route[(route.length - 1)];
         PSAdd(77, te, ve, sid);
         PSSubmit(77);
-        conn.commit();
-      }
-      catch (SQLException e1) {
-        printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
-        throw new RuntimeException("database failure");
-      }
-    }
-    public void DBUpdateServerSchedule(int sid, int[] sched, int[] route)
-    throws RuntimeException {
-      int[] output = new int[] { };
-      int se, sq;
-      Map<Integer, int[]> cache = new HashMap<>();
-      try {
-        output = DBFetch(48, 2, sid);
-        sq = output[0];
-        se = output[1];
-        PSClear(76);
-        PSAdd(76, sid, route[0]);
-        PSSubmit(76);
-        PSClear(10);
-        for (int i = 0; i < (route.length - 3); i += 2) {
-          int t1 = route[i];
-          int v1 = route[(i + 1)];
-          int t2 = route[(i + 2)];
-          int v2 = route[(i + 3)];
-          output = DBFetch(46, 2, v1, v2);
-          int dd = output[0];
-          int nu = output[1];
-          PSAdd(10, uid, se, t1, v1, t2, v2, dd, nu);
-        }
-        PSSubmit(10);
-        PSClear(77);
-        int te = route[(route.length - 2)];
-        int ve = route[(route.length - 1)];
-        PSAdd(77, te, ve, sid);
-        PSSubmit(77);
-        int bound = ((sched.length/3) - 1);
-        PSClear(82, 83, 84);
-        for (int j = 0; j < bound; j++) {
-          int tj = sched[(3*j)];
-          int vj = sched[(3*j + 1)];
-          int Lj = sched[(3*j + 2)];
-          PSAdd(82, tj, vj, Lj);
-          PSAdd(83, tj, vj, Lj);
-          PSAdd(84, tj, vj, Lj);
-        }
-        PSSubmit(82, 83, 84);
-        for (int j = 0; j < bound; j++) {
-          int Lj = sched[(3*j + 2)];
-          int rq, tp, td;
-          if (!cache.containsKey(Lj)) {
-            rq = DBFetch(85, 1, Lj)[0];
-            output = DBFetch(86, 2, Lj);
-            tp = output[0];
-            td = output[1];
-            cache.put(Lj, new int[] { rq, tp, td });
+        if (sched.length > 0) {
+          Map<Integer, int[]> cache = new HashMap<>();
+          int bound = ((sched.length/3) - 1);
+          PSClear(82, 83, 84);
+          for (int j = 0; j < bound; j++) {
+            int tj = sched[(3*j)];
+            int vj = sched[(3*j + 1)];
+            int Lj = sched[(3*j + 2)];
+            PSAdd(82, tj, vj, Lj);
+            PSAdd(83, tj, vj, Lj);
+            PSAdd(84, tj, vj, Lj);
           }
+          PSSubmit(82, 83, 84);
+          for (int j = 0; j < bound; j++) {
+            int Lj = sched[(3*j + 2)];
+            int rq, tp, td;
+            if (!cache.containsKey(Lj)) {
+              rq = DBFetch(85, 1, Lj)[0];
+              output = DBFetch(86, 2, Lj);
+              tp = output[0];
+              td = output[1];
+              cache.put(Lj, new int[] { rq, tp, td });
+            }
+          }
+          PSClear(80);
+          PSAdd(80, sid, route[0]);
+          PSSubmit(80);
+          int t1, q1, o1;
+          output = DBFetch(87, 3, sid, sched[0]);
+          t1 = output[0];
+          q1 = output[1];
+          o1 = output[2];
+          PSClear(14);
+          for (int j = 0; j < bound; j++) {
+            int t2 = sched[(3*j)];
+            int v2 = sched[(3*j + 1)];
+            int Lj = sched[(3*j + 2)];
+            int[] qpd = cache.get(Lj);
+            int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
+            int o2 = o1 + 1;
+            PSAdd(14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
+                  qpd[0], qpd[1], qpd[2], o1, o2);
+            t1 = t2;
+            q1 = q2;
+            o1 = o2;
+          }
+          PSSubmit(14);
         }
-        PSClear(80);
-        PSAdd(80, sid, route[0]);
-        PSSubmit(80);
-        int t1, q1, o1;
-        output = DBFetch(87, 3, sid, sched[0]);
-        t1 = output[0];
-        q1 = output[1];
-        o1 = output[2];
-        PSClear(14);
-        for (int j = 0; j < bound; j++) {
-          int t2 = sched[(3*j)];
-          int v2 = sched[(3*j + 1)];
-          int Lj = sched[(3*j + 2)];
-          int[] qpd = cache.get(Lj);
-          int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
-          int o2 = o1 + 1;
-          PSAdd(14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
-                qpd[0], qpd[1], qpd[2], o1, o2);
-          t1 = t2;
-          q1 = q2;
-          o1 = o2;
-        }
-        PSSubmit(14);
         conn.commit();
       }
       catch (SQLException e1) {
