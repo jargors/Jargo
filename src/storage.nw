@@ -2172,7 +2172,7 @@ public int DBAddNewRequest(int[] u) throws RuntimeException {
   try {
     uid += 1;
     <<..insert new user into user tables>>
-    <<..insert new request into Table R>>
+    <<..insert new request into r>>
     conn.commit();
     return uid;
   }
@@ -2189,7 +2189,7 @@ PSAdd(6, uid, u[4]);
 PSAdd(7, uid, u[5]);
 PSSubmit(2, 3, 4, 5, 6, 7);
 @
-<<..insert new request into Table R>>=
+<<..insert new request into r>>=
 PSClear(9);
 PSAdd(9, uid, u[0], u[1], u[2], u[3], u[4], u[5]);
 PSSubmit(9);
@@ -2229,17 +2229,17 @@ public int DBAddNewServer(int[] u, int[] route) throws RuntimeException {
     int se = u[1];
     uid += 1;
     <<..insert new user into user tables>>
-    <<..insert new server into Table S>>
-    <<..insert new server route into Table W>>
-    <<..insert new server route into Table CW>>
-    <<..insert new server into Table CQ>>
+    <<..insert new server into s>>
+    <<..insert new server route into w>>
+    <<..insert new server route into cw>>
+    <<..insert new server into cq>>
     conn.commit();
     return uid;
   }
   <<Catch and print [[SQLException]]>>
 }
 @ %def DBAddNewServer
-<<..insert new server into Table S>>=
+<<..insert new server into s>>=
 PSClear(8);
 PSAdd(8, uid, u[0], u[1], u[2], u[3], u[4], u[5]);
 PSSubmit(8);
@@ -2247,7 +2247,7 @@ PSSubmit(8);
 The procedure to insert [[route]] into Table W is written into its own chunk so
 we can re-use it later. The first step is to add the first waypoint with
 [[null]] as its predecessor.
-<<..insert new server route into Table W>>=
+<<..insert new server route into w>>=
 PSClear(10);
 PSAdd(10, uid, se, null, null, route[0], route[1], null, null);
 PSSubmit(10);
@@ -2268,13 +2268,13 @@ for (int i = 0; i < (route.length - 3); i += 2) {
 }
 PSSubmit(10);
 @
-<<..insert new server route into Table CW>>=
+<<..insert new server route into cw>>=
 PSClear(11);
 int te = route[(route.length - 2)];
 PSAdd(11, uid, u[1], u[2], u[3], u[4], u[1], u[3], te, u[4]);
 PSSubmit(11);
 @
-<<..insert new server into Table CQ>>=
+<<..insert new server into cq>>=
 PSClear(14);
 PSAdd(14, uid, u[0], u[1], null, u[1], u[3], null, u[0],
     null, null, null, null, null, 1);
@@ -2357,19 +2357,19 @@ sq = output[0];
 se = output[1];
 @
 <<..update route>>=
-<<....delete remaining route>>
-<<....insert new remaining route>>
-<<....update route endpoint>>
+<<....delete remaining route from w>>
+<<....insert new remaining route into w>>
+<<....update route endpoint in cw>>
 @
-<<....delete remaining route>>=
+<<....delete remaining route from w>>=
 PSClear(76);
 PSAdd(76, sid, route[0]);
 PSSubmit(76);
 @
-<<....insert new remaining route>>=
+<<....insert new remaining route into w>>=
 <<Procedure to insert [[route]] into Table W>>
 @
-<<....update route endpoint>>=
+<<....update route endpoint in cw>>=
 PSClear(77);
 int te = route[(route.length - 2)];
 int ve = route[(route.length - 1)];
@@ -2382,7 +2382,8 @@ in the schedule, which is expected to be the server's destination.
 int bound = ((sched.length/3) - 1);
 <<....update times in pd and cpd>>
 <<....populate the tp, td cache>>
-<<....insert into cq>>
+<<....delete remaining schedule from cq>>
+<<....insert new remaining schedule into cq>>
 @
 <<....update times in pd and cpd>>=
 PSClear(82, 83, 84);
@@ -2409,10 +2410,12 @@ for (int j = 0; j < bound; j++) {
   }
 }
 @
-<<....insert into cq>>=
+<<....delete remaining schedule from cq>>=
 PSClear(80);
 PSAdd(80, sid, route[0]);
 PSSubmit(80);
+@
+<<....insert new remaining schedule into cq>>=
 int t1, q1, o1;
 output = DBFetch(87, 3, sid, sched[0]);
 t1 = output[0];
@@ -2459,7 +2462,8 @@ throws RuntimeException {
 int bound = ((sched.length/3) - 1);
 <<....update times in pd and cpd>>
 <<....populate the tp, td cache and vp, vd cache>>
-<<....insert into cq>>
+<<....delete remaining schedule from cq>>
+<<....insert new remaining schedule into cq>>
 <<....insert into pd, cpd>>
 @
 <<....populate the tp, td cache and vp, vd cache>>=
