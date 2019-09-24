@@ -1564,9 +1564,9 @@ schedule, and status of Request 12.
 <<......test [[DBUpdateServerAddToSchedule]](4) route>>=
 {
   storage.DBUpdateServerAddToSchedule(13,
-    new int[] { 12 },
+    new int[] { 7, 44, 14, 45, 21, 24, 22, 0 },
     new int[] { 14, 45, 12, 21, 24, 12, 22, 0, 13 },
-    new int[] { 7, 44, 14, 45, 21, 24, 22, 0 });
+    new int[] { 12 });
   int[] output = storage.DBQueryRoute(13);
   if (!(output[0] == 0
     && output[1] == 27
@@ -1669,9 +1669,9 @@ Now it's time to remove Request 12 from Server 13...
 <<......test [[DBUpdateServerRemoveFromSchedule]](4) route>>=
 {
   storage.DBUpdateServerRemoveFromSchedule(13,
-    new int[] { 12 },
-    new int[] { 1, 0, 13 },
     new int[] { 1, 0 });
+    new int[] { 1, 0, 13 },
+    new int[] { 12 },
   int[] output = storage.DBQueryRoute(13);
   if (!(output[0] == 0
     && output[1] == 27
