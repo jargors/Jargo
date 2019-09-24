@@ -725,7 +725,7 @@
       }
     }
     public void DBUpdateServerAddToSchedule(
-        int sid, int[] rid, int[] sched, int[] route)
+        int sid, int[] route, int[] sched, int[] rid)
     throws RuntimeException {
       int[] output = new int[] { };
       int se, sq;
