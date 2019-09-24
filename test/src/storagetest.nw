@@ -1662,7 +1662,42 @@ schedule, and status of Request 12.
 }
 @
 \subsubsection{[[DBUpdateServerRemoveFromSchedule]](4)}
+Now it's time to remove Request 12 from Server 13...
 <<....test [[DBUpdateServerRemoveFromSchedule]](4)>>=
+  <<......test [[DBUpdateServerRemoveFromSchedule]](4) route>>
+  <<......test [[DBUpdateServerRemoveFromSchedule]](4) schedule>>
+  <<......test [[DBUpdateServerRemoveFromSchedule]](4) request status when $t=13$>>
+  <<......test [[DBUpdateServerRemoveFromSchedule]](4) request status when $t=14$>>
+  <<......test [[DBUpdateServerRemoveFromSchedule]](4) request status when $t=21$>>
+@
+<<......test [[DBUpdateServerRemoveFromSchedule]](4) route>>=
+{
+  storage.DBUpdateServerRemoveFromSchedule(13,
+    new int[] { 12 },
+    new int[] { 1, 0, 13 },
+    new int[] { 1, 0 });
+  int[] output = storage.DBQueryRoute(13);
+  if (!(output[0] == 0
+    && output[1] == 27
+    && output[2] == 1
+    && output[3] == 0)) {
+    Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (1/5)");
+    Print("\tExpected (0, 27) (1, 0); got ");
+    storage.printRoute(output);
+    count_failed++;
+  } else {
+    Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (1/5)");
+    count_passed++;
+  }
+}
+@
+<<......test [[DBUpdateServerRemoveFromSchedule]](4) schedule>>=
+@
+<<......test [[DBUpdateServerRemoveFromSchedule]](4) request status when $t=13$>>=
+@
+<<......test [[DBUpdateServerRemoveFromSchedule]](4) request status when $t=14$>>=
+@
+<<......test [[DBUpdateServerRemoveFromSchedule]](4) request status when $t=21$>>=
 @
 
 \appendix
