@@ -1084,7 +1084,6 @@
           count_passed++;
         }
       }
-      //TODO
         {
           storage.DBUpdateServerAddToSchedule(13,
             new int[] { 12 },
