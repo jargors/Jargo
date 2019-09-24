@@ -2206,15 +2206,15 @@ Array {\tt{}u} =
 };
 \end{tikzpicture}
 
-\noindent for user $u$. In order to use {\tt{}DBAddServer}, $u_q$ must be less
-than 0, otherwise constraint C40 will be violated. Use {\tt{}route} to provide the
-initial route. Array {\tt{}route} =
+\noindent for user $u$, where $d_u$ is the base distance.
+The value of $u_q$ \emph{must} be less than 0. Array {\tt{}route} =
 
 \noindent
 \begin{tikzpicture}
 \small
 \matrix[nodes={draw,minimum size=6mm}] {
-  \node {$0:t_1$}; & \node {$1:v_1$};
+  \node {$0:t_i$}; & \node {$1:v_i$};
+ &\node {$0:t_{i+1}$}; & \node {$1:v_{i+1}$};
  &\node[minimum width=12mm] {...};
  &\node {$(2|w|-2):t_{|w|}$}; & \node {$(2|w|-1):v_{|w|}$};\\
 };
@@ -2246,13 +2246,14 @@ PSSubmit(8);
 \nwidentuses{\\{{PSAdd}{PSAdd}}\\{{PSClear}{PSClear}}\\{{PSSubmit}{PSSubmit}}\\{{uid}{uid}}}\nwindexuse{PSAdd}{PSAdd}{NW15FRcE-1y8HBC-1}\nwindexuse{PSClear}{PSClear}{NW15FRcE-1y8HBC-1}\nwindexuse{PSSubmit}{PSSubmit}{NW15FRcE-1y8HBC-1}\nwindexuse{uid}{uid}{NW15FRcE-1y8HBC-1}\nwendcode{}\nwbegindocs{170}\nwdocspar
 The procedure to insert {\tt{}route} into Table W is written into its own chunk so
 we can re-use it later. The first step is to add the first waypoint with
-{\tt{}null} as its predecessor. Then we loop through the remaining waypoints.
+{\tt{}null} as its predecessor.
 \nwenddocs{}\nwbegincode{171}\sublabel{NW15FRcE-2JTZnV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-2JTZnV-1}}}\moddef{..insert new server route into Table W~{\nwtagstyle{}\subpageref{NW15FRcE-2JTZnV-1}}}\endmoddef\nwused{\\{NW15FRcE-IYVQQ-1}}
 PSClear(10);
 PSAdd(10, uid, se, null, null, route[0], route[1], null, null);
 PSSubmit(10);
 \LA{}Procedure to insert \code{}route\edoc{} into Table W~{\nwtagstyle{}\subpageref{NW15FRcE-1EP7t-1}}\RA{}
 \nwidentuses{\\{{PSAdd}{PSAdd}}\\{{PSClear}{PSClear}}\\{{PSSubmit}{PSSubmit}}\\{{uid}{uid}}}\nwindexuse{PSAdd}{PSAdd}{NW15FRcE-2JTZnV-1}\nwindexuse{PSClear}{PSClear}{NW15FRcE-2JTZnV-1}\nwindexuse{PSSubmit}{PSSubmit}{NW15FRcE-2JTZnV-1}\nwindexuse{uid}{uid}{NW15FRcE-2JTZnV-1}\nwendcode{}\nwbegindocs{172}\nwdocspar
+Then we loop through the remaining waypoints.
 \nwenddocs{}\nwbegincode{173}\sublabel{NW15FRcE-1EP7t-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-1EP7t-1}}}\moddef{Procedure to insert \code{}route\edoc{} into Table W~{\nwtagstyle{}\subpageref{NW15FRcE-1EP7t-1}}}\endmoddef\nwused{\\{NW15FRcE-2JTZnV-1}\\{NW15FRcE-1cGW7n-1}}
 PSClear(10);
 for (int i = 0; i < (route.length - 3); i += 2) \{

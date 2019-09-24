@@ -2206,15 +2206,15 @@ Array [[u]] =
 };
 \end{tikzpicture}
 
-\noindent for user $u$. In order to use [[DBAddServer]], $u_q$ must be less
-than 0, otherwise constraint C40 will be violated. Use [[route]] to provide the
-initial route. Array [[route]] =
+\noindent for user $u$, where $d_u$ is the base distance.
+The value of $u_q$ \emph{must} be less than 0. Array [[route]] =
 
 \noindent
 \begin{tikzpicture}
 \small
 \matrix[nodes={draw,minimum size=6mm}] {
-  \node {$0:t_1$}; & \node {$1:v_1$};
+  \node {$0:t_i$}; & \node {$1:v_i$};
+ &\node {$0:t_{i+1}$}; & \node {$1:v_{i+1}$};
  &\node[minimum width=12mm] {...};
  &\node {$(2|w|-2):t_{|w|}$}; & \node {$(2|w|-1):v_{|w|}$};\\
 };
@@ -2246,13 +2246,14 @@ PSSubmit(8);
 @
 The procedure to insert [[route]] into Table W is written into its own chunk so
 we can re-use it later. The first step is to add the first waypoint with
-[[null]] as its predecessor. Then we loop through the remaining waypoints.
+[[null]] as its predecessor.
 <<..insert new server route into Table W>>=
 PSClear(10);
 PSAdd(10, uid, se, null, null, route[0], route[1], null, null);
 PSSubmit(10);
 <<Procedure to insert [[route]] into Table W>>
 @
+Then we loop through the remaining waypoints.
 <<Procedure to insert [[route]] into Table W>>=
 PSClear(10);
 for (int i = 0; i < (route.length - 3); i += 2) {
