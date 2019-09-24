@@ -2271,11 +2271,24 @@ PSSubmit(14);
 @
 
 \subsubsection{[[DBUpdateServerRoute]](3)}
+The [[DBUpdateServerRoute]](3) method can be used to
+\begin{enumerate}
+\item update the route of a server with no schedule;
+\item update the route of a server through the server's existing schedule;
+\item updating the ordering of the remaining stops in the server's schedule.
+\end{enumerate}
+To perform Item 1, pass the new route as [[route]] and an empty array as
+[[sched]]. To perform Item 2, pass the new route as [[route]]. Then as the
+timing of the stops in the schedule may have changed, pass along the updated
+timings in [[sched]]. To perform Item 3, pass the new arrangement in [[sched]]
+and the new route through the arrangement as [[route]].
+
 Array [[route]] =
 
 \begin{tikzpicture}
 \matrix[nodes={draw,minimum size=6mm}] {
-  \node {$0:t_1$}; & \node {$1:v_1$};
+  \node {$0:t_i$}; & \node {$1:v_i$};
+ &\node {$2:t_{i+1}$}; & \node {$3:v_{i+1}$};
  &\node[minimum width=12mm] {...};
  &\node {$(2|w|-2):t_{|w|}$}; & \node {$(2|w|-1):v_{|w|}$};\\
 };
@@ -2285,7 +2298,8 @@ Array [[route]] =
 
 \begin{tikzpicture}
 \matrix[nodes={draw,minimum size=6mm}] {
-  \node {$0:t_{i_1}$}; & \node {$1:v_{i_1}$}; & \node {$2:L_{i_1}$};
+  \node {$0:t_{i_j}$}; & \node {$1:v_{i_j}$}; & \node {$2:L_{i_j}$};
+ &\node {$3:t_{i_{j+1}}$}; & \node {$4:v_{i_{j+1}}$}; & \node {$5:L_{i_{j+1}}$};
  &\node[minimum width=12mm] {...};
  &\node {$(3|b|-3):t_{i_{|b|}}$};
  &\node {$(3|b|-2):v_{i_{|b|}}$};
@@ -2294,7 +2308,16 @@ Array [[route]] =
 \end{tikzpicture}
 
 \noindent for schedule $b$, where $(t_{i_j},v_{i_j})$ make up a waypoint and
-$L_{i_j}$ is the label.
+$L_{i_j}$ is the label. Important notes:
+\begin{itemize}
+\item all waypoints beyond $t_i$ in the existing route will be replaced with
+those in [[route]];
+\item all stops beyond $(t_{i_j},v_{i_j})$ in the existing schedule will be
+replaced with those in [[sched]];
+\item waypoint $(t_i,v_i)$ \emph{must} exist in the current route;
+\item index $i_j$ must \emph{not} equal $i$; in other words the first waypoint
+in [[route]] cannot be labeled.
+\end{itemize}
 
 <<Update server route>>=
 public void DBUpdateServerRoute(int sid, int[] route, int[] sched)
