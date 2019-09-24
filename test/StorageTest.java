@@ -1172,9 +1172,9 @@
         }
         {
           storage.DBUpdateServerRemoveFromSchedule(13,
-            new int[] { 1, 0 });
+            new int[] { 0, 27, 1, 0 },
             new int[] { 1, 0, 13 },
-            new int[] { 12 },
+            new int[] { 12 });
           int[] output = storage.DBQueryRoute(13);
           if (!(output[0] == 0
             && output[1] == 27
