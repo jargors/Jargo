@@ -2439,8 +2439,71 @@ PSSubmit(14);
 \nwidentuses{\\{{DBFetch}{DBFetch}}\\{{PSAdd}{PSAdd}}\\{{PSClear}{PSClear}}\\{{PSSubmit}{PSSubmit}}}\nwindexuse{DBFetch}{DBFetch}{NW15FRcE-2Ir9Yx-1}\nwindexuse{PSAdd}{PSAdd}{NW15FRcE-2Ir9Yx-1}\nwindexuse{PSClear}{PSClear}{NW15FRcE-2Ir9Yx-1}\nwindexuse{PSSubmit}{PSSubmit}{NW15FRcE-2Ir9Yx-1}\nwendcode{}\nwbegindocs{199}\nwdocspar
 
 \subsubsection{{\tt{}\protect\nwindexuse{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}{NW15FRcE-y828a-1}DBUpdateServerAddToSchedule}(4)}
-A second cache, {\tt{}cache2}, is introduced to store the pick-up an drop-off
-vertices so that we can use them when we insert into Table PD and CPD.
+The {\tt{}\protect\nwindexuse{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}{NW15FRcE-y828a-1}DBUpdateServerAddToSchedule}(4) method can be used to add new labeled
+waypoints to a server's existing remaining schedule. The ordering of the
+remaining waypoints in the existing schedule does not have to be the same
+upon adding the new waypoints. Pass the new remaining schedule as {\tt{}sched} and
+the new route through this schedule as {\tt{}route}. Pass the identifiers of all
+the requests used to label the new waypoints, in other words the new
+requests assigned to the server, as array {\tt{}rid}.
+
+Array {\tt{}route} =
+
+\noindent
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:t_i$}; & \node {$1:v_i$};
+ &\node {$2:t_{i+1}$}; & \node {$3:v_{i+1}$};
+ &\node[minimum width=12mm] {...};
+ &\node {$(2|w|-2):t_{|w|}$}; & \node {$(2|w|-1):v_{|w|}$};\\
+};
+\end{tikzpicture}
+
+\noindent for route $w$. Array {\tt{}sched} =
+
+\noindent
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:t_{i_j}$}; & \node {$1:v_{i_j}$}; & \node {$2:L_{i_j}$};
+ &\node {$3:t_{i_{j+1}}$}; & \node {$4:v_{i_{j+1}}$}; & \node {$5:L_{i_{j+1}}$};
+ &\node[minimum width=12mm] {...};
+ &\node {$(3|b|-3):t_{i_{|b|}}$};
+ &\node {$(3|b|-2):v_{i_{|b|}}$};
+ &\node {$(3|b|-1):L_{i_{|b|}}$}; \\
+};
+\end{tikzpicture}
+
+\noindent for schedule $b$, where $(t_{i_j},v_{i_j})$ make up a waypoint and
+$L_{i_j}$ is the label. Array {\tt{}rid} = any permutation of
+
+\noindent
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:L_{i_{j'}}$};
+ &\node {$1:L_{i_{(j'+1)}}$};
+ &\node[minimum width=12mm] {...};
+ &\node {$(n-1):L_{i_{(j'+n-1)}}$};\\
+};
+\end{tikzpicture}
+
+\noindent where $i_{j'},i_{j'+1},...i_{j'+n-1}$ identify the $n$ new labels
+(request identifiers) not appearing in the server's existing remaining
+schedule.
+
+Important notes:
+\begin{itemize}
+\item all waypoints beyond $t_i$ in the existing route will be replaced with
+those in {\tt{}route};
+\item all stops beyond $(t_{i_j},v_{i_j})$ in the existing schedule will be
+replaced with those in {\tt{}sched};
+\item waypoint $(t_i,v_i)$ \emph{must} exist in the current route;
+\item index $i_j$ must \emph{not} equal $i$; in other words the first waypoint
+in {\tt{}route} cannot be labeled;
+\item array {\tt{}rid} can be in any order.
+\end{itemize}
 \nwenddocs{}\nwbegincode{200}\sublabel{NW15FRcE-y828a-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-y828a-1}}}\moddef{Update server add to schedule~{\nwtagstyle{}\subpageref{NW15FRcE-y828a-1}}}\endmoddef\nwused{\\{NW15FRcE-4PbjF-2}}
 public void DBUpdateServerAddToSchedule(
     int sid, int[] rid, int[] sched, int[] route)
@@ -2495,6 +2558,8 @@ for (int r : rid) \{
   \}
 \}
 \nwendcode{}\nwbegindocs{206}\nwdocspar
+A second cache, {\tt{}cache2}, is introduced to store the pick-up an drop-off
+vertices so that we can use them when we insert into Table PD and CPD.
 \nwenddocs{}\nwbegincode{207}\sublabel{NW15FRcE-pddDf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW15FRcE-pddDf-1}}}\moddef{......get tp, vp, td, vd of new job~{\nwtagstyle{}\subpageref{NW15FRcE-pddDf-1}}}\endmoddef\nwused{\\{NW15FRcE-10xBjT-1}}
 tp = sched[(3*j)];
 vp = sched[(3*j + 1)];
