@@ -1189,10 +1189,58 @@
             count_passed++;
           }
         }
-        
-        
-        
-        
+        {
+          int[] output = storage.DBQuerySchedule(13);
+          if (!(output[0] == 0
+            && output[1] == 27
+            && output[2] == 13
+            && output[3] == 0
+            && output[4] == 1
+            && output[5] == 0
+            && output[6] == 13
+            && output[7] == 0)) {
+            Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (2/5)");
+            Print("\tExpected (0, 27, 13, 0) (1, 0, 13, 0); got ");
+            storage.printSchedule(output);
+            count_failed++;
+          } else {
+            Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (2/5)");
+            count_passed++;
+          }
+        }
+        {
+          int[] output = storage.DBQueryRequestStatus(12, 13);
+          if (!(output.length == 0)) {
+            Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (3/5)");
+            Print("\tExpected 0; got "+output.length);
+            count_failed++;
+          } else {
+            Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (3/5)");
+            count_passed++;
+          }
+        }
+        {
+          int[] output = storage.DBQueryRequestStatus(12, 14);
+          if (!(output.length == 0)) {
+            Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (4/5)");
+            Print("\tExpected 0; got "+output.length);
+            count_failed++;
+          } else {
+            Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (4/5)");
+            count_passed++;
+          }
+        }
+        {
+          int[] output = storage.DBQueryRequestStatus(12, 21);
+          if (!(output.length == 0)) {
+            Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (5/5)");
+            Print("\tExpected 0; got "+output.length);
+            count_failed++;
+          } else {
+            Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (5/5)");
+            count_passed++;
+          }
+        }
       Print("Complete! Passed: "+count_passed+"; Failed: "+count_failed);
     }
     private static void Print(String msg) {
