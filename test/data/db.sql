@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
--- This file contains the SQL used to prepare the test database.
+-- This file contains the SQL used to manually prepare the test database.
 --------------------------------------------------------------------------------
 -- Clear
 delete from cq;
