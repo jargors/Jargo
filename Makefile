@@ -4,8 +4,8 @@
 all : pdf jar
 
 jar : java
-	javac -d . -cp . Storage.java
-	jar cvf jargors-storage-1.0.0.jar com
+	javac -d . Storage.java
+	jar cvf $(JARGO_LIB)/jargors-storage-1.0.0.jar com
 
 java : src/storage.nw
 	notangle -RStorage.java src/storage.nw > Storage.java
@@ -21,4 +21,4 @@ clean :
 	rm -f Storage.ja* jargors-storage-*.jar
 	rm -rf com/
 	latexmk -f -c doc/storage.tex
-	rm doc/storage.tex
+	rm -f doc/storage.tex
