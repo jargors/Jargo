@@ -303,7 +303,6 @@ formalizing certain concepts such as pick-up and drop-off times for a customer
 or the cruising and service distance for a vehicle.
 
 \subsubsection*{Relations}
-\label{sec:relations}
 The following briefly overviews the concept of relations and introduces some
 notation.
 Relations can be defined in terms of \emph{sequences} and \emph{tuples}.
@@ -1688,6 +1687,7 @@ definition} (\S\ref{sec:class-definition}).
   <<StorageInterface.java preamble>>
   <<[[StorageInterface]] definition>>
 @
+
 \subsection{Preamble}
 \label{sec:preamble}
 The preamble declares the package and imports dependencies.
@@ -1716,6 +1716,7 @@ import java.util.HashMap;
 import java.time.LocalDateTime;
 @
 \end{itemize}
+
 \subsection{Class Definition}
 \label{sec:class-definition}
 The [[StorageInterface]] class consists of member variables, a constructor, and public
@@ -1815,6 +1816,7 @@ try {
 }
 <<Catch and print [[SQLException]]>>
 @
+
 \subsubsection{Initializing the Data Model}
 \label{sec:initializing-the-data-model}
 <<....initialize data model>>=
@@ -1865,12 +1867,13 @@ try {
 <<Catch and print [[SQLException]]>>
 Print("Finished loading model");
 @
+
 \subsubsection{Initializing the Prepared Statements}
 \label{sec:initializing-the-prepared-statements}
-See \S\ref{sec:initialize-statements}.
 <<..initialize prepared statements>>=
 PSInit();
 @
+
 \subsubsection{Initializing the Road Network}
 \label{sec:initializing-the-road-network}
 <<..initialize road network>>=
@@ -1925,12 +1928,11 @@ if (!lu_nodes.containsKey(col[2])) {
 }
 @
 We use haversine to compute edge weights\footnote{If the distance between two
-vertices is 0 due to rounding, then we round it up to 1; see
-\S\ref{sec:compute-haversine}.}.  If one of the vertices in the edge is a dummy
-vertex, we set the weight to 0\footnote{The dummy vertex should only terminate
-and never begin an edge in the road network, otherwise a shortest path could
-take a shortcut through the dummy vertex to reach any other vertex with 0
-weight!}.
+vertices is 0 due to rounding, then we round it up to 1.}.  If one of the
+vertices in the edge is a dummy vertex, we set the weight to 0\footnote{The
+dummy vertex should only terminate and never begin an edge in the road network,
+otherwise a shortest path could take a shortcut through the dummy vertex to
+reach any other vertex with 0 weight!}.
 <<....compute edge weight [[dist]]>>=
 dist = ((col[1] != 0 && col[2] != 0)
   ? haversine(col[3]/CSHIFT, col[4]/CSHIFT,
@@ -1945,10 +1947,11 @@ PSAdd(1, col[1], col[2], dist, 10);
 
 \section{Public Methods}
 \label{sec:public-methods}
+
 \subsection{Utilities}
 \label{sec:utilities}
+
 \subsubsection{[[printSQLException]](1)}
-\label{sec:print-sql-exceptions}
 The [[printSQLException]] method  unwraps the entire exception chain to unveil
 the real cause of a [[SQLException]].  This portion is Copyright 2004--2019 The
 Apache Software Foundation and is licensed under the Apache License, Version
@@ -2003,8 +2006,8 @@ catch (SQLException e1) {
 }
 @
 \end{itemize}
+
 \subsubsection{[[DBLoadBackup]](1)}
-\label{sec:load-database-backup}
 We update [[uid]] to be the current largest [[uid]] in the backup.
 <<Load backup>>=
 public void DBLoadBackup(String filepath) throws RuntimeException {
@@ -2021,8 +2024,8 @@ public void DBLoadBackup(String filepath) throws RuntimeException {
   <<Catch and print [[SQLException]]>>
 }
 @
+
 \subsubsection{[[DBSaveBackup]](1)}
-\label{sec:save-database-backup}
 To save a database backup:
 <<Save backup>>=
 public void DBSaveBackup(String filepath) throws RuntimeException {
@@ -2036,8 +2039,8 @@ public void DBSaveBackup(String filepath) throws RuntimeException {
   <<Catch and print [[SQLException]]>>
 }
 @
+
 \subsubsection{[[haversine]](4)}
-\label{sec:compute-haversine}
 The [[haversine]] method computes the haversine distance between two
 coordinates, rounded to the nearest meter.  Most of this code is Copyright 2017
 Juliano Macedo and is licensed under the MIT License. It has been modified from
@@ -2064,6 +2067,7 @@ if (d == 0 && (lng1 != lng2 || lat1 != lat2)) {
   d = 1;
 }
 @
+
 \subsubsection{[[haversine]](2)}
 We can compute haversine using vertex identifiers instead of the coordinates.
 <<Compute haversine>>=
@@ -2074,16 +2078,16 @@ public int haversine(int v1, int v2) {
                    c2[0]/CSHIFT, c2[1]/CSHIFT);
 }
 @
+
 \subsubsection{[[printUser]](1)}
-\label{sec:print-user}
 <<Print user>>=
 public void printUser(int[] u) {
   System.out.println("User {uid="+u[0]+", q="+u[1]+", e="+u[2]+", l="+u[3]
     +", o="+u[4]+", d="+u[5]+", b="+u[6]+"}");
 }
 @ %def printUser
+
 \subsubsection{[[printPath]](1)}
-\label{sec:print-paths}
 <<Print path>>=
 public void printPath(int[] path) {
   for (Integer i : path) {
@@ -2092,8 +2096,8 @@ public void printPath(int[] path) {
   System.out.println();
 }
 @ %def printPath
+
 \subsubsection{[[printRoute]](1)}
-\label{sec:print-routes}
 <<Print route>>=
 public void printRoute(int[] route) {
   for (int i = 0; i < (route.length - 1); i += 2) {
@@ -2102,6 +2106,7 @@ public void printRoute(int[] route) {
   System.out.println();
 }
 @ %def printRoute
+
 \subsubsection{[[printSchedule]](1)}
 <<Print schedule>>=
 public void printSchedule(int[] sched) {
@@ -2112,6 +2117,7 @@ public void printSchedule(int[] sched) {
   System.out.println();
 }
 @ %def printSchedule
+
 \subsection{Write Operations}
 \label{sec:write-operations}
 None of the write operations perform data validation, instead
@@ -2135,7 +2141,6 @@ $\textit{index}:\textit{value}$. For example:
 value at index 1 is $b$; the value at index 2 is $c$.
 
 \subsubsection{[[DBUpdateEdgeSpeed]](3)}
-\label{sec:update-edge-speed}
 The speed stored for each edge in the road network is the maximum free-flow
 speed, in meters per second.  It can be updated with
 [[DBUpdateEdgeSpeed]]. The new speed [[nu]] must be greater than or equal to 0,
@@ -2196,6 +2201,7 @@ PSClear(9);
 PSAdd(9, uid, u[0], u[1], u[2], u[3], u[4], u[5]);
 PSSubmit(9);
 @
+
 \subsubsection{[[DBAddNewServer]](2)}
 Array [[u]] =
 
@@ -2694,6 +2700,7 @@ PSSubmit(42, 43);
 
 \subsection{Read Operations}
 \label{sec:read-operations}
+
 \subsubsection{[[DBQuery]](2)}
 Run custom [[SELECT]] queries against the database using
 [[DBQuery]]. The second parameter indicates the number of columns in the
@@ -3325,6 +3332,7 @@ public int[] DBQueryServerArrivalTime(int sid) throws RuntimeException {
   <<Submit prepared statement batch>>
   <<Initialize statements>>
 @
+
 \subsection{[[Print]](1)}
 <<Print a message>>=
 private void Print(String msg) {
@@ -3346,8 +3354,8 @@ private PreparedStatement PS(String sql) throws SQLException {
   return ps;
 }
 @ %def PS
+
 \subsection{[[DBFetch]](3...)}
-\label{sec:fetch}
 <<Fetch items from database>>=
 private int[] DBFetch(int k, int ncols, Integer... values) throws SQLException {
   int[] output = new int[] { };
@@ -3381,6 +3389,7 @@ do {
   }
 } while (res.next());
 @
+
 \subsection{[[PSAdd]](2...)}
 <<Fill prepared statement>>=
 private void PSAdd(int k, Integer... values) throws SQLException {
@@ -3416,8 +3425,8 @@ private void PSSubmit(Integer... values) throws SQLException {
   <<Catch and rollback [[SQLException]]>>
 }
 @ %def PSSubmit
+
 \subsection{[[PSInit]](0)}
-\label{sec:initialize-statements}
 <<Initialize statements>>=
 private void PSInit() throws RuntimeException {
   pstmt = new HashMap<>();

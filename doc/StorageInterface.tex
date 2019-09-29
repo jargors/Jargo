@@ -303,7 +303,6 @@ formalizing certain concepts such as pick-up and drop-off times for a customer
 or the cruising and service distance for a vehicle.
 
 \subsubsection*{Relations}
-\label{sec:relations}
 The following briefly overviews the concept of relations and introduces some
 notation.
 Relations can be defined in terms of \emph{sequences} and \emph{tuples}.
@@ -1688,6 +1687,7 @@ definition} (\S\ref{sec:class-definition}).
   \LA{}StorageInterface.java preamble~{\nwtagstyle{}\subpageref{NW3wHtHL-WmKXF-1}}\RA{}
   \LA{}\code{}StorageInterface\edoc{} definition~{\nwtagstyle{}\subpageref{NW3wHtHL-1sukLB-1}}\RA{}
 \nwendcode{}\nwbegindocs{84}\nwdocspar
+
 \subsection{Preamble}
 \label{sec:preamble}
 The preamble declares the package and imports dependencies.
@@ -1716,6 +1716,7 @@ import java.util.HashMap;
 import java.time.LocalDateTime;
 \nwendcode{}\nwbegindocs{94}\nwdocspar
 \end{itemize}
+
 \subsection{Class Definition}
 \label{sec:class-definition}
 The {\tt{}StorageInterface} class consists of member variables, a constructor, and public
@@ -1815,6 +1816,7 @@ try \{
 \}
 \LA{}Catch and print \code{}SQLException\edoc{}~{\nwtagstyle{}\subpageref{NW3wHtHL-4P0tKA-1}}\RA{}
 \nwidentuses{\\{{conn}{conn}}}\nwindexuse{conn}{conn}{NW3wHtHL-1oq4K7-1}\nwendcode{}\nwbegindocs{118}\nwdocspar
+
 \subsubsection{Initializing the Data Model}
 \label{sec:initializing-the-data-model}
 \nwenddocs{}\nwbegincode{119}\sublabel{NW3wHtHL-1b3IMM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3wHtHL-1b3IMM-1}}}\moddef{....initialize data model~{\nwtagstyle{}\subpageref{NW3wHtHL-1b3IMM-1}}}\endmoddef\nwused{\\{NW3wHtHL-47jz5t-1}}
@@ -1865,12 +1867,13 @@ try \{
 \LA{}Catch and print \code{}SQLException\edoc{}~{\nwtagstyle{}\subpageref{NW3wHtHL-4P0tKA-1}}\RA{}
 Print("Finished loading model");
 \nwidentuses{\\{{conn}{conn}}\\{{Print}{Print}}}\nwindexuse{conn}{conn}{NW3wHtHL-1b3IMM-1}\nwindexuse{Print}{Print}{NW3wHtHL-1b3IMM-1}\nwendcode{}\nwbegindocs{120}\nwdocspar
+
 \subsubsection{Initializing the Prepared Statements}
 \label{sec:initializing-the-prepared-statements}
-See \S\ref{sec:initialize-statements}.
 \nwenddocs{}\nwbegincode{121}\sublabel{NW3wHtHL-1uI1uN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3wHtHL-1uI1uN-1}}}\moddef{..initialize prepared statements~{\nwtagstyle{}\subpageref{NW3wHtHL-1uI1uN-1}}}\endmoddef\nwused{\\{NW3wHtHL-1vIbEn-1}\\{NW3wHtHL-b3Hn1-1}}
 PSInit();
 \nwidentuses{\\{{PSInit}{PSInit}}}\nwindexuse{PSInit}{PSInit}{NW3wHtHL-1uI1uN-1}\nwendcode{}\nwbegindocs{122}\nwdocspar
+
 \subsubsection{Initializing the Road Network}
 \label{sec:initializing-the-road-network}
 \nwenddocs{}\nwbegincode{123}\sublabel{NW3wHtHL-1tcQJD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3wHtHL-1tcQJD-1}}}\moddef{..initialize road network~{\nwtagstyle{}\subpageref{NW3wHtHL-1tcQJD-1}}}\endmoddef\nwused{\\{NW3wHtHL-1vIbEn-1}}
@@ -1925,12 +1928,11 @@ if (!lu_nodes.containsKey(col[2])) \{
 \}
 \nwidentuses{\\{{PSAdd}{PSAdd}}}\nwindexuse{PSAdd}{PSAdd}{NW3wHtHL-3jqNnf-1}\nwendcode{}\nwbegindocs{130}\nwdocspar
 We use haversine to compute edge weights\footnote{If the distance between two
-vertices is 0 due to rounding, then we round it up to 1; see
-\S\ref{sec:compute-haversine}.}.  If one of the vertices in the edge is a dummy
-vertex, we set the weight to 0\footnote{The dummy vertex should only terminate
-and never begin an edge in the road network, otherwise a shortest path could
-take a shortcut through the dummy vertex to reach any other vertex with 0
-weight!}.
+vertices is 0 due to rounding, then we round it up to 1.}.  If one of the
+vertices in the edge is a dummy vertex, we set the weight to 0\footnote{The
+dummy vertex should only terminate and never begin an edge in the road network,
+otherwise a shortest path could take a shortcut through the dummy vertex to
+reach any other vertex with 0 weight!}.
 \nwenddocs{}\nwbegincode{131}\sublabel{NW3wHtHL-7y6It-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3wHtHL-7y6It-1}}}\moddef{....compute edge weight \code{}dist\edoc{}~{\nwtagstyle{}\subpageref{NW3wHtHL-7y6It-1}}}\endmoddef\nwused{\\{NW3wHtHL-1tcQJD-1}}
 dist = ((col[1] != 0 && col[2] != 0)
   ? haversine(col[3]/CSHIFT, col[4]/CSHIFT,
@@ -1945,10 +1947,11 @@ PSAdd(1, col[1], col[2], dist, 10);
 
 \section{Public Methods}
 \label{sec:public-methods}
+
 \subsection{Utilities}
 \label{sec:utilities}
+
 \subsubsection{{\tt{}\protect\nwindexuse{printSQLException}{printSQLException}{NW3wHtHL-31QNBg-1}printSQLException}(1)}
-\label{sec:print-sql-exceptions}
 The {\tt{}\protect\nwindexuse{printSQLException}{printSQLException}{NW3wHtHL-31QNBg-1}printSQLException} method  unwraps the entire exception chain to unveil
 the real cause of a {\tt{}SQLException}.  This portion is Copyright 2004--2019 The
 Apache Software Foundation and is licensed under the Apache License, Version
@@ -2003,8 +2006,8 @@ catch (SQLException e1) \{
 \}
 \nwidentuses{\\{{conn}{conn}}}\nwindexuse{conn}{conn}{NW3wHtHL-rUmGB-1}\nwendcode{}\nwbegindocs{142}\nwdocspar
 \end{itemize}
+
 \subsubsection{{\tt{}DBLoadBackup}(1)}
-\label{sec:load-database-backup}
 We update {\tt{}\protect\nwindexuse{uid}{uid}{NW3wHtHL-s0Hgq-3}uid} to be the current largest {\tt{}\protect\nwindexuse{uid}{uid}{NW3wHtHL-s0Hgq-3}uid} in the backup.
 \nwenddocs{}\nwbegincode{143}\sublabel{NW3wHtHL-b3Hn1-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3wHtHL-b3Hn1-1}}}\moddef{Load backup~{\nwtagstyle{}\subpageref{NW3wHtHL-b3Hn1-1}}}\endmoddef\nwused{\\{NW3wHtHL-2Uuk6D-1}}
 public void DBLoadBackup(String filepath) throws RuntimeException \{
@@ -2021,8 +2024,8 @@ public void DBLoadBackup(String filepath) throws RuntimeException \{
   \LA{}Catch and print \code{}SQLException\edoc{}~{\nwtagstyle{}\subpageref{NW3wHtHL-4P0tKA-1}}\RA{}
 \}
 \nwidentuses{\\{{conn}{conn}}\\{{DBFetch}{DBFetch}}\\{{Print}{Print}}\\{{uid}{uid}}}\nwindexuse{conn}{conn}{NW3wHtHL-b3Hn1-1}\nwindexuse{DBFetch}{DBFetch}{NW3wHtHL-b3Hn1-1}\nwindexuse{Print}{Print}{NW3wHtHL-b3Hn1-1}\nwindexuse{uid}{uid}{NW3wHtHL-b3Hn1-1}\nwendcode{}\nwbegindocs{144}\nwdocspar
+
 \subsubsection{{\tt{}DBSaveBackup}(1)}
-\label{sec:save-database-backup}
 To save a database backup:
 \nwenddocs{}\nwbegincode{145}\sublabel{NW3wHtHL-2OKmqF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3wHtHL-2OKmqF-1}}}\moddef{Save backup~{\nwtagstyle{}\subpageref{NW3wHtHL-2OKmqF-1}}}\endmoddef\nwused{\\{NW3wHtHL-2Uuk6D-1}}
 public void DBSaveBackup(String filepath) throws RuntimeException \{
@@ -2036,8 +2039,8 @@ public void DBSaveBackup(String filepath) throws RuntimeException \{
   \LA{}Catch and print \code{}SQLException\edoc{}~{\nwtagstyle{}\subpageref{NW3wHtHL-4P0tKA-1}}\RA{}
 \}
 \nwidentuses{\\{{conn}{conn}}}\nwindexuse{conn}{conn}{NW3wHtHL-2OKmqF-1}\nwendcode{}\nwbegindocs{146}\nwdocspar
+
 \subsubsection{{\tt{}\protect\nosublabel{NW3wHtHL-2OKmqF-1-u1}\protect\nwindexuse{haversine}{haversine}{NW3wHtHL-1XfngC-1}haversine}(4)}
-\label{sec:compute-haversine}
 The {\tt{}\protect\nwindexuse{haversine}{haversine}{NW3wHtHL-1XfngC-1}haversine} method computes the haversine distance between two
 coordinates, rounded to the nearest meter.  Most of this code is Copyright 2017
 Juliano Macedo and is licensed under the MIT License. It has been modified from
@@ -2064,6 +2067,7 @@ if (d == 0 && (lng1 != lng2 || lat1 != lat2)) \{
   d = 1;
 \}
 \nwendcode{}\nwbegindocs{150}\nwdocspar
+
 \subsubsection{{\tt{}\protect\nwindexuse{haversine}{haversine}{NW3wHtHL-1XfngC-1}haversine}(2)}
 We can compute haversine using vertex identifiers instead of the coordinates.
 \nwenddocs{}\nwbegincode{151}\sublabel{NW3wHtHL-1XfngC-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3wHtHL-1XfngC-2}}}\moddef{Compute haversine~{\nwtagstyle{}\subpageref{NW3wHtHL-1XfngC-1}}}\plusendmoddef
@@ -2074,16 +2078,16 @@ public int haversine(int v1, int v2) \{
                    c2[0]/CSHIFT, c2[1]/CSHIFT);
 \}
 \nwidentuses{\\{{CSHIFT}{CSHIFT}}\\{{haversine}{haversine}}}\nwindexuse{CSHIFT}{CSHIFT}{NW3wHtHL-1XfngC-2}\nwindexuse{haversine}{haversine}{NW3wHtHL-1XfngC-2}\nwendcode{}\nwbegindocs{152}\nwdocspar
+
 \subsubsection{{\tt{}\protect\nwindexuse{printUser}{printUser}{NW3wHtHL-3sWW32-1}printUser}(1)}
-\label{sec:print-user}
 \nwenddocs{}\nwbegincode{153}\sublabel{NW3wHtHL-3sWW32-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3wHtHL-3sWW32-1}}}\moddef{Print user~{\nwtagstyle{}\subpageref{NW3wHtHL-3sWW32-1}}}\endmoddef\nwused{\\{NW3wHtHL-2Uuk6D-1}}
 public void printUser(int[] u) \{
   System.out.println("User \{uid="+u[0]+", q="+u[1]+", e="+u[2]+", l="+u[3]
     +", o="+u[4]+", d="+u[5]+", b="+u[6]+"\}");
 \}
 \nwindexdefn{printUser}{printUser}{NW3wHtHL-3sWW32-1}\eatline
-\nwidentdefs{\\{{printUser}{printUser}}}\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW3wHtHL-3sWW32-1}\nwendcode{}\nwbegindocs{154}\subsubsection{{\tt{}\protect\nwindexuse{printPath}{printPath}{NW3wHtHL-3QvbXQ-1}printPath}(1)}
-\label{sec:print-paths}
+\nwidentdefs{\\{{printUser}{printUser}}}\nwidentuses{\\{{uid}{uid}}}\nwindexuse{uid}{uid}{NW3wHtHL-3sWW32-1}\nwendcode{}\nwbegindocs{154}\nwdocspar
+\subsubsection{{\tt{}\protect\nwindexuse{printPath}{printPath}{NW3wHtHL-3QvbXQ-1}printPath}(1)}
 \nwenddocs{}\nwbegincode{155}\sublabel{NW3wHtHL-3QvbXQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3wHtHL-3QvbXQ-1}}}\moddef{Print path~{\nwtagstyle{}\subpageref{NW3wHtHL-3QvbXQ-1}}}\endmoddef\nwused{\\{NW3wHtHL-2Uuk6D-1}}
 public void printPath(int[] path) \{
   for (Integer i : path) \{
@@ -2092,8 +2096,8 @@ public void printPath(int[] path) \{
   System.out.println();
 \}
 \nwindexdefn{printPath}{printPath}{NW3wHtHL-3QvbXQ-1}\eatline
-\nwidentdefs{\\{{printPath}{printPath}}}\nwendcode{}\nwbegindocs{156}\subsubsection{{\tt{}\protect\nwindexuse{printRoute}{printRoute}{NW3wHtHL-2sTsm3-1}printRoute}(1)}
-\label{sec:print-routes}
+\nwidentdefs{\\{{printPath}{printPath}}}\nwendcode{}\nwbegindocs{156}\nwdocspar
+\subsubsection{{\tt{}\protect\nwindexuse{printRoute}{printRoute}{NW3wHtHL-2sTsm3-1}printRoute}(1)}
 \nwenddocs{}\nwbegincode{157}\sublabel{NW3wHtHL-2sTsm3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3wHtHL-2sTsm3-1}}}\moddef{Print route~{\nwtagstyle{}\subpageref{NW3wHtHL-2sTsm3-1}}}\endmoddef\nwused{\\{NW3wHtHL-2Uuk6D-1}}
 public void printRoute(int[] route) \{
   for (int i = 0; i < (route.length - 1); i += 2) \{
@@ -2102,7 +2106,8 @@ public void printRoute(int[] route) \{
   System.out.println();
 \}
 \nwindexdefn{printRoute}{printRoute}{NW3wHtHL-2sTsm3-1}\eatline
-\nwidentdefs{\\{{printRoute}{printRoute}}}\nwendcode{}\nwbegindocs{158}\subsubsection{{\tt{}\protect\nwindexuse{printSchedule}{printSchedule}{NW3wHtHL-45oGvT-1}printSchedule}(1)}
+\nwidentdefs{\\{{printRoute}{printRoute}}}\nwendcode{}\nwbegindocs{158}\nwdocspar
+\subsubsection{{\tt{}\protect\nwindexuse{printSchedule}{printSchedule}{NW3wHtHL-45oGvT-1}printSchedule}(1)}
 \nwenddocs{}\nwbegincode{159}\sublabel{NW3wHtHL-45oGvT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3wHtHL-45oGvT-1}}}\moddef{Print schedule~{\nwtagstyle{}\subpageref{NW3wHtHL-45oGvT-1}}}\endmoddef\nwused{\\{NW3wHtHL-2Uuk6D-1}}
 public void printSchedule(int[] sched) \{
   for (int i = 0; i < (sched.length - 3); i += 4) \{
@@ -2112,7 +2117,8 @@ public void printSchedule(int[] sched) \{
   System.out.println();
 \}
 \nwindexdefn{printSchedule}{printSchedule}{NW3wHtHL-45oGvT-1}\eatline
-\nwidentdefs{\\{{printSchedule}{printSchedule}}}\nwendcode{}\nwbegindocs{160}\subsection{Write Operations}
+\nwidentdefs{\\{{printSchedule}{printSchedule}}}\nwendcode{}\nwbegindocs{160}\nwdocspar
+\subsection{Write Operations}
 \label{sec:write-operations}
 None of the write operations perform data validation, instead
 delegating that task to the database.
@@ -2135,7 +2141,6 @@ $\textit{index}:\textit{value}$. For example:
 value at index 1 is $b$; the value at index 2 is $c$.
 
 \subsubsection{{\tt{}\protect\nwindexuse{DBUpdateEdgeSpeed}{DBUpdateEdgeSpeed}{NW3wHtHL-3SpUqj-1}DBUpdateEdgeSpeed}(3)}
-\label{sec:update-edge-speed}
 The speed stored for each edge in the road network is the maximum free-flow
 speed, in meters per second.  It can be updated with
 {\tt{}\protect\nwindexuse{DBUpdateEdgeSpeed}{DBUpdateEdgeSpeed}{NW3wHtHL-3SpUqj-1}DBUpdateEdgeSpeed}. The new speed {\tt{}nu} must be greater than or equal to 0,
@@ -2196,6 +2201,7 @@ PSClear(9);
 PSAdd(9, uid, u[0], u[1], u[2], u[3], u[4], u[5]);
 PSSubmit(9);
 \nwidentuses{\\{{PSAdd}{PSAdd}}\\{{PSClear}{PSClear}}\\{{PSSubmit}{PSSubmit}}\\{{uid}{uid}}}\nwindexuse{PSAdd}{PSAdd}{NW3wHtHL-44Ff7c-1}\nwindexuse{PSClear}{PSClear}{NW3wHtHL-44Ff7c-1}\nwindexuse{PSSubmit}{PSSubmit}{NW3wHtHL-44Ff7c-1}\nwindexuse{uid}{uid}{NW3wHtHL-44Ff7c-1}\nwendcode{}\nwbegindocs{167}\nwdocspar
+
 \subsubsection{{\tt{}\protect\nwindexuse{DBAddNewServer}{DBAddNewServer}{NW3wHtHL-IYVQQ-1}DBAddNewServer}(2)}
 Array {\tt{}u} =
 
@@ -2694,6 +2700,7 @@ PSSubmit(42, 43);
 
 \subsection{Read Operations}
 \label{sec:read-operations}
+
 \subsubsection{{\tt{}DBQuery}(2)}
 Run custom {\tt{}SELECT} queries against the database using
 {\tt{}DBQuery}. The second parameter indicates the number of columns in the
@@ -3325,6 +3332,7 @@ public int[] DBQueryServerArrivalTime(int sid) throws RuntimeException \{
   \LA{}Submit prepared statement batch~{\nwtagstyle{}\subpageref{NW3wHtHL-322zJf-1}}\RA{}
   \LA{}Initialize statements~{\nwtagstyle{}\subpageref{NW3wHtHL-1g2xnv-1}}\RA{}
 \nwendcode{}\nwbegindocs{311}\nwdocspar
+
 \subsection{{\tt{}\protect\nosublabel{NW3wHtHL-DpyaQ-1-u7}\protect\nwindexuse{Print}{Print}{NW3wHtHL-2wEn3G-1}Print}(1)}
 \nwenddocs{}\nwbegincode{312}\sublabel{NW3wHtHL-2wEn3G-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3wHtHL-2wEn3G-1}}}\moddef{Print a message~{\nwtagstyle{}\subpageref{NW3wHtHL-2wEn3G-1}}}\endmoddef\nwused{\\{NW3wHtHL-DpyaQ-1}}
 private void Print(String msg) \{
@@ -3346,8 +3354,8 @@ private PreparedStatement PS(String sql) throws SQLException \{
   return ps;
 \}
 \nosublabel{NW3wHtHL-4UQpM2-1-u1}\nwindexdefn{PS}{PS}{NW3wHtHL-4UQpM2-1}\eatline
-\nwidentdefs{\\{{PS}{PS}}}\nwidentuses{\\{{conn}{conn}}}\nwindexuse{conn}{conn}{NW3wHtHL-4UQpM2-1}\nwendcode{}\nwbegindocs{315}\subsection{{\tt{}\protect\nwindexuse{DBFetch}{DBFetch}{NW3wHtHL-17Zt8W-1}DBFetch}(3...)}
-\label{sec:fetch}
+\nwidentdefs{\\{{PS}{PS}}}\nwidentuses{\\{{conn}{conn}}}\nwindexuse{conn}{conn}{NW3wHtHL-4UQpM2-1}\nwendcode{}\nwbegindocs{315}\nwdocspar
+\subsection{{\tt{}\protect\nwindexuse{DBFetch}{DBFetch}{NW3wHtHL-17Zt8W-1}DBFetch}(3...)}
 \nwenddocs{}\nwbegincode{316}\sublabel{NW3wHtHL-17Zt8W-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3wHtHL-17Zt8W-1}}}\moddef{Fetch items from database~{\nwtagstyle{}\subpageref{NW3wHtHL-17Zt8W-1}}}\endmoddef\nwused{\\{NW3wHtHL-DpyaQ-1}}
 private int[] DBFetch(int k, int ncols, Integer... values) throws SQLException \{
   int[] output = new int[] \{ \};
@@ -3381,6 +3389,7 @@ do \{
   \}
 \} while (res.next());
 \nwidentuses{\\{{res}{res}}}\nwindexuse{res}{res}{NW3wHtHL-2Xu6MS-1}\nwendcode{}\nwbegindocs{320}\nwdocspar
+
 \subsection{{\tt{}\protect\nwindexuse{PSAdd}{PSAdd}{NW3wHtHL-1ZE0ye-1}PSAdd}(2...)}
 \nwenddocs{}\nwbegincode{321}\sublabel{NW3wHtHL-1ZE0ye-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3wHtHL-1ZE0ye-1}}}\moddef{Fill prepared statement~{\nwtagstyle{}\subpageref{NW3wHtHL-1ZE0ye-1}}}\endmoddef\nwused{\\{NW3wHtHL-DpyaQ-1}}
 private void PSAdd(int k, Integer... values) throws SQLException \{
@@ -3416,8 +3425,8 @@ private void PSSubmit(Integer... values) throws SQLException \{
   \LA{}Catch and rollback \code{}SQLException\edoc{}~{\nwtagstyle{}\subpageref{NW3wHtHL-rUmGB-1}}\RA{}
 \}
 \nosublabel{NW3wHtHL-322zJf-1-u1}\nwindexdefn{PSSubmit}{PSSubmit}{NW3wHtHL-322zJf-1}\eatline
-\nwidentdefs{\\{{PSSubmit}{PSSubmit}}}\nwidentuses{\\{{pstmt}{pstmt}}}\nwindexuse{pstmt}{pstmt}{NW3wHtHL-322zJf-1}\nwendcode{}\nwbegindocs{326}\subsection{{\tt{}\protect\nwindexuse{PSInit}{PSInit}{NW3wHtHL-1g2xnv-1}PSInit}(0)}
-\label{sec:initialize-statements}
+\nwidentdefs{\\{{PSSubmit}{PSSubmit}}}\nwidentuses{\\{{pstmt}{pstmt}}}\nwindexuse{pstmt}{pstmt}{NW3wHtHL-322zJf-1}\nwendcode{}\nwbegindocs{326}\nwdocspar
+\subsection{{\tt{}\protect\nwindexuse{PSInit}{PSInit}{NW3wHtHL-1g2xnv-1}PSInit}(0)}
 \nwenddocs{}\nwbegincode{327}\sublabel{NW3wHtHL-1g2xnv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3wHtHL-1g2xnv-1}}}\moddef{Initialize statements~{\nwtagstyle{}\subpageref{NW3wHtHL-1g2xnv-1}}}\endmoddef\nwused{\\{NW3wHtHL-DpyaQ-1}}
 private void PSInit() throws RuntimeException \{
   pstmt = new HashMap<>();
