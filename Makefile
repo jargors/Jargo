@@ -1,10 +1,13 @@
 # Storage
+# - Set JARGO_LIB environmental variable before running `make`.
+# - Command `make clean` does NOT remove the compressed jar from $JARGO_LIB/.
+#   Do that manually.
 .PHONY : all clean
 
 all : pdf jar
 
 jar : java
-	javac -d . Storage.java
+	javac -Xlint:deprecation -d . Storage.java
 	jar cvf $(JARGO_LIB)/jargors-storage-1.0.0.jar com
 
 java : src/storage.nw
@@ -18,7 +21,7 @@ tex : src/storage.nw
 
 clean :
 	rm -f storage.pdf
-	rm -f Storage.ja* jargors-storage-*.jar
+	rm -f Storage.java
 	rm -rf com/
 	latexmk -f -c doc/storage.tex
 	rm -f doc/storage.tex
