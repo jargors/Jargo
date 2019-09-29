@@ -1,29 +1,23 @@
-all : storagetest.pdf StorageTest.class
-.PHONY : all clean cleantex cleandoc cleanjava cleanclass
+# Storage Test
+.PHONY : all clean
 
-StorageTest.class : StorageTest.java
+all : pdf class
+
+class : java
 	javac -Xlint:deprecation -d . -cp ../jargors-storage-1.0.0.jar StorageTest.java
 
-StorageTest.java : src/storagetest.nw
+java : src/storagetest.nw
 	notangle -RStorageTest.java src/storagetest.nw > StorageTest.java
 
-storagetest.pdf : doc/storagetest.tex
+pdf : tex
 	pdflatex doc/storagetest.tex
 
-doc/storagetest.tex : src/storagetest.nw
+tex : src/storagetest.nw
 	noweave -delay -index src/storagetest.nw > doc/storagetest.tex
 
-clean : cleanjava cleanclass cleantex cleandoc
+clean :
 	rm -f storagetest.pdf
-
-cleanjava :
 	rm -f StorageTest.java
-
-cleanclass :
 	rm -f StorageTest.class
-
-cleantex :
 	latexmk -f -c doc/storagetest.tex
-
-cleandoc :
 	rm -f doc/storagetest.tex
