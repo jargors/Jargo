@@ -1,3 +1,4 @@
+# Storage
 all : storage.pdf jargors-storage-1.0.0.jar
 .PHONY : all clean cleantex cleandoc cleanjava cleanclass
 
