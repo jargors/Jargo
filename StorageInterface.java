@@ -9,7 +9,7 @@
   import java.util.Map;
   import java.util.HashMap;
   import java.time.LocalDateTime;
-  public class Storage {
+  public class StorageInterface {
     private Connection conn;
     private ResultSet res;
     private Map<Integer, PreparedStatement> pstmt = new HashMap<>();
@@ -18,7 +18,7 @@
     private final double CSHIFT = 10000000.0;
     private int uid = 0;
     private final String VERSION = "1.0.0";
-    public Storage(String f_rnet) {
+    public StorageInterface(String f_rnet) {
       Print("Initializing Storage Interface "+VERSION);
       Print("Initializing a new database...");
       try {
@@ -1794,7 +1794,7 @@
       return output;
     }
       private void Print(String msg) {
-        System.out.println("[Jargo][Storage]["+LocalDateTime.now()+"] "+msg);
+        System.out.println("[Jargo][StorageInterface]["+LocalDateTime.now()+"] "+msg);
       }
       private PreparedStatement PS(String sql) throws SQLException {
         PreparedStatement ps = null;

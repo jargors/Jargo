@@ -1,24 +1,26 @@
 # Storage Test
 # - Set JARGO_LIB environmental variable before running `make`.
+WIDGET=StorageInterfaceTest
+
 .PHONY : all clean
 
 all : pdf class
 
 class : java
-	javac -Xlint:deprecation -d . -cp .:$(JARGO_LIB)/* StorageTest.java
+	javac -Xlint:deprecation -d . -cp .:$(JARGO_LIB)/* $(WIDGET).java
 
-java : src/storagetest.nw
-	notangle -RStorageTest.java src/storagetest.nw > StorageTest.java
+java : src/$(WIDGET).nw
+	notangle -R$(WIDGET).java src/$(WIDGET).nw > $(WIDGET).java
 
 pdf : tex
-	pdflatex doc/storagetest.tex
+	pdflatex doc/$(WIDGET).tex
 
-tex : src/storagetest.nw
-	noweave -delay -index src/storagetest.nw > doc/storagetest.tex
+tex : src/$(WIDGET).nw
+	noweave -delay -index src/$(WIDGET).nw > doc/$(WIDGET).tex
 
 clean :
-	rm -f storagetest.pdf
-	rm -f StorageTest.java
-	rm -f StorageTest.class
-	latexmk -f -c doc/storagetest.tex
-	rm -f doc/storagetest.tex
+	rm -f $(WIDGET).pdf
+	rm -f $(WIDGET).java
+	rm -f $(WIDGET).class
+	latexmk -f -c doc/$(WIDGET).tex
+	rm -f doc/$(WIDGET).tex

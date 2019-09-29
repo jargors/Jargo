@@ -1,27 +1,30 @@
-# Storage
+# Storage Interface
 # - Set JARGO_LIB environmental variable before running `make`.
 # - Command `make clean` does NOT remove the compressed jar from $JARGO_LIB/.
 #   Do that manually.
+WIDGET=StorageInterface
+VERSION=1.0.0
+
 .PHONY : all clean
 
 all : pdf jar
 
 jar : java
-	javac -Xlint:deprecation -d . Storage.java
-	jar cvf $(JARGO_LIB)/jargors-storage-1.0.0.jar com
+	javac -Xlint:deprecation -d . $(WIDGET).java
+	jar cvf $(JARGO_LIB)/jargors-$(WIDGET)-$(VERSION).jar com
 
-java : src/storage.nw
-	notangle -RStorage.java src/storage.nw > Storage.java
+java : src/$(WIDGET).nw
+	notangle -R$(WIDGET).java src/$(WIDGET).nw > $(WIDGET).java
 
 pdf : tex
-	pdflatex doc/storage.tex
+	pdflatex doc/$(WIDGET).tex
 
-tex : src/storage.nw
-	noweave -delay -index src/storage.nw > doc/storage.tex
+tex : src/$(WIDGET).nw
+	noweave -delay -index src/$(WIDGET).nw > doc/$(WIDGET).tex
 
 clean :
-	rm -f storage.pdf
-	rm -f Storage.java
+	rm -f $(WIDGET).pdf
+	rm -f $(WIDGET).java
 	rm -rf com/
-	latexmk -f -c doc/storage.tex
-	rm -f doc/storage.tex
+	latexmk -f -c doc/$(WIDGET).tex
+	rm -f doc/$(WIDGET).tex

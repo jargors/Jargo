@@ -57,26 +57,26 @@ to be in an invalid state. Jargo's data model guarantees the integrity of the
 simulation at all other times. The storage interface is written in Java so it
 can communicate with Derby using JDBC. A listing of the public methods is
 shown in Figure~\ref{fig:methods}.
+The storage interface is developed using the
+Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
+programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
+([[src/StorageInterface.nw]]) is the source for both the documentation
+([[doc/StorageInterface.tex]]) and the Java code ([[StorageInterface.java]])\footnote{See the
+[[Makefile]] for build details.}.
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=120mm]{src/fig/storage-fig}
+\includegraphics[width=150mm]{src/fig/storage-fig}
 \caption{Storage interface and data layer within the Jargo stack.}
 \label{fig:storage}
 \end{figure}
 
-The storage interface is developed using the
-Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
-programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
-([[src/storage.nw]]) is the source for both the documentation
-([[doc/storage.tex]]) and the Java code (Storage.java)\footnote{See the
-[[Makefile]] for build details.}.
 
 \begin{figure}
 \adjustbox{scale=0.85}{
 \begin{minipage}[t]{0.40\textwidth}
 \hi{Utilities}
-<<[[Storage]] public methods>>=
+<<[[StorageInterface]] public methods>>=
 <<Load backup>>
 <<Save backup>>
 <<Print SQL exception>>
@@ -89,7 +89,7 @@ programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
 \end{minipage}
 \begin{minipage}[t]{0.40\textwidth}
 \hi{Write Methods}
-<<[[Storage]] public methods>>=
+<<[[StorageInterface]] public methods>>=
 <<Update edge speed>>
 <<Add new request>>
 <<Add new server>>
@@ -100,7 +100,7 @@ programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
 \end{minipage}
 \begin{minipage}[t]{0.40\textwidth}
 \hi{Read Methods}
-<<[[Storage]] public methods>>=
+<<[[StorageInterface]] public methods>>=
 <<Query ridesharing user>>
 <<Query request status>>
 <<Query queued requests>>
@@ -1682,55 +1682,55 @@ To list arrival times $t^\textrm{arrive}$ of all servers:
 The remaining sections are concerned with producing the Java code.  The code
 consists of the \emph{preamble} (\S\ref{sec:preamble}) and the \emph{class
 definition} (\S\ref{sec:class-definition}).
-<<Storage.java>>=
-  <<Storage.java preamble>>
-  <<[[Storage]] definition>>
+<<StorageInterface.java>>=
+  <<StorageInterface.java preamble>>
+  <<[[StorageInterface]] definition>>
 @
 \subsection{Preamble}
 \label{sec:preamble}
 The preamble declares the package and imports dependencies.
-<<Storage.java preamble>>=
+<<StorageInterface.java preamble>>=
 package com.github.jargors;
 @
 We import:
 \begin{itemize}
 \item parts of the JDBC~API from [[java.sql]], for communication with Derby;
-<<Storage.java preamble>>=
+<<StorageInterface.java preamble>>=
 import java.sql.CallableStatement;   import java.sql.Connection;
 import java.sql.DriverManager;       import java.sql.PreparedStatement;
 import java.sql.ResultSet;           import java.sql.SQLException;
 import java.sql.Statement;           import java.sql.Types;
 @ \item standard classes for parse and file operations;
-<<Storage.java preamble>>=
+<<StorageInterface.java preamble>>=
 import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
 @ \item standard map classes for caching various items;
-<<Storage.java preamble>>=
+<<StorageInterface.java preamble>>=
 import java.util.Map;
 import java.util.HashMap;
 @ \item date-time class for printing timestamps.
-<<Storage.java preamble>>=
+<<StorageInterface.java preamble>>=
 import java.time.LocalDateTime;
 @
 \end{itemize}
 \subsection{Class Definition}
 \label{sec:class-definition}
-The [[Storage]] class consists of member variables, a constructor, and public
+The [[StorageInterface]] class consists of member variables, a constructor, and public
 and private methods, just like any other Java class.
-<<[[Storage]] definition>>=
-public class Storage {
-  <<[[Storage]] member variables>>
-  <<[[Storage]] constructor>>
-  <<[[Storage]] public methods>>
-  <<[[Storage]] private methods>>
+<<[[StorageInterface]] definition>>=
+public class StorageInterface {
+  <<[[StorageInterface]] member variables>>
+  <<[[StorageInterface]] constructor>>
+  <<[[StorageInterface]] public methods>>
+  <<[[StorageInterface]] private methods>>
 }
 @
 
 \subsection{Member Variables}
 \label{sec:member-variables}
 Member variables are grouped into JDBC objects and internal objects.
-<<[[Storage]] member variables>>=
+<<[[StorageInterface]] member variables>>=
 <<JDBC objects>>
 <<Internal objects>>
 @
@@ -1776,8 +1776,8 @@ private final String VERSION = "1.0.0";
 \label{sec:constructor}
 The constructor takes one parameter, [[f_rnet]], indicating the filepath to the
 [[*.rnet]] road network file.
-<<[[Storage]] constructor>>=
-public Storage(String f_rnet) {
+<<[[StorageInterface]] constructor>>=
+public StorageInterface(String f_rnet) {
   Print("Initializing Storage Interface "+VERSION);
   <<..initialize new database>>
   <<..initialize prepared statements>>
@@ -3314,7 +3314,7 @@ public int[] DBQueryServerArrivalTime(int sid) throws RuntimeException {
 
 \section{Private Methods}
 \label{sec:private}
-<<[[Storage]] private methods>>=
+<<[[StorageInterface]] private methods>>=
   <<Print a message>>
   <<Prepare a prepared statement>>
   <<Fetch items from database>>
@@ -3326,7 +3326,7 @@ public int[] DBQueryServerArrivalTime(int sid) throws RuntimeException {
 \subsection{[[Print]](1)}
 <<Print a message>>=
 private void Print(String msg) {
-  System.out.println("[Jargo][Storage]["+LocalDateTime.now()+"] "+msg);
+  System.out.println("[Jargo][StorageInterface]["+LocalDateTime.now()+"] "+msg);
 }
 @ %def Print
 

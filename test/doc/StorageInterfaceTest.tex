@@ -1,0 +1,1892 @@
+\documentclass{article}
+
+\usepackage{noweb}
+\noweboptions{smallcode,longchunks}
+
+\usepackage[a4paper,margin=1in]{geometry}
+
+\usepackage{adjustbox}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{colortbl}
+\usepackage{enumitem}
+\usepackage[colorlinks=true]{hyperref}
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage{tikz}
+
+% Define a handy paragraph opener
+\newcommand{\hi}[1]{\noindent {\bf #1}}
+
+% Remove noweb page break penalty
+\def\nwendcode{\endtrivlist \endgroup}
+\let\nwdocspar=\par
+
+% Define an "example" environment
+\theoremstyle{definition}
+\newtheorem{example}{Example}
+
+% Define colors for tables
+\definecolor{TableTitle}{rgb}{0.900, 0.900, 0.900}
+\definecolor{TableHeader}{rgb}{0.900, 0.900, 0.900}
+
+\title{Jargo Storage Interface
+  and Data Model\footnote{\url{https://github.com/jargors/Storage}}\\
+  \vspace{.5em}
+  \Large{\textbf{Correctness Test Program}}}
+\author{James J. Pan\\
+  \small{\href{mailto:jamesjpan@outlook.com}{jamesjpan@outlook.com}}
+}
+
+\begin{document}
+\maketitle
+\pagestyle{noweb}
+
+\begin{figure}[h]
+\centering
+\fbox{\includegraphics[width=\textwidth]{data/small-directed-dummy.png}}
+\caption{Portion of a road network in Chengdu, China,
+    used for tests (46 nodes, 104 directed edges).}
+\label{fig:road-network}
+\end{figure}
+\newpage
+
+\tableofcontents
+
+\section{Introduction}
+\label{sec:introduction}
+The correctness test program for Jargo's storage interface uses a series of
+positive tests to check that the storage interface is functioning correctly.
+These tests pass if the output from the storage interface matches with what is
+expected. A database storing a test ridesharing state is provided in
+{\tt{}data/db}.  The test road network is shown in Figure~\ref{fig:road-network}.
+The vertex coordinates can be found in {\tt{}data/small-directed-dummy.rnet}.
+Keep in mind that the tests are not comprehensive and do not guarantee bug-free
+code. Not all possible inputs to the storage interface methods are tested,
+although more comprehensive testing may be added in the future.
+The test program is developed using the
+Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
+programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
+({\tt{}src/StorageInterfaceTest.nw}) is the source for both the documentation
+({\tt{}doc/StorageInterfaceTest.tex}) and the Java code ({\tt{}StorageInterfaceTest.java})\footnote{See the
+{\tt{}Makefile} for build details.}.
+\nwfilename{src/StorageInterfaceTest.nw}\nwbegincode{1}\sublabel{NW36uAHF-3BhLwI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-3BhLwI-1}}}\moddef{StorageInterfaceTest.java~{\nwtagstyle{}\subpageref{NW36uAHF-3BhLwI-1}}}\endmoddef\nwnotused{StorageInterfaceTest.java}
+  \LA{}StorageInterfaceTest.java preamble~{\nwtagstyle{}\subpageref{NW36uAHF-2gcBS8-1}}\RA{}
+  \LA{}\code{}StorageInterfaceTest\edoc{} definition~{\nwtagstyle{}\subpageref{NW36uAHF-4PL2gj-1}}\RA{}
+\nwendcode{}\nwbegindocs{2}\nwdocspar
+
+\nwenddocs{}\nwbegincode{3}\sublabel{NW36uAHF-2gcBS8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-2gcBS8-1}}}\moddef{StorageInterfaceTest.java preamble~{\nwtagstyle{}\subpageref{NW36uAHF-2gcBS8-1}}}\endmoddef\nwused{\\{NW36uAHF-3BhLwI-1}}
+import com.github.jargors.StorageInterface;
+import java.time.LocalDateTime;
+\nwendcode{}\nwbegindocs{4}\nwdocspar
+\nwenddocs{}\nwbegincode{5}\sublabel{NW36uAHF-4PL2gj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-4PL2gj-1}}}\moddef{\code{}StorageInterfaceTest\edoc{} definition~{\nwtagstyle{}\subpageref{NW36uAHF-4PL2gj-1}}}\endmoddef\nwused{\\{NW36uAHF-3BhLwI-1}}
+public class StorageInterfaceTest \{
+  \LA{}\code{}StorageInterfaceTest\edoc{} member variables~{\nwtagstyle{}\subpageref{NW36uAHF-2JUpt8-1}}\RA{}
+  \LA{}\code{}StorageInterfaceTest\edoc{} main routine~{\nwtagstyle{}\subpageref{NW36uAHF-1IzyGx-1}}\RA{}
+  \LA{}\code{}StorageInterfaceTest\edoc{} private methods~{\nwtagstyle{}\subpageref{NW36uAHF-1oLTLd-1}}\RA{}
+\}
+\nwendcode{}\nwbegindocs{6}\nwdocspar
+\nwenddocs{}\nwbegincode{7}\sublabel{NW36uAHF-2JUpt8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-2JUpt8-1}}}\moddef{\code{}StorageInterfaceTest\edoc{} member variables~{\nwtagstyle{}\subpageref{NW36uAHF-2JUpt8-1}}}\endmoddef\nwused{\\{NW36uAHF-4PL2gj-1}}
+private static int count_passed = 0;
+private static int count_failed = 0;
+\nwindexdefn{count{\char95}passed}{count:unpassed}{NW36uAHF-2JUpt8-1}\nwindexdefn{count{\char95}failed}{count:unfailed}{NW36uAHF-2JUpt8-1}\eatline
+\nwidentdefs{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwendcode{}\nwbegincode{8}\sublabel{NW36uAHF-1IzyGx-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-1IzyGx-1}}}\moddef{\code{}StorageInterfaceTest\edoc{} main routine~{\nwtagstyle{}\subpageref{NW36uAHF-1IzyGx-1}}}\endmoddef\nwused{\\{NW36uAHF-4PL2gj-1}}
+public static void main(String[] args) \{
+  Print("Starting storage interface tests");
+  StorageInterface storage = new StorageInterface("data/small-directed-dummy.rnet");
+  \LA{}..load test database~{\nwtagstyle{}\subpageref{NW36uAHF-11CmW8-1}}\RA{}
+  \LA{}..run read tests~{\nwtagstyle{}\subpageref{NW36uAHF-2w6SyW-1}}\RA{}
+  \LA{}..run write tests~{\nwtagstyle{}\subpageref{NW36uAHF-4HcfWS-1}}\RA{}
+  Print("Complete! Passed: "+count_passed+"; Failed: "+count_failed);
+\}
+\nwindexdefn{main}{main}{NW36uAHF-1IzyGx-1}\eatline
+\nwidentdefs{\\{{main}{main}}}\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-1IzyGx-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-1IzyGx-1}\nwendcode{}\nwbegindocs{9}We load a manually prepared test database.
+\nwenddocs{}\nwbegincode{10}\sublabel{NW36uAHF-11CmW8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-11CmW8-1}}}\moddef{..load test database~{\nwtagstyle{}\subpageref{NW36uAHF-11CmW8-1}}}\endmoddef\nwused{\\{NW36uAHF-1IzyGx-1}}
+storage.DBLoadBackup("data/db");
+\nwendcode{}\nwbegindocs{11}\nwdocspar
+\nwenddocs{}\nwbegincode{12}\sublabel{NW36uAHF-1oLTLd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-1oLTLd-1}}}\moddef{\code{}StorageInterfaceTest\edoc{} private methods~{\nwtagstyle{}\subpageref{NW36uAHF-1oLTLd-1}}}\endmoddef\nwused{\\{NW36uAHF-4PL2gj-1}}
+private static void Print(String msg) \{
+  System.out.println("[StorageInterfaceTest]["+LocalDateTime.now()+"] "+msg);
+\}
+\nwendcode{}\nwbegindocs{13}\nwdocspar
+
+\section{Tests}
+\label{sec:tests}
+
+\subsection{Read Tests}
+\label{sec:read-tests}
+\nwenddocs{}\nwbegincode{14}\sublabel{NW36uAHF-2w6SyW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-2w6SyW-1}}}\moddef{..run read tests~{\nwtagstyle{}\subpageref{NW36uAHF-2w6SyW-1}}}\endmoddef\nwused{\\{NW36uAHF-1IzyGx-1}}
+\LA{}....test \code{}DBQuery\edoc{}(2)~{\nwtagstyle{}\subpageref{NW36uAHF-RMkGl-1}}\RA{}
+\LA{}....test \code{}DBQueryServer\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-3O8MFc-1}}\RA{}
+\LA{}....test \code{}DBQueryRequest\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-1C0pk3-1}}\RA{}
+\LA{}....test \code{}DBQueryQueuedRequests\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-1Ao9lm-1}}\RA{}
+\LA{}....test \code{}DBQueryServerLocationsAll\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-2dAmyn-1}}\RA{}
+\LA{}....test \code{}DBQueryServerLocationsActive\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-3GrgPk-1}}\RA{}
+\LA{}....test \code{}DBQueryRoute\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-4TWZqG-1}}\RA{}
+\LA{}....test \code{}DBQueryRouteRemaining\edoc{}(2)~{\nwtagstyle{}\subpageref{NW36uAHF-1LMBE6-1}}\RA{}
+\LA{}....test \code{}DBQuerySchedule\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-3I1Rij-1}}\RA{}
+\LA{}....test \code{}DBQueryScheduleRemaining\edoc{}(2)~{\nwtagstyle{}\subpageref{NW36uAHF-3vhAZd-1}}\RA{}
+\LA{}....test \code{}DBQueryCurrentLoad\edoc{}(2)~{\nwtagstyle{}\subpageref{NW36uAHF-2jSLg0-1}}\RA{}
+\LA{}....test \code{}DBQueryCountVertices\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-2FbhMk-1}}\RA{}
+\LA{}....test \code{}DBQueryCountEdges\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-fMEma-1}}\RA{}
+\LA{}....test \code{}DBQueryVertex\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-HmHFv-1}}\RA{}
+\LA{}....test \code{}DBQueryEdge\edoc{}(2)~{\nwtagstyle{}\subpageref{NW36uAHF-4e874K-1}}\RA{}
+\LA{}....test \code{}DBQueryStatisticsEdges\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-3wfpeD-1}}\RA{}
+\LA{}....test \code{}DBQueryMBR\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-2Yf5B8-1}}\RA{}
+\LA{}....test \code{}DBQueryCountServers\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-2qdA7h-1}}\RA{}
+\LA{}....test \code{}DBQueryCountRequests\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-3azEeu-1}}\RA{}
+\LA{}....test \code{}DBQueryServerPendingAssignments\edoc{}(2)~{\nwtagstyle{}\subpageref{NW36uAHF-g6QHQ-1}}\RA{}
+\LA{}....test \code{}DBQueryServerCompletedAssignments\edoc{}(2)~{\nwtagstyle{}\subpageref{NW36uAHF-1HkuSf-1}}\RA{}
+\LA{}....test \code{}DBQueryServiceRate\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-3JCT8W-1}}\RA{}
+\LA{}....test \code{}DBQueryBaseDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-3FE8t4-1}}\RA{}
+\LA{}....test \code{}DBQueryServerBaseDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-1BF5dX-1}}\RA{}
+\LA{}....test \code{}DBQueryRequestBaseDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-38E973-1}}\RA{}
+\LA{}....test \code{}DBQueryServerTravelDistance\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-R0me6-1}}\RA{}
+\LA{}....test \code{}DBQueryServerTravelDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-2cvcHE-1}}\RA{}
+\LA{}....test \code{}DBQueryServerCruisingDistance\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-okQ1Q-1}}\RA{}
+\LA{}....test \code{}DBQueryServerCruisingDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-1RB1yH-1}}\RA{}
+\LA{}....test \code{}DBQueryServerServiceDistance\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-3T7Ecl-1}}\RA{}
+\LA{}....test \code{}DBQueryServerServiceDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-2c14Sj-1}}\RA{}
+\LA{}....test \code{}DBQueryRequestDetourDistance\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-sBkzR-1}}\RA{}
+\LA{}....test \code{}DBQueryRequestDetourDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-1qIOK3-1}}\RA{}
+\LA{}....test \code{}DBQueryRequestTransitDistance\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-3yzPUp-1}}\RA{}
+\LA{}....test \code{}DBQueryRequestTransitDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-NiwSo-1}}\RA{}
+\LA{}....test \code{}DBQueryServerTravelDuration\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-1TZ4V8-1}}\RA{}
+\LA{}....test \code{}DBQueryServerTravelDurationTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-2bE0DP-1}}\RA{}
+\LA{}....test \code{}DBQueryRequestPickupDuration\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-2weSRk-1}}\RA{}
+\LA{}....test \code{}DBQueryRequestPickupDurationTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-PC7q9-1}}\RA{}
+\LA{}....test \code{}DBQueryRequestTransitDuration\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-2uQ1SB-1}}\RA{}
+\LA{}....test \code{}DBQueryRequestTransitDurationTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-PQhaD-1}}\RA{}
+\LA{}....test \code{}DBQueryRequestTravelDuration\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-4MzTFA-1}}\RA{}
+\LA{}....test \code{}DBQueryRequestTravelDurationTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-ALSer-1}}\RA{}
+\LA{}....test \code{}DBQueryRequestDepartureTime\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-XFEEZ-1}}\RA{}
+\LA{}....test \code{}DBQueryServerDepartureTime\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-1TCj44-1}}\RA{}
+\LA{}....test \code{}DBQueryRequestArrivalTime\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-1dQ6qD-1}}\RA{}
+\LA{}....test \code{}DBQueryServerArrivalTime\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-1angPN-1}}\RA{}
+\nwendcode{}\nwbegindocs{15}\nwdocspar
+
+\subsubsection{{\tt{}DBQuery}(2)}
+Test {\tt{}DBQuery}(2) with a simple select statement. The road network has
+46 vertices, plus 1 dummy vertex for a total of 47 vertices.
+\nwenddocs{}\nwbegincode{16}\sublabel{NW36uAHF-RMkGl-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-RMkGl-1}}}\moddef{....test \code{}DBQuery\edoc{}(2)~{\nwtagstyle{}\subpageref{NW36uAHF-RMkGl-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQuery("SELECT COUNT (*) FROM V", 1);
+  if (output[0] != 47) \{
+    Print("[FAIL] DBQuery(2)");
+    Print("\\tExpected 47; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQuery(2)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-RMkGl-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-RMkGl-1}\nwendcode{}\nwbegindocs{17}\nwdocspar
+
+\subsubsection{{\tt{}DBQueryServer}(1)}
+\nwenddocs{}\nwbegincode{18}\sublabel{NW36uAHF-3O8MFc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-3O8MFc-1}}}\moddef{....test \code{}DBQueryServer\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-3O8MFc-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryServer(1);
+  if (!(output[0] == 1
+     && output[1] == -10
+     && output[2] == 1
+     && output[3] == 500
+     && output[4] == 22
+     && output[5] == 0
+     && output[6] == 0)) \{
+    Print("[FAIL] DBQueryServer(1)");
+    Print("\\tExpected \{uid=1, q=-10, e=1, l=500, o=22, d=0, b=0\}; got");
+    storage.printUser(output);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServer(1)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-3O8MFc-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-3O8MFc-1}\nwendcode{}\nwbegindocs{19}\nwdocspar
+\subsubsection{{\tt{}DBQueryRequest}(1)}
+\nwenddocs{}\nwbegincode{20}\sublabel{NW36uAHF-1C0pk3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-1C0pk3-1}}}\moddef{....test \code{}DBQueryRequest\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-1C0pk3-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryRequest(10);
+  if (!(output[0] == 10
+     && output[1] == 1
+     && output[2] == 0
+     && output[3] == 500
+     && output[4] == 4
+     && output[5] == 30
+     && output[6] == 172)) \{
+    Print("[FAIL] DBQueryRequest(1)");
+    Print("\\tExpected \{uid=10, q=1, e=0, l=500, o=4, d=30, b=172\}; got");
+    storage.printUser(output);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryRequest(1)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-1C0pk3-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-1C0pk3-1}\nwendcode{}\nwbegindocs{21}\nwdocspar
+\subsubsection{{\tt{}DBQueryQueuedRequests}(1)}
+In the test database, Request 11 is never assigned. It appears
+at $t=5$ and times out after $t=35$.
+\nwenddocs{}\nwbegincode{22}\sublabel{NW36uAHF-1Ao9lm-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-1Ao9lm-1}}}\moddef{....test \code{}DBQueryQueuedRequests\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-1Ao9lm-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  \LA{}......test \code{}DBQueryQueuedRequests\edoc{}(1) at t=0~{\nwtagstyle{}\subpageref{NW36uAHF-2K5XSE-1}}\RA{}
+  \LA{}......test \code{}DBQueryQueuedRequests\edoc{}(1) at t=5~{\nwtagstyle{}\subpageref{NW36uAHF-3LO5Sc-1}}\RA{}
+  \LA{}......test \code{}DBQueryQueuedRequests\edoc{}(1) at t=35~{\nwtagstyle{}\subpageref{NW36uAHF-3GJyuc-1}}\RA{}
+  \LA{}......test \code{}DBQueryQueuedRequests\edoc{}(1) at t=36~{\nwtagstyle{}\subpageref{NW36uAHF-182uIY-1}}\RA{}
+\}
+\nwendcode{}\nwbegindocs{23}\nwdocspar
+As Request 11 has not appeared yet at $t=0$, we expect
+{\tt{}DBQueryQueuedRequests} to return nothing.
+\nwenddocs{}\nwbegincode{24}\sublabel{NW36uAHF-2K5XSE-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-2K5XSE-1}}}\moddef{......test \code{}DBQueryQueuedRequests\edoc{}(1) at t=0~{\nwtagstyle{}\subpageref{NW36uAHF-2K5XSE-1}}}\endmoddef\nwused{\\{NW36uAHF-1Ao9lm-1}}
+\{
+  int output[] = storage.DBQueryQueuedRequests(0);
+  if (!(output.length/7 == 0)) \{
+    Print("[FAIL] DBQueryQueuedRequests(1) (1/4)");
+    Print("\\tExpected 0; got "+output.length/7);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryQueuedRequests(1) (1/4)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-2K5XSE-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-2K5XSE-1}\nwendcode{}\nwbegindocs{25}\nwdocspar
+At $t=5$, Request 11 should have just appeared and be queued up.
+\nwenddocs{}\nwbegincode{26}\sublabel{NW36uAHF-3LO5Sc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-3LO5Sc-1}}}\moddef{......test \code{}DBQueryQueuedRequests\edoc{}(1) at t=5~{\nwtagstyle{}\subpageref{NW36uAHF-3LO5Sc-1}}}\endmoddef\nwused{\\{NW36uAHF-1Ao9lm-1}}
+\{
+  int output[] = storage.DBQueryQueuedRequests(5);
+  if (!(output.length/7 == 1)) \{
+    Print("[FAIL] DBQueryQueuedRequests(1) (2/4)");
+    Print("\\tExpected 1; got "+output.length/7);
+    count_failed++;
+  \} else if (!(output[0] == 11)
+    && (output[1] == 1)
+    && (output[2] == 5)
+    && (output[3] == 500)
+    && (output[4] == 1)
+    && (output[5] == 32)
+    && (output[6] == 194)) \{
+    Print("[FAIL] DBQueryQueuedRequests(1) (2/4)");
+    Print("\\tExpected \{uid=11, q=1, e=5, l=500, o=1, d=32, b=194\}; got");
+    storage.printUser(output);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryQueuedRequests(1) (2/4)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-3LO5Sc-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-3LO5Sc-1}\nwendcode{}\nwbegindocs{27}\nwdocspar
+At $t=35$, Request 11 should be just about to time out but still in the queue.
+\nwenddocs{}\nwbegincode{28}\sublabel{NW36uAHF-3GJyuc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-3GJyuc-1}}}\moddef{......test \code{}DBQueryQueuedRequests\edoc{}(1) at t=35~{\nwtagstyle{}\subpageref{NW36uAHF-3GJyuc-1}}}\endmoddef\nwused{\\{NW36uAHF-1Ao9lm-1}}
+\{
+  int output[] = storage.DBQueryQueuedRequests(35);
+  if (!(output.length/7 == 1)) \{
+    Print("[FAIL] DBQueryQueuedRequests(1) (3/4)");
+    Print("\\tExpected 1; got "+output.length/7);
+    count_failed++;
+  \} else if (!(output[0] == 11)
+    && (output[1] == 1)
+    && (output[2] == 5)
+    && (output[3] == 500)
+    && (output[4] == 1)
+    && (output[5] == 32)
+    && (output[6] == 194)) \{
+    Print("[FAIL] DBQueryQueuedRequests(1) (3/4)");
+    Print("\\tExpected \{uid=11, q=1, e=5, l=500, o=1, d=32, b=194\}; got");
+    storage.printUser(output);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryQueuedRequests(1) (3/4)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-3GJyuc-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-3GJyuc-1}\nwendcode{}\nwbegindocs{29}\nwdocspar
+At $t>35$, Request 11 should be timed out and there should be no queued
+requests.
+\nwenddocs{}\nwbegincode{30}\sublabel{NW36uAHF-182uIY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-182uIY-1}}}\moddef{......test \code{}DBQueryQueuedRequests\edoc{}(1) at t=36~{\nwtagstyle{}\subpageref{NW36uAHF-182uIY-1}}}\endmoddef\nwused{\\{NW36uAHF-1Ao9lm-1}}
+\{
+  int output[] = storage.DBQueryQueuedRequests(36);
+  if (!(output.length/7 == 0)) \{
+    Print("[FAIL] DBQueryQueuedRequests(1) (4/4)");
+    Print("\\tExpected 0; got "+output.length/7);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryQueuedRequests(1) (4/4)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-182uIY-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-182uIY-1}\nwendcode{}\nwbegindocs{31}\nwdocspar
+\subsubsection{{\tt{}DBQueryServerLocationsAll}(1)}
+We focus on four cases. When $t=0$, neither service has begun service yet,
+and we expect no locations to be returned. When $t=44$, Server 2 is out of
+server, and Server 1 has just arrived at vertex 30. When $t=45$, Server 1
+has just ended service. When $t=46$, both Server 1 and Server 2 are out of
+service.
+\nwenddocs{}\nwbegincode{32}\sublabel{NW36uAHF-2dAmyn-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-2dAmyn-1}}}\moddef{....test \code{}DBQueryServerLocationsAll\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-2dAmyn-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  \LA{}......test \code{}DBQueryServerLocationsAll\edoc{}(1) when $t=0$~{\nwtagstyle{}\subpageref{NW36uAHF-2sf19g-1}}\RA{}
+  \LA{}......test \code{}DBQueryServerLocationsAll\edoc{}(1) when $t=44$~{\nwtagstyle{}\subpageref{NW36uAHF-HtL0w-1}}\RA{}
+  \LA{}......test \code{}DBQueryServerLocationsAll\edoc{}(1) when $t=45$~{\nwtagstyle{}\subpageref{NW36uAHF-HH7DS-1}}\RA{}
+  \LA{}......test \code{}DBQueryServerLocationsAll\edoc{}(1) when $t=46$~{\nwtagstyle{}\subpageref{NW36uAHF-Hqj38-1}}\RA{}
+\}
+\nwendcode{}\nwbegindocs{33}\nwdocspar
+\nwenddocs{}\nwbegincode{34}\sublabel{NW36uAHF-2sf19g-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-2sf19g-1}}}\moddef{......test \code{}DBQueryServerLocationsAll\edoc{}(1) when $t=0$~{\nwtagstyle{}\subpageref{NW36uAHF-2sf19g-1}}}\endmoddef\nwused{\\{NW36uAHF-2dAmyn-1}}
+\{
+  int output[] = storage.DBQueryServerLocationsAll(0);
+  if (!(output.length/3 == 0)) \{
+    Print("[FAIL] DBQueryServerLocationsAll(1) (1/4)");
+    Print("\\tExpected 0; got "+output.length/3);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServerLocationsAll(1) (1/4)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-2sf19g-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-2sf19g-1}\nwendcode{}\nwbegindocs{35}\nwdocspar
+Keep an out of for false fail due to wrong ordering that we assume out
+the {\tt{}output} array.
+\nwenddocs{}\nwbegincode{36}\sublabel{NW36uAHF-HtL0w-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-HtL0w-1}}}\moddef{......test \code{}DBQueryServerLocationsAll\edoc{}(1) when $t=44$~{\nwtagstyle{}\subpageref{NW36uAHF-HtL0w-1}}}\endmoddef\nwused{\\{NW36uAHF-2dAmyn-1}}
+\{
+  int output[] = storage.DBQueryServerLocationsAll(44);
+  if (!(output.length/3 == 2)) \{
+    Print("[FAIL] DBQueryServerLocationsAll(1) (2/4)");
+    Print("\\tExpected 2; got "+output.length/3);
+    count_failed++;
+  \} else if (!(output[0] == 1
+    && output[1] == 44
+    && output[2] == 30
+    && output[3] == 2
+    && output[4] == 28
+    && output[5] == 5)) \{
+    Print("[FAIL] DBQueryServerLocationsAll(1) (2/4)");
+    Print("Expected (sid=1, t=44, v=30) (sid=2, t=28, v=5); got "
+      + "(sid="+output[0]+", t="+output[1]+", v="+output[2]+") "
+      + "(sid="+output[3]+", t="+output[4]+", v="+output[5]+")");
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServerLocationsAll(1) (2/4)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-HtL0w-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-HtL0w-1}\nwendcode{}\nwbegindocs{37}\nwdocspar
+At $t=45$, Server 1 has just ended service and is now at the dummy vertex.
+Its last known location was at vertex 30 at $t=44$. We expect to see vertex
+30 returned here.
+Again keep an eye out for false fail due to ordering.
+\nwenddocs{}\nwbegincode{38}\sublabel{NW36uAHF-HH7DS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-HH7DS-1}}}\moddef{......test \code{}DBQueryServerLocationsAll\edoc{}(1) when $t=45$~{\nwtagstyle{}\subpageref{NW36uAHF-HH7DS-1}}}\endmoddef\nwused{\\{NW36uAHF-2dAmyn-1}}
+\{
+  int output[] = storage.DBQueryServerLocationsAll(45);
+  if (!(output.length/3 == 2)) \{
+    Print("[FAIL] DBQueryServerLocationsAll(1) (3/4)");
+    Print("\\tExpected 2; got "+output.length/3);
+    count_failed++;
+  \} else if (!(output[0] == 1
+    && output[1] == 44
+    && output[2] == 30
+    && output[3] == 2
+    && output[4] == 28
+    && output[5] == 5)) \{
+    Print("[FAIL] DBQueryServerLocationsAll(1) (3/4)");
+    Print("Expected (sid=1, t=44, v=30) (sid=2, t=28, v=5); got "
+      + "(sid="+output[0]+", t="+output[1]+", v="+output[2]+") "
+      + "(sid="+output[3]+", t="+output[4]+", v="+output[5]+")");
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServerLocationsAll(1) (3/4)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-HH7DS-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-HH7DS-1}\nwendcode{}\nwbegindocs{39}\nwdocspar
+We should get the same output at $t=45$ and at $t=46$.
+\nwenddocs{}\nwbegincode{40}\sublabel{NW36uAHF-Hqj38-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-Hqj38-1}}}\moddef{......test \code{}DBQueryServerLocationsAll\edoc{}(1) when $t=46$~{\nwtagstyle{}\subpageref{NW36uAHF-Hqj38-1}}}\endmoddef\nwused{\\{NW36uAHF-2dAmyn-1}}
+\{
+  int output[] = storage.DBQueryServerLocationsAll(45);
+  if (!(output.length/3 == 2)) \{
+    Print("[FAIL] DBQueryServerLocationsAll(1) (4/4)");
+    Print("\\tExpected 2; got "+output.length/3);
+    count_failed++;
+  \} else if (!(output[0] == 1
+    && output[1] == 44
+    && output[2] == 30
+    && output[3] == 2
+    && output[4] == 28
+    && output[5] == 5)) \{
+    Print("[FAIL] DBQueryServerLocationsAll(1) (4/4)");
+    Print("Expected (sid=1, t=44, v=30) (sid=2, t=28, v=5); got "
+      + "(sid="+output[0]+", t="+output[1]+", v="+output[2]+") "
+      + "(sid="+output[3]+", t="+output[4]+", v="+output[5]+")");
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServerLocationsAll(1) (4/4)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-Hqj38-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-Hqj38-1}\nwendcode{}\nwbegindocs{41}\nwdocspar
+\subsubsection{{\tt{}DBQueryServerLocationsActive}(1)}
+\nwenddocs{}\nwbegincode{42}\sublabel{NW36uAHF-3GrgPk-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-3GrgPk-1}}}\moddef{....test \code{}DBQueryServerLocationsActive\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-3GrgPk-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  \LA{}......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=0$~{\nwtagstyle{}\subpageref{NW36uAHF-1JQJiP-1}}\RA{}
+  \LA{}......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=1$~{\nwtagstyle{}\subpageref{NW36uAHF-1Iuh5h-1}}\RA{}
+  \LA{}......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=44$~{\nwtagstyle{}\subpageref{NW36uAHF-4O1SEc-1}}\RA{}
+  \LA{}......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=45$~{\nwtagstyle{}\subpageref{NW36uAHF-4NnQjy-1}}\RA{}
+  \LA{}......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=46$~{\nwtagstyle{}\subpageref{NW36uAHF-4OQ470-1}}\RA{}
+\}
+\nwendcode{}\nwbegindocs{43}\nwdocspar
+\nwenddocs{}\nwbegincode{44}\sublabel{NW36uAHF-1JQJiP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-1JQJiP-1}}}\moddef{......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=0$~{\nwtagstyle{}\subpageref{NW36uAHF-1JQJiP-1}}}\endmoddef\nwused{\\{NW36uAHF-3GrgPk-1}}
+\{
+  int output[] = storage.DBQueryServerLocationsActive(0);
+  if (!(output.length/3 == 0)) \{
+    Print("[FAIL] DBQueryServerLocationsActive(1) (1/5)");
+    Print("\\tExpected 0; got "+output.length/3);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServerLocationsActive(1) (1/5)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-1JQJiP-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-1JQJiP-1}\nwendcode{}\nwbegindocs{45}\nwdocspar
+\nwenddocs{}\nwbegincode{46}\sublabel{NW36uAHF-1Iuh5h-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-1Iuh5h-1}}}\moddef{......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=1$~{\nwtagstyle{}\subpageref{NW36uAHF-1Iuh5h-1}}}\endmoddef\nwused{\\{NW36uAHF-3GrgPk-1}}
+\{
+  int output[] = storage.DBQueryServerLocationsActive(1);
+  if (!(output.length/3 == 1)) \{
+    Print("[FAIL] DBQueryServerLocationsActive(1) (2/5)");
+    Print("\\tExpected 1; got "+output.length/3);
+    count_failed++;
+  \} else if (!(output[0] == 1
+    && output[1] == 1
+    && output[2] == 22)) \{
+    Print("[FAIL] DBQueryServerLocationsActive(1) (2/5)");
+    Print("Expected (sid=1, t=1, v=22); got "
+      + "(sid="+output[0]+", t="+output[1]+", v="+output[2]+")");
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServerLocationsActive(1) (2/5)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-1Iuh5h-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-1Iuh5h-1}\nwendcode{}\nwbegindocs{47}\nwdocspar
+\nwenddocs{}\nwbegincode{48}\sublabel{NW36uAHF-4O1SEc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-4O1SEc-1}}}\moddef{......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=44$~{\nwtagstyle{}\subpageref{NW36uAHF-4O1SEc-1}}}\endmoddef\nwused{\\{NW36uAHF-3GrgPk-1}}
+\{
+  int output[] = storage.DBQueryServerLocationsActive(44);
+  if (!(output.length/3 == 1)) \{
+    Print("[FAIL] DBQueryServerLocationsActive(1) (3/5)");
+    Print("\\tExpected 1; got "+output.length/3);
+    count_failed++;
+  \} else if (!(output[0] == 1
+    && output[1] == 44
+    && output[2] == 30)) \{
+    Print("[FAIL] DBQueryServerLocationsActive(1) (3/5)");
+    Print("Expected (sid=1, t=44, v=30); got "
+      + "(sid="+output[0]+", t="+output[1]+", v="+output[2]+")");
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServerLocationsActive(1) (3/5)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-4O1SEc-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-4O1SEc-1}\nwendcode{}\nwbegindocs{49}\nwdocspar
+Server 1 just ends service at $t=45$. We expect it to not appear for this
+query because it is no longer active.
+\nwenddocs{}\nwbegincode{50}\sublabel{NW36uAHF-4NnQjy-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-4NnQjy-1}}}\moddef{......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=45$~{\nwtagstyle{}\subpageref{NW36uAHF-4NnQjy-1}}}\endmoddef\nwused{\\{NW36uAHF-3GrgPk-1}}
+\{
+  int output[] = storage.DBQueryServerLocationsActive(45);
+  if (!(output.length/3 == 0)) \{
+    Print("[FAIL] DBQueryServerLocationsActive(1) (4/5)");
+    Print("\\tExpected 0; got "+output.length/3);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServerLocationsActive(1) (4/5)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-4NnQjy-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-4NnQjy-1}\nwendcode{}\nwbegindocs{51}\nwdocspar
+\nwenddocs{}\nwbegincode{52}\sublabel{NW36uAHF-4OQ470-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-4OQ470-1}}}\moddef{......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=46$~{\nwtagstyle{}\subpageref{NW36uAHF-4OQ470-1}}}\endmoddef\nwused{\\{NW36uAHF-3GrgPk-1}}
+\{
+  int output[] = storage.DBQueryServerLocationsActive(46);
+  if (!(output.length/3 == 0)) \{
+    Print("[FAIL] DBQueryServerLocationsActive(1) (5/5)");
+    Print("\\tExpected 0; got "+output.length/3);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServerLocationsActive(1) (5/5)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-4OQ470-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-4OQ470-1}\nwendcode{}\nwbegindocs{53}\nwdocspar
+\subsubsection{{\tt{}DBQueryRoute}(1)}
+\nwenddocs{}\nwbegincode{54}\sublabel{NW36uAHF-4TWZqG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-4TWZqG-1}}}\moddef{....test \code{}DBQueryRoute\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-4TWZqG-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryRoute(2);
+  if (!(output.length == 6)) \{
+    Print("[FAIL] DBQueryRoute(1)");
+    Print("\\tExpected 6; got "+output.length);
+    count_failed++;
+  \} else if (!(output[0] == 10)
+    && (output[1] == 45)
+    && (output[2] == 19)
+    && (output[3] == 40)
+    && (output[4] == 28)
+    && (output[5] == 5)) \{
+    Print("[FAIL] DBQueryRoute(1)");
+    Print("\\tExpected (10, 45) (19, 40) (28, 5); got ");
+    storage.printRoute(output);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryRoute(1)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-4TWZqG-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-4TWZqG-1}\nwendcode{}\nwbegindocs{55}\nwdocspar
+\subsubsection{{\tt{}DBQueryRouteRemaining}(2)}
+We use Server 2 to test {\tt{}DBQueryRouteRemaining}. Server 2 appears at $t=10$.
+We expect the remaining route to not include its origin when $t>=10$, but
+include the origin when $t<10$. Even though Server 2 is not in service when
+$t<10$, we can still query its remaining route in case the simulation engine
+wants to make adjustments to the route.
+\nwenddocs{}\nwbegincode{56}\sublabel{NW36uAHF-1LMBE6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-1LMBE6-1}}}\moddef{....test \code{}DBQueryRouteRemaining\edoc{}(2)~{\nwtagstyle{}\subpageref{NW36uAHF-1LMBE6-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+  \LA{}......test \code{}DBQueryRouteRemaining\edoc{}(2) at $t=9$~{\nwtagstyle{}\subpageref{NW36uAHF-3Kf6AF-1}}\RA{}
+  \LA{}......test \code{}DBQueryRouteRemaining\edoc{}(2) at $t=10$~{\nwtagstyle{}\subpageref{NW36uAHF-3AIjLv-1}}\RA{}
+  \LA{}......test \code{}DBQueryRouteRemaining\edoc{}(2) at $t=11$~{\nwtagstyle{}\subpageref{NW36uAHF-39Mi27-1}}\RA{}
+\nwendcode{}\nwbegindocs{57}\nwdocspar
+\nwenddocs{}\nwbegincode{58}\sublabel{NW36uAHF-3Kf6AF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-3Kf6AF-1}}}\moddef{......test \code{}DBQueryRouteRemaining\edoc{}(2) at $t=9$~{\nwtagstyle{}\subpageref{NW36uAHF-3Kf6AF-1}}}\endmoddef\nwused{\\{NW36uAHF-1LMBE6-1}}
+\{
+  int output[] = storage.DBQueryRouteRemaining(2, 9);
+  if (!(output.length == 6)) \{
+    Print("[FAIL] DBQueryRouteRemaining(2) (1/3)");
+    Print("\\tExpected 6; got "+output.length);
+    count_failed++;
+  \} else if (!(output[0] == 10
+    && output[1] == 45
+    && output[2] == 19
+    && output[3] == 40
+    && output[4] == 28
+    && output[5] == 5)) \{
+    Print("[FAIL] DBQueryRouteRemaining(2) (1/3)");
+    Print("\\tExpected (10, 45) (19, 40) (28 5); got ");
+    storage.printRoute(output);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryRouteRemaining(2) (1/3)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-3Kf6AF-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-3Kf6AF-1}\nwendcode{}\nwbegindocs{59}\nwdocspar
+\nwenddocs{}\nwbegincode{60}\sublabel{NW36uAHF-3AIjLv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-3AIjLv-1}}}\moddef{......test \code{}DBQueryRouteRemaining\edoc{}(2) at $t=10$~{\nwtagstyle{}\subpageref{NW36uAHF-3AIjLv-1}}}\endmoddef\nwused{\\{NW36uAHF-1LMBE6-1}}
+\{
+  int output[] = storage.DBQueryRouteRemaining(2, 10);
+  if (!(output.length == 4)) \{
+    Print("[FAIL] DBQueryRouteRemaining(2) (2/3)");
+    Print("\\tExpected 4; got "+output.length);
+    count_failed++;
+  \} else if (!(output[0] == 19
+    && output[1] == 40
+    && output[2] == 28
+    && output[3] == 5)) \{
+    Print("[FAIL] DBQueryRouteRemaining(2) (2/3)");
+    Print("\\tExpected (19, 40) (28 5); got ");
+    storage.printRoute(output);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryRouteRemaining(2) (2/3)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-3AIjLv-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-3AIjLv-1}\nwendcode{}\nwbegindocs{61}\nwdocspar
+\nwenddocs{}\nwbegincode{62}\sublabel{NW36uAHF-39Mi27-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-39Mi27-1}}}\moddef{......test \code{}DBQueryRouteRemaining\edoc{}(2) at $t=11$~{\nwtagstyle{}\subpageref{NW36uAHF-39Mi27-1}}}\endmoddef\nwused{\\{NW36uAHF-1LMBE6-1}}
+\{
+  int output[] = storage.DBQueryRouteRemaining(2, 11);
+  if (!(output.length == 4)) \{
+    Print("[FAIL] DBQueryRouteRemaining(2) (3/3)");
+    Print("\\tExpected 4; got "+output.length);
+    count_failed++;
+  \} else if (!(output[0] == 19
+    && output[1] == 40
+    && output[2] == 28
+    && output[3] == 5)) \{
+    Print("[FAIL] DBQueryRouteRemaining(2) (3/3)");
+    Print("\\tExpected (19, 40) (28 5); got ");
+    storage.printRoute(output);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryRouteRemaining(2) (3/3)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-39Mi27-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-39Mi27-1}\nwendcode{}\nwbegindocs{63}\nwdocspar
+\subsubsection{{\tt{}DBQuerySchedule}(1)}
+\nwenddocs{}\nwbegincode{64}\sublabel{NW36uAHF-3I1Rij-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-3I1Rij-1}}}\moddef{....test \code{}DBQuerySchedule\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-3I1Rij-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQuerySchedule(1);
+  if (!(output.length == 16)) \{
+    Print("[FAIL] DBQuerySchedule(1)");
+    Print("\\tExpected 16; got "+output.length);
+    count_failed++;
+  \} else if (!(output[0] == 1
+    && output[1] == 22
+    && output[2] == 1
+    && output[3] == 0
+    && output[4] == 25
+    && output[5] == 4
+    && output[6] == 0
+    && output[7] == 10
+    && output[8] == 44
+    && output[9] == 30
+    && output[10] == 0
+    && output[11] == 10
+    && output[12] == 45
+    && output[13] == 0
+    && output[14] == 1
+    && output[15] == 0)) \{
+    Print("[FAIL] DBQuerySchedule(1)");
+    Print("\\tExpected (1, 22, 1, 0) (25, 4, 0, 10) "
+      + "(44, 30, 0, 10) (45, 0, 1, 0); got ");
+    storage.printSchedule(output);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQuerySchedule(1)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-3I1Rij-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-3I1Rij-1}\nwendcode{}\nwbegindocs{65}\nwdocspar
+\subsubsection{{\tt{}DBQueryScheduleRemaining}(2)}
+The key here is that a dummy stop is \emph{always} returned if it exists,
+because a dummy is not a real destination, in other words the server has not
+really ended service yet.
+\nwenddocs{}\nwbegincode{66}\sublabel{NW36uAHF-3vhAZd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-3vhAZd-1}}}\moddef{....test \code{}DBQueryScheduleRemaining\edoc{}(2)~{\nwtagstyle{}\subpageref{NW36uAHF-3vhAZd-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  \LA{}......test \code{}DBQueryScheduleRemaining\edoc{}(2) when $t=43$~{\nwtagstyle{}\subpageref{NW36uAHF-qvLii-1}}\RA{}
+  \LA{}......test \code{}DBQueryScheduleRemaining\edoc{}(2) when $t=44$~{\nwtagstyle{}\subpageref{NW36uAHF-qQtYO-1}}\RA{}
+  \LA{}......test \code{}DBQueryScheduleRemaining\edoc{}(2) when $t=45$~{\nwtagstyle{}\subpageref{NW36uAHF-rCT0y-1}}\RA{}
+  \LA{}......test \code{}DBQueryScheduleRemaining\edoc{}(2) when $t=46$~{\nwtagstyle{}\subpageref{NW36uAHF-qbTw8-1}}\RA{}
+\}
+\nwendcode{}\nwbegindocs{67}\nwdocspar
+\nwenddocs{}\nwbegincode{68}\sublabel{NW36uAHF-qvLii-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-qvLii-1}}}\moddef{......test \code{}DBQueryScheduleRemaining\edoc{}(2) when $t=43$~{\nwtagstyle{}\subpageref{NW36uAHF-qvLii-1}}}\endmoddef\nwused{\\{NW36uAHF-3vhAZd-1}}
+\{
+  int output[] = storage.DBQueryScheduleRemaining(1, 43);
+  if (!(output.length == 8)) \{
+    Print("[FAIL] DBQueryScheduleRemaining(2) (1/4)");
+    Print("\\tExpected 8; got "+output.length);
+    count_failed++;
+  \} else if (!(output[0] == 44
+    && output[1] == 30
+    && output[2] == 0
+    && output[3] == 10
+    && output[4] == 45
+    && output[5] == 0
+    && output[6] == 1
+    && output[7] == 0)) \{
+    Print("[FAIL] DBQueryScheduleRemaining(2) (1/4)");
+    Print("\\tExpected (44, 30, 0, 10) (45, 0, 1, 0); got ");
+    storage.printSchedule(output);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryScheduleRemaining(2) (1/4)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-qvLii-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-qvLii-1}\nwendcode{}\nwbegindocs{69}\nwdocspar
+\nwenddocs{}\nwbegincode{70}\sublabel{NW36uAHF-qQtYO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-qQtYO-1}}}\moddef{......test \code{}DBQueryScheduleRemaining\edoc{}(2) when $t=44$~{\nwtagstyle{}\subpageref{NW36uAHF-qQtYO-1}}}\endmoddef\nwused{\\{NW36uAHF-3vhAZd-1}}
+\{
+  int output[] = storage.DBQueryScheduleRemaining(1, 44);
+  if (!(output.length == 4)) \{
+    Print("[FAIL] DBQueryScheduleRemaining(2) (2/4)");
+    Print("\\tExpected 4; got "+output.length);
+    count_failed++;
+  \} else if (!(output[0] == 45
+    && output[1] == 0
+    && output[2] == 1
+    && output[3] == 0)) \{
+    Print("[FAIL] DBQueryScheduleRemaining(2) (2/4)");
+    Print("\\tExpected (45, 0, 1, 0); got ");
+    storage.printSchedule(output);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryScheduleRemaining(2) (2/4)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-qQtYO-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-qQtYO-1}\nwendcode{}\nwbegindocs{71}\nwdocspar
+At $t=45$, Server 1 has just arrived at its dummy destination. We are still
+going to return this destination as its remaining schedule.
+\nwenddocs{}\nwbegincode{72}\sublabel{NW36uAHF-rCT0y-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-rCT0y-1}}}\moddef{......test \code{}DBQueryScheduleRemaining\edoc{}(2) when $t=45$~{\nwtagstyle{}\subpageref{NW36uAHF-rCT0y-1}}}\endmoddef\nwused{\\{NW36uAHF-3vhAZd-1}}
+\{
+  int output[] = storage.DBQueryScheduleRemaining(1, 45);
+  if (!(output.length == 4)) \{
+    Print("[FAIL] DBQueryScheduleRemaining(2) (3/4)");
+    Print("\\tExpected 4; got "+output.length);
+    count_failed++;
+  \} else if (!(output[0] == 45
+    && output[1] == 0
+    && output[2] == 1
+    && output[3] == 0)) \{
+    Print("[FAIL] DBQueryScheduleRemaining(2) (3/4)");
+    Print("\\tExpected (45, 0, 1, 0); got ");
+    storage.printSchedule(output);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryScheduleRemaining(2) (3/4)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-rCT0y-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-rCT0y-1}\nwendcode{}\nwbegindocs{73}\nwdocspar
+\nwenddocs{}\nwbegincode{74}\sublabel{NW36uAHF-qbTw8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-qbTw8-1}}}\moddef{......test \code{}DBQueryScheduleRemaining\edoc{}(2) when $t=46$~{\nwtagstyle{}\subpageref{NW36uAHF-qbTw8-1}}}\endmoddef\nwused{\\{NW36uAHF-3vhAZd-1}}
+\{
+  int output[] = storage.DBQueryScheduleRemaining(1, 46);
+  if (!(output.length == 4)) \{
+    Print("[FAIL] DBQueryScheduleRemaining(2) (4/4)");
+    Print("\\tExpected 4; got "+output.length);
+    count_failed++;
+  \} else if (!(output[0] == 45
+    && output[1] == 0
+    && output[2] == 1
+    && output[3] == 0)) \{
+    Print("[FAIL] DBQueryScheduleRemaining(2) (4/4)");
+    Print("\\tExpected (45, 0, 1, 0); got ");
+    storage.printSchedule(output);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryScheduleRemaining(2) (4/4)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-qbTw8-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-qbTw8-1}\nwendcode{}\nwbegindocs{75}\nwdocspar
+\subsubsection{{\tt{}DBQueryCurrentLoad}(2)}
+Load changes happen right as a server arrives at a pick-up or drop-off.
+Server 1 makes a pick-up at $t=25$ and a drop-off at $t=44$. At $t=0$, Server 1
+has not appeared yet and its current load is empty.
+\nwenddocs{}\nwbegincode{76}\sublabel{NW36uAHF-2jSLg0-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-2jSLg0-1}}}\moddef{....test \code{}DBQueryCurrentLoad\edoc{}(2)~{\nwtagstyle{}\subpageref{NW36uAHF-2jSLg0-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  \LA{}......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=0$~{\nwtagstyle{}\subpageref{NW36uAHF-GriL0-1}}\RA{}
+  \LA{}......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=24$~{\nwtagstyle{}\subpageref{NW36uAHF-1zadoG-1}}\RA{}
+  \LA{}......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=25$~{\nwtagstyle{}\subpageref{NW36uAHF-1yp4Lg-1}}\RA{}
+  \LA{}......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=26$~{\nwtagstyle{}\subpageref{NW36uAHF-1zLee0-1}}\RA{}
+  \LA{}......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=44$~{\nwtagstyle{}\subpageref{NW36uAHF-1zaa1w-1}}\RA{}
+\}
+\nwendcode{}\nwbegindocs{77}\nwdocspar
+\nwenddocs{}\nwbegincode{78}\sublabel{NW36uAHF-GriL0-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-GriL0-1}}}\moddef{......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=0$~{\nwtagstyle{}\subpageref{NW36uAHF-GriL0-1}}}\endmoddef\nwused{\\{NW36uAHF-2jSLg0-1}}
+\{
+  int output[] = storage.DBQueryCurrentLoad(1, 0);
+  if (!(output.length == 0)) \{
+    Print("[FAIL] DBQueryCurrentLoad(2) (1/5)");
+    Print("\\tExpected empty; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryCurrentLoad(2) (1/5)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-GriL0-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-GriL0-1}\nwendcode{}\nwbegindocs{79}\nwdocspar
+\nwenddocs{}\nwbegincode{80}\sublabel{NW36uAHF-1zadoG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-1zadoG-1}}}\moddef{......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=24$~{\nwtagstyle{}\subpageref{NW36uAHF-1zadoG-1}}}\endmoddef\nwused{\\{NW36uAHF-2jSLg0-1}}
+\{
+  int output[] = storage.DBQueryCurrentLoad(1, 24);
+  if (!(output[0] == -10)) \{
+    Print("[FAIL] DBQueryCurrentLoad(2) (2/5)");
+    Print("\\tExpected -10; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryCurrentLoad(2) (2/5)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-1zadoG-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-1zadoG-1}\nwendcode{}\nwbegindocs{81}\nwdocspar
+\nwenddocs{}\nwbegincode{82}\sublabel{NW36uAHF-1yp4Lg-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-1yp4Lg-1}}}\moddef{......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=25$~{\nwtagstyle{}\subpageref{NW36uAHF-1yp4Lg-1}}}\endmoddef\nwused{\\{NW36uAHF-2jSLg0-1}}
+\{
+  int output[] = storage.DBQueryCurrentLoad(1, 25);
+  if (!(output[0] == -9)) \{
+    Print("[FAIL] DBQueryCurrentLoad(2) (3/5)");
+    Print("\\tExpected -9; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryCurrentLoad(2) (3/5)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-1yp4Lg-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-1yp4Lg-1}\nwendcode{}\nwbegindocs{83}\nwdocspar
+\nwenddocs{}\nwbegincode{84}\sublabel{NW36uAHF-1zLee0-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-1zLee0-1}}}\moddef{......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=26$~{\nwtagstyle{}\subpageref{NW36uAHF-1zLee0-1}}}\endmoddef\nwused{\\{NW36uAHF-2jSLg0-1}}
+\{
+  int output[] = storage.DBQueryCurrentLoad(1, 26);
+  if (!(output[0] == -9)) \{
+    Print("[FAIL] DBQueryCurrentLoad(2) (4/5)");
+    Print("\\tExpected -9; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryCurrentLoad(2) (4/5)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-1zLee0-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-1zLee0-1}\nwendcode{}\nwbegindocs{85}\nwdocspar
+\nwenddocs{}\nwbegincode{86}\sublabel{NW36uAHF-1zaa1w-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-1zaa1w-1}}}\moddef{......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=44$~{\nwtagstyle{}\subpageref{NW36uAHF-1zaa1w-1}}}\endmoddef\nwused{\\{NW36uAHF-2jSLg0-1}}
+\{
+  int output[] = storage.DBQueryCurrentLoad(1, 44);
+  if (!(output[0] == -10)) \{
+    Print("[FAIL] DBQueryCurrentLoad(2) (5/5)");
+    Print("\\tExpected -10; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryCurrentLoad(2) (5/5)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-1zaa1w-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-1zaa1w-1}\nwendcode{}\nwbegindocs{87}\nwdocspar
+\subsubsection{{\tt{}DBQueryCountVertices}(0)}
+Method {\tt{}DBQueryCountVertices}(0) does not include the dummy vertex 0 in its
+count.
+\nwenddocs{}\nwbegincode{88}\sublabel{NW36uAHF-2FbhMk-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-2FbhMk-1}}}\moddef{....test \code{}DBQueryCountVertices\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-2FbhMk-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryCountVertices();
+  if (!(output[0] == 46)) \{
+    Print("[FAIL] DBQueryCountVertices(0)");
+    Print("\\tExpected 46; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryCountVertices(0)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-2FbhMk-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-2FbhMk-1}\nwendcode{}\nwbegindocs{89}\nwdocspar
+\subsubsection{{\tt{}DBQueryCountEdges}(0)}
+Method {\tt{}DBQueryCountEdges}(0) does not include edges to the dummy vertex 0 in
+its count.
+\nwenddocs{}\nwbegincode{90}\sublabel{NW36uAHF-fMEma-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-fMEma-1}}}\moddef{....test \code{}DBQueryCountEdges\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-fMEma-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryCountEdges();
+  if (!(output[0] == 104)) \{
+    Print("[FAIL] DBQueryCountEdges(0)");
+    Print("\\tExpected 104; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryCountEdges(0)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-fMEma-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-fMEma-1}\nwendcode{}\nwbegindocs{91}\nwdocspar
+\subsubsection{{\tt{}DBQueryVertex}(1)}
+\nwenddocs{}\nwbegincode{92}\sublabel{NW36uAHF-HmHFv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-HmHFv-1}}}\moddef{....test \code{}DBQueryVertex\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-HmHFv-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryVertex(22);
+  if (!(output[0] == 1040750029)
+    && (output[1] == 306639030)) \{
+    Print("[FAIL] DBQueryVertex(1)");
+    Print("\\tExpected \{1040750029, 306639030\}; got "
+      + "\{"+output[0]+", "+output[1]+"\}");
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryVertex(1)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-HmHFv-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-HmHFv-1}\nwendcode{}\nwbegindocs{93}\nwdocspar
+\subsubsection{{\tt{}DBQueryEdge}(2)}
+\nwenddocs{}\nwbegincode{94}\sublabel{NW36uAHF-4e874K-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-4e874K-1}}}\moddef{....test \code{}DBQueryEdge\edoc{}(2)~{\nwtagstyle{}\subpageref{NW36uAHF-4e874K-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryEdge(22, 1);
+  if (!(output[0] == 71)
+    && (output[1] == 10)) \{
+    Print("[FAIL] DBQueryEdge(2)");
+    Print("\\tExpected \{71, 10\}; got "
+      + "\{"+output[0]+", "+output[1]+"\}");
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryEdge(2)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-4e874K-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-4e874K-1}\nwendcode{}\nwbegindocs{95}\nwdocspar
+\subsubsection{{\tt{}DBQueryStatisticsEdges}(0)}
+\nwenddocs{}\nwbegincode{96}\sublabel{NW36uAHF-3wfpeD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-3wfpeD-1}}}\moddef{....test \code{}DBQueryStatisticsEdges\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-3wfpeD-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryStatisticsEdges();
+  if (!(output[0] == 46)
+    && (output[1] == 83)
+    && (output[2] == 61)
+    && (output[3] == 10)
+    && (output[4] == 10)
+    && (output[5] == 10)) \{
+    Print("[FAIL] DBQueryStatisticsEdges(0)");
+    Print("\\tExpected \{46, 83, 61, 10, 10, 10\}; got \{"+output[0]+", "+output[1]
+      + ", "+output[2]+", "+output[3]+", "+output[4]+", "+output[5]+"\}");
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryStatisticsEdges(0)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-3wfpeD-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-3wfpeD-1}\nwendcode{}\nwbegindocs{97}\nwdocspar
+\subsubsection{{\tt{}DBQueryMBR}(0)}
+\nwenddocs{}\nwbegincode{98}\sublabel{NW36uAHF-2Yf5B8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-2Yf5B8-1}}}\moddef{....test \code{}DBQueryMBR\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-2Yf5B8-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryMBR();
+  if (!(output[0] == 1040738577)
+    && (output[1] == 1040803253)
+    && (output[2] == 306608700)
+    && (output[3] == 306659874)) \{
+    Print("[FAIL] DBQueryMBR(0)");
+    Print("\\tExpected \{1040738577, 1040803253, 306608700, 306659874\}; "
+      + "got \{"+output[0]+", "+output[1]+", "+output[2]+", "+output[3]+"\}");
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryMBR(0)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-2Yf5B8-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-2Yf5B8-1}\nwendcode{}\nwbegindocs{99}\nwdocspar
+\subsubsection{{\tt{}DBQueryCountServers}(0)}
+\nwenddocs{}\nwbegincode{100}\sublabel{NW36uAHF-2qdA7h-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-2qdA7h-1}}}\moddef{....test \code{}DBQueryCountServers\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-2qdA7h-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryCountServers();
+  if (!(output[0] == 2)) \{
+    Print("[FAIL] DBQueryCountServers(0)");
+    Print("\\tExpected 2; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryCountServers(0)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-2qdA7h-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-2qdA7h-1}\nwendcode{}\nwbegindocs{101}\nwdocspar
+\subsubsection{{\tt{}DBQueryCountRequests}(0)}
+\nwenddocs{}\nwbegincode{102}\sublabel{NW36uAHF-3azEeu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-3azEeu-1}}}\moddef{....test \code{}DBQueryCountRequests\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-3azEeu-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryCountRequests();
+  if (!(output[0] == 2)) \{
+    Print("[FAIL] DBQueryCountRequests(0)");
+    Print("\\tExpected 2; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryCountRequests(0)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-3azEeu-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-3azEeu-1}\nwendcode{}\nwbegindocs{103}\nwdocspar
+\subsubsection{{\tt{}DBQueryServerPendingAssignments}(2)}
+The {\tt{}DBQueryServerPendingAssignments} method gives the number of requests that
+a server still needs to drop-off (or pick-up and drop-off) at a given time.
+Server 1 makes its drop-off at $t=44$.
+\nwenddocs{}\nwbegincode{104}\sublabel{NW36uAHF-g6QHQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-g6QHQ-1}}}\moddef{....test \code{}DBQueryServerPendingAssignments\edoc{}(2)~{\nwtagstyle{}\subpageref{NW36uAHF-g6QHQ-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+  \LA{}......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=43$~{\nwtagstyle{}\subpageref{NW36uAHF-Fmx82-1}}\RA{}
+  \LA{}......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=44$~{\nwtagstyle{}\subpageref{NW36uAHF-FA6yE-1}}\RA{}
+  \LA{}......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=45$~{\nwtagstyle{}\subpageref{NW36uAHF-FXU7y-1}}\RA{}
+\nwendcode{}\nwbegindocs{105}\nwdocspar
+\nwenddocs{}\nwbegincode{106}\sublabel{NW36uAHF-Fmx82-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-Fmx82-1}}}\moddef{......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=43$~{\nwtagstyle{}\subpageref{NW36uAHF-Fmx82-1}}}\endmoddef\nwused{\\{NW36uAHF-g6QHQ-1}}
+\{
+  int output[] = storage.DBQueryServerPendingAssignments(1, 43);
+  if (!(output.length == 1)) \{
+    Print("[FAIL] DBQueryServerPendingAssignments(2) (1/3)");
+    Print("\\tExpected 1; got "+output.length);
+    count_failed++;
+  \} else if (!(output[0] == 10)) \{
+    Print("[FAIL] DBQueryServerPendingAssignments(2) (1/3)");
+    Print("\\tExpected 10; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServerPendingAssignments(2) (1/3)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-Fmx82-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-Fmx82-1}\nwendcode{}\nwbegindocs{107}\nwdocspar
+\nwenddocs{}\nwbegincode{108}\sublabel{NW36uAHF-FA6yE-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-FA6yE-1}}}\moddef{......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=44$~{\nwtagstyle{}\subpageref{NW36uAHF-FA6yE-1}}}\endmoddef\nwused{\\{NW36uAHF-g6QHQ-1}}
+\{
+  int output[] = storage.DBQueryServerPendingAssignments(1,44);
+  if (!(output.length == 0)) \{
+    Print("[FAIL] DBQueryServerPendingAssignments(2) (2/3)");
+    Print("\\tExpected 0; got "+output.length);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServerPendingAssignments(2) (2/3)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-FA6yE-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-FA6yE-1}\nwendcode{}\nwbegindocs{109}\nwdocspar
+\nwenddocs{}\nwbegincode{110}\sublabel{NW36uAHF-FXU7y-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-FXU7y-1}}}\moddef{......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=45$~{\nwtagstyle{}\subpageref{NW36uAHF-FXU7y-1}}}\endmoddef\nwused{\\{NW36uAHF-g6QHQ-1}}
+\{
+  int output[] = storage.DBQueryServerPendingAssignments(1,45);
+  if (!(output.length == 0)) \{
+    Print("[FAIL] DBQueryServerPendingAssignments(2) (3/3)");
+    Print("\\tExpected 0; got "+output.length);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServerPendingAssignments(2) (3/3)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-FXU7y-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-FXU7y-1}\nwendcode{}\nwbegindocs{111}\nwdocspar
+\subsubsection{{\tt{}DBQueryServerCompletedAssignments}(2)}
+\nwenddocs{}\nwbegincode{112}\sublabel{NW36uAHF-1HkuSf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-1HkuSf-1}}}\moddef{....test \code{}DBQueryServerCompletedAssignments\edoc{}(2)~{\nwtagstyle{}\subpageref{NW36uAHF-1HkuSf-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+  \LA{}......test \code{}DBQueryServerCompletedAssignments\edoc{}(2) when $t=43$~{\nwtagstyle{}\subpageref{NW36uAHF-29NaUg-1}}\RA{}
+  \LA{}......test \code{}DBQueryServerCompletedAssignments\edoc{}(2) when $t=44$~{\nwtagstyle{}\subpageref{NW36uAHF-29kLI6-1}}\RA{}
+  \LA{}......test \code{}DBQueryServerCompletedAssignments\edoc{}(2) when $t=45$~{\nwtagstyle{}\subpageref{NW36uAHF-297ZOY-1}}\RA{}
+\nwendcode{}\nwbegindocs{113}\nwdocspar
+\nwenddocs{}\nwbegincode{114}\sublabel{NW36uAHF-29NaUg-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-29NaUg-1}}}\moddef{......test \code{}DBQueryServerCompletedAssignments\edoc{}(2) when $t=43$~{\nwtagstyle{}\subpageref{NW36uAHF-29NaUg-1}}}\endmoddef\nwused{\\{NW36uAHF-1HkuSf-1}}
+\{
+  int output[] = storage.DBQueryServerCompletedAssignments(1, 43);
+  if (!(output.length == 0)) \{
+    Print("[FAIL] DBQueryServerCompletedAssignments(2) (1/3)");
+    Print("\\tExpected 0; got "+output.length);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServerCompletedAssignments(2) (1/3)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-29NaUg-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-29NaUg-1}\nwendcode{}\nwbegindocs{115}\nwdocspar
+\nwenddocs{}\nwbegincode{116}\sublabel{NW36uAHF-29kLI6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-29kLI6-1}}}\moddef{......test \code{}DBQueryServerCompletedAssignments\edoc{}(2) when $t=44$~{\nwtagstyle{}\subpageref{NW36uAHF-29kLI6-1}}}\endmoddef\nwused{\\{NW36uAHF-1HkuSf-1}}
+\{
+  int output[] = storage.DBQueryServerCompletedAssignments(1, 44);
+  if (!(output.length == 1)) \{
+    Print("[FAIL] DBQueryServerCompletedAssignments(2) (2/3)");
+    Print("\\tExpected 1; got "+output.length);
+    count_failed++;
+  \} else if (!(output[0] == 10)) \{
+    Print("[FAIL] DBQueryServerCompletedAssignments(2) (2/3)");
+    Print("\\tExpected 10; got "+output.length);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServerCompletedAssignments(2) (2/3)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-29kLI6-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-29kLI6-1}\nwendcode{}\nwbegindocs{117}\nwdocspar
+\nwenddocs{}\nwbegincode{118}\sublabel{NW36uAHF-297ZOY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-297ZOY-1}}}\moddef{......test \code{}DBQueryServerCompletedAssignments\edoc{}(2) when $t=45$~{\nwtagstyle{}\subpageref{NW36uAHF-297ZOY-1}}}\endmoddef\nwused{\\{NW36uAHF-1HkuSf-1}}
+\{
+  int output[] = storage.DBQueryServerCompletedAssignments(1, 45);
+  if (!(output.length == 1)) \{
+    Print("[FAIL] DBQueryServerCompletedAssignments(2) (3/3)");
+    Print("\\tExpected 1; got "+output.length);
+    count_failed++;
+  \} else if (!(output[0] == 10)) \{
+    Print("[FAIL] DBQueryServerCompletedAssignments(2) (3/3)");
+    Print("\\tExpected 10; got "+output.length);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServerCompletedAssignments(2) (3/3)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-297ZOY-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-297ZOY-1}\nwendcode{}\nwbegindocs{119}\nwdocspar
+\subsubsection{{\tt{}DBQueryServiceRate}(0)}
+\nwenddocs{}\nwbegincode{120}\sublabel{NW36uAHF-3JCT8W-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-3JCT8W-1}}}\moddef{....test \code{}DBQueryServiceRate\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-3JCT8W-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryServiceRate();
+  if (!(output[0] == 50)) \{
+    Print("[FAIL] DBQueryServiceRate(0)");
+    Print("\\tExpected 50; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServiceRate(0)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-3JCT8W-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-3JCT8W-1}\nwendcode{}\nwbegindocs{121}\nwdocspar
+\subsubsection{{\tt{}DBQueryBaseDistanceTotal}(0)}
+\nwenddocs{}\nwbegincode{122}\sublabel{NW36uAHF-3FE8t4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-3FE8t4-1}}}\moddef{....test \code{}DBQueryBaseDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-3FE8t4-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryBaseDistanceTotal();
+  if (!(output[0] == 532)) \{
+    Print("[FAIL] DBQueryBaseDistanceTotal(0)");
+    Print("\\tExpected 532; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryBaseDistanceTotal(0)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-3FE8t4-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-3FE8t4-1}\nwendcode{}\nwbegindocs{123}\nwdocspar
+\subsubsection{{\tt{}DBQueryServerBaseDistanceTotal}(0)}
+\nwenddocs{}\nwbegincode{124}\sublabel{NW36uAHF-1BF5dX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-1BF5dX-1}}}\moddef{....test \code{}DBQueryServerBaseDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-1BF5dX-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryServerBaseDistanceTotal();
+  if (!(output[0] == 166)) \{
+    Print("[FAIL] DBQueryServerBaseDistanceTotal(0)");
+    Print("\\tExpected 166; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServerBaseDistanceTotal(0)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-1BF5dX-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-1BF5dX-1}\nwendcode{}\nwbegindocs{125}\nwdocspar
+\subsubsection{{\tt{}DBQueryRequestBaseDistanceTotal}(0)}
+\nwenddocs{}\nwbegincode{126}\sublabel{NW36uAHF-38E973-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-38E973-1}}}\moddef{....test \code{}DBQueryRequestBaseDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-38E973-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryRequestBaseDistanceTotal();
+  if (!(output[0] == 366)) \{
+    Print("[FAIL] DBQueryRequestBaseDistanceTotal(0)");
+    Print("\\tExpected 366; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryRequestBaseDistanceTotal(0)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-38E973-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-38E973-1}\nwendcode{}\nwbegindocs{127}\nwdocspar
+\subsubsection{{\tt{}DBQueryServerTravelDistance}(1)}
+\nwenddocs{}\nwbegincode{128}\sublabel{NW36uAHF-R0me6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-R0me6-1}}}\moddef{....test \code{}DBQueryServerTravelDistance\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-R0me6-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryServerTravelDistance(1);
+  if (!(output[0] == 387)) \{
+    Print("[FAIL] DBQueryServerTravelDistance(1)");
+    Print("\\tExpected 387; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServerTravelDistance(1)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-R0me6-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-R0me6-1}\nwendcode{}\nwbegindocs{129}\nwdocspar
+\subsubsection{{\tt{}DBQueryServerTravelDistanceTotal}(0)}
+\nwenddocs{}\nwbegincode{130}\sublabel{NW36uAHF-2cvcHE-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-2cvcHE-1}}}\moddef{....test \code{}DBQueryServerTravelDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-2cvcHE-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryServerTravelDistanceTotal();
+  if (!(output[0] == 553)) \{
+    Print("[FAIL] DBQueryServerTravelDistanceTotal(0)");
+    Print("\\tExpected 553; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServerTravelDistanceTotal(0)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-2cvcHE-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-2cvcHE-1}\nwendcode{}\nwbegindocs{131}\nwdocspar
+\subsubsection{{\tt{}DBQueryServerCruisingDistance}(1)}
+\nwenddocs{}\nwbegincode{132}\sublabel{NW36uAHF-okQ1Q-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-okQ1Q-1}}}\moddef{....test \code{}DBQueryServerCruisingDistance\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-okQ1Q-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryServerCruisingDistance(1);
+  if (!(output[0] == 213)) \{
+    Print("[FAIL] DBQueryServerCruisingDistance(1)");
+    Print("\\tExpected 213; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServerCruisingDistance(1)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-okQ1Q-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-okQ1Q-1}\nwendcode{}\nwbegindocs{133}\nwdocspar
+\subsubsection{{\tt{}DBQueryServerCruisingDistanceTotal}(0)}
+\nwenddocs{}\nwbegincode{134}\sublabel{NW36uAHF-1RB1yH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-1RB1yH-1}}}\moddef{....test \code{}DBQueryServerCruisingDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-1RB1yH-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryServerCruisingDistanceTotal();
+  if (!(output[0] == 379)) \{
+    Print("[FAIL] DBQueryServerCruisingDistanceTotal(0)");
+    Print("\\tExpected 379; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServerCruisingDistanceTotal(0)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-1RB1yH-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-1RB1yH-1}\nwendcode{}\nwbegindocs{135}\nwdocspar
+\subsubsection{{\tt{}DBQueryServerServiceDistance}(1)}
+\nwenddocs{}\nwbegincode{136}\sublabel{NW36uAHF-3T7Ecl-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-3T7Ecl-1}}}\moddef{....test \code{}DBQueryServerServiceDistance\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-3T7Ecl-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryServerServiceDistance(1);
+  if (!(output[0] == 174)) \{
+    Print("[FAIL] DBQueryServerServiceDistance(1)");
+    Print("\\tExpected 174; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServerServiceDistance(1)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-3T7Ecl-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-3T7Ecl-1}\nwendcode{}\nwbegindocs{137}\nwdocspar
+\subsubsection{{\tt{}DBQueryServerServiceDistanceTotal}(0)}
+\nwenddocs{}\nwbegincode{138}\sublabel{NW36uAHF-2c14Sj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-2c14Sj-1}}}\moddef{....test \code{}DBQueryServerServiceDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-2c14Sj-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryServerServiceDistanceTotal();
+  if (!(output[0] == 174)) \{
+    Print("[FAIL] DBQueryServerServiceDistanceTotal(0)");
+    Print("\\tExpected 174; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServerServiceDistanceTotal(0)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-2c14Sj-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-2c14Sj-1}\nwendcode{}\nwbegindocs{139}\nwdocspar
+\subsubsection{{\tt{}DBQueryRequestDetourDistance}(1)}
+\nwenddocs{}\nwbegincode{140}\sublabel{NW36uAHF-sBkzR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-sBkzR-1}}}\moddef{....test \code{}DBQueryRequestDetourDistance\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-sBkzR-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryRequestDetourDistance(10);
+  if (!(output[0] == 2)) \{
+    Print("[FAIL] DBQueryRequestDetourDistance(1)");
+    Print("\\tExpected 2; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryRequestDetourDistance(1)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-sBkzR-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-sBkzR-1}\nwendcode{}\nwbegindocs{141}\nwdocspar
+\subsubsection{{\tt{}DBQueryRequestDetourDistanceTotal}(0)}
+\nwenddocs{}\nwbegincode{142}\sublabel{NW36uAHF-1qIOK3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-1qIOK3-1}}}\moddef{....test \code{}DBQueryRequestDetourDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-1qIOK3-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryRequestDetourDistanceTotal();
+  if (!(output[0] == 2)) \{
+    Print("[FAIL] DBQueryRequestDetourDistanceTotal(0)");
+    Print("\\tExpected 2; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryRequestDetourDistanceTotal(0)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-1qIOK3-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-1qIOK3-1}\nwendcode{}\nwbegindocs{143}\nwdocspar
+\subsubsection{{\tt{}DBQueryRequestTransitDistance}(1)}
+\nwenddocs{}\nwbegincode{144}\sublabel{NW36uAHF-3yzPUp-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-3yzPUp-1}}}\moddef{....test \code{}DBQueryRequestTransitDistance\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-3yzPUp-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryRequestTransitDistance(10);
+  if (!(output[0] == 174)) \{
+    Print("[FAIL] DBQueryRequestTransitDistance(1)");
+    Print("\\tExpected 174; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryRequestTransitDistance(1)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-3yzPUp-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-3yzPUp-1}\nwendcode{}\nwbegindocs{145}\nwdocspar
+\subsubsection{{\tt{}DBQueryRequestTransitDistanceTotal}(0)}
+\nwenddocs{}\nwbegincode{146}\sublabel{NW36uAHF-NiwSo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-NiwSo-1}}}\moddef{....test \code{}DBQueryRequestTransitDistanceTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-NiwSo-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryRequestTransitDistanceTotal();
+  if (!(output[0] == 174)) \{
+    Print("[FAIL] DBQueryRequestTransitDistanceTotal(0)");
+    Print("\\tExpected 174; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryRequestTransitDistanceTotal(0)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-NiwSo-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-NiwSo-1}\nwendcode{}\nwbegindocs{147}\nwdocspar
+\subsubsection{{\tt{}DBQueryServerTravelDuration}(1)}
+\nwenddocs{}\nwbegincode{148}\sublabel{NW36uAHF-1TZ4V8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-1TZ4V8-1}}}\moddef{....test \code{}DBQueryServerTravelDuration\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-1TZ4V8-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryServerTravelDuration(1);
+  if (!(output[0] == 44)) \{
+    Print("[FAIL] DBQueryServerTravelDuration(1)");
+    Print("\\tExpected 44; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServerTravelDuration(1)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-1TZ4V8-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-1TZ4V8-1}\nwendcode{}\nwbegindocs{149}\nwdocspar
+\subsubsection{{\tt{}DBQueryServerTravelDurationTotal}(0)}
+\nwenddocs{}\nwbegincode{150}\sublabel{NW36uAHF-2bE0DP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-2bE0DP-1}}}\moddef{....test \code{}DBQueryServerTravelDurationTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-2bE0DP-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryServerTravelDurationTotal();
+  if (!(output[0] == 62)) \{
+    Print("[FAIL] DBQueryServerTravelDurationTotal(0)");
+    Print("\\tExpected 62; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServerTravelDurationTotal(0)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-2bE0DP-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-2bE0DP-1}\nwendcode{}\nwbegindocs{151}\nwdocspar
+\subsubsection{{\tt{}DBQueryRequestPickupDuration}(1)}
+Request 10 gets picked up at $t=25$, but appears on the road network at $t=0$.
+\nwenddocs{}\nwbegincode{152}\sublabel{NW36uAHF-2weSRk-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-2weSRk-1}}}\moddef{....test \code{}DBQueryRequestPickupDuration\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-2weSRk-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryRequestPickupDuration(10);
+  if (!(output[0] == 25)) \{
+    Print("[FAIL] DBQueryRequestPickupDuration(1)");
+    Print("\\tExpected 25; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryRequestPickupDuration(1)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-2weSRk-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-2weSRk-1}\nwendcode{}\nwbegindocs{153}\nwdocspar
+\subsubsection{{\tt{}DBQueryRequestPickupDurationTotal}(0)}
+\nwenddocs{}\nwbegincode{154}\sublabel{NW36uAHF-PC7q9-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-PC7q9-1}}}\moddef{....test \code{}DBQueryRequestPickupDurationTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-PC7q9-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryRequestPickupDurationTotal();
+  if (!(output[0] == 25)) \{
+    Print("[FAIL] DBQueryRequestPickupDurationTotal()");
+    Print("\\tExpected 25; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryRequestPickupDurationTotal()");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-PC7q9-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-PC7q9-1}\nwendcode{}\nwbegindocs{155}\nwdocspar
+\subsubsection{{\tt{}DBQueryRequestTransitDuration}(1)}
+Request 10 is picked up at $t=25$ and dropped off at $t=44$.
+\nwenddocs{}\nwbegincode{156}\sublabel{NW36uAHF-2uQ1SB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-2uQ1SB-1}}}\moddef{....test \code{}DBQueryRequestTransitDuration\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-2uQ1SB-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryRequestTransitDuration(10);
+  if (!(output[0] == 19)) \{
+    Print("[FAIL] DBQueryRequestTransitDuration(1)");
+    Print("\\tExpected 19; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryRequestTransitDuration(1)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-2uQ1SB-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-2uQ1SB-1}\nwendcode{}\nwbegindocs{157}\nwdocspar
+\subsubsection{{\tt{}DBQueryRequestTransitDurationTotal}(0)}
+\nwenddocs{}\nwbegincode{158}\sublabel{NW36uAHF-PQhaD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-PQhaD-1}}}\moddef{....test \code{}DBQueryRequestTransitDurationTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-PQhaD-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryRequestTransitDurationTotal();
+  if (!(output[0] == 19)) \{
+    Print("[FAIL] DBQueryRequestTransitDurationTotal(0)");
+    Print("\\tExpected 19; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryRequestTransitDurationTotal(0)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-PQhaD-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-PQhaD-1}\nwendcode{}\nwbegindocs{159}\nwdocspar
+\subsubsection{{\tt{}DBQueryRequestTravelDuration}(1)}
+Request 11 appeared at time $t=0$ and was finally dropped off at $t=44$. Its
+travel duration is $44-0=44$.
+\nwenddocs{}\nwbegincode{160}\sublabel{NW36uAHF-4MzTFA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-4MzTFA-1}}}\moddef{....test \code{}DBQueryRequestTravelDuration\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-4MzTFA-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryRequestTravelDuration(10);
+  if (!(output[0] == 44)) \{
+    Print("[FAIL] DBQueryRequestTravelDuration(1)");
+    Print("\\tExpected 44; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryRequestTravelDuration(1)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-4MzTFA-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-4MzTFA-1}\nwendcode{}\nwbegindocs{161}\nwdocspar
+\subsubsection{{\tt{}DBQueryRequestTravelDurationTotal}(0)}
+\nwenddocs{}\nwbegincode{162}\sublabel{NW36uAHF-ALSer-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-ALSer-1}}}\moddef{....test \code{}DBQueryRequestTravelDurationTotal\edoc{}(0)~{\nwtagstyle{}\subpageref{NW36uAHF-ALSer-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryRequestTravelDurationTotal();
+  if (!(output[0] == 44)) \{
+    Print("[FAIL] DBQueryRequestTravelDurationTotal(0)");
+    Print("\\tExpected 44; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryRequestTravelDurationTotal(0)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-ALSer-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-ALSer-1}\nwendcode{}\nwbegindocs{163}\nwdocspar
+\subsubsection{{\tt{}DBQueryRequestDepartureTime}(1)}
+\nwenddocs{}\nwbegincode{164}\sublabel{NW36uAHF-XFEEZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-XFEEZ-1}}}\moddef{....test \code{}DBQueryRequestDepartureTime\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-XFEEZ-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryRequestDepartureTime(10);
+  if (!(output[0] == 25)) \{
+    Print("[FAIL] DBQueryRequestDepartureTime(1)");
+    Print("\\tExpected 25; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryRequestDepartureTime(1)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-XFEEZ-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-XFEEZ-1}\nwendcode{}\nwbegindocs{165}\nwdocspar
+\subsubsection{{\tt{}DBQueryServerDepartureTime}(1)}
+\nwenddocs{}\nwbegincode{166}\sublabel{NW36uAHF-1TCj44-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-1TCj44-1}}}\moddef{....test \code{}DBQueryServerDepartureTime\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-1TCj44-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryServerDepartureTime(1);
+  if (!(output[0] == 1)) \{
+    Print("[FAIL] DBQueryServerDepartureTime(1)");
+    Print("\\tExpected 1; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServerDepartureTime(1)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-1TCj44-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-1TCj44-1}\nwendcode{}\nwbegindocs{167}\nwdocspar
+\subsubsection{{\tt{}DBQueryRequestArrivalTime}(1)}
+\nwenddocs{}\nwbegincode{168}\sublabel{NW36uAHF-1dQ6qD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-1dQ6qD-1}}}\moddef{....test \code{}DBQueryRequestArrivalTime\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-1dQ6qD-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryRequestArrivalTime(10);
+  if (!(output[0] == 44)) \{
+    Print("[FAIL] DBQueryRequestArrivalTime(1)");
+    Print("\\tExpected 44; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryRequestArrivalTime(1)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-1dQ6qD-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-1dQ6qD-1}\nwendcode{}\nwbegindocs{169}\nwdocspar
+\subsubsection{{\tt{}DBQueryServerArrivalTime}(1)}
+\nwenddocs{}\nwbegincode{170}\sublabel{NW36uAHF-1angPN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-1angPN-1}}}\moddef{....test \code{}DBQueryServerArrivalTime\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-1angPN-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
+\{
+  int output[] = storage.DBQueryServerArrivalTime(1);
+  if (!(output[0] == 45)) \{
+    Print("[FAIL] DBQueryServerArrivalTime(1)");
+    Print("\\tExpected 45; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryServerArrivalTime(1)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-1angPN-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-1angPN-1}\nwendcode{}\nwbegindocs{171}\nwdocspar
+
+\subsection{Write Tests}
+\label{sec:write-tests}
+\nwenddocs{}\nwbegincode{172}\sublabel{NW36uAHF-4HcfWS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-4HcfWS-1}}}\moddef{..run write tests~{\nwtagstyle{}\subpageref{NW36uAHF-4HcfWS-1}}}\endmoddef\nwused{\\{NW36uAHF-1IzyGx-1}}
+\LA{}....test \code{}DBUpdateEdgeSpeed\edoc{}(3)~{\nwtagstyle{}\subpageref{NW36uAHF-4FqPVU-1}}\RA{}
+\LA{}....test \code{}DBAddNewRequest\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-BAsgV-1}}\RA{}
+\LA{}....test \code{}DBAddNewServer\edoc{}(2)~{\nwtagstyle{}\subpageref{NW36uAHF-3pzOz8-1}}\RA{}
+\LA{}....test \code{}DBUpdateServerRoute\edoc{}(2)~{\nwtagstyle{}\subpageref{NW36uAHF-1e7qm0-1}}\RA{}
+\LA{}....test \code{}DBUpdateServerAddToSchedule\edoc{}(4)~{\nwtagstyle{}\subpageref{NW36uAHF-3t5oWt-1}}\RA{}
+\LA{}....test \code{}DBUpdateServerRemoveFromSchedule\edoc{}(4)~{\nwtagstyle{}\subpageref{NW36uAHF-2DOHvZ-1}}\RA{}
+\nwendcode{}\nwbegindocs{173}\nwdocspar
+\subsubsection{{\tt{}DBUpdateEdgeSpeed}(3)}
+\nwenddocs{}\nwbegincode{174}\sublabel{NW36uAHF-4FqPVU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-4FqPVU-1}}}\moddef{....test \code{}DBUpdateEdgeSpeed\edoc{}(3)~{\nwtagstyle{}\subpageref{NW36uAHF-4FqPVU-1}}}\endmoddef\nwused{\\{NW36uAHF-4HcfWS-1}}
+\{
+  storage.DBUpdateEdgeSpeed(22, 1, 11);
+  int[] output = storage.DBQueryEdge(22, 1);
+  if (!(output[1] == 11)) \{
+    Print("[FAIL] DBUpdateEdgeSpeed(3)");
+    Print("\\tExpected 11; got "+output[1]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBUpdateEdgeSpeed(3)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-4FqPVU-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-4FqPVU-1}\nwendcode{}\nwbegindocs{175}\nwdocspar
+\subsubsection{{\tt{}DBAddNewRequest}(1)}
+There are already four users in the test database,
+and the largest {\tt{}uid} is 11; when we add a new request, we
+expect the identifier to return 12.
+\nwenddocs{}\nwbegincode{176}\sublabel{NW36uAHF-BAsgV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-BAsgV-1}}}\moddef{....test \code{}DBAddNewRequest\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-BAsgV-1}}}\endmoddef\nwused{\\{NW36uAHF-4HcfWS-1}}
+\{
+  int uid = storage.DBAddNewRequest(
+    new int[] \{ 1, 0, 200, 45, 24, 63 \});
+  if (!(uid == 12)) \{
+    Print("[FAIL] DBAddNewRequest(1)");
+    Print("\\tExpected 12; got "+uid);
+    count_failed++;
+  \} else \{
+    int[] output = storage.DBQueryRequest(uid);
+    if (!(output[0] == uid
+      && output[1] == 1
+      && output[2] == 0
+      && output[3] == 200
+      && output[4] == 45
+      && output[5] == 24
+      && output[6] == 63)) \{
+      Print("[FAIL] DBAddNewRequest(1)");
+      Print("\\tExpected \{ 12, 1, 0, 200, 45, 24, 63 \}; got ");
+      storage.printUser(output);
+      count_failed++;
+    \} else \{
+      Print("[PASS] DBAddNewRequest(1)");
+      count_passed++;
+    \}
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-BAsgV-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-BAsgV-1}\nwendcode{}\nwbegindocs{177}\nwdocspar
+\subsubsection{{\tt{}DBAddNewServer}(2)}
+Now we expect the identifier to be 13 when we add a new server.
+\nwenddocs{}\nwbegincode{178}\sublabel{NW36uAHF-3pzOz8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-3pzOz8-1}}}\moddef{....test \code{}DBAddNewServer\edoc{}(2)~{\nwtagstyle{}\subpageref{NW36uAHF-3pzOz8-1}}}\endmoddef\nwused{\\{NW36uAHF-4HcfWS-1}}
+\{
+  int uid = storage.DBAddNewServer(
+    new int[] \{ -1, 0, 200, 27, 0, 0 \},
+    new int[] \{ 0, 27, 1, 0 \});
+  if (!(uid == 13)) \{
+    Print("[FAIL] DBAddNewServer(2)");
+    Print("\\tExpected 13; got "+uid);
+    count_failed++;
+  \} else \{
+    int[] output = storage.DBQueryServer(uid);
+    if (!(output[0] == uid
+      && output[1] == -1
+      && output[2] == 0
+      && output[3] == 200
+      && output[4] == 27
+      && output[5] == 0
+      && output[6] == 0)) \{
+      Print("[FAIL] DBAddNewServer(2)");
+      Print("\\tExpected \{ 13, -1, 0, 200, 27, 0, 0 \}; got ");
+      storage.printUser(output);
+      count_failed++;
+    \} else \{
+      output = storage.DBQueryRoute(uid);
+      if (!(output[0] == 0
+        && output[1] == 27
+        && output[2] == 1
+        && output[3] == 0)) \{
+        Print("[FAIL] DBAddNewServer(2)");
+        Print("\\tExpected (0, 27) (1, 0); got ");
+        storage.printRoute(output);
+        count_failed++;
+      \} else \{
+        output = storage.DBQuerySchedule(uid);
+        if (!(output[0] == 0
+          && output[1] == 27
+          && output[2] == uid
+          && output[3] == 0
+          && output[4] == 1
+          && output[5] == 0
+          && output[6] == uid
+          && output[7] == 0)) \{
+          Print("[FAIL] DBAddNewServer(2)");
+          Print("\\tExpected (0, 27, 13, 0) (1, 0, 13, 0); got ");
+          storage.printSchedule(output);
+          count_failed++;
+        \} else \{
+          Print("[PASS] DBAddNewServer(2)");
+          count_passed++;
+        \}
+      \}
+    \}
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-3pzOz8-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-3pzOz8-1}\nwendcode{}\nwbegindocs{179}\nwdocspar
+\subsubsection{{\tt{}DBUpdateServerRoute}(2)}
+We try to update the route for newly-inserted Server 13.
+\nwenddocs{}\nwbegincode{180}\sublabel{NW36uAHF-1e7qm0-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-1e7qm0-1}}}\moddef{....test \code{}DBUpdateServerRoute\edoc{}(2)~{\nwtagstyle{}\subpageref{NW36uAHF-1e7qm0-1}}}\endmoddef\nwused{\\{NW36uAHF-4HcfWS-1}}
+\{
+  storage.DBUpdateServerRoute(13,
+    new int[] \{ 0, 27, 7, 44, 14, 45, 15, 0 \},
+    new int[] \{ \});
+  int[] output = storage.DBQueryRoute(13);
+  if (!(output[0] == 0
+    && output[1] == 27
+    && output[2] == 7
+    && output[3] == 44
+    && output[4] == 14
+    && output[5] == 45
+    && output[6] == 15
+    && output[7] == 0)) \{
+    Print("[FAIL] DBUpdateServerRoute(2)");
+    Print("\\tExpected (0, 27) (7, 44) (14, 45) (15, 0); got ");
+    storage.printRoute(output);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBUpdateServerRoute(2)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-1e7qm0-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-1e7qm0-1}\nwendcode{}\nwbegindocs{181}\nwdocspar
+\subsubsection{{\tt{}DBUpdateServerAddToSchedule}(4)}
+We try to add Request 12 to Server 13's schedule. Then we check the route,
+schedule, and status of Request 12.
+\nwenddocs{}\nwbegincode{182}\sublabel{NW36uAHF-3t5oWt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-3t5oWt-1}}}\moddef{....test \code{}DBUpdateServerAddToSchedule\edoc{}(4)~{\nwtagstyle{}\subpageref{NW36uAHF-3t5oWt-1}}}\endmoddef\nwused{\\{NW36uAHF-4HcfWS-1}}
+  \LA{}......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) route~{\nwtagstyle{}\subpageref{NW36uAHF-3GEMZN-1}}\RA{}
+  \LA{}......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) schedule~{\nwtagstyle{}\subpageref{NW36uAHF-2MZ5fS-1}}\RA{}
+  \LA{}......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) request status when $t=13$~{\nwtagstyle{}\subpageref{NW36uAHF-1AIKSX-1}}\RA{}
+  \LA{}......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) request status when $t=14$~{\nwtagstyle{}\subpageref{NW36uAHF-19fLmD-1}}\RA{}
+  \LA{}......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) request status when $t=21$~{\nwtagstyle{}\subpageref{NW36uAHF-1ATroX-1}}\RA{}
+\nwendcode{}\nwbegindocs{183}\nwdocspar
+\nwenddocs{}\nwbegincode{184}\sublabel{NW36uAHF-3GEMZN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-3GEMZN-1}}}\moddef{......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) route~{\nwtagstyle{}\subpageref{NW36uAHF-3GEMZN-1}}}\endmoddef\nwused{\\{NW36uAHF-3t5oWt-1}}
+\{
+  storage.DBUpdateServerAddToSchedule(13,
+    new int[] \{ 7, 44, 14, 45, 21, 24, 22, 0 \},
+    new int[] \{ 14, 45, 12, 21, 24, 12, 22, 0, 13 \},
+    new int[] \{ 12 \});
+  int[] output = storage.DBQueryRoute(13);
+  if (!(output[0] == 0
+    && output[1] == 27
+    && output[2] == 7
+    && output[3] == 44
+    && output[4] == 14
+    && output[5] == 45
+    && output[6] == 21
+    && output[7] == 24
+    && output[8] == 22
+    && output[9] == 0)) \{
+    Print("[FAIL] DBUpdateServerAddToSchedule(4) (1/5)");
+    Print("\\tExpected (0, 27) (7, 44) (14, 45) (21, 24) (22, 0); got ");
+    storage.printRoute(output);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBUpdateServerAddToSchedule(4) (1/5)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-3GEMZN-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-3GEMZN-1}\nwendcode{}\nwbegindocs{185}\nwdocspar
+\nwenddocs{}\nwbegincode{186}\sublabel{NW36uAHF-2MZ5fS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-2MZ5fS-1}}}\moddef{......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) schedule~{\nwtagstyle{}\subpageref{NW36uAHF-2MZ5fS-1}}}\endmoddef\nwused{\\{NW36uAHF-3t5oWt-1}}
+\{
+  int[] output = storage.DBQuerySchedule(13);
+  if (!(output[0] == 0
+    && output[1] == 27
+    && output[2] == 13
+    && output[3] == 0
+    && output[4] == 14
+    && output[5] == 45
+    && output[6] == 0
+    && output[7] == 12
+    && output[8] == 21
+    && output[9] == 24
+    && output[10] == 0
+    && output[11] == 12
+    && output[12] == 22
+    && output[13] == 0
+    && output[14] == 13
+    && output[15] == 0)) \{
+    Print("[FAIL] DBAddNewServer(2) (2/5)");
+    Print("\\tExpected (0, 27, 13, 0) (14, 45, 0, 12) (21, 24, 0, 12) "
+      + "(22, 0, 13, 0); got ");
+    storage.printSchedule(output);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBUpdateServerAddToSchedule(4) (2/5)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-2MZ5fS-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-2MZ5fS-1}\nwendcode{}\nwbegindocs{187}\nwdocspar
+\nwenddocs{}\nwbegincode{188}\sublabel{NW36uAHF-1AIKSX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-1AIKSX-1}}}\moddef{......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) request status when $t=13$~{\nwtagstyle{}\subpageref{NW36uAHF-1AIKSX-1}}}\endmoddef\nwused{\\{NW36uAHF-3t5oWt-1}}
+\{
+  int[] output = storage.DBQueryRequestStatus(12, 13);
+  if (!(output.length == 0)) \{
+    Print("[FAIL] DBUpdateServerAddToSchedule(4) (3/5)");
+    Print("\\tExpected 0; got "+output.length);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBUpdateServerAddToSchedule(4) (3/5)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-1AIKSX-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-1AIKSX-1}\nwendcode{}\nwbegindocs{189}\nwdocspar
+\nwenddocs{}\nwbegincode{190}\sublabel{NW36uAHF-19fLmD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-19fLmD-1}}}\moddef{......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) request status when $t=14$~{\nwtagstyle{}\subpageref{NW36uAHF-19fLmD-1}}}\endmoddef\nwused{\\{NW36uAHF-3t5oWt-1}}
+\{
+  int[] output = storage.DBQueryRequestStatus(12, 14);
+  if (!(output[0] == 1)) \{
+    Print("[FAIL] DBUpdateServerAddToSchedule(4) (4/5)");
+    Print("\\tExpected 1; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBUpdateServerAddToSchedule(4) (4/5)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-19fLmD-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-19fLmD-1}\nwendcode{}\nwbegindocs{191}\nwdocspar
+\nwenddocs{}\nwbegincode{192}\sublabel{NW36uAHF-1ATroX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-1ATroX-1}}}\moddef{......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) request status when $t=21$~{\nwtagstyle{}\subpageref{NW36uAHF-1ATroX-1}}}\endmoddef\nwused{\\{NW36uAHF-3t5oWt-1}}
+\{
+  int[] output = storage.DBQueryRequestStatus(12, 21);
+  if (!(output[0] == 2)) \{
+    Print("[FAIL] DBUpdateServerAddToSchedule(4) (5/5)");
+    Print("\\tExpected 2; got "+output[0]);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBUpdateServerAddToSchedule(4) (5/5)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-1ATroX-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-1ATroX-1}\nwendcode{}\nwbegindocs{193}\nwdocspar
+\subsubsection{{\tt{}DBUpdateServerRemoveFromSchedule}(4)}
+Now it's time to remove Request 12 from Server 13...
+\nwenddocs{}\nwbegincode{194}\sublabel{NW36uAHF-2DOHvZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-2DOHvZ-1}}}\moddef{....test \code{}DBUpdateServerRemoveFromSchedule\edoc{}(4)~{\nwtagstyle{}\subpageref{NW36uAHF-2DOHvZ-1}}}\endmoddef\nwused{\\{NW36uAHF-4HcfWS-1}}
+  \LA{}......test \code{}DBUpdateServerRemoveFromSchedule\edoc{}(4) route~{\nwtagstyle{}\subpageref{NW36uAHF-FrKh7-1}}\RA{}
+  \LA{}......test \code{}DBUpdateServerRemoveFromSchedule\edoc{}(4) schedule~{\nwtagstyle{}\subpageref{NW36uAHF-OXZaD-1}}\RA{}
+  \LA{}......test \code{}DBUpdateServerRemoveFromSchedule\edoc{}(4) request status when $t=13$~{\nwtagstyle{}\subpageref{NW36uAHF-2PtPZK-1}}\RA{}
+  \LA{}......test \code{}DBUpdateServerRemoveFromSchedule\edoc{}(4) request status when $t=14$~{\nwtagstyle{}\subpageref{NW36uAHF-2QgQXK-1}}\RA{}
+  \LA{}......test \code{}DBUpdateServerRemoveFromSchedule\edoc{}(4) request status when $t=21$~{\nwtagstyle{}\subpageref{NW36uAHF-2QQxy6-1}}\RA{}
+\nwendcode{}\nwbegindocs{195}\nwdocspar
+\nwenddocs{}\nwbegincode{196}\sublabel{NW36uAHF-FrKh7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-FrKh7-1}}}\moddef{......test \code{}DBUpdateServerRemoveFromSchedule\edoc{}(4) route~{\nwtagstyle{}\subpageref{NW36uAHF-FrKh7-1}}}\endmoddef\nwused{\\{NW36uAHF-2DOHvZ-1}}
+\{
+  storage.DBUpdateServerRemoveFromSchedule(13,
+    new int[] \{ 0, 27, 1, 0 \},
+    new int[] \{ 1, 0, 13 \},
+    new int[] \{ 12 \});
+  int[] output = storage.DBQueryRoute(13);
+  if (!(output[0] == 0
+    && output[1] == 27
+    && output[2] == 1
+    && output[3] == 0)) \{
+    Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (1/5)");
+    Print("\\tExpected (0, 27) (1, 0); got ");
+    storage.printRoute(output);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (1/5)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-FrKh7-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-FrKh7-1}\nwendcode{}\nwbegindocs{197}\nwdocspar
+\nwenddocs{}\nwbegincode{198}\sublabel{NW36uAHF-OXZaD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-OXZaD-1}}}\moddef{......test \code{}DBUpdateServerRemoveFromSchedule\edoc{}(4) schedule~{\nwtagstyle{}\subpageref{NW36uAHF-OXZaD-1}}}\endmoddef\nwused{\\{NW36uAHF-2DOHvZ-1}}
+\{
+  int[] output = storage.DBQuerySchedule(13);
+  if (!(output[0] == 0
+    && output[1] == 27
+    && output[2] == 13
+    && output[3] == 0
+    && output[4] == 1
+    && output[5] == 0
+    && output[6] == 13
+    && output[7] == 0)) \{
+    Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (2/5)");
+    Print("\\tExpected (0, 27, 13, 0) (1, 0, 13, 0); got ");
+    storage.printSchedule(output);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (2/5)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-OXZaD-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-OXZaD-1}\nwendcode{}\nwbegindocs{199}\nwdocspar
+\nwenddocs{}\nwbegincode{200}\sublabel{NW36uAHF-2PtPZK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-2PtPZK-1}}}\moddef{......test \code{}DBUpdateServerRemoveFromSchedule\edoc{}(4) request status when $t=13$~{\nwtagstyle{}\subpageref{NW36uAHF-2PtPZK-1}}}\endmoddef\nwused{\\{NW36uAHF-2DOHvZ-1}}
+\{
+  int[] output = storage.DBQueryRequestStatus(12, 13);
+  if (!(output.length == 0)) \{
+    Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (3/5)");
+    Print("\\tExpected 0; got "+output.length);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (3/5)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-2PtPZK-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-2PtPZK-1}\nwendcode{}\nwbegindocs{201}\nwdocspar
+\nwenddocs{}\nwbegincode{202}\sublabel{NW36uAHF-2QgQXK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-2QgQXK-1}}}\moddef{......test \code{}DBUpdateServerRemoveFromSchedule\edoc{}(4) request status when $t=14$~{\nwtagstyle{}\subpageref{NW36uAHF-2QgQXK-1}}}\endmoddef\nwused{\\{NW36uAHF-2DOHvZ-1}}
+\{
+  int[] output = storage.DBQueryRequestStatus(12, 14);
+  if (!(output.length == 0)) \{
+    Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (4/5)");
+    Print("\\tExpected 0; got "+output.length);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (4/5)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-2QgQXK-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-2QgQXK-1}\nwendcode{}\nwbegindocs{203}\nwdocspar
+\nwenddocs{}\nwbegincode{204}\sublabel{NW36uAHF-2QQxy6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-2QQxy6-1}}}\moddef{......test \code{}DBUpdateServerRemoveFromSchedule\edoc{}(4) request status when $t=21$~{\nwtagstyle{}\subpageref{NW36uAHF-2QQxy6-1}}}\endmoddef\nwused{\\{NW36uAHF-2DOHvZ-1}}
+\{
+  int[] output = storage.DBQueryRequestStatus(12, 21);
+  if (!(output.length == 0)) \{
+    Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (5/5)");
+    Print("\\tExpected 0; got "+output.length);
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (5/5)");
+    count_passed++;
+  \}
+\}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-2QQxy6-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-2QQxy6-1}\nwendcode{}
+
+\nwixlogsorted{c}{{......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=0$}{NW36uAHF-GriL0-1}{\nwixu{NW36uAHF-2jSLg0-1}\nwixd{NW36uAHF-GriL0-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=24$}{NW36uAHF-1zadoG-1}{\nwixu{NW36uAHF-2jSLg0-1}\nwixd{NW36uAHF-1zadoG-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=25$}{NW36uAHF-1yp4Lg-1}{\nwixu{NW36uAHF-2jSLg0-1}\nwixd{NW36uAHF-1yp4Lg-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=26$}{NW36uAHF-1zLee0-1}{\nwixu{NW36uAHF-2jSLg0-1}\nwixd{NW36uAHF-1zLee0-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=44$}{NW36uAHF-1zaa1w-1}{\nwixu{NW36uAHF-2jSLg0-1}\nwixd{NW36uAHF-1zaa1w-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryQueuedRequests\edoc{}(1) at t=0}{NW36uAHF-2K5XSE-1}{\nwixu{NW36uAHF-1Ao9lm-1}\nwixd{NW36uAHF-2K5XSE-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryQueuedRequests\edoc{}(1) at t=35}{NW36uAHF-3GJyuc-1}{\nwixu{NW36uAHF-1Ao9lm-1}\nwixd{NW36uAHF-3GJyuc-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryQueuedRequests\edoc{}(1) at t=36}{NW36uAHF-182uIY-1}{\nwixu{NW36uAHF-1Ao9lm-1}\nwixd{NW36uAHF-182uIY-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryQueuedRequests\edoc{}(1) at t=5}{NW36uAHF-3LO5Sc-1}{\nwixu{NW36uAHF-1Ao9lm-1}\nwixd{NW36uAHF-3LO5Sc-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryRouteRemaining\edoc{}(2) at $t=10$}{NW36uAHF-3AIjLv-1}{\nwixu{NW36uAHF-1LMBE6-1}\nwixd{NW36uAHF-3AIjLv-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryRouteRemaining\edoc{}(2) at $t=11$}{NW36uAHF-39Mi27-1}{\nwixu{NW36uAHF-1LMBE6-1}\nwixd{NW36uAHF-39Mi27-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryRouteRemaining\edoc{}(2) at $t=9$}{NW36uAHF-3Kf6AF-1}{\nwixu{NW36uAHF-1LMBE6-1}\nwixd{NW36uAHF-3Kf6AF-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryScheduleRemaining\edoc{}(2) when $t=43$}{NW36uAHF-qvLii-1}{\nwixu{NW36uAHF-3vhAZd-1}\nwixd{NW36uAHF-qvLii-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryScheduleRemaining\edoc{}(2) when $t=44$}{NW36uAHF-qQtYO-1}{\nwixu{NW36uAHF-3vhAZd-1}\nwixd{NW36uAHF-qQtYO-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryScheduleRemaining\edoc{}(2) when $t=45$}{NW36uAHF-rCT0y-1}{\nwixu{NW36uAHF-3vhAZd-1}\nwixd{NW36uAHF-rCT0y-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryScheduleRemaining\edoc{}(2) when $t=46$}{NW36uAHF-qbTw8-1}{\nwixu{NW36uAHF-3vhAZd-1}\nwixd{NW36uAHF-qbTw8-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerCompletedAssignments\edoc{}(2) when $t=43$}{NW36uAHF-29NaUg-1}{\nwixu{NW36uAHF-1HkuSf-1}\nwixd{NW36uAHF-29NaUg-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerCompletedAssignments\edoc{}(2) when $t=44$}{NW36uAHF-29kLI6-1}{\nwixu{NW36uAHF-1HkuSf-1}\nwixd{NW36uAHF-29kLI6-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerCompletedAssignments\edoc{}(2) when $t=45$}{NW36uAHF-297ZOY-1}{\nwixu{NW36uAHF-1HkuSf-1}\nwixd{NW36uAHF-297ZOY-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=0$}{NW36uAHF-1JQJiP-1}{\nwixu{NW36uAHF-3GrgPk-1}\nwixd{NW36uAHF-1JQJiP-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=1$}{NW36uAHF-1Iuh5h-1}{\nwixu{NW36uAHF-3GrgPk-1}\nwixd{NW36uAHF-1Iuh5h-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=44$}{NW36uAHF-4O1SEc-1}{\nwixu{NW36uAHF-3GrgPk-1}\nwixd{NW36uAHF-4O1SEc-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=45$}{NW36uAHF-4NnQjy-1}{\nwixu{NW36uAHF-3GrgPk-1}\nwixd{NW36uAHF-4NnQjy-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=46$}{NW36uAHF-4OQ470-1}{\nwixu{NW36uAHF-3GrgPk-1}\nwixd{NW36uAHF-4OQ470-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerLocationsAll\edoc{}(1) when $t=0$}{NW36uAHF-2sf19g-1}{\nwixu{NW36uAHF-2dAmyn-1}\nwixd{NW36uAHF-2sf19g-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerLocationsAll\edoc{}(1) when $t=44$}{NW36uAHF-HtL0w-1}{\nwixu{NW36uAHF-2dAmyn-1}\nwixd{NW36uAHF-HtL0w-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerLocationsAll\edoc{}(1) when $t=45$}{NW36uAHF-HH7DS-1}{\nwixu{NW36uAHF-2dAmyn-1}\nwixd{NW36uAHF-HH7DS-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerLocationsAll\edoc{}(1) when $t=46$}{NW36uAHF-Hqj38-1}{\nwixu{NW36uAHF-2dAmyn-1}\nwixd{NW36uAHF-Hqj38-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=43$}{NW36uAHF-Fmx82-1}{\nwixu{NW36uAHF-g6QHQ-1}\nwixd{NW36uAHF-Fmx82-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=44$}{NW36uAHF-FA6yE-1}{\nwixu{NW36uAHF-g6QHQ-1}\nwixd{NW36uAHF-FA6yE-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=45$}{NW36uAHF-FXU7y-1}{\nwixu{NW36uAHF-g6QHQ-1}\nwixd{NW36uAHF-FXU7y-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) request status when $t=13$}{NW36uAHF-1AIKSX-1}{\nwixu{NW36uAHF-3t5oWt-1}\nwixd{NW36uAHF-1AIKSX-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) request status when $t=14$}{NW36uAHF-19fLmD-1}{\nwixu{NW36uAHF-3t5oWt-1}\nwixd{NW36uAHF-19fLmD-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) request status when $t=21$}{NW36uAHF-1ATroX-1}{\nwixu{NW36uAHF-3t5oWt-1}\nwixd{NW36uAHF-1ATroX-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) route}{NW36uAHF-3GEMZN-1}{\nwixu{NW36uAHF-3t5oWt-1}\nwixd{NW36uAHF-3GEMZN-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) schedule}{NW36uAHF-2MZ5fS-1}{\nwixu{NW36uAHF-3t5oWt-1}\nwixd{NW36uAHF-2MZ5fS-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBUpdateServerRemoveFromSchedule\edoc{}(4) request status when $t=13$}{NW36uAHF-2PtPZK-1}{\nwixu{NW36uAHF-2DOHvZ-1}\nwixd{NW36uAHF-2PtPZK-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBUpdateServerRemoveFromSchedule\edoc{}(4) request status when $t=14$}{NW36uAHF-2QgQXK-1}{\nwixu{NW36uAHF-2DOHvZ-1}\nwixd{NW36uAHF-2QgQXK-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBUpdateServerRemoveFromSchedule\edoc{}(4) request status when $t=21$}{NW36uAHF-2QQxy6-1}{\nwixu{NW36uAHF-2DOHvZ-1}\nwixd{NW36uAHF-2QQxy6-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBUpdateServerRemoveFromSchedule\edoc{}(4) route}{NW36uAHF-FrKh7-1}{\nwixu{NW36uAHF-2DOHvZ-1}\nwixd{NW36uAHF-FrKh7-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBUpdateServerRemoveFromSchedule\edoc{}(4) schedule}{NW36uAHF-OXZaD-1}{\nwixu{NW36uAHF-2DOHvZ-1}\nwixd{NW36uAHF-OXZaD-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBAddNewRequest\edoc{}(1)}{NW36uAHF-BAsgV-1}{\nwixu{NW36uAHF-4HcfWS-1}\nwixd{NW36uAHF-BAsgV-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBAddNewServer\edoc{}(2)}{NW36uAHF-3pzOz8-1}{\nwixu{NW36uAHF-4HcfWS-1}\nwixd{NW36uAHF-3pzOz8-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQuery\edoc{}(2)}{NW36uAHF-RMkGl-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-RMkGl-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryBaseDistanceTotal\edoc{}(0)}{NW36uAHF-3FE8t4-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-3FE8t4-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryCountEdges\edoc{}(0)}{NW36uAHF-fMEma-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-fMEma-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryCountRequests\edoc{}(0)}{NW36uAHF-3azEeu-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-3azEeu-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryCountServers\edoc{}(0)}{NW36uAHF-2qdA7h-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-2qdA7h-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryCountVertices\edoc{}(0)}{NW36uAHF-2FbhMk-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-2FbhMk-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryCurrentLoad\edoc{}(2)}{NW36uAHF-2jSLg0-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-2jSLg0-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryEdge\edoc{}(2)}{NW36uAHF-4e874K-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-4e874K-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryMBR\edoc{}(0)}{NW36uAHF-2Yf5B8-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-2Yf5B8-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryQueuedRequests\edoc{}(1)}{NW36uAHF-1Ao9lm-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-1Ao9lm-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryRequest\edoc{}(1)}{NW36uAHF-1C0pk3-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-1C0pk3-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryRequestArrivalTime\edoc{}(1)}{NW36uAHF-1dQ6qD-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-1dQ6qD-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryRequestBaseDistanceTotal\edoc{}(0)}{NW36uAHF-38E973-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-38E973-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryRequestDepartureTime\edoc{}(1)}{NW36uAHF-XFEEZ-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-XFEEZ-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryRequestDetourDistance\edoc{}(1)}{NW36uAHF-sBkzR-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-sBkzR-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryRequestDetourDistanceTotal\edoc{}(0)}{NW36uAHF-1qIOK3-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-1qIOK3-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryRequestPickupDuration\edoc{}(1)}{NW36uAHF-2weSRk-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-2weSRk-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryRequestPickupDurationTotal\edoc{}(0)}{NW36uAHF-PC7q9-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-PC7q9-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryRequestTransitDistance\edoc{}(1)}{NW36uAHF-3yzPUp-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-3yzPUp-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryRequestTransitDistanceTotal\edoc{}(0)}{NW36uAHF-NiwSo-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-NiwSo-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryRequestTransitDuration\edoc{}(1)}{NW36uAHF-2uQ1SB-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-2uQ1SB-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryRequestTransitDurationTotal\edoc{}(0)}{NW36uAHF-PQhaD-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-PQhaD-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryRequestTravelDuration\edoc{}(1)}{NW36uAHF-4MzTFA-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-4MzTFA-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryRequestTravelDurationTotal\edoc{}(0)}{NW36uAHF-ALSer-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-ALSer-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryRoute\edoc{}(1)}{NW36uAHF-4TWZqG-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-4TWZqG-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryRouteRemaining\edoc{}(2)}{NW36uAHF-1LMBE6-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-1LMBE6-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQuerySchedule\edoc{}(1)}{NW36uAHF-3I1Rij-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-3I1Rij-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryScheduleRemaining\edoc{}(2)}{NW36uAHF-3vhAZd-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-3vhAZd-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryServer\edoc{}(1)}{NW36uAHF-3O8MFc-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-3O8MFc-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryServerArrivalTime\edoc{}(1)}{NW36uAHF-1angPN-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-1angPN-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryServerBaseDistanceTotal\edoc{}(0)}{NW36uAHF-1BF5dX-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-1BF5dX-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryServerCompletedAssignments\edoc{}(2)}{NW36uAHF-1HkuSf-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-1HkuSf-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryServerCruisingDistance\edoc{}(1)}{NW36uAHF-okQ1Q-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-okQ1Q-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryServerCruisingDistanceTotal\edoc{}(0)}{NW36uAHF-1RB1yH-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-1RB1yH-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryServerDepartureTime\edoc{}(1)}{NW36uAHF-1TCj44-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-1TCj44-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryServerLocationsActive\edoc{}(1)}{NW36uAHF-3GrgPk-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-3GrgPk-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryServerLocationsAll\edoc{}(1)}{NW36uAHF-2dAmyn-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-2dAmyn-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryServerPendingAssignments\edoc{}(2)}{NW36uAHF-g6QHQ-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-g6QHQ-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryServerServiceDistance\edoc{}(1)}{NW36uAHF-3T7Ecl-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-3T7Ecl-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryServerServiceDistanceTotal\edoc{}(0)}{NW36uAHF-2c14Sj-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-2c14Sj-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryServerTravelDistance\edoc{}(1)}{NW36uAHF-R0me6-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-R0me6-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryServerTravelDistanceTotal\edoc{}(0)}{NW36uAHF-2cvcHE-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-2cvcHE-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryServerTravelDuration\edoc{}(1)}{NW36uAHF-1TZ4V8-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-1TZ4V8-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryServerTravelDurationTotal\edoc{}(0)}{NW36uAHF-2bE0DP-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-2bE0DP-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryServiceRate\edoc{}(0)}{NW36uAHF-3JCT8W-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-3JCT8W-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryStatisticsEdges\edoc{}(0)}{NW36uAHF-3wfpeD-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-3wfpeD-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryVertex\edoc{}(1)}{NW36uAHF-HmHFv-1}{\nwixu{NW36uAHF-2w6SyW-1}\nwixd{NW36uAHF-HmHFv-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBUpdateEdgeSpeed\edoc{}(3)}{NW36uAHF-4FqPVU-1}{\nwixu{NW36uAHF-4HcfWS-1}\nwixd{NW36uAHF-4FqPVU-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBUpdateServerAddToSchedule\edoc{}(4)}{NW36uAHF-3t5oWt-1}{\nwixu{NW36uAHF-4HcfWS-1}\nwixd{NW36uAHF-3t5oWt-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBUpdateServerRemoveFromSchedule\edoc{}(4)}{NW36uAHF-2DOHvZ-1}{\nwixu{NW36uAHF-4HcfWS-1}\nwixd{NW36uAHF-2DOHvZ-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBUpdateServerRoute\edoc{}(2)}{NW36uAHF-1e7qm0-1}{\nwixu{NW36uAHF-4HcfWS-1}\nwixd{NW36uAHF-1e7qm0-1}}}%
+\nwixlogsorted{c}{{..load test database}{NW36uAHF-11CmW8-1}{\nwixu{NW36uAHF-1IzyGx-1}\nwixd{NW36uAHF-11CmW8-1}}}%
+\nwixlogsorted{c}{{..run read tests}{NW36uAHF-2w6SyW-1}{\nwixu{NW36uAHF-1IzyGx-1}\nwixd{NW36uAHF-2w6SyW-1}}}%
+\nwixlogsorted{c}{{..run write tests}{NW36uAHF-4HcfWS-1}{\nwixu{NW36uAHF-1IzyGx-1}\nwixd{NW36uAHF-4HcfWS-1}}}%
+\nwixlogsorted{c}{{\code{}StorageInterfaceTest\edoc{} definition}{NW36uAHF-4PL2gj-1}{\nwixu{NW36uAHF-3BhLwI-1}\nwixd{NW36uAHF-4PL2gj-1}}}%
+\nwixlogsorted{c}{{\code{}StorageInterfaceTest\edoc{} main routine}{NW36uAHF-1IzyGx-1}{\nwixu{NW36uAHF-4PL2gj-1}\nwixd{NW36uAHF-1IzyGx-1}}}%
+\nwixlogsorted{c}{{\code{}StorageInterfaceTest\edoc{} member variables}{NW36uAHF-2JUpt8-1}{\nwixu{NW36uAHF-4PL2gj-1}\nwixd{NW36uAHF-2JUpt8-1}}}%
+\nwixlogsorted{c}{{\code{}StorageInterfaceTest\edoc{} private methods}{NW36uAHF-1oLTLd-1}{\nwixu{NW36uAHF-4PL2gj-1}\nwixd{NW36uAHF-1oLTLd-1}}}%
+\nwixlogsorted{c}{{StorageInterfaceTest.java}{NW36uAHF-3BhLwI-1}{\nwixd{NW36uAHF-3BhLwI-1}}}%
+\nwixlogsorted{c}{{StorageInterfaceTest.java preamble}{NW36uAHF-2gcBS8-1}{\nwixu{NW36uAHF-3BhLwI-1}\nwixd{NW36uAHF-2gcBS8-1}}}%
+\nwixlogsorted{i}{{count{\char95}failed}{count:unfailed}}%
+\nwixlogsorted{i}{{count{\char95}passed}{count:unpassed}}%
+\nwixlogsorted{i}{{main}{main}}%
+\nwbegindocs{205}\nwdocspar
+
+\appendix
+
+\section{Appendix: List of Chunks}
+\label{ap:list-of-chunks}
+\nowebchunks
+
+\section{Appendix: List of Identifiers}
+\label{ap:list-of-identifiers}
+\nowebindex
+
+\end{document}
+
+\nwenddocs{}
