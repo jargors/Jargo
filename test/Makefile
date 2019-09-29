@@ -1,10 +1,11 @@
 # Storage Test
+# - Set JARGO_LIB environmental variable before running `make`.
 .PHONY : all clean
 
 all : pdf class
 
 class : java
-	javac -Xlint:deprecation -d . -cp ../jargors-storage-1.0.0.jar StorageTest.java
+	javac -Xlint:deprecation -d . -cp .:$(JARGO_LIB)/* StorageTest.java
 
 java : src/storagetest.nw
 	notangle -RStorageTest.java src/storagetest.nw > StorageTest.java
