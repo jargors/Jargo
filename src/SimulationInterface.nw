@@ -1,0 +1,221 @@
+\documentclass{article}
+
+\usepackage{noweb}
+\noweboptions{smallcode,longchunks}
+
+\usepackage[a4paper,margin=1in]{geometry}
+
+\usepackage{colortbl}
+\usepackage[colorlinks=true]{hyperref}
+\usepackage{graphicx}
+
+% Define a handy paragraph opener
+\newcommand{\hi}[1]{\noindent {\bf #1}}
+
+% Remove noweb page break penalty
+\def\nwendcode{\endtrivlist \endgroup}
+\let\nwdocspar=\par
+
+\title{Jargo Simulation Interface\footnote{\url{https://github.com/jargors/Simulation-Interface}}}
+\author{James J. Pan\\
+  \small{\href{mailto:jamesjpan@outlook.com}{jamesjpan@outlook.com}}
+}
+
+\begin{document}
+\maketitle
+\pagestyle{noweb}
+
+\tableofcontents
+
+\section{Introduction}
+\label{sec:introduction}
+Jargo's simulation interface provides a way for Jargo clients to interact with
+the Jargo simulated world (Figure~\ref{fig:interface-fig}). The interface
+exposes only the subset of Jargo's storage interface API that a client would
+possibly have access to in the real world, including querying and submitting
+server routes and schedules.  The simulation interface is developed using the
+Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
+programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
+([[src/SimulationInterface.nw]]) is the source for the documentation
+([[doc/SimulationInterface.tex]]) and the Java code
+([[SimulationInterface.java]])\footnote{See the [[Makefile]] for build
+details.}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=150mm]{src/fig/interface-fig}
+\caption{Simulation interface within the Jargo stack.}
+\label{fig:interface-fig}
+\end{figure}
+
+\section{Implementation Overview}
+\label{sec:implementation-overview}
+<<SimulationInterface.java>>=
+  <<SimulationInterface.java preamble>>
+  <<[[SimulationInterface]] definition>>
+@
+
+\subsection{Preamble}
+\label{sec:preamble}
+The preamble declares the package and imports dependencies.
+<<SimulationInterface.java preamble>>=
+package com.github.jargors;
+@
+We import [[StorageInterface]] to gain access to the storage API. We also
+import [[LocalDateTime]] for printing timestamps.
+<<SimulationInterface.java preamble>>=
+import com.github.jargors.StorageInterface;
+import java.time.LocalDateTime;
+@
+
+\subsection{Class Definition}
+\label{sec:class-definition}
+The [[SimulationInterface]] class consists of member variables, a constructor, and public
+and private methods, just like any other Java class.
+<<[[SimulationInterface]] definition>>=
+public class SimulationInterface {
+  <<[[SimulationInterface]] member variables>>
+  <<[[SimulationInterface]] constructor>>
+  <<[[SimulationInterface]] public methods>>
+  <<[[SimulationInterface]] private methods>>
+}
+@
+
+\subsection{Member Variables}
+\label{sec:member-variables}
+We define a [[StorageInterface]] in the member variables.
+<<[[SimulationInterface]] member variables>>=
+private StorageInterface storage;
+@ %def storage
+
+\subsection{Constructor}
+\label{sec:constructor}
+Nothing is done in the constructor.
+<<[[SimulationInterface]] constructor>>=
+public SimulationInterface() { }
+@
+
+\section{Public Methods}
+\label{sec:public-methods}
+\hi{General Methods.}
+<<[[SimulationInterface]] public methods>>=
+<<Set storage interface>>
+@
+\hi{Write Methods.}
+<<[[SimulationInterface]] public methods>>=
+<<Update server route>>
+<<Update server add to schedule>>
+<<Update server remove from schedule>>
+@
+\hi{Read Methods.}
+<<[[SimulationInterface]] public methods>>=
+<<Query ridesharing user>>
+<<Query active server locations>>
+<<Query routes>>
+<<Query schedules>>
+<<Query current load>>
+@
+
+\subsection{General Methods}
+\label{sec:general-methods}
+
+\subsubsection{[[setStorageInterface]](1)}
+<<Set storage interface>>=
+public void setStorageInterface(StorageInterface src) {
+  storage = src;
+}
+@ %def setStorageInterface
+
+\subsection{Write Methods}
+\label{sec:write-methods}
+
+\subsubsection{[[updateServerRoute]](3)}
+<<Update server route>>=
+public void updateServerRoute(int sid, int[] route, int[] sched) {
+  storage.DBUpdateServerRoute(sid, route, sched);
+}
+@ %def updateServerRoute
+
+\subsubsection{[[updateServerAddToSchedule]](4)}
+<<Update server add to schedule>>=
+public void updateServerAddToSchedule(
+    int sid, int[] route, int[] sched, int[] rid) {
+  storage.DBUpdateServerAddToSchedule(sid, route, sched, rid);
+}
+@ %def updateServerAddToSchedule
+
+\subsubsection{[[updateServerRemoveFromSchedule]](4)}
+<<Update server remove from schedule>>=
+public void updateServerRemoveFromSchedule(
+    int sid, int[] route, int[] sched, int[] rid) {
+  storage.DBUpdateServerRemoveFromSchedule(sid, route, sched, rid);
+}
+@ %def updateServerRemoveFromSchedule
+
+\subsection{Read Methods}
+\label{sec:read-methods}
+
+\subsubsection{[[queryServer]](1)}
+<<Query ridesharing user>>=
+public int[] queryServer(int sid) throws RuntimeException {
+  return storage.DBQueryServer(sid);
+}
+@ %def queryServer
+
+\subsubsection{[[queryRequest]](1)}
+<<Query ridesharing user>>=
+public int[] queryRequest(int rid) throws RuntimeException {
+  return storage.DBQueryRequest(rid);
+}
+@ %def queryRequest
+
+\subsubsection{[[queryServerLocationsActive]](1)}
+<<Query active server locations>>=
+public int[] queryServerLocationsActive(int t) throws RuntimeException {
+  return storage.DBQueryServerLocationsActive(t);
+}
+@ %def queryServerLocationsActive
+
+\subsubsection{[[queryRouteRemaining]](2)}
+<<Query routes>>=
+public int[] queryRouteRemaining(int sid, int t) throws RuntimeException {
+  return storage.DBQueryRouteRemaining(sid, t);
+}
+@ %def queryRouteRemaining
+
+\subsubsection{[[queryScheduleRemaining]](2)}
+<<Query schedules>>=
+public int[] queryScheduleRemaining(int sid, int t) throws RuntimeException {
+  return storage.DBQueryScheduleRemaining(sid, t);
+}
+@ %def queryScheduleRemaining
+
+\subsubsection{[[queryCurrentLoad]](2)}
+<<Query current load>>=
+public int[] queryCurrentLoad(int sid, int t) throws RuntimeException {
+  return storage.DBQueryCurrentLoad(sid, t);
+}
+@ %def queryCurrentLoad
+
+\section{Private Methods}
+\label{sec:private-methods}
+
+\subsection{[[Print]](1)}
+<<[[SimulationInterface]] private methods>>=
+private void Print(String msg) {
+  System.out.println("[SimulationInterface]["+LocalDateTime.now()+"] "+msg);
+}
+@ %def Print
+
+\appendix
+
+\section{Appendix: List of Chunks}
+\label{ap:list-of-chunks}
+\nowebchunks
+
+\section{Appendix: List of Identifiers}
+\label{ap:list-of-identifiers}
+\nowebindex
+
+\end{document}
+
