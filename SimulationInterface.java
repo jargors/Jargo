@@ -3,9 +3,16 @@
   import java.time.LocalDateTime;
   public class SimulationInterface {
     private StorageInterface storage;
+    private int world_time = 0;
     public SimulationInterface() { }
     public void setStorageInterface(StorageInterface src) {
       storage = src;
+    }
+    public void setSimulationWorldTime(int t) {
+      world_time = t;
+    }
+    public int getSimulationWorldTime() {
+      return world_time;
     }
     public void updateServerRoute(int sid, int[] route, int[] sched) {
       storage.DBUpdateServerRoute(sid, route, sched);

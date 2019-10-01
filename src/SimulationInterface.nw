@@ -83,10 +83,11 @@ public class SimulationInterface {
 
 \subsection{Member Variables}
 \label{sec:member-variables}
-We define a [[StorageInterface]] in the member variables.
+We define a [[StorageInterface]] and a container for the simulation world time.
 <<[[SimulationInterface]] member variables>>=
 private StorageInterface storage;
-@ %def storage
+private int world_time = 0;
+@ %def storage world_time
 
 \subsection{Constructor}
 \label{sec:constructor}
@@ -100,6 +101,7 @@ public SimulationInterface() { }
 \hi{General Methods.}
 <<[[SimulationInterface]] public methods>>=
 <<Set storage interface>>
+<<Set/get simulation world time>>
 @
 \hi{Write Methods.}
 <<[[SimulationInterface]] public methods>>=
@@ -125,6 +127,22 @@ public void setStorageInterface(StorageInterface src) {
   storage = src;
 }
 @ %def setStorageInterface
+
+\subsubsection{[[setSimulationWorldTime]](1)}
+We depend on the controller to tell the simulation interface about the current
+world time.
+<<Set/get simulation world time>>=
+public void setSimulationWorldTime(int t) {
+  world_time = t;
+}
+@ %def setSimulationWorldTime
+
+\subsubsection{[[getSimulationWorldTime]](0)}
+<<Set/get simulation world time>>=
+public int getSimulationWorldTime() {
+  return world_time;
+}
+@ %def getSimulationWorldTime
 
 \subsection{Write Methods}
 \label{sec:write-methods}
