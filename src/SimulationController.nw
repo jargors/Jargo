@@ -1,0 +1,477 @@
+\documentclass{article}
+
+\usepackage{noweb}
+\noweboptions{smallcode,longchunks}
+
+\usepackage[a4paper,margin=1in]{geometry}
+
+\usepackage{colortbl}
+\usepackage[colorlinks=true]{hyperref}
+\usepackage{graphicx}
+
+% Define a handy paragraph opener
+\newcommand{\hi}[1]{\noindent {\bf #1}}
+
+% Remove noweb page break penalty
+\def\nwendcode{\endtrivlist \endgroup}
+\let\nwdocspar=\par
+
+\title{Jargo Simulation Controller\footnote{\url{https://github.com/jargors/Simulation-Controller}}}
+\author{James J. Pan\\
+  \small{\href{mailto:jamesjpan@outlook.com}{jamesjpan@outlook.com}}
+}
+
+\begin{document}
+\maketitle
+\pagestyle{noweb}
+
+\tableofcontents
+
+\section{Introduction}
+\label{sec:introduction}
+The simulation controller is designed to be the sole means of an evaluation
+program for controlling Jargo's simulation environment. The controller is
+responsible for advancing the simulation world time, ``pushing'' server
+locations and new requests to the client, perturbing server routes stored in
+the data layer to mimic real-world stochastic traffic and vehicle processes,
+and reporting evaluation metrics to the evaluation program.  The simulation
+controller is developed using the
+Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
+programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
+([[src/SimulationController.nw]]) is the source for both the documentation
+([[doc/SimulationController.tex]]) and the Java code
+([[SimulationController.java]])\footnote{See the [[Makefile]] for build
+details.}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=150mm]{src/fig/controller-fig}
+\caption{Controller within the Jargo stack.}
+\label{fig:controller}
+\end{figure}
+
+\section{Implementation Overview}
+<<SimulationController.java>>=
+  <<SimulationController.java preamble>>
+  <<[[SimulationController]] definition>>
+@
+
+\subsection{Preamble}
+<<SimulationController.java preamble>>=
+package com.github.jargors;
+@
+<<SimulationController.java preamble>>=
+import com.github.jargors.StorageInterface;
+import com.github.jargors.SimulationInterface;
+import com.github.jargors.JargoClient;
+@
+<<SimulationController.java preamble>>=
+import java.time.LocalDateTime;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
+@
+
+\subsection{Class Definition}
+<<[[SimulationController]] definition>>=
+public class SimulationController {
+  <<[[SimulationController]] member variables>>
+  <<[[SimulationController]] constructor>>
+  <<[[SimulationController]] public methods>>
+  <<[[SimulationController]] private methods>>
+}
+@
+
+\subsection{Member Variables}
+<<[[SimulationController]] member variables>>=
+private StorageInterface storage;
+private SimulationInterface simulator;
+private JargoClient client;
+private String f_rnet = "";
+private String f_prob = "";
+private String f_backup = "";
+private static int world_time = 0;
+private final ReentrantLock lock = new ReentrantLock();
+<<Definition of clock loop>>
+<<Definition of engine loop>>
+<<Definition of request collection loop>>
+<<Definition of server collection loop>>
+@ % def storage simulator client f_rnet f_prob world_time lock
+
+\subsubsection{Clock Loop}
+This loop advances the simulation world time.
+<<Definition of clock loop>>=
+private Runnable ClockLoop = new Runnable() {
+  public void run() {
+    Print("I am ClockLoop running on "+Thread.currentThread().getName());
+    world_time++;
+  }
+};
+@ %def ClockLoop
+
+\subsubsection{Engine Loop}
+TODO: Stochastic processes (e.g. traffic) will go here.
+<<Definition of engine loop>>=
+private Runnable EngineLoop = new Runnable() {
+  public void run() {
+    Print("I am EngineLoop running on "+Thread.currentThread().getName());
+  }
+};
+@ %def EngineLoop
+
+\subsubsection{Request Loop}
+This loop ``pushes'' queued requests to the client.
+<<Definition of request collection loop>>=
+private Runnable RequestLoop = new Runnable() {
+  public void run() {
+    lock.lock();
+    try {
+      Print("I am RequestLoop running on "+Thread.currentThread().getName());
+      client.collectRequests(storage.DBQueryQueuedRequests(world_time));
+    } finally {
+      lock.unlock();
+    }
+  }
+};
+@ %def RequestLoop
+
+\subsubsection{Server Loop}
+This loop ``pushes'' server locations to the client.
+<<Definition of server collection loop>>=
+private Runnable ServerLoop = new Runnable() {
+  public void run() {
+    lock.lock();
+    try {
+      Print("I am ServerLoop running on "+Thread.currentThread().getName());
+      client.collectServerLocations(storage.DBQueryServerLocationsActive(world_time));
+    } finally {
+      lock.unlock();
+    }
+  }
+};
+@ %def ServerLoop
+
+\subsection{Constructor}
+<<[[SimulationController]] constructor>>=
+public SimulationController(JargoClient target) {
+  <<..initialize new storage interface>>
+  <<..initialize new simulation interface>>
+  client = target;
+}
+@
+<<..initialize new storage interface>>=
+storage = new StorageInterface(f_rnet);
+if (f_backup.length() > 0) {
+  storage.DBLoadBackup(f_backup);
+}
+@
+<<..initialize new simulation interface>>=
+simulator = new SimulationInterface(storage);
+@
+
+\section{Public Methods}
+\label{sec:public-methods}
+\hi{General methods.}
+<<[[SimulationController]] public methods>>=
+<<Set path to road network>>
+<<Set path to problem instance>>
+<<Set path to previous backup>>
+<<Get world time>>
+<<Start simulation>>
+@
+\hi{Read methods.}
+<<[[SimulationController]] public methods>>=
+<<Query custom statement>>
+<<Query ridesharing user>>
+<<Query routes>>
+<<Query schedules>>
+<<Query various metrics>>
+@
+
+\subsection{General methods}
+
+\subsubsection{[[setRoadNetwork]](1)}
+<<Set path to road network>>=
+public void setRoadNetwork(String f) {
+  f_rnet = f;
+}
+@ %def setRoadNetwork
+
+\subsubsection{[[setProblemInstance(1)]]}
+<<Set path to problem instance>>=
+public void setProblemInstance(String f) {
+  f_prob = f;
+}
+@ %def setProblemInstance
+
+\subsubsection{[[setRestoreFrom(1)]]}
+<<Set path to previous backup>>=
+public void setRestoreFrom(String f) {
+  f_backup = f;
+}
+@ %def setRestoreFrom
+
+\subsubsection{[[getSimulationWorldTime(0)]]}
+<<Get world time>>=
+public static int getSimulationWorldTime() {
+  return world_time;
+}
+@ %def getSimulationWorldTime
+
+\subsubsection{[[start]](0)}
+<<Start simulation>>=
+public void start() {
+  Print("START");
+  int delay = 0;
+  int update_period = 10;
+
+  ScheduledExecutorService exe = Executors.newScheduledThreadPool(4);
+
+  ScheduledFuture<?> cb1 = exe.scheduleAtFixedRate(
+    ClockLoop, 0, 1, TimeUnit.SECONDS);
+
+  ScheduledFuture<?> cb2 = exe.scheduleAtFixedRate(
+    EngineLoop, delay, update_period, TimeUnit.SECONDS);
+
+  int request_collection_period = client.getRequestCollectionPeriod();
+  ScheduledFuture<?> cb3 = exe.scheduleAtFixedRate(
+    RequestLoop, delay, request_collection_period, TimeUnit.SECONDS);
+
+  int server_collection_period = client.getServerLocationCollectionPeriod();
+  ScheduledFuture<?> cb4 = exe.scheduleAtFixedRate(
+    ServerLoop, delay, server_collection_period, TimeUnit.SECONDS);
+
+  exe.schedule(new Runnable() {
+    public void run() {
+      cb1.cancel(false);
+      cb2.cancel(false);
+      cb3.cancel(false);
+      cb4.cancel(false);
+      exe.shutdown();
+      Print("END");
+    }}, 20, TimeUnit.SECONDS);
+}
+@ %def start
+
+\subsection{Read Methods}
+\subsubsection{[[query]](2)}
+<<Query custom statement>>=
+public int[] query(String sql, int ncols) throws RuntimeException {
+  return storage.DBQuery(sql, ncols);
+}
+@ %def query
+
+\subsubsection{[[queryServer]](1)}
+<<Query ridesharing user>>=
+public int[] queryServer(int sid) throws RuntimeException {
+  return storage.DBQueryServer(sid);
+}
+@ %def queryServer
+
+\subsubsection{[[queryRequest]](1)}
+<<Query ridesharing user>>=
+public int[] queryRequest(int rid) throws RuntimeException {
+  return storage.DBQueryRequest(rid);
+}
+@ %def queryRequest
+
+\subsubsection{[[queryRoute]](1)}
+<<Query routes>>=
+public int[] queryRoute(int sid) throws RuntimeException {
+  return storage.DBQueryRoute(sid);
+}
+@ %def queryRoute
+
+\subsubsection{[[querySchedule]](1)}
+<<Query schedules>>=
+public int[] querySchedule(int sid) throws RuntimeException {
+  return storage.DBQuerySchedule(sid);
+}
+@ %def querySchedule
+
+\subsubsection{[[queryCountVertices]](0)}
+<<Query various metrics>>=
+public int[] queryCountVertices() throws RuntimeException {
+  return storage.DBQueryCountVertices();
+}
+@ %def queryCountVertices
+
+\subsubsection{[[queryCountEdges]](0)}
+<<Query various metrics>>=
+public int[] queryCountEdges() throws RuntimeException {
+  return storage.DBQueryCountEdges();
+}
+@ %def queryCountEdges
+
+\subsubsection{[[queryStatisticsEdges]](0)}
+<<Query various metrics>>=
+public int[] queryStatisticsEdges() throws RuntimeException {
+  return storage.DBQueryStatisticsEdges();
+}
+@ %def queryStatisticsEdges
+
+\subsubsection{[[queryMBR]](0)}
+<<Query various metrics>>=
+public int[] queryMBR() throws RuntimeException {
+  return storage.DBQueryMBR();
+}
+@ %def queryMBR
+
+\subsubsection{[[queryCountServers]](0)}
+<<Query various metrics>>=
+public int[] queryCountServers() throws RuntimeException {
+  return storage.DBQueryCountServers();
+}
+@ %def queryCountServers
+
+\subsubsection{[[queryCountRequests]](0)}
+<<Query various metrics>>=
+public int[] queryCountRequests() throws RuntimeException {
+  return storage.DBQueryCountRequests();
+}
+@ %def queryCountRequests
+
+\subsubsection{[[queryServiceRate]](0)}
+<<Query various metrics>>=
+public int[] queryServiceRate() throws RuntimeException {
+  return storage.DBQueryServiceRate();
+}
+@ %def queryServiceRate
+
+\subsubsection{[[queryBaseDistanceTotal]](0)}
+<<Query various metrics>>=
+public int[] queryBaseDistanceTotal() throws RuntimeException {
+  return storage.DBQueryBaseDistanceTotal();
+}
+@ %def queryBaseDistanceTotal
+
+\subsubsection{[[queryServerBaseDistanceTotal]](0)}
+<<Query various metrics>>=
+public int[] queryServerBaseDistanceTotal() throws RuntimeException {
+  return storage.DBQueryServerBaseDistanceTotal();
+}
+@ %def queryServerBaseDistanceTotal
+
+\subsubsection{[[queryRequestBaseDistanceTotal]](0)}
+<<Query various metrics>>=
+public int[] queryRequestBaseDistanceTotal() throws RuntimeException {
+  return storage.DBQueryRequestBaseDistanceTotal();
+}
+@ %def queryRequestBaseDistanceTotal
+
+\subsubsection{[[queryServerTravelDistanceTotal]](0)}
+<<Query various metrics>>=
+public int[] queryServerTravelDistanceTotal() throws RuntimeException {
+  return storage.DBQueryServerTravelDistanceTotal();
+}
+@ %def queryServerTravelDistanceTotal
+
+\subsubsection{[[queryServerCruisingDistanceTotal]](0)}
+<<Query various metrics>>=
+public int[] queryServerCruisingDistanceTotal() throws RuntimeException {
+  return storage.DBQueryServerCruisingDistanceTotal();
+}
+@ %def queryServerCruisingDistanceTotal
+
+\subsubsection{[[queryServerServiceDistanceTotal]](0)}
+<<Query various metrics>>=
+public int[] queryServerServiceDistanceTotal() throws RuntimeException {
+  return storage.DBQueryServerServiceDistanceTotal();
+}
+@ %def queryServerServiceDistanceTotal
+
+\subsubsection{[[queryRequestDetourDistanceTotal]](0)}
+<<Query various metrics>>=
+public int[] queryRequestDetourDistanceTotal() throws RuntimeException {
+  return storage.DBQueryRequestDetourDistanceTotal();
+}
+@ %def queryRequestDetourDistanceTotal
+
+\subsubsection{[[queryRequestTransitDistanceTotal]](0)}
+<<Query various metrics>>=
+public int[] queryRequestTransitDistanceTotal() throws RuntimeException {
+  return storage.DBQueryRequestTransitDistanceTotal();
+}
+@ %def queryRequestTransitDistanceTotal
+
+\subsubsection{[[queryServerTravelDurationTotal]](0)}
+<<Query various metrics>>=
+public int[] queryServerTravelDurationTotal() throws RuntimeException {
+  return storage.DBQueryServerTravelDurationTotal();
+}
+@ %def queryServerTravelDurationTotal
+
+\subsubsection{[[queryRequestPickupDurationTotal]](0)}
+<<Query various metrics>>=
+public int[] queryRequestPickupDurationTotal() throws RuntimeException {
+  return storage.DBQueryRequestPickupDurationTotal();
+}
+@ %def queryRequestPickupDurationTotal
+
+\subsubsection{[[queryRequestTransitDurationTotal]](0)}
+<<Query various metrics>>=
+public int[] queryRequestTransitDurationTotal() throws RuntimeException {
+  return storage.DBQueryRequestTransitDurationTotal();
+}
+@ %def queryRequestTransitDurationTotal
+
+\subsubsection{[[queryRequestTravelDurationTotal]](0)}
+<<Query various metrics>>=
+public int[] queryRequestTravelDurationTotal() throws RuntimeException {
+  return storage.DBQueryRequestTravelDurationTotal();
+}
+@ %def queryRequestTravelDurationTotal
+
+\subsubsection{[[queryRequestDepartureTime]](1)}
+<<Query various metrics>>=
+public int[] queryRequestDepartureTime(int rid) throws RuntimeException {
+  return storage.DBQueryRequestDepartureTime(rid);
+}
+@ %def queryRequestDepartureTime
+
+\subsubsection{[[queryServerDepartureTime]](1)}
+<<Query various metrics>>=
+public int[] queryServerDepartureTime(int sid) throws RuntimeException {
+  return storage.DBQueryServerDepartureTime(sid);
+}
+@ %def queryServerDepartureTime
+
+\subsubsection{[[queryRequestArrivalTime]](1)}
+<<Query various metrics>>=
+public int[] queryRequestArrivalTime(int rid) throws RuntimeException {
+  return storage.DBQueryRequestArrivalTime(rid);
+}
+@ %def queryRequestArrivalTime
+
+\subsubsection{[[queryServerArrivalTime]](1)}
+<<Query various metrics>>=
+public int[] queryServerArrivalTime(int sid) throws RuntimeException {
+  return storage.DBQueryServerArrivalTime(sid);
+}
+@ %def queryServerArrivalTime
+
+\section{Private Methods}
+\label{sec:private-methods}
+
+\subsection{[[Print(1)]]}
+<<[[SimulationController]] private methods>>=
+private void Print(String msg) {
+  System.out.println("[SimulationController]["+LocalDateTime.now()+"]"
+    + "[t="+world_time+"] "+msg);
+}
+@ %def Print
+
+\appendix
+
+\section{Appendix: List of Chunks}
+\label{ap:list-of-chunks}
+\nowebchunks
+
+\section{Appendix: List of Identifiers}
+\label{ap:list-of-identifiers}
+\nowebindex
+
+\end{document}
+
