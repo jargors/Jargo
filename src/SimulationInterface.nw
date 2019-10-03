@@ -91,16 +91,17 @@ private int world_time = 0;
 
 \subsection{Constructor}
 \label{sec:constructor}
-Nothing is done in the constructor.
+The storage interface is set in the constructor.
 <<[[SimulationInterface]] constructor>>=
-public SimulationInterface() { }
+public SimulationInterface(StorageInterface src) {
+  storage = src;
+}
 @
 
 \section{Public Methods}
 \label{sec:public-methods}
 \hi{General Methods.}
 <<[[SimulationInterface]] public methods>>=
-<<Set storage interface>>
 <<Set/get simulation world time>>
 @
 \hi{Write Methods.}
@@ -120,13 +121,6 @@ public SimulationInterface() { }
 
 \subsection{General Methods}
 \label{sec:general-methods}
-
-\subsubsection{[[setStorageInterface]](1)}
-<<Set storage interface>>=
-public void setStorageInterface(StorageInterface src) {
-  storage = src;
-}
-@ %def setStorageInterface
 
 \subsubsection{[[setSimulationWorldTime]](1)}
 We depend on the controller to tell the simulation interface about the current

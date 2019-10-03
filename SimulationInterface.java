@@ -4,8 +4,7 @@
   public class SimulationInterface {
     private StorageInterface storage;
     private int world_time = 0;
-    public SimulationInterface() { }
-    public void setStorageInterface(StorageInterface src) {
+    public SimulationInterface(StorageInterface src) {
       storage = src;
     }
     public void setSimulationWorldTime(int t) {
