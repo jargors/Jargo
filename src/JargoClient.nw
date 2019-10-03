@@ -1,0 +1,301 @@
+\documentclass{article}
+
+\usepackage{noweb}
+\noweboptions{smallcode,longchunks}
+
+\usepackage[a4paper,margin=1in]{geometry}
+
+\usepackage{colortbl}
+\usepackage[colorlinks=true]{hyperref}
+\usepackage{tikz}
+
+% Define a handy paragraph opener
+\newcommand{\hi}[1]{\noindent {\bf #1}}
+
+% Remove noweb page break penalty
+\def\nwendcode{\endtrivlist \endgroup}
+\let\nwdocspar=\par
+
+\title{Jargo Client\footnote{\url{https://github.com/jargors/Client}}}
+\author{James J. Pan\\
+  \small{\href{mailto:jamesjpan@outlook.com}{jamesjpan@outlook.com}}
+}
+
+\begin{document}
+\maketitle
+\pagestyle{noweb}
+
+\tableofcontents
+
+\section{Introduction}
+\label{sec:introduction}
+We supply an abstract base class for developing Jargo client ridesharing
+algorithms. The class provides a standard interface for interacting with the
+simulation engine (Figure~\ref{fig:client}). Algorithm developers extend the
+base class to add specific customer-to-vehicle matching and vehicle routing
+functionality.
+The base class is developed using the
+Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
+programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
+([[src/JargoClient.nw]]) is the source for both the documentation
+([[doc/JargoClient.tex]]) and the Java code (JargoClient.java)\footnote{See the
+[[Makefile]] for build details.}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=150mm]{src/fig/client-fig}
+\caption{Client within the Jargo stack.}
+\label{fig:client}
+\end{figure}
+
+\section{Implementation Overview}
+<<JargoClient.java>>=
+  <<JargoClient.java preamble>>
+  <<[[JargoClient]] definition>>
+@
+
+\subsection{Preamble}
+The preamble declares the package and imports dependencies.
+<<JargoClient.java preamble>>=
+package com.github.jargors;
+@
+We import [[SimulationInterface]] so we can interact with the simulated world,
+and we import [[LocalDateTime]] so we can query the physical time for
+logging purposes.
+<<JargoClient.java preamble>>=
+import com.github.jargors.SimulationInterface;
+import java.time.LocalDateTime;
+@
+
+\subsection{Class Definition}
+The [[JargoClient]] class consists of member variables, a constructor, and public
+and private methods, just like any other Java class. Note the [[abstract]]
+keyword indicates the class cannot be used directly.
+<<[[JargoClient]] definition>>=
+public abstract class JargoClient {
+  <<[[JargoClient]] member variables>>
+  <<[[JargoClient]] constructor>>
+  <<[[JargoClient]] public methods>>
+  <<[[JargoClient]] private methods>>
+}
+@
+
+\subsection{Member Variables}
+We define two containers for requests and server locations obtained from the
+simulation engine. We also define the collection periods, in seconds. By
+default, requests and server locations are collected every second.
+<<[[JargoClient]] member variables>>=
+private int[] requests;
+private int[] locations;
+private int r_collection_period = 1;
+private int s_collection_period = 1;
+private SimulationInterface simulator;
+@ %def requests locations r_collection_period s_collection_period simulator
+
+\subsection{Constructor}
+An actual algorithm might override the default constructor to perform
+preprocessing tasks such as building a road network index.
+<<[[JargoClient]] constructor>>=
+public JargoClient(SimulationInterface src) {
+  simulator = src;
+}
+@
+
+\section{Public Methods}
+<<[[JargoClient]] public methods>>=
+  <<Collect requests>>
+  <<Collect server locations>>
+  <<Get/set request collection period>>
+  <<Get/set server location collection period>>
+@
+
+\subsection{Obtaining Requests and Server Locations}
+To obtain unassigned customer requests and server locations, we depend on
+the simulation engine to push the data to the client. The [[collectRequests]](1)
+and [[collectServerLocations]](1) methods simply copy [[src]] into
+the client's working memory.
+
+\subsubsection{[[collectRequests]](1)}
+Array [[src]] =
+
+\noindent
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{[[rid]] of request }r$};
+ &\node {$1:r_q$}; & \node {$2:r_e$}; & \node {$3:r_l$};
+ &\node {$4:r_o$}; & \node {$5:r_d$}; & \node {$6:d_r$};
+ &\node[minimum width=12mm] {...};\\
+};
+\end{tikzpicture}
+
+\noindent containing all $r$ queued to be assigned\footnote{See
+\url{https://github.com/jargors/Storage} to learn about Jargo's data model.}.
+After copying [[src]] into [[requests]], the [[endCollectRequests]](0) method
+is executed.
+<<Collect requests>>=
+public void collectRequests(int[] src) {
+  requests = src.clone();
+  endCollectRequests();
+}
+@ %def collectRequests
+
+\subsubsection{[[collectServerLocations]](1)}
+Array [[src]] =
+
+\noindent
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{[[sid]] of server }s$};
+ &\node {$1:\textrm{time of $s$'s last location}$};
+ &\node {$2:\textrm{vertex of $s$'s last location}$};
+ &\node[minimum width=12mm] {...};\\
+};
+\end{tikzpicture}
+
+\noindent If locations are polled for and stored into [[src]] at $t'$ world
+time, then formally the last location for server $s$ is defined as waypoint
+$(t,v)$ that satisfies $t=\textrm{argmin}_{(t,v)\in w_{\leq t'}} (t-t')$, where
+$w_{\leq t'}$ is the server's traveled route.  In other words the last location
+is the waypoint in the server's traveled route that is nearest $t'$.  After
+copying [[src]] into [[locations]], the [[endCollectServerLocations]](0) method
+is executed.
+<<Collect server locations>>=
+public void collectServerLocations(int[] src) {
+  locations = src.clone();
+  endCollectServerLocations();
+}
+@ %def collectServerLocations
+
+\subsection{Getters and Setters}
+
+\subsubsection{[[getRequestCollectionPeriod]](0)}
+<<Get/set request collection period>>=
+public int getRequestCollectionPeriod() {
+  return r_collection_period;
+}
+@ %def getRequestCollectionPeriod 
+
+\subsubsection{[[setRequestCollectionPeriod]](1)}
+<<Get/set request collection period>>=
+public void setRequestCollectionPeriod(int t) {
+  r_collection_period = t;
+}
+@ %def setRequestCollectionPeriod
+
+\subsubsection{[[getServerLocationCollectionPeriod]](0)}
+<<Get/set server location collection period>>=
+public int getServerLocationCollectionPeriod () {
+  return s_collection_period;
+}
+@ %def getServerLocationCollectionPeriod
+
+\subsubsection{[[setServerLocationCollectionPeriod]](1)}
+<<Get/set server location collection period>>=
+public void setServerLocationCollectionPeriod(int t) {
+  s_collection_period = t;
+}
+@ %def setServerLocationCollectionPeriod
+
+\section{Private Methods}
+<<[[JargoClient]] private methods>>=
+  <<End collect requests>>
+  <<End collect server locations>>
+  <<Handle request>>
+  <<Handle server location>>
+  <<Print a message>>
+
+@
+
+\subsection{[[endCollectRequests]](0)}
+After requests are collected, [[handleRequest]](1) is executed on each one.
+<<End collect requests>>=
+private void endCollectRequests() {
+  for (int i = 0; i < (requests.length - 6); i += 7) {
+    handleRequest(new int[] {
+      requests[i],
+      requests[(i + 1)],
+      requests[(i + 2)],
+      requests[(i + 3)],
+      requests[(i + 4)],
+      requests[(i + 5)],
+      requests[(i + 6)]
+    });
+  }
+}
+@ %def endCollectRequests
+
+\subsection{[[endCollectServerLocations]](0)}
+After server locations are collected, [[handleServerLocation]](1) is executed
+on each one.
+<<End collect server locations>>=
+private void endCollectServerLocations() {
+  for (int i = 0; i < (locations.length - 2); i += 3) {
+    handleServerLocation(new int[] {
+      locations[i],
+      locations[(i + 1)],
+      locations[(i + 2)]
+    });
+  }
+}
+@ %def endCollectServerLocations
+
+\subsection{[[handleRequest]](1)}
+Array [[r]] =
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{[[rid]] of request $r$}$};
+ &\node {$1:r_q$}; & \node {$2:r_e$}; & \node {$3:r_l$};
+ &\node {$4:r_o$}; & \node {$5:r_d$}; & \node {$6:d_r$};\\
+};
+\end{tikzpicture}
+
+\noindent By default, [[handleRequest]](1) simply prints [[rid]].
+<<Handle request>>=
+private void handleRequest(int[] r) {
+  Print("handleRequest(1) got Request "+r[0]);
+}
+@ %def handleRequest
+
+\subsection{[[handleServerLocation]](1)}
+Array [[loc]] =
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{[[sid]] of server $s$}$};
+ &\node {$1:\textrm{time of $s$'s last location}$};
+ &\node {$2:\textrm{vertex of $s$'s last location}$};\\
+};
+\end{tikzpicture}
+
+\noindent By default, [[handleServerLocation]](1) simply prints [[sid]].
+<<Handle server location>>=
+private void handleServerLocation(int[] loc) {
+  Print("handleServerLocation(1) got Server "+loc[0]);
+}
+@ %def handleServerLocation
+
+\subsection{[[Print]](1)}
+<<Print a message>>=
+private void Print(String msg) {
+  System.out.println("[JargoClient]["+LocalDateTime.now()+"]"
+    + "[t="+simulator.getSimulationWorldTime()+"] "+msg);
+}
+@ %def Print
+
+\appendix
+
+\section{Appendix: List of Chunks}
+\label{ap:list-of-chunks}
+\nowebchunks
+
+\section{Appendix: List of Identifiers}
+\label{ap:list-of-identifiers}
+\nowebindex
+
+\end{document}
+
