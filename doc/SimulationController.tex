@@ -163,9 +163,6 @@ public SimulationController(JargoClient target) \{
 \nwendcode{}\nwbegindocs{22}\nwdocspar
 \nwenddocs{}\nwbegincode{23}\sublabel{NW3Xlx2m-2B3Inh-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3Xlx2m-2B3Inh-1}}}\moddef{..initialize new storage interface~{\nwtagstyle{}\subpageref{NW3Xlx2m-2B3Inh-1}}}\endmoddef\nwused{\\{NW3Xlx2m-28Kazp-1}}
 storage = new StorageInterface(f_rnet);
-if (f_backup.length() > 0) \{
-  storage.DBLoadBackup(f_backup);
-\}
 \nwendcode{}\nwbegindocs{24}\nwdocspar
 \nwenddocs{}\nwbegincode{25}\sublabel{NW3Xlx2m-4I0D3t-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3Xlx2m-4I0D3t-1}}}\moddef{..initialize new simulation interface~{\nwtagstyle{}\subpageref{NW3Xlx2m-4I0D3t-1}}}\endmoddef\nwused{\\{NW3Xlx2m-28Kazp-1}}
 simulator = new SimulationInterface(storage);
@@ -209,7 +206,7 @@ public void setProblemInstance(String f) \{
 \subsubsection{{\tt{}\protect\nwindexuse{setRestoreFrom}{setRestoreFrom}{NW3Xlx2m-22fZvO-1}setRestoreFrom(1)}}
 \nwenddocs{}\nwbegincode{35}\sublabel{NW3Xlx2m-22fZvO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3Xlx2m-22fZvO-1}}}\moddef{Set path to previous backup~{\nwtagstyle{}\subpageref{NW3Xlx2m-22fZvO-1}}}\endmoddef\nwused{\\{NW3Xlx2m-45Q7Ei-1}}
 public void setRestoreFrom(String f) \{
-  f_backup = f;
+  storage.DBLoadBackup(f);
 \}
 \nwindexdefn{setRestoreFrom}{setRestoreFrom}{NW3Xlx2m-22fZvO-1}\eatline
 \nwidentdefs{\\{{setRestoreFrom}{setRestoreFrom}}}\nwendcode{}\nwbegindocs{36}\nwdocspar

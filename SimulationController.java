@@ -52,9 +52,6 @@
     };
     public SimulationController(JargoClient target) {
       storage = new StorageInterface(f_rnet);
-      if (f_backup.length() > 0) {
-        storage.DBLoadBackup(f_backup);
-      }
       simulator = new SimulationInterface(storage);
       client = target;
     }
@@ -65,7 +62,7 @@
       f_prob = f;
     }
     public void setRestoreFrom(String f) {
-      f_backup = f;
+      storage.DBLoadBackup(f);
     }
     public static int getSimulationWorldTime() {
       return world_time;

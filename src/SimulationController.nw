@@ -163,9 +163,6 @@ public SimulationController(JargoClient target) {
 @
 <<..initialize new storage interface>>=
 storage = new StorageInterface(f_rnet);
-if (f_backup.length() > 0) {
-  storage.DBLoadBackup(f_backup);
-}
 @
 <<..initialize new simulation interface>>=
 simulator = new SimulationInterface(storage);
@@ -209,7 +206,7 @@ public void setProblemInstance(String f) {
 \subsubsection{[[setRestoreFrom(1)]]}
 <<Set path to previous backup>>=
 public void setRestoreFrom(String f) {
-  f_backup = f;
+  storage.DBLoadBackup(f);
 }
 @ %def setRestoreFrom
 
