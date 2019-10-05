@@ -51,9 +51,14 @@
       }
     };
     public SimulationController(JargoClient target) {
-      storage = new StorageInterface(f_rnet);
-      simulator = new SimulationInterface(storage);
       client = target;
+    }
+    public void init() {
+      storage = new StorageInterface(f_rnet);
+      if (f_backup.length() > 0) {
+        storage.DBLoadBackup(f_backup);
+      }
+      simulator = new SimulationInterface(storage);
     }
     public void setRoadNetwork(String f) {
       f_rnet = f;
@@ -62,7 +67,7 @@
       f_prob = f;
     }
     public void setRestoreFrom(String f) {
-      storage.DBLoadBackup(f);
+      f_backup = f;
     }
     public static int getSimulationWorldTime() {
       return world_time;

@@ -156,22 +156,15 @@ private Runnable ServerLoop = new Runnable() {
 \subsection{Constructor}
 <<[[SimulationController]] constructor>>=
 public SimulationController(JargoClient target) {
-  <<..initialize new storage interface>>
-  <<..initialize new simulation interface>>
   client = target;
 }
-@
-<<..initialize new storage interface>>=
-storage = new StorageInterface(f_rnet);
-@
-<<..initialize new simulation interface>>=
-simulator = new SimulationInterface(storage);
 @
 
 \section{Public Methods}
 \label{sec:public-methods}
 \hi{General methods.}
 <<[[SimulationController]] public methods>>=
+<<Initialize controller>>
 <<Set path to road network>>
 <<Set path to problem instance>>
 <<Set path to previous backup>>
@@ -188,6 +181,17 @@ simulator = new SimulationInterface(storage);
 @
 
 \subsection{General methods}
+
+\subsubsection{[[init]](0)}
+<<Initialize controller>>=
+public void init() {
+  storage = new StorageInterface(f_rnet);
+  if (f_backup.length() > 0) {
+    storage.DBLoadBackup(f_backup);
+  }
+  simulator = new SimulationInterface(storage);
+}
+@ %def init
 
 \subsubsection{[[setRoadNetwork]](1)}
 <<Set path to road network>>=
@@ -206,7 +210,7 @@ public void setProblemInstance(String f) {
 \subsubsection{[[setRestoreFrom(1)]]}
 <<Set path to previous backup>>=
 public void setRestoreFrom(String f) {
-  storage.DBLoadBackup(f);
+  f_backup = f;
 }
 @ %def setRestoreFrom
 
