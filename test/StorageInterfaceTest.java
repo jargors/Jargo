@@ -251,9 +251,9 @@
         }
         {
           int output[] = storage.DBQueryServerLocationsActive(45);
-          if (!(output.length/3 == 0)) {
+          if (!(output.length/3 == 1)) {
             Print("[FAIL] DBQueryServerLocationsActive(1) (4/5)");
-            Print("\tExpected 0; got "+output.length/3);
+            Print("\tExpected 1; got "+output.length/3);
             count_failed++;
           } else {
             Print("[PASS] DBQueryServerLocationsActive(1) (4/5)");
@@ -261,7 +261,7 @@
           }
         }
         {
-          int output[] = storage.DBQueryServerLocationsActive(46);
+          int output[] = storage.DBQueryServerLocationsActive(500);
           if (!(output.length/3 == 0)) {
             Print("[FAIL] DBQueryServerLocationsActive(1) (5/5)");
             Print("\tExpected 0; got "+output.length/3);

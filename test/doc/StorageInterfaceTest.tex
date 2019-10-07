@@ -411,7 +411,7 @@ We should get the same output at $t=45$ and at $t=46$.
   \LA{}......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=1$~{\nwtagstyle{}\subpageref{NW36uAHF-1Iuh5h-1}}\RA{}
   \LA{}......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=44$~{\nwtagstyle{}\subpageref{NW36uAHF-4O1SEc-1}}\RA{}
   \LA{}......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=45$~{\nwtagstyle{}\subpageref{NW36uAHF-4NnQjy-1}}\RA{}
-  \LA{}......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=46$~{\nwtagstyle{}\subpageref{NW36uAHF-4OQ470-1}}\RA{}
+  \LA{}......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=500$~{\nwtagstyle{}\subpageref{NW36uAHF-1MX5TS-1}}\RA{}
 \}
 \nwendcode{}\nwbegindocs{43}\nwdocspar
 \nwenddocs{}\nwbegincode{44}\sublabel{NW36uAHF-1JQJiP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-1JQJiP-1}}}\moddef{......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=0$~{\nwtagstyle{}\subpageref{NW36uAHF-1JQJiP-1}}}\endmoddef\nwused{\\{NW36uAHF-3GrgPk-1}}
@@ -467,14 +467,14 @@ We should get the same output at $t=45$ and at $t=46$.
   \}
 \}
 \nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-4O1SEc-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-4O1SEc-1}\nwendcode{}\nwbegindocs{49}\nwdocspar
-Server 1 just ends service at $t=45$. We expect it to not appear for this
-query because it is no longer active.
+Server 1 ends service at $t=45$, but is at a dummy vertex and is still
+eligible for future requests.
 \nwenddocs{}\nwbegincode{50}\sublabel{NW36uAHF-4NnQjy-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-4NnQjy-1}}}\moddef{......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=45$~{\nwtagstyle{}\subpageref{NW36uAHF-4NnQjy-1}}}\endmoddef\nwused{\\{NW36uAHF-3GrgPk-1}}
 \{
   int output[] = storage.DBQueryServerLocationsActive(45);
-  if (!(output.length/3 == 0)) \{
+  if (!(output.length/3 == 1)) \{
     Print("[FAIL] DBQueryServerLocationsActive(1) (4/5)");
-    Print("\\tExpected 0; got "+output.length/3);
+    Print("\\tExpected 1; got "+output.length/3);
     count_failed++;
   \} else \{
     Print("[PASS] DBQueryServerLocationsActive(1) (4/5)");
@@ -482,9 +482,10 @@ query because it is no longer active.
   \}
 \}
 \nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-4NnQjy-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-4NnQjy-1}\nwendcode{}\nwbegindocs{51}\nwdocspar
-\nwenddocs{}\nwbegincode{52}\sublabel{NW36uAHF-4OQ470-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-4OQ470-1}}}\moddef{......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=46$~{\nwtagstyle{}\subpageref{NW36uAHF-4OQ470-1}}}\endmoddef\nwused{\\{NW36uAHF-3GrgPk-1}}
+Server 1 officially ends service at $t=500$ due to late window.
+\nwenddocs{}\nwbegincode{52}\sublabel{NW36uAHF-1MX5TS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-1MX5TS-1}}}\moddef{......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=500$~{\nwtagstyle{}\subpageref{NW36uAHF-1MX5TS-1}}}\endmoddef\nwused{\\{NW36uAHF-3GrgPk-1}}
 \{
-  int output[] = storage.DBQueryServerLocationsActive(46);
+  int output[] = storage.DBQueryServerLocationsActive(500);
   if (!(output.length/3 == 0)) \{
     Print("[FAIL] DBQueryServerLocationsActive(1) (5/5)");
     Print("\\tExpected 0; got "+output.length/3);
@@ -494,7 +495,7 @@ query because it is no longer active.
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-4OQ470-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-4OQ470-1}\nwendcode{}\nwbegindocs{53}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW36uAHF-1MX5TS-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW36uAHF-1MX5TS-1}\nwendcode{}\nwbegindocs{53}\nwdocspar
 \subsubsection{{\tt{}DBQueryRoute}(1)}
 \nwenddocs{}\nwbegincode{54}\sublabel{NW36uAHF-4TWZqG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW36uAHF-4TWZqG-1}}}\moddef{....test \code{}DBQueryRoute\edoc{}(1)~{\nwtagstyle{}\subpageref{NW36uAHF-4TWZqG-1}}}\endmoddef\nwused{\\{NW36uAHF-2w6SyW-1}}
 \{
@@ -1774,7 +1775,7 @@ Now it's time to remove Request 12 from Server 13...
 \nwixlogsorted{c}{{......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=1$}{NW36uAHF-1Iuh5h-1}{\nwixu{NW36uAHF-3GrgPk-1}\nwixd{NW36uAHF-1Iuh5h-1}}}%
 \nwixlogsorted{c}{{......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=44$}{NW36uAHF-4O1SEc-1}{\nwixu{NW36uAHF-3GrgPk-1}\nwixd{NW36uAHF-4O1SEc-1}}}%
 \nwixlogsorted{c}{{......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=45$}{NW36uAHF-4NnQjy-1}{\nwixu{NW36uAHF-3GrgPk-1}\nwixd{NW36uAHF-4NnQjy-1}}}%
-\nwixlogsorted{c}{{......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=46$}{NW36uAHF-4OQ470-1}{\nwixu{NW36uAHF-3GrgPk-1}\nwixd{NW36uAHF-4OQ470-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=500$}{NW36uAHF-1MX5TS-1}{\nwixu{NW36uAHF-3GrgPk-1}\nwixd{NW36uAHF-1MX5TS-1}}}%
 \nwixlogsorted{c}{{......test \code{}DBQueryServerLocationsAll\edoc{}(1) when $t=0$}{NW36uAHF-2sf19g-1}{\nwixu{NW36uAHF-2dAmyn-1}\nwixd{NW36uAHF-2sf19g-1}}}%
 \nwixlogsorted{c}{{......test \code{}DBQueryServerLocationsAll\edoc{}(1) when $t=44$}{NW36uAHF-HtL0w-1}{\nwixu{NW36uAHF-2dAmyn-1}\nwixd{NW36uAHF-HtL0w-1}}}%
 \nwixlogsorted{c}{{......test \code{}DBQueryServerLocationsAll\edoc{}(1) when $t=45$}{NW36uAHF-HH7DS-1}{\nwixu{NW36uAHF-2dAmyn-1}\nwixd{NW36uAHF-HH7DS-1}}}%

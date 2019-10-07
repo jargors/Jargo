@@ -411,7 +411,7 @@ We should get the same output at $t=45$ and at $t=46$.
   <<......test [[DBQueryServerLocationsActive]](1) when $t=1$>>
   <<......test [[DBQueryServerLocationsActive]](1) when $t=44$>>
   <<......test [[DBQueryServerLocationsActive]](1) when $t=45$>>
-  <<......test [[DBQueryServerLocationsActive]](1) when $t=46$>>
+  <<......test [[DBQueryServerLocationsActive]](1) when $t=500$>>
 }
 @
 <<......test [[DBQueryServerLocationsActive]](1) when $t=0$>>=
@@ -467,14 +467,14 @@ We should get the same output at $t=45$ and at $t=46$.
   }
 }
 @
-Server 1 just ends service at $t=45$. We expect it to not appear for this
-query because it is no longer active.
+Server 1 ends service at $t=45$, but is at a dummy vertex and is still
+eligible for future requests.
 <<......test [[DBQueryServerLocationsActive]](1) when $t=45$>>=
 {
   int output[] = storage.DBQueryServerLocationsActive(45);
-  if (!(output.length/3 == 0)) {
+  if (!(output.length/3 == 1)) {
     Print("[FAIL] DBQueryServerLocationsActive(1) (4/5)");
-    Print("\tExpected 0; got "+output.length/3);
+    Print("\tExpected 1; got "+output.length/3);
     count_failed++;
   } else {
     Print("[PASS] DBQueryServerLocationsActive(1) (4/5)");
@@ -482,9 +482,10 @@ query because it is no longer active.
   }
 }
 @
-<<......test [[DBQueryServerLocationsActive]](1) when $t=46$>>=
+Server 1 officially ends service at $t=500$ due to late window.
+<<......test [[DBQueryServerLocationsActive]](1) when $t=500$>>=
 {
-  int output[] = storage.DBQueryServerLocationsActive(46);
+  int output[] = storage.DBQueryServerLocationsActive(500);
   if (!(output.length/3 == 0)) {
     Print("[FAIL] DBQueryServerLocationsActive(1) (5/5)");
     Print("\tExpected 0; got "+output.length/3);
