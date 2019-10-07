@@ -2786,7 +2786,7 @@ public int[] DBQueryServerLocationsAll(int t) throws RuntimeException \{
 public int[] DBQueryServerLocationsActive(int t) throws RuntimeException \{
   int[] output = new int[] \{ \};
   try \{
-    output = DBFetch(128, 3, t, t, t, t, t);
+    output = DBFetch(128, 3, t, t, t, t, t, t);
   \}
   \LA{}Catch and print \code{}SQLException\edoc{}~{\nwtagstyle{}\subpageref{NW3wHtHL-4P0tKA-1}}\RA{}
   return output;
@@ -3490,7 +3490,7 @@ private void PSInit() throws RuntimeException \{
       + "GROUP BY sid"
       + ") as b ON a.sid=b.sid AND ABS(a.t2-?)=b.tdiff AND a.t2<=?");
   pstr.put(128, SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
-      + "SELECT sid FROM CW WHERE te>? OR ve=0"
+      + "SELECT sid FROM CW WHERE te>? OR (ve=0 AND sl>?)"
       + ") as b ON a.sid=b.sid INNER JOIN ("
       + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
       + "GROUP BY sid"
