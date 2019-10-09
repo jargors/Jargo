@@ -2,24 +2,20 @@
 
 \usepackage{noweb}
 \noweboptions{smallcode,longchunks}
-
 \usepackage[a4paper,margin=1in]{geometry}
-
 \usepackage{colortbl}
 \usepackage[colorlinks=true]{hyperref}
 \usepackage{graphicx}
 
-% Define a handy paragraph opener
-\newcommand{\hi}[1]{\noindent {\bf #1}}
+\newcommand{\hi}[1]{\noindent {\bf #1}}     % Define a handy paragraph opener
 
-% Remove noweb page break penalty
-\def\nwendcode{\endtrivlist \endgroup}
+\def\nwendcode{\endtrivlist \endgroup}      % Remove noweb page break penalty
 \let\nwdocspar=\par
 
-\title{Jargo Simulation Interface\footnote{\url{https://github.com/jargors/Simulation-Interface}}}
+\title{Jargo Communicator\footnote{
+  \url{https://github.com/jargors/Communicator}}}
 \author{James J. Pan\\
-  \small{\href{mailto:jamesjpan@outlook.com}{jamesjpan@outlook.com}}
-}
+  \small{\href{mailto:pan-j16@mails.tsinghua.edu.cn}{pan-j16@mails.tsinghua.edu.cn}}}
 
 \begin{document}
 \maketitle
@@ -29,89 +25,85 @@
 
 \section{Introduction}
 \label{sec:introduction}
-Jargo's simulation interface provides a way for Jargo clients to interact with
-the Jargo simulated world (Figure~\ref{fig:interface-fig}). The interface
-exposes only the subset of Jargo's storage interface API that a client would
-possibly have access to in the real world, including querying and submitting
-server routes and schedules.  The simulation interface is developed using the
-Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
+Jargo's communicator intends to be the sole way for Jargo clients to interact
+with the Jargo simulated world (Figure~\ref{fig:interface-fig}). The
+communicator exposes only the subset of Jargo's storage interface API that a
+client would possibly have access to in the real world, including querying and
+submitting server routes and schedules.  The communicator is developed using
+the Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
 programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
-([[src/SimulationInterface.nw]]) is the source for the documentation
-([[doc/SimulationInterface.tex]]) and the Java code
-([[SimulationInterface.java]])\footnote{See the [[Makefile]] for build
-details.}.
+([[src/Communicator.nw]]) is the source for the documentation
+([[doc/Communicator.tex]]) and the Java code
+([[Communicator.java]])\footnote{See the [[Makefile]] for build details.}.
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=150mm]{src/fig/interface-fig}
-\caption{Simulation interface within the Jargo stack.}
+\caption{Communicator within the Jargo stack.}
 \label{fig:interface-fig}
 \end{figure}
 
 \section{Implementation Overview}
 \label{sec:implementation-overview}
-<<SimulationInterface.java>>=
-  <<SimulationInterface.java preamble>>
-  <<[[SimulationInterface]] definition>>
+<<Communicator.java>>=
+  <<Communicator.java preamble>>
+  <<[[Communicator]] definition>>
 @
 
 \subsection{Preamble}
 \label{sec:preamble}
 The preamble declares the package and imports dependencies.
-<<SimulationInterface.java preamble>>=
+<<Communicator.java preamble>>=
 package com.github.jargors;
 @
-We import [[StorageInterface]] to gain access to the storage API. We also
-import [[LocalDateTime]] for printing timestamps.
-<<SimulationInterface.java preamble>>=
-import com.github.jargors.StorageInterface;
+<<Communicator.java preamble>>=
+import com.github.jargors.Storage;
+import java.util.function.Supplier;
 import java.time.LocalDateTime;
 @
 
 \subsection{Class Definition}
 \label{sec:class-definition}
-The [[SimulationInterface]] class consists of member variables, a constructor, and public
-and private methods, just like any other Java class.
-<<[[SimulationInterface]] definition>>=
-public class SimulationInterface {
-  <<[[SimulationInterface]] member variables>>
-  <<[[SimulationInterface]] constructor>>
-  <<[[SimulationInterface]] public methods>>
-  <<[[SimulationInterface]] private methods>>
+<<[[Communicator]] definition>>=
+public class Communicator {
+  <<[[Communicator]] member variables>>
+  <<[[Communicator]] constructor>>
+  <<[[Communicator]] public methods>>
+  <<[[Communicator]] private methods>>
 }
 @
 
 \subsection{Member Variables}
 \label{sec:member-variables}
-We define a [[StorageInterface]] and a container for the simulation world time.
-<<[[SimulationInterface]] member variables>>=
-private StorageInterface storage;
+We define a [[Storage]] and a container for the simulation world time.
+<<[[Communicator]] member variables>>=
+private Storage storage;
 private int world_time = 0;
 @ %def storage world_time
 
 \subsection{Constructor}
 \label{sec:constructor}
-The storage interface is set in the constructor.
-<<[[SimulationInterface]] constructor>>=
-public SimulationInterface(StorageInterface src) {
-  storage = src;
-}
+<<[[Communicator]] constructor>>=
+public Communicator() { }
 @
 
 \section{Public Methods}
 \label{sec:public-methods}
 \hi{General Methods.}
-<<[[SimulationInterface]] public methods>>=
+<<[[Communicator]] public methods>>=
+<<Set storage>>
 <<Set/get simulation world time>>
 @
 \hi{Write Methods.}
-<<[[SimulationInterface]] public methods>>=
+<<[[Communicator]] public methods>>=
 <<Update server route>>
 <<Update server add to schedule>>
 <<Update server remove from schedule>>
 @
 \hi{Read Methods.}
-<<[[SimulationInterface]] public methods>>=
+<<[[Communicator]] public methods>>=
+<<Query vertex>>
+<<Query edge>>
 <<Query ridesharing user>>
 <<Query active server locations>>
 <<Query routes>>
@@ -121,6 +113,13 @@ public SimulationInterface(StorageInterface src) {
 
 \subsection{General Methods}
 \label{sec:general-methods}
+
+\subsubsection{[[setStorage]](1)}
+<<Set storage>>=
+public void setStorage(Storage src) {
+  storage = src;
+}
+@ %def setStorage
 
 \subsubsection{[[setSimulationWorldTime]](1)}
 We depend on the controller to tell the simulation interface about the current
@@ -166,6 +165,20 @@ public void updateServerRemoveFromSchedule(
 
 \subsection{Read Methods}
 \label{sec:read-methods}
+
+\subsubsection{[[queryVertex]](1)}
+<<Query vertex>>=
+public int[] queryVertex(int v) throws RuntimeException {
+  return storage.DBQueryVertex(v);
+}
+@ %def queryVertex
+
+\subsubsection{[[queryEdge]](2)}
+<<Query edge>>=
+public int[] queryEdge(int v1, int v2) throws RuntimeException {
+  return storage.DBQueryEdge(v1, v2);
+}
+@ %def queryEdge
 
 \subsubsection{[[queryServer]](1)}
 <<Query ridesharing user>>=
@@ -213,9 +226,9 @@ public int[] queryCurrentLoad(int sid, int t) throws RuntimeException {
 \label{sec:private-methods}
 
 \subsection{[[Print]](1)}
-<<[[SimulationInterface]] private methods>>=
+<<[[Communicator]] private methods>>=
 private void Print(String msg) {
-  System.out.println("[SimulationInterface]["+LocalDateTime.now()+"] "+msg);
+  System.out.println("[Jargo][Communicator]["+LocalDateTime.now()+"] "+msg);
 }
 @ %def Print
 

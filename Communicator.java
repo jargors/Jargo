@@ -1,10 +1,12 @@
   package com.github.jargors;
-  import com.github.jargors.StorageInterface;
+  import com.github.jargors.Storage;
+  import java.util.function.Supplier;
   import java.time.LocalDateTime;
-  public class SimulationInterface {
-    private StorageInterface storage;
+  public class Communicator {
+    private Storage storage;
     private int world_time = 0;
-    public SimulationInterface(StorageInterface src) {
+    public Communicator() { }
+    public void setStorage(Storage src) {
       storage = src;
     }
     public void setSimulationWorldTime(int t) {
@@ -23,6 +25,12 @@
     public void updateServerRemoveFromSchedule(
         int sid, int[] route, int[] sched, int[] rid) {
       storage.DBUpdateServerRemoveFromSchedule(sid, route, sched, rid);
+    }
+    public int[] queryVertex(int v) throws RuntimeException {
+      return storage.DBQueryVertex(v);
+    }
+    public int[] queryEdge(int v1, int v2) throws RuntimeException {
+      return storage.DBQueryEdge(v1, v2);
     }
     public int[] queryServer(int sid) throws RuntimeException {
       return storage.DBQueryServer(sid);
@@ -43,6 +51,6 @@
       return storage.DBQueryCurrentLoad(sid, t);
     }
     private void Print(String msg) {
-      System.out.println("[SimulationInterface]["+LocalDateTime.now()+"] "+msg);
+      System.out.println("[Jargo][Communicator]["+LocalDateTime.now()+"] "+msg);
     }
   }

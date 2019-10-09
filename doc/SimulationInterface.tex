@@ -61,10 +61,9 @@ The preamble declares the package and imports dependencies.
 \nwenddocs{}\nwbegincode{3}\sublabel{NW3Bji2p-1Ogd8c-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3Bji2p-1Ogd8c-1}}}\moddef{SimulationInterface.java preamble~{\nwtagstyle{}\subpageref{NW3Bji2p-1Ogd8c-1}}}\endmoddef\nwalsodefined{\\{NW3Bji2p-1Ogd8c-2}}\nwused{\\{NW3Bji2p-2qVXZY-1}}
 package com.github.jargors;
 \nwendcode{}\nwbegindocs{4}\nwdocspar
-We import {\tt{}StorageInterface} to gain access to the storage API. We also
-import {\tt{}LocalDateTime} for printing timestamps.
 \nwenddocs{}\nwbegincode{5}\sublabel{NW3Bji2p-1Ogd8c-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3Bji2p-1Ogd8c-2}}}\moddef{SimulationInterface.java preamble~{\nwtagstyle{}\subpageref{NW3Bji2p-1Ogd8c-1}}}\plusendmoddef
 import com.github.jargors.StorageInterface;
+import java.util.function.Supplier;
 import java.time.LocalDateTime;
 \nwendcode{}\nwbegindocs{6}\nwdocspar
 
@@ -112,6 +111,8 @@ public SimulationInterface(StorageInterface src) \{
 \nwendcode{}\nwbegindocs{16}\nwdocspar
 \hi{Read Methods.}
 \nwenddocs{}\nwbegincode{17}\sublabel{NW3Bji2p-48YU8C-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW3Bji2p-48YU8C-3}}}\moddef{\code{}SimulationInterface\edoc{} public methods~{\nwtagstyle{}\subpageref{NW3Bji2p-48YU8C-1}}}\plusendmoddef
+\LA{}Query vertex~{\nwtagstyle{}\subpageref{NW3Bji2p-4IfXsG-1}}\RA{}
+\LA{}Query edge~{\nwtagstyle{}\subpageref{NW3Bji2p-1E2aru-1}}\RA{}
 \LA{}Query ridesharing user~{\nwtagstyle{}\subpageref{NW3Bji2p-3isdeu-1}}\RA{}
 \LA{}Query active server locations~{\nwtagstyle{}\subpageref{NW3Bji2p-3UaQCb-1}}\RA{}
 \LA{}Query routes~{\nwtagstyle{}\subpageref{NW3Bji2p-1AprqI-1}}\RA{}
@@ -122,7 +123,7 @@ public SimulationInterface(StorageInterface src) \{
 \subsection{General Methods}
 \label{sec:general-methods}
 
-\subsubsection{{\tt{}\protect\nosublabel{NW3Bji2p-48YU8C-3-u5}\protect\nwindexuse{setSimulationWorldTime}{setSimulationWorldTime}{NW3Bji2p-3SIXWk-1}setSimulationWorldTime}(1)}
+\subsubsection{{\tt{}\protect\nosublabel{NW3Bji2p-48YU8C-3-u7}\protect\nwindexuse{setSimulationWorldTime}{setSimulationWorldTime}{NW3Bji2p-3SIXWk-1}setSimulationWorldTime}(1)}
 We depend on the controller to tell the simulation interface about the current
 world time.
 \nwenddocs{}\nwbegincode{19}\sublabel{NW3Bji2p-3SIXWk-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3Bji2p-3SIXWk-1}}}\moddef{Set/get simulation world time~{\nwtagstyle{}\subpageref{NW3Bji2p-3SIXWk-1}}}\endmoddef\nwalsodefined{\\{NW3Bji2p-3SIXWk-2}}\nwused{\\{NW3Bji2p-48YU8C-1}}
@@ -167,55 +168,69 @@ public void updateServerRemoveFromSchedule(
 \subsection{Read Methods}
 \label{sec:read-methods}
 
+\subsubsection{{\tt{}\protect\nwindexuse{queryVertex}{queryVertex}{NW3Bji2p-4IfXsG-1}queryVertex}(1)}
+\nwenddocs{}\nwbegincode{29}\sublabel{NW3Bji2p-4IfXsG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3Bji2p-4IfXsG-1}}}\moddef{Query vertex~{\nwtagstyle{}\subpageref{NW3Bji2p-4IfXsG-1}}}\endmoddef\nwused{\\{NW3Bji2p-48YU8C-3}}
+public int[] queryVertex(int v) throws RuntimeException \{
+  return storage.DBQueryVertex(v);
+\}
+\nwindexdefn{queryVertex}{queryVertex}{NW3Bji2p-4IfXsG-1}\eatline
+\nwidentdefs{\\{{queryVertex}{queryVertex}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW3Bji2p-4IfXsG-1}\nwendcode{}\nwbegindocs{30}\nwdocspar
+\subsubsection{{\tt{}\protect\nwindexuse{queryEdge}{queryEdge}{NW3Bji2p-1E2aru-1}queryEdge}(2)}
+\nwenddocs{}\nwbegincode{31}\sublabel{NW3Bji2p-1E2aru-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3Bji2p-1E2aru-1}}}\moddef{Query edge~{\nwtagstyle{}\subpageref{NW3Bji2p-1E2aru-1}}}\endmoddef\nwused{\\{NW3Bji2p-48YU8C-3}}
+public int[] queryEdge(int v1, int v2) throws RuntimeException \{
+  return storage.DBQueryEdge(v1, v2);
+\}
+\nwindexdefn{queryEdge}{queryEdge}{NW3Bji2p-1E2aru-1}\eatline
+\nwidentdefs{\\{{queryEdge}{queryEdge}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW3Bji2p-1E2aru-1}\nwendcode{}\nwbegindocs{32}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryServer}{queryServer}{NW3Bji2p-3isdeu-1}queryServer}(1)}
-\nwenddocs{}\nwbegincode{29}\sublabel{NW3Bji2p-3isdeu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3Bji2p-3isdeu-1}}}\moddef{Query ridesharing user~{\nwtagstyle{}\subpageref{NW3Bji2p-3isdeu-1}}}\endmoddef\nwalsodefined{\\{NW3Bji2p-3isdeu-2}}\nwused{\\{NW3Bji2p-48YU8C-3}}
+\nwenddocs{}\nwbegincode{33}\sublabel{NW3Bji2p-3isdeu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3Bji2p-3isdeu-1}}}\moddef{Query ridesharing user~{\nwtagstyle{}\subpageref{NW3Bji2p-3isdeu-1}}}\endmoddef\nwalsodefined{\\{NW3Bji2p-3isdeu-2}}\nwused{\\{NW3Bji2p-48YU8C-3}}
 public int[] queryServer(int sid) throws RuntimeException \{
   return storage.DBQueryServer(sid);
 \}
 \nwindexdefn{queryServer}{queryServer}{NW3Bji2p-3isdeu-1}\eatline
-\nwidentdefs{\\{{queryServer}{queryServer}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW3Bji2p-3isdeu-1}\nwendcode{}\nwbegindocs{30}\nwdocspar
+\nwidentdefs{\\{{queryServer}{queryServer}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW3Bji2p-3isdeu-1}\nwendcode{}\nwbegindocs{34}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryRequest}{queryRequest}{NW3Bji2p-3isdeu-2}queryRequest}(1)}
-\nwenddocs{}\nwbegincode{31}\sublabel{NW3Bji2p-3isdeu-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3Bji2p-3isdeu-2}}}\moddef{Query ridesharing user~{\nwtagstyle{}\subpageref{NW3Bji2p-3isdeu-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{35}\sublabel{NW3Bji2p-3isdeu-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3Bji2p-3isdeu-2}}}\moddef{Query ridesharing user~{\nwtagstyle{}\subpageref{NW3Bji2p-3isdeu-1}}}\plusendmoddef
 public int[] queryRequest(int rid) throws RuntimeException \{
   return storage.DBQueryRequest(rid);
 \}
 \nwindexdefn{queryRequest}{queryRequest}{NW3Bji2p-3isdeu-2}\eatline
-\nwidentdefs{\\{{queryRequest}{queryRequest}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW3Bji2p-3isdeu-2}\nwendcode{}\nwbegindocs{32}\nwdocspar
+\nwidentdefs{\\{{queryRequest}{queryRequest}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW3Bji2p-3isdeu-2}\nwendcode{}\nwbegindocs{36}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryServerLocationsActive}{queryServerLocationsActive}{NW3Bji2p-3UaQCb-1}queryServerLocationsActive}(1)}
-\nwenddocs{}\nwbegincode{33}\sublabel{NW3Bji2p-3UaQCb-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3Bji2p-3UaQCb-1}}}\moddef{Query active server locations~{\nwtagstyle{}\subpageref{NW3Bji2p-3UaQCb-1}}}\endmoddef\nwused{\\{NW3Bji2p-48YU8C-3}}
+\nwenddocs{}\nwbegincode{37}\sublabel{NW3Bji2p-3UaQCb-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3Bji2p-3UaQCb-1}}}\moddef{Query active server locations~{\nwtagstyle{}\subpageref{NW3Bji2p-3UaQCb-1}}}\endmoddef\nwused{\\{NW3Bji2p-48YU8C-3}}
 public int[] queryServerLocationsActive(int t) throws RuntimeException \{
   return storage.DBQueryServerLocationsActive(t);
 \}
 \nwindexdefn{queryServerLocationsActive}{queryServerLocationsActive}{NW3Bji2p-3UaQCb-1}\eatline
-\nwidentdefs{\\{{queryServerLocationsActive}{queryServerLocationsActive}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW3Bji2p-3UaQCb-1}\nwendcode{}\nwbegindocs{34}\nwdocspar
+\nwidentdefs{\\{{queryServerLocationsActive}{queryServerLocationsActive}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW3Bji2p-3UaQCb-1}\nwendcode{}\nwbegindocs{38}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryRouteRemaining}{queryRouteRemaining}{NW3Bji2p-1AprqI-1}queryRouteRemaining}(2)}
-\nwenddocs{}\nwbegincode{35}\sublabel{NW3Bji2p-1AprqI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3Bji2p-1AprqI-1}}}\moddef{Query routes~{\nwtagstyle{}\subpageref{NW3Bji2p-1AprqI-1}}}\endmoddef\nwused{\\{NW3Bji2p-48YU8C-3}}
+\nwenddocs{}\nwbegincode{39}\sublabel{NW3Bji2p-1AprqI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3Bji2p-1AprqI-1}}}\moddef{Query routes~{\nwtagstyle{}\subpageref{NW3Bji2p-1AprqI-1}}}\endmoddef\nwused{\\{NW3Bji2p-48YU8C-3}}
 public int[] queryRouteRemaining(int sid, int t) throws RuntimeException \{
   return storage.DBQueryRouteRemaining(sid, t);
 \}
 \nwindexdefn{queryRouteRemaining}{queryRouteRemaining}{NW3Bji2p-1AprqI-1}\eatline
-\nwidentdefs{\\{{queryRouteRemaining}{queryRouteRemaining}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW3Bji2p-1AprqI-1}\nwendcode{}\nwbegindocs{36}\nwdocspar
+\nwidentdefs{\\{{queryRouteRemaining}{queryRouteRemaining}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW3Bji2p-1AprqI-1}\nwendcode{}\nwbegindocs{40}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryScheduleRemaining}{queryScheduleRemaining}{NW3Bji2p-3yA8FQ-1}queryScheduleRemaining}(2)}
-\nwenddocs{}\nwbegincode{37}\sublabel{NW3Bji2p-3yA8FQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3Bji2p-3yA8FQ-1}}}\moddef{Query schedules~{\nwtagstyle{}\subpageref{NW3Bji2p-3yA8FQ-1}}}\endmoddef\nwused{\\{NW3Bji2p-48YU8C-3}}
+\nwenddocs{}\nwbegincode{41}\sublabel{NW3Bji2p-3yA8FQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3Bji2p-3yA8FQ-1}}}\moddef{Query schedules~{\nwtagstyle{}\subpageref{NW3Bji2p-3yA8FQ-1}}}\endmoddef\nwused{\\{NW3Bji2p-48YU8C-3}}
 public int[] queryScheduleRemaining(int sid, int t) throws RuntimeException \{
   return storage.DBQueryScheduleRemaining(sid, t);
 \}
 \nwindexdefn{queryScheduleRemaining}{queryScheduleRemaining}{NW3Bji2p-3yA8FQ-1}\eatline
-\nwidentdefs{\\{{queryScheduleRemaining}{queryScheduleRemaining}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW3Bji2p-3yA8FQ-1}\nwendcode{}\nwbegindocs{38}\nwdocspar
+\nwidentdefs{\\{{queryScheduleRemaining}{queryScheduleRemaining}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW3Bji2p-3yA8FQ-1}\nwendcode{}\nwbegindocs{42}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryCurrentLoad}{queryCurrentLoad}{NW3Bji2p-aKbeg-1}queryCurrentLoad}(2)}
-\nwenddocs{}\nwbegincode{39}\sublabel{NW3Bji2p-aKbeg-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3Bji2p-aKbeg-1}}}\moddef{Query current load~{\nwtagstyle{}\subpageref{NW3Bji2p-aKbeg-1}}}\endmoddef\nwused{\\{NW3Bji2p-48YU8C-3}}
+\nwenddocs{}\nwbegincode{43}\sublabel{NW3Bji2p-aKbeg-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3Bji2p-aKbeg-1}}}\moddef{Query current load~{\nwtagstyle{}\subpageref{NW3Bji2p-aKbeg-1}}}\endmoddef\nwused{\\{NW3Bji2p-48YU8C-3}}
 public int[] queryCurrentLoad(int sid, int t) throws RuntimeException \{
   return storage.DBQueryCurrentLoad(sid, t);
 \}
 \nwindexdefn{queryCurrentLoad}{queryCurrentLoad}{NW3Bji2p-aKbeg-1}\eatline
-\nwidentdefs{\\{{queryCurrentLoad}{queryCurrentLoad}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW3Bji2p-aKbeg-1}\nwendcode{}\nwbegindocs{40}\nwdocspar
+\nwidentdefs{\\{{queryCurrentLoad}{queryCurrentLoad}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW3Bji2p-aKbeg-1}\nwendcode{}\nwbegindocs{44}\nwdocspar
 \section{Private Methods}
 \label{sec:private-methods}
 
 \subsection{{\tt{}\protect\nwindexuse{Print}{Print}{NW3Bji2p-3pxn9j-1}Print}(1)}
-\nwenddocs{}\nwbegincode{41}\sublabel{NW3Bji2p-3pxn9j-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3Bji2p-3pxn9j-1}}}\moddef{\code{}SimulationInterface\edoc{} private methods~{\nwtagstyle{}\subpageref{NW3Bji2p-3pxn9j-1}}}\endmoddef\nwused{\\{NW3Bji2p-2ph1Ov-1}}
+\nwenddocs{}\nwbegincode{45}\sublabel{NW3Bji2p-3pxn9j-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3Bji2p-3pxn9j-1}}}\moddef{\code{}SimulationInterface\edoc{} private methods~{\nwtagstyle{}\subpageref{NW3Bji2p-3pxn9j-1}}}\endmoddef\nwused{\\{NW3Bji2p-2ph1Ov-1}}
 private void Print(String msg) \{
-  System.out.println("[SimulationInterface]["+LocalDateTime.now()+"] "+msg);
+  System.out.println("[Jargo][SimulationInterface]["+LocalDateTime.now()+"] "+msg);
 \}
 \nwindexdefn{Print}{Print}{NW3Bji2p-3pxn9j-1}\eatline
 \nwidentdefs{\\{{Print}{Print}}}\nwendcode{}
@@ -227,9 +242,11 @@ private void Print(String msg) \{
 \nwixlogsorted{c}{{\code{}SimulationInterface\edoc{} public methods}{NW3Bji2p-48YU8C-1}{\nwixu{NW3Bji2p-2ph1Ov-1}\nwixd{NW3Bji2p-48YU8C-1}\nwixd{NW3Bji2p-48YU8C-2}\nwixd{NW3Bji2p-48YU8C-3}}}%
 \nwixlogsorted{c}{{Query active server locations}{NW3Bji2p-3UaQCb-1}{\nwixu{NW3Bji2p-48YU8C-3}\nwixd{NW3Bji2p-3UaQCb-1}}}%
 \nwixlogsorted{c}{{Query current load}{NW3Bji2p-aKbeg-1}{\nwixu{NW3Bji2p-48YU8C-3}\nwixd{NW3Bji2p-aKbeg-1}}}%
+\nwixlogsorted{c}{{Query edge}{NW3Bji2p-1E2aru-1}{\nwixu{NW3Bji2p-48YU8C-3}\nwixd{NW3Bji2p-1E2aru-1}}}%
 \nwixlogsorted{c}{{Query ridesharing user}{NW3Bji2p-3isdeu-1}{\nwixu{NW3Bji2p-48YU8C-3}\nwixd{NW3Bji2p-3isdeu-1}\nwixd{NW3Bji2p-3isdeu-2}}}%
 \nwixlogsorted{c}{{Query routes}{NW3Bji2p-1AprqI-1}{\nwixu{NW3Bji2p-48YU8C-3}\nwixd{NW3Bji2p-1AprqI-1}}}%
 \nwixlogsorted{c}{{Query schedules}{NW3Bji2p-3yA8FQ-1}{\nwixu{NW3Bji2p-48YU8C-3}\nwixd{NW3Bji2p-3yA8FQ-1}}}%
+\nwixlogsorted{c}{{Query vertex}{NW3Bji2p-4IfXsG-1}{\nwixu{NW3Bji2p-48YU8C-3}\nwixd{NW3Bji2p-4IfXsG-1}}}%
 \nwixlogsorted{c}{{Set/get simulation world time}{NW3Bji2p-3SIXWk-1}{\nwixu{NW3Bji2p-48YU8C-1}\nwixd{NW3Bji2p-3SIXWk-1}\nwixd{NW3Bji2p-3SIXWk-2}}}%
 \nwixlogsorted{c}{{SimulationInterface.java}{NW3Bji2p-2qVXZY-1}{\nwixd{NW3Bji2p-2qVXZY-1}}}%
 \nwixlogsorted{c}{{SimulationInterface.java preamble}{NW3Bji2p-1Ogd8c-1}{\nwixu{NW3Bji2p-2qVXZY-1}\nwixd{NW3Bji2p-1Ogd8c-1}\nwixd{NW3Bji2p-1Ogd8c-2}}}%
@@ -239,18 +256,20 @@ private void Print(String msg) \{
 \nwixlogsorted{i}{{getSimulationWorldTime}{getSimulationWorldTime}}%
 \nwixlogsorted{i}{{Print}{Print}}%
 \nwixlogsorted{i}{{queryCurrentLoad}{queryCurrentLoad}}%
+\nwixlogsorted{i}{{queryEdge}{queryEdge}}%
 \nwixlogsorted{i}{{queryRequest}{queryRequest}}%
 \nwixlogsorted{i}{{queryRouteRemaining}{queryRouteRemaining}}%
 \nwixlogsorted{i}{{queryScheduleRemaining}{queryScheduleRemaining}}%
 \nwixlogsorted{i}{{queryServer}{queryServer}}%
 \nwixlogsorted{i}{{queryServerLocationsActive}{queryServerLocationsActive}}%
+\nwixlogsorted{i}{{queryVertex}{queryVertex}}%
 \nwixlogsorted{i}{{setSimulationWorldTime}{setSimulationWorldTime}}%
 \nwixlogsorted{i}{{storage}{storage}}%
 \nwixlogsorted{i}{{updateServerAddToSchedule}{updateServerAddToSchedule}}%
 \nwixlogsorted{i}{{updateServerRemoveFromSchedule}{updateServerRemoveFromSchedule}}%
 \nwixlogsorted{i}{{updateServerRoute}{updateServerRoute}}%
 \nwixlogsorted{i}{{world{\char95}time}{world:untime}}%
-\nwbegindocs{42}\nwdocspar
+\nwbegindocs{46}\nwdocspar
 \appendix
 
 \section{Appendix: List of Chunks}
