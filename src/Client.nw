@@ -2,24 +2,20 @@
 
 \usepackage{noweb}
 \noweboptions{smallcode,longchunks}
-
 \usepackage[a4paper,margin=1in]{geometry}
-
 \usepackage{colortbl}
 \usepackage[colorlinks=true]{hyperref}
 \usepackage{tikz}
 
-% Define a handy paragraph opener
-\newcommand{\hi}[1]{\noindent {\bf #1}}
+\newcommand{\hi}[1]{\noindent {\bf #1}}     % Define a handy paragraph opener
 
-% Remove noweb page break penalty
-\def\nwendcode{\endtrivlist \endgroup}
+\def\nwendcode{\endtrivlist \endgroup}      % Remove noweb page break penalty
 \let\nwdocspar=\par
 
-\title{Jargo Client\footnote{\url{https://github.com/jargors/Client}}}
+\title{Jargo Client\footnote{
+    \url{https://github.com/jargors/Client}}}
 \author{James J. Pan\\
-  \small{\href{mailto:jamesjpan@outlook.com}{jamesjpan@outlook.com}}
-}
+  \small{\href{mailto:pan-j16@mails.tsinghua.edu.cn}{pan-j16@mails.tsinghua.edu.cn}}}
 
 \begin{document}
 \maketitle
@@ -33,12 +29,11 @@ We supply an abstract base class for developing Jargo client ridesharing
 algorithms. The class provides a standard interface for interacting with the
 simulation engine (Figure~\ref{fig:client}). Algorithm developers extend the
 base class to add specific customer-to-vehicle matching and vehicle routing
-functionality.
-The base class is developed using the
+functionality.  The base class is developed using the
 Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
 programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
-([[src/JargoClient.nw]]) is the source for both the documentation
-([[doc/JargoClient.tex]]) and the Java code (JargoClient.java)\footnote{See the
+([[src/Client.nw]]) is the source for both the documentation
+([[doc/Client.tex]]) and the Java code (Client.java)\footnote{See the
 [[Makefile]] for build details.}.
 
 \begin{figure}[h]
@@ -49,34 +44,36 @@ programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
 \end{figure}
 
 \section{Implementation Overview}
-<<JargoClient.java>>=
-  <<JargoClient.java preamble>>
-  <<[[JargoClient]] definition>>
+<<Client.java>>=
+  <<Client.java preamble>>
+  <<[[Client]] definition>>
 @
 
 \subsection{Preamble}
 The preamble declares the package and imports dependencies.
-<<JargoClient.java preamble>>=
+<<Client.java preamble>>=
 package com.github.jargors;
 @
-We import [[SimulationInterface]] so we can interact with the simulated world,
+We import [[Communicator]] so we can interact with the simulated world,
 and we import [[LocalDateTime]] so we can query the physical time for
 logging purposes.
-<<JargoClient.java preamble>>=
-import com.github.jargors.SimulationInterface;
+<<Client.java preamble>>=
+import com.github.jargors.Communicator;
+import com.github.jargors.Tools;
+import java.util.function.Supplier;
 import java.time.LocalDateTime;
 @
 
 \subsection{Class Definition}
-The [[JargoClient]] class consists of member variables, a constructor, and
+The [[Client]] class consists of member variables, a constructor, and
 public and protected methods. Note the [[abstract]] keyword indicates the class
 cannot be used directly.
-<<[[JargoClient]] definition>>=
-public abstract class JargoClient {
-  <<[[JargoClient]] member variables>>
-  <<[[JargoClient]] constructor>>
-  <<[[JargoClient]] public methods>>
-  <<[[JargoClient]] protected methods>>
+<<[[Client]] definition>>=
+public abstract class Client {
+  <<[[Client]] member variables>>
+  <<[[Client]] constructor>>
+  <<[[Client]] public methods>>
+  <<[[Client]] protected methods>>
 }
 @
 
@@ -84,28 +81,30 @@ public abstract class JargoClient {
 We define two containers for requests and server locations obtained from the
 simulation engine. We also define the collection periods, in seconds. By
 default, requests and server locations are collected every second.
-<<[[JargoClient]] member variables>>=
+<<[[Client]] member variables>>=
 protected int[] requests;
 protected int[] locations;
 protected int r_collection_period = 1;
-protected int s_collection_period = 1;
-protected SimulationInterface simulator;
-@ %def requests locations r_collection_period s_collection_period simulator
+protected int s_collection_period = 10;
+protected Communicator simulator;
+protected Tools distance = new Tools();
+@ %def requests locations r_collection_period s_collection_period simulator distance
 
 \subsection{Constructor}
 An actual algorithm might override the default constructor to perform
 preprocessing tasks such as building a road network index.
-<<[[JargoClient]] constructor>>=
-public JargoClient() { }
+<<[[Client]] constructor>>=
+public Client() { }
 @
 
 \section{Public Methods}
-<<[[JargoClient]] public methods>>=
+<<[[Client]] public methods>>=
   <<Collect requests>>
   <<Collect server locations>>
   <<Set simulation interface>>
   <<Get/set request collection period>>
   <<Get/set server location collection period>>
+  <<Compute haversine>>
 @
 
 \subsection{Obtaining Requests and Server Locations}
@@ -169,12 +168,12 @@ public void collectServerLocations(int[] src) {
 
 \subsection{Getters and Setters}
 
-\subsubsection{[[setSimulationInterface]](1)}
+\subsubsection{[[setCommunicator]](1)}
 <<Set simulation interface>>=
-public void setSimulationInterface(SimulationInterface src) {
+public void setCommunicator(Communicator src) {
   simulator = src;
 }
-@ %def setSimulationInterface
+@ %def setCommunicator
 
 \subsubsection{[[getRequestCollectionPeriod]](0)}
 <<Get/set request collection period>>=
@@ -204,8 +203,17 @@ public void setServerLocationCollectionPeriod(int t) {
 }
 @ %def setServerLocationCollectionPeriod
 
+\subsubsection{[[computeHaversine]](2)}
+<<Compute haversine>>=
+public int computeHaversine(int u, int v) {
+  int[] U = simulator.queryVertex(u);
+  int[] V = simulator.queryVertex(v);
+  return distance.computeHaversine(U[0], U[1], V[0], V[1]);
+}
+@ %def computeHaversine
+
 \section{Private Methods}
-<<[[JargoClient]] protected methods>>=
+<<[[Client]] protected methods>>=
   <<End collect requests>>
   <<End collect server locations>>
   <<Handle request>>
@@ -259,11 +267,8 @@ Array [[r]] =
 };
 \end{tikzpicture}
 
-\noindent By default, [[handleRequest]](1) simply prints [[rid]].
 <<Handle request>>=
-protected void handleRequest(int[] r) {
-  Print("handleRequest(1) got Request "+r[0]);
-}
+protected void handleRequest(int[] r) { }
 @ %def handleRequest
 
 \subsection{[[handleServerLocation]](1)}
@@ -278,17 +283,14 @@ Array [[loc]] =
 };
 \end{tikzpicture}
 
-\noindent By default, [[handleServerLocation]](1) simply prints [[sid]].
 <<Handle server location>>=
-protected void handleServerLocation(int[] loc) {
-  Print("handleServerLocation(1) got Server "+loc[0]);
-}
+protected void handleServerLocation(int[] loc) { }
 @ %def handleServerLocation
 
 \subsection{[[Print]](1)}
 <<Print a message>>=
 protected void Print(String msg) {
-  System.out.println("[JargoClient]["+LocalDateTime.now()+"]"
+  System.out.println("[Client]["+LocalDateTime.now()+"]"
     + "[t="+simulator.getSimulationWorldTime()+"] "+msg);
 }
 @ %def Print

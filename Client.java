@@ -1,13 +1,16 @@
   package com.github.jargors;
-  import com.github.jargors.SimulationInterface;
+  import com.github.jargors.Communicator;
+  import com.github.jargors.Tools;
+  import java.util.function.Supplier;
   import java.time.LocalDateTime;
-  public abstract class JargoClient {
+  public abstract class Client {
     protected int[] requests;
     protected int[] locations;
     protected int r_collection_period = 1;
-    protected int s_collection_period = 1;
-    protected SimulationInterface simulator;
-    public JargoClient() { }
+    protected int s_collection_period = 10;
+    protected Communicator simulator;
+    protected Tools distance = new Tools();
+    public Client() { }
       public void collectRequests(int[] src) {
         requests = src.clone();
         endCollectRequests();
@@ -16,7 +19,7 @@
         locations = src.clone();
         endCollectServerLocations();
       }
-      public void setSimulationInterface(SimulationInterface src) {
+      public void setCommunicator(Communicator src) {
         simulator = src;
       }
       public int getRequestCollectionPeriod() {
@@ -30,6 +33,11 @@
       }
       public void setServerLocationCollectionPeriod(int t) {
         s_collection_period = t;
+      }
+      public int computeHaversine(int u, int v) {
+        int[] U = simulator.queryVertex(u);
+        int[] V = simulator.queryVertex(v);
+        return distance.computeHaversine(U[0], U[1], V[0], V[1]);
       }
       protected void endCollectRequests() {
         for (int i = 0; i < (requests.length - 6); i += 7) {
@@ -53,14 +61,10 @@
           });
         }
       }
-      protected void handleRequest(int[] r) {
-        Print("handleRequest(1) got Request "+r[0]);
-      }
-      protected void handleServerLocation(int[] loc) {
-        Print("handleServerLocation(1) got Server "+loc[0]);
-      }
+      protected void handleRequest(int[] r) { }
+      protected void handleServerLocation(int[] loc) { }
       protected void Print(String msg) {
-        System.out.println("[JargoClient]["+LocalDateTime.now()+"]"
+        System.out.println("[Client]["+LocalDateTime.now()+"]"
           + "[t="+simulator.getSimulationWorldTime()+"] "+msg);
       }
 
