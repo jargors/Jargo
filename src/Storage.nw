@@ -922,17 +922,15 @@ weight. To implement the dummy vertex, we add a constraint ([[C11]]) that
 @
 
 \subsubsection{Table UQ, UE, UL, UO, UD, and UB (User Tables)}
-To allow other tables to reference specific user components,
-the user relation is partitioned into five 2-column tables, UQ, UE, UL,
-UO, and UD, by taking projections on the respective \texttt{q}, \texttt{e}, \texttt{l},
-\texttt{o}, and \texttt{d} components. Each row is a key-value pair,
-storing a unique \textsf{uid} for user identification as the key alongside the component value,
-and each row is also its own primary key.
-A sixth table UB is introduced to store base costs for computing
-$D^\textrm{base}$ and $\rho^\textrm{distance}$
-(\S\ref{sec:ridesharing-metrics}).
-Table UO and UD can be referenced to Table V to validate against
-property P2 and rule P4.
+To allow other tables to reference specific user components, the user relation
+is partitioned into five 2-column tables, UQ, UE, UL, UO, and UD, by taking
+projections on the respective \texttt{q}, \texttt{e}, \texttt{l}, \texttt{o},
+and \texttt{d} components. Each row is a key-value pair, storing a unique
+\textsf{uid} for user identification as the key alongside the component value,
+and each row is also its own primary key.  A sixth table UB is introduced to
+store base costs for computing $D^\textrm{base}$ and $\rho^\textrm{distance}$
+(\S\ref{sec:ridesharing-metrics}).  Table UO and UD can be referenced to Table
+V to validate against property P2 and rule P4.
 \begin{table}[h]
 \centering
 \small
@@ -1741,11 +1739,6 @@ public class Storage {
 <<[[Storage]] member variables>>=
 private static Map<String, String> pstr = new HashMap<>();
 @ %def pstr
-\item We also want to uniquely identify each ridesharing user. We declare a
-[[uid]] counter for this purpose.
-<<[[Storage]] member variables>>=
-private int uid = 0;
-@ %def uid
 \item We declare configuration settings.
 <<[[Storage]] member variables>>=
 private String CONNECTIONS_URL = "jdbc:derby:memory:jargo;create=true";
@@ -1873,16 +1866,10 @@ public void DBLoadBackup(String p) throws RuntimeException {
     CONNECTIONS_URL = "jdbc:derby:memory:jargobak;createFrom="+p;
     setupDriver();
     <<..configure database properties>>
-    <<..fetch latest [[uid]]>>
   }
   <<Catch and print [[SQLException]]>>
 }
 @ %def DBLoadBackup
-We update our internal [[uid]] counter to be the current largest [[uid]] in the
-backup.
-<<..fetch latest [[uid]]>>=
-this.uid = DBFetch("S132", 1)[0];
-@
 
 \subsubsection{[[DBSaveBackup]](1)}
 The [[DBSaveBackup]](1) method can save a database snapshot to disk.
@@ -2069,8 +2056,9 @@ Array [[u]] =
 \begin{tikzpicture}
 \small
 \matrix[nodes={draw,minimum size=6mm}] {
-  \node {$0:u_q$}; & \node {$1:u_e$}; & \node {$2:u_l$};
- &\node {$3:u_o$}; & \node {$4:u_d$}; & \node {$5:d_u$};\\
+  \node {$0:\textrm{user identifier}$};
+ &\node {$1:u_q$}; & \node {$2:u_e$}; & \node {$3:u_l$};
+ &\node {$4:u_o$}; & \node {$5:u_d$}; & \node {$6:d_u$};\\
 };
 \end{tikzpicture}
 
@@ -2078,14 +2066,13 @@ Array [[u]] =
 The value of $u_q$ \emph{must} be greater than 0.
 
 <<Add new request>>=
-public int DBAddNewRequest(int[] u) throws RuntimeException {
+public void DBAddNewRequest(int[] u) throws RuntimeException {
   try {
     Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-    uid += 1;
+    int uid = u[0];
     <<..insert new user into user tables>>
     <<..insert new request into r>>
     <<..commit and close>>
-    return uid;
   }
   <<Catch and print [[SQLException]]>>
 }
@@ -2097,17 +2084,17 @@ PreparedStatement pS4 = PS(conn, "S4");
 PreparedStatement pS5 = PS(conn, "S5");
 PreparedStatement pS6 = PS(conn, "S6");
 PreparedStatement pS7 = PS(conn, "S7");
-PSAdd(pS2, uid, u[0]);
-PSAdd(pS3, uid, u[1]);
-PSAdd(pS4, uid, u[2]);
-PSAdd(pS5, uid, u[3]);
-PSAdd(pS6, uid, u[4]);
-PSAdd(pS7, uid, u[5]);
+PSAdd(pS2, uid, u[1]);
+PSAdd(pS3, uid, u[2]);
+PSAdd(pS4, uid, u[3]);
+PSAdd(pS5, uid, u[4]);
+PSAdd(pS6, uid, u[5]);
+PSAdd(pS7, uid, u[6]);
 PSSubmit(pS2, pS3, pS4, pS5, pS6, pS7);
 @
 <<..insert new request into r>>=
 PreparedStatement pS9 = PS(conn, "S9");
-PSAdd(pS9, uid, u[0], u[1], u[2], u[3], u[4], u[5]);
+PSAdd(pS9, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
 PSSubmit(pS9);
 @
 
@@ -2118,8 +2105,9 @@ Array [[u]] =
 \begin{tikzpicture}
 \small
 \matrix[nodes={draw,minimum size=6mm}] {
-  \node {$0:u_q$}; & \node {$1:u_e$}; & \node {$2:u_l$};
- &\node {$3:u_o$}; & \node {$4:u_d$}; & \node {$5:d_u$};\\
+  \node {$0:\textrm{user identifier}$};
+ &\node {$1:u_q$}; & \node {$2:u_e$}; & \node {$3:u_l$};
+ &\node {$4:u_o$}; & \node {$5:u_d$}; & \node {$6:d_u$};\\
 };
 \end{tikzpicture}
 
@@ -2140,25 +2128,24 @@ The value of $u_q$ \emph{must} be less than 0. Array [[route]] =
 \noindent for route $w$.
 
 <<Add new server>>=
-public int DBAddNewServer(int[] u, int[] route) throws RuntimeException {
+public void DBAddNewServer(int[] u, int[] route) throws RuntimeException {
   try {
     Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-    int se = u[1];
-    uid += 1;
+    int uid = u[0];
+    int se = u[2];
     <<..insert new user into user tables>>
     <<..insert new server into s>>
     <<..insert new server route into w>>
     <<..insert new server route into cw>>
     <<..insert new server into cq>>
     <<..commit and close>>
-    return uid;
   }
   <<Catch and print [[SQLException]]>>
 }
 @ %def DBAddNewServer
 <<..insert new server into s>>=
 PreparedStatement pS8 = PS(conn, "S8");
-PSAdd(pS8, uid, u[0], u[1], u[2], u[3], u[4], u[5]);
+PSAdd(pS8, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
 PSSubmit(pS8);
 @
 The procedure to insert [[route]] into Table W is written into its own chunk so
@@ -2189,12 +2176,12 @@ PSSubmit(pS10);
 <<..insert new server route into cw>>=
 PreparedStatement pS11 = PS(conn, "S11");
 int te = route[(route.length - 2)];
-PSAdd(pS11, uid, u[1], u[2], u[3], u[4], u[1], u[3], te, u[4]);
+PSAdd(pS11, uid, u[2], u[3], u[4], u[5], u[2], u[4], te, u[5]);
 PSSubmit(pS11);
 @
 <<..insert new server into cq>>=
 PreparedStatement pS14 = PS(conn, "S14");
-PSAdd(pS14, uid, u[0], u[1], null, u[1], u[3], null, u[0],
+PSAdd(pS14, uid, u[1], u[2], null, u[2], u[4], null, u[1],
     null, null, null, null, null, 1);
 PSSubmit(pS14);
 @
@@ -2285,7 +2272,9 @@ PreparedStatement pS76 = PS(conn, "S76");
 PSAdd(pS76, sid, route[0]);
 PSSubmit(pS76);
 @
+The chunk for inserting [[route]] into Table W uses [[uid]], so we set it here.
 <<....insert new remaining route into w>>=
+int uid = sid;
 <<Procedure to insert [[route]] into Table W>>
 @
 <<....update route endpoint in cw>>=
@@ -3308,7 +3297,6 @@ private static void PSInit() {
   <<S42>>
   <<S43>>
   <<S80>>
-  <<S132>>
   <<S62>>
   <<S64>>
   <<S63>>
@@ -3441,9 +3429,6 @@ pstr.put("S43", DEL+"CPD WHERE rid=?");
 <<S80>>=
 pstr.put("S80", DEL+"CQ WHERE sid=? AND t2>?");
 @ %def S80
-<<S132>>=
-pstr.put("S132", SEL+"MAX (uid) FROM UQ");
-@ %def S132
 <<S62>>=
 pstr.put("S62", SEL+"COUNT (*) FROM V WHERE v<>0");
 @ %def S62

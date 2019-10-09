@@ -15,7 +15,6 @@
   import java.time.LocalDateTime;
   public class Storage {
     private static Map<String, String> pstr = new HashMap<>();
-    private int uid = 0;
     private String CONNECTIONS_URL = "jdbc:derby:memory:jargo;create=true";
     private final String CONNECTIONS_DRIVER_URL = "jdbc:apache:commons:dbcp:";
     private final String CONNECTIONS_POOL_NAME = "jargo";
@@ -364,7 +363,6 @@
         cs.setInt(2, DERBY_PAGECACHESIZE);
         cs.execute();
         conn.close();
-        this.uid = DBFetch("S132", 1)[0];
       }
       catch (SQLException e1) {
         printSQLException(e1);
@@ -462,29 +460,28 @@
         throw new RuntimeException("database failure");
       }
     }
-    public int DBAddNewRequest(int[] u) throws RuntimeException {
+    public void DBAddNewRequest(int[] u) throws RuntimeException {
       try {
         Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-        uid += 1;
+        int uid = u[0];
         PreparedStatement pS2 = PS(conn, "S2");
         PreparedStatement pS3 = PS(conn, "S3");
         PreparedStatement pS4 = PS(conn, "S4");
         PreparedStatement pS5 = PS(conn, "S5");
         PreparedStatement pS6 = PS(conn, "S6");
         PreparedStatement pS7 = PS(conn, "S7");
-        PSAdd(pS2, uid, u[0]);
-        PSAdd(pS3, uid, u[1]);
-        PSAdd(pS4, uid, u[2]);
-        PSAdd(pS5, uid, u[3]);
-        PSAdd(pS6, uid, u[4]);
-        PSAdd(pS7, uid, u[5]);
+        PSAdd(pS2, uid, u[1]);
+        PSAdd(pS3, uid, u[2]);
+        PSAdd(pS4, uid, u[3]);
+        PSAdd(pS5, uid, u[4]);
+        PSAdd(pS6, uid, u[5]);
+        PSAdd(pS7, uid, u[6]);
         PSSubmit(pS2, pS3, pS4, pS5, pS6, pS7);
         PreparedStatement pS9 = PS(conn, "S9");
-        PSAdd(pS9, uid, u[0], u[1], u[2], u[3], u[4], u[5]);
+        PSAdd(pS9, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
         PSSubmit(pS9);
         conn.commit();
         conn.close();
-        return uid;
       }
       catch (SQLException e1) {
         printSQLException(e1);
@@ -492,26 +489,26 @@
         throw new RuntimeException("database failure");
       }
     }
-    public int DBAddNewServer(int[] u, int[] route) throws RuntimeException {
+    public void DBAddNewServer(int[] u, int[] route) throws RuntimeException {
       try {
         Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-        int se = u[1];
-        uid += 1;
+        int uid = u[0];
+        int se = u[2];
         PreparedStatement pS2 = PS(conn, "S2");
         PreparedStatement pS3 = PS(conn, "S3");
         PreparedStatement pS4 = PS(conn, "S4");
         PreparedStatement pS5 = PS(conn, "S5");
         PreparedStatement pS6 = PS(conn, "S6");
         PreparedStatement pS7 = PS(conn, "S7");
-        PSAdd(pS2, uid, u[0]);
-        PSAdd(pS3, uid, u[1]);
-        PSAdd(pS4, uid, u[2]);
-        PSAdd(pS5, uid, u[3]);
-        PSAdd(pS6, uid, u[4]);
-        PSAdd(pS7, uid, u[5]);
+        PSAdd(pS2, uid, u[1]);
+        PSAdd(pS3, uid, u[2]);
+        PSAdd(pS4, uid, u[3]);
+        PSAdd(pS5, uid, u[4]);
+        PSAdd(pS6, uid, u[5]);
+        PSAdd(pS7, uid, u[6]);
         PSSubmit(pS2, pS3, pS4, pS5, pS6, pS7);
         PreparedStatement pS8 = PS(conn, "S8");
-        PSAdd(pS8, uid, u[0], u[1], u[2], u[3], u[4], u[5]);
+        PSAdd(pS8, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
         PSSubmit(pS8);
         int[] output = new int[] { };
         PreparedStatement pS10 = PS(conn, "S10");
@@ -531,15 +528,14 @@
         PSSubmit(pS10);
         PreparedStatement pS11 = PS(conn, "S11");
         int te = route[(route.length - 2)];
-        PSAdd(pS11, uid, u[1], u[2], u[3], u[4], u[1], u[3], te, u[4]);
+        PSAdd(pS11, uid, u[2], u[3], u[4], u[5], u[2], u[4], te, u[5]);
         PSSubmit(pS11);
         PreparedStatement pS14 = PS(conn, "S14");
-        PSAdd(pS14, uid, u[0], u[1], null, u[1], u[3], null, u[0],
+        PSAdd(pS14, uid, u[1], u[2], null, u[2], u[4], null, u[1],
             null, null, null, null, null, 1);
         PSSubmit(pS14);
         conn.commit();
         conn.close();
-        return uid;
       }
       catch (SQLException e1) {
         printSQLException(e1);
@@ -576,6 +572,7 @@
         PreparedStatement pS76 = PS(conn, "S76");
         PSAdd(pS76, sid, route[0]);
         PSSubmit(pS76);
+        int uid = sid;
         PreparedStatement pS10 = PS(conn, "S10");
         for (int i = 0; i < (route.length - 3); i += 2) {
           int t1 = route[i];
@@ -673,6 +670,7 @@
         PreparedStatement pS76 = PS(conn, "S76");
         PSAdd(pS76, sid, route[0]);
         PSSubmit(pS76);
+        int uid = sid;
         PreparedStatement pS10 = PS(conn, "S10");
         for (int i = 0; i < (route.length - 3); i += 2) {
           int t1 = route[i];
@@ -806,6 +804,7 @@
         PreparedStatement pS76 = PS(conn, "S76");
         PSAdd(pS76, sid, route[0]);
         PSSubmit(pS76);
+        int uid = sid;
         PreparedStatement pS10 = PS(conn, "S10");
         for (int i = 0; i < (route.length - 3); i += 2) {
           int t1 = route[i];
@@ -1546,7 +1545,6 @@
         pstr.put("S42", DEL+"PD WHERE rid=?");
         pstr.put("S43", DEL+"CPD WHERE rid=?");
         pstr.put("S80", DEL+"CQ WHERE sid=? AND t2>?");
-        pstr.put("S132", SEL+"MAX (uid) FROM UQ");
         pstr.put("S62", SEL+"COUNT (*) FROM V WHERE v<>0");
         pstr.put("S64", SEL+"MIN (lng), MAX (lng), MIN (lat), MAX (lat) "
               + "FROM V WHERE v<>0");
