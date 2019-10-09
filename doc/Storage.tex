@@ -2163,14 +2163,15 @@ PSSubmit(pS8);
 \nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S8}{S8}}\\{{uid}{uid}}}\nwindexuse{PS}{PS}{NW27XAxz-JGp6y-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-JGp6y-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-JGp6y-1}\nwindexuse{S8}{S8}{NW27XAxz-JGp6y-1}\nwindexuse{uid}{uid}{NW27XAxz-JGp6y-1}\nwendcode{}\nwbegindocs{148}\nwdocspar
 The procedure to insert {\tt{}route} into Table W is written into its own chunk so
 we can re-use it later. The procedure requires an integer array {\tt{}output}.
-After the procedure, we can re-use prepared statement {\tt{}pS10} to add the first
+After the procedure, we can re-initialize prepared statement {\tt{}pS10} to add the first
 waypoint, with {\tt{}null} as its predecessor, into the database.
 \nwenddocs{}\nwbegincode{149}\sublabel{NW27XAxz-3xg8Fp-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3xg8Fp-1}}}\moddef{..insert new server route into w~{\nwtagstyle{}\subpageref{NW27XAxz-3xg8Fp-1}}}\endmoddef\nwused{\\{NW27XAxz-IYVQQ-1}}
 int[] output = new int[] \{ \};
 \LA{}Procedure to insert \code{}route\edoc{} into Table W~{\nwtagstyle{}\subpageref{NW27XAxz-1EP7t-1}}\RA{}
+pS10 = PS(conn, "S10");
 PSAdd(pS10, uid, se, null, null, route[0], route[1], null, null);
 PSSubmit(pS10);
-\nwidentuses{\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{uid}{uid}}}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-3xg8Fp-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-3xg8Fp-1}\nwindexuse{uid}{uid}{NW27XAxz-3xg8Fp-1}\nwendcode{}\nwbegindocs{150}\nwdocspar
+\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S10}{S10}}\\{{uid}{uid}}}\nwindexuse{PS}{PS}{NW27XAxz-3xg8Fp-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-3xg8Fp-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-3xg8Fp-1}\nwindexuse{S10}{S10}{NW27XAxz-3xg8Fp-1}\nwindexuse{uid}{uid}{NW27XAxz-3xg8Fp-1}\nwendcode{}\nwbegindocs{150}\nwdocspar
 \nwenddocs{}\nwbegincode{151}\sublabel{NW27XAxz-1EP7t-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1EP7t-1}}}\moddef{Procedure to insert \code{}route\edoc{} into Table W~{\nwtagstyle{}\subpageref{NW27XAxz-1EP7t-1}}}\endmoddef\nwused{\\{NW27XAxz-3xg8Fp-1}\\{NW27XAxz-2BaQBV-1}}
 PreparedStatement pS10 = PS(conn, "S10");
 for (int i = 0; i < (route.length - 3); i += 2) \{
@@ -3265,8 +3266,8 @@ private void PSSubmit(PreparedStatement... statements) throws SQLException \{
 \nwidentdefs{\\{{PSSubmit}{PSSubmit}}}\nwendcode{}\nwbegindocs{317}\nwdocspar
 \subsection{{\tt{}\protect\nwindexuse{PSInit}{PSInit}{NW27XAxz-1g2xnv-1}PSInit}(0)}
 The {\tt{}\protect\nwindexuse{PSInit}{PSInit}{NW27XAxz-1g2xnv-1}PSInit}(0) method initializes the statement cache {\tt{}\protect\nwindexuse{pstr}{pstr}{NW27XAxz-17yXws-1}pstr}. Each
-statement is placed in its own chunk so it can be referenced
-wherever the statement is used.
+statement is placed in its own chunk so it can be referenced wherever the
+statement is used.
 \nwenddocs{}\nwbegincode{318}\sublabel{NW27XAxz-1g2xnv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1g2xnv-1}}}\moddef{Initialize statements~{\nwtagstyle{}\subpageref{NW27XAxz-1g2xnv-1}}}\endmoddef\nwused{\\{NW27XAxz-XGFF1-1}}
 private static void PSInit() \{
   pstr = new HashMap<>();

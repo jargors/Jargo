@@ -526,6 +526,7 @@
           PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
         }
         PSSubmit(pS10);
+        pS10 = PS(conn, "S10");
         PSAdd(pS10, uid, se, null, null, route[0], route[1], null, null);
         PSSubmit(pS10);
         PreparedStatement pS11 = PS(conn, "S11");
