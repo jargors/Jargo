@@ -1,0 +1,145 @@
+\documentclass{article}
+
+\usepackage{noweb}
+\noweboptions{smallcode,longchunks}
+
+\usepackage[a4paper,margin=1in]{geometry}
+
+\usepackage{colortbl}
+\usepackage[colorlinks=true]{hyperref}
+\usepackage{tikz}
+
+% Define a handy paragraph opener
+\newcommand{\hi}[1]{\noindent {\bf #1}}
+
+% Remove noweb page break penalty
+\def\nwendcode{\endtrivlist \endgroup}
+\let\nwdocspar=\par
+
+\title{Jargo Distance Utilities\footnote{\url{https://github.com/jargors/Distance-Utilities}}}
+\author{James J. Pan\\
+  \small{\href{mailto:pan-j16@mails.tsinghua.edu.cn}{pan-j16@mails.tsinghua.edu.cn}}
+}
+
+\begin{document}
+\maketitle
+\pagestyle{noweb}
+
+\tableofcontents
+
+\section{Introduction}
+\label{sec:introduction}
+
+\section{Implementation Overview}
+<<Tools.java>>=
+  <<Tools.java preamble>>
+  <<[[Tools]] definition>>
+@
+
+<<Tools.java preamble>>=
+package com.github.jargors;
+import com.github.jargors.gtreeJNI.*;
+@
+<<[[Tools]] definition>>=
+public class Tools {
+  <<Member variables>>
+  <<Constructor>>
+  <<Public methods>>
+}
+@
+
+<<Member variables>>=
+private G_Tree gtree;
+@
+
+<<Constructor>>=
+public Tools() { }
+@
+
+\section{Public Methods}
+<<Public methods>>=
+  <<Load GTree>>
+  <<Compute haversine>>
+  <<Compute shortest path>>
+  <<Compute shortest path distance>>
+@
+
+\subsection{[[loadGTree]](1)}
+The [[gtreeJNI.load]](1) method can do strange things if [[f_gtree]] is empty,
+so we do some basic validation here before proceeding.
+<<Load GTree>>=
+public void loadGTree(String p) {
+  try {
+    System.loadLibrary("gtree");
+  } catch (UnsatisfiedLinkError e) {
+    System.err.println("Native code library failed to load: "+e);
+    System.exit(1);
+  }
+  if (p.length() > 0) {
+    gtreeJNI.load(p);
+    gtree = gtreeJNI.get();
+  } else {
+    System.out.println("Bad path to gtree");
+  }
+}
+@ %def loadGTree
+
+\subsection{[[computeHaversine]](4)}
+Most of this code is Copyright 2017 Juliano Macedo and is licensed under the
+MIT License. It has been modified from its original form.
+<<Compute haversine>>=
+public int computeHaversine(double lng1, double lat1, double lng2, double lat2) {
+  double dlat = Math.toRadians(lat2 - lat1);
+  double dlng = Math.toRadians(lng2 - lng1);
+  double rlat1 = Math.toRadians(lat1);
+  double rlat2 = Math.toRadians(lat2);
+  double a = Math.pow(Math.sin(dlat / 2), 2)
+    + Math.pow(Math.sin(dlng / 2), 2)
+    * Math.cos(rlat1) * Math.cos(rlat2);
+  double c = 2 * Math.asin(Math.sqrt(a));
+  int d = (int) Math.round(c * 6371000);
+  <<..round to nearest meter>>
+  return d;
+}
+@ %def computeHaversine
+If the nearest meter is 0 and the two points are not equal, then the distance
+is rounded up to 1 meter.
+<<..round to nearest meter>>=
+if (d == 0 && (lng1 != lng2 || lat1 != lat2)) {
+  d = 1;
+}
+@
+
+<<Compute shortest path>>=
+public int[] computeShortestPath(int u, int v) {
+  IntVector path = null;
+  int[] output = null;
+  gtree.find_path(u, v, path);
+  if (path != null) {
+    output = new int[path.size()];
+    for (int i = 0; i < path.size(); i++) {
+      output[i] = path.get(i);
+    }
+  }
+  return output;
+}
+@ %def computeShortestPath
+
+<<Compute shortest path distance>>=
+public int computeShortestPathDistance(int u, int v) {
+  return gtree.search(u, v);
+}
+@
+
+\appendix
+
+\section{Appendix: List of Chunks}
+\label{ap:list-of-chunks}
+\nowebchunks
+
+\section{Appendix: List of Identifiers}
+\label{ap:list-of-identifiers}
+\nowebindex
+
+\end{document}
+
