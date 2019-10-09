@@ -1,0 +1,709 @@
+\documentclass{article}
+
+\usepackage{noweb}
+\noweboptions{smallcode,longchunks}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{caption}
+\usepackage{colortbl}
+\usepackage[colorlinks=true]{hyperref}
+\usepackage{graphicx}
+
+\newcommand{\hi}[1]{\noindent {\bf #1}}     % Define a handy paragraph opener
+
+\def\nwendcode{\endtrivlist \endgroup}      % Remove noweb page break penalty
+\let\nwdocspar=\par
+
+\captionsetup{labelfont={bf},textfont={bf,it}}
+\setlength{\abovecaptionskip}{1mm}
+\setlength{\belowcaptionskip}{1mm}
+
+\title{Jargo Simulation Controller\footnote{
+  \url{https://github.com/jargors/Simulation-Controller}}}
+\author{James J. Pan\\
+  \small{\href{mailto:pan-j16@mails.tsinghua.edu.cn}{pan-j16@mails.tsinghua.edu.cn}}}
+
+\begin{document}
+\maketitle
+\pagestyle{noweb}
+
+\tableofcontents
+
+\section{Introduction}
+\label{sec:introduction}
+The simulation controller is intended to be the sole interface for an
+evaluation program to control Jargo's simulation environment. The controller
+advances the simulation world time, ``pushes'' server locations and new
+requests to the client, perturbs server routes stored in the data layer in
+order to mimic traffic and other stochastic vehicle processes, and can be used
+to report evaluation metrics to the program.  The simulation controller is
+developed using the Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}}
+literate programming\footnote{\url{http://literateprogramming.com/}} tool.
+This file ([[src/Controller.nw]]) is the source for the documentation
+([[doc/Controller.tex]]) and the Java code ([[Controller.java]])\footnote{See
+the [[Makefile]] for build details.}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=150mm]{src/fig/controller-fig}
+\caption{Controller within the Jargo stack.}
+\label{fig:controller}
+\end{figure}
+
+\section{Implementation Overview}
+The code consist of the \emph{preamble} (\S\ref{sec:preamble})
+and the \emph{class definition} (\S\ref{sec:class-definition}).
+<<Controller.java>>=
+  <<Controller.java preamble>>
+  <<[[Controller]] definition>>
+@
+
+\subsection{Preamble}
+\label{sec:preamble}
+The preamble declares the package and imports dependencies.
+<<Controller.java preamble>>=
+package com.github.jargors;
+@
+We import:
+\begin{itemize}
+\item all parts of the Jargo stack;
+<<Controller.java preamble>>=
+import com.github.jargors.Storage;
+import com.github.jargors.Communicator;
+import com.github.jargors.Client;
+import com.github.jargors.Tools;
+@ \item standard utilities for concurrent execution;
+<<Controller.java preamble>>=
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+@ \item standard classes for file operations;
+<<Controller.java preamble>>=
+import java.util.Scanner;
+import java.io.File;
+import java.io.FileNotFoundException;
+@ \item date-time class for printing timestamps;
+<<Controller.java preamble>>=
+import java.time.LocalDateTime;
+@ \item standard map classes for caching various items.
+<<Controller.java preamble>>=
+import java.util.Map;
+import java.util.HashMap;
+@
+\end{itemize}
+
+\subsection{Class Definition}
+\label{sec:class-definition}
+<<[[Controller]] definition>>=
+public class Controller {
+  <<[[Controller]] member variables>>
+  <<[[Controller]] constructor>>
+  <<[[Controller]] public methods>>
+  <<[[Controller]] private methods>>
+}
+@
+
+\subsection{Member Variables}
+Member variables are grouped into \emph{containers}, \emph{settings}, and
+\emph{loops}.
+<<[[Controller]] member variables>>=
+<<Container objects>>
+<<Settings objects>>
+<<Loop objects>>
+@
+\hi{Containers.}
+<<Container objects>>=
+private Storage storage;
+private Communicator communicator;
+private Tools distance = new Tools();
+private Client client;
+private Map<Integer, int[]> lu_nodes = new HashMap<>();
+@ %def storage communicator distance client lu_nodes
+\hi{Settings.} Settings objects configure various aspects of the simulation.
+These settings should mostly be set by the evaluation program by using the public
+setters.
+
+Ultimately we want everything in the database to be an integer so we don't have
+to fiddle around with data types when we do reads and writes. We use [[CSHIFT]]
+to shift the decimal places of latitude and longitude coordinates left and
+right by multiplication or division.
+<<Settings objects>>=
+private final double CSHIFT = 10000000.0;
+private static int world_time = 0;
+private int initial_world_time = 0;
+private int final_world_time = 86400;
+private int engine_update_period = 10;
+private int loop_delay = 0;
+// private int breakdown_rate = 0.005;
+// private int offcourse_rate = 0.02;
+@ %def CSHIFT world_time initial_world_time final_world_time engine_update_period loop_delay
+\hi{Loops.} Jargo's simulation environment comprises four ``loops'', defined
+here, running in parallel. They are executed using Java's
+[[ScheduledExecutorService]] to control timing.
+<<Loop objects>>=
+<<Definition of clock loop>>
+<<Definition of engine loop>>
+<<Definition of request collection loop>>
+<<Definition of server collection loop>>
+@
+
+\subsubsection{Clock Loop}
+This loop advances the simulation world time.
+<<Definition of clock loop>>=
+private Runnable ClockLoop = new Runnable() {
+  public void run() {
+    communicator.setSimulationWorldTime(++world_time);
+    storage.printSQLDriverStatistics();
+  }
+};
+@ %def ClockLoop
+
+\subsubsection{Engine Loop}
+TODO: Stochastic processes (e.g. traffic) will go here.
+<<Definition of engine loop>>=
+private Runnable EngineLoop = new Runnable() {
+  public void run() {
+    // Print("I am EngineLoop running on "+Thread.currentThread().getName());
+    // applyTraffic(world_time);
+    // applyBreakdown(world_time);
+    // applyOffCourse(world_time);
+  }
+};
+@ %def EngineLoop
+
+\subsubsection{Request Loop}
+This loop ``pushes'' queued requests to the client.
+<<Definition of request collection loop>>=
+private Runnable RequestLoop = () -> {
+  final int t0 = world_time;
+  int[] output = storage.DBQueryQueuedRequests(world_time);
+  final int t1 = world_time;
+  Print("RequestLoop t0="+t0+", t1="+t1+", # of requests="+output.length/7);
+  client.collectRequests(output);
+};
+@ %def RequestLoop
+
+\subsubsection{Server Loop}
+This loop ``pushes'' server locations to the client.
+<<Definition of server collection loop>>=
+private Runnable ServerLoop = () -> {
+  final int t0 = world_time;
+  int[] output = storage.DBQueryServerLocationsActive(world_time);
+  final int t1 = world_time;
+  Print("ServerLoop t0="+t0+", t1="+t1+", # of servers="+output.length/3);
+  client.collectServerLocations(output);
+};
+@ %def ServerLoop
+
+\subsection{Constructor}
+<<[[Controller]] constructor>>=
+public Controller() {
+  storage = new Storage();
+  communicator = new Communicator();
+  communicator.setStorage(storage);
+}
+@
+
+\section{Public Methods}
+\label{sec:public-methods}
+\hi{General methods.}
+<<[[Controller]] public methods>>=
+<<Set client>>
+<<Set initial world time>>
+<<Set final world time>>
+<<Get world time>>
+<<Save backup>>
+<<Load backup>>
+<<Load data model>>
+<<Load road network>>
+<<Load problem>>
+<<Load GTree>>
+<<Start simulation>>
+@
+\hi{Read methods.}
+<<[[Controller]] public methods>>=
+<<Query custom statement>>
+<<Query ridesharing user>>
+<<Query routes>>
+<<Query schedules>>
+<<Query various metrics>>
+@
+
+\subsection{General methods}
+
+\subsubsection{[[setClient]](1)}
+<<Set client>>=
+public void setClient(Client target) {
+  client = target;
+}
+@ %def setClient
+
+\subsubsection{[[setInitialWorldTime(1)]]}
+<<Set initial world time>>=
+public void setInitialWorldTime(int t) {
+  initial_world_time = t;
+}
+@ %def setInitialWorldTime
+
+\subsubsection{[[setFinalWorldTime(1)]]}
+<<Set final world time>>=
+public void setFinalWorldTime(int t) {
+  final_world_time = t;
+}
+@ %def setFinalWorldTime
+
+\subsubsection{[[getSimulationWorldTime(0)]]}
+<<Get world time>>=
+public static int getSimulationWorldTime() {
+  return world_time;
+}
+@ %def getSimulationWorldTime
+
+\subsubsection{[[save]](1)}
+<<Save backup>>=
+public void saveBackup(String p) {
+  storage.DBSaveBackup(p);
+}
+@ %def saveBackup
+
+\subsubsection{[[loadBackup]](1)}
+<<Load backup>>=
+public void loadBackup(String p) {
+  storage.DBLoadBackup(p);
+}
+@ %def loadBackup
+
+\subsubsection{[[loadDataModel]](0)}
+<<Load data model>>=
+public void loadDataModel() throws RuntimeException {
+  storage.DBLoadDataModel();
+}
+@
+
+\subsubsection{[[loadRoadNetwork]](1)}
+<<Load road network>>=
+public void loadRoadNetwork(String f_rnet) throws RuntimeException {
+  try {
+    int[] col = new int[7];
+    int dist;
+    Scanner sc = new Scanner(new File(f_rnet));
+    while (sc.hasNext()) {
+      <<..parse a line of the road network>>
+      <<..detect dummy vertex>>
+      <<..insert vertex coordinates>>
+      <<..compute edge weight [[dist]]>>
+      <<..insert edge>>
+    }
+  } catch (Exception e) {
+    throw new RuntimeException(e);
+  }
+}
+@ %def loadRoadNetwork
+<<..parse a line of the road network>>=
+col[0] = sc.nextInt();
+col[1] = sc.nextInt();
+col[2] = sc.nextInt();
+col[3] = (int) Math.round(sc.nextDouble()*CSHIFT);
+col[4] = (int) Math.round(sc.nextDouble()*CSHIFT);
+col[5] = (int) Math.round(sc.nextDouble()*CSHIFT);
+col[6] = (int) Math.round(sc.nextDouble()*CSHIFT);
+@
+If a vertex identifier is $0$, then we store its coordinates as $(0,0)$.
+<<..detect dummy vertex>>=
+if (col[1] == 0) {
+  col[3] = 0;
+  col[4] = 0;
+}
+if (col[2] == 0) {
+  col[5] = 0;
+  col[6] = 0;
+}
+@
+<<..insert vertex coordinates>>=
+if (!lu_nodes.containsKey(col[1])) {
+  lu_nodes.put(col[1], new int[] { col[3], col[4] });
+  storage.DBAddNewVertex(col[1], col[3], col[4]);
+}
+if (!lu_nodes.containsKey(col[2])) {
+  lu_nodes.put(col[2], new int[] { col[5], col[6] });
+  storage.DBAddNewVertex(col[2], col[5], col[6]);
+}
+@
+We use haversine to compute edge weights\footnote{If the distance between two
+vertices is 0 due to rounding, then we round it up to 1.}.  If one of the
+vertices in the edge is a dummy vertex, we set the weight to 0\footnote{The
+dummy vertex should only terminate and never begin an edge in the road network,
+otherwise a shortest path could take a shortcut through the dummy vertex to
+reach any other vertex with 0 weight!}.
+<<..compute edge weight [[dist]]>>=
+dist = ((col[1] != 0 && col[2] != 0)
+  ? distance.computeHaversine(
+        col[3]/CSHIFT, col[4]/CSHIFT,
+        col[5]/CSHIFT, col[6]/CSHIFT) : 0);
+@
+The fifth parameter is the \textit{initial speed} on all the edges \footnote{In
+the future, the speed on each edge may be recorded directly in the road network
+file instead of hardcoded here.}.
+<<..insert edge>>=
+storage.DBAddNewEdge(col[1], col[2], dist, 10);
+@
+
+\subsubsection{[[loadProblem(1)]]}
+<<Load problem>>=
+public void loadProblem(String p) {
+  try {
+    Scanner sc = new Scanner(new File(p));
+    <<..skip header rows>>
+    int[] col = new int[6];
+    while (sc.hasNext()) {
+      for (int i = 0; i < 6; i++) {
+        col[i] = sc.nextInt();
+      }
+      int uid = col[0];
+      int uo = col[1];
+      int ud = col[2];
+      int uq = col[3];
+      int ue = col[4];
+      int ul = col[5];
+      int ub = distance.computeShortestPathDistance(uo, ud);
+      if (uq < 0) {
+        int[] server = new int[] { uid, uq, ue, ul, uo, ud, ub };
+        int[] route = computeRoute(uo, ud, ue);
+        storage.DBAddNewServer(server, route);
+        Print("Put user "+uid);
+      } else {
+        int[] request = new int[] { uid, uq, ue, ul, uo, ud, ub };
+        storage.DBAddNewRequest(request);
+        Print("Put user "+uid);
+      }
+    }
+  } catch (FileNotFoundException e) {
+    System.out.println("Bad path to problem instance");
+  } catch (RuntimeException e) {
+    System.out.println(e.getMessage());
+    e.printStackTrace();
+    System.out.println("Jargo runtime exception");
+  }
+}
+@ %def loadProblem
+<<..skip header rows>>=
+for (int i = 0; i < 6; i++) {
+  sc.nextLine();
+}
+@
+
+\subsubsection{[[loadGTree]](1)}
+<<Load GTree>>=
+public void loadGTree(String p) {
+  distance.loadGTree(p);
+}
+@ %def loadGTree
+
+\subsubsection{[[start]](0)}
+<<Start simulation>>=
+public void start() {
+  Print("SIMULATION STARTED");
+
+  client.setCommunicator(communicator);
+
+  world_time = initial_world_time;
+  Print("Set world time to "+world_time);
+
+  int simulation_duration = (final_world_time - initial_world_time);
+  Print("Set duration to "+simulation_duration+" (sec)");
+
+  ScheduledExecutorService exe = Executors.newScheduledThreadPool(4);
+
+  ScheduledFuture<?> cb1 = exe.scheduleAtFixedRate(
+    ClockLoop, 0, 1, TimeUnit.SECONDS);
+  Print("Set clock-loop period to 1 (sec)");
+
+  ScheduledFuture<?> cb2 = exe.scheduleAtFixedRate(
+    EngineLoop, loop_delay, engine_update_period, TimeUnit.SECONDS);
+  Print("Set engine-loop period to "+engine_update_period+" (sec)");
+
+  int request_collection_period = client.getRequestCollectionPeriod();
+  ScheduledFuture<?> cb3 = exe.scheduleAtFixedRate(
+    RequestLoop, loop_delay, request_collection_period, TimeUnit.SECONDS);
+  Print("Set request-loop period to "+request_collection_period+" (sec)");
+
+  int server_collection_period = client.getServerLocationCollectionPeriod();
+  ScheduledFuture<?> cb4 = exe.scheduleAtFixedRate(
+    ServerLoop, loop_delay, server_collection_period, TimeUnit.SECONDS);
+  Print("Set server-loop period to "+server_collection_period+" (sec)");
+
+  exe.schedule(() -> {
+    cb1.cancel(false);
+    cb2.cancel(false);
+    cb3.cancel(false);
+    cb4.cancel(false);
+    exe.shutdown();
+    Print("SIMULATION ENDED");
+  }, simulation_duration, TimeUnit.SECONDS);
+}
+@ %def start
+
+
+\subsection{Read Methods}
+\subsubsection{[[query]](2)}
+<<Query custom statement>>=
+public int[] query(String sql, int ncols) throws RuntimeException {
+  return storage.DBQuery(sql, ncols);
+}
+@ %def query
+
+\subsubsection{[[queryServer]](1)}
+<<Query ridesharing user>>=
+public int[] queryServer(int sid) throws RuntimeException {
+  return storage.DBQueryServer(sid);
+}
+@ %def queryServer
+
+\subsubsection{[[queryRequest]](1)}
+<<Query ridesharing user>>=
+public int[] queryRequest(int rid) throws RuntimeException {
+  return storage.DBQueryRequest(rid);
+}
+@ %def queryRequest
+
+\subsubsection{[[queryRoute]](1)}
+<<Query routes>>=
+public int[] queryRoute(int sid) throws RuntimeException {
+  return storage.DBQueryRoute(sid);
+}
+@ %def queryRoute
+
+\subsubsection{[[querySchedule]](1)}
+<<Query schedules>>=
+public int[] querySchedule(int sid) throws RuntimeException {
+  return storage.DBQuerySchedule(sid);
+}
+@ %def querySchedule
+
+\subsubsection{[[queryCountVertices]](0)}
+<<Query various metrics>>=
+public int[] queryCountVertices() throws RuntimeException {
+  return storage.DBQueryCountVertices();
+}
+@ %def queryCountVertices
+
+\subsubsection{[[queryCountEdges]](0)}
+<<Query various metrics>>=
+public int[] queryCountEdges() throws RuntimeException {
+  return storage.DBQueryCountEdges();
+}
+@ %def queryCountEdges
+
+\subsubsection{[[queryStatisticsEdges]](0)}
+<<Query various metrics>>=
+public int[] queryStatisticsEdges() throws RuntimeException {
+  return storage.DBQueryStatisticsEdges();
+}
+@ %def queryStatisticsEdges
+
+\subsubsection{[[queryMBR]](0)}
+<<Query various metrics>>=
+public int[] queryMBR() throws RuntimeException {
+  return storage.DBQueryMBR();
+}
+@ %def queryMBR
+
+\subsubsection{[[queryCountServers]](0)}
+<<Query various metrics>>=
+public int[] queryCountServers() throws RuntimeException {
+  return storage.DBQueryCountServers();
+}
+@ %def queryCountServers
+
+\subsubsection{[[queryCountRequests]](0)}
+<<Query various metrics>>=
+public int[] queryCountRequests() throws RuntimeException {
+  return storage.DBQueryCountRequests();
+}
+@ %def queryCountRequests
+
+\subsubsection{[[queryServiceRate]](0)}
+<<Query various metrics>>=
+public int[] queryServiceRate() throws RuntimeException {
+  return storage.DBQueryServiceRate();
+}
+@ %def queryServiceRate
+
+\subsubsection{[[queryBaseDistanceTotal]](0)}
+<<Query various metrics>>=
+public int[] queryBaseDistanceTotal() throws RuntimeException {
+  return storage.DBQueryBaseDistanceTotal();
+}
+@ %def queryBaseDistanceTotal
+
+\subsubsection{[[queryServerBaseDistanceTotal]](0)}
+<<Query various metrics>>=
+public int[] queryServerBaseDistanceTotal() throws RuntimeException {
+  return storage.DBQueryServerBaseDistanceTotal();
+}
+@ %def queryServerBaseDistanceTotal
+
+\subsubsection{[[queryRequestBaseDistanceTotal]](0)}
+<<Query various metrics>>=
+public int[] queryRequestBaseDistanceTotal() throws RuntimeException {
+  return storage.DBQueryRequestBaseDistanceTotal();
+}
+@ %def queryRequestBaseDistanceTotal
+
+\subsubsection{[[queryServerTravelDistanceTotal]](0)}
+<<Query various metrics>>=
+public int[] queryServerTravelDistanceTotal() throws RuntimeException {
+  return storage.DBQueryServerTravelDistanceTotal();
+}
+@ %def queryServerTravelDistanceTotal
+
+\subsubsection{[[queryServerCruisingDistanceTotal]](0)}
+<<Query various metrics>>=
+public int[] queryServerCruisingDistanceTotal() throws RuntimeException {
+  return storage.DBQueryServerCruisingDistanceTotal();
+}
+@ %def queryServerCruisingDistanceTotal
+
+\subsubsection{[[queryServerServiceDistanceTotal]](0)}
+<<Query various metrics>>=
+public int[] queryServerServiceDistanceTotal() throws RuntimeException {
+  return storage.DBQueryServerServiceDistanceTotal();
+}
+@ %def queryServerServiceDistanceTotal
+
+\subsubsection{[[queryRequestDetourDistanceTotal]](0)}
+<<Query various metrics>>=
+public int[] queryRequestDetourDistanceTotal() throws RuntimeException {
+  return storage.DBQueryRequestDetourDistanceTotal();
+}
+@ %def queryRequestDetourDistanceTotal
+
+\subsubsection{[[queryRequestTransitDistanceTotal]](0)}
+<<Query various metrics>>=
+public int[] queryRequestTransitDistanceTotal() throws RuntimeException {
+  return storage.DBQueryRequestTransitDistanceTotal();
+}
+@ %def queryRequestTransitDistanceTotal
+
+\subsubsection{[[queryServerTravelDurationTotal]](0)}
+<<Query various metrics>>=
+public int[] queryServerTravelDurationTotal() throws RuntimeException {
+  return storage.DBQueryServerTravelDurationTotal();
+}
+@ %def queryServerTravelDurationTotal
+
+\subsubsection{[[queryRequestPickupDurationTotal]](0)}
+<<Query various metrics>>=
+public int[] queryRequestPickupDurationTotal() throws RuntimeException {
+  return storage.DBQueryRequestPickupDurationTotal();
+}
+@ %def queryRequestPickupDurationTotal
+
+\subsubsection{[[queryRequestTransitDurationTotal]](0)}
+<<Query various metrics>>=
+public int[] queryRequestTransitDurationTotal() throws RuntimeException {
+  return storage.DBQueryRequestTransitDurationTotal();
+}
+@ %def queryRequestTransitDurationTotal
+
+\subsubsection{[[queryRequestTravelDurationTotal]](0)}
+<<Query various metrics>>=
+public int[] queryRequestTravelDurationTotal() throws RuntimeException {
+  return storage.DBQueryRequestTravelDurationTotal();
+}
+@ %def queryRequestTravelDurationTotal
+
+\subsubsection{[[queryRequestDepartureTime]](1)}
+<<Query various metrics>>=
+public int[] queryRequestDepartureTime(int rid) throws RuntimeException {
+  return storage.DBQueryRequestDepartureTime(rid);
+}
+@ %def queryRequestDepartureTime
+
+\subsubsection{[[queryServerDepartureTime]](1)}
+<<Query various metrics>>=
+public int[] queryServerDepartureTime(int sid) throws RuntimeException {
+  return storage.DBQueryServerDepartureTime(sid);
+}
+@ %def queryServerDepartureTime
+
+\subsubsection{[[queryRequestArrivalTime]](1)}
+<<Query various metrics>>=
+public int[] queryRequestArrivalTime(int rid) throws RuntimeException {
+  return storage.DBQueryRequestArrivalTime(rid);
+}
+@ %def queryRequestArrivalTime
+
+\subsubsection{[[queryServerArrivalTime]](1)}
+<<Query various metrics>>=
+public int[] queryServerArrivalTime(int sid) throws RuntimeException {
+  return storage.DBQueryServerArrivalTime(sid);
+}
+@ %def queryServerArrivalTime
+
+\section{Private Methods}
+\label{sec:private-methods}
+
+\subsection{[[Print(1)]]}
+<<[[Controller]] private methods>>=
+private void Print(String msg) {
+  System.out.println("[Controller]["+LocalDateTime.now()+"]"
+    + "[t="+world_time+"] "+msg);
+}
+@ %def Print
+
+\subsection{[[computeRoute(3)]]}
+Jargo road network is 1-indexed while G-tree is 0-indexed, so we need to
+compensate appropriately. The G-tree component doesn't have the best error
+handling, so we add some input validation into this method.
+We also need to detect when the target is the dummy
+vertex 0.
+<<[[Controller]] private methods>>=
+private int[] computeRoute(int source, int target, int starttime)
+throws RuntimeException {
+  int[] output = null;
+  if (source == 0) {
+    throw new RuntimeException("ERROR computeRoute(3): source cannot be 0!");
+  } else if (target == 0) {
+    output = new int[] { starttime, source, starttime + 1, target };
+  } else {
+    int[] path = null;
+    int[] edge = null;
+    int u, v, dd, nu, t;
+    path = distance.computeShortestPath((source - 1), (target - 1));
+    if (path == null) {
+      throw new RuntimeException("ERROR computeRoute(3): null path!");
+    } else {
+      output = new int[(path.length*2)];
+      output[0] = starttime;
+      output[1] = source;
+      for (int i = 1; i < path.length; i++) {
+        u = path[(i - 1)] + 1;
+        v = path[i] + 1;
+        edge = storage.DBQueryEdge(u, v);
+        dd = edge[0];
+        nu = edge[1];
+        t = (int) Math.ceil((float) dd/nu);
+        output[(2*i + 0)] = t;
+        output[(2*i + 1)] = v;
+      }
+    }
+  }
+  return output;
+}
+@ %def computeRoute
+
+\appendix
+
+\section{Appendix: List of Chunks}
+\label{ap:list-of-chunks}
+\nowebchunks
+
+\section{Appendix: List of Identifiers}
+\label{ap:list-of-identifiers}
+\nowebindex
+
+\end{document}
+
+
