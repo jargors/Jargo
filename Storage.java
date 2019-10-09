@@ -3,48 +3,45 @@
   import java.sql.DriverManager;       import java.sql.PreparedStatement;
   import java.sql.ResultSet;           import java.sql.SQLException;
   import java.sql.Statement;           import java.sql.Types;
-  import java.util.Scanner;
-  import java.io.File;
-  import java.io.FileNotFoundException;
+  import org.apache.commons.dbcp2.ConnectionFactory;
+  import org.apache.commons.dbcp2.DriverManagerConnectionFactory;
+  import org.apache.commons.dbcp2.PoolableConnection;
+  import org.apache.commons.dbcp2.PoolableConnectionFactory;
+  import org.apache.commons.dbcp2.PoolingDriver;
+  import org.apache.commons.pool2.ObjectPool;
+  import org.apache.commons.pool2.impl.GenericObjectPool;
   import java.util.Map;
   import java.util.HashMap;
   import java.time.LocalDateTime;
-  public class StorageInterface {
-    private Connection conn;
-    private ResultSet res;
-    private Map<Integer, PreparedStatement> pstmt = new HashMap<>();
-    private Map<Integer, String> pstr = new HashMap<>();
-    private Map<Integer, int[]> lu_nodes = new HashMap<>();
-    private final double CSHIFT = 10000000.0;
+  public class Storage {
+    private static Map<String, String> pstr = new HashMap<>();
     private int uid = 0;
+    private String CONNECTIONS_URL = "jdbc:derby:memory:jargo;create=true";
+    private final String CONNECTIONS_DRIVER_URL = "jdbc:apache:commons:dbcp:";
+    private final String CONNECTIONS_POOL_NAME = "jargo";
+    private String CONNECTIONS_POOL_URL = (CONNECTIONS_DRIVER_URL + CONNECTIONS_POOL_NAME);
+    private final int STATEMENTS_MAX_COUNT = 20;
+    private final int DERBY_PAGECACHESIZE = 8000;  // default=1000
+    private final String DERBY_DUMPNAME = "db-lastgood";
+    private ConnectionFactory connection_factory;
+    private PoolableConnectionFactory poolableconnection_factory;
+    private ObjectPool<PoolableConnection> pool;
+    private PoolingDriver driver;
     private final String VERSION = "1.0.0";
-    public StorageInterface(String f_rnet) {
-      Print("Initializing Storage Interface "+VERSION);
-      Print("Initializing a new database...");
+    public Storage() {
+      Print("Initialize Storage Interface "+VERSION);
       try {
-        conn = DriverManager.getConnection("jdbc:derby:memory:jargo;create=true");
-        Print("Connected to in-memory database");
-        conn.setAutoCommit(false);
-        try {
-          CallableStatement cs = conn.prepareCall(
-            "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
-          cs.setString(1, "derby.storage.pageCacheSize");
-          cs.setInt(2, 8000);  // default=1000
-          cs.execute();
-          cs.close();
-        }
-        catch (SQLException e1) {
-          printSQLException(e1);
-          try {
-            conn.rollback();
-          } catch (SQLException e2) {
-            printSQLException(e2);
-          }
-          DBSaveBackup("db-lastgood");
-          throw new RuntimeException("database failure");
-        }
+        setupDriver();
+        PSInit();
+      } catch (RuntimeException e) {
+        e.printStackTrace();
+      }
+    }
+    public void DBLoadDataModel() throws RuntimeException {
+      Print("Load data model");
+      try {
+        Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
         Statement stmt = conn.createStatement();
-        Print("Creating tables and views...");
         stmt.clearBatch();
         stmt.addBatch("CREATE TABLE V ("
                         + "v   int  CONSTRAINT P1 PRIMARY KEY,"
@@ -345,139 +342,60 @@
                         + "SELECT rid, td FROM CPD");
         stmt.addBatch("CREATE VIEW t_s_arrive (sid, val) AS "
                         + "SELECT sid, te FROM CW");
-        try {
-          stmt.executeBatch();
-        }
-        catch (SQLException e1) {
-          printSQLException(e1);
-          try {
-            conn.rollback();
-          } catch (SQLException e2) {
-            printSQLException(e2);
-          }
-          DBSaveBackup("db-lastgood");
-          throw new RuntimeException("database failure");
-        }
-        Print("Finished loading model");
-      }
-      catch (SQLException e1) {
-        printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
-        throw new RuntimeException("database failure");
-      }
-      PSInit();
-      Print("Loading road network ("+f_rnet+")");
-      try {
-        PSClear(0, 1);
-        int[] col = new int[7];
-        int dist;
-        Scanner sc = new Scanner(new File(f_rnet));
-        while (sc.hasNext()) {
-          col[0] = sc.nextInt();
-          col[1] = sc.nextInt();
-          col[2] = sc.nextInt();
-          col[3] = (int) Math.round(sc.nextDouble()*CSHIFT);
-          col[4] = (int) Math.round(sc.nextDouble()*CSHIFT);
-          col[5] = (int) Math.round(sc.nextDouble()*CSHIFT);
-          col[6] = (int) Math.round(sc.nextDouble()*CSHIFT);
-          if (col[1] == 0) {
-            col[3] = 0;
-            col[4] = 0;
-          }
-          if (col[2] == 0) {
-            col[5] = 0;
-            col[6] = 0;
-          }
-          if (!lu_nodes.containsKey(col[1])) {
-            lu_nodes.put(col[1], new int[] { col[3], col[4] });
-            PSAdd(0, col[1], col[3], col[4]);
-          }
-          if (!lu_nodes.containsKey(col[2])) {
-            lu_nodes.put(col[2], new int[] { col[3], col[4] });
-            PSAdd(0, col[2], col[5], col[6]);
-          }
-          dist = ((col[1] != 0 && col[2] != 0)
-            ? haversine(col[3]/CSHIFT, col[4]/CSHIFT,
-                        col[5]/CSHIFT, col[6]/CSHIFT) : 0);
-          PSAdd(1, col[1], col[2], dist, 10);
-        }
-        PSSubmit(0, 1);
+        stmt.executeBatch();
         conn.commit();
-      } catch (FileNotFoundException e) {
-        throw new IllegalArgumentException("bad file");
+        conn.close();
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
     }
-    public void DBLoadBackup(String filepath) throws RuntimeException {
-      Print("Loading database backup ("+filepath+")");
+    public void DBLoadBackup(String p) throws RuntimeException {
+      Print("Load database backup ("+p+")");
       try {
-        if (!conn.isClosed()) {
-          conn.close();
-        }
-        conn = DriverManager.getConnection("jdbc:derby:memory:jargobak;createFrom="+filepath);
-        conn.setAutoCommit(false);
-        try {
-          CallableStatement cs = conn.prepareCall(
-            "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
-          cs.setString(1, "derby.storage.pageCacheSize");
-          cs.setInt(2, 8000);  // default=1000
-          cs.execute();
-          cs.close();
-        }
-        catch (SQLException e1) {
-          printSQLException(e1);
-          try {
-            conn.rollback();
-          } catch (SQLException e2) {
-            printSQLException(e2);
-          }
-          DBSaveBackup("db-lastgood");
-          throw new RuntimeException("database failure");
-        }
-        PSInit();
-        uid = DBFetch(132, 1)[0];
+        CONNECTIONS_URL = "jdbc:derby:memory:jargobak;createFrom="+p;
+        setupDriver();
+        Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+        CallableStatement cs = conn.prepareCall(
+          "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
+        cs.setString(1, "derby.storage.pageCacheSize");
+        cs.setInt(2, DERBY_PAGECACHESIZE);
+        cs.execute();
+        conn.close();
+        this.uid = DBFetch("S132", 1)[0];
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
     }
-    public void DBSaveBackup(String filepath) throws RuntimeException {
+    public void DBSaveBackup(String p) throws RuntimeException {
       try {
+        Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
         CallableStatement cs = conn.prepareCall(
           "CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE(?)");
-        cs.setString(1, filepath);
+        cs.setString(1, p);
         cs.execute();
-        cs.close();
+        conn.close();
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
+        throw new RuntimeException("database failure");
+      }
+    }
+    public void printSQLDriverStatistics() {
+      try {
+        PoolingDriver d = (PoolingDriver) DriverManager.getDriver(CONNECTIONS_DRIVER_URL);
+        ObjectPool<? extends Connection> cp = d.getConnectionPool(CONNECTIONS_POOL_NAME);
+        Print("Connections: "+cp.getNumActive()+" active; "+cp.getNumIdle()+" idle");
+      }
+      catch (SQLException e1) {
+        printSQLException(e1);
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
     }
@@ -491,147 +409,157 @@
         e = e.getNextException();
       }
     }
-    public int haversine(double lng1, double lat1, double lng2, double lat2) {
-      double dlat = Math.toRadians(lat2 - lat1);
-      double dlng = Math.toRadians(lng2 - lng1);
-      double rlat1 = Math.toRadians(lat1);
-      double rlat2 = Math.toRadians(lat2);
-      double a = Math.pow(Math.sin(dlat / 2), 2)
-        + Math.pow(Math.sin(dlng / 2), 2)
-        * Math.cos(rlat1) * Math.cos(rlat2);
-      double c = 2 * Math.asin(Math.sqrt(a));
-      int d = (int) Math.round(c * 6371000);
-      if (d == 0 && (lng1 != lng2 || lat1 != lat2)) {
-        d = 1;
-      }
-      return d;
-    }
-    public int haversine(int v1, int v2) {
-      int[] c1 = lu_nodes.get(v1);
-      int[] c2 = lu_nodes.get(v2);
-      return haversine(c1[0]/CSHIFT, c1[1]/CSHIFT,
-                       c2[0]/CSHIFT, c2[1]/CSHIFT);
-    }
     public void printUser(int[] u) {
       System.out.println("User {uid="+u[0]+", q="+u[1]+", e="+u[2]+", l="+u[3]
         +", o="+u[4]+", d="+u[5]+", b="+u[6]+"}");
     }
-    public void printPath(int[] path) {
-      for (Integer i : path) {
+    public void printPath(int[] p) {
+      for (Integer i : p) {
         System.out.print(i+" ");
       }
       System.out.println();
     }
-    public void printRoute(int[] route) {
-      for (int i = 0; i < (route.length - 1); i += 2) {
-        System.out.print("("+route[i]+", "+route[(i + 1)]+") ");
+    public void printRoute(int[] w) {
+      for (int i = 0; i < (w.length - 1); i += 2) {
+        System.out.print("("+w[i]+", "+w[(i + 1)]+") ");
       }
       System.out.println();
     }
-    public void printSchedule(int[] sched) {
-      for (int i = 0; i < (sched.length - 3); i += 4) {
-        System.out.print("("+sched[i]+", "+sched[(i + 1)]
-          + ", "+sched[(i + 2)]+", "+sched[(i + 3)]+") ");
+    public void printSchedule(int[] b) {
+      for (int i = 0; i < (b.length - 3); i += 4) {
+        System.out.print("("+b[i]+", "+b[(i + 1)]
+          + ", "+b[(i + 2)]+", "+b[(i + 3)]+") ");
       }
       System.out.println();
     }
-    public void DBUpdateEdgeSpeed(int v1, int v2, int nu) throws RuntimeException {
+    public void DBAddNewVertex(int v, int lng, int lat) throws RuntimeException {
       try {
-        PSClear(15, 131);
-        PSAdd(15, nu, v1, v2);
-        PSAdd(131, nu, v1, v2);
-        PSSubmit(15, 131);
+        Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+        PreparedStatement pS0 = PS(conn, "S0");
+        PSAdd(pS0, v, lng, lat);
+        PSSubmit(pS0);
         conn.commit();
+        conn.close();
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
+        throw new RuntimeException("database failure");
+      }
+    }
+    public void DBAddNewEdge(int v1, int v2, int dd, int nu) throws RuntimeException {
+      try {
+        Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+        PreparedStatement pS1 = PS(conn, "S1");
+        PSAdd(pS1, v1, v2, dd, nu);
+        PSSubmit(pS1);
+        conn.commit();
+        conn.close();
+      }
+      catch (SQLException e1) {
+        printSQLException(e1);
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
     }
     public int DBAddNewRequest(int[] u) throws RuntimeException {
       try {
+        Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
         uid += 1;
-        PSClear(2, 3, 4, 5, 6, 7);
-        PSAdd(2, uid, u[0]);
-        PSAdd(3, uid, u[1]);
-        PSAdd(4, uid, u[2]);
-        PSAdd(5, uid, u[3]);
-        PSAdd(6, uid, u[4]);
-        PSAdd(7, uid, u[5]);
-        PSSubmit(2, 3, 4, 5, 6, 7);
-        PSClear(9);
-        PSAdd(9, uid, u[0], u[1], u[2], u[3], u[4], u[5]);
-        PSSubmit(9);
+        PreparedStatement pS2 = PS(conn, "S2");
+        PreparedStatement pS3 = PS(conn, "S3");
+        PreparedStatement pS4 = PS(conn, "S4");
+        PreparedStatement pS5 = PS(conn, "S5");
+        PreparedStatement pS6 = PS(conn, "S6");
+        PreparedStatement pS7 = PS(conn, "S7");
+        PSAdd(pS2, uid, u[0]);
+        PSAdd(pS3, uid, u[1]);
+        PSAdd(pS4, uid, u[2]);
+        PSAdd(pS5, uid, u[3]);
+        PSAdd(pS6, uid, u[4]);
+        PSAdd(pS7, uid, u[5]);
+        PSSubmit(pS2, pS3, pS4, pS5, pS6, pS7);
+        PreparedStatement pS9 = PS(conn, "S9");
+        PSAdd(pS9, uid, u[0], u[1], u[2], u[3], u[4], u[5]);
+        PSSubmit(pS9);
         conn.commit();
+        conn.close();
         return uid;
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
     }
     public int DBAddNewServer(int[] u, int[] route) throws RuntimeException {
       try {
-        int[] output = new int[] { };
+        Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
         int se = u[1];
         uid += 1;
-        PSClear(2, 3, 4, 5, 6, 7);
-        PSAdd(2, uid, u[0]);
-        PSAdd(3, uid, u[1]);
-        PSAdd(4, uid, u[2]);
-        PSAdd(5, uid, u[3]);
-        PSAdd(6, uid, u[4]);
-        PSAdd(7, uid, u[5]);
-        PSSubmit(2, 3, 4, 5, 6, 7);
-        PSClear(8);
-        PSAdd(8, uid, u[0], u[1], u[2], u[3], u[4], u[5]);
-        PSSubmit(8);
-        PSClear(10);
-        PSAdd(10, uid, se, null, null, route[0], route[1], null, null);
-        PSSubmit(10);
-        PSClear(10);
+        PreparedStatement pS2 = PS(conn, "S2");
+        PreparedStatement pS3 = PS(conn, "S3");
+        PreparedStatement pS4 = PS(conn, "S4");
+        PreparedStatement pS5 = PS(conn, "S5");
+        PreparedStatement pS6 = PS(conn, "S6");
+        PreparedStatement pS7 = PS(conn, "S7");
+        PSAdd(pS2, uid, u[0]);
+        PSAdd(pS3, uid, u[1]);
+        PSAdd(pS4, uid, u[2]);
+        PSAdd(pS5, uid, u[3]);
+        PSAdd(pS6, uid, u[4]);
+        PSAdd(pS7, uid, u[5]);
+        PSSubmit(pS2, pS3, pS4, pS5, pS6, pS7);
+        PreparedStatement pS8 = PS(conn, "S8");
+        PSAdd(pS8, uid, u[0], u[1], u[2], u[3], u[4], u[5]);
+        PSSubmit(pS8);
+        int[] output = new int[] { };
+        PreparedStatement pS10 = PS(conn, "S10");
         for (int i = 0; i < (route.length - 3); i += 2) {
           int t1 = route[i];
           int v1 = route[(i + 1)];
           int t2 = route[(i + 2)];
           int v2 = route[(i + 3)];
-          output = DBFetch(46, 2, v1, v2);
+          output = DBFetch("S46", 2, v1, v2);
           int dd = output[0];
           int nu = output[1];
-          PSAdd(10, uid, se, t1, v1, t2, v2, dd, nu);
+          PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
         }
-        PSSubmit(10);
-        PSClear(11);
+        PSSubmit(pS10);
+        PSAdd(pS10, uid, se, null, null, route[0], route[1], null, null);
+        PSSubmit(pS10);
+        PreparedStatement pS11 = PS(conn, "S11");
         int te = route[(route.length - 2)];
-        PSAdd(11, uid, u[1], u[2], u[3], u[4], u[1], u[3], te, u[4]);
-        PSSubmit(11);
-        PSClear(14);
-        PSAdd(14, uid, u[0], u[1], null, u[1], u[3], null, u[0],
+        PSAdd(pS11, uid, u[1], u[2], u[3], u[4], u[1], u[3], te, u[4]);
+        PSSubmit(pS11);
+        PreparedStatement pS14 = PS(conn, "S14");
+        PSAdd(pS14, uid, u[0], u[1], null, u[1], u[3], null, u[0],
             null, null, null, null, null, 1);
-        PSSubmit(14);
+        PSSubmit(pS14);
         conn.commit();
+        conn.close();
         return uid;
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
+        throw new RuntimeException("database failure");
+      }
+    }
+    public void DBUpdateEdgeSpeed(int v1, int v2, int nu) throws RuntimeException {
+      try {
+        Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+        PreparedStatement pS15 = PS(conn, "S15");
+        PreparedStatement pS131 = PS(conn, "S131");
+        PSAdd(pS15, nu, v1, v2);
+        PSAdd(pS131, nu, v1, v2);
+        PSSubmit(pS15, pS131);
+        conn.commit();
+        conn.close();
+      }
+      catch (SQLException e1) {
+        printSQLException(e1);
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
     }
@@ -640,66 +568,69 @@
       int[] output = new int[] { };
       int se, sq;
       try {
-        output = DBFetch(48, 2, sid);
+        Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+        output = DBFetch("S48", 2, sid);
         sq = output[0];
         se = output[1];
-        PSClear(76);
-        PSAdd(76, sid, route[0]);
-        PSSubmit(76);
-        PSClear(10);
+        PreparedStatement pS76 = PS(conn, "S76");
+        PSAdd(pS76, sid, route[0]);
+        PSSubmit(pS76);
+        PreparedStatement pS10 = PS(conn, "S10");
         for (int i = 0; i < (route.length - 3); i += 2) {
           int t1 = route[i];
           int v1 = route[(i + 1)];
           int t2 = route[(i + 2)];
           int v2 = route[(i + 3)];
-          output = DBFetch(46, 2, v1, v2);
+          output = DBFetch("S46", 2, v1, v2);
           int dd = output[0];
           int nu = output[1];
-          PSAdd(10, uid, se, t1, v1, t2, v2, dd, nu);
+          PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
         }
-        PSSubmit(10);
-        PSClear(77);
+        PSSubmit(pS10);
+        PreparedStatement pS77 = PS(conn, "S77");
         int te = route[(route.length - 2)];
         int ve = route[(route.length - 1)];
-        PSAdd(77, te, ve, sid);
-        PSSubmit(77);
+        PSAdd(pS77, te, ve, sid);
+        PSSubmit(pS77);
         if (sched.length > 0) {
           Map<Integer, int[]> cache = new HashMap<>();
           int bound = (sched.length/3);
-          PSClear(82, 83, 84);
+          PreparedStatement pS82 = PS(conn, "S82");
+          PreparedStatement pS83 = PS(conn, "S83");
+          PreparedStatement pS84 = PS(conn, "S84");
           for (int j = 0; j < bound; j++) {
             int tj = sched[(3*j)];
             int vj = sched[(3*j + 1)];
             int Lj = sched[(3*j + 2)];
             if (Lj != sid) {
-              PSAdd(82, tj, vj, Lj);
-              PSAdd(83, tj, vj, Lj);
-              PSAdd(84, tj, vj, Lj);
+              PSAdd(pS82, tj, vj, Lj);
+              PSAdd(pS83, tj, vj, Lj);
+              PSAdd(pS84, tj, vj, Lj);
             }
           }
-          PSSubmit(82, 83, 84);
+          PSSubmit(pS82, pS83, pS84);
           for (int j = 0; j < bound; j++) {
             int Lj = sched[(3*j + 2)];
             if (Lj != sid) {
               int rq, tp, td;
               if (!cache.containsKey(Lj)) {
-                rq = DBFetch(85, 1, Lj)[0];
-                output = DBFetch(86, 2, Lj);
+                rq = DBFetch("S85", 1, Lj)[0];
+                output = DBFetch("S86", 2, Lj);
                 tp = output[0];
                 td = output[1];
                 cache.put(Lj, new int[] { rq, tp, td });
               }
             }
           }
-          PSClear(80);
-          PSAdd(80, sid, route[0]);
-          PSSubmit(80);
+          PreparedStatement pS80 = PS(conn, "S80");
+          PSAdd(pS80, sid, route[0]);
+          PSSubmit(pS80);
           int t1, q1, o1;
-          output = DBFetch(87, 3, sid, sched[0]);
+          output = DBFetch("S87", 3, sid, sched[0]);
           t1 = output[0];
           q1 = output[1];
           o1 = output[2];
-          PSClear(14);
+          PreparedStatement pS14 = PS(conn, "S14");
           for (int j = 0; j < bound; j++) {
             int t2 = sched[(3*j)];
             int v2 = sched[(3*j + 1)];
@@ -708,25 +639,21 @@
               int[] qpd = cache.get(Lj);
               int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
               int o2 = o1 + 1;
-              PSAdd(14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
+              PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
                     qpd[0], qpd[1], qpd[2], o1, o2);
               t1 = t2;
               q1 = q2;
               o1 = o2;
             }
           }
-          PSSubmit(14);
+          PSSubmit(pS14);
         }
         conn.commit();
+        conn.close();
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
     }
@@ -738,42 +665,45 @@
       Map<Integer, int[]> cache = new HashMap<>();
       Map<Integer, int[]> cache2 = new HashMap<>();
       try {
-        output = DBFetch(48, 2, sid);
+        Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+        output = DBFetch("S48", 2, sid);
         sq = output[0];
         se = output[1];
-        PSClear(76);
-        PSAdd(76, sid, route[0]);
-        PSSubmit(76);
-        PSClear(10);
+        PreparedStatement pS76 = PS(conn, "S76");
+        PSAdd(pS76, sid, route[0]);
+        PSSubmit(pS76);
+        PreparedStatement pS10 = PS(conn, "S10");
         for (int i = 0; i < (route.length - 3); i += 2) {
           int t1 = route[i];
           int v1 = route[(i + 1)];
           int t2 = route[(i + 2)];
           int v2 = route[(i + 3)];
-          output = DBFetch(46, 2, v1, v2);
+          output = DBFetch("S46", 2, v1, v2);
           int dd = output[0];
           int nu = output[1];
-          PSAdd(10, uid, se, t1, v1, t2, v2, dd, nu);
+          PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
         }
-        PSSubmit(10);
-        PSClear(77);
+        PSSubmit(pS10);
+        PreparedStatement pS77 = PS(conn, "S77");
         int te = route[(route.length - 2)];
         int ve = route[(route.length - 1)];
-        PSAdd(77, te, ve, sid);
-        PSSubmit(77);
+        PSAdd(pS77, te, ve, sid);
+        PSSubmit(pS77);
         int bound = (sched.length/3);
-        PSClear(82, 83, 84);
+        PreparedStatement pS82 = PS(conn, "S82");
+        PreparedStatement pS83 = PS(conn, "S83");
+        PreparedStatement pS84 = PS(conn, "S84");
         for (int j = 0; j < bound; j++) {
           int tj = sched[(3*j)];
           int vj = sched[(3*j + 1)];
           int Lj = sched[(3*j + 2)];
           if (Lj != sid) {
-            PSAdd(82, tj, vj, Lj);
-            PSAdd(83, tj, vj, Lj);
-            PSAdd(84, tj, vj, Lj);
+            PSAdd(pS82, tj, vj, Lj);
+            PSAdd(pS83, tj, vj, Lj);
+            PSAdd(pS84, tj, vj, Lj);
           }
         }
-        PSSubmit(82, 83, 84);
+        PSSubmit(pS82, pS83, pS84);
         for (int j = 0; j < bound; j++) {
           int Lj = sched[(3*j + 2)];
           if (Lj != sid) {
@@ -781,7 +711,7 @@
             int td = -1;
             int vd = -1;
             if (!cache.containsKey(Lj)) {
-              rq = DBFetch(85, 1, Lj)[0];
+              rq = DBFetch("S85", 1, Lj)[0];
               boolean flagged = false;
               for (int r : rid) {
                 if (Lj == r) {
@@ -800,7 +730,7 @@
                 }
                 cache2.put(Lj, new int[] { vp, vd });
               } else {
-                output = DBFetch(86, 2, Lj);
+                output = DBFetch("S86", 2, Lj);
                 tp = output[0];
                 td = output[1];
               }
@@ -808,15 +738,15 @@
             }
           }
         }
-        PSClear(80);
-        PSAdd(80, sid, route[0]);
-        PSSubmit(80);
+        PreparedStatement pS80 = PS(conn, "S80");
+        PSAdd(pS80, sid, route[0]);
+        PSSubmit(pS80);
         int t1, q1, o1;
-        output = DBFetch(87, 3, sid, sched[0]);
+        output = DBFetch("S87", 3, sid, sched[0]);
         t1 = output[0];
         q1 = output[1];
         o1 = output[2];
-        PSClear(14);
+        PreparedStatement pS14 = PS(conn, "S14");
         for (int j = 0; j < bound; j++) {
           int t2 = sched[(3*j)];
           int v2 = sched[(3*j + 1)];
@@ -825,19 +755,20 @@
             int[] qpd = cache.get(Lj);
             int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
             int o2 = o1 + 1;
-            PSAdd(14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
+            PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
                   qpd[0], qpd[1], qpd[2], o1, o2);
             t1 = t2;
             q1 = q2;
             o1 = o2;
           }
         }
-        PSSubmit(14);
-        PSClear(12, 13);
+        PSSubmit(pS14);
+        PreparedStatement pS12 = PS(conn, "S12");
+        PreparedStatement pS13 = PS(conn, "S13");
         int rq, re, rl, ro, rd;
         int[] qpd, pd;
         for (int r : rid) {
-          output = DBFetch(51, 5, r);
+          output = DBFetch("S51", 5, r);
           rq = output[0];
           re = output[1];
           rl = output[2];
@@ -845,22 +776,18 @@
           rd = output[4];
           qpd = cache.get(r);
           pd = cache2.get(r);
-          PSAdd(12, sid, qpd[1], pd[0], r);
-          PSAdd(12, sid, qpd[2], pd[1], r);
-          PSAdd(13, sid, se, route[(route.length - 2)], qpd[1], pd[0], qpd[2], pd[1],
+          PSAdd(pS12, sid, qpd[1], pd[0], r);
+          PSAdd(pS12, sid, qpd[2], pd[1], r);
+          PSAdd(pS13, sid, se, route[(route.length - 2)], qpd[1], pd[0], qpd[2], pd[1],
                 r, re, rl, ro, rd);
         }
-        PSSubmit(12, 13);
+        PSSubmit(pS12, pS13);
         conn.commit();
+        conn.close();
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
     }
@@ -871,64 +798,67 @@
       int se, sq;
       Map<Integer, int[]> cache = new HashMap<>();
       try {
-        output = DBFetch(48, 2, sid);
+        Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+        output = DBFetch("S48", 2, sid);
         sq = output[0];
         se = output[1];
-        PSClear(76);
-        PSAdd(76, sid, route[0]);
-        PSSubmit(76);
-        PSClear(10);
+        PreparedStatement pS76 = PS(conn, "S76");
+        PSAdd(pS76, sid, route[0]);
+        PSSubmit(pS76);
+        PreparedStatement pS10 = PS(conn, "S10");
         for (int i = 0; i < (route.length - 3); i += 2) {
           int t1 = route[i];
           int v1 = route[(i + 1)];
           int t2 = route[(i + 2)];
           int v2 = route[(i + 3)];
-          output = DBFetch(46, 2, v1, v2);
+          output = DBFetch("S46", 2, v1, v2);
           int dd = output[0];
           int nu = output[1];
-          PSAdd(10, uid, se, t1, v1, t2, v2, dd, nu);
+          PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
         }
-        PSSubmit(10);
-        PSClear(77);
+        PSSubmit(pS10);
+        PreparedStatement pS77 = PS(conn, "S77");
         int te = route[(route.length - 2)];
         int ve = route[(route.length - 1)];
-        PSAdd(77, te, ve, sid);
-        PSSubmit(77);
+        PSAdd(pS77, te, ve, sid);
+        PSSubmit(pS77);
         int bound = (sched.length/3);
-        PSClear(82, 83, 84);
+        PreparedStatement pS82 = PS(conn, "S82");
+        PreparedStatement pS83 = PS(conn, "S83");
+        PreparedStatement pS84 = PS(conn, "S84");
         for (int j = 0; j < bound; j++) {
           int tj = sched[(3*j)];
           int vj = sched[(3*j + 1)];
           int Lj = sched[(3*j + 2)];
           if (Lj != sid) {
-            PSAdd(82, tj, vj, Lj);
-            PSAdd(83, tj, vj, Lj);
-            PSAdd(84, tj, vj, Lj);
+            PSAdd(pS82, tj, vj, Lj);
+            PSAdd(pS83, tj, vj, Lj);
+            PSAdd(pS84, tj, vj, Lj);
           }
         }
-        PSSubmit(82, 83, 84);
+        PSSubmit(pS82, pS83, pS84);
         for (int j = 0; j < bound; j++) {
           int Lj = sched[(3*j + 2)];
           if (Lj != sid) {
             int rq, tp, td;
             if (!cache.containsKey(Lj)) {
-              rq = DBFetch(85, 1, Lj)[0];
-              output = DBFetch(86, 2, Lj);
+              rq = DBFetch("S85", 1, Lj)[0];
+              output = DBFetch("S86", 2, Lj);
               tp = output[0];
               td = output[1];
               cache.put(Lj, new int[] { rq, tp, td });
             }
           }
         }
-        PSClear(80);
-        PSAdd(80, sid, route[0]);
-        PSSubmit(80);
+        PreparedStatement pS80 = PS(conn, "S80");
+        PSAdd(pS80, sid, route[0]);
+        PSSubmit(pS80);
         int t1, q1, o1;
-        output = DBFetch(87, 3, sid, sched[0]);
+        output = DBFetch("S87", 3, sid, sched[0]);
         t1 = output[0];
         q1 = output[1];
         o1 = output[2];
-        PSClear(14);
+        PreparedStatement pS14 = PS(conn, "S14");
         for (int j = 0; j < bound; j++) {
           int t2 = sched[(3*j)];
           int v2 = sched[(3*j + 1)];
@@ -937,46 +867,38 @@
             int[] qpd = cache.get(Lj);
             int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
             int o2 = o1 + 1;
-            PSAdd(14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
+            PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
                   qpd[0], qpd[1], qpd[2], o1, o2);
             t1 = t2;
             q1 = q2;
             o1 = o2;
           }
         }
-        PSSubmit(14);
-        PSClear(42, 43);
+        PSSubmit(pS14);
+        PreparedStatement pS42 = PS(conn, "S42");
+        PreparedStatement pS43 = PS(conn, "S43");
         for (int r : rid) {
-          PSAdd(42, r);
-          PSAdd(43, r);
+          PSAdd(pS42, r);
+          PSAdd(pS43, r);
         }
-        PSSubmit(42, 43);
+        PSSubmit(pS42, pS43);
         conn.commit();
+        conn.close();
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
     }
     public int[] DBQueryServer(int sid) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(70, 7, sid);
+      output = DBFetch("S70", 7, sid);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -984,16 +906,11 @@
     public int[] DBQueryRequest(int rid) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(75, 7, rid);
+      output = DBFetch("S75", 7, rid);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1001,16 +918,11 @@
     public int[] DBQueryRequestStatus(int rid, int t) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(133, 1, rid, t);
+      output = DBFetch("S133", 1, rid, t);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1018,16 +930,11 @@
     public int[] DBQueryQueuedRequests(int t) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(68, 7, t, t);
+      output = DBFetch("S68", 7, t, t);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1035,16 +942,11 @@
     public int[] DBQueryServerLocationsAll(int t) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(59, 3, t, t, t, t);
+      output = DBFetch("S59", 3, t, t, t, t);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1052,16 +954,11 @@
     public int[] DBQueryServerLocationsActive(int t) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(128, 3, t, t, t, t, t, t);
+      output = DBFetch("S128", 3, t, t, t, t, t, t);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1069,16 +966,11 @@
     public int[] DBQueryRoute(int sid) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(60, 2, sid);
+      output = DBFetch("S60", 2, sid);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1086,16 +978,11 @@
     public int[] DBQueryRouteRemaining(int sid, int t) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(129, 2, sid, t);
+      output = DBFetch("S129", 2, sid, t);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1103,16 +990,11 @@
     public int[] DBQuerySchedule(int sid) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(61, 4, sid);
+      output = DBFetch("S61", 4, sid);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1120,16 +1002,11 @@
     public int[] DBQueryScheduleRemaining(int sid, int t) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(69, 4, sid, t);
+      output = DBFetch("S69", 4, sid, t);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1137,16 +1014,11 @@
     public int[] DBQueryCurrentLoad(int sid, int t) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(73, 1, sid, t);
+      output = DBFetch("S73", 1, sid, t);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1154,16 +1026,11 @@
     public int[] DBQueryCountVertices() throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(62, 1);
+      output = DBFetch("S62", 1);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1171,16 +1038,11 @@
     public int[] DBQueryCountEdges() throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(63, 1);
+      output = DBFetch("S63", 1);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1188,16 +1050,11 @@
     public int[] DBQueryVertex(int v) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(130, 2, v);
+      output = DBFetch("S130", 2, v);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1205,16 +1062,11 @@
     public int[] DBQueryEdge(int v1, int v2) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(46, 2, v1, v2);
+      output = DBFetch("S46", 2, v1, v2);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1222,16 +1074,11 @@
     public int[] DBQueryStatisticsEdges() throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(65, 6);
+      output = DBFetch("S65", 6);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1239,16 +1086,11 @@
     public int[] DBQueryMBR() throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(64, 4);
+      output = DBFetch("S64", 4);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1256,16 +1098,11 @@
     public int[] DBQueryCountServers() throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(66, 1);
+      output = DBFetch("S66", 1);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1273,52 +1110,35 @@
     public int[] DBQueryCountRequests() throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(67, 1);
+      output = DBFetch("S67", 1);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
     }
-    public int[] DBQueryServerPendingAssignments(int sid, int t)
-    throws RuntimeException {
+    public int[] DBQueryServerPendingAssignments(int sid, int t) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(100, 1, t, sid);
+      output = DBFetch("S100", 1, t, sid);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
     }
-    public int[] DBQueryServerCompletedAssignments(int sid, int t)
-    throws RuntimeException {
+    public int[] DBQueryServerCompletedAssignments(int sid, int t) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(101, 1, t, sid);
+      output = DBFetch("S101", 1, t, sid);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1326,16 +1146,11 @@
     public int[] DBQueryServiceRate() throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(102, 1);
+      output = DBFetch("S102", 1);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1343,16 +1158,11 @@
     public int[] DBQueryBaseDistanceTotal() throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(103, 1);
+      output = DBFetch("S103", 1);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1360,16 +1170,11 @@
     public int[] DBQueryServerBaseDistanceTotal() throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(110, 1);
+      output = DBFetch("S110", 1);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1377,16 +1182,11 @@
     public int[] DBQueryRequestBaseDistanceTotal() throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(111, 1);
+      output = DBFetch("S111", 1);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1394,16 +1194,11 @@
     public int[] DBQueryServerTravelDistance(int sid) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(104, 1, sid);
+      output = DBFetch("S104", 1, sid);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1411,16 +1206,11 @@
     public int[] DBQueryServerTravelDistanceTotal() throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(105, 1);
+      output = DBFetch("S105", 1);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1428,16 +1218,11 @@
     public int[] DBQueryServerCruisingDistance(int sid) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(106, 1, sid);
+      output = DBFetch("S106", 1, sid);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1445,16 +1230,11 @@
     public int[] DBQueryServerCruisingDistanceTotal() throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(107, 1);
+      output = DBFetch("S107", 1);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1462,16 +1242,11 @@
     public int[] DBQueryServerServiceDistance(int sid) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(108, 1, sid);
+      output = DBFetch("S108", 1, sid);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1479,16 +1254,11 @@
     public int[] DBQueryServerServiceDistanceTotal() throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(109, 1);
+      output = DBFetch("S109", 1);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1496,16 +1266,11 @@
     public int[] DBQueryRequestDetourDistance(int rid) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(112, 1, rid);
+      output = DBFetch("S112", 1, rid);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1513,16 +1278,11 @@
     public int[] DBQueryRequestDetourDistanceTotal() throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(113, 1);
+      output = DBFetch("S113", 1);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1530,16 +1290,11 @@
     public int[] DBQueryRequestTransitDistance(int rid) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(114, 1, rid);
+      output = DBFetch("S114", 1, rid);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1547,16 +1302,11 @@
     public int[] DBQueryRequestTransitDistanceTotal() throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(115, 1);
+      output = DBFetch("S115", 1);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1564,16 +1314,11 @@
     public int[] DBQueryServerTravelDuration(int sid) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(116, 1, sid);
+      output = DBFetch("S116", 1, sid);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1581,16 +1326,11 @@
     public int[] DBQueryServerTravelDurationTotal() throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(117, 1);
+      output = DBFetch("S117", 1);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1598,16 +1338,11 @@
     public int[] DBQueryRequestPickupDuration(int rid) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(118, 1, rid);
+      output = DBFetch("S118", 1, rid);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1615,16 +1350,11 @@
     public int[] DBQueryRequestPickupDurationTotal() throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(119, 1);
+      output = DBFetch("S119", 1);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1632,16 +1362,11 @@
     public int[] DBQueryRequestTransitDuration(int rid) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(120, 1, rid);
+      output = DBFetch("S120", 1, rid);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1649,16 +1374,11 @@
     public int[] DBQueryRequestTransitDurationTotal() throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(121, 1);
+      output = DBFetch("S121", 1);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1666,16 +1386,11 @@
     public int[] DBQueryRequestTravelDuration(int rid) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(122, 1, rid);
+      output = DBFetch("S122", 1, rid);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1683,16 +1398,11 @@
     public int[] DBQueryRequestTravelDurationTotal() throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(123, 1);
+      output = DBFetch("S123", 1);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1700,16 +1410,11 @@
     public int[] DBQueryRequestDepartureTime(int rid) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(124, 1, rid);
+      output = DBFetch("S124", 1, rid);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1717,16 +1422,11 @@
     public int[] DBQueryServerDepartureTime(int sid) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(125, 1, sid);
+      output = DBFetch("S125", 1, sid);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1734,16 +1434,11 @@
     public int[] DBQueryRequestArrivalTime(int rid) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(126, 1, rid);
+      output = DBFetch("S126", 1, rid);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1751,16 +1446,11 @@
     public int[] DBQueryServerArrivalTime(int sid) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        output = DBFetch(127, 1, sid);
+      output = DBFetch("S127", 1, sid);
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
@@ -1768,115 +1458,55 @@
     public int[] DBQuery(String sql, int ncols) throws RuntimeException {
       int[] output = new int[] { };
       try {
-        Statement stmt = conn.createStatement(
-          ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        res = stmt.executeQuery(sql);
-        if (res.last()) {
-          output = new int[(ncols*res.getRow())];
-          res.first();
-          do {
-            for (int j = 1; j <= ncols; j++) {
-              output[((res.getRow() - 1)*ncols + (j - 1))] = res.getInt(j);
-            }
-          } while (res.next());
-        }
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Statement stmt = conn.createStatement(
+        ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+      ResultSet res = stmt.executeQuery(sql);
+      if (res.last()) {
+        output = new int[(ncols*res.getRow())];
+        res.first();
+        do {
+          for (int j = 1; j <= ncols; j++) {
+            output[((res.getRow() - 1)*ncols + (j - 1))] = res.getInt(j);
+          }
+        } while (res.next());
+      }
+      conn.close();
       }
       catch (SQLException e1) {
         printSQLException(e1);
-        try {
-          conn.rollback();
-        } catch (SQLException e2) {
-          printSQLException(e2);
-        }
-        DBSaveBackup("db-lastgood");
+        DBSaveBackup(DERBY_DUMPNAME);
         throw new RuntimeException("database failure");
       }
       return output;
     }
       private void Print(String msg) {
-        System.out.println("[Jargo][StorageInterface]["+LocalDateTime.now()+"] "+msg);
+        System.out.println("[Jargo][Storage]["+LocalDateTime.now()+"] "+msg);
       }
-      private PreparedStatement PS(String sql) throws SQLException {
-        PreparedStatement ps = null;
+      private void setupDriver() throws RuntimeException {
         try {
-          ps = conn.prepareStatement(sql,
-            ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        }
-        catch (SQLException e) {
-          throw e;
-        }
-        return ps;
-      }
-      private int[] DBFetch(int k, int ncols, Integer... values) throws SQLException {
-        int[] output = new int[] { };
-        pstmt.get(k).clearParameters();
-        for (int i = 0; i < values.length; i++) {
-          if (values[i] == null) {
-            pstmt.get(k).setNull((i + 1), java.sql.Types.INTEGER);
-          } else {
-            pstmt.get(k).setInt ((i + 1), values[i]);
-          }
-        }
-        try {
-          res = pstmt.get(k).executeQuery();
-          if (res.last() == true) {
-            output = new int[(ncols*res.getRow())];
-            res.first();
-            do {
-              for (int j = 1; j <= ncols; j++) {
-                output[((res.getRow() - 1)*ncols + (j - 1))] = res.getInt(j);
-              }
-            } while (res.next());
-          }
-        }
-        catch (SQLException e) {
-          throw e;
-        }
-        return output;
-      }
-      private void PSAdd(int k, Integer... values) throws SQLException {
-        pstmt.get(k).clearParameters();
-        for (int i = 0; i < values.length; i++) {
-          if (values[i] == null) {
-            pstmt.get(k).setNull((i + 1), java.sql.Types.INTEGER);
-          } else {
-            pstmt.get(k).setInt ((i + 1), values[i]);
-          }
-        }
-        try {
-          pstmt.get(k).addBatch();
-        }
-        catch (SQLException e) {
-          throw e;
+          connection_factory = new DriverManagerConnectionFactory(CONNECTIONS_URL);
+          poolableconnection_factory = new PoolableConnectionFactory(connection_factory, null);
+          poolableconnection_factory.setPoolStatements(true);
+          poolableconnection_factory.setDefaultAutoCommit(false);
+          poolableconnection_factory.setMaxOpenPreparedStatements(STATEMENTS_MAX_COUNT);
+          pool = new GenericObjectPool<>(poolableconnection_factory);
+          poolableconnection_factory.setPool(pool);
+          Class.forName("org.apache.commons.dbcp2.PoolingDriver");
+          driver = (PoolingDriver) DriverManager.getDriver(CONNECTIONS_DRIVER_URL);
+          driver.registerPool(CONNECTIONS_POOL_NAME, pool);
+          Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+          CallableStatement cs = conn.prepareCall(
+            "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
+          cs.setString(1, "derby.storage.pageCacheSize");
+          cs.setInt(2, DERBY_PAGECACHESIZE);
+          cs.execute();
+          conn.close();
+        } catch (Exception e) {
+          throw new RuntimeException(e);
         }
       }
-      private void PSClear(Integer... values) throws SQLException {
-        try {
-          for (Integer k : values) {
-            pstmt.get(k).clearBatch();
-          }
-        }
-        catch (SQLException e) {
-          throw e;
-        }
-      }
-      private void PSSubmit(Integer... values) throws SQLException {
-        try {
-          for (Integer k : values) {
-            pstmt.get(k).executeBatch();
-          }
-        }
-        catch (SQLException e1) {
-          try {
-            conn.rollback();
-          } catch (SQLException e2) {
-            throw e2;
-          }
-          throw e1;
-        }
-      }
-      private void PSInit() throws RuntimeException {
-        pstmt = new HashMap<>();
+      private static void PSInit() {
         pstr = new HashMap<>();
         String INS = "INSERT INTO ";
         String UPD = "UPDATE ";
@@ -1890,119 +1520,179 @@
         String q9  = "(?,?,?,?,?,?,?,?,?)";
         String q12 = "(?,?,?,?,?,?,?,?,?,?,?,?)";
         String q14 = "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-
-        pstr.put( 0, INS+"V VALUES "+q3);
-        pstr.put( 1, INS+"E VALUES "+q4);
-        pstr.put( 2, INS+"UQ VALUES "+q2);
-        pstr.put( 3, INS+"UE VALUES "+q2);
-        pstr.put( 4, INS+"UL VALUES "+q2);
-        pstr.put( 5, INS+"UO VALUES "+q2);
-        pstr.put( 6, INS+"UD VALUES "+q2);
-        pstr.put( 7, INS+"UB VALUES "+q2);
-        pstr.put( 8, INS+"S VALUES "+q7);
-        pstr.put( 9, INS+"R VALUES "+q7);
-        pstr.put(10, INS+"W VALUES "+q8);
-        pstr.put(11, INS+"CW VALUES "+q9);
-        pstr.put(12, INS+"PD VALUES "+q4);
-        pstr.put(13, INS+"CPD VALUES "+q12);
-        pstr.put(14, INS+"CQ VALUES "+q14);
-        pstr.put(15, UPD+"E SET nu=? WHERE v1=? AND v2=?");
-        pstr.put(131, UPD+"W SET nu=? WHERE v1=? AND v2=?");
-        pstr.put(77, UPD+"CW SET te=?, ve=? WHERE sid=?");
-        pstr.put(84, UPD+"PD SET t2=? WHERE v2=? AND rid=?");
-        pstr.put(82, UPD+"CPD SET tp=? WHERE vp=? AND rid=?");
-        pstr.put(83, UPD+"CPD SET td=? WHERE vd=? AND rid=?");
-        pstr.put(76, DEL+"W WHERE sid=? AND t2>?");
-        pstr.put(42, DEL+"PD WHERE rid=?");
-        pstr.put(43, DEL+"CPD WHERE rid=?");
-        pstr.put(80, DEL+"CQ WHERE sid=? AND t2>?");
-        pstr.put(132, SEL+"MAX (uid) FROM UQ");
-        pstr.put(62, SEL+"COUNT (*) FROM V WHERE v<>0");
-        pstr.put(64, SEL+"MIN (lng), MAX (lng), MIN (lat), MAX (lat) "
-            + "FROM V WHERE v<>0");
-        pstr.put(63, SEL+"COUNT (*) FROM E WHERE v1<>0 AND v2<>0");
-        pstr.put(65, SEL+"MIN (dd), MAX (dd), SUM (dd) / COUNT (dd), "
-            + "MIN (nu), MAX (nu), SUM (nu) / COUNT (nu) "
-            + "FROM E WHERE v1<>0 AND v2<>0");
-        pstr.put(46, SEL+"dd, nu FROM E WHERE v1=? AND v2=?");
-        pstr.put(130, SEL+"lng, lat FROM V WHERE v=?");
-        pstr.put(70, SEL+"sid, sq, se, sl, so, sd, sb FROM S WHERE sid=?");
-        pstr.put(48, SEL+"sq, se FROM S WHERE sid=?");
-        pstr.put(66, SEL+"COUNT (*) FROM S");
-        pstr.put(75, SEL+"rid, rq, re, rl, ro, rd, rb FROM R WHERE rid=?");
-        pstr.put(51, SEL+"rq, re, rl, ro, rd FROM R WHERE rid=?");
-        pstr.put(67, SEL+"COUNT (*) FROM R");
-        pstr.put(59, SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
-            + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
-            + "GROUP BY sid"
-            + ") as b ON a.sid=b.sid AND ABS(a.t2-?)=b.tdiff AND a.t2<=?");
-        pstr.put(128, SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
-            + "SELECT sid FROM CW WHERE te>? OR (ve=0 AND sl>?)"
-            + ") as b ON a.sid=b.sid INNER JOIN ("
-            + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
-            + "GROUP BY sid"
-            + ") as c ON a.sid=c.sid AND ABS(a.t2-?)=c.tdiff AND a.t2<=?");
-        pstr.put(60, SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC");
-        pstr.put(129, SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC");
-        pstr.put(61, SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
-            + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC");
+        pstr.put("S0", INS+"V VALUES "+q3);
+        pstr.put("S1", INS+"E VALUES "+q4);
+        pstr.put("S2", INS+"UQ VALUES "+q2);
+        pstr.put("S3", INS+"UE VALUES "+q2);
+        pstr.put("S4", INS+"UL VALUES "+q2);
+        pstr.put("S5", INS+"UO VALUES "+q2);
+        pstr.put("S6", INS+"UD VALUES "+q2);
+        pstr.put("S7", INS+"UB VALUES "+q2);
+        pstr.put("S8", INS+"S VALUES "+q7);
+        pstr.put("S9", INS+"R VALUES "+q7);
+        pstr.put("S10", INS+"W VALUES "+q8);
+        pstr.put("S11", INS+"CW VALUES "+q9);
+        pstr.put("S12", INS+"PD VALUES "+q4);
+        pstr.put("S13", INS+"CPD VALUES "+q12);
+        pstr.put("S14", INS+"CQ VALUES "+q14);
+        pstr.put("S15", UPD+"E SET nu=? WHERE v1=? AND v2=?");
+        pstr.put("S131", UPD+"W SET nu=? WHERE v1=? AND v2=?");
+        pstr.put("S77", UPD+"CW SET te=?, ve=? WHERE sid=?");
+        pstr.put("S84", UPD+"PD SET t2=? WHERE v2=? AND rid=?");
+        pstr.put("S82", UPD+"CPD SET tp=? WHERE vp=? AND rid=?");
+        pstr.put("S83", UPD+"CPD SET td=? WHERE vd=? AND rid=?");
+        pstr.put("S76", DEL+"W WHERE sid=? AND t2>?");
+        pstr.put("S42", DEL+"PD WHERE rid=?");
+        pstr.put("S43", DEL+"CPD WHERE rid=?");
+        pstr.put("S80", DEL+"CQ WHERE sid=? AND t2>?");
+        pstr.put("S132", SEL+"MAX (uid) FROM UQ");
+        pstr.put("S62", SEL+"COUNT (*) FROM V WHERE v<>0");
+        pstr.put("S64", SEL+"MIN (lng), MAX (lng), MIN (lat), MAX (lat) "
+              + "FROM V WHERE v<>0");
+        pstr.put("S63", SEL+"COUNT (*) FROM E WHERE v1<>0 AND v2<>0");
+        pstr.put("S65", SEL+"MIN (dd), MAX (dd), SUM (dd) / COUNT (dd), "
+              + "MIN (nu), MAX (nu), SUM (nu) / COUNT (nu) "
+              + "FROM E WHERE v1<>0 AND v2<>0");
+        pstr.put("S46", SEL+"dd, nu FROM E WHERE v1=? AND v2=?");
+        pstr.put("S130", SEL+"lng, lat FROM V WHERE v=?");
+        pstr.put("S70", SEL+"sid, sq, se, sl, so, sd, sb FROM S WHERE sid=?");
+        pstr.put("S48", SEL+"sq, se FROM S WHERE sid=?");
+        pstr.put("S66", SEL+"COUNT (*) FROM S");
+        pstr.put("S75", SEL+"rid, rq, re, rl, ro, rd, rb FROM R WHERE rid=?");
+        pstr.put("S51", SEL+"rq, re, rl, ro, rd FROM R WHERE rid=?");
+        pstr.put("S67", SEL+"COUNT (*) FROM R");
+        pstr.put("S59", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
+              + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
+              + "GROUP BY sid"
+              + ") as b ON a.sid=b.sid AND ABS(a.t2-?)=b.tdiff AND a.t2<=?");
+        pstr.put("S128", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
+              + "SELECT sid FROM CW WHERE te>? OR (ve=0 AND sl>?)"
+              + ") as b ON a.sid=b.sid INNER JOIN ("
+              + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
+              + "GROUP BY sid"
+              + ") as c ON a.sid=c.sid AND ABS(a.t2-?)=c.tdiff AND a.t2<=?");
+        pstr.put("S60", SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC");
+        pstr.put("S129", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC");
+        pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
+              + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC");
         // Always return a dummy destination
-        pstr.put(69, SEL+"t, v, Ls, Lr FROM r_server WHERE sid=? "
-            + "AND (t>? OR v=0) "
-            + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC");
+        pstr.put("S69", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=? "
+              + "AND (t>? OR v=0) "
+              + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC");
         // A "timeout" of 30 seconds is hard-coded here
-        pstr.put(68, SEL+"* FROM R WHERE re<=? AND ?<=re+30 AND rid NOT IN  "
-            + "(SELECT rid FROM assignments_r)");
-        pstr.put(85, SEL+"uq FROM UQ WHERE uid=?");
-        pstr.put(86, SEL+"tp, td FROM CPD WHERE rid=?");
-        pstr.put(73, SEL+"q2 FROM CQ WHERE sid=? AND t2<=? "
-            + "ORDER BY t2 DESC, o2 DESC FETCH FIRST ROW ONLY");
-        pstr.put(87, SEL+"t2, q2, o2 FROM CQ WHERE sid=? AND t2<? "
-            + "ORDER BY t2 DESC, o2 DESC FETCH FIRST ROW ONLY");
-        pstr.put(100, SEL+"rid FROM assignments WHERE t>? AND sid=?");
-        pstr.put(101, SEL+"rid FROM assignments WHERE t<=? AND sid=?");
-        pstr.put(102, SEL+"* FROM service_rate");
-        pstr.put(103, SEL+"* FROM dist_base");
-        pstr.put(104, SEL+"val FROM dist_s_travel WHERE sid=?");
-        pstr.put(105, SEL+"SUM (val) FROM dist_s_travel");
-        pstr.put(106, SEL+"val FROM dist_s_cruising WHERE sid=?");
-        pstr.put(107, SEL+"SUM (val) FROM dist_s_cruising");
-        pstr.put(108, SEL+"val FROM dist_s_service WHERE sid=?");
-        pstr.put(109, SEL+"SUM (val) FROM dist_s_service");
-        pstr.put(110, SEL+"val FROM dist_s_base");
-        pstr.put(111, SEL+"val FROM dist_r_base");
-        pstr.put(112, SEL+"val FROM dist_r_detour WHERE rid=?");
-        pstr.put(113, SEL+"SUM (val) FROM dist_r_detour");
-        pstr.put(114, SEL+"val FROM dist_r_transit WHERE rid=?");
-        pstr.put(115, SEL+"SUM (val) FROM dist_r_transit");
-        pstr.put(116, SEL+"val FROM dur_s_travel WHERE sid=?");
-        pstr.put(117, SEL+"SUM (val) FROM dur_s_travel");
-        pstr.put(118, SEL+"val FROM dur_r_pickup WHERE rid=?");
-        pstr.put(119, SEL+"SUM (val) FROM dur_r_pickup");
-        pstr.put(120, SEL+"val FROM dur_r_transit WHERE rid=?");
-        pstr.put(121, SEL+"SUM (val) FROM dur_r_transit");
-        pstr.put(122, SEL+"val FROM dur_r_travel WHERE rid=?");
-        pstr.put(123, SEL+"SUM (val) FROM dur_r_travel");
-        pstr.put(124, SEL+"val FROM t_r_depart WHERE rid=?");
-        pstr.put(125, SEL+"val FROM t_s_depart WHERE sid=?");
-        pstr.put(126, SEL+"val FROM t_r_arrive WHERE rid=?");
-        pstr.put(127, SEL+"val FROM t_s_arrive WHERE sid=?");
-        pstr.put(133, SEL+"val FROM f_status WHERE rid=? AND t<=? "
-          + "ORDER BY t DESC FETCH FIRST ROW ONLY");
+        pstr.put("S68", SEL+"* FROM R WHERE re<=? AND ?<=re+30 AND rid NOT IN  "
+              + "(SELECT rid FROM assignments_r)");
+        pstr.put("S85", SEL+"uq FROM UQ WHERE uid=?");
+        pstr.put("S86", SEL+"tp, td FROM CPD WHERE rid=?");
+        pstr.put("S73", SEL+"q2 FROM CQ WHERE sid=? AND t2<=? "
+              + "ORDER BY t2 DESC, o2 DESC FETCH FIRST ROW ONLY");
+        pstr.put("S87", SEL+"t2, q2, o2 FROM CQ WHERE sid=? AND t2<? "
+              + "ORDER BY t2 DESC, o2 DESC FETCH FIRST ROW ONLY");
+        pstr.put("S100", SEL+"rid FROM assignments WHERE t>? AND sid=?");
+        pstr.put("S101", SEL+"rid FROM assignments WHERE t<=? AND sid=?");
+        pstr.put("S102", SEL+"* FROM service_rate");
+        pstr.put("S103", SEL+"* FROM dist_base");
+        pstr.put("S104", SEL+"val FROM dist_s_travel WHERE sid=?");
+        pstr.put("S105", SEL+"SUM (val) FROM dist_s_travel");
+        pstr.put("S106", SEL+"val FROM dist_s_cruising WHERE sid=?");
+        pstr.put("S107", SEL+"SUM (val) FROM dist_s_cruising");
+        pstr.put("S108", SEL+"val FROM dist_s_service WHERE sid=?");
+        pstr.put("S109", SEL+"SUM (val) FROM dist_s_service");
+        pstr.put("S110", SEL+"val FROM dist_s_base");
+        pstr.put("S111", SEL+"val FROM dist_r_base");
+        pstr.put("S112", SEL+"val FROM dist_r_detour WHERE rid=?");
+        pstr.put("S113", SEL+"SUM (val) FROM dist_r_detour");
+        pstr.put("S114", SEL+"val FROM dist_r_transit WHERE rid=?");
+        pstr.put("S115", SEL+"SUM (val) FROM dist_r_transit");
+        pstr.put("S116", SEL+"val FROM dur_s_travel WHERE sid=?");
+        pstr.put("S117", SEL+"SUM (val) FROM dur_s_travel");
+        pstr.put("S118", SEL+"val FROM dur_r_pickup WHERE rid=?");
+        pstr.put("S119", SEL+"SUM (val) FROM dur_r_pickup");
+        pstr.put("S120", SEL+"val FROM dur_r_transit WHERE rid=?");
+        pstr.put("S121", SEL+"SUM (val) FROM dur_r_transit");
+        pstr.put("S122", SEL+"val FROM dur_r_travel WHERE rid=?");
+        pstr.put("S123", SEL+"SUM (val) FROM dur_r_travel");
+        pstr.put("S124", SEL+"val FROM t_r_depart WHERE rid=?");
+        pstr.put("S125", SEL+"val FROM t_s_depart WHERE sid=?");
+        pstr.put("S126", SEL+"val FROM t_r_arrive WHERE rid=?");
+        pstr.put("S127", SEL+"val FROM t_s_arrive WHERE sid=?");
+        pstr.put("S133", SEL+"val FROM f_status WHERE rid=? AND t<=? "
+            + "ORDER BY t DESC FETCH FIRST ROW ONLY");
+      }
+      private PreparedStatement PS(Connection conn, String k) throws SQLException {
+        PreparedStatement p = null;
         try {
-          for (Map.Entry<Integer, String> kv : pstr.entrySet()) {
-            pstmt.put(kv.getKey(), PS(kv.getValue()));
+          p = conn.prepareStatement(pstr.get(k),
+            ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+          p.clearBatch();
+          p.clearParameters();
+        }
+        catch (SQLException e) {
+          throw e;
+        }
+        return p;
+      }
+      private int[] DBFetch(String k, int ncols, Integer... values) throws SQLException {
+        Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+        PreparedStatement p = PS(conn, k);
+        // FOR DEBUGGING
+        // Print("DBFetch("+pstr.get(k)+")");
+        // Print("DBFetch use conn "+conn.toString());
+        // Print("DBFetch use thread "+Thread.currentThread().getName());
+        int[] output = new int[] { };
+        for (int i = 0; i < values.length; i++) {
+          if (values[i] == null) {
+            p.setNull((i + 1), java.sql.Types.INTEGER);
+          } else {
+            p.setInt ((i + 1), values[i]);
           }
         }
-        catch (SQLException e1) {
-          printSQLException(e1);
-          try {
-            conn.rollback();
-          } catch (SQLException e2) {
-            printSQLException(e2);
+        try {
+          ResultSet res = p.executeQuery();
+          if (res.last() == true) {
+            output = new int[(ncols*res.getRow())];
+            res.first();
+            do {
+              for (int j = 1; j <= ncols; j++) {
+                output[((res.getRow() - 1)*ncols + (j - 1))] = res.getInt(j);
+              }
+            } while (res.next());
           }
-          DBSaveBackup("db-lastgood");
-          throw new RuntimeException("database failure");
+          res.close();
+        }
+        catch (SQLException e) {
+          throw e;
+        }
+        p.close();
+        // Print("DBFetch close conn "+conn.toString());
+        conn.close();
+        return output;
+      }
+      private void PSAdd(PreparedStatement p, Integer... values) throws SQLException {
+        p.clearParameters();
+        for (int i = 0; i < values.length; i++) {
+          if (values[i] == null) {
+            p.setNull((i + 1), java.sql.Types.INTEGER);
+          } else {
+            p.setInt ((i + 1), values[i]);
+          }
+        }
+        try {
+          p.addBatch();
+        }
+        catch (SQLException e) {
+          throw e;
+        }
+      }
+      private void PSSubmit(PreparedStatement... statements) throws SQLException {
+        try {
+          for (PreparedStatement p : statements) {
+            p.executeBatch();
+            p.close();
+          }
+        }
+        catch (SQLException e) {
+          throw e;
         }
       }
   }

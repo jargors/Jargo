@@ -1,11 +1,11 @@
-  import com.github.jargors.StorageInterface;
+  import com.github.jargors.Storage;
   import java.time.LocalDateTime;
-  public class StorageInterfaceTest {
+  public class StorageTest {
     private static int count_passed = 0;
     private static int count_failed = 0;
     public static void main(String[] args) {
       Print("Starting storage interface tests");
-      StorageInterface storage = new StorageInterface("data/small-directed-dummy.rnet");
+      Storage storage = new Storage();
       storage.DBLoadBackup("data/db");
       {
         int output[] = storage.DBQuery("SELECT COUNT (*) FROM V", 1);
@@ -1262,6 +1262,6 @@
       Print("Complete! Passed: "+count_passed+"; Failed: "+count_failed);
     }
     private static void Print(String msg) {
-      System.out.println("[StorageInterfaceTest]["+LocalDateTime.now()+"] "+msg);
+      System.out.println("[StorageTest]["+LocalDateTime.now()+"] "+msg);
     }
   }

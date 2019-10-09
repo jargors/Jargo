@@ -50,33 +50,33 @@ although more comprehensive testing may be added in the future.
 The test program is developed using the
 Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
 programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
-([[src/StorageInterfaceTest.nw]]) is the source for both the documentation
-([[doc/StorageInterfaceTest.tex]]) and the Java code ([[StorageInterfaceTest.java]])\footnote{See the
+([[src/StorageTest.nw]]) is the source for both the documentation
+([[doc/StorageTest.tex]]) and the Java code ([[StorageTest.java]])\footnote{See the
 [[Makefile]] for build details.}.
-<<StorageInterfaceTest.java>>=
-  <<StorageInterfaceTest.java preamble>>
-  <<[[StorageInterfaceTest]] definition>>
+<<StorageTest.java>>=
+  <<StorageTest.java preamble>>
+  <<[[StorageTest]] definition>>
 @
 
-<<StorageInterfaceTest.java preamble>>=
-import com.github.jargors.StorageInterface;
+<<StorageTest.java preamble>>=
+import com.github.jargors.Storage;
 import java.time.LocalDateTime;
 @
-<<[[StorageInterfaceTest]] definition>>=
-public class StorageInterfaceTest {
-  <<[[StorageInterfaceTest]] member variables>>
-  <<[[StorageInterfaceTest]] main routine>>
-  <<[[StorageInterfaceTest]] private methods>>
+<<[[StorageTest]] definition>>=
+public class StorageTest {
+  <<[[StorageTest]] member variables>>
+  <<[[StorageTest]] main routine>>
+  <<[[StorageTest]] private methods>>
 }
 @
-<<[[StorageInterfaceTest]] member variables>>=
+<<[[StorageTest]] member variables>>=
 private static int count_passed = 0;
 private static int count_failed = 0;
 @ %def count_passed count_failed
-<<[[StorageInterfaceTest]] main routine>>=
+<<[[StorageTest]] main routine>>=
 public static void main(String[] args) {
   Print("Starting storage interface tests");
-  StorageInterface storage = new StorageInterface("data/small-directed-dummy.rnet");
+  Storage storage = new Storage();
   <<..load test database>>
   <<..run read tests>>
   <<..run write tests>>
@@ -87,9 +87,9 @@ We load a manually prepared test database.
 <<..load test database>>=
 storage.DBLoadBackup("data/db");
 @
-<<[[StorageInterfaceTest]] private methods>>=
+<<[[StorageTest]] private methods>>=
 private static void Print(String msg) {
-  System.out.println("[StorageInterfaceTest]["+LocalDateTime.now()+"] "+msg);
+  System.out.println("[StorageTest]["+LocalDateTime.now()+"] "+msg);
 }
 @
 

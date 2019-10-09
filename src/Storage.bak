@@ -2,13 +2,12 @@
 
 \usepackage{noweb}
 \noweboptions{smallcode,longchunks}
-
 \usepackage[a4paper,margin=1in]{geometry}
-
 \usepackage{adjustbox}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsthm}
+\usepackage{caption}
 \usepackage{colortbl}
 \usepackage{enumitem}
 \usepackage[colorlinks=true]{hyperref}
@@ -16,26 +15,25 @@
 \usepackage{multirow}
 \usepackage{tikz}
 
-% Define a handy paragraph opener
-\newcommand{\hi}[1]{\noindent {\bf #1}}
+\newcommand{\hi}[1]{\noindent {\bf #1}}     % Define a handy paragraph opener
 
-% Remove noweb page break penalty
-\def\nwendcode{\endtrivlist \endgroup}
+\def\nwendcode{\endtrivlist \endgroup}      % Remove noweb page break penalty
 \let\nwdocspar=\par
 
-% Define an "example" environment
-\theoremstyle{definition}
+\theoremstyle{definition}                   % Define an "example" environment
 \newtheorem{example}{Example}
 
-% Define colors for tables
-\definecolor{TableTitle}{rgb}{0.900, 0.900, 0.900}
+\definecolor{TableTitle}{rgb}{0.900, 0.900, 0.900}  % Define colors for tables
 \definecolor{TableHeader}{rgb}{0.900, 0.900, 0.900}
 
-\title{Jargo Storage Interface
-  and Data Model\footnote{\url{https://github.com/jargors/Storage-Interface}}}
+\captionsetup{labelfont={bf},textfont={bf,it}}
+\setlength{\abovecaptionskip}{1mm}
+\setlength{\belowcaptionskip}{1mm}
+
+\title{Jargo Storage Interface and Data Model\footnote{
+  \url{https://github.com/jargors/Storage-Interface}}}
 \author{James J. Pan\\
-  \small{\href{mailto:jamesjpan@outlook.com}{jamesjpan@outlook.com}}
-}
+  \small{\href{mailto:pan-j16@mails.tsinghua.edu.cn}{pan-j16@mails.tsinghua.edu.cn}}}
 
 \begin{document}
 \maketitle
@@ -46,24 +44,21 @@
 \section{Introduction}
 \label{sec:introduction}
 Jargo's storage interface is a data access layer (Figure~\ref{fig:storage}) for
-Jargo's simulation
-engine\footnote{See \url{https://github.com/jargors/Simulation-Interface}
-and \url{https://github.com/jargors/Simulation-Controller}}
-to record the ground-truth state of ridesharing users (customers and vehicles)
-as they evolve over time, and to query analytical metrics about the state.  The
-storage engine is Apache Derby\footnote{\url{https://db.apache.org/derby}},
-chosen for its ability to defer table and column constraints until the end of a
+Jargo to record the ground-truth state of ridesharing users (customers and
+vehicles) as they evolve over time, and to query analytical metrics about the
+state.  The storage engine is Apache
+Derby\footnote{\url{https://db.apache.org/derby}}, chosen for its (apparently
+rare) ability to defer table and column constraints until the end of a
 transaction\footnote{...as specified by the SQL standard!}.  This ability is
 needed during some write operations that may temporarily cause the simulation
-to be in an invalid state. Jargo's data model guarantees the integrity of the
-simulation at all other times. The storage interface is written in Java so it
-can communicate with Derby using JDBC. A listing of the public methods is
-shown in Figure~\ref{fig:methods}.
-The storage interface is developed using the
+to be in an invalid state. At all other times, Jargo's data model guarantees
+the integrity of the simulation. The storage interface is written in Java so it
+can communicate with Derby using JDBC. A listing of the public methods is shown
+in Figure~\ref{fig:methods}.  The storage interface is developed using the
 Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
 programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
-([[src/StorageInterface.nw]]) is the source for both the documentation
-([[doc/StorageInterface.tex]]) and the Java code ([[StorageInterface.java]])\footnote{See the
+([[src/Storage.nw]]) is the source for both the documentation
+([[doc/Storage.tex]]) and the Java code ([[Storage.java]])\footnote{See the
 [[Makefile]] for build details.}.
 
 \begin{figure}[h]
@@ -73,36 +68,38 @@ programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
 \label{fig:storage}
 \end{figure}
 
-
 \begin{figure}
 \adjustbox{scale=0.85}{
-\begin{minipage}[t]{0.40\textwidth}
+\begin{minipage}[t]{0.4\textwidth}
 \hi{Utilities}
-<<[[StorageInterface]] public methods>>=
+<<[[Storage]] public methods>>=
+<<Load data model>>
 <<Load backup>>
 <<Save backup>>
+<<Print SQL driver statistics>>
 <<Print SQL exception>>
-<<Compute haversine>>
 <<Print user>>
 <<Print path>>
 <<Print route>>
 <<Print schedule>>
 @
 \end{minipage}
-\begin{minipage}[t]{0.40\textwidth}
+\begin{minipage}[t]{0.4\textwidth}
 \hi{Write Methods}
-<<[[StorageInterface]] public methods>>=
-<<Update edge speed>>
+<<[[Storage]] public methods>>=
+<<Add new vertex>>
+<<Add new edge>>
 <<Add new request>>
 <<Add new server>>
+<<Update edge speed>>
 <<Update server route>>
 <<Update server add to schedule>>
 <<Update server remove from schedule>>
 @
 \end{minipage}
-\begin{minipage}[t]{0.40\textwidth}
+\begin{minipage}[t]{0.4\textwidth}
 \hi{Read Methods}
-<<[[StorageInterface]] public methods>>=
+<<[[Storage]] public methods>>=
 <<Query ridesharing user>>
 <<Query request status>>
 <<Query queued requests>>
@@ -165,13 +162,16 @@ the effect of certain parameters, such as presence and absence of traffic, on
 algorithm quality are also difficult or impossible to perform. In contrast,
 testing algorithms on a simulated environment is inexpensive, fast to deploy,
 readily accessible, and controllable. The challenge then becomes to design an
-environment that can simulate these items.
+environment that can faithfully reproduce these real-world features. As there
+is no ``lag'' in the real world, the environment must also be highly
+responsive.
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=100mm]{src/fig/physical}
-\caption{Evaluating algorithms on physical vehicles and customers is expensive,
-    slow to deploy, and out of reach for most researchers.}
+\caption{To evaluate quality, ridesharing algorithms can be tested on physical
+vehicles and customers, but this method is expensive, slow to deploy, and out
+of reach for most researchers.}
 \label{fig:physical}
 \end{figure}
 
@@ -188,9 +188,9 @@ state, in other words that impossible circumstances in the real world do not
 end up in the simulation data. The following is an explanation of how the data
 is organized, beginning with a description of physical ridesharing
 (\S\ref{sec:ridesharing-systems}), then the mathematical model to describe
-physical ridesharing (\S\ref{sec:ridesharing-formulation}), and finally the
-SQL schema to store the state data (\S\ref{sec:ridesharing-data-model}).  Those interested
-in the storage interface code can skip directly to
+physical ridesharing (\S\ref{sec:ridesharing-formulation}), and finally the SQL
+schema to store the state data (\S\ref{sec:ridesharing-data-model}).  Those
+interested in the implementation code can skip directly to
 \S\ref{sec:implementation-overview}.
 
 \subsection{Ridesharing Systems}
@@ -198,7 +198,11 @@ in the storage interface code can skip directly to
 To determine the best way to organize the state data, we first start with
 examining real-world ridesharing systems.  Ridesharing involves the
 \emph{users} and the \emph{rules} governing their behavior. The users can be
-classified into four types, shown in Table~\ref{tab:user-types}.
+classified into four types, shown in Table~\ref{tab:user-types}.  We use the
+term \emph{customer} to refer to both Type 1 and Type 2 users, and the term
+\emph{vehicle} to refer to both Type 3 and Type 4 users.  Physical users have
+the properties in Table~\ref{tab:user-properties} and obey the rules in
+Table~\ref{tab:user-rules}.
 \begin{table}[h]
 \centering
 \small
@@ -278,10 +282,6 @@ before the drop-off; or \emph{arrived} at destination. A vehicle can be either
 \hline
 \end{tabular}
 \end{table}
-We use the term \emph{customer} to refer to both Type 1 and Type 2 users, and
-the term \emph{vehicle} to refer to both Type 3 and Type 4 users.
-Physical users have the properties in Table~\ref{tab:user-properties} and obey
-the rules in Table~\ref{tab:user-rules}.
 
 \subsection{Ridesharing Formulation}
 \label{sec:ridesharing-formulation}
@@ -839,9 +839,9 @@ are included for illustrating the foreign key relationships, but in practice
 the duplicates are implemented as single columns participating in multiple
 foreign keys.
 
-Actual SQL statements used by the storage interface are also shown. References
-in the text to named constraints in the SQL will be written in [[typewriter]]
-script.
+As a feature of literate programming, actual SQL statements used by the storage
+interface are also shown. References in the text to named constraints in the
+SQL will be written in [[typewriter]] script.
 
 \subsubsection{Table V and E (Road Network Tables)}
 Each vertex $v\in\mathcal{V}$ is stored in Table V along with its coordinates
@@ -1678,271 +1678,131 @@ To list arrival times $t^\textrm{arrive}$ of all servers:
   + "SELECT sid, te FROM CW"
 @
 
+% =============================================================================
+
 \section{Implementation Overview}
 \label{sec:implementation-overview}
 The remaining sections are concerned with producing the Java code.  The code
 consists of the \emph{preamble} (\S\ref{sec:preamble}) and the \emph{class
 definition} (\S\ref{sec:class-definition}).
-<<StorageInterface.java>>=
-  <<StorageInterface.java preamble>>
-  <<[[StorageInterface]] definition>>
+<<Storage.java>>=
+  <<Storage.java preamble>>
+  <<[[Storage]] definition>>
 @
 
 \subsection{Preamble}
 \label{sec:preamble}
 The preamble declares the package and imports dependencies.
-<<StorageInterface.java preamble>>=
+<<Storage.java preamble>>=
 package com.github.jargors;
 @
 We import:
 \begin{itemize}
 \item parts of the JDBC~API from [[java.sql]], for communication with Derby;
-<<StorageInterface.java preamble>>=
+<<Storage.java preamble>>=
 import java.sql.CallableStatement;   import java.sql.Connection;
 import java.sql.DriverManager;       import java.sql.PreparedStatement;
 import java.sql.ResultSet;           import java.sql.SQLException;
 import java.sql.Statement;           import java.sql.Types;
-@ \item standard classes for parse and file operations;
-<<StorageInterface.java preamble>>=
-import java.util.Scanner;
-import java.io.File;
-import java.io.FileNotFoundException;
+@ \item Apache DBCP2 and Pool2, for connection pooling;
+<<Storage.java preamble>>=
+import org.apache.commons.dbcp2.ConnectionFactory;
+import org.apache.commons.dbcp2.DriverManagerConnectionFactory;
+import org.apache.commons.dbcp2.PoolableConnection;
+import org.apache.commons.dbcp2.PoolableConnectionFactory;
+import org.apache.commons.dbcp2.PoolingDriver;
+import org.apache.commons.pool2.ObjectPool;
+import org.apache.commons.pool2.impl.GenericObjectPool;
 @ \item standard map classes for caching various items;
-<<StorageInterface.java preamble>>=
+<<Storage.java preamble>>=
 import java.util.Map;
 import java.util.HashMap;
+@ \item functional interfaces for asynchronous methods;
+<<Storage.java preamble>>=
+import java.util.function.Supplier;
 @ \item date-time class for printing timestamps.
-<<StorageInterface.java preamble>>=
+<<Storage.java preamble>>=
 import java.time.LocalDateTime;
 @
 \end{itemize}
 
 \subsection{Class Definition}
 \label{sec:class-definition}
-The [[StorageInterface]] class consists of member variables, a constructor, and public
-and private methods, just like any other Java class.
-<<[[StorageInterface]] definition>>=
-public class StorageInterface {
-  <<[[StorageInterface]] member variables>>
-  <<[[StorageInterface]] constructor>>
-  <<[[StorageInterface]] public methods>>
-  <<[[StorageInterface]] private methods>>
+<<[[Storage]] definition>>=
+public class Storage {
+  <<[[Storage]] member variables>>
+  <<[[Storage]] member function>>
+  <<[[Storage]] constructor>>
+  <<[[Storage]] public methods>>
+  <<[[Storage]] private methods>>
 }
 @
 
 \subsection{Member Variables}
 \label{sec:member-variables}
-Member variables are grouped into JDBC objects and internal objects.
-<<[[StorageInterface]] member variables>>=
-<<JDBC objects>>
-<<Internal objects>>
-@
-\subsubsection{JDBC Objects}
-\label{sec:jdbc-objects}
-For JDBC objects, we use a [[Connection]] object to establish a Derby session,
-and a [[ResultSet]] to store query results.
-<<JDBC objects>>=
-private Connection conn;
-private ResultSet res;
-@ %def conn res
-We use maps to store prepared statements and their statement strings.
-<<JDBC objects>>=
-private Map<Integer, PreparedStatement> pstmt = new HashMap<>();
-private Map<Integer, String> pstr = new HashMap<>();
-@ %def pstmt pstr
-
-\subsubsection{Internal Objects}
-\label{sec:internal-objects}
-We cache the vertices locally so we can avoid asking the database for
-vertex coordinates.
-<<Internal objects>>=
-private Map<Integer, int[]> lu_nodes = new HashMap<>();
+\begin{itemize}
+\item We use a map to store statement strings, keyed by a string identifier.
+<<[[Storage]] member variables>>=
+private static Map<String, String> pstr = new HashMap<>();
+@ %def pstr
+\item We cache the vertices locally so we can avoid asking the database for vertex
+coordinates.
+<<[[Storage]] member variables>>=
+private HashMap<Integer, int[]> lu_nodes = new HashMap<>();
 @ %def lu_nodes;
-Ultimately we want everything in the database to be an integer so we don't have
+\item Ultimately we want everything in the database to be an integer so we don't have
 to fiddle around with data types when we do reads and writes. We use [[CSHIFT]]
 to shift the decimal places of latitude and longitude coordinates left and
 right by multiplication or division.
-<<Internal objects>>=
+<<[[Storage]] member variables>>=
 private final double CSHIFT = 10000000.0;
 @ %def CSHIFT
-We also want to uniquely identify each ridesharing user. We declare a
+\item We also want to uniquely identify each ridesharing user. We declare a
 [[uid]] counter for this purpose.
-<<Internal objects>>=
+<<[[Storage]] member variables>>=
 private int uid = 0;
 @ %def uid
-Finally we declare a version string.
-<<Internal objects>>=
+\item We declare configurable settings.
+<<[[Storage]] member variables>>=
+private String CONNECTIONS_URL = "jdbc:derby:memory:jargo;create=true";
+private final String CONNECTIONS_DRIVER_URL = "jdbc:apache:commons:dbcp:";
+private final String CONNECTIONS_POOL_NAME = "jargo";
+private String CONNECTIONS_POOL_URL = (CONNECTIONS_DRIVER_URL + CONNECTIONS_POOL_NAME);
+private final int STATEMENTS_MAX_COUNT = 20;
+private final int DERBY_PAGECACHESIZE = 8000;  // default=1000
+private final String DERBY_DUMPNAME = "db-lastgood";
+@ %def CONNECTIONS_URL CONNECTIONS_DRIVER_URL CONNECTIONS_POOL_NAME STATEMENTS_MAX_COUNT DERBY_PAGECACHESIZE DERBY_DUMPNAME
+\item We declare connection pool and factories;
+<<[[Storage]] member variables>>=
+private ConnectionFactory connection_factory;
+private PoolableConnectionFactory poolableconnection_factory;
+private ObjectPool<PoolableConnection> pool;
+private PoolingDriver driver;
+@
+\item We declare a version string.
+<<[[Storage]] member variables>>=
 private final String VERSION = "1.0.0";
 @ %def VERSION
 
+\subsection{Member Function}
+<<[[Storage]] member function>>=
+static {
+  PSInit();
+}
+@
+\end{itemize}
+
 \subsection{Constructor}
 \label{sec:constructor}
-The constructor takes one parameter, [[f_rnet]], indicating the filepath to the
-[[*.rnet]] road network file.
-<<[[StorageInterface]] constructor>>=
-public StorageInterface(String f_rnet) {
+<<[[Storage]] constructor>>=
+public Storage() {
   Print("Initializing Storage Interface "+VERSION);
-  <<..initialize new database>>
-  <<..initialize prepared statements>>
-  <<..initialize road network>>
-}
-@
-<<..initialize new database>>=
-Print("Initializing a new database...");
-try {
-  <<....initialize database connection>>
-  <<....configure database properties>>
-  <<....initialize data model>>
-}
-<<Catch and print [[SQLException]]>>
-@
-<<....initialize database connection>>=
-conn = DriverManager.getConnection("jdbc:derby:memory:jargo;create=true");
-Print("Connected to in-memory database");
-@
-We disable auto-commit in order to defer Derby from checking constraints until
-a manual commit is issued. We also increase the page size\footnote{Even though the
-database is in-memory, the page size still needs to be set; see the Derby
-Tuning Guide for details.}.
-<<....configure database properties>>=
-conn.setAutoCommit(false);
-try {
-  CallableStatement cs = conn.prepareCall(
-    "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
-  cs.setString(1, "derby.storage.pageCacheSize");
-  cs.setInt(2, 8000);  // default=1000
-  cs.execute();
-  cs.close();
-}
-<<Catch and print [[SQLException]]>>
-@
-
-\subsubsection{Initializing the Data Model}
-\label{sec:initializing-the-data-model}
-<<....initialize data model>>=
-Statement stmt = conn.createStatement();
-Print("Creating tables and views...");
-stmt.clearBatch();
-stmt.addBatch(<<Create Table V statement>>);
-stmt.addBatch(<<Create Table E statement>>);
-stmt.addBatch(<<Create Table UQ statement>>);
-stmt.addBatch(<<Create Table UE statement>>);
-stmt.addBatch(<<Create Table UL statement>>);
-stmt.addBatch(<<Create Table UO statement>>);
-stmt.addBatch(<<Create Table UD statement>>);
-stmt.addBatch(<<Create Table UB statement>>);
-stmt.addBatch(<<Create Table S statement>>);
-stmt.addBatch(<<Create Table R statement>>);
-stmt.addBatch(<<Create Table W statement>>);
-stmt.addBatch(<<Create Table PD statement>>);
-stmt.addBatch(<<Create Table CW statement>>);
-stmt.addBatch(<<Create Table CPD statement>>);
-stmt.addBatch(<<Create Table CQ statement>>);
-stmt.addBatch(<<Create View r\_user statement>>);
-stmt.addBatch(<<Create View r\_server statement>>);
-stmt.addBatch(<<Create View f\_distance\_blocks statement>>);
-stmt.addBatch(<<Create View f\_status statement (Eq.~\ref{eq:status})>>);
-stmt.addBatch(<<Create View assignments statement (Eq.~\ref{eq:assignments})>>);
-stmt.addBatch(<<Create View assignments\_r statement (Eq.~\ref{eq:assigned-requests})>>);
-stmt.addBatch(<<Create View service\_rate statement (Eq.~\ref{eq:service-rate})>>);
-stmt.addBatch(<<Create View dist\_base statement (Eq.~\ref{eq:base-distance})>>);
-stmt.addBatch(<<Create View dist\_s\_travel statement>>);
-stmt.addBatch(<<Create View dist\_s\_cruising statement (Eq.~\ref{eq:cruising-distance})>>);
-stmt.addBatch(<<Create View dist\_s\_service statement (Eq.~\ref{eq:service-distance})>>);
-stmt.addBatch(<<Create View dist\_s\_base statement>>);
-stmt.addBatch(<<Create View dist\_r\_base statement>>);
-stmt.addBatch(<<Create View dist\_r\_transit statement (Eq.~\ref{eq:transit-distance})>>);
-stmt.addBatch(<<Create View dist\_r\_detour statement (Eq.~\ref{eq:detour-distance})>>);
-stmt.addBatch(<<Create View dur\_s\_travel statement>>);
-stmt.addBatch(<<Create View dur\_r\_pickup statement (Eq.~\ref{eq:pick-up delay})>>);
-stmt.addBatch(<<Create View dur\_r\_transit statement (Eq.~\ref{eq:transit-duration})>>);
-stmt.addBatch(<<Create View dur\_r\_travel statement (Eq.~\ref{eq:travel-duration})>>);
-stmt.addBatch(<<Create View t\_r\_depart statement (Eq.~\ref{eq:departure-time})>>);
-stmt.addBatch(<<Create View t\_s\_depart statement (Eq.~\ref{eq:departure-time})>>);
-stmt.addBatch(<<Create View t\_r\_arrive statement (Eq.~\ref{eq:arrival-time})>>);
-stmt.addBatch(<<Create View t\_s\_arrive statement (Eq.~\ref{eq:arrival-time})>>);
-try {
-  stmt.executeBatch();
-}
-<<Catch and print [[SQLException]]>>
-Print("Finished loading model");
-@
-
-\subsubsection{Initializing the Prepared Statements}
-\label{sec:initializing-the-prepared-statements}
-<<..initialize prepared statements>>=
-PSInit();
-@
-
-\subsubsection{Initializing the Road Network}
-\label{sec:initializing-the-road-network}
-<<..initialize road network>>=
-Print("Loading road network ("+f_rnet+")");
-try {
-  PSClear(0, 1);
-  int[] col = new int[7];
-  int dist;
-  Scanner sc = new Scanner(new File(f_rnet));
-  while (sc.hasNext()) {
-    <<....parse a line of the road network>>
-    <<....detect dummy vertex>>
-    <<....insert vertex coordinates>>
-    <<....compute edge weight [[dist]]>>
-    <<....insert edge>>
+  try {
+    setupDriver();
+  } catch (RuntimeException e) {
+    e.printStackTrace();
   }
-  PSSubmit(0, 1);
-  conn.commit();
-} catch (FileNotFoundException e) {
-  throw new IllegalArgumentException("bad file");
 }
-<<Catch and print [[SQLException]]>>
-@
-<<....parse a line of the road network>>=
-col[0] = sc.nextInt();
-col[1] = sc.nextInt();
-col[2] = sc.nextInt();
-col[3] = (int) Math.round(sc.nextDouble()*CSHIFT);
-col[4] = (int) Math.round(sc.nextDouble()*CSHIFT);
-col[5] = (int) Math.round(sc.nextDouble()*CSHIFT);
-col[6] = (int) Math.round(sc.nextDouble()*CSHIFT);
-@
-If a vertex identifier is $0$, then we store its coordinates as $(0,0)$.
-<<....detect dummy vertex>>=
-if (col[1] == 0) {
-  col[3] = 0;
-  col[4] = 0;
-}
-if (col[2] == 0) {
-  col[5] = 0;
-  col[6] = 0;
-}
-@
-<<....insert vertex coordinates>>=
-if (!lu_nodes.containsKey(col[1])) {
-  lu_nodes.put(col[1], new int[] { col[3], col[4] });
-  PSAdd(0, col[1], col[3], col[4]);
-}
-if (!lu_nodes.containsKey(col[2])) {
-  lu_nodes.put(col[2], new int[] { col[3], col[4] });
-  PSAdd(0, col[2], col[5], col[6]);
-}
-@
-We use haversine to compute edge weights\footnote{If the distance between two
-vertices is 0 due to rounding, then we round it up to 1.}.  If one of the
-vertices in the edge is a dummy vertex, we set the weight to 0\footnote{The
-dummy vertex should only terminate and never begin an edge in the road network,
-otherwise a shortest path could take a shortcut through the dummy vertex to
-reach any other vertex with 0 weight!}.
-<<....compute edge weight [[dist]]>>=
-dist = ((col[1] != 0 && col[2] != 0)
-  ? haversine(col[3]/CSHIFT, col[4]/CSHIFT,
-              col[5]/CSHIFT, col[6]/CSHIFT) : 0);
-@
-The fifth parameter is the \textit{initial speed} on all the edges \footnote{In
-the future, the speed on each edge may be recorded directly in the road network
-file instead of hardcoded here.}.
-<<....insert edge>>=
-PSAdd(1, col[1], col[2], dist, 10);
 @
 
 \section{Public Methods}
@@ -1950,6 +1810,104 @@ PSAdd(1, col[1], col[2], dist, 10);
 
 \subsection{Utilities}
 \label{sec:utilities}
+
+\subsubsection{[[DBLoadDataModel]](0)}
+Should call only once.
+<<Load data model>>=
+public void DBLoadDataModel() throws RuntimeException {
+  Print("Loading data model");
+  try {
+    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    Statement stmt = conn.createStatement();
+    stmt.clearBatch();
+    stmt.addBatch(<<Create Table V statement>>);
+    stmt.addBatch(<<Create Table E statement>>);
+    stmt.addBatch(<<Create Table UQ statement>>);
+    stmt.addBatch(<<Create Table UE statement>>);
+    stmt.addBatch(<<Create Table UL statement>>);
+    stmt.addBatch(<<Create Table UO statement>>);
+    stmt.addBatch(<<Create Table UD statement>>);
+    stmt.addBatch(<<Create Table UB statement>>);
+    stmt.addBatch(<<Create Table S statement>>);
+    stmt.addBatch(<<Create Table R statement>>);
+    stmt.addBatch(<<Create Table W statement>>);
+    stmt.addBatch(<<Create Table PD statement>>);
+    stmt.addBatch(<<Create Table CW statement>>);
+    stmt.addBatch(<<Create Table CPD statement>>);
+    stmt.addBatch(<<Create Table CQ statement>>);
+    stmt.addBatch(<<Create View r\_user statement>>);
+    stmt.addBatch(<<Create View r\_server statement>>);
+    stmt.addBatch(<<Create View f\_distance\_blocks statement>>);
+    stmt.addBatch(<<Create View f\_status statement (Eq.~\ref{eq:status})>>);
+    stmt.addBatch(<<Create View assignments statement (Eq.~\ref{eq:assignments})>>);
+    stmt.addBatch(<<Create View assignments\_r statement (Eq.~\ref{eq:assigned-requests})>>);
+    stmt.addBatch(<<Create View service\_rate statement (Eq.~\ref{eq:service-rate})>>);
+    stmt.addBatch(<<Create View dist\_base statement (Eq.~\ref{eq:base-distance})>>);
+    stmt.addBatch(<<Create View dist\_s\_travel statement>>);
+    stmt.addBatch(<<Create View dist\_s\_cruising statement (Eq.~\ref{eq:cruising-distance})>>);
+    stmt.addBatch(<<Create View dist\_s\_service statement (Eq.~\ref{eq:service-distance})>>);
+    stmt.addBatch(<<Create View dist\_s\_base statement>>);
+    stmt.addBatch(<<Create View dist\_r\_base statement>>);
+    stmt.addBatch(<<Create View dist\_r\_transit statement (Eq.~\ref{eq:transit-distance})>>);
+    stmt.addBatch(<<Create View dist\_r\_detour statement (Eq.~\ref{eq:detour-distance})>>);
+    stmt.addBatch(<<Create View dur\_s\_travel statement>>);
+    stmt.addBatch(<<Create View dur\_r\_pickup statement (Eq.~\ref{eq:pick-up delay})>>);
+    stmt.addBatch(<<Create View dur\_r\_transit statement (Eq.~\ref{eq:transit-duration})>>);
+    stmt.addBatch(<<Create View dur\_r\_travel statement (Eq.~\ref{eq:travel-duration})>>);
+    stmt.addBatch(<<Create View t\_r\_depart statement (Eq.~\ref{eq:departure-time})>>);
+    stmt.addBatch(<<Create View t\_s\_depart statement (Eq.~\ref{eq:departure-time})>>);
+    stmt.addBatch(<<Create View t\_r\_arrive statement (Eq.~\ref{eq:arrival-time})>>);
+    stmt.addBatch(<<Create View t\_s\_arrive statement (Eq.~\ref{eq:arrival-time})>>);
+    stmt.executeBatch();
+    conn.commit();
+    conn.close();
+  }
+  <<Catch and print [[SQLException]]>>
+}
+@ %def DBLoadDataModel
+
+\subsubsection{[[DBLoadBackup]](1)}
+We update [[uid]] to be the current largest [[uid]] in the backup.
+<<Load backup>>=
+public void DBLoadBackup(String filepath) throws RuntimeException {
+  Print("Loading database backup ("+filepath+")");
+  try {
+    CONNECTIONS_URL = "jdbc:derby:memory:jargobak;createFrom="+filepath;
+    setupDriver();
+    <<..configure database properties>>
+    uid = DBFetch("S132", 1)[0];
+  }
+  <<Catch and print [[SQLException]]>>
+}
+@ %def DBLoadBackup
+
+\subsubsection{[[DBSaveBackup]](1)}
+To save a database backup:
+<<Save backup>>=
+public void DBSaveBackup(String filepath) throws RuntimeException {
+  try {
+    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    CallableStatement cs = conn.prepareCall(
+      "CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE(?)");
+    cs.setString(1, filepath);
+    cs.execute();
+    conn.close();
+  }
+  <<Catch and print [[SQLException]]>>
+}
+@ %def DBSaveBackup
+
+\subsubsection{[[printSQLDriverStatistics]](0)}
+<<Print SQL driver statistics>>=
+public void printSQLDriverStatistics() {
+  try {
+    PoolingDriver d = (PoolingDriver) DriverManager.getDriver(CONNECTIONS_DRIVER_URL);
+    ObjectPool<? extends Connection> cp = d.getConnectionPool(CONNECTIONS_POOL_NAME);
+    Print("Connections: "+cp.getNumActive()+" active; "+cp.getNumIdle()+" idle");
+  }
+  <<Catch and print [[SQLException]]>>
+}
+@ %def printSQLDriverStatistics
 
 \subsubsection{[[printSQLException]](1)}
 The [[printSQLException]] method  unwraps the entire exception chain to unveil
@@ -1974,16 +1932,11 @@ If [[SQLException]] occurs, handle it using:
 arising out of low-level SQL operations.  Rolls back any attempted transactions
 and throws a [[RuntimeException]] that can be caught by a the simulation
 engine. Exports the last good state of the database to folder
-[[db-lastgood/jargo]] on the disk.
+[[DERBY_DUMPNAME/jargo]] on the disk.
 <<Catch and print [[SQLException]]>>=
 catch (SQLException e1) {
   printSQLException(e1);
-  try {
-    conn.rollback();
-  } catch (SQLException e2) {
-    printSQLException(e2);
-  }
-  DBSaveBackup("db-lastgood");
+  DBSaveBackup(DERBY_DUMPNAME);
   throw new RuntimeException("database failure");
 }
 @
@@ -1993,91 +1946,7 @@ catch (SQLException e) {
   throw e;
 }
 @
-\item Catch-and-rollback, for [[PSSubmit]].  The only difference between
-catch-and-throw is the use of [[rollback]].
-<<Catch and rollback [[SQLException]]>>=
-catch (SQLException e1) {
-  try {
-    conn.rollback();
-  } catch (SQLException e2) {
-    throw e2;
-  }
-  throw e1;
-}
-@
 \end{itemize}
-
-\subsubsection{[[DBLoadBackup]](1)}
-We update [[uid]] to be the current largest [[uid]] in the backup.
-<<Load backup>>=
-public void DBLoadBackup(String filepath) throws RuntimeException {
-  Print("Loading database backup ("+filepath+")");
-  try {
-    if (!conn.isClosed()) {
-      conn.close();
-    }
-    conn = DriverManager.getConnection("jdbc:derby:memory:jargobak;createFrom="+filepath);
-    <<....configure database properties>>
-    <<..initialize prepared statements>>
-    uid = DBFetch(132, 1)[0];
-  }
-  <<Catch and print [[SQLException]]>>
-}
-@
-
-\subsubsection{[[DBSaveBackup]](1)}
-To save a database backup:
-<<Save backup>>=
-public void DBSaveBackup(String filepath) throws RuntimeException {
-  try {
-    CallableStatement cs = conn.prepareCall(
-      "CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE(?)");
-    cs.setString(1, filepath);
-    cs.execute();
-    cs.close();
-  }
-  <<Catch and print [[SQLException]]>>
-}
-@
-
-\subsubsection{[[haversine]](4)}
-The [[haversine]] method computes the haversine distance between two
-coordinates, rounded to the nearest meter.  Most of this code is Copyright 2017
-Juliano Macedo and is licensed under the MIT License. It has been modified from
-its original form.
-<<Compute haversine>>=
-public int haversine(double lng1, double lat1, double lng2, double lat2) {
-  double dlat = Math.toRadians(lat2 - lat1);
-  double dlng = Math.toRadians(lng2 - lng1);
-  double rlat1 = Math.toRadians(lat1);
-  double rlat2 = Math.toRadians(lat2);
-  double a = Math.pow(Math.sin(dlat / 2), 2)
-    + Math.pow(Math.sin(dlng / 2), 2)
-    * Math.cos(rlat1) * Math.cos(rlat2);
-  double c = 2 * Math.asin(Math.sqrt(a));
-  int d = (int) Math.round(c * 6371000);
-  <<..round to nearest meter>>
-  return d;
-}
-@ %def haversine
-If the nearest meter is 0 and the two points are not equal, then the distance
-is rounded up to 1 meter.
-<<..round to nearest meter>>=
-if (d == 0 && (lng1 != lng2 || lat1 != lat2)) {
-  d = 1;
-}
-@
-
-\subsubsection{[[haversine]](2)}
-We can compute haversine using vertex identifiers instead of the coordinates.
-<<Compute haversine>>=
-public int haversine(int v1, int v2) {
-  int[] c1 = lu_nodes.get(v1);
-  int[] c2 = lu_nodes.get(v2);
-  return haversine(c1[0]/CSHIFT, c1[1]/CSHIFT,
-                   c2[0]/CSHIFT, c2[1]/CSHIFT);
-}
-@
 
 \subsubsection{[[printUser]](1)}
 <<Print user>>=
@@ -2118,10 +1987,10 @@ public void printSchedule(int[] sched) {
 }
 @ %def printSchedule
 
-\subsection{Write Operations}
-\label{sec:write-operations}
-None of the write operations perform data validation, instead
-delegating that task to the database.
+\subsection{Write Methods}
+\label{sec:write-methods}
+None of the write methods perform data validation, instead delegating that task
+to the database.
 
 This section introduces array diagrams. These diagrams show each element
 in a box, with the contents of each box taking the form
@@ -2140,6 +2009,39 @@ $\textit{index}:\textit{value}$. For example:
 \noindent shows an array with three elements. The value at index 0 is $a$; the
 value at index 1 is $b$; the value at index 2 is $c$.
 
+\subsubsection{[[DBAddNewVertex]](3)}
+<<Add new vertex>>=
+public void DBAddNewVertex(int v, int lng, int lat) throws RuntimeException {
+  try {
+    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    PreparedStatement pS0 = PS(conn, "S0");
+    PSAdd(pS0, v, lng, lat);
+    PSSubmit(pS0);
+    conn.commit();
+    conn.close();
+    if (!lu_nodes.containsKey(v)) {
+      lu_nodes.put(v, new int[] { lng, lat });
+    }
+  }
+  <<Catch and print [[SQLException]]>>
+}
+@ %def DBAddNewVertex
+
+\subsubsection{[[DBAddNewEdge]](4)}
+<<Add new edge>>=
+public void DBAddNewEdge(int v1, int v2, int dd, int nu) throws RuntimeException {
+  try {
+    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    PreparedStatement pS1 = PS(conn, "S1");
+    PSAdd(pS1, v1, v2, dd, nu);
+    PSSubmit(pS1);
+    conn.commit();
+    conn.close();
+  }
+  <<Catch and print [[SQLException]]>>
+}
+@ %def DBAddNewEdge
+
 \subsubsection{[[DBUpdateEdgeSpeed]](3)}
 The speed stored for each edge in the road network is the maximum free-flow
 speed, in meters per second.  It can be updated with
@@ -2149,11 +2051,14 @@ edge ([[v1]], [[v2]]) does not exist.
 <<Update edge speed>>=
 public void DBUpdateEdgeSpeed(int v1, int v2, int nu) throws RuntimeException {
   try {
-    PSClear(15, 131);
-    PSAdd(15, nu, v1, v2);
-    PSAdd(131, nu, v1, v2);
-    PSSubmit(15, 131);
+    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    PreparedStatement pS15 = PS(conn, "S15");
+    PreparedStatement pS131 = PS(conn, "S131");
+    PSAdd(pS15, nu, v1, v2);
+    PSAdd(pS131, nu, v1, v2);
+    PSSubmit(pS15, pS131);
     conn.commit();
+    conn.close();
   }
   <<Catch and print [[SQLException]]>>
 }
@@ -2177,29 +2082,36 @@ The value of $u_q$ \emph{must} be greater than 0.
 <<Add new request>>=
 public int DBAddNewRequest(int[] u) throws RuntimeException {
   try {
+    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
     uid += 1;
     <<..insert new user into user tables>>
     <<..insert new request into r>>
     conn.commit();
+    conn.close();
     return uid;
   }
   <<Catch and print [[SQLException]]>>
 }
 @ %def DBAddNewRequest
 <<..insert new user into user tables>>=
-PSClear(2, 3, 4, 5, 6, 7);
-PSAdd(2, uid, u[0]);
-PSAdd(3, uid, u[1]);
-PSAdd(4, uid, u[2]);
-PSAdd(5, uid, u[3]);
-PSAdd(6, uid, u[4]);
-PSAdd(7, uid, u[5]);
-PSSubmit(2, 3, 4, 5, 6, 7);
+PreparedStatement pS2 = PS(conn, "S2");
+PreparedStatement pS3 = PS(conn, "S3");
+PreparedStatement pS4 = PS(conn, "S4");
+PreparedStatement pS5 = PS(conn, "S5");
+PreparedStatement pS6 = PS(conn, "S6");
+PreparedStatement pS7 = PS(conn, "S7");
+PSAdd(pS2, uid, u[0]);
+PSAdd(pS3, uid, u[1]);
+PSAdd(pS4, uid, u[2]);
+PSAdd(pS5, uid, u[3]);
+PSAdd(pS6, uid, u[4]);
+PSAdd(pS7, uid, u[5]);
+PSSubmit(pS2, pS3, pS4, pS5, pS6, pS7);
 @
 <<..insert new request into r>>=
-PSClear(9);
-PSAdd(9, uid, u[0], u[1], u[2], u[3], u[4], u[5]);
-PSSubmit(9);
+PreparedStatement pS9 = PS(conn, "S9");
+PSAdd(pS9, uid, u[0], u[1], u[2], u[3], u[4], u[5]);
+PSSubmit(pS9);
 @
 
 \subsubsection{[[DBAddNewServer]](2)}
@@ -2233,6 +2145,7 @@ The value of $u_q$ \emph{must} be less than 0. Array [[route]] =
 <<Add new server>>=
 public int DBAddNewServer(int[] u, int[] route) throws RuntimeException {
   try {
+    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
     int[] output = new int[] { };
     int se = u[1];
     uid += 1;
@@ -2242,51 +2155,62 @@ public int DBAddNewServer(int[] u, int[] route) throws RuntimeException {
     <<..insert new server route into cw>>
     <<..insert new server into cq>>
     conn.commit();
+    conn.close();
     return uid;
   }
   <<Catch and print [[SQLException]]>>
 }
 @ %def DBAddNewServer
 <<..insert new server into s>>=
-PSClear(8);
-PSAdd(8, uid, u[0], u[1], u[2], u[3], u[4], u[5]);
-PSSubmit(8);
+{
+  PreparedStatement pS8 = PS(conn, "S8");
+  PSAdd(pS8, uid, u[0], u[1], u[2], u[3], u[4], u[5]);
+  PSSubmit(pS8);
+}
 @
 The procedure to insert [[route]] into Table W is written into its own chunk so
 we can re-use it later. The first step is to add the first waypoint with
 [[null]] as its predecessor.
 <<..insert new server route into w>>=
-PSClear(10);
-PSAdd(10, uid, se, null, null, route[0], route[1], null, null);
-PSSubmit(10);
+{
+  PreparedStatement pS10 = PS(conn, "S10");
+  PSAdd(pS10, uid, se, null, null, route[0], route[1], null, null);
+  PSSubmit(pS10);
+}
 <<Procedure to insert [[route]] into Table W>>
 @
 Then we loop through the remaining waypoints.
 <<Procedure to insert [[route]] into Table W>>=
-PSClear(10);
-for (int i = 0; i < (route.length - 3); i += 2) {
-  int t1 = route[i];
-  int v1 = route[(i + 1)];
-  int t2 = route[(i + 2)];
-  int v2 = route[(i + 3)];
-  output = DBFetch(46, 2, v1, v2);
-  int dd = output[0];
-  int nu = output[1];
-  PSAdd(10, uid, se, t1, v1, t2, v2, dd, nu);
+{
+  PreparedStatement pS10 = PS(conn, "S10");
+  for (int i = 0; i < (route.length - 3); i += 2) {
+    int t1 = route[i];
+    int v1 = route[(i + 1)];
+    int t2 = route[(i + 2)];
+    int v2 = route[(i + 3)];
+    output = DBFetch("S46", 2, v1, v2);
+    int dd = output[0];
+    int nu = output[1];
+    PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
+  }
+  PSSubmit(pS10);
 }
-PSSubmit(10);
 @
 <<..insert new server route into cw>>=
-PSClear(11);
-int te = route[(route.length - 2)];
-PSAdd(11, uid, u[1], u[2], u[3], u[4], u[1], u[3], te, u[4]);
-PSSubmit(11);
+{
+  PreparedStatement pS11 = PS(conn, "S11");
+  int te = route[(route.length - 2)];
+  PSAdd(pS11, uid, u[1], u[2], u[3], u[4], u[1], u[3], te, u[4]);
+  PSSubmit(pS11);
+}
 @
 <<..insert new server into cq>>=
-PSClear(14);
-PSAdd(14, uid, u[0], u[1], null, u[1], u[3], null, u[0],
-    null, null, null, null, null, 1);
-PSSubmit(14);
+{
+  PreparedStatement pS14 = PS(conn, "S14");
+  PSAdd(pS14, uid, u[0], u[1], null, u[1], u[3], null, u[0],
+      null, null, null, null, null, 1);
+  PSSubmit(pS14);
+}
 @
 
 \subsubsection{[[DBUpdateServerRoute]](3)}
@@ -2348,6 +2272,7 @@ throws RuntimeException {
   int[] output = new int[] { };
   int se, sq;
   try {
+    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
     <<..fetch [[sq]] and [[se]]>>
     <<..update route>>
     if (sched.length > 0) {
@@ -2355,12 +2280,13 @@ throws RuntimeException {
       <<..update schedule>>
     }
     conn.commit();
+    conn.close();
   }
   <<Catch and print [[SQLException]]>>
 }
 @ %def DBUpdateServerRoute
 <<..fetch [[sq]] and [[se]]>>=
-output = DBFetch(48, 2, sid);
+output = DBFetch("S48", 2, sid);
 sq = output[0];
 se = output[1];
 @
@@ -2370,19 +2296,19 @@ se = output[1];
 <<....update route endpoint in cw>>
 @
 <<....delete remaining route from w>>=
-PSClear(76);
-PSAdd(76, sid, route[0]);
-PSSubmit(76);
+PreparedStatement pS76 = PS(conn, "S76");
+PSAdd(pS76, sid, route[0]);
+PSSubmit(pS76);
 @
 <<....insert new remaining route into w>>=
 <<Procedure to insert [[route]] into Table W>>
 @
 <<....update route endpoint in cw>>=
-PSClear(77);
+PreparedStatement pS77 = PS(conn, "S77");
 int te = route[(route.length - 2)];
 int ve = route[(route.length - 1)];
-PSAdd(77, te, ve, sid);
-PSSubmit(77);
+PSAdd(pS77, te, ve, sid);
+PSSubmit(pS77);
 @
 <<..update schedule>>=
 int bound = (sched.length/3);
@@ -2392,18 +2318,20 @@ int bound = (sched.length/3);
 <<....insert new remaining schedule into cq>>
 @
 <<....update times in pd and cpd>>=
-PSClear(82, 83, 84);
+PreparedStatement pS82 = PS(conn, "S82");
+PreparedStatement pS83 = PS(conn, "S83");
+PreparedStatement pS84 = PS(conn, "S84");
 for (int j = 0; j < bound; j++) {
   int tj = sched[(3*j)];
   int vj = sched[(3*j + 1)];
   int Lj = sched[(3*j + 2)];
   if (Lj != sid) {
-    PSAdd(82, tj, vj, Lj);
-    PSAdd(83, tj, vj, Lj);
-    PSAdd(84, tj, vj, Lj);
+    PSAdd(pS82, tj, vj, Lj);
+    PSAdd(pS83, tj, vj, Lj);
+    PSAdd(pS84, tj, vj, Lj);
   }
 }
-PSSubmit(82, 83, 84);
+PSSubmit(pS82, pS83, pS84);
 @
 <<....populate the tp, td cache>>=
 for (int j = 0; j < bound; j++) {
@@ -2411,8 +2339,8 @@ for (int j = 0; j < bound; j++) {
   if (Lj != sid) {
     int rq, tp, td;
     if (!cache.containsKey(Lj)) {
-      rq = DBFetch(85, 1, Lj)[0];
-      output = DBFetch(86, 2, Lj);
+      rq = DBFetch("S85", 1, Lj)[0];
+      output = DBFetch("S86", 2, Lj);
       tp = output[0];
       td = output[1];
       cache.put(Lj, new int[] { rq, tp, td });
@@ -2421,17 +2349,17 @@ for (int j = 0; j < bound; j++) {
 }
 @
 <<....delete remaining schedule from cq>>=
-PSClear(80);
-PSAdd(80, sid, route[0]);
-PSSubmit(80);
+PreparedStatement pS80 = PS(conn, "S80");
+PSAdd(pS80, sid, route[0]);
+PSSubmit(pS80);
 @
 <<....insert new remaining schedule into cq>>=
 int t1, q1, o1;
-output = DBFetch(87, 3, sid, sched[0]);
+output = DBFetch("S87", 3, sid, sched[0]);
 t1 = output[0];
 q1 = output[1];
 o1 = output[2];
-PSClear(14);
+PreparedStatement pS14 = PS(conn, "S14");
 for (int j = 0; j < bound; j++) {
   int t2 = sched[(3*j)];
   int v2 = sched[(3*j + 1)];
@@ -2440,14 +2368,14 @@ for (int j = 0; j < bound; j++) {
     int[] qpd = cache.get(Lj);
     int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
     int o2 = o1 + 1;
-    PSAdd(14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
+    PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
           qpd[0], qpd[1], qpd[2], o1, o2);
     t1 = t2;
     q1 = q2;
     o1 = o2;
   }
 }
-PSSubmit(14);
+PSSubmit(pS14);
 @
 
 \subsubsection{[[DBUpdateServerAddToSchedule]](4)}
@@ -2525,10 +2453,12 @@ throws RuntimeException {
   Map<Integer, int[]> cache = new HashMap<>();
   Map<Integer, int[]> cache2 = new HashMap<>();
   try {
+    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
     <<..fetch [[sq]] and [[se]]>>
     <<..update route>>
     <<..update and add to schedule>>
     conn.commit();
+    conn.close();
   }
   <<Catch and print [[SQLException]]>>
 }
@@ -2549,13 +2479,13 @@ for (int j = 0; j < bound; j++) {
     int td = -1;
     int vd = -1;
     if (!cache.containsKey(Lj)) {
-      rq = DBFetch(85, 1, Lj)[0];
+      rq = DBFetch("S85", 1, Lj)[0];
       boolean flagged = false;
       <<......check if new job>>
       if (flagged) {
         <<......get tp, vp, td, vd of new job>>
       } else {
-        output = DBFetch(86, 2, Lj);
+        output = DBFetch("S86", 2, Lj);
         tp = output[0];
         td = output[1];
       }
@@ -2586,11 +2516,12 @@ for (int k = (j + 1); k < bound; k++) {
 cache2.put(Lj, new int[] { vp, vd });
 @
 <<....insert into pd, cpd>>=
-PSClear(12, 13);
+PreparedStatement pS12 = PS(conn, "S12");
+PreparedStatement pS13 = PS(conn, "S13");
 int rq, re, rl, ro, rd;
 int[] qpd, pd;
 for (int r : rid) {
-  output = DBFetch(51, 5, r);
+  output = DBFetch("S51", 5, r);
   rq = output[0];
   re = output[1];
   rl = output[2];
@@ -2598,12 +2529,12 @@ for (int r : rid) {
   rd = output[4];
   qpd = cache.get(r);
   pd = cache2.get(r);
-  PSAdd(12, sid, qpd[1], pd[0], r);
-  PSAdd(12, sid, qpd[2], pd[1], r);
-  PSAdd(13, sid, se, route[(route.length - 2)], qpd[1], pd[0], qpd[2], pd[1],
+  PSAdd(pS12, sid, qpd[1], pd[0], r);
+  PSAdd(pS12, sid, qpd[2], pd[1], r);
+  PSAdd(pS13, sid, se, route[(route.length - 2)], qpd[1], pd[0], qpd[2], pd[1],
         r, re, rl, ro, rd);
 }
-PSSubmit(12, 13);
+PSSubmit(pS12, pS13);
 @
 
 \subsubsection{[[DBUpdateServerRemoveFromSchedule]](4)}
@@ -2680,206 +2611,295 @@ throws RuntimeException {
   int se, sq;
   Map<Integer, int[]> cache = new HashMap<>();
   try {
+    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
     <<..fetch [[sq]] and [[se]]>>
     <<..update route>>
     <<..update schedule>>
     <<..remove jobs from pd, cpd>>
     conn.commit();
+    conn.close();
   }
   <<Catch and print [[SQLException]]>>
 }
 @ %def DBUpdateServerRemoveFromSchedule
 <<..remove jobs from pd, cpd>>=
-PSClear(42, 43);
+PreparedStatement pS42 = PS(conn, "S42");
+PreparedStatement pS43 = PS(conn, "S43");
 for (int r : rid) {
-  PSAdd(42, r);
-  PSAdd(43, r);
+  PSAdd(pS42, r);
+  PSAdd(pS43, r);
 }
-PSSubmit(42, 43);
+PSSubmit(pS42, pS43);
 @
 
 \subsection{Read Operations}
 \label{sec:read-operations}
+Read methods are implemented by wrapping [[DBFetch]](3...) with given
+parameters. Each read operation has a synchronous and asynchronous version. The
+asynchronous version is meant to be used with a Java [[CompletableFuture]].
 
 \subsubsection{[[DBQuery]](2)}
-Run custom [[SELECT]] queries against the database using
-[[DBQuery]]. The second parameter indicates the number of columns in the
-[[SELECT]] statement.
+Run custom [[SELECT]] queries against the database using [[DBQuery]]. The
+second parameter indicates the number of columns in the [[SELECT]] statement.
 <<Query custom statement>>=
 public int[] DBQuery(String sql, int ncols) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    Statement stmt = conn.createStatement(
-      ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-    res = stmt.executeQuery(sql);
-    if (res.last()) {
-      <<..flatten results>>
-    }
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBQuery>>
 }
-@ % def DBQuery
+public Supplier<int[]> DBQueryAsync(String sql, int ncols) {
+  return () -> { <<DBQuery>> };
+}
+@ % def DBQuery DBQueryAsync
+<<DBQuery>>=
+int[] output = new int[] { };
+try {
+  Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+  Statement stmt = conn.createStatement(
+    ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+  ResultSet res = stmt.executeQuery(sql);
+  if (res.last()) {
+    <<..flatten results>>
+  }
+  conn.close();
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryServer]](1)}
 <<Query ridesharing user>>=
 public int[] DBQueryServer(int sid) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(70, 7, sid);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S70>>
 }
-@ %def DBQueryServer
+public Supplier<int[]> DBQueryServerAsync(int sid) {
+  return () -> { <<DBFetch S70>> };
+}
+@ %def DBQueryServer DBQueryServerAsync
+<<DBFetch S70>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S70", 7, sid);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryRequest]](1)}
 <<Query ridesharing user>>=
 public int[] DBQueryRequest(int rid) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(75, 7, rid);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S75>>
 }
-@ %def DBQueryRequest
+public Supplier<int[]> DBQueryRequestAsync(int rid) {
+  return () -> { <<DBFetch S75>> };
+}
+@ %def DBQueryRequest DBQueryRequestAsync
+<<DBFetch S75>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S75", 7, rid);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryRequestStatus]](2)}
 <<Query request status>>=
 public int[] DBQueryRequestStatus(int rid, int t) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(133, 1, rid, t);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S133>>
+}
+public Supplier<int[]> DBQueryRequestStatusAsync(int rid, int t) {
+  return () -> { <<DBFetch S133>> };
 }
 @ %def DBQueryRequestStatus
+<<DBFetch S133>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S133", 1, rid, t);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryQueuedRequests]](1)}
 <<Query queued requests>>=
 public int[] DBQueryQueuedRequests(int t) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(68, 7, t, t);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S68>>
 }
-@ %def DBQueryQueuedRequests
+public Supplier<int[]> DBQueryQueuedRequestsAsync(int t) {
+  return () -> { <<DBFetch S68>> };
+}
+@ %def DBQueryQueuedRequests DBQueryQueuedRequestsAsync
+<<DBFetch S68>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S68", 7, t, t);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryServerLocationsAll]](1)}
 <<Query all server locations>>=
 public int[] DBQueryServerLocationsAll(int t) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(59, 3, t, t, t, t);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S59>>
 }
-@ %def DBQueryServerLocationsAll
+public Supplier<int[]> DBQueryServerLocationsAllAsync(int t) {
+  return () -> { <<DBFetch S59>> };
+}
+@ %def DBQueryServerLocationsAll DBQueryServerLocationsAllAsync
+<<DBFetch S59>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S59", 3, t, t, t, t);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryServerLocationsActive]](1)}
 <<Query active server locations>>=
 public int[] DBQueryServerLocationsActive(int t) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(128, 3, t, t, t, t, t, t);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S128>>
 }
-@ %def DBQueryServerLocationsActive
+public Supplier<int[]> DBQueryServerLocationsActiveAsync(int t) {
+  return () -> { <<DBFetch S128>> };
+}
+@ %def DBQueryServerLocationsActive DBQueryServerLocationsActiveAsync
+<<DBFetch S128>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S128", 3, t, t, t, t, t, t);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryRoute]](1)}
-A vehicle's route can be retrieved if its corresponding [[sid]] is known.
 <<Query routes>>=
 public int[] DBQueryRoute(int sid) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(60, 2, sid);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S60>>
 }
-@ %def DBQueryRoute
+public Supplier<int[]> DBQueryRouteAsync(int sid) {
+  return () -> { <<DBFetch S60>> };
+}
+@ %def DBQueryRoute DBQueryRouteAsync
+<<DBFetch S60>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S60", 2, sid);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryRouteRemaining]](2)}
 <<Query routes>>=
 public int[] DBQueryRouteRemaining(int sid, int t) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(129, 2, sid, t);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S129>>
 }
-@ %def DBQueryRouteRemaining
+public Supplier<int[]> DBQueryRouteRemainingAsync(int sid, int t) {
+  return () -> { <<DBFetch S129>> };
+}
+@ %def DBQueryRouteRemaining DBQueryRouteRemainingAsync
+<<DBFetch S129>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S129", 2, sid, t);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQuerySchedule]](1)}
-Similarly, a vehicle's schedule can be retrieved.
-\footnote{Schedules may contain [[null]] values in the labels. A null is recorded
-as a 0 in the output array due to [[getInt]] in [[DBFetch]].}
+Schedules may contain [[null]] values in the labels. A null is recorded
+as a 0 in the output array due to [[getInt]] in [[DBFetch]].
 <<Query schedules>>=
 public int[] DBQuerySchedule(int sid) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(61, 4, sid);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S61>>
 }
-@ %def DBQuerySchedule
+public Supplier<int[]> DBQueryScheduleAsync(int sid) {
+  return () -> { <<DBFetch S61>> };
+}
+@ %def DBQuerySchedule DBQueryScheduleAsync
+<<DBFetch S61>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S61", 4, sid);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryScheduleRemaining]](2)}
 <<Query schedules>>=
 public int[] DBQueryScheduleRemaining(int sid, int t) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(69, 4, sid, t);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S69>>
 }
-@ %def DBQueryScheduleRemaining
+public Supplier<int[]> DBQueryScheduleRemainingAsync(int sid, int t) {
+  return () -> { <<DBFetch S69>> };
+}
+@ %def DBQueryScheduleRemaining DBQueryScheduleRemainingAsync
+<<DBFetch S69>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S69", 4, sid, t);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryCurrentLoad]](2)}
 <<Query current load>>=
 public int[] DBQueryCurrentLoad(int sid, int t) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(73, 1, sid, t);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S73>>
 }
-@ %def DBQueryCurrentLoad
+public Supplier<int[]> DBQueryCurrentLoadAsync(int sid, int t) {
+  return () -> { <<DBFetch S73>> };
+}
+@ %def DBQueryCurrentLoad DBQueryCurrentLoadAsync
+<<DBFetch S73>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S73", 1, sid, t);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryCountVertices]](0)}
 <<Query various metrics>>=
 public int[] DBQueryCountVertices() throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(62, 1);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S62>>
 }
-@ %def DBQueryCountVertices
+public Supplier<int[]> DBQueryCountVerticesAsync() {
+  return () -> { <<DBFetch S62>> };
+}
+@ %def DBQueryCountVertices DBQueryCountVerticesAsync
+<<DBFetch S62>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S62", 1);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryCountEdges]](0)}
 <<Query various metrics>>=
 public int[] DBQueryCountEdges() throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(63, 1);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S63>>
 }
-@ %def DBQueryCountEdges
+public Supplier<int[]> DBQueryCountEdgesAsync() {
+  return () -> { <<DBFetch S63>> };
+}
+@ %def DBQueryCountEdges DBQueryCountEdgesAsync
+<<DBFetch S63>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S63", 1);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryVertex]](1)}
 Returned array =
@@ -2896,14 +2916,20 @@ Returned array =
 \noindent where parameter [[v]] provides $v$.
 <<Query various metrics>>=
 public int[] DBQueryVertex(int v) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(130, 2, v);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S130>>
 }
-@ %def DBQueryVertex
+public Supplier<int[]> DBQueryVertexAsync(int v) {
+  return () -> { <<DBFetch S130>> };
+}
+@ %def DBQueryVertex DBQueryVertexAsync
+<<DBFetch S130>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S130", 2, v);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryEdge]](2)}
 Returned array =
@@ -2920,14 +2946,20 @@ Returned array =
 [[v2]] provides $v_2$.
 <<Query various metrics>>=
 public int[] DBQueryEdge(int v1, int v2) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(46, 2, v1, v2);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S46>>
 }
-@ %def DBQueryEdge
+public Supplier<int[]> DBQueryEdgeAsync(int v1, int v2) {
+  return () -> { <<DBFetch S46>> };
+}
+@ %def DBQueryEdge DBQueryEdgeAsync
+<<DBFetch S46>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S46", 2, v1, v2);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryStatisticsEdges]](0)}
 The following method returns six statistics: minimum edge weight,
@@ -2935,14 +2967,20 @@ maximum edge weight, average edge weight, minimum edge speed, maximum edge speed
 average edge speed.
 <<Query various metrics>>=
 public int[] DBQueryStatisticsEdges() throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(65, 6);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S65>>
 }
-@ %def DBQueryStatisticsEdges
+public Supplier<int[]> DBQueryStatisticsEdgesAsync() {
+  return () -> { <<DBFetch S65>> };
+}
+@ %def DBQueryStatisticsEdges DBQueryStatisticsEdgesAsync
+<<DBFetch S65>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S65", 6);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryMBR]](0)}
 The minimum bounding rectangle is
@@ -2950,433 +2988,675 @@ returned as four numbers: minimum longitude, maximum longitude, minimum
 latitude, maximum latitude.
 <<Query various metrics>>=
 public int[] DBQueryMBR() throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(64, 4);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S64>>
 }
-@ %def DBQueryMBR
+public Supplier<int[]> DBQueryMBRAsync() {
+  return () -> { <<DBFetch S64>> };
+}
+@ %def DBQueryMBR DBQueryMBRAsync
+<<DBFetch S64>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S64", 4);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryCountServers]](0)}
 <<Query various metrics>>=
 public int[] DBQueryCountServers() throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(66, 1);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S66>>
 }
-@ %def DBQueryCountServers
+public Supplier<int[]> DBQueryCountServersAsync() {
+  return () -> { <<DBFetch S66>> };
+}
+@ %def DBQueryCountServers DBQueryCountServersAsync
+<<DBFetch S66>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S66", 1);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryCountRequests]](0)}
 <<Query various metrics>>=
 public int[] DBQueryCountRequests() throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(67, 1);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S67>>
 }
-@ %def DBQueryCountRequests
+public Supplier<int[]> DBQueryCountRequestsAsync() {
+  return () -> { <<DBFetch S67>> };
+}
+@ %def DBQueryCountRequests DBQueryCountRequestsAsync
+<<DBFetch S67>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S67", 1);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryServerPendingAssignments]](2)}
 <<Query various metrics>>=
-public int[] DBQueryServerPendingAssignments(int sid, int t)
-throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(100, 1, t, sid);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+public int[] DBQueryServerPendingAssignments(int sid, int t) throws RuntimeException {
+  <<DBFetch S100>>
 }
-@ %def DBQueryServerPendingAssignments
+public Supplier<int[]> DBQueryServerPendingAssignmentsAsync(int sid, int t) {
+  return () -> { <<DBFetch S100>> };
+}
+@ %def DBQueryServerPendingAssignments DBQueryServerPendingAssignmentsAsync
+<<DBFetch S100>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S100", 1, t, sid);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryServerCompletedAssignments]](2)}
 <<Query various metrics>>=
-public int[] DBQueryServerCompletedAssignments(int sid, int t)
-throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(101, 1, t, sid);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+public int[] DBQueryServerCompletedAssignments(int sid, int t) throws RuntimeException {
+  <<DBFetch S101>>
 }
-@ %def DBQueryServerCompletedAssignments
+public Supplier<int[]> DBQueryServerCompletedAssignmentsAsync(int sid, int t) {
+  return () -> { <<DBFetch S101>> };
+}
+@ %def DBQueryServerCompletedAssignments DBQueryServerCompletedAssignmentsAsync
+<<DBFetch S101>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S101", 1, t, sid);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryServiceRate]](0)}
 <<Query various metrics>>=
 public int[] DBQueryServiceRate() throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(102, 1);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S102>>
 }
-@ %def DBQueryServiceRate
+public Supplier<int[]> DBQueryServiceRateAsync() {
+  return () -> { <<DBFetch S102>> };
+}
+@ %def DBQueryServiceRate DBQueryServiceRateAsync
+<<DBFetch S102>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S102", 1);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryBaseDistanceTotal]](0)}
 <<Query various metrics>>=
 public int[] DBQueryBaseDistanceTotal() throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(103, 1);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S103>>
 }
-@ %def DBQueryBaseDistanceTotal
+public Supplier<int[]> DBQueryBaseDistanceTotalAsync() {
+  return () -> { <<DBFetch S103>> };
+}
+@ %def DBQueryBaseDistanceTotal DBQueryBaseDistanceTotalAsync
+<<DBFetch S103>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S103", 1);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryServerBaseDistanceTotal]](0)}
 <<Query various metrics>>=
 public int[] DBQueryServerBaseDistanceTotal() throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(110, 1);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S110>>
 }
-@ %def DBQueryServerBaseDistanceTotal
+public Supplier<int[]> DBQueryServerBaseDistanceTotalAsync() {
+  return () -> { <<DBFetch S110>> };
+}
+@ %def DBQueryServerBaseDistanceTotal DBQueryServerBaseDistanceTotalAsync
+<<DBFetch S110>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S110", 1);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryRequestBaseDistanceTotal]](0)}
 <<Query various metrics>>=
 public int[] DBQueryRequestBaseDistanceTotal() throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(111, 1);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S111>>
 }
-@ %def DBQueryRequestBaseDistanceTotal
+public Supplier<int[]> DBQueryRequestBaseDistanceTotalAsync() {
+  return () -> { <<DBFetch S111>> };
+}
+@ %def DBQueryRequestBaseDistanceTotal DBQueryRequestBaseDistanceTotalAsync
+<<DBFetch S111>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S111", 1);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryServerTravelDistance]](1)}
 <<Query various metrics>>=
 public int[] DBQueryServerTravelDistance(int sid) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(104, 1, sid);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S104>>
 }
-@ %def DBQueryServerTravelDistance
+public Supplier<int[]> DBQueryServerTravelDistanceAsync(int sid) {
+  return () -> { <<DBFetch S104>> };
+}
+@ %def DBQueryServerTravelDistance DBQueryServerTravelDistanceAsync
+<<DBFetch S104>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S104", 1, sid);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryServerTravelDistanceTotal]](0)}
 <<Query various metrics>>=
 public int[] DBQueryServerTravelDistanceTotal() throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(105, 1);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S105>>
 }
-@ %def DBQueryServerTravelDistanceTotal
+public Supplier<int[]> DBQueryServerTravelDistanceTotalAsync() {
+  return () -> { <<DBFetch S105>> };
+}
+@ %def DBQueryServerTravelDistanceTotal DBQueryServerTravelDistanceTotalAsync
+<<DBFetch S105>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S105", 1);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryServerCruisingDistance]](1)}
 <<Query various metrics>>=
 public int[] DBQueryServerCruisingDistance(int sid) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(106, 1, sid);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S106>>
 }
-@ %def DBQueryServerCruisingDistance
+public Supplier<int[]> DBQueryServerCruisingDistanceAsync(int sid) {
+  return () -> { <<DBFetch S106>> };
+}
+@ %def DBQueryServerCruisingDistance DBQueryServerCruisingDistanceAsync
+<<DBFetch S106>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S106", 1, sid);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryServerCruisingDistanceTotal]](0)}
 <<Query various metrics>>=
 public int[] DBQueryServerCruisingDistanceTotal() throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(107, 1);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S107>>
 }
-@ %def DBQueryServerCruisingDistanceTotal
+public Supplier<int[]> DBQueryServerCruisingDistanceTotalAsync() {
+  return () -> { <<DBFetch S107>> };
+}
+@ %def DBQueryServerCruisingDistanceTotal DBQueryServerCruisingDistanceTotalAsync
+<<DBFetch S107>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S107", 1);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryServerServiceDistance]](1)}
 <<Query various metrics>>=
 public int[] DBQueryServerServiceDistance(int sid) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(108, 1, sid);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S108>>
 }
-@ %def DBQueryServerServiceDistance
+public Supplier<int[]> DBQueryServerServiceDistanceAsync(int sid) {
+  return () -> { <<DBFetch S108>> };
+}
+@ %def DBQueryServerServiceDistance DBQueryServerServiceDistanceAsync
+<<DBFetch S108>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S108", 1, sid);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryServerServiceDistanceTotal]](0)}
 <<Query various metrics>>=
 public int[] DBQueryServerServiceDistanceTotal() throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(109, 1);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S109>>
 }
-@ %def DBQueryServerServiceDistanceTotal
+public Supplier<int[]> DBQueryServerServiceDistanceTotalAsync() {
+  return () -> { <<DBFetch S109>> };
+}
+@ %def DBQueryServerServiceDistanceTotal DBQueryServerServiceDistanceTotalAsync
+<<DBFetch S109>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S109", 1);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryRequestDetourDistance]](1)}
 <<Query various metrics>>=
 public int[] DBQueryRequestDetourDistance(int rid) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(112, 1, rid);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S112>>
 }
-@ %def DBQueryRequestDetourDistance
+public Supplier<int[]> DBQueryRequestDetourDistanceAsync(int rid) {
+  return () -> { <<DBFetch S112>> };
+}
+@ %def DBQueryRequestDetourDistance DBQueryRequestDetourDistanceAsync
+<<DBFetch S112>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S112", 1, rid);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryRequestDetourDistanceTotal]](0)}
 <<Query various metrics>>=
 public int[] DBQueryRequestDetourDistanceTotal() throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(113, 1);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S113>>
 }
-@ %def DBQueryRequestDetourDistanceTotal
+public Supplier<int[]> DBQueryRequestDetourDistanceTotalAsync() {
+  return () -> { <<DBFetch S113>> };
+}
+@ %def DBQueryRequestDetourDistanceTotal DBQueryRequestDetourDistanceTotalAsync
+<<DBFetch S113>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S113", 1);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryRequestTransitDistance]](1)}
 <<Query various metrics>>=
 public int[] DBQueryRequestTransitDistance(int rid) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(114, 1, rid);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S114>>
 }
-@ %def DBQueryRequestTransitDistance
+public Supplier<int[]> DBQueryRequestTransitDistanceAsync(int rid) {
+  return () -> { <<DBFetch S114>> };
+}
+@ %def DBQueryRequestTransitDistance DBQueryRequestTransitDistanceAsync
+<<DBFetch S114>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S114", 1, rid);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryRequestTransitDistanceTotal]](0)}
 <<Query various metrics>>=
 public int[] DBQueryRequestTransitDistanceTotal() throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(115, 1);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S115>>
 }
-@ %def DBQueryRequestTransitDistanceTotal
+public Supplier<int[]> DBQueryRequestTransitDistanceTotalAsync() {
+  return () -> { <<DBFetch S115>> };
+}
+@ %def DBQueryRequestTransitDistanceTotal DBQueryRequestTransitDistanceTotalAsync
+<<DBFetch S115>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S115", 1);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryServerTravelDuration]](1)}
 <<Query various metrics>>=
 public int[] DBQueryServerTravelDuration(int sid) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(116, 1, sid);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S116>>
 }
-@ %def DBQueryServerTravelDuration
+public Supplier<int[]> DBQueryServerTravelDurationAsync(int sid) {
+  return () -> { <<DBFetch S116>> };
+}
+@ %def DBQueryServerTravelDuration DBQueryServerTravelDurationAsync
+<<DBFetch S116>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S116", 1, sid);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryServerTravelDurationTotal]](0)}
 <<Query various metrics>>=
 public int[] DBQueryServerTravelDurationTotal() throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(117, 1);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S117>>
 }
-@ %def DBQueryServerTravelDurationTotal
+public Supplier<int[]> DBQueryServerTravelDurationTotalAsync() {
+  return () -> { <<DBFetch S117>> };
+}
+@ %def DBQueryServerTravelDurationTotal DBQueryServerTravelDurationTotalAsync
+<<DBFetch S117>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S117", 1);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryRequestPickupDuration]](1)}
 <<Query various metrics>>=
 public int[] DBQueryRequestPickupDuration(int rid) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(118, 1, rid);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S118>>
 }
-@ %def DBQueryRequestPickupDuration
+public Supplier<int[]> DBQueryRequestPickupDurationAsync(int rid) {
+  return () -> { <<DBFetch S118>> };
+}
+@ %def DBQueryRequestPickupDuration DBQueryRequestPickupDurationAsync
+<<DBFetch S118>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S118", 1, rid);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryRequestPickupDurationTotal]](0)}
 <<Query various metrics>>=
 public int[] DBQueryRequestPickupDurationTotal() throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(119, 1);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S119>>
 }
-@ %def DBQueryRequestPickupDurationTotal
+public Supplier<int[]> DBQueryRequestPickupDurationTotalAsync() {
+  return () -> { <<DBFetch S119>> };
+}
+@ %def DBQueryRequestPickupDurationTotal DBQueryRequestPickupDurationTotalAsync
+<<DBFetch S119>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S119", 1);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryRequestTransitDuration]](1)}
 <<Query various metrics>>=
 public int[] DBQueryRequestTransitDuration(int rid) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(120, 1, rid);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S120>>
 }
-@ %def DBQueryRequestTransitDuration
+public Supplier<int[]> DBQueryRequestTransitDurationAsync(int rid) {
+  return () -> { <<DBFetch S120>> };
+}
+@ %def DBQueryRequestTransitDuration DBQueryRequestTransitDurationAsync
+<<DBFetch S120>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S120", 1, rid);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryRequestTransitDurationTotal]](0)}
 <<Query various metrics>>=
 public int[] DBQueryRequestTransitDurationTotal() throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(121, 1);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S121>>
 }
-@ %def DBQueryRequestTransitDurationTotal
+public Supplier<int[]> DBQueryRequestTransitDurationTotalAsync() {
+  return () -> { <<DBFetch S121>> };
+}
+@ %def DBQueryRequestTransitDurationTotal DBQueryRequestTransitDurationTotalAsync
+<<DBFetch S121>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S121", 1);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryRequestTravelDuration]](1)}
 <<Query various metrics>>=
 public int[] DBQueryRequestTravelDuration(int rid) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(122, 1, rid);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S122>>
 }
-@ %def DBQueryRequestTravelDuration
+public Supplier<int[]> DBQueryRequestTravelDurationAsync(int rid) {
+  return () -> { <<DBFetch S122>> };
+}
+@ %def DBQueryRequestTravelDuration DBQueryRequestTravelDurationAsync
+<<DBFetch S122>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S122", 1, rid);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryRequestTravelDurationTotal]](0)}
 <<Query various metrics>>=
 public int[] DBQueryRequestTravelDurationTotal() throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(123, 1);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S123>>
 }
-@ %def DBQueryRequestTravelDurationTotal
+public Supplier<int[]> DBQueryRequestTravelDurationTotalAsync() {
+  return () -> { <<DBFetch S123>> };
+}
+@ %def DBQueryRequestTravelDurationTotal DBQueryRequestTravelDurationTotalAsync
+<<DBFetch S123>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S123", 1);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryRequestDepartureTime]](1)}
 <<Query various metrics>>=
 public int[] DBQueryRequestDepartureTime(int rid) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(124, 1, rid);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S124>>
 }
-@ %def DBQueryRequestDepartureTime
+public Supplier<int[]> DBQueryRequestDepartureTimeAsync(int rid) {
+  return () -> { <<DBFetch S124>> };
+}
+@ %def DBQueryRequestDepartureTime DBQueryRequestDepartureTimeAsync
+<<DBFetch S124>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S124", 1, rid);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryServerDepartureTime]](1)}
 <<Query various metrics>>=
 public int[] DBQueryServerDepartureTime(int sid) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(125, 1, sid);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S125>>
 }
-@ %def DBQueryServerDepartureTime
+public Supplier<int[]> DBQueryServerDepartureTimeAsync(int sid) {
+  return () -> { <<DBFetch S125>> };
+}
+@ %def DBQueryServerDepartureTime DBQueryServerDepartureTimeAsync
+<<DBFetch S125>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S125", 1, sid);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryRequestArrivalTime]](1)}
 <<Query various metrics>>=
 public int[] DBQueryRequestArrivalTime(int rid) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(126, 1, rid);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S126>>
 }
-@ %def DBQueryRequestArrivalTime
+public Supplier<int[]> DBQueryRequestArrivalTimeAsync(int rid) {
+  return () -> { <<DBFetch S126>> };
+}
+@ %def DBQueryRequestArrivalTime DBQueryRequestArrivalTimeAsync
+<<DBFetch S126>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S126", 1, rid);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \subsubsection{[[DBQueryServerArrivalTime]](1)}
 <<Query various metrics>>=
 public int[] DBQueryServerArrivalTime(int sid) throws RuntimeException {
-  int[] output = new int[] { };
-  try {
-    output = DBFetch(127, 1, sid);
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
+  <<DBFetch S127>>
 }
-@ %def DBQueryServerArrivalTime
+public Supplier<int[]> DBQueryServerArrivalTimeAsync(int sid) {
+  return () -> { <<DBFetch S127>> };
+}
+@ %def DBQueryServerArrivalTime DBQueryServerArrivalTimeAsync
+<<DBFetch S127>>=
+int[] output = new int[] { };
+try {
+  output = DBFetch("S127", 1, sid);
+}
+<<Catch and print [[SQLException]]>>
+return output;
+@
 
 \section{Private Methods}
 \label{sec:private}
-<<[[StorageInterface]] private methods>>=
+<<[[Storage]] private methods>>=
   <<Print a message>>
+  <<Setup JDBC driver>>
+  <<Initialize statements>>
   <<Prepare a prepared statement>>
   <<Fetch items from database>>
   <<Fill prepared statement>>
-  <<Clear prepared statement batch>>
   <<Submit prepared statement batch>>
-  <<Initialize statements>>
 @
 
 \subsection{[[Print]](1)}
 <<Print a message>>=
 private void Print(String msg) {
-  System.out.println("[Jargo][StorageInterface]["+LocalDateTime.now()+"] "+msg);
+  System.out.println("[Jargo][Storage]["+LocalDateTime.now()+"] "+msg);
 }
 @ %def Print
+
+\subsection{[[setupDriver]](0)}
+The following code registers a connection pool to the JDBC driver.
+<<Setup JDBC driver>>=
+private void setupDriver() throws RuntimeException {
+  try {
+    <<..initialize connection factory>>
+    <<..initialize poolable-connection factory using connection factory>>
+    <<..initialize connection pool using poolable-connection factory>>
+    <<..register pool to poolable-connection factory and driver>>
+    <<..configure database properties>>
+  } catch (Exception e) {
+    throw new RuntimeException(e);
+  }
+}
+@ %def setupDriver
+<<..initialize connection factory>>=
+connection_factory = new DriverManagerConnectionFactory(CONNECTIONS_URL);
+@
+<<..initialize poolable-connection factory using connection factory>>=
+poolableconnection_factory = new PoolableConnectionFactory(connection_factory, null);
+poolableconnection_factory.setPoolStatements(true);
+poolableconnection_factory.setDefaultAutoCommit(false);
+poolableconnection_factory.setMaxOpenPreparedStatements(STATEMENTS_MAX_COUNT);
+@
+<<..initialize connection pool using poolable-connection factory>>=
+pool = new GenericObjectPool<>(poolableconnection_factory);
+@
+<<..register pool to poolable-connection factory and driver>>=
+poolableconnection_factory.setPool(pool);
+Class.forName("org.apache.commons.dbcp2.PoolingDriver");
+driver = (PoolingDriver) DriverManager.getDriver(CONNECTIONS_DRIVER_URL);
+driver.registerPool(CONNECTIONS_POOL_NAME, pool);
+@
+We increase the page size\footnote{Even though the database is in-memory, the
+page size still needs to be set; see the Derby Tuning Guide for details.}.
+<<..configure database properties>>=
+Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+CallableStatement cs = conn.prepareCall(
+  "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
+cs.setString(1, "derby.storage.pageCacheSize");
+cs.setInt(2, DERBY_PAGECACHESIZE);
+cs.execute();
+conn.close();
+@
 
 \subsection{[[PS]](1)}
 We set the result set to scroll-insensitive and read-only in order to allow
 cursor movements.
 <<Prepare a prepared statement>>=
-private PreparedStatement PS(String sql) throws SQLException {
-  PreparedStatement ps = null;
+private PreparedStatement PS(Connection conn, String k) throws SQLException {
+  PreparedStatement p = null;
   try {
-    ps = conn.prepareStatement(sql,
+    p = conn.prepareStatement(pstr.get(k),
       ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+    p.clearBatch();
+    p.clearParameters();
+    // FOR DEBUGGING
+    // Print("PS("+pstr.get(k)+")");
   }
   <<Catch and throw [[SQLException]]>>
-  return ps;
+  return p;
 }
 @ %def PS
 
 \subsection{[[DBFetch]](3...)}
 <<Fetch items from database>>=
-private int[] DBFetch(int k, int ncols, Integer... values) throws SQLException {
+private int[] DBFetch(String k, int ncols, Integer... values) throws SQLException {
+  Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+  PreparedStatement p = PS(conn, k);
+  // FOR DEBUGGING
+  // Print("DBFetch("+pstr.get(k)+")");
+  // Print("DBFetch using conn "+conn.toString());
+  // Print("DBFetch on thread "+Thread.currentThread().getName());
   int[] output = new int[] { };
-  pstmt.get(k).clearParameters();
-  <<..set values for [[pstmt[k]]]>>
+  <<..set values for statement>>
   try {
-    res = pstmt.get(k).executeQuery();
+    ResultSet res = p.executeQuery();
     if (res.last() == true) {
       <<..flatten results>>
     }
+    res.close();
   }
   <<Catch and throw [[SQLException]]>>
+  p.close();
+  //Print("DBFetch closing conn "+conn.toString());
+  conn.close();
   return output;
 }
 @ %def DBFetch
-<<..set values for [[pstmt[k]]]>>=
+<<..set values for statement>>=
 for (int i = 0; i < values.length; i++) {
   if (values[i] == null) {
-    pstmt.get(k).setNull((i + 1), java.sql.Types.INTEGER);
+    p.setNull((i + 1), java.sql.Types.INTEGER);
   } else {
-    pstmt.get(k).setInt ((i + 1), values[i]);
+    p.setInt ((i + 1), values[i]);
   }
 }
 @
@@ -3392,44 +3672,32 @@ do {
 
 \subsection{[[PSAdd]](2...)}
 <<Fill prepared statement>>=
-private void PSAdd(int k, Integer... values) throws SQLException {
-  pstmt.get(k).clearParameters();
-  <<..set values for [[pstmt[k]]]>>
+private void PSAdd(PreparedStatement p, Integer... values) throws SQLException {
+  p.clearParameters();
+  <<..set values for statement>>
   try {
-    pstmt.get(k).addBatch();
+    p.addBatch();
   }
   <<Catch and throw [[SQLException]]>>
 }
 @ %def PSAdd
 
-\subsection{[[PSClear]](1...)}
-<<Clear prepared statement batch>>=
-private void PSClear(Integer... values) throws SQLException {
+\subsection{[[PSSubmit]](1...)}
+<<Submit prepared statement batch>>=
+private void PSSubmit(PreparedStatement... statements) throws SQLException {
   try {
-    for (Integer k : values) {
-      pstmt.get(k).clearBatch();
+    for (PreparedStatement p : statements) {
+      p.executeBatch();
+      p.close();
     }
   }
   <<Catch and throw [[SQLException]]>>
-}
-@ %def PSClear
-
-\subsection{[[PSSubmit]](1...)}
-<<Submit prepared statement batch>>=
-private void PSSubmit(Integer... values) throws SQLException {
-  try {
-    for (Integer k : values) {
-      pstmt.get(k).executeBatch();
-    }
-  }
-  <<Catch and rollback [[SQLException]]>>
 }
 @ %def PSSubmit
 
 \subsection{[[PSInit]](0)}
 <<Initialize statements>>=
-private void PSInit() throws RuntimeException {
-  pstmt = new HashMap<>();
+private static void PSInit() {
   pstr = new HashMap<>();
   String INS = "INSERT INTO ";
   String UPD = "UPDATE ";
@@ -3443,113 +3711,340 @@ private void PSInit() throws RuntimeException {
   String q9  = "(?,?,?,?,?,?,?,?,?)";
   String q12 = "(?,?,?,?,?,?,?,?,?,?,?,?)";
   String q14 = "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-
-  pstr.put( 0, INS+"V VALUES "+q3);
-  pstr.put( 1, INS+"E VALUES "+q4);
-  pstr.put( 2, INS+"UQ VALUES "+q2);
-  pstr.put( 3, INS+"UE VALUES "+q2);
-  pstr.put( 4, INS+"UL VALUES "+q2);
-  pstr.put( 5, INS+"UO VALUES "+q2);
-  pstr.put( 6, INS+"UD VALUES "+q2);
-  pstr.put( 7, INS+"UB VALUES "+q2);
-  pstr.put( 8, INS+"S VALUES "+q7);
-  pstr.put( 9, INS+"R VALUES "+q7);
-  pstr.put(10, INS+"W VALUES "+q8);
-  pstr.put(11, INS+"CW VALUES "+q9);
-  pstr.put(12, INS+"PD VALUES "+q4);
-  pstr.put(13, INS+"CPD VALUES "+q12);
-  pstr.put(14, INS+"CQ VALUES "+q14);
-  pstr.put(15, UPD+"E SET nu=? WHERE v1=? AND v2=?");
-  pstr.put(131, UPD+"W SET nu=? WHERE v1=? AND v2=?");
-  pstr.put(77, UPD+"CW SET te=?, ve=? WHERE sid=?");
-  pstr.put(84, UPD+"PD SET t2=? WHERE v2=? AND rid=?");
-  pstr.put(82, UPD+"CPD SET tp=? WHERE vp=? AND rid=?");
-  pstr.put(83, UPD+"CPD SET td=? WHERE vd=? AND rid=?");
-  pstr.put(76, DEL+"W WHERE sid=? AND t2>?");
-  pstr.put(42, DEL+"PD WHERE rid=?");
-  pstr.put(43, DEL+"CPD WHERE rid=?");
-  pstr.put(80, DEL+"CQ WHERE sid=? AND t2>?");
-  pstr.put(132, SEL+"MAX (uid) FROM UQ");
-  pstr.put(62, SEL+"COUNT (*) FROM V WHERE v<>0");
-  pstr.put(64, SEL+"MIN (lng), MAX (lng), MIN (lat), MAX (lat) "
+  <<S0>>
+  <<S1>>
+  <<S2>>
+  <<S3>>
+  <<S4>>
+  <<S5>>
+  <<S6>>
+  <<S7>>
+  <<S8>>
+  <<S9>>
+  <<S10>>
+  <<S11>>
+  <<S12>>
+  <<S13>>
+  <<S14>>
+  <<S15>>
+  <<S131>>
+  <<S77>>
+  <<S84>>
+  <<S82>>
+  <<S83>>
+  <<S76>>
+  <<S42>>
+  <<S43>>
+  <<S80>>
+  <<S132>>
+  <<S62>>
+  <<S64>>
+  <<S63>>
+  <<S65>>
+  <<S46>>
+  <<S130>>
+  <<S70>>
+  <<S48>>
+  <<S66>>
+  <<S75>>
+  <<S51>>
+  <<S67>>
+  <<S59>>
+  <<S128>>
+  <<S60>>
+  <<S129>>
+  <<S61>>
+  <<S69>>
+  <<S68>>
+  <<S85>>
+  <<S86>>
+  <<S73>>
+  <<S87>>
+  <<S100>>
+  <<S101>>
+  <<S102>>
+  <<S103>>
+  <<S104>>
+  <<S105>>
+  <<S106>>
+  <<S107>>
+  <<S108>>
+  <<S109>>
+  <<S110>>
+  <<S111>>
+  <<S112>>
+  <<S113>>
+  <<S114>>
+  <<S115>>
+  <<S116>>
+  <<S117>>
+  <<S118>>
+  <<S119>>
+  <<S120>>
+  <<S121>>
+  <<S122>>
+  <<S123>>
+  <<S124>>
+  <<S125>>
+  <<S126>>
+  <<S127>>
+  <<S133>>
+}
+@ %def PSInit
+<<S0>>=
+pstr.put("S0", INS+"V VALUES "+q3);
+@ %def S0
+<<S1>>=
+pstr.put("S1", INS+"E VALUES "+q4);
+@ %def S1
+<<S2>>=
+pstr.put("S2", INS+"UQ VALUES "+q2);
+@ %def S2
+<<S3>>=
+pstr.put("S3", INS+"UE VALUES "+q2);
+@ %def S3
+<<S4>>=
+pstr.put("S4", INS+"UL VALUES "+q2);
+@ %def S4
+<<S5>>=
+pstr.put("S5", INS+"UO VALUES "+q2);
+@ %def S5
+<<S6>>=
+pstr.put("S6", INS+"UD VALUES "+q2);
+@ %def S6
+<<S7>>=
+pstr.put("S7", INS+"UB VALUES "+q2);
+@ %def S7
+<<S8>>=
+pstr.put("S8", INS+"S VALUES "+q7);
+@ %def S8
+<<S9>>=
+pstr.put("S9", INS+"R VALUES "+q7);
+@ %def S9
+<<S10>>=
+pstr.put("S10", INS+"W VALUES "+q8);
+@ %def S10
+<<S70>>=
+pstr.put("S70", SEL+"sid, sq, se, sl, so, sd, sb FROM S WHERE sid=?");
+@ %def S70
+<<S11>>=
+pstr.put("S11", INS+"CW VALUES "+q9);
+@ %def S11
+<<S12>>=
+pstr.put("S12", INS+"PD VALUES "+q4);
+@ %def S12
+<<S13>>=
+pstr.put("S13", INS+"CPD VALUES "+q12);
+@ %def S13
+<<S14>>=
+pstr.put("S14", INS+"CQ VALUES "+q14);
+@ %def S14
+<<S15>>=
+pstr.put("S15", UPD+"E SET nu=? WHERE v1=? AND v2=?");
+@ %def S15
+<<S131>>=
+pstr.put("S131", UPD+"W SET nu=? WHERE v1=? AND v2=?");
+@ %def S131
+<<S77>>=
+pstr.put("S77", UPD+"CW SET te=?, ve=? WHERE sid=?");
+@ %def S77
+<<S84>>=
+pstr.put("S84", UPD+"PD SET t2=? WHERE v2=? AND rid=?");
+@ %def S84
+<<S82>>=
+pstr.put("S82", UPD+"CPD SET tp=? WHERE vp=? AND rid=?");
+@ %def S82
+<<S83>>=
+pstr.put("S83", UPD+"CPD SET td=? WHERE vd=? AND rid=?");
+@ %def S83
+<<S76>>=
+pstr.put("S76", DEL+"W WHERE sid=? AND t2>?");
+@ %def S76
+<<S42>>=
+pstr.put("S42", DEL+"PD WHERE rid=?");
+@ %def S42
+<<S43>>=
+pstr.put("S43", DEL+"CPD WHERE rid=?");
+@ %def S43
+<<S80>>=
+pstr.put("S80", DEL+"CQ WHERE sid=? AND t2>?");
+@ %def S80
+<<S132>>=
+pstr.put("S132", SEL+"MAX (uid) FROM UQ");
+@ %def S132
+<<S62>>=
+pstr.put("S62", SEL+"COUNT (*) FROM V WHERE v<>0");
+@ %def S62
+<<S64>>=
+pstr.put("S64", SEL+"MIN (lng), MAX (lng), MIN (lat), MAX (lat) "
       + "FROM V WHERE v<>0");
-  pstr.put(63, SEL+"COUNT (*) FROM E WHERE v1<>0 AND v2<>0");
-  pstr.put(65, SEL+"MIN (dd), MAX (dd), SUM (dd) / COUNT (dd), "
+@ %def S64
+<<S63>>=
+pstr.put("S63", SEL+"COUNT (*) FROM E WHERE v1<>0 AND v2<>0");
+@ %def S63
+<<S65>>=
+pstr.put("S65", SEL+"MIN (dd), MAX (dd), SUM (dd) / COUNT (dd), "
       + "MIN (nu), MAX (nu), SUM (nu) / COUNT (nu) "
       + "FROM E WHERE v1<>0 AND v2<>0");
-  pstr.put(46, SEL+"dd, nu FROM E WHERE v1=? AND v2=?");
-  pstr.put(130, SEL+"lng, lat FROM V WHERE v=?");
-  pstr.put(70, SEL+"sid, sq, se, sl, so, sd, sb FROM S WHERE sid=?");
-  pstr.put(48, SEL+"sq, se FROM S WHERE sid=?");
-  pstr.put(66, SEL+"COUNT (*) FROM S");
-  pstr.put(75, SEL+"rid, rq, re, rl, ro, rd, rb FROM R WHERE rid=?");
-  pstr.put(51, SEL+"rq, re, rl, ro, rd FROM R WHERE rid=?");
-  pstr.put(67, SEL+"COUNT (*) FROM R");
-  pstr.put(59, SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
+@ %def S65
+<<S46>>=
+pstr.put("S46", SEL+"dd, nu FROM E WHERE v1=? AND v2=?");
+@ %def S46
+<<S130>>=
+pstr.put("S130", SEL+"lng, lat FROM V WHERE v=?");
+@ %def S130
+<<S48>>=
+pstr.put("S48", SEL+"sq, se FROM S WHERE sid=?");
+@ %def S48
+<<S66>>=
+pstr.put("S66", SEL+"COUNT (*) FROM S");
+@ %def S66
+<<S75>>=
+pstr.put("S75", SEL+"rid, rq, re, rl, ro, rd, rb FROM R WHERE rid=?");
+@ %def S75
+<<S51>>=
+pstr.put("S51", SEL+"rq, re, rl, ro, rd FROM R WHERE rid=?");
+@ %def S51
+<<S67>>=
+pstr.put("S67", SEL+"COUNT (*) FROM R");
+@ %def S67
+<<S59>>=
+pstr.put("S59", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
       + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
       + "GROUP BY sid"
       + ") as b ON a.sid=b.sid AND ABS(a.t2-?)=b.tdiff AND a.t2<=?");
-  pstr.put(128, SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
+@ %def S59
+<<S128>>=
+pstr.put("S128", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
       + "SELECT sid FROM CW WHERE te>? OR (ve=0 AND sl>?)"
       + ") as b ON a.sid=b.sid INNER JOIN ("
       + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
       + "GROUP BY sid"
       + ") as c ON a.sid=c.sid AND ABS(a.t2-?)=c.tdiff AND a.t2<=?");
-  pstr.put(60, SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC");
-  pstr.put(129, SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC");
-  pstr.put(61, SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
+@ %def S128
+<<S60>>=
+pstr.put("S60", SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC");
+@ %def S60
+<<S129>>=
+pstr.put("S129", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC");
+@ %def S129
+<<S61>>=
+pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
       + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC");
-  // Always return a dummy destination
-  pstr.put(69, SEL+"t, v, Ls, Lr FROM r_server WHERE sid=? "
+@ %def S61
+<<S69>>=
+// Always return a dummy destination
+pstr.put("S69", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=? "
       + "AND (t>? OR v=0) "
       + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC");
-  // A "timeout" of 30 seconds is hard-coded here
-  pstr.put(68, SEL+"* FROM R WHERE re<=? AND ?<=re+30 AND rid NOT IN  "
+@ %def S69
+<<S68>>=
+// A "timeout" of 30 seconds is hard-coded here
+pstr.put("S68", SEL+"* FROM R WHERE re<=? AND ?<=re+30 AND rid NOT IN  "
       + "(SELECT rid FROM assignments_r)");
-  pstr.put(85, SEL+"uq FROM UQ WHERE uid=?");
-  pstr.put(86, SEL+"tp, td FROM CPD WHERE rid=?");
-  pstr.put(73, SEL+"q2 FROM CQ WHERE sid=? AND t2<=? "
+@ %def S68
+<<S85>>=
+pstr.put("S85", SEL+"uq FROM UQ WHERE uid=?");
+@ %def S85
+<<S86>>=
+pstr.put("S86", SEL+"tp, td FROM CPD WHERE rid=?");
+@ %def S86
+<<S73>>=
+pstr.put("S73", SEL+"q2 FROM CQ WHERE sid=? AND t2<=? "
       + "ORDER BY t2 DESC, o2 DESC FETCH FIRST ROW ONLY");
-  pstr.put(87, SEL+"t2, q2, o2 FROM CQ WHERE sid=? AND t2<? "
+@ %def S73
+<<S87>>=
+pstr.put("S87", SEL+"t2, q2, o2 FROM CQ WHERE sid=? AND t2<? "
       + "ORDER BY t2 DESC, o2 DESC FETCH FIRST ROW ONLY");
-  pstr.put(100, SEL+"rid FROM assignments WHERE t>? AND sid=?");
-  pstr.put(101, SEL+"rid FROM assignments WHERE t<=? AND sid=?");
-  pstr.put(102, SEL+"* FROM service_rate");
-  pstr.put(103, SEL+"* FROM dist_base");
-  pstr.put(104, SEL+"val FROM dist_s_travel WHERE sid=?");
-  pstr.put(105, SEL+"SUM (val) FROM dist_s_travel");
-  pstr.put(106, SEL+"val FROM dist_s_cruising WHERE sid=?");
-  pstr.put(107, SEL+"SUM (val) FROM dist_s_cruising");
-  pstr.put(108, SEL+"val FROM dist_s_service WHERE sid=?");
-  pstr.put(109, SEL+"SUM (val) FROM dist_s_service");
-  pstr.put(110, SEL+"val FROM dist_s_base");
-  pstr.put(111, SEL+"val FROM dist_r_base");
-  pstr.put(112, SEL+"val FROM dist_r_detour WHERE rid=?");
-  pstr.put(113, SEL+"SUM (val) FROM dist_r_detour");
-  pstr.put(114, SEL+"val FROM dist_r_transit WHERE rid=?");
-  pstr.put(115, SEL+"SUM (val) FROM dist_r_transit");
-  pstr.put(116, SEL+"val FROM dur_s_travel WHERE sid=?");
-  pstr.put(117, SEL+"SUM (val) FROM dur_s_travel");
-  pstr.put(118, SEL+"val FROM dur_r_pickup WHERE rid=?");
-  pstr.put(119, SEL+"SUM (val) FROM dur_r_pickup");
-  pstr.put(120, SEL+"val FROM dur_r_transit WHERE rid=?");
-  pstr.put(121, SEL+"SUM (val) FROM dur_r_transit");
-  pstr.put(122, SEL+"val FROM dur_r_travel WHERE rid=?");
-  pstr.put(123, SEL+"SUM (val) FROM dur_r_travel");
-  pstr.put(124, SEL+"val FROM t_r_depart WHERE rid=?");
-  pstr.put(125, SEL+"val FROM t_s_depart WHERE sid=?");
-  pstr.put(126, SEL+"val FROM t_r_arrive WHERE rid=?");
-  pstr.put(127, SEL+"val FROM t_s_arrive WHERE sid=?");
-  pstr.put(133, SEL+"val FROM f_status WHERE rid=? AND t<=? "
+@ %def S87
+<<S100>>=
+pstr.put("S100", SEL+"rid FROM assignments WHERE t>? AND sid=?");
+@ %def S100
+<<S101>>=
+pstr.put("S101", SEL+"rid FROM assignments WHERE t<=? AND sid=?");
+@ %def S101
+<<S102>>=
+pstr.put("S102", SEL+"* FROM service_rate");
+@ %def S102
+<<S103>>=
+pstr.put("S103", SEL+"* FROM dist_base");
+@ %def S103
+<<S104>>=
+pstr.put("S104", SEL+"val FROM dist_s_travel WHERE sid=?");
+@ %def S104
+<<S105>>=
+pstr.put("S105", SEL+"SUM (val) FROM dist_s_travel");
+@ %def S105
+<<S106>>=
+pstr.put("S106", SEL+"val FROM dist_s_cruising WHERE sid=?");
+@ %def S106
+<<S107>>=
+pstr.put("S107", SEL+"SUM (val) FROM dist_s_cruising");
+@ %def S107
+<<S108>>=
+pstr.put("S108", SEL+"val FROM dist_s_service WHERE sid=?");
+@ %def S108
+<<S109>>=
+pstr.put("S109", SEL+"SUM (val) FROM dist_s_service");
+@ %def S109
+<<S110>>=
+pstr.put("S110", SEL+"val FROM dist_s_base");
+@ %def S110
+<<S111>>=
+pstr.put("S111", SEL+"val FROM dist_r_base");
+@ %def S111
+<<S112>>=
+pstr.put("S112", SEL+"val FROM dist_r_detour WHERE rid=?");
+@ %def S112
+<<S113>>=
+pstr.put("S113", SEL+"SUM (val) FROM dist_r_detour");
+@ %def S113
+<<S114>>=
+pstr.put("S114", SEL+"val FROM dist_r_transit WHERE rid=?");
+@ %def S114
+<<S115>>=
+pstr.put("S115", SEL+"SUM (val) FROM dist_r_transit");
+@ %def S115
+<<S116>>=
+pstr.put("S116", SEL+"val FROM dur_s_travel WHERE sid=?");
+@ %def S116
+<<S117>>=
+pstr.put("S117", SEL+"SUM (val) FROM dur_s_travel");
+@ %def S117
+<<S118>>=
+pstr.put("S118", SEL+"val FROM dur_r_pickup WHERE rid=?");
+@ %def S118
+<<S119>>=
+pstr.put("S119", SEL+"SUM (val) FROM dur_r_pickup");
+@ %def S119
+<<S120>>=
+pstr.put("S120", SEL+"val FROM dur_r_transit WHERE rid=?");
+@ %def S120
+<<S121>>=
+pstr.put("S121", SEL+"SUM (val) FROM dur_r_transit");
+@ %def S121
+<<S122>>=
+pstr.put("S122", SEL+"val FROM dur_r_travel WHERE rid=?");
+@ %def S122
+<<S123>>=
+pstr.put("S123", SEL+"SUM (val) FROM dur_r_travel");
+@ %def S123
+<<S124>>=
+pstr.put("S124", SEL+"val FROM t_r_depart WHERE rid=?");
+@ %def S124
+<<S125>>=
+pstr.put("S125", SEL+"val FROM t_s_depart WHERE sid=?");
+@ %def S125
+<<S126>>=
+pstr.put("S126", SEL+"val FROM t_r_arrive WHERE rid=?");
+@ %def S126
+<<S127>>=
+pstr.put("S127", SEL+"val FROM t_s_arrive WHERE sid=?");
+@ %def S127
+<<S133>>=
+pstr.put("S133", SEL+"val FROM f_status WHERE rid=? AND t<=? "
     + "ORDER BY t DESC FETCH FIRST ROW ONLY");
-  try {
-    for (Map.Entry<Integer, String> kv : pstr.entrySet()) {
-      pstmt.put(kv.getKey(), PS(kv.getValue()));
-    }
-  }
-  <<Catch and print [[SQLException]]>>
-}
-@ %def PSInit
+@ %def S133
 
 \appendix
 

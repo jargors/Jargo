@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-java -cp .:$JARGO_LIB/*:$DERBYPATH/derby.jar StorageInterfaceTest $@
+java -cp .:$CLASSPATH/*:$DERBYPATH/derby.jar StorageTest $@

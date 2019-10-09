@@ -1,8 +1,8 @@
 # Storage Interface
-# - Set JARGO_LIB environmental variable before running `make`.
-# - Command `make clean` does NOT remove the compressed jar from $JARGO_LIB/.
+# - Set CLASSPATH environmental variable before running `make`.
+# - Command `make clean` does NOT remove the compressed jar from $CLASSPATH/.
 #   Do that manually.
-WIDGET=StorageInterface
+WIDGET=Storage
 VERSION=1.0.0
 
 .PHONY : all clean
@@ -10,8 +10,8 @@ VERSION=1.0.0
 all : pdf jar
 
 jar : java
-	javac -Xlint:deprecation -d . $(WIDGET).java
-	jar cvf $(JARGO_LIB)/jargors-$(WIDGET)-$(VERSION).jar com
+	javac -Xlint:deprecation -d . -cp .:$(CLASSPATH)/* $(WIDGET).java
+	jar cvf $(CLASSPATH)/jargors-$(WIDGET)-$(VERSION).jar com
 
 java : src/$(WIDGET).nw
 	notangle -R$(WIDGET).java src/$(WIDGET).nw > $(WIDGET).java

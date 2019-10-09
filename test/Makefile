@@ -1,13 +1,13 @@
 # Storage Test
-# - Set JARGO_LIB environmental variable before running `make`.
-WIDGET=StorageInterfaceTest
+# - Set CLASSPATH environmental variable before running `make`.
+WIDGET=StorageTest
 
 .PHONY : all clean
 
 all : pdf class
 
 class : java
-	javac -Xlint:deprecation -d . -cp .:$(JARGO_LIB)/* $(WIDGET).java
+	javac -Xlint:deprecation -d . -cp .:$(CLASSPATH)/* $(WIDGET).java
 
 java : src/$(WIDGET).nw
 	notangle -R$(WIDGET).java src/$(WIDGET).nw > $(WIDGET).java
