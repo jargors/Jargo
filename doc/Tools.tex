@@ -46,6 +46,7 @@ public class Tools \{
 
 \nwenddocs{}\nwbegincode{7}\sublabel{NW3zOIuJ-aPohW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-aPohW-1}}}\moddef{Member variables~{\nwtagstyle{}\subpageref{NW3zOIuJ-aPohW-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1xm30x-1}}
 private G_Tree gtree;
+private boolean flag_loaded = false;
 \nwendcode{}\nwbegindocs{8}\nwdocspar
 
 \nwenddocs{}\nwbegincode{9}\sublabel{NW3zOIuJ-4exbaU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-4exbaU-1}}}\moddef{Constructor~{\nwtagstyle{}\subpageref{NW3zOIuJ-4exbaU-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1xm30x-1}}
@@ -74,6 +75,7 @@ public void loadGTree(String p) \{
   if (p.length() > 0) \{
     gtreeJNI.load(p);
     gtree = gtreeJNI.get();
+    flag_loaded = true;
   \} else \{
     System.out.println("Bad path to gtree");
   \}
@@ -119,7 +121,9 @@ vertex is undefined and throws a {\tt{}RuntimeException}.
 \nwenddocs{}\nwbegincode{19}\sublabel{NW3zOIuJ-1XAjSF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1XAjSF-1}}}\moddef{Compute shortest path~{\nwtagstyle{}\subpageref{NW3zOIuJ-1XAjSF-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
 public int[] computeShortestPath(int u, int v) \{
   int[] output = null;
-  if (u == 0) \{
+  if (!flag_loaded) \{
+    throw new RuntimeException("GTree not loaded!");
+  \} else if (u == 0) \{
     throw new RuntimeException(
         "Attempted to find shortest path originating from dummy vertex!");
   \} else if (v == 0) \{
@@ -152,7 +156,9 @@ is always 0.
 \nwenddocs{}\nwbegincode{21}\sublabel{NW3zOIuJ-1A9hi2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1A9hi2-1}}}\moddef{Compute shortest path distance~{\nwtagstyle{}\subpageref{NW3zOIuJ-1A9hi2-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
 public int computeShortestPathDistance(int u, int v) \{
   int d = 0;
-  if (u == 0) \{
+  if (!flag_loaded) \{
+    throw new RuntimeException("GTree not loaded!");
+  \} else if (u == 0) \{
     throw new RuntimeException(
         "Attempted to find shortest distance originating from dummy vertex!");
   \} else if (u != v && v != 0) \{

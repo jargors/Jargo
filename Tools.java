@@ -2,6 +2,7 @@ package com.github.jargors;
 import com.github.jargors.gtreeJNI.*;
 public class Tools {
   private G_Tree gtree;
+  private boolean flag_loaded = false;
   public Tools() { }
     public void loadGTree(String p) {
       try {
@@ -13,6 +14,7 @@ public class Tools {
       if (p.length() > 0) {
         gtreeJNI.load(p);
         gtree = gtreeJNI.get();
+        flag_loaded = true;
       } else {
         System.out.println("Bad path to gtree");
       }
@@ -34,7 +36,9 @@ public class Tools {
     }
     public int[] computeShortestPath(int u, int v) {
       int[] output = null;
-      if (u == 0) {
+      if (!flag_loaded) {
+        throw new RuntimeException("GTree not loaded!");
+      } else if (u == 0) {
         throw new RuntimeException(
             "Attempted to find shortest path originating from dummy vertex!");
       } else if (v == 0) {
@@ -55,7 +59,9 @@ public class Tools {
     }
     public int computeShortestPathDistance(int u, int v) {
       int d = 0;
-      if (u == 0) {
+      if (!flag_loaded) {
+        throw new RuntimeException("GTree not loaded!");
+      } else if (u == 0) {
         throw new RuntimeException(
             "Attempted to find shortest distance originating from dummy vertex!");
       } else if (u != v && v != 0) {

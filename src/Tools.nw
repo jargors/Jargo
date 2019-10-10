@@ -46,6 +46,7 @@ public class Tools {
 
 <<Member variables>>=
 private G_Tree gtree;
+private boolean flag_loaded = false;
 @
 
 <<Constructor>>=
@@ -74,6 +75,7 @@ public void loadGTree(String p) {
   if (p.length() > 0) {
     gtreeJNI.load(p);
     gtree = gtreeJNI.get();
+    flag_loaded = true;
   } else {
     System.out.println("Bad path to gtree");
   }
@@ -119,7 +121,9 @@ vertex is undefined and throws a [[RuntimeException]].
 <<Compute shortest path>>=
 public int[] computeShortestPath(int u, int v) {
   int[] output = null;
-  if (u == 0) {
+  if (!flag_loaded) {
+    throw new RuntimeException("GTree not loaded!");
+  } else if (u == 0) {
     throw new RuntimeException(
         "Attempted to find shortest path originating from dummy vertex!");
   } else if (v == 0) {
@@ -152,7 +156,9 @@ is always 0.
 <<Compute shortest path distance>>=
 public int computeShortestPathDistance(int u, int v) {
   int d = 0;
-  if (u == 0) {
+  if (!flag_loaded) {
+    throw new RuntimeException("GTree not loaded!");
+  } else if (u == 0) {
     throw new RuntimeException(
         "Attempted to find shortest distance originating from dummy vertex!");
   } else if (u != v && v != 0) {
