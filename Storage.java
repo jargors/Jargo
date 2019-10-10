@@ -407,29 +407,6 @@ public class Storage {
       e = e.getNextException();
     }
   }
-  public void printUser(int[] u) {
-    System.out.println("User {uid="+u[0]+", q="+u[1]+", e="+u[2]+", l="+u[3]
-      +", o="+u[4]+", d="+u[5]+", b="+u[6]+"}");
-  }
-  public void printPath(int[] p) {
-    for (Integer i : p) {
-      System.out.print(i+" ");
-    }
-    System.out.println();
-  }
-  public void printRoute(int[] w) {
-    for (int i = 0; i < (w.length - 1); i += 2) {
-      System.out.print("("+w[i]+", "+w[(i + 1)]+") ");
-    }
-    System.out.println();
-  }
-  public void printSchedule(int[] b) {
-    for (int i = 0; i < (b.length - 3); i += 4) {
-      System.out.print("("+b[i]+", "+b[(i + 1)]
-        + ", "+b[(i + 2)]+", "+b[(i + 3)]+") ");
-    }
-    System.out.println();
-  }
   public void DBAddNewVertex(int v, int lng, int lat) throws RuntimeException {
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);

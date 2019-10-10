@@ -1,4 +1,5 @@
 import com.github.jargors.Storage;
+import com.github.jargors.Tools;
 import java.time.LocalDateTime;
 public class StorageTest {
   private static int count_passed = 0;
@@ -6,6 +7,7 @@ public class StorageTest {
   public static void main(String[] args) {
     Print("Starting storage interface tests");
     Storage storage = new Storage();
+    Tools tools = new Tools();
     storage.DBLoadBackup("data/db");
     {
       int output[] = storage.DBQuery("SELECT COUNT (*) FROM V", 1);
@@ -29,7 +31,7 @@ public class StorageTest {
          && output[6] == 0)) {
         Print("[FAIL] DBQueryServer(1)");
         Print("\tExpected {uid=1, q=-10, e=1, l=500, o=22, d=0, b=0}; got");
-        storage.printUser(output);
+        tools.printUser(output);
         count_failed++;
       } else {
         Print("[PASS] DBQueryServer(1)");
@@ -47,7 +49,7 @@ public class StorageTest {
          && output[6] == 172)) {
         Print("[FAIL] DBQueryRequest(1)");
         Print("\tExpected {uid=10, q=1, e=0, l=500, o=4, d=30, b=172}; got");
-        storage.printUser(output);
+        tools.printUser(output);
         count_failed++;
       } else {
         Print("[PASS] DBQueryRequest(1)");
@@ -81,7 +83,7 @@ public class StorageTest {
           && (output[6] == 194)) {
           Print("[FAIL] DBQueryQueuedRequests(1) (2/4)");
           Print("\tExpected {uid=11, q=1, e=5, l=500, o=1, d=32, b=194}; got");
-          storage.printUser(output);
+          tools.printUser(output);
           count_failed++;
         } else {
           Print("[PASS] DBQueryQueuedRequests(1) (2/4)");
@@ -103,7 +105,7 @@ public class StorageTest {
           && (output[6] == 194)) {
           Print("[FAIL] DBQueryQueuedRequests(1) (3/4)");
           Print("\tExpected {uid=11, q=1, e=5, l=500, o=1, d=32, b=194}; got");
-          storage.printUser(output);
+          tools.printUser(output);
           count_failed++;
         } else {
           Print("[PASS] DBQueryQueuedRequests(1) (3/4)");
@@ -286,7 +288,7 @@ public class StorageTest {
         && (output[5] == 5)) {
         Print("[FAIL] DBQueryRoute(1)");
         Print("\tExpected (10, 45) (19, 40) (28, 5); got ");
-        storage.printRoute(output);
+        tools.printRoute(output);
         count_failed++;
       } else {
         Print("[PASS] DBQueryRoute(1)");
@@ -307,7 +309,7 @@ public class StorageTest {
           && output[5] == 5)) {
           Print("[FAIL] DBQueryRouteRemaining(2) (1/3)");
           Print("\tExpected (10, 45) (19, 40) (28 5); got ");
-          storage.printRoute(output);
+          tools.printRoute(output);
           count_failed++;
         } else {
           Print("[PASS] DBQueryRouteRemaining(2) (1/3)");
@@ -326,7 +328,7 @@ public class StorageTest {
           && output[3] == 5)) {
           Print("[FAIL] DBQueryRouteRemaining(2) (2/3)");
           Print("\tExpected (19, 40) (28 5); got ");
-          storage.printRoute(output);
+          tools.printRoute(output);
           count_failed++;
         } else {
           Print("[PASS] DBQueryRouteRemaining(2) (2/3)");
@@ -345,7 +347,7 @@ public class StorageTest {
           && output[3] == 5)) {
           Print("[FAIL] DBQueryRouteRemaining(2) (3/3)");
           Print("\tExpected (19, 40) (28 5); got ");
-          storage.printRoute(output);
+          tools.printRoute(output);
           count_failed++;
         } else {
           Print("[PASS] DBQueryRouteRemaining(2) (3/3)");
@@ -377,7 +379,7 @@ public class StorageTest {
         Print("[FAIL] DBQuerySchedule(1)");
         Print("\tExpected (1, 22, 1, 0) (25, 4, 0, 10) "
           + "(44, 30, 0, 10) (45, 0, 1, 0); got ");
-        storage.printSchedule(output);
+        tools.printSchedule(output);
         count_failed++;
       } else {
         Print("[PASS] DBQuerySchedule(1)");
@@ -401,7 +403,7 @@ public class StorageTest {
           && output[7] == 0)) {
           Print("[FAIL] DBQueryScheduleRemaining(2) (1/4)");
           Print("\tExpected (44, 30, 0, 10) (45, 0, 1, 0); got ");
-          storage.printSchedule(output);
+          tools.printSchedule(output);
           count_failed++;
         } else {
           Print("[PASS] DBQueryScheduleRemaining(2) (1/4)");
@@ -420,7 +422,7 @@ public class StorageTest {
           && output[3] == 0)) {
           Print("[FAIL] DBQueryScheduleRemaining(2) (2/4)");
           Print("\tExpected (45, 0, 1, 0); got ");
-          storage.printSchedule(output);
+          tools.printSchedule(output);
           count_failed++;
         } else {
           Print("[PASS] DBQueryScheduleRemaining(2) (2/4)");
@@ -439,7 +441,7 @@ public class StorageTest {
           && output[3] == 0)) {
           Print("[FAIL] DBQueryScheduleRemaining(2) (3/4)");
           Print("\tExpected (45, 0, 1, 0); got ");
-          storage.printSchedule(output);
+          tools.printSchedule(output);
           count_failed++;
         } else {
           Print("[PASS] DBQueryScheduleRemaining(2) (3/4)");
@@ -458,7 +460,7 @@ public class StorageTest {
           && output[3] == 0)) {
           Print("[FAIL] DBQueryScheduleRemaining(2) (4/4)");
           Print("\tExpected (45, 0, 1, 0); got ");
-          storage.printSchedule(output);
+          tools.printSchedule(output);
           count_failed++;
         } else {
           Print("[PASS] DBQueryScheduleRemaining(2) (4/4)");
@@ -1013,7 +1015,7 @@ public class StorageTest {
         && output[6] == 63)) {
         Print("[FAIL] DBAddNewRequest(1)");
         Print("\tExpected { 12, 1, 0, 200, 45, 24, 63 }; got ");
-        storage.printUser(output);
+        tools.printUser(output);
         count_failed++;
       } else {
         Print("[PASS] DBAddNewRequest(1)");
@@ -1034,7 +1036,7 @@ public class StorageTest {
         && output[6] == 0)) {
         Print("[FAIL] DBAddNewServer(2)");
         Print("\tExpected { 13, -1, 0, 200, 27, 0, 0 }; got ");
-        storage.printUser(output);
+        tools.printUser(output);
         count_failed++;
       } else {
         output = storage.DBQueryRoute(13);
@@ -1044,7 +1046,7 @@ public class StorageTest {
           && output[3] == 0)) {
           Print("[FAIL] DBAddNewServer(2)");
           Print("\tExpected (0, 27) (1, 0); got ");
-          storage.printRoute(output);
+          tools.printRoute(output);
           count_failed++;
         } else {
           output = storage.DBQuerySchedule(13);
@@ -1058,7 +1060,7 @@ public class StorageTest {
             && output[7] == 0)) {
             Print("[FAIL] DBAddNewServer(2)");
             Print("\tExpected (0, 27, 13, 0) (1, 0, 13, 0); got ");
-            storage.printSchedule(output);
+            tools.printSchedule(output);
             count_failed++;
           } else {
             Print("[PASS] DBAddNewServer(2)");
@@ -1082,7 +1084,7 @@ public class StorageTest {
         && output[7] == 0)) {
         Print("[FAIL] DBUpdateServerRoute(2)");
         Print("\tExpected (0, 27) (7, 44) (14, 45) (15, 0); got ");
-        storage.printRoute(output);
+        tools.printRoute(output);
         count_failed++;
       } else {
         Print("[PASS] DBUpdateServerRoute(2)");
@@ -1107,7 +1109,7 @@ public class StorageTest {
           && output[9] == 0)) {
           Print("[FAIL] DBUpdateServerAddToSchedule(4) (1/5)");
           Print("\tExpected (0, 27) (7, 44) (14, 45) (21, 24) (22, 0); got ");
-          storage.printRoute(output);
+          tools.printRoute(output);
           count_failed++;
         } else {
           Print("[PASS] DBUpdateServerAddToSchedule(4) (1/5)");
@@ -1135,7 +1137,7 @@ public class StorageTest {
           Print("[FAIL] DBAddNewServer(2) (2/5)");
           Print("\tExpected (0, 27, 13, 0) (14, 45, 0, 12) (21, 24, 0, 12) "
             + "(22, 0, 13, 0); got ");
-          storage.printSchedule(output);
+          tools.printSchedule(output);
           count_failed++;
         } else {
           Print("[PASS] DBUpdateServerAddToSchedule(4) (2/5)");
@@ -1187,7 +1189,7 @@ public class StorageTest {
           && output[3] == 0)) {
           Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (1/5)");
           Print("\tExpected (0, 27) (1, 0); got ");
-          storage.printRoute(output);
+          tools.printRoute(output);
           count_failed++;
         } else {
           Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (1/5)");
@@ -1206,7 +1208,7 @@ public class StorageTest {
           && output[7] == 0)) {
           Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (2/5)");
           Print("\tExpected (0, 27, 13, 0) (1, 0, 13, 0); got ");
-          storage.printSchedule(output);
+          tools.printSchedule(output);
           count_failed++;
         } else {
           Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (2/5)");
