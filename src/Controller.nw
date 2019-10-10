@@ -116,10 +116,10 @@ Member variables are grouped into \emph{containers}, \emph{settings}, and
 <<Container objects>>=
 private Storage storage;
 private Communicator communicator;
-private Tools distance = new Tools();
+private Tools tools = new Tools();
 private Client client;
 private Map<Integer, int[]> lu_nodes = new HashMap<>();
-@ %def storage communicator distance client lu_nodes
+@ %def storage communicator tools client lu_nodes
 \hi{Settings.} Settings objects configure various aspects of the simulation.
 These settings should mostly be set by the evaluation program by using the public
 setters.
@@ -360,7 +360,7 @@ otherwise a shortest path could take a shortcut through the dummy vertex to
 reach any other vertex with 0 weight!}.
 <<..compute edge weight [[dist]]>>=
 dist = ((col[1] != 0 && col[2] != 0)
-  ? distance.computeHaversine(
+  ? tools.computeHaversine(
         col[3]/CSHIFT, col[4]/CSHIFT,
         col[5]/CSHIFT, col[6]/CSHIFT) : 0);
 @
@@ -388,7 +388,7 @@ public void loadProblem(String p) {
       int uq = col[3];
       int ue = col[4];
       int ul = col[5];
-      int ub = distance.computeShortestPathDistance(uo, ud);
+      int ub = tools.computeShortestPathDistance(uo, ud);
       if (uq < 0) {
         int[] server = new int[] { uid, uq, ue, ul, uo, ud, ub };
         int[] route = computeRoute(uo, ud, ue);
@@ -418,7 +418,7 @@ for (int i = 0; i < 6; i++) {
 \subsubsection{[[loadGTree]](1)}
 <<Load GTree>>=
 public void loadGTree(String p) {
-  distance.loadGTree(p);
+  tools.loadGTree(p);
 }
 @ %def loadGTree
 
@@ -676,11 +676,9 @@ private void Print(String msg) {
 @ %def Print
 
 \subsection{[[computeRoute(3)]]}
-Jargo road network is 1-indexed while G-tree is 0-indexed, so we need to
-compensate appropriately. The G-tree component doesn't have the best error
-handling, so we add some input validation into this method.
-We also need to detect when the target is the dummy
-vertex 0.
+The G-tree component doesn't have the best error handling, so we add some input
+validation into this method.  We also need to detect when the target is the
+dummy vertex 0.
 <<[[Controller]] private methods>>=
 private int[] computeRoute(int source, int target, int starttime)
 throws RuntimeException {
@@ -693,7 +691,7 @@ throws RuntimeException {
     int[] path = null;
     int[] edge = null;
     int u, v, dd, nu, t;
-    path = distance.computeShortestPath((source - 1), (target - 1));
+    path = tools.computeShortestPath(source, target);
     if (path == null) {
       throw new RuntimeException("ERROR computeRoute(3): null path!");
     } else {

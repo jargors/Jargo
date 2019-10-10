@@ -17,7 +17,7 @@ import java.util.HashMap;
 public class Controller {
   private Storage storage;
   private Communicator communicator;
-  private Tools distance = new Tools();
+  private Tools tools = new Tools();
   private Client client;
   private Map<Integer, int[]> lu_nodes = new HashMap<>();
   private final double CSHIFT = 10000000.0;
@@ -135,7 +135,7 @@ public class Controller {
           storage.DBAddNewVertex(col[2], col[5], col[6]);
         }
         dist = ((col[1] != 0 && col[2] != 0)
-          ? distance.computeHaversine(
+          ? tools.computeHaversine(
                 col[3]/CSHIFT, col[4]/CSHIFT,
                 col[5]/CSHIFT, col[6]/CSHIFT) : 0);
         storage.DBAddNewEdge(col[1], col[2], dist, 10);
@@ -161,7 +161,7 @@ public class Controller {
         int uq = col[3];
         int ue = col[4];
         int ul = col[5];
-        int ub = distance.computeShortestPathDistance(uo, ud);
+        int ub = tools.computeShortestPathDistance(uo, ud);
         if (uq < 0) {
           int[] server = new int[] { uid, uq, ue, ul, uo, ud, ub };
           int[] route = computeRoute(uo, ud, ue);
@@ -182,7 +182,7 @@ public class Controller {
     }
   }
   public void loadGTree(String p) {
-    distance.loadGTree(p);
+    tools.loadGTree(p);
   }
   public void start() {
     Print("SIMULATION STARTED");
@@ -323,7 +323,7 @@ public class Controller {
       int[] path = null;
       int[] edge = null;
       int u, v, dd, nu, t;
-      path = distance.computeShortestPath((source - 1), (target - 1));
+      path = tools.computeShortestPath(source, target);
       if (path == null) {
         throw new RuntimeException("ERROR computeRoute(3): null path!");
       } else {
