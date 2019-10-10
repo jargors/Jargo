@@ -34,21 +34,37 @@ public class Tools {
     }
     public int[] computeShortestPath(int u, int v) {
       int[] output = null;
-      if (u == v) {
+      if (u == 0) {
+        throw new RuntimeException(
+            "Attempted to find shortest path originating from dummy vertex!");
+      } else if (v == 0) {
+        output = new int[] { u, v };
+      } else if (u == v) {
         output = new int[] { u };
       } else {
         IntVector path = null;
-        gtree.find_path(u, v, path);
+        gtree.find_path((u - 1), (v - 1), path);        // L1
         if (path != null) {
           output = new int[path.size()];
           for (int i = 0; i < path.size(); i++) {
-            output[i] = path.get(i);
+            output[i] = path.get(i) + 1;                // L2
           }
         }
       }
       return output;
     }
     public int computeShortestPathDistance(int u, int v) {
-      return u == v ? 0 : gtree.search(u, v);
+      System.out.println("h0");
+      int d = 0;
+      if (u == 0) {
+        throw new RuntimeException(
+            "Attempted to find shortest distance originating from dummy vertex!");
+      } else if (u != v && v != 0) {
+        System.out.println("h1");
+        d = gtree.search((u - 1), (v - 1));
+        System.out.println("h2");
+      }
+      System.out.println("h3");
+      return d;
     }
 }

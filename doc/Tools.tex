@@ -106,18 +106,33 @@ if (d == 0 && (lng1 != lng2 || lat1 != lat2)) \{
 \}
 \nwendcode{}\nwbegindocs{18}\nwdocspar
 
+\subsection{{\tt{}\protect\nwindexuse{computeShortestPath}{computeShortestPath}{NW3zOIuJ-1XAjSF-1}computeShortestPath}(2)}
+Two important notes:
+\begin{itemize}
+\item The vertices in G-tree are 0-indexed while they are 1-indexed in Jargo.  To
+compensate, at location {\tt{}L1} we subtract 1 from {\tt{}u} and {\tt{}v}, and at
+location {\tt{}L2} we add 1 to the vertices returned in the path.
+\item We consider vertex 0 to be a dummy vertex. The path to this vertex
+from any other vertex $v$ is always $\{v, 0\}$. The path from 0 to any other
+vertex is undefined and throws a {\tt{}RuntimeException}.
+\end{itemize}
 \nwenddocs{}\nwbegincode{19}\sublabel{NW3zOIuJ-1XAjSF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1XAjSF-1}}}\moddef{Compute shortest path~{\nwtagstyle{}\subpageref{NW3zOIuJ-1XAjSF-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
 public int[] computeShortestPath(int u, int v) \{
   int[] output = null;
-  if (u == v) \{
+  if (u == 0) \{
+    throw new RuntimeException(
+        "Attempted to find shortest path originating from dummy vertex!");
+  \} else if (v == 0) \{
+    output = new int[] \{ u, v \};
+  \} else if (u == v) \{
     output = new int[] \{ u \};
   \} else \{
     IntVector path = null;
-    gtree.find_path(u, v, path);
+    gtree.find_path((u - 1), (v - 1), path);        // L1
     if (path != null) \{
       output = new int[path.size()];
       for (int i = 0; i < path.size(); i++) \{
-        output[i] = path.get(i);
+        output[i] = path.get(i) + 1;                // L2
       \}
     \}
   \}
@@ -125,9 +140,29 @@ public int[] computeShortestPath(int u, int v) \{
 \}
 \nwindexdefn{computeShortestPath}{computeShortestPath}{NW3zOIuJ-1XAjSF-1}\eatline
 \nwidentdefs{\\{{computeShortestPath}{computeShortestPath}}}\nwendcode{}\nwbegindocs{20}\nwdocspar
+\subsection{{\tt{}computeShortestPathDistance}(2)}
+Two important notes:
+\begin{itemize}
+\item The vertices in G-tree are 0-indexed while they are 1-indexed in Jargo.
+To compensate, at we subtract 1 from {\tt{}u} and {\tt{}v} when calling
+{\tt{}gtree.search}(2).
+\item We consider vertex 0 to be a dummy vertex. The distance to this vertex
+is always 0.
+\end{itemize}
 \nwenddocs{}\nwbegincode{21}\sublabel{NW3zOIuJ-1A9hi2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1A9hi2-1}}}\moddef{Compute shortest path distance~{\nwtagstyle{}\subpageref{NW3zOIuJ-1A9hi2-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
 public int computeShortestPathDistance(int u, int v) \{
-  return u == v ? 0 : gtree.search(u, v);
+  System.out.println("h0");
+  int d = 0;
+  if (u == 0) \{
+    throw new RuntimeException(
+        "Attempted to find shortest distance originating from dummy vertex!");
+  \} else if (u != v && v != 0) \{
+    System.out.println("h1");
+    d = gtree.search((u - 1), (v - 1));
+    System.out.println("h2");
+  \}
+  System.out.println("h3");
+  return d;
 \}
 \nwendcode{}
 
