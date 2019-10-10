@@ -59,9 +59,13 @@ public Tools() \{ \}
   \LA{}Compute haversine~{\nwtagstyle{}\subpageref{NW3zOIuJ-1XfngC-1}}\RA{}
   \LA{}Compute shortest path~{\nwtagstyle{}\subpageref{NW3zOIuJ-1XAjSF-1}}\RA{}
   \LA{}Compute shortest path distance~{\nwtagstyle{}\subpageref{NW3zOIuJ-1A9hi2-1}}\RA{}
+  \LA{}Print user~{\nwtagstyle{}\subpageref{NW3zOIuJ-3sWW32-1}}\RA{}
+  \LA{}Print path~{\nwtagstyle{}\subpageref{NW3zOIuJ-3QvbXQ-1}}\RA{}
+  \LA{}Print route~{\nwtagstyle{}\subpageref{NW3zOIuJ-2sTsm3-1}}\RA{}
+  \LA{}Print schedule~{\nwtagstyle{}\subpageref{NW3zOIuJ-45oGvT-1}}\RA{}
 \nwendcode{}\nwbegindocs{12}\nwdocspar
 
-\subsection{{\tt{}\protect\nosublabel{NW3zOIuJ-1eKCCy-1-u4}\protect\nwindexuse{loadGTree}{loadGTree}{NW3zOIuJ-b7Jka-1}loadGTree}(1)}
+\subsection{{\tt{}\protect\nosublabel{NW3zOIuJ-1eKCCy-1-u8}\protect\nwindexuse{loadGTree}{loadGTree}{NW3zOIuJ-b7Jka-1}loadGTree}(1)}
 The {\tt{}gtreeJNI.load}(1) method can do strange things if {\tt{}f{\char95}gtree} is empty,
 so we do some basic validation here before proceeding.
 \nwenddocs{}\nwbegincode{13}\sublabel{NW3zOIuJ-b7Jka-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-b7Jka-1}}}\moddef{Load GTree~{\nwtagstyle{}\subpageref{NW3zOIuJ-b7Jka-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
@@ -166,7 +170,52 @@ public int computeShortestPathDistance(int u, int v) \{
   \}
   return d;
 \}
-\nwendcode{}
+\nwendcode{}\nwbegindocs{22}\nwdocspar
+
+\subsection{{\tt{}\protect\nwindexuse{printUser}{printUser}{NW3zOIuJ-3sWW32-1}printUser}(1)}
+The {\tt{}\protect\nwindexuse{printUser}{printUser}{NW3zOIuJ-3sWW32-1}printUser}(1) method can be used to print properties of a ridesharing
+user.
+\nwenddocs{}\nwbegincode{23}\sublabel{NW3zOIuJ-3sWW32-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-3sWW32-1}}}\moddef{Print user~{\nwtagstyle{}\subpageref{NW3zOIuJ-3sWW32-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
+public void printUser(int[] u) \{
+  System.out.println("User \{uid="+u[0]+", q="+u[1]+", e="+u[2]+", l="+u[3]
+    +", o="+u[4]+", d="+u[5]+", b="+u[6]+"\}");
+\}
+\nwindexdefn{printUser}{printUser}{NW3zOIuJ-3sWW32-1}\eatline
+\nwidentdefs{\\{{printUser}{printUser}}}\nwendcode{}\nwbegindocs{24}\nwdocspar
+\subsection{{\tt{}\protect\nwindexuse{printPath}{printPath}{NW3zOIuJ-3QvbXQ-1}printPath}(1)}
+The {\tt{}\protect\nwindexuse{printPath}{printPath}{NW3zOIuJ-3QvbXQ-1}printPath}(1) method can be used to print a path.
+\nwenddocs{}\nwbegincode{25}\sublabel{NW3zOIuJ-3QvbXQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-3QvbXQ-1}}}\moddef{Print path~{\nwtagstyle{}\subpageref{NW3zOIuJ-3QvbXQ-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
+public void printPath(int[] p) \{
+  for (Integer i : p) \{
+    System.out.print(i+" ");
+  \}
+  System.out.println();
+\}
+\nwindexdefn{printPath}{printPath}{NW3zOIuJ-3QvbXQ-1}\eatline
+\nwidentdefs{\\{{printPath}{printPath}}}\nwendcode{}\nwbegindocs{26}\nwdocspar
+\subsection{{\tt{}\protect\nwindexuse{printRoute}{printRoute}{NW3zOIuJ-2sTsm3-1}printRoute}(1)}
+The {\tt{}\protect\nwindexuse{printRoute}{printRoute}{NW3zOIuJ-2sTsm3-1}printRoute}(1) method can be used to print a route.
+\nwenddocs{}\nwbegincode{27}\sublabel{NW3zOIuJ-2sTsm3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-2sTsm3-1}}}\moddef{Print route~{\nwtagstyle{}\subpageref{NW3zOIuJ-2sTsm3-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
+public void printRoute(int[] w) \{
+  for (int i = 0; i < (w.length - 1); i += 2) \{
+    System.out.print("("+w[i]+", "+w[(i + 1)]+") ");
+  \}
+  System.out.println();
+\}
+\nwindexdefn{printRoute}{printRoute}{NW3zOIuJ-2sTsm3-1}\eatline
+\nwidentdefs{\\{{printRoute}{printRoute}}}\nwendcode{}\nwbegindocs{28}\nwdocspar
+\subsection{{\tt{}\protect\nwindexuse{printSchedule}{printSchedule}{NW3zOIuJ-45oGvT-1}printSchedule}(1)}
+The {\tt{}\protect\nwindexuse{printSchedule}{printSchedule}{NW3zOIuJ-45oGvT-1}printSchedule}(1) method can be used to print a schedule.
+\nwenddocs{}\nwbegincode{29}\sublabel{NW3zOIuJ-45oGvT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-45oGvT-1}}}\moddef{Print schedule~{\nwtagstyle{}\subpageref{NW3zOIuJ-45oGvT-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
+public void printSchedule(int[] b) \{
+  for (int i = 0; i < (b.length - 3); i += 4) \{
+    System.out.print("("+b[i]+", "+b[(i + 1)]
+      + ", "+b[(i + 2)]+", "+b[(i + 3)]+") ");
+  \}
+  System.out.println();
+\}
+\nwindexdefn{printSchedule}{printSchedule}{NW3zOIuJ-45oGvT-1}\eatline
+\nwidentdefs{\\{{printSchedule}{printSchedule}}}\nwendcode{}
 
 \nwixlogsorted{c}{{..round to nearest meter}{NW3zOIuJ-1p0YRJ-1}{\nwixu{NW3zOIuJ-1XfngC-1}\nwixd{NW3zOIuJ-1p0YRJ-1}}}%
 \nwixlogsorted{c}{{\code{}Tools\edoc{} definition}{NW3zOIuJ-1xm30x-1}{\nwixu{NW3zOIuJ-2Vh5vZ-1}\nwixd{NW3zOIuJ-1xm30x-1}}}%
@@ -176,13 +225,21 @@ public int computeShortestPathDistance(int u, int v) \{
 \nwixlogsorted{c}{{Constructor}{NW3zOIuJ-4exbaU-1}{\nwixu{NW3zOIuJ-1xm30x-1}\nwixd{NW3zOIuJ-4exbaU-1}}}%
 \nwixlogsorted{c}{{Load GTree}{NW3zOIuJ-b7Jka-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-b7Jka-1}}}%
 \nwixlogsorted{c}{{Member variables}{NW3zOIuJ-aPohW-1}{\nwixu{NW3zOIuJ-1xm30x-1}\nwixd{NW3zOIuJ-aPohW-1}}}%
+\nwixlogsorted{c}{{Print path}{NW3zOIuJ-3QvbXQ-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-3QvbXQ-1}}}%
+\nwixlogsorted{c}{{Print route}{NW3zOIuJ-2sTsm3-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-2sTsm3-1}}}%
+\nwixlogsorted{c}{{Print schedule}{NW3zOIuJ-45oGvT-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-45oGvT-1}}}%
+\nwixlogsorted{c}{{Print user}{NW3zOIuJ-3sWW32-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-3sWW32-1}}}%
 \nwixlogsorted{c}{{Public methods}{NW3zOIuJ-1eKCCy-1}{\nwixu{NW3zOIuJ-1xm30x-1}\nwixd{NW3zOIuJ-1eKCCy-1}}}%
 \nwixlogsorted{c}{{Tools.java}{NW3zOIuJ-2Vh5vZ-1}{\nwixd{NW3zOIuJ-2Vh5vZ-1}}}%
 \nwixlogsorted{c}{{Tools.java preamble}{NW3zOIuJ-1ANZ96-1}{\nwixu{NW3zOIuJ-2Vh5vZ-1}\nwixd{NW3zOIuJ-1ANZ96-1}}}%
 \nwixlogsorted{i}{{computeHaversine}{computeHaversine}}%
 \nwixlogsorted{i}{{computeShortestPath}{computeShortestPath}}%
 \nwixlogsorted{i}{{loadGTree}{loadGTree}}%
-\nwbegindocs{22}\nwdocspar
+\nwixlogsorted{i}{{printPath}{printPath}}%
+\nwixlogsorted{i}{{printRoute}{printRoute}}%
+\nwixlogsorted{i}{{printSchedule}{printSchedule}}%
+\nwixlogsorted{i}{{printUser}{printUser}}%
+\nwbegindocs{30}\nwdocspar
 
 \appendix
 
