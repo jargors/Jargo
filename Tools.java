@@ -33,18 +33,22 @@ public class Tools {
       return d;
     }
     public int[] computeShortestPath(int u, int v) {
-      IntVector path = null;
       int[] output = null;
-      gtree.find_path(u, v, path);
-      if (path != null) {
-        output = new int[path.size()];
-        for (int i = 0; i < path.size(); i++) {
-          output[i] = path.get(i);
+      if (u == v) {
+        output = new int[] { u };
+      } else {
+        IntVector path = null;
+        gtree.find_path(u, v, path);
+        if (path != null) {
+          output = new int[path.size()];
+          for (int i = 0; i < path.size(); i++) {
+            output[i] = path.get(i);
+          }
         }
       }
       return output;
     }
     public int computeShortestPathDistance(int u, int v) {
-      return gtree.search(u, v);
+      return u == v ? 0 : gtree.search(u, v);
     }
 }

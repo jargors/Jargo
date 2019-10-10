@@ -108,13 +108,17 @@ if (d == 0 && (lng1 != lng2 || lat1 != lat2)) \{
 
 \nwenddocs{}\nwbegincode{19}\sublabel{NW3zOIuJ-1XAjSF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1XAjSF-1}}}\moddef{Compute shortest path~{\nwtagstyle{}\subpageref{NW3zOIuJ-1XAjSF-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
 public int[] computeShortestPath(int u, int v) \{
-  IntVector path = null;
   int[] output = null;
-  gtree.find_path(u, v, path);
-  if (path != null) \{
-    output = new int[path.size()];
-    for (int i = 0; i < path.size(); i++) \{
-      output[i] = path.get(i);
+  if (u == v) \{
+    output = new int[] \{ u \};
+  \} else \{
+    IntVector path = null;
+    gtree.find_path(u, v, path);
+    if (path != null) \{
+      output = new int[path.size()];
+      for (int i = 0; i < path.size(); i++) \{
+        output[i] = path.get(i);
+      \}
     \}
   \}
   return output;
@@ -123,7 +127,7 @@ public int[] computeShortestPath(int u, int v) \{
 \nwidentdefs{\\{{computeShortestPath}{computeShortestPath}}}\nwendcode{}\nwbegindocs{20}\nwdocspar
 \nwenddocs{}\nwbegincode{21}\sublabel{NW3zOIuJ-1A9hi2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1A9hi2-1}}}\moddef{Compute shortest path distance~{\nwtagstyle{}\subpageref{NW3zOIuJ-1A9hi2-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
 public int computeShortestPathDistance(int u, int v) \{
-  return gtree.search(u, v);
+  return u == v ? 0 : gtree.search(u, v);
 \}
 \nwendcode{}
 
