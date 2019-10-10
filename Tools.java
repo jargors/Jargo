@@ -54,17 +54,13 @@ public class Tools {
       return output;
     }
     public int computeShortestPathDistance(int u, int v) {
-      System.out.println("h0");
       int d = 0;
       if (u == 0) {
         throw new RuntimeException(
             "Attempted to find shortest distance originating from dummy vertex!");
       } else if (u != v && v != 0) {
-        System.out.println("h1");
         d = gtree.search((u - 1), (v - 1));
-        System.out.println("h2");
       }
-      System.out.println("h3");
       return d;
     }
 }
