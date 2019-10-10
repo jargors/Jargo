@@ -306,6 +306,7 @@ public void loadDataModel() throws RuntimeException {
 \subsubsection{[[loadRoadNetwork]](1)}
 <<Load road network>>=
 public void loadRoadNetwork(String f_rnet) throws RuntimeException {
+  Print("Load road network ("+f_rnet+")");
   try {
     int[] col = new int[7];
     int dist;
@@ -374,6 +375,7 @@ storage.DBAddNewEdge(col[1], col[2], dist, 10);
 \subsubsection{[[loadProblem(1)]]}
 <<Load problem>>=
 public void loadProblem(String p) {
+  Print("Load problem ("+p+")");
   try {
     Scanner sc = new Scanner(new File(p));
     <<..skip header rows>>
@@ -670,7 +672,7 @@ public int[] queryServerArrivalTime(int sid) throws RuntimeException {
 \subsection{[[Print(1)]]}
 <<[[Controller]] private methods>>=
 private void Print(String msg) {
-  System.out.println("[Controller]["+LocalDateTime.now()+"]"
+  System.out.println("[Jargo][Controller]["+LocalDateTime.now()+"]"
     + "[t="+world_time+"] "+msg);
 }
 @ %def Print

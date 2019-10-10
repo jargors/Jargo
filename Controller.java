@@ -106,6 +106,7 @@ public class Controller {
     storage.DBLoadDataModel();
   }
   public void loadRoadNetwork(String f_rnet) throws RuntimeException {
+    Print("Load road network ("+f_rnet+")");
     try {
       int[] col = new int[7];
       int dist;
@@ -145,6 +146,7 @@ public class Controller {
     }
   }
   public void loadProblem(String p) {
+    Print("Load problem ("+p+")");
     try {
       Scanner sc = new Scanner(new File(p));
       for (int i = 0; i < 6; i++) {
@@ -309,7 +311,7 @@ public class Controller {
     return storage.DBQueryServerArrivalTime(sid);
   }
   private void Print(String msg) {
-    System.out.println("[Controller]["+LocalDateTime.now()+"]"
+    System.out.println("[Jargo][Controller]["+LocalDateTime.now()+"]"
       + "[t="+world_time+"] "+msg);
   }
   private int[] computeRoute(int source, int target, int starttime)
