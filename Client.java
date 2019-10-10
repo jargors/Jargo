@@ -9,7 +9,7 @@ public abstract class Client {
   protected int r_collection_period = 1;
   protected int s_collection_period = 10;
   protected Communicator communicator;
-  protected Tools distance = new Tools();
+  protected Tools tools = new Tools();
   public Client() { }
     public void collectRequests(int[] src) {
       requests = src.clone();
@@ -37,7 +37,7 @@ public abstract class Client {
     public int computeHaversine(int u, int v) {
       int[] U = communicator.queryVertex(u);
       int[] V = communicator.queryVertex(v);
-      return distance.computeHaversine(U[0], U[1], V[0], V[1]);
+      return tools.computeHaversine(U[0], U[1], V[0], V[1]);
     }
     protected void endCollectRequests() {
       for (int i = 0; i < (requests.length - 6); i += 7) {
