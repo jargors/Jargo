@@ -46,7 +46,7 @@ public class Tools {
       } else if (u == v) {
         output = new int[] { u };
       } else {
-        IntVector path = null;
+        IntVector path = new IntVector();
         gtree.find_path((u - 1), (v - 1), path);        // L1
         if (path != null) {
           output = new int[path.size()];
