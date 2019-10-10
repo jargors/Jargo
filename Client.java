@@ -34,6 +34,9 @@ public abstract class Client {
     public void setServerLocationCollectionPeriod(int t) {
       s_collection_period = t;
     }
+    public void loadGTree(String p) {
+      tools.loadGTree(p);
+    }
     public int computeHaversine(int u, int v) {
       int[] U = communicator.queryVertex(u);
       int[] V = communicator.queryVertex(v);
