@@ -45,8 +45,8 @@ programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
 
 \section{Implementation Overview}
 <<Client.java>>=
-  <<Client.java preamble>>
-  <<[[Client]] definition>>
+<<Client.java preamble>>
+<<[[Client]] definition>>
 @
 
 \subsection{Preamble}
@@ -86,9 +86,9 @@ protected int[] requests;
 protected int[] locations;
 protected int r_collection_period = 1;
 protected int s_collection_period = 10;
-protected Communicator simulator;
+protected Communicator communicator;
 protected Tools distance = new Tools();
-@ %def requests locations r_collection_period s_collection_period simulator distance
+@ %def requests locations r_collection_period s_collection_period communicator distance
 
 \subsection{Constructor}
 An actual algorithm might override the default constructor to perform
@@ -171,7 +171,7 @@ public void collectServerLocations(int[] src) {
 \subsubsection{[[setCommunicator]](1)}
 <<Set simulation interface>>=
 public void setCommunicator(Communicator src) {
-  simulator = src;
+  communicator = src;
 }
 @ %def setCommunicator
 
@@ -206,8 +206,8 @@ public void setServerLocationCollectionPeriod(int t) {
 \subsubsection{[[computeHaversine]](2)}
 <<Compute haversine>>=
 public int computeHaversine(int u, int v) {
-  int[] U = simulator.queryVertex(u);
-  int[] V = simulator.queryVertex(v);
+  int[] U = communicator.queryVertex(u);
+  int[] V = communicator.queryVertex(v);
   return distance.computeHaversine(U[0], U[1], V[0], V[1]);
 }
 @ %def computeHaversine
@@ -291,7 +291,7 @@ protected void handleServerLocation(int[] loc) { }
 <<Print a message>>=
 protected void Print(String msg) {
   System.out.println("[Client]["+LocalDateTime.now()+"]"
-    + "[t="+simulator.getSimulationWorldTime()+"] "+msg);
+    + "[t="+communicator.getSimulationWorldTime()+"] "+msg);
 }
 @ %def Print
 

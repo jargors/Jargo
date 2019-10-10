@@ -45,8 +45,8 @@ programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
 
 \section{Implementation Overview}
 \nwfilename{src/Client.nw}\nwbegincode{1}\sublabel{NW2q3QGT-bpC9O-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-bpC9O-1}}}\moddef{Client.java~{\nwtagstyle{}\subpageref{NW2q3QGT-bpC9O-1}}}\endmoddef\nwnotused{Client.java}
-  \LA{}Client.java preamble~{\nwtagstyle{}\subpageref{NW2q3QGT-xBgX1-1}}\RA{}
-  \LA{}\code{}Client\edoc{} definition~{\nwtagstyle{}\subpageref{NW2q3QGT-3hr6Rs-1}}\RA{}
+\LA{}Client.java preamble~{\nwtagstyle{}\subpageref{NW2q3QGT-xBgX1-1}}\RA{}
+\LA{}\code{}Client\edoc{} definition~{\nwtagstyle{}\subpageref{NW2q3QGT-3hr6Rs-1}}\RA{}
 \nwendcode{}\nwbegindocs{2}\nwdocspar
 
 \subsection{Preamble}
@@ -86,10 +86,10 @@ protected int[] requests;
 protected int[] locations;
 protected int r_collection_period = 1;
 protected int s_collection_period = 10;
-protected Communicator simulator;
+protected Communicator communicator;
 protected Tools distance = new Tools();
-\nwindexdefn{requests}{requests}{NW2q3QGT-3qCSiR-1}\nwindexdefn{locations}{locations}{NW2q3QGT-3qCSiR-1}\nwindexdefn{r{\char95}collection{\char95}period}{r:uncollection:unperiod}{NW2q3QGT-3qCSiR-1}\nwindexdefn{s{\char95}collection{\char95}period}{s:uncollection:unperiod}{NW2q3QGT-3qCSiR-1}\nwindexdefn{simulator}{simulator}{NW2q3QGT-3qCSiR-1}\nwindexdefn{distance}{distance}{NW2q3QGT-3qCSiR-1}\eatline
-\nwidentdefs{\\{{distance}{distance}}\\{{locations}{locations}}\\{{r{\char95}collection{\char95}period}{r:uncollection:unperiod}}\\{{requests}{requests}}\\{{s{\char95}collection{\char95}period}{s:uncollection:unperiod}}\\{{simulator}{simulator}}}\nwendcode{}\nwbegindocs{10}\nwdocspar
+\nwindexdefn{requests}{requests}{NW2q3QGT-3qCSiR-1}\nwindexdefn{locations}{locations}{NW2q3QGT-3qCSiR-1}\nwindexdefn{r{\char95}collection{\char95}period}{r:uncollection:unperiod}{NW2q3QGT-3qCSiR-1}\nwindexdefn{s{\char95}collection{\char95}period}{s:uncollection:unperiod}{NW2q3QGT-3qCSiR-1}\nwindexdefn{communicator}{communicator}{NW2q3QGT-3qCSiR-1}\nwindexdefn{distance}{distance}{NW2q3QGT-3qCSiR-1}\eatline
+\nwidentdefs{\\{{communicator}{communicator}}\\{{distance}{distance}}\\{{locations}{locations}}\\{{r{\char95}collection{\char95}period}{r:uncollection:unperiod}}\\{{requests}{requests}}\\{{s{\char95}collection{\char95}period}{s:uncollection:unperiod}}}\nwendcode{}\nwbegindocs{10}\nwdocspar
 \subsection{Constructor}
 An actual algorithm might override the default constructor to perform
 preprocessing tasks such as building a road network index.
@@ -171,10 +171,10 @@ public void collectServerLocations(int[] src) \{
 \subsubsection{{\tt{}\protect\nwindexuse{setCommunicator}{setCommunicator}{NW2q3QGT-4etKpU-1}setCommunicator}(1)}
 \nwenddocs{}\nwbegincode{19}\sublabel{NW2q3QGT-4etKpU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-4etKpU-1}}}\moddef{Set simulation interface~{\nwtagstyle{}\subpageref{NW2q3QGT-4etKpU-1}}}\endmoddef\nwused{\\{NW2q3QGT-4VlNed-1}}
 public void setCommunicator(Communicator src) \{
-  simulator = src;
+  communicator = src;
 \}
 \nwindexdefn{setCommunicator}{setCommunicator}{NW2q3QGT-4etKpU-1}\eatline
-\nwidentdefs{\\{{setCommunicator}{setCommunicator}}}\nwidentuses{\\{{simulator}{simulator}}}\nwindexuse{simulator}{simulator}{NW2q3QGT-4etKpU-1}\nwendcode{}\nwbegindocs{20}\nwdocspar
+\nwidentdefs{\\{{setCommunicator}{setCommunicator}}}\nwidentuses{\\{{communicator}{communicator}}}\nwindexuse{communicator}{communicator}{NW2q3QGT-4etKpU-1}\nwendcode{}\nwbegindocs{20}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{getRequestCollectionPeriod}{getRequestCollectionPeriod}{NW2q3QGT-4fmrsw-1}getRequestCollectionPeriod}(0)}
 \nwenddocs{}\nwbegincode{21}\sublabel{NW2q3QGT-4fmrsw-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-4fmrsw-1}}}\moddef{Get/set request collection period~{\nwtagstyle{}\subpageref{NW2q3QGT-4fmrsw-1}}}\endmoddef\nwalsodefined{\\{NW2q3QGT-4fmrsw-2}}\nwused{\\{NW2q3QGT-4VlNed-1}}
 public int getRequestCollectionPeriod() \{
@@ -206,12 +206,12 @@ public void setServerLocationCollectionPeriod(int t) \{
 \subsubsection{{\tt{}\protect\nwindexuse{computeHaversine}{computeHaversine}{NW2q3QGT-1XfngC-1}computeHaversine}(2)}
 \nwenddocs{}\nwbegincode{29}\sublabel{NW2q3QGT-1XfngC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-1XfngC-1}}}\moddef{Compute haversine~{\nwtagstyle{}\subpageref{NW2q3QGT-1XfngC-1}}}\endmoddef\nwused{\\{NW2q3QGT-4VlNed-1}}
 public int computeHaversine(int u, int v) \{
-  int[] U = simulator.queryVertex(u);
-  int[] V = simulator.queryVertex(v);
+  int[] U = communicator.queryVertex(u);
+  int[] V = communicator.queryVertex(v);
   return distance.computeHaversine(U[0], U[1], V[0], V[1]);
 \}
 \nwindexdefn{computeHaversine}{computeHaversine}{NW2q3QGT-1XfngC-1}\eatline
-\nwidentdefs{\\{{computeHaversine}{computeHaversine}}}\nwidentuses{\\{{distance}{distance}}\\{{simulator}{simulator}}}\nwindexuse{distance}{distance}{NW2q3QGT-1XfngC-1}\nwindexuse{simulator}{simulator}{NW2q3QGT-1XfngC-1}\nwendcode{}\nwbegindocs{30}\nwdocspar
+\nwidentdefs{\\{{computeHaversine}{computeHaversine}}}\nwidentuses{\\{{communicator}{communicator}}\\{{distance}{distance}}}\nwindexuse{communicator}{communicator}{NW2q3QGT-1XfngC-1}\nwindexuse{distance}{distance}{NW2q3QGT-1XfngC-1}\nwendcode{}\nwbegindocs{30}\nwdocspar
 \section{Private Methods}
 \nwenddocs{}\nwbegincode{31}\sublabel{NW2q3QGT-4EUu6m-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-4EUu6m-1}}}\moddef{\code{}Client\edoc{} protected methods~{\nwtagstyle{}\subpageref{NW2q3QGT-4EUu6m-1}}}\endmoddef\nwused{\\{NW2q3QGT-3hr6Rs-1}}
   \LA{}End collect requests~{\nwtagstyle{}\subpageref{NW2q3QGT-2fY8iU-1}}\RA{}
@@ -291,10 +291,10 @@ protected void handleServerLocation(int[] loc) \{ \}
 \nwenddocs{}\nwbegincode{41}\sublabel{NW2q3QGT-2wEn3G-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-2wEn3G-1}}}\moddef{Print a message~{\nwtagstyle{}\subpageref{NW2q3QGT-2wEn3G-1}}}\endmoddef\nwused{\\{NW2q3QGT-4EUu6m-1}}
 protected void Print(String msg) \{
   System.out.println("[Client]["+LocalDateTime.now()+"]"
-    + "[t="+simulator.getSimulationWorldTime()+"] "+msg);
+    + "[t="+communicator.getSimulationWorldTime()+"] "+msg);
 \}
 \nwindexdefn{Print}{Print}{NW2q3QGT-2wEn3G-1}\eatline
-\nwidentdefs{\\{{Print}{Print}}}\nwidentuses{\\{{simulator}{simulator}}}\nwindexuse{simulator}{simulator}{NW2q3QGT-2wEn3G-1}\nwendcode{}
+\nwidentdefs{\\{{Print}{Print}}}\nwidentuses{\\{{communicator}{communicator}}}\nwindexuse{communicator}{communicator}{NW2q3QGT-2wEn3G-1}\nwendcode{}
 
 \nwixlogsorted{c}{{\code{}Client\edoc{} constructor}{NW2q3QGT-2crckK-1}{\nwixu{NW2q3QGT-3hr6Rs-1}\nwixd{NW2q3QGT-2crckK-1}}}%
 \nwixlogsorted{c}{{\code{}Client\edoc{} definition}{NW2q3QGT-3hr6Rs-1}{\nwixu{NW2q3QGT-bpC9O-1}\nwixd{NW2q3QGT-3hr6Rs-1}}}%
@@ -316,6 +316,7 @@ protected void Print(String msg) \{
 \nwixlogsorted{c}{{Set simulation interface}{NW2q3QGT-4etKpU-1}{\nwixu{NW2q3QGT-4VlNed-1}\nwixd{NW2q3QGT-4etKpU-1}}}%
 \nwixlogsorted{i}{{collectRequests}{collectRequests}}%
 \nwixlogsorted{i}{{collectServerLocations}{collectServerLocations}}%
+\nwixlogsorted{i}{{communicator}{communicator}}%
 \nwixlogsorted{i}{{computeHaversine}{computeHaversine}}%
 \nwixlogsorted{i}{{distance}{distance}}%
 \nwixlogsorted{i}{{endCollectRequests}{endCollectRequests}}%
@@ -332,7 +333,6 @@ protected void Print(String msg) \{
 \nwixlogsorted{i}{{setCommunicator}{setCommunicator}}%
 \nwixlogsorted{i}{{setRequestCollectionPeriod}{setRequestCollectionPeriod}}%
 \nwixlogsorted{i}{{setServerLocationCollectionPeriod}{setServerLocationCollectionPeriod}}%
-\nwixlogsorted{i}{{simulator}{simulator}}%
 \nwbegindocs{42}\nwdocspar
 \appendix
 
