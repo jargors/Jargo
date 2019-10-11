@@ -208,6 +208,10 @@ private Runnable RequestLoop = () -> {
 
 \subsubsection{Server Loop}
 This loop ``pushes'' server locations to the client.
+Option A. Cache the routes here, then update the cache when the routes change.
+Option B. Change the query to use one query to get active vehicles, then
+  a second query to get position from table W for each active vehicle, instead
+  of using join.
 <<Definition of server collection loop>>=
 private Runnable ServerLoop = () -> {
   final int t0 = world_time;
@@ -241,7 +245,8 @@ public Controller() {
 <<Load road network>>
 <<Load problem>>
 <<Load GTree>>
-<<Start simulation>>
+<<Start dynamic simulation>>
+<<Start static simulation>>
 @
 \hi{Read methods.}
 <<[[Controller]] public methods>>=
@@ -425,7 +430,7 @@ public void loadGTree(String p) {
 @ %def loadGTree
 
 \subsubsection{[[start]](0)}
-<<Start simulation>>=
+<<Start dynamic simulation>>=
 public void start() {
   Print("SIMULATION STARTED");
 
@@ -435,7 +440,7 @@ public void start() {
   Print("Set world time to "+world_time);
 
   int simulation_duration = (final_world_time - initial_world_time);
-  Print("Set duration to "+simulation_duration+" (sec)");
+  Print("Set world duration to "+simulation_duration+" (sec)");
 
   ScheduledExecutorService exe = Executors.newScheduledThreadPool(4);
 
@@ -467,6 +472,28 @@ public void start() {
   }, simulation_duration, TimeUnit.SECONDS);
 }
 @ %def start
+
+\subsubsection{[[startStatic]](0)}
+<<Start static simulation>>=
+public void startStatic() {
+  Print("SIMULATION STARTED -- STATIC MODE");
+
+  client.setCommunicator(communicator);
+
+  world_time = initial_world_time;
+  Print("Set world time to "+world_time);
+  Print("Set final world time to "+final_world_time+" (sec)");
+
+  while (world_time < final_world_time) {
+    ClockLoop.run();
+    EngineLoop.run();
+    ServerLoop.run();
+    RequestLoop.run();
+  }
+
+  Print("SIMULATION ENDED");
+}
+@ %def startStatic
 
 
 \subsection{Read Methods}

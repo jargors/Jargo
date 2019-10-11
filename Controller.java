@@ -195,7 +195,7 @@ public class Controller {
     Print("Set world time to "+world_time);
 
     int simulation_duration = (final_world_time - initial_world_time);
-    Print("Set duration to "+simulation_duration+" (sec)");
+    Print("Set world duration to "+simulation_duration+" (sec)");
 
     ScheduledExecutorService exe = Executors.newScheduledThreadPool(4);
 
@@ -225,6 +225,24 @@ public class Controller {
       exe.shutdown();
       Print("SIMULATION ENDED");
     }, simulation_duration, TimeUnit.SECONDS);
+  }
+  public void startStatic() {
+    Print("SIMULATION STARTED -- STATIC MODE");
+
+    client.setCommunicator(communicator);
+
+    world_time = initial_world_time;
+    Print("Set world time to "+world_time);
+    Print("Set final world time to "+final_world_time+" (sec)");
+
+    while (world_time < final_world_time) {
+      ClockLoop.run();
+      EngineLoop.run();
+      ServerLoop.run();
+      RequestLoop.run();
+    }
+
+    Print("SIMULATION ENDED");
   }
   public int[] query(String sql, int ncols) throws RuntimeException {
     return storage.DBQuery(sql, ncols);
