@@ -597,14 +597,14 @@ public class Storage {
             }
           }
         }
-        PreparedStatement pS80 = PS(conn, "S80");
-        PSAdd(pS80, sid, route[0]);
-        PSSubmit(pS80);
         int t1, q1, o1;
         output = DBFetch("S87", 3, sid, sched[0]);
         t1 = output[0];
         q1 = output[1];
         o1 = output[2];
+        PreparedStatement pS80 = PS(conn, "S80");
+        PSAdd(pS80, sid, route[0]);
+        PSSubmit(pS80);
         PreparedStatement pS14 = PS(conn, "S14");
         for (int j = 0; j < bound; j++) {
           int t2 = sched[(3*j)];
@@ -714,14 +714,14 @@ public class Storage {
           }
         }
       }
-      PreparedStatement pS80 = PS(conn, "S80");
-      PSAdd(pS80, sid, route[0]);
-      PSSubmit(pS80);
       int t1, q1, o1;
       output = DBFetch("S87", 3, sid, sched[0]);
       t1 = output[0];
       q1 = output[1];
       o1 = output[2];
+      PreparedStatement pS80 = PS(conn, "S80");
+      PSAdd(pS80, sid, route[0]);
+      PSSubmit(pS80);
       PreparedStatement pS14 = PS(conn, "S14");
       for (int j = 0; j < bound; j++) {
         int t2 = sched[(3*j)];
@@ -827,14 +827,14 @@ public class Storage {
           }
         }
       }
-      PreparedStatement pS80 = PS(conn, "S80");
-      PSAdd(pS80, sid, route[0]);
-      PSSubmit(pS80);
       int t1, q1, o1;
       output = DBFetch("S87", 3, sid, sched[0]);
       t1 = output[0];
       q1 = output[1];
       o1 = output[2];
+      PreparedStatement pS80 = PS(conn, "S80");
+      PSAdd(pS80, sid, route[0]);
+      PSSubmit(pS80);
       PreparedStatement pS14 = PS(conn, "S14");
       for (int j = 0; j < bound; j++) {
         int t2 = sched[(3*j)];
@@ -930,8 +930,18 @@ public class Storage {
   }
   public int[] DBQueryServerLocationsActive(int t) throws RuntimeException {
     int[] output = new int[] { };
+    int[] temp1 = new int[] { };
+    int[] temp2 = new int[] { };
     try {
-    output = DBFetch("S128", 3, t, t, t, t, t, t);
+      temp1 = DBFetch("S134", 1, t, t, t);
+      output = new int[(temp1.length*3)];
+      for (int i = 0; i < temp1.length; i++) {
+        int sid = temp1[i];
+        output[3*i] = sid;
+        temp2 = DBFetch("S135", 2, t, sid);
+        output[(3*i + 1)] = temp2[0];
+        output[(3*i + 2)] = temp2[1];
+      }
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1594,6 +1604,9 @@ public class Storage {
       pstr.put("S127", SEL+"val FROM t_s_arrive WHERE sid=?");
       pstr.put("S133", SEL+"val FROM f_status WHERE rid=? AND t<=? "
           + "ORDER BY t DESC FETCH FIRST ROW ONLY");
+      pstr.put("S134", SEL+"sid FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
+      pstr.put("S135", SEL+"t2, v2 FROM W WHERE t2<=? AND v2<>0 AND sid=? "
+            + "ORDER BY t2 DESC FETCH FIRST ROW ONLY");
     }
     private PreparedStatement PS(Connection conn, String k) throws SQLException {
       PreparedStatement p = null;
@@ -1624,7 +1637,7 @@ public class Storage {
         }
       }
       try {
-        ResultSet res = p.executeQuery();
+        ResultSet res = p.executeQuery();  // <-- if stuck here, investigate locks
         if (res.last() == true) {
           output = new int[(ncols*res.getRow())];
           res.first();
@@ -1642,6 +1655,9 @@ public class Storage {
       p.close();
       // Print("DBFetch close conn "+conn.toString());
       conn.close();
+      if (output.length == 0) {
+        Print("WARNING: DBFetch(3...) returned empty!");
+      }
       return output;
     }
     private void PSAdd(PreparedStatement p, Integer... values) throws SQLException {

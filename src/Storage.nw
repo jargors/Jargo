@@ -2240,6 +2240,7 @@ PSSubmit(pS77);
 int bound = (sched.length/3);
 <<....update times in pd and cpd>>
 <<....populate the tp, td cache>>
+<<....select latest order number>>
 <<....delete remaining schedule from cq>>
 <<....insert new remaining schedule into cq>>
 @
@@ -2274,17 +2275,19 @@ for (int j = 0; j < bound; j++) {
   }
 }
 @
+<<....select latest order number>>=
+int t1, q1, o1;
+output = DBFetch("S87", 3, sid, sched[0]);
+t1 = output[0];
+q1 = output[1];
+o1 = output[2];
+@
 <<....delete remaining schedule from cq>>=
 PreparedStatement pS80 = PS(conn, "S80");
 PSAdd(pS80, sid, route[0]);
 PSSubmit(pS80);
 @
 <<....insert new remaining schedule into cq>>=
-int t1, q1, o1;
-output = DBFetch("S87", 3, sid, sched[0]);
-t1 = output[0];
-q1 = output[1];
-o1 = output[2];
 PreparedStatement pS14 = PS(conn, "S14");
 for (int j = 0; j < bound; j++) {
   int t2 = sched[(3*j)];
@@ -2392,6 +2395,7 @@ throws RuntimeException {
 int bound = (sched.length/3);
 <<....update times in pd and cpd>>
 <<....populate the tp, td cache and vp, vd cache>>
+<<....select latest order number>>
 <<....delete remaining schedule from cq>>
 <<....insert new remaining schedule into cq>>
 <<....insert into pd, cpd>>
@@ -2637,9 +2641,22 @@ public int[] DBQueryServerLocationsAll(int t) throws RuntimeException {
 \subsubsection{[[DBQueryServerLocationsActive]](1)}
 <<Query active server locations>>=
 public int[] DBQueryServerLocationsActive(int t) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch("S128", 3, t, t, t, t, t, t);
-  <<..read return>>
+  int[] output = new int[] { };
+  int[] temp1 = new int[] { };
+  int[] temp2 = new int[] { };
+  try {
+    temp1 = DBFetch("S134", 1, t, t, t);
+    output = new int[(temp1.length*3)];
+    for (int i = 0; i < temp1.length; i++) {
+      int sid = temp1[i];
+      output[3*i] = sid;
+      temp2 = DBFetch("S135", 2, t, sid);
+      output[(3*i + 1)] = temp2[0];
+      output[(3*i + 2)] = temp2[1];
+    }
+  }
+  <<Catch and print [[SQLException]]>>
+  return output;
 }
 @ %def DBQueryServerLocationsActive
 
@@ -3148,7 +3165,7 @@ private int[] DBFetch(String k, int ncols, Integer... values) throws SQLExceptio
   int[] output = new int[] { };
   <<..set values for statement>>
   try {
-    ResultSet res = p.executeQuery();
+    ResultSet res = p.executeQuery();  // <-- if stuck here, investigate locks
     if (res.last() == true) {
       <<..flatten results>>
     }
@@ -3158,6 +3175,9 @@ private int[] DBFetch(String k, int ncols, Integer... values) throws SQLExceptio
   p.close();
   // Print("DBFetch close conn "+conn.toString());
   conn.close();
+  if (output.length == 0) {
+    Print("WARNING: DBFetch(3...) returned empty!");
+  }
   return output;
 }
 @ %def DBFetch
@@ -3301,6 +3321,8 @@ private static void PSInit() {
   <<S126>>
   <<S127>>
   <<S133>>
+  <<S134>>
+  <<S135>>
 }
 @ %def PSInit
 <<S0>>=
@@ -3554,6 +3576,13 @@ pstr.put("S127", SEL+"val FROM t_s_arrive WHERE sid=?");
 pstr.put("S133", SEL+"val FROM f_status WHERE rid=? AND t<=? "
     + "ORDER BY t DESC FETCH FIRST ROW ONLY");
 @ %def S133
+<<S134>>=
+pstr.put("S134", SEL+"sid FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
+@ %def S134
+<<S135>>=
+pstr.put("S135", SEL+"t2, v2 FROM W WHERE t2<=? AND v2<>0 AND sid=? "
+      + "ORDER BY t2 DESC FETCH FIRST ROW ONLY");
+@ %def S135
 
 \appendix
 
