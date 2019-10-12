@@ -548,30 +548,30 @@ public class StorageTest {
       }
     }
     {
-      int output[] = storage.DBQueryVertex(22);
-      if (!(output[0] == 1040750029)
-        && (output[1] == 306639030)) {
-        Print("[FAIL] DBQueryVertex(1)");
-        Print("\tExpected {1040750029, 306639030}; got "
-          + "{"+output[0]+", "+output[1]+"}");
-        count_failed++;
-      } else {
-        Print("[PASS] DBQueryVertex(1)");
-        count_passed++;
-      }
+      //int output[] = storage.DBQueryVertex(22);
+      //if (!(output[0] == 1040750029)
+      //  && (output[1] == 306639030)) {
+      //  Print("[FAIL] DBQueryVertex(1)");
+      //  Print("\tExpected {1040750029, 306639030}; got "
+      //    + "{"+output[0]+", "+output[1]+"}");
+      //  count_failed++;
+      //} else {
+      //  Print("[PASS] DBQueryVertex(1)");
+      //  count_passed++;
+      //}
     }
     {
-      int output[] = storage.DBQueryEdge(22, 1);
-      if (!(output[0] == 71)
-        && (output[1] == 10)) {
-        Print("[FAIL] DBQueryEdge(2)");
-        Print("\tExpected {71, 10}; got "
-          + "{"+output[0]+", "+output[1]+"}");
-        count_failed++;
-      } else {
-        Print("[PASS] DBQueryEdge(2)");
-        count_passed++;
-      }
+      //int output[] = storage.DBQueryEdge(22, 1);
+      //if (!(output[0] == 71)
+      //  && (output[1] == 10)) {
+      //  Print("[FAIL] DBQueryEdge(2)");
+      //  Print("\tExpected {71, 10}; got "
+      //    + "{"+output[0]+", "+output[1]+"}");
+      //  count_failed++;
+      //} else {
+      //  Print("[PASS] DBQueryEdge(2)");
+      //  count_passed++;
+      //}
     }
     {
       int output[] = storage.DBQueryStatisticsEdges();
@@ -992,16 +992,16 @@ public class StorageTest {
       }
     }
     {
-      storage.DBUpdateEdgeSpeed(22, 1, 11);
-      int[] output = storage.DBQueryEdge(22, 1);
-      if (!(output[1] == 11)) {
-        Print("[FAIL] DBUpdateEdgeSpeed(3)");
-        Print("\tExpected 11; got "+output[1]);
-        count_failed++;
-      } else {
-        Print("[PASS] DBUpdateEdgeSpeed(3)");
-        count_passed++;
-      }
+      //storage.DBUpdateEdgeSpeed(22, 1, 11);
+      //int[] output = storage.DBQueryEdge(22, 1);
+      //if (!(output[1] == 11)) {
+      //  Print("[FAIL] DBUpdateEdgeSpeed(3)");
+      //  Print("\tExpected 11; got "+output[1]);
+      //  count_failed++;
+      //} else {
+      //  Print("[PASS] DBUpdateEdgeSpeed(3)");
+      //  count_passed++;
+      //}
     }
     {
       storage.DBAddNewRequest(new int[] { 12, 1, 0, 200, 45, 24, 63 });

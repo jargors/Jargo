@@ -1732,9 +1732,12 @@ public class Storage {
 \label{sec:member-variables}
 \begin{itemize}
 \item We use a map to store statement strings, keyed by a string identifier.
+We also cache the road network vertices and edges.
 <<[[Storage]] member variables>>=
 private static Map<String, String> pstr = new HashMap<>();
-@ %def pstr
+private Map<Integer, int[]> lu_vertices = new HashMap<>();
+private Map<Integer, Map<Integer, int[]>> lu_edges = new HashMap<>();
+@ %def pstr lu_vertices lu_edges
 \item We declare configuration settings.
 <<[[Storage]] member variables>>=
 private String CONNECTIONS_URL = "jdbc:derby:memory:jargo;create=true";
@@ -1951,18 +1954,22 @@ conn.close();
 @
 
 \subsubsection{[[DBAddNewVertex]](3)}
-The [[DBAddNewVertex]](3) method is used by the simulation controller to
-load an on-disk road network into the database.
+The [[DBAddNewVertex]](3) method is used by the Controller to load an on-disk
+road network into the database. Duplicate-prevention is included here so the
+Controller doesn't have to.
 <<Add new vertex>>=
 public void DBAddNewVertex(int v, int lng, int lat) throws RuntimeException {
-  try {
-    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-    PreparedStatement pS0 = PS(conn, "S0");
-    PSAdd(pS0, v, lng, lat);
-    PSSubmit(pS0);
-    <<..commit and close>>
+  if (!lu_vertices.containsKey(v)) {
+    try {
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      PreparedStatement pS0 = PS(conn, "S0");
+      PSAdd(pS0, v, lng, lat);
+      PSSubmit(pS0);
+      <<..commit and close>>
+      lu_vertices.put(v, new int[] { lng, lat });
+    }
+    <<Catch and print [[SQLException]]>>
   }
-  <<Catch and print [[SQLException]]>>
 }
 @ %def DBAddNewVertex
 
@@ -1971,21 +1978,26 @@ The [[DBAddNewEdge]](4) method is also used to load an on-disk road network
 into the database.
 <<Add new edge>>=
 public void DBAddNewEdge(int v1, int v2, int dd, int nu) throws RuntimeException {
-  try {
-    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-    PreparedStatement pS1 = PS(conn, "S1");
-    PSAdd(pS1, v1, v2, dd, nu);
-    PSSubmit(pS1);
-    <<..commit and close>>
+  if (!lu_edges.containsKey(v1)) {
+    lu_edges.put(v1, new HashMap<>());
   }
-  <<Catch and print [[SQLException]]>>
+  if (!lu_edges.get(v1).containsKey(v2)) {
+    try {
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      PreparedStatement pS1 = PS(conn, "S1");
+      PSAdd(pS1, v1, v2, dd, nu);
+      PSSubmit(pS1);
+      <<..commit and close>>
+      lu_edges.get(v1).put(v2, new int[] { dd, nu });
+    }
+    <<Catch and print [[SQLException]]>>
+  }
 }
 @ %def DBAddNewEdge
 
 \subsubsection{[[DBUpdateEdgeSpeed]](3)}
 The [[DBUpdateEdgeSpeed]](3) method updates the maximum free-flow speed of an
-edge in the road network (in meters per second). This method fails silently if
-edge ([[v1]], [[v2]]) does not exist.
+edge in the road network (in meters per second).
 <<Update edge speed>>=
 public void DBUpdateEdgeSpeed(int v1, int v2, int nu) throws RuntimeException {
   try {
@@ -1996,10 +2008,15 @@ public void DBUpdateEdgeSpeed(int v1, int v2, int nu) throws RuntimeException {
     PSAdd(pS131, nu, v1, v2);
     PSSubmit(pS15, pS131);
     <<..commit and close>>
+    <<..update edges cache>>
   }
   <<Catch and print [[SQLException]]>>
 }
 @ %def DBUpdateEdgeSpeed
+<<..update edges cache>>=
+int dd = lu_edges.get(v1).get(v2)[0];
+lu_edges.get(v1).put(v2, new int[] { dd, nu });
+@
 
 \subsubsection{[[DBAddNewRequest]](1)}
 Array [[u]] =
@@ -2380,6 +2397,15 @@ in [[route]] cannot be labeled;
 public void DBUpdateServerAddToSchedule(
     int sid, int[] route, int[] sched, int[] rid)
 throws RuntimeException {
+  Print("Call DBUpdateServerAddToSchedule(4)");
+  Print("  sid="+sid);
+  Print("  route.length="+route.length);
+  Print("  schedule.length="+sched.length);
+  Print("  rid=");
+  for (int r : rid)
+    System.out.print(r+" ");
+  System.out.println();
+
   int[] output = new int[] { };
   int se, sq;
   Map<Integer, int[]> cache = new HashMap<>();
@@ -2421,6 +2447,7 @@ for (int j = 0; j < bound; j++) {
         tp = output[0];
         td = output[1];
       }
+      Print("cache.put("+Lj+", { "+rq+", "+tp+", "+td+" })");
       cache.put(Lj, new int[] { rq, tp, td });
     }
   }
@@ -2429,6 +2456,7 @@ for (int j = 0; j < bound; j++) {
 <<......check if new job>>=
 for (int r : rid) {
   if (Lj == r) {
+    Print("set flagged=true");
     flagged = true;
     break;
   }
@@ -2437,14 +2465,24 @@ for (int r : rid) {
 A second cache, [[cache2]], is introduced to store the pick-up an drop-off
 vertices so that we can use them when we insert into Table PD and CPD.
 <<......get tp, vp, td, vd of new job>>=
+Print("get tp, vp, td, vd of new job");
 tp = sched[(3*j)];
 vp = sched[(3*j + 1)];
+Print("set tp="+tp);
+Print("set vd="+vd);
 for (int k = (j + 1); k < bound; k++) {
+  Print(": k="+k);
+  Print(":   Lj="+Lj);
+  Print(":   sched[(3*k+2)]="+sched[3*k+2]);
   if (Lj == sched[(3*k + 2)]) {
     td = sched[(3*k)];
     vd = sched[(3*k + 1)];
+    Print(":   set td="+sched[3*k]);
+    Print(":   set vd="+sched[3*k+1]);
   }
 }
+Print("set td="+td);
+Print("set vd="+vd);
 cache2.put(Lj, new int[] { vp, vd });
 @
 <<....insert into pd, cpd>>=
@@ -2463,6 +2501,9 @@ for (int r : rid) {
   pd = cache2.get(r);
   PSAdd(pS12, sid, qpd[1], pd[0], r);
   PSAdd(pS12, sid, qpd[2], pd[1], r);
+  Print("INSERT INTO CPD VALUES "+sid+", "+se+", "+route[(route.length - 2)]
+    +", "+qpd[1]+", "+pd[0]+", "+qpd[2]+", "+pd[1]+", "+r+", "+re+", "+rl
+    +", "+ro+", "+rd+")");
   PSAdd(pS13, sid, se, route[(route.length - 2)], qpd[1], pd[0], qpd[2], pd[1],
         r, re, rl, ro, rd);
 }
@@ -2743,9 +2784,7 @@ Returned array =
 \noindent where parameter [[v]] provides $v$.
 <<Query various metrics>>=
 public int[] DBQueryVertex(int v) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch("S130", 2, v);
-  <<..read return>>
+  return lu_vertices.get(v);
 }
 @ %def DBQueryVertex
 
@@ -2764,9 +2803,7 @@ Returned array =
 [[v2]] provides $v_2$.
 <<Query various metrics>>=
 public int[] DBQueryEdge(int v1, int v2) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch("S46", 2, v1, v2);
-  <<..read return>>
+  return lu_edges.get(v1).get(v2);
 }
 @ %def DBQueryEdge
 

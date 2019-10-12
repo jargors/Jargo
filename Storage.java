@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.time.LocalDateTime;
 public class Storage {
   private static Map<String, String> pstr = new HashMap<>();
+  private Map<Integer, int[]> lu_vertices = new HashMap<>();
+  private Map<Integer, Map<Integer, int[]>> lu_edges = new HashMap<>();
   private String CONNECTIONS_URL = "jdbc:derby:memory:jargo;create=true";
   private final String CONNECTIONS_DRIVER_URL = "jdbc:apache:commons:dbcp:";
   private final String CONNECTIONS_POOL_NAME = "jargo";
@@ -408,33 +410,42 @@ public class Storage {
     }
   }
   public void DBAddNewVertex(int v, int lng, int lat) throws RuntimeException {
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      PreparedStatement pS0 = PS(conn, "S0");
-      PSAdd(pS0, v, lng, lat);
-      PSSubmit(pS0);
-      conn.commit();
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    if (!lu_vertices.containsKey(v)) {
+      try {
+        Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+        PreparedStatement pS0 = PS(conn, "S0");
+        PSAdd(pS0, v, lng, lat);
+        PSSubmit(pS0);
+        conn.commit();
+        conn.close();
+        lu_vertices.put(v, new int[] { lng, lat });
+      }
+      catch (SQLException e1) {
+        printSQLException(e1);
+        DBSaveBackup(DERBY_DUMPNAME);
+        throw new RuntimeException("database failure");
+      }
     }
   }
   public void DBAddNewEdge(int v1, int v2, int dd, int nu) throws RuntimeException {
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      PreparedStatement pS1 = PS(conn, "S1");
-      PSAdd(pS1, v1, v2, dd, nu);
-      PSSubmit(pS1);
-      conn.commit();
-      conn.close();
+    if (!lu_edges.containsKey(v1)) {
+      lu_edges.put(v1, new HashMap<>());
     }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    if (!lu_edges.get(v1).containsKey(v2)) {
+      try {
+        Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+        PreparedStatement pS1 = PS(conn, "S1");
+        PSAdd(pS1, v1, v2, dd, nu);
+        PSSubmit(pS1);
+        conn.commit();
+        conn.close();
+        lu_edges.get(v1).put(v2, new int[] { dd, nu });
+      }
+      catch (SQLException e1) {
+        printSQLException(e1);
+        DBSaveBackup(DERBY_DUMPNAME);
+        throw new RuntimeException("database failure");
+      }
     }
   }
   public void DBAddNewRequest(int[] u) throws RuntimeException {
@@ -530,6 +541,8 @@ public class Storage {
       PSSubmit(pS15, pS131);
       conn.commit();
       conn.close();
+      int dd = lu_edges.get(v1).get(v2)[0];
+      lu_edges.get(v1).put(v2, new int[] { dd, nu });
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -635,6 +648,15 @@ public class Storage {
   public void DBUpdateServerAddToSchedule(
       int sid, int[] route, int[] sched, int[] rid)
   throws RuntimeException {
+    Print("Call DBUpdateServerAddToSchedule(4)");
+    Print("  sid="+sid);
+    Print("  route.length="+route.length);
+    Print("  schedule.length="+sched.length);
+    Print("  rid=");
+    for (int r : rid)
+      System.out.print(r+" ");
+    System.out.println();
+
     int[] output = new int[] { };
     int se, sq;
     Map<Integer, int[]> cache = new HashMap<>();
@@ -691,25 +713,37 @@ public class Storage {
             boolean flagged = false;
             for (int r : rid) {
               if (Lj == r) {
+                Print("set flagged=true");
                 flagged = true;
                 break;
               }
             }
             if (flagged) {
+              Print("get tp, vp, td, vd of new job");
               tp = sched[(3*j)];
               vp = sched[(3*j + 1)];
+              Print("set tp="+tp);
+              Print("set vd="+vd);
               for (int k = (j + 1); k < bound; k++) {
+                Print(": k="+k);
+                Print(":   Lj="+Lj);
+                Print(":   sched[(3*k+2)]="+sched[3*k+2]);
                 if (Lj == sched[(3*k + 2)]) {
                   td = sched[(3*k)];
                   vd = sched[(3*k + 1)];
+                  Print(":   set td="+sched[3*k]);
+                  Print(":   set vd="+sched[3*k+1]);
                 }
               }
+              Print("set td="+td);
+              Print("set vd="+vd);
               cache2.put(Lj, new int[] { vp, vd });
             } else {
               output = DBFetch("S86", 2, Lj);
               tp = output[0];
               td = output[1];
             }
+            Print("cache.put("+Lj+", { "+rq+", "+tp+", "+td+" })");
             cache.put(Lj, new int[] { rq, tp, td });
           }
         }
@@ -754,6 +788,9 @@ public class Storage {
         pd = cache2.get(r);
         PSAdd(pS12, sid, qpd[1], pd[0], r);
         PSAdd(pS12, sid, qpd[2], pd[1], r);
+        Print("INSERT INTO CPD VALUES "+sid+", "+se+", "+route[(route.length - 2)]
+          +", "+qpd[1]+", "+pd[0]+", "+qpd[2]+", "+pd[1]+", "+r+", "+re+", "+rl
+          +", "+ro+", "+rd+")");
         PSAdd(pS13, sid, se, route[(route.length - 2)], qpd[1], pd[0], qpd[2], pd[1],
               r, re, rl, ro, rd);
       }
@@ -1035,28 +1072,10 @@ public class Storage {
     return output;
   }
   public int[] DBQueryVertex(int v) throws RuntimeException {
-    int[] output = new int[] { };
-    try {
-    output = DBFetch("S130", 2, v);
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
-    }
-    return output;
+    return lu_vertices.get(v);
   }
   public int[] DBQueryEdge(int v1, int v2) throws RuntimeException {
-    int[] output = new int[] { };
-    try {
-    output = DBFetch("S46", 2, v1, v2);
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
-    }
-    return output;
+    return lu_edges.get(v1).get(v2);
   }
   public int[] DBQueryStatisticsEdges() throws RuntimeException {
     int[] output = new int[] { };
