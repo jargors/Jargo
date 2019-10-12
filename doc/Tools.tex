@@ -35,6 +35,10 @@
 \nwenddocs{}\nwbegincode{3}\sublabel{NW3zOIuJ-1ANZ96-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1ANZ96-1}}}\moddef{Tools.java preamble~{\nwtagstyle{}\subpageref{NW3zOIuJ-1ANZ96-1}}}\endmoddef\nwused{\\{NW3zOIuJ-2Vh5vZ-1}}
 package com.github.jargors;
 import com.github.jargors.gtreeJNI.*;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 \nwendcode{}\nwbegindocs{4}\nwdocspar
 \nwenddocs{}\nwbegincode{5}\sublabel{NW3zOIuJ-1xm30x-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1xm30x-1}}}\moddef{\code{}Tools\edoc{} definition~{\nwtagstyle{}\subpageref{NW3zOIuJ-1xm30x-1}}}\endmoddef\nwused{\\{NW3zOIuJ-2Vh5vZ-1}}
 public class Tools \{
@@ -46,7 +50,9 @@ public class Tools \{
 
 \nwenddocs{}\nwbegincode{7}\sublabel{NW3zOIuJ-aPohW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-aPohW-1}}}\moddef{Member variables~{\nwtagstyle{}\subpageref{NW3zOIuJ-aPohW-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1xm30x-1}}
 private G_Tree gtree;
-private boolean flag_loaded = false;
+private boolean flag_gtree_loaded = false;
+private Map<Integer, int[]> lu_vertices;
+private Map<int[], int[]> lu_edges;
 \nwendcode{}\nwbegindocs{8}\nwdocspar
 
 \nwenddocs{}\nwbegincode{9}\sublabel{NW3zOIuJ-4exbaU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-4exbaU-1}}}\moddef{Constructor~{\nwtagstyle{}\subpageref{NW3zOIuJ-4exbaU-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1xm30x-1}}
@@ -56,16 +62,19 @@ public Tools() \{ \}
 \section{Public Methods}
 \nwenddocs{}\nwbegincode{11}\sublabel{NW3zOIuJ-1eKCCy-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1eKCCy-1}}}\moddef{Public methods~{\nwtagstyle{}\subpageref{NW3zOIuJ-1eKCCy-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1xm30x-1}}
   \LA{}Load GTree~{\nwtagstyle{}\subpageref{NW3zOIuJ-b7Jka-1}}\RA{}
+  \LA{}Load vertices map~{\nwtagstyle{}\subpageref{NW3zOIuJ-3xdAnJ-1}}\RA{}
+  \LA{}Load edges map~{\nwtagstyle{}\subpageref{NW3zOIuJ-2lPetT-1}}\RA{}
   \LA{}Compute haversine~{\nwtagstyle{}\subpageref{NW3zOIuJ-1XfngC-1}}\RA{}
   \LA{}Compute shortest path~{\nwtagstyle{}\subpageref{NW3zOIuJ-1XAjSF-1}}\RA{}
   \LA{}Compute shortest path distance~{\nwtagstyle{}\subpageref{NW3zOIuJ-1A9hi2-1}}\RA{}
+  \LA{}Filter locs by haversine distance~{\nwtagstyle{}\subpageref{NW3zOIuJ-1bwZd1-1}}\RA{}
   \LA{}Print user~{\nwtagstyle{}\subpageref{NW3zOIuJ-3sWW32-1}}\RA{}
   \LA{}Print path~{\nwtagstyle{}\subpageref{NW3zOIuJ-3QvbXQ-1}}\RA{}
   \LA{}Print route~{\nwtagstyle{}\subpageref{NW3zOIuJ-2sTsm3-1}}\RA{}
   \LA{}Print schedule~{\nwtagstyle{}\subpageref{NW3zOIuJ-45oGvT-1}}\RA{}
 \nwendcode{}\nwbegindocs{12}\nwdocspar
 
-\subsection{{\tt{}\protect\nosublabel{NW3zOIuJ-1eKCCy-1-u8}\protect\nwindexuse{loadGTree}{loadGTree}{NW3zOIuJ-b7Jka-1}loadGTree}(1)}
+\subsection{{\tt{}\protect\nosublabel{NW3zOIuJ-1eKCCy-1-u11}\protect\nwindexuse{loadGTree}{loadGTree}{NW3zOIuJ-b7Jka-1}loadGTree}(1)}
 The {\tt{}gtreeJNI.load}(1) method can do strange things if {\tt{}f{\char95}gtree} is empty,
 so we do some basic validation here before proceeding.
 \nwenddocs{}\nwbegincode{13}\sublabel{NW3zOIuJ-b7Jka-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-b7Jka-1}}}\moddef{Load GTree~{\nwtagstyle{}\subpageref{NW3zOIuJ-b7Jka-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
@@ -79,17 +88,33 @@ public void loadGTree(String p) \{
   if (p.length() > 0) \{
     gtreeJNI.load(p);
     gtree = gtreeJNI.get();
-    flag_loaded = true;
+    flag_gtree_loaded = true;
   \} else \{
     System.out.println("Bad path to gtree");
   \}
 \}
 \nwindexdefn{loadGTree}{loadGTree}{NW3zOIuJ-b7Jka-1}\eatline
 \nwidentdefs{\\{{loadGTree}{loadGTree}}}\nwendcode{}\nwbegindocs{14}\nwdocspar
+\subsection{{\tt{}\protect\nwindexuse{loadVerticesMap}{loadVerticesMap}{NW3zOIuJ-3xdAnJ-1}loadVerticesMap}(1)}
+Be mindful, any change to {\tt{}src} will appear in {\tt{}lu{\char95}vertices}.
+\nwenddocs{}\nwbegincode{15}\sublabel{NW3zOIuJ-3xdAnJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-3xdAnJ-1}}}\moddef{Load vertices map~{\nwtagstyle{}\subpageref{NW3zOIuJ-3xdAnJ-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
+public void loadVerticesMap(Map<Integer, int[]> src) \{
+  lu_vertices = src;
+\}
+\nwindexdefn{loadVerticesMap}{loadVerticesMap}{NW3zOIuJ-3xdAnJ-1}\eatline
+\nwidentdefs{\\{{loadVerticesMap}{loadVerticesMap}}}\nwendcode{}\nwbegindocs{16}\nwdocspar
+\subsection{{\tt{}\protect\nwindexuse{loadEdgesMap}{loadEdgesMap}{NW3zOIuJ-2lPetT-1}loadEdgesMap}(1)}
+Be mindful, any change to {\tt{}src} will appear in {\tt{}lu{\char95}edges}.
+\nwenddocs{}\nwbegincode{17}\sublabel{NW3zOIuJ-2lPetT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-2lPetT-1}}}\moddef{Load edges map~{\nwtagstyle{}\subpageref{NW3zOIuJ-2lPetT-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
+public void loadEdgesMap(Map<int[], int[]> src) \{
+  lu_edges = src;
+\}
+\nwindexdefn{loadEdgesMap}{loadEdgesMap}{NW3zOIuJ-2lPetT-1}\eatline
+\nwidentdefs{\\{{loadEdgesMap}{loadEdgesMap}}}\nwendcode{}\nwbegindocs{18}\nwdocspar
 \subsection{{\tt{}\protect\nwindexuse{computeHaversine}{computeHaversine}{NW3zOIuJ-1XfngC-1}computeHaversine}(4)}
 Most of this code is Copyright 2017 Juliano Macedo and is licensed under the
 MIT License. It has been modified from its original form.
-\nwenddocs{}\nwbegincode{15}\sublabel{NW3zOIuJ-1XfngC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1XfngC-1}}}\moddef{Compute haversine~{\nwtagstyle{}\subpageref{NW3zOIuJ-1XfngC-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
+\nwenddocs{}\nwbegincode{19}\sublabel{NW3zOIuJ-1XfngC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1XfngC-1}}}\moddef{Compute haversine~{\nwtagstyle{}\subpageref{NW3zOIuJ-1XfngC-1}}}\endmoddef\nwalsodefined{\\{NW3zOIuJ-1XfngC-2}}\nwused{\\{NW3zOIuJ-1eKCCy-1}}
 public int computeHaversine(double lng1, double lat1, double lng2, double lat2) \{
   double dlat = Math.toRadians(lat2 - lat1);
   double dlng = Math.toRadians(lng2 - lng1);
@@ -104,13 +129,22 @@ public int computeHaversine(double lng1, double lat1, double lng2, double lat2) 
   return d;
 \}
 \nosublabel{NW3zOIuJ-1XfngC-1-u1}\nwindexdefn{computeHaversine}{computeHaversine}{NW3zOIuJ-1XfngC-1}\eatline
-\nwidentdefs{\\{{computeHaversine}{computeHaversine}}}\nwendcode{}\nwbegindocs{16}If the nearest meter is 0 and the two points are not equal, then the distance
+\nwidentdefs{\\{{computeHaversine}{computeHaversine}}}\nwendcode{}\nwbegindocs{20}If the nearest meter is 0 and the two points are not equal, then the distance
 is rounded up to 1 meter.
-\nwenddocs{}\nwbegincode{17}\sublabel{NW3zOIuJ-1p0YRJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1p0YRJ-1}}}\moddef{..round to nearest meter~{\nwtagstyle{}\subpageref{NW3zOIuJ-1p0YRJ-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1XfngC-1}}
+\nwenddocs{}\nwbegincode{21}\sublabel{NW3zOIuJ-1p0YRJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1p0YRJ-1}}}\moddef{..round to nearest meter~{\nwtagstyle{}\subpageref{NW3zOIuJ-1p0YRJ-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1XfngC-1}}
 if (d == 0 && (lng1 != lng2 || lat1 != lat2)) \{
   d = 1;
 \}
-\nwendcode{}\nwbegindocs{18}\nwdocspar
+\nwendcode{}\nwbegindocs{22}\nwdocspar
+
+\subsection{{\tt{}\protect\nwindexuse{computeHaversine}{computeHaversine}{NW3zOIuJ-1XfngC-1}computeHaversine}(2)}
+\nwenddocs{}\nwbegincode{23}\sublabel{NW3zOIuJ-1XfngC-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1XfngC-2}}}\moddef{Compute haversine~{\nwtagstyle{}\subpageref{NW3zOIuJ-1XfngC-1}}}\plusendmoddef
+public int computeHaversine(int u, int v) \{
+  return computeHaversine(
+    lu_vertices.get(u)[0], lu_vertices.get(u)[1],
+    lu_vertices.get(v)[0], lu_vertices.get(v)[1]);
+\}
+\nwidentuses{\\{{computeHaversine}{computeHaversine}}}\nwindexuse{computeHaversine}{computeHaversine}{NW3zOIuJ-1XfngC-2}\nwendcode{}\nwbegindocs{24}\nwdocspar
 
 \subsection{{\tt{}\protect\nwindexuse{computeShortestPath}{computeShortestPath}{NW3zOIuJ-1XAjSF-1}computeShortestPath}(2)}
 Two important notes:
@@ -122,10 +156,10 @@ location {\tt{}L2} we add 1 to the vertices returned in the path.
 from any other vertex $v$ is always $\{v, 0\}$. The path from 0 to any other
 vertex is undefined and throws a {\tt{}RuntimeException}.
 \end{itemize}
-\nwenddocs{}\nwbegincode{19}\sublabel{NW3zOIuJ-1XAjSF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1XAjSF-1}}}\moddef{Compute shortest path~{\nwtagstyle{}\subpageref{NW3zOIuJ-1XAjSF-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
+\nwenddocs{}\nwbegincode{25}\sublabel{NW3zOIuJ-1XAjSF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1XAjSF-1}}}\moddef{Compute shortest path~{\nwtagstyle{}\subpageref{NW3zOIuJ-1XAjSF-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
 public int[] computeShortestPath(int u, int v) \{
   int[] output = null;
-  if (!flag_loaded) \{
+  if (!flag_gtree_loaded) \{
     throw new RuntimeException("GTree not loaded!");
   \} else if (u == 0) \{
     throw new RuntimeException(
@@ -147,7 +181,7 @@ public int[] computeShortestPath(int u, int v) \{
   return output;
 \}
 \nwindexdefn{computeShortestPath}{computeShortestPath}{NW3zOIuJ-1XAjSF-1}\eatline
-\nwidentdefs{\\{{computeShortestPath}{computeShortestPath}}}\nwendcode{}\nwbegindocs{20}\nwdocspar
+\nwidentdefs{\\{{computeShortestPath}{computeShortestPath}}}\nwendcode{}\nwbegindocs{26}\nwdocspar
 \subsection{{\tt{}computeShortestPathDistance}(2)}
 Two important notes:
 \begin{itemize}
@@ -157,10 +191,10 @@ To compensate, at we subtract 1 from {\tt{}u} and {\tt{}v} when calling
 \item We consider vertex 0 to be a dummy vertex. The distance to this vertex
 is always 0.
 \end{itemize}
-\nwenddocs{}\nwbegincode{21}\sublabel{NW3zOIuJ-1A9hi2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1A9hi2-1}}}\moddef{Compute shortest path distance~{\nwtagstyle{}\subpageref{NW3zOIuJ-1A9hi2-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
+\nwenddocs{}\nwbegincode{27}\sublabel{NW3zOIuJ-1A9hi2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1A9hi2-1}}}\moddef{Compute shortest path distance~{\nwtagstyle{}\subpageref{NW3zOIuJ-1A9hi2-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
 public int computeShortestPathDistance(int u, int v) \{
   int d = 0;
-  if (!flag_loaded) \{
+  if (!flag_gtree_loaded) \{
     throw new RuntimeException("GTree not loaded!");
   \} else if (u == 0) \{
     throw new RuntimeException(
@@ -170,21 +204,34 @@ public int computeShortestPathDistance(int u, int v) \{
   \}
   return d;
 \}
-\nwendcode{}\nwbegindocs{22}\nwdocspar
+\nwendcode{}\nwbegindocs{28}\nwdocspar
 
+\subsection{{\tt{}\protect\nwindexuse{filterByHaversine}{filterByHaversine}{NW3zOIuJ-1bwZd1-1}filterByHaversine}(3)}
+\nwenddocs{}\nwbegincode{29}\sublabel{NW3zOIuJ-1bwZd1-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1bwZd1-1}}}\moddef{Filter locs by haversine distance~{\nwtagstyle{}\subpageref{NW3zOIuJ-1bwZd1-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
+public int[] filterByHaversine(int ro, int[] locs, int threshold) \{
+  List<Integer> candidates = new ArrayList<>();
+  for (int k = 0; k < (locs.length - 2); k += 3) \{
+    if (computeHaversine(ro, locs[(k + 2)]) < threshold) \{
+      candidates.add(k);
+    \}
+  \}
+  return candidates.stream().mapToInt(k -> k).toArray();
+\}
+\nwindexdefn{filterByHaversine}{filterByHaversine}{NW3zOIuJ-1bwZd1-1}\eatline
+\nwidentdefs{\\{{filterByHaversine}{filterByHaversine}}}\nwidentuses{\\{{computeHaversine}{computeHaversine}}}\nwindexuse{computeHaversine}{computeHaversine}{NW3zOIuJ-1bwZd1-1}\nwendcode{}\nwbegindocs{30}\nwdocspar
 \subsection{{\tt{}\protect\nwindexuse{printUser}{printUser}{NW3zOIuJ-3sWW32-1}printUser}(1)}
 The {\tt{}\protect\nwindexuse{printUser}{printUser}{NW3zOIuJ-3sWW32-1}printUser}(1) method can be used to print properties of a ridesharing
 user.
-\nwenddocs{}\nwbegincode{23}\sublabel{NW3zOIuJ-3sWW32-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-3sWW32-1}}}\moddef{Print user~{\nwtagstyle{}\subpageref{NW3zOIuJ-3sWW32-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
+\nwenddocs{}\nwbegincode{31}\sublabel{NW3zOIuJ-3sWW32-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-3sWW32-1}}}\moddef{Print user~{\nwtagstyle{}\subpageref{NW3zOIuJ-3sWW32-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
 public void printUser(int[] u) \{
   System.out.println("User \{uid="+u[0]+", q="+u[1]+", e="+u[2]+", l="+u[3]
     +", o="+u[4]+", d="+u[5]+", b="+u[6]+"\}");
 \}
 \nwindexdefn{printUser}{printUser}{NW3zOIuJ-3sWW32-1}\eatline
-\nwidentdefs{\\{{printUser}{printUser}}}\nwendcode{}\nwbegindocs{24}\nwdocspar
+\nwidentdefs{\\{{printUser}{printUser}}}\nwendcode{}\nwbegindocs{32}\nwdocspar
 \subsection{{\tt{}\protect\nwindexuse{printPath}{printPath}{NW3zOIuJ-3QvbXQ-1}printPath}(1)}
 The {\tt{}\protect\nwindexuse{printPath}{printPath}{NW3zOIuJ-3QvbXQ-1}printPath}(1) method can be used to print a path.
-\nwenddocs{}\nwbegincode{25}\sublabel{NW3zOIuJ-3QvbXQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-3QvbXQ-1}}}\moddef{Print path~{\nwtagstyle{}\subpageref{NW3zOIuJ-3QvbXQ-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
+\nwenddocs{}\nwbegincode{33}\sublabel{NW3zOIuJ-3QvbXQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-3QvbXQ-1}}}\moddef{Print path~{\nwtagstyle{}\subpageref{NW3zOIuJ-3QvbXQ-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
 public void printPath(int[] p) \{
   for (Integer i : p) \{
     System.out.print(i+" ");
@@ -192,10 +239,10 @@ public void printPath(int[] p) \{
   System.out.println();
 \}
 \nwindexdefn{printPath}{printPath}{NW3zOIuJ-3QvbXQ-1}\eatline
-\nwidentdefs{\\{{printPath}{printPath}}}\nwendcode{}\nwbegindocs{26}\nwdocspar
+\nwidentdefs{\\{{printPath}{printPath}}}\nwendcode{}\nwbegindocs{34}\nwdocspar
 \subsection{{\tt{}\protect\nwindexuse{printRoute}{printRoute}{NW3zOIuJ-2sTsm3-1}printRoute}(1)}
 The {\tt{}\protect\nwindexuse{printRoute}{printRoute}{NW3zOIuJ-2sTsm3-1}printRoute}(1) method can be used to print a route.
-\nwenddocs{}\nwbegincode{27}\sublabel{NW3zOIuJ-2sTsm3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-2sTsm3-1}}}\moddef{Print route~{\nwtagstyle{}\subpageref{NW3zOIuJ-2sTsm3-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
+\nwenddocs{}\nwbegincode{35}\sublabel{NW3zOIuJ-2sTsm3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-2sTsm3-1}}}\moddef{Print route~{\nwtagstyle{}\subpageref{NW3zOIuJ-2sTsm3-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
 public void printRoute(int[] w) \{
   for (int i = 0; i < (w.length - 1); i += 2) \{
     System.out.print("("+w[i]+", "+w[(i + 1)]+") ");
@@ -203,10 +250,10 @@ public void printRoute(int[] w) \{
   System.out.println();
 \}
 \nwindexdefn{printRoute}{printRoute}{NW3zOIuJ-2sTsm3-1}\eatline
-\nwidentdefs{\\{{printRoute}{printRoute}}}\nwendcode{}\nwbegindocs{28}\nwdocspar
+\nwidentdefs{\\{{printRoute}{printRoute}}}\nwendcode{}\nwbegindocs{36}\nwdocspar
 \subsection{{\tt{}\protect\nwindexuse{printSchedule}{printSchedule}{NW3zOIuJ-45oGvT-1}printSchedule}(1)}
 The {\tt{}\protect\nwindexuse{printSchedule}{printSchedule}{NW3zOIuJ-45oGvT-1}printSchedule}(1) method can be used to print a schedule.
-\nwenddocs{}\nwbegincode{29}\sublabel{NW3zOIuJ-45oGvT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-45oGvT-1}}}\moddef{Print schedule~{\nwtagstyle{}\subpageref{NW3zOIuJ-45oGvT-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
+\nwenddocs{}\nwbegincode{37}\sublabel{NW3zOIuJ-45oGvT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-45oGvT-1}}}\moddef{Print schedule~{\nwtagstyle{}\subpageref{NW3zOIuJ-45oGvT-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
 public void printSchedule(int[] b) \{
   for (int i = 0; i < (b.length - 3); i += 4) \{
     System.out.print("("+b[i]+", "+b[(i + 1)]
@@ -219,11 +266,14 @@ public void printSchedule(int[] b) \{
 
 \nwixlogsorted{c}{{..round to nearest meter}{NW3zOIuJ-1p0YRJ-1}{\nwixu{NW3zOIuJ-1XfngC-1}\nwixd{NW3zOIuJ-1p0YRJ-1}}}%
 \nwixlogsorted{c}{{\code{}Tools\edoc{} definition}{NW3zOIuJ-1xm30x-1}{\nwixu{NW3zOIuJ-2Vh5vZ-1}\nwixd{NW3zOIuJ-1xm30x-1}}}%
-\nwixlogsorted{c}{{Compute haversine}{NW3zOIuJ-1XfngC-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-1XfngC-1}}}%
+\nwixlogsorted{c}{{Compute haversine}{NW3zOIuJ-1XfngC-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-1XfngC-1}\nwixd{NW3zOIuJ-1XfngC-2}}}%
 \nwixlogsorted{c}{{Compute shortest path}{NW3zOIuJ-1XAjSF-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-1XAjSF-1}}}%
 \nwixlogsorted{c}{{Compute shortest path distance}{NW3zOIuJ-1A9hi2-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-1A9hi2-1}}}%
 \nwixlogsorted{c}{{Constructor}{NW3zOIuJ-4exbaU-1}{\nwixu{NW3zOIuJ-1xm30x-1}\nwixd{NW3zOIuJ-4exbaU-1}}}%
+\nwixlogsorted{c}{{Filter locs by haversine distance}{NW3zOIuJ-1bwZd1-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-1bwZd1-1}}}%
+\nwixlogsorted{c}{{Load edges map}{NW3zOIuJ-2lPetT-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-2lPetT-1}}}%
 \nwixlogsorted{c}{{Load GTree}{NW3zOIuJ-b7Jka-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-b7Jka-1}}}%
+\nwixlogsorted{c}{{Load vertices map}{NW3zOIuJ-3xdAnJ-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-3xdAnJ-1}}}%
 \nwixlogsorted{c}{{Member variables}{NW3zOIuJ-aPohW-1}{\nwixu{NW3zOIuJ-1xm30x-1}\nwixd{NW3zOIuJ-aPohW-1}}}%
 \nwixlogsorted{c}{{Print path}{NW3zOIuJ-3QvbXQ-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-3QvbXQ-1}}}%
 \nwixlogsorted{c}{{Print route}{NW3zOIuJ-2sTsm3-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-2sTsm3-1}}}%
@@ -234,12 +284,15 @@ public void printSchedule(int[] b) \{
 \nwixlogsorted{c}{{Tools.java preamble}{NW3zOIuJ-1ANZ96-1}{\nwixu{NW3zOIuJ-2Vh5vZ-1}\nwixd{NW3zOIuJ-1ANZ96-1}}}%
 \nwixlogsorted{i}{{computeHaversine}{computeHaversine}}%
 \nwixlogsorted{i}{{computeShortestPath}{computeShortestPath}}%
+\nwixlogsorted{i}{{filterByHaversine}{filterByHaversine}}%
+\nwixlogsorted{i}{{loadEdgesMap}{loadEdgesMap}}%
 \nwixlogsorted{i}{{loadGTree}{loadGTree}}%
+\nwixlogsorted{i}{{loadVerticesMap}{loadVerticesMap}}%
 \nwixlogsorted{i}{{printPath}{printPath}}%
 \nwixlogsorted{i}{{printRoute}{printRoute}}%
 \nwixlogsorted{i}{{printSchedule}{printSchedule}}%
 \nwixlogsorted{i}{{printUser}{printUser}}%
-\nwbegindocs{30}\nwdocspar
+\nwbegindocs{38}\nwdocspar
 
 \appendix
 

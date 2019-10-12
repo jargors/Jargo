@@ -1,8 +1,14 @@
 package com.github.jargors;
 import com.github.jargors.gtreeJNI.*;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 public class Tools {
   private G_Tree gtree;
-  private boolean flag_loaded = false;
+  private boolean flag_gtree_loaded = false;
+  private Map<Integer, int[]> lu_vertices;
+  private Map<int[], int[]> lu_edges;
   public Tools() { }
     public void loadGTree(String p) {
       try {
@@ -14,10 +20,16 @@ public class Tools {
       if (p.length() > 0) {
         gtreeJNI.load(p);
         gtree = gtreeJNI.get();
-        flag_loaded = true;
+        flag_gtree_loaded = true;
       } else {
         System.out.println("Bad path to gtree");
       }
+    }
+    public void loadVerticesMap(Map<Integer, int[]> src) {
+      lu_vertices = src;
+    }
+    public void loadEdgesMap(Map<int[], int[]> src) {
+      lu_edges = src;
     }
     public int computeHaversine(double lng1, double lat1, double lng2, double lat2) {
       double dlat = Math.toRadians(lat2 - lat1);
@@ -34,9 +46,14 @@ public class Tools {
       }
       return d;
     }
+    public int computeHaversine(int u, int v) {
+      return computeHaversine(
+        lu_vertices.get(u)[0], lu_vertices.get(u)[1],
+        lu_vertices.get(v)[0], lu_vertices.get(v)[1]);
+    }
     public int[] computeShortestPath(int u, int v) {
       int[] output = null;
-      if (!flag_loaded) {
+      if (!flag_gtree_loaded) {
         throw new RuntimeException("GTree not loaded!");
       } else if (u == 0) {
         throw new RuntimeException(
@@ -59,7 +76,7 @@ public class Tools {
     }
     public int computeShortestPathDistance(int u, int v) {
       int d = 0;
-      if (!flag_loaded) {
+      if (!flag_gtree_loaded) {
         throw new RuntimeException("GTree not loaded!");
       } else if (u == 0) {
         throw new RuntimeException(
@@ -68,6 +85,15 @@ public class Tools {
         d = gtree.search((u - 1), (v - 1));
       }
       return d;
+    }
+    public int[] filterByHaversine(int ro, int[] locs, int threshold) {
+      List<Integer> candidates = new ArrayList<>();
+      for (int k = 0; k < (locs.length - 2); k += 3) {
+        if (computeHaversine(ro, locs[(k + 2)]) < threshold) {
+          candidates.add(k);
+        }
+      }
+      return candidates.stream().mapToInt(k -> k).toArray();
     }
     public void printUser(int[] u) {
       System.out.println("User {uid="+u[0]+", q="+u[1]+", e="+u[2]+", l="+u[3]
