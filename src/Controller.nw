@@ -118,8 +118,9 @@ private Storage storage;
 private Communicator communicator;
 private Tools tools = new Tools();
 private Client client;
-private Map<Integer, int[]> lu_nodes = new HashMap<>();
-@ %def storage communicator tools client lu_nodes
+private Map<Integer, int[]> lu_vertices = new HashMap<>();
+private Map<int[], int[]> lu_edges = new HashMap<>();
+@ %def storage communicator tools client lu_vertices lu_edges
 \hi{Settings.} Settings objects configure various aspects of the simulation.
 These settings should mostly be set by the evaluation program by using the public
 setters.
@@ -239,6 +240,8 @@ public Controller() {
 <<Set initial world time>>
 <<Set final world time>>
 <<Get world time>>
+<<Get vertices map>>
+<<Get edges map>>
 <<Save backup>>
 <<Load backup>>
 <<Load data model>>
@@ -286,6 +289,20 @@ public static int getSimulationWorldTime() {
   return world_time;
 }
 @ %def getSimulationWorldTime
+
+\subsubsection{[[getVerticesMap]](0)}
+<<Get vertices map>>=
+public final Map<Integer, int[]> getVerticesMap() {
+  return lu_vertices;
+}
+@ %def getVerticesMap
+
+\subsubsection{[[getEdgesMap]](0)}
+<<Get edges map>>=
+public final Map<int[], int[]> getEdgesMap() {
+  return lu_edges;
+}
+@ %def getEdgesMap
 
 \subsubsection{[[save]](1)}
 <<Save backup>>=
@@ -349,12 +366,12 @@ if (col[2] == 0) {
 }
 @
 <<..insert vertex coordinates>>=
-if (!lu_nodes.containsKey(col[1])) {
-  lu_nodes.put(col[1], new int[] { col[3], col[4] });
+if (!lu_vertices.containsKey(col[1])) {
+  lu_vertices.put(col[1], new int[] { col[3], col[4] });
   storage.DBAddNewVertex(col[1], col[3], col[4]);
 }
-if (!lu_nodes.containsKey(col[2])) {
-  lu_nodes.put(col[2], new int[] { col[5], col[6] });
+if (!lu_vertices.containsKey(col[2])) {
+  lu_vertices.put(col[2], new int[] { col[5], col[6] });
   storage.DBAddNewVertex(col[2], col[5], col[6]);
 }
 @
@@ -375,6 +392,7 @@ the future, the speed on each edge may be recorded directly in the road network
 file instead of hardcoded here.}.
 <<..insert edge>>=
 storage.DBAddNewEdge(col[1], col[2], dist, 10);
+lu_edges.put(new int[] { col[1], col[2] }, new int[] { dist, 10 });
 @
 
 \subsubsection{[[loadProblem(1)]]}

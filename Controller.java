@@ -19,7 +19,8 @@ public class Controller {
   private Communicator communicator;
   private Tools tools = new Tools();
   private Client client;
-  private Map<Integer, int[]> lu_nodes = new HashMap<>();
+  private Map<Integer, int[]> lu_vertices = new HashMap<>();
+  private Map<int[], int[]> lu_edges = new HashMap<>();
   private final double CSHIFT = 10000000.0;
   private static int world_time = 0;
   private int initial_world_time = 0;
@@ -96,6 +97,12 @@ public class Controller {
   public static int getSimulationWorldTime() {
     return world_time;
   }
+  public final Map<Integer, int[]> getVerticesMap() {
+    return lu_vertices;
+  }
+  public final Map<int[], int[]> getEdgesMap() {
+    return lu_edges;
+  }
   public void saveBackup(String p) {
     storage.DBSaveBackup(p);
   }
@@ -127,12 +134,12 @@ public class Controller {
           col[5] = 0;
           col[6] = 0;
         }
-        if (!lu_nodes.containsKey(col[1])) {
-          lu_nodes.put(col[1], new int[] { col[3], col[4] });
+        if (!lu_vertices.containsKey(col[1])) {
+          lu_vertices.put(col[1], new int[] { col[3], col[4] });
           storage.DBAddNewVertex(col[1], col[3], col[4]);
         }
-        if (!lu_nodes.containsKey(col[2])) {
-          lu_nodes.put(col[2], new int[] { col[5], col[6] });
+        if (!lu_vertices.containsKey(col[2])) {
+          lu_vertices.put(col[2], new int[] { col[5], col[6] });
           storage.DBAddNewVertex(col[2], col[5], col[6]);
         }
         dist = ((col[1] != 0 && col[2] != 0)
@@ -140,6 +147,7 @@ public class Controller {
                 col[3]/CSHIFT, col[4]/CSHIFT,
                 col[5]/CSHIFT, col[6]/CSHIFT) : 0);
         storage.DBAddNewEdge(col[1], col[2], dist, 10);
+        lu_edges.put(new int[] { col[1], col[2] }, new int[] { dist, 10 });
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
