@@ -51,8 +51,8 @@ public class Tools {
 <<Member variables>>=
 private G_Tree gtree;
 private boolean flag_gtree_loaded = false;
-private Map<Integer, int[]> lu_vertices;
-private Map<int[], int[]> lu_edges;
+private Map<Integer, int[]> lu_vertices = new HashMap<>();
+private Map<Integer, Map<Integer, int[]>> lu_edges = new HashMap<>();
 @
 
 <<Constructor>>=
@@ -62,8 +62,8 @@ public Tools() { }
 \section{Public Methods}
 <<Public methods>>=
   <<Load GTree>>
-  <<Load vertices map>>
-  <<Load edges map>>
+  <<Register vertices>>
+  <<Register edges>>
   <<Compute haversine>>
   <<Compute shortest path>>
   <<Compute shortest path distance>>
@@ -95,21 +95,21 @@ public void loadGTree(String p) {
 }
 @ %def loadGTree
 
-\subsection{[[loadVerticesMap]](1)}
+\subsection{[[registerVertices]](1)}
 Be mindful, any change to [[src]] will appear in [[lu_vertices]].
-<<Load vertices map>>=
-public void loadVerticesMap(Map<Integer, int[]> src) {
+<<Register vertices>>=
+public void registerVertices(Map<Integer, int[]> src) {
   lu_vertices = src;
 }
-@ %def loadVerticesMap
+@ %def registerVertices
 
-\subsection{[[loadEdgesMap]](1)}
+\subsection{[[registerEdges]](1)}
 Be mindful, any change to [[src]] will appear in [[lu_edges]].
-<<Load edges map>>=
-public void loadEdgesMap(Map<int[], int[]> src) {
+<<Register edges>>=
+public void registerEdges(Map<Integer, Map<Integer, int[]>> src) {
   lu_edges = src;
 }
-@ %def loadEdgesMap
+@ %def registerEdges
 
 \subsection{[[computeHaversine]](4)}
 Most of this code is Copyright 2017 Juliano Macedo and is licensed under the

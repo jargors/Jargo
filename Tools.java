@@ -7,8 +7,8 @@ import java.util.ArrayList;
 public class Tools {
   private G_Tree gtree;
   private boolean flag_gtree_loaded = false;
-  private Map<Integer, int[]> lu_vertices;
-  private Map<int[], int[]> lu_edges;
+  private Map<Integer, int[]> lu_vertices = new HashMap<>();
+  private Map<Integer, Map<Integer, int[]>> lu_edges = new HashMap<>();
   public Tools() { }
     public void loadGTree(String p) {
       try {
@@ -25,10 +25,10 @@ public class Tools {
         System.out.println("Bad path to gtree");
       }
     }
-    public void loadVerticesMap(Map<Integer, int[]> src) {
+    public void registerVertices(Map<Integer, int[]> src) {
       lu_vertices = src;
     }
-    public void loadEdgesMap(Map<int[], int[]> src) {
+    public void registerEdges(Map<Integer, Map<Integer, int[]>> src) {
       lu_edges = src;
     }
     public int computeHaversine(double lng1, double lat1, double lng2, double lat2) {

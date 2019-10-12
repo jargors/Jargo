@@ -51,8 +51,8 @@ public class Tools \{
 \nwenddocs{}\nwbegincode{7}\sublabel{NW3zOIuJ-aPohW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-aPohW-1}}}\moddef{Member variables~{\nwtagstyle{}\subpageref{NW3zOIuJ-aPohW-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1xm30x-1}}
 private G_Tree gtree;
 private boolean flag_gtree_loaded = false;
-private Map<Integer, int[]> lu_vertices;
-private Map<int[], int[]> lu_edges;
+private Map<Integer, int[]> lu_vertices = new HashMap<>();
+private Map<Integer, Map<Integer, int[]>> lu_edges = new HashMap<>();
 \nwendcode{}\nwbegindocs{8}\nwdocspar
 
 \nwenddocs{}\nwbegincode{9}\sublabel{NW3zOIuJ-4exbaU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-4exbaU-1}}}\moddef{Constructor~{\nwtagstyle{}\subpageref{NW3zOIuJ-4exbaU-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1xm30x-1}}
@@ -62,8 +62,8 @@ public Tools() \{ \}
 \section{Public Methods}
 \nwenddocs{}\nwbegincode{11}\sublabel{NW3zOIuJ-1eKCCy-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1eKCCy-1}}}\moddef{Public methods~{\nwtagstyle{}\subpageref{NW3zOIuJ-1eKCCy-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1xm30x-1}}
   \LA{}Load GTree~{\nwtagstyle{}\subpageref{NW3zOIuJ-b7Jka-1}}\RA{}
-  \LA{}Load vertices map~{\nwtagstyle{}\subpageref{NW3zOIuJ-3xdAnJ-1}}\RA{}
-  \LA{}Load edges map~{\nwtagstyle{}\subpageref{NW3zOIuJ-2lPetT-1}}\RA{}
+  \LA{}Register vertices~{\nwtagstyle{}\subpageref{NW3zOIuJ-2ZKKW-1}}\RA{}
+  \LA{}Register edges~{\nwtagstyle{}\subpageref{NW3zOIuJ-3Nu1Fg-1}}\RA{}
   \LA{}Compute haversine~{\nwtagstyle{}\subpageref{NW3zOIuJ-1XfngC-1}}\RA{}
   \LA{}Compute shortest path~{\nwtagstyle{}\subpageref{NW3zOIuJ-1XAjSF-1}}\RA{}
   \LA{}Compute shortest path distance~{\nwtagstyle{}\subpageref{NW3zOIuJ-1A9hi2-1}}\RA{}
@@ -95,22 +95,22 @@ public void loadGTree(String p) \{
 \}
 \nwindexdefn{loadGTree}{loadGTree}{NW3zOIuJ-b7Jka-1}\eatline
 \nwidentdefs{\\{{loadGTree}{loadGTree}}}\nwendcode{}\nwbegindocs{14}\nwdocspar
-\subsection{{\tt{}\protect\nwindexuse{loadVerticesMap}{loadVerticesMap}{NW3zOIuJ-3xdAnJ-1}loadVerticesMap}(1)}
+\subsection{{\tt{}\protect\nwindexuse{registerVertices}{registerVertices}{NW3zOIuJ-2ZKKW-1}registerVertices}(1)}
 Be mindful, any change to {\tt{}src} will appear in {\tt{}lu{\char95}vertices}.
-\nwenddocs{}\nwbegincode{15}\sublabel{NW3zOIuJ-3xdAnJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-3xdAnJ-1}}}\moddef{Load vertices map~{\nwtagstyle{}\subpageref{NW3zOIuJ-3xdAnJ-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
-public void loadVerticesMap(Map<Integer, int[]> src) \{
+\nwenddocs{}\nwbegincode{15}\sublabel{NW3zOIuJ-2ZKKW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-2ZKKW-1}}}\moddef{Register vertices~{\nwtagstyle{}\subpageref{NW3zOIuJ-2ZKKW-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
+public void registerVertices(Map<Integer, int[]> src) \{
   lu_vertices = src;
 \}
-\nwindexdefn{loadVerticesMap}{loadVerticesMap}{NW3zOIuJ-3xdAnJ-1}\eatline
-\nwidentdefs{\\{{loadVerticesMap}{loadVerticesMap}}}\nwendcode{}\nwbegindocs{16}\nwdocspar
-\subsection{{\tt{}\protect\nwindexuse{loadEdgesMap}{loadEdgesMap}{NW3zOIuJ-2lPetT-1}loadEdgesMap}(1)}
+\nwindexdefn{registerVertices}{registerVertices}{NW3zOIuJ-2ZKKW-1}\eatline
+\nwidentdefs{\\{{registerVertices}{registerVertices}}}\nwendcode{}\nwbegindocs{16}\nwdocspar
+\subsection{{\tt{}\protect\nwindexuse{registerEdges}{registerEdges}{NW3zOIuJ-3Nu1Fg-1}registerEdges}(1)}
 Be mindful, any change to {\tt{}src} will appear in {\tt{}lu{\char95}edges}.
-\nwenddocs{}\nwbegincode{17}\sublabel{NW3zOIuJ-2lPetT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-2lPetT-1}}}\moddef{Load edges map~{\nwtagstyle{}\subpageref{NW3zOIuJ-2lPetT-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
-public void loadEdgesMap(Map<int[], int[]> src) \{
+\nwenddocs{}\nwbegincode{17}\sublabel{NW3zOIuJ-3Nu1Fg-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-3Nu1Fg-1}}}\moddef{Register edges~{\nwtagstyle{}\subpageref{NW3zOIuJ-3Nu1Fg-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
+public void registerEdges(Map<Integer, Map<Integer, int[]>> src) \{
   lu_edges = src;
 \}
-\nwindexdefn{loadEdgesMap}{loadEdgesMap}{NW3zOIuJ-2lPetT-1}\eatline
-\nwidentdefs{\\{{loadEdgesMap}{loadEdgesMap}}}\nwendcode{}\nwbegindocs{18}\nwdocspar
+\nwindexdefn{registerEdges}{registerEdges}{NW3zOIuJ-3Nu1Fg-1}\eatline
+\nwidentdefs{\\{{registerEdges}{registerEdges}}}\nwendcode{}\nwbegindocs{18}\nwdocspar
 \subsection{{\tt{}\protect\nwindexuse{computeHaversine}{computeHaversine}{NW3zOIuJ-1XfngC-1}computeHaversine}(4)}
 Most of this code is Copyright 2017 Juliano Macedo and is licensed under the
 MIT License. It has been modified from its original form.
@@ -271,27 +271,27 @@ public void printSchedule(int[] b) \{
 \nwixlogsorted{c}{{Compute shortest path distance}{NW3zOIuJ-1A9hi2-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-1A9hi2-1}}}%
 \nwixlogsorted{c}{{Constructor}{NW3zOIuJ-4exbaU-1}{\nwixu{NW3zOIuJ-1xm30x-1}\nwixd{NW3zOIuJ-4exbaU-1}}}%
 \nwixlogsorted{c}{{Filter locs by haversine distance}{NW3zOIuJ-1bwZd1-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-1bwZd1-1}}}%
-\nwixlogsorted{c}{{Load edges map}{NW3zOIuJ-2lPetT-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-2lPetT-1}}}%
 \nwixlogsorted{c}{{Load GTree}{NW3zOIuJ-b7Jka-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-b7Jka-1}}}%
-\nwixlogsorted{c}{{Load vertices map}{NW3zOIuJ-3xdAnJ-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-3xdAnJ-1}}}%
 \nwixlogsorted{c}{{Member variables}{NW3zOIuJ-aPohW-1}{\nwixu{NW3zOIuJ-1xm30x-1}\nwixd{NW3zOIuJ-aPohW-1}}}%
 \nwixlogsorted{c}{{Print path}{NW3zOIuJ-3QvbXQ-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-3QvbXQ-1}}}%
 \nwixlogsorted{c}{{Print route}{NW3zOIuJ-2sTsm3-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-2sTsm3-1}}}%
 \nwixlogsorted{c}{{Print schedule}{NW3zOIuJ-45oGvT-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-45oGvT-1}}}%
 \nwixlogsorted{c}{{Print user}{NW3zOIuJ-3sWW32-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-3sWW32-1}}}%
 \nwixlogsorted{c}{{Public methods}{NW3zOIuJ-1eKCCy-1}{\nwixu{NW3zOIuJ-1xm30x-1}\nwixd{NW3zOIuJ-1eKCCy-1}}}%
+\nwixlogsorted{c}{{Register edges}{NW3zOIuJ-3Nu1Fg-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-3Nu1Fg-1}}}%
+\nwixlogsorted{c}{{Register vertices}{NW3zOIuJ-2ZKKW-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-2ZKKW-1}}}%
 \nwixlogsorted{c}{{Tools.java}{NW3zOIuJ-2Vh5vZ-1}{\nwixd{NW3zOIuJ-2Vh5vZ-1}}}%
 \nwixlogsorted{c}{{Tools.java preamble}{NW3zOIuJ-1ANZ96-1}{\nwixu{NW3zOIuJ-2Vh5vZ-1}\nwixd{NW3zOIuJ-1ANZ96-1}}}%
 \nwixlogsorted{i}{{computeHaversine}{computeHaversine}}%
 \nwixlogsorted{i}{{computeShortestPath}{computeShortestPath}}%
 \nwixlogsorted{i}{{filterByHaversine}{filterByHaversine}}%
-\nwixlogsorted{i}{{loadEdgesMap}{loadEdgesMap}}%
 \nwixlogsorted{i}{{loadGTree}{loadGTree}}%
-\nwixlogsorted{i}{{loadVerticesMap}{loadVerticesMap}}%
 \nwixlogsorted{i}{{printPath}{printPath}}%
 \nwixlogsorted{i}{{printRoute}{printRoute}}%
 \nwixlogsorted{i}{{printSchedule}{printSchedule}}%
 \nwixlogsorted{i}{{printUser}{printUser}}%
+\nwixlogsorted{i}{{registerEdges}{registerEdges}}%
+\nwixlogsorted{i}{{registerVertices}{registerVertices}}%
 \nwbegindocs{38}\nwdocspar
 
 \appendix
