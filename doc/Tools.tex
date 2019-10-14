@@ -37,8 +37,7 @@ package com.github.jargors;
 import com.github.jargors.gtreeJNI.*;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.Arrays;
 \nwendcode{}\nwbegindocs{4}\nwdocspar
 \nwenddocs{}\nwbegincode{5}\sublabel{NW3zOIuJ-1xm30x-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1xm30x-1}}}\moddef{\code{}Tools\edoc{} definition~{\nwtagstyle{}\subpageref{NW3zOIuJ-1xm30x-1}}}\endmoddef\nwused{\\{NW3zOIuJ-2Vh5vZ-1}}
 public class Tools \{
@@ -209,13 +208,15 @@ public int computeShortestPathDistance(int u, int v) \{
 \subsection{{\tt{}\protect\nwindexuse{filterByHaversine}{filterByHaversine}{NW3zOIuJ-1bwZd1-1}filterByHaversine}(3)}
 \nwenddocs{}\nwbegincode{29}\sublabel{NW3zOIuJ-1bwZd1-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1bwZd1-1}}}\moddef{Filter locs by haversine distance~{\nwtagstyle{}\subpageref{NW3zOIuJ-1bwZd1-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
 public int[] filterByHaversine(int ro, int[] locs, int threshold) \{
-  List<Integer> candidates = new ArrayList<>();
-  for (int k = 0; k < (locs.length - 2); k += 3) \{
-    if (computeHaversine(ro, locs[(k + 2)]) < threshold) \{
-      candidates.add(k);
+  int n = (locs.length/3);
+  int[] temp = new int[n];
+  int i = 0;
+  for (int k = 0; k < n; k++) \{
+    if (computeHaversine(ro, locs[((3*k) + 2)]) < threshold) \{
+      temp[i++] = 3*k;
     \}
   \}
-  return candidates.stream().mapToInt(k -> k).toArray();
+  return Arrays.copyOf(temp, i);
 \}
 \nwindexdefn{filterByHaversine}{filterByHaversine}{NW3zOIuJ-1bwZd1-1}\eatline
 \nwidentdefs{\\{{filterByHaversine}{filterByHaversine}}}\nwidentuses{\\{{computeHaversine}{computeHaversine}}}\nwindexuse{computeHaversine}{computeHaversine}{NW3zOIuJ-1bwZd1-1}\nwendcode{}\nwbegindocs{30}\nwdocspar

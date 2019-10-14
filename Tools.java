@@ -2,8 +2,7 @@ package com.github.jargors;
 import com.github.jargors.gtreeJNI.*;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.Arrays;
 public class Tools {
   private G_Tree gtree;
   private boolean flag_gtree_loaded = false;
@@ -87,13 +86,15 @@ public class Tools {
       return d;
     }
     public int[] filterByHaversine(int ro, int[] locs, int threshold) {
-      List<Integer> candidates = new ArrayList<>();
-      for (int k = 0; k < (locs.length - 2); k += 3) {
-        if (computeHaversine(ro, locs[(k + 2)]) < threshold) {
-          candidates.add(k);
+      int n = (locs.length/3);
+      int[] temp = new int[n];
+      int i = 0;
+      for (int k = 0; k < n; k++) {
+        if (computeHaversine(ro, locs[((3*k) + 2)]) < threshold) {
+          temp[i++] = 3*k;
         }
       }
-      return candidates.stream().mapToInt(k -> k).toArray();
+      return Arrays.copyOf(temp, i);
     }
     public void printUser(int[] u) {
       System.out.println("User {uid="+u[0]+", q="+u[1]+", e="+u[2]+", l="+u[3]
