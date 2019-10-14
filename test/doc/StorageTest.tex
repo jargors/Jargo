@@ -27,7 +27,7 @@
 
 \begin{figure}[h]
 \centering
-\fbox{\includegraphics[width=\textwidth]{data/small-directed-dummy.png}}
+\fbox{\includegraphics[width=\textwidth]{data/test.png}}
 \caption{Portion of a road network in Chengdu, China,
     used for tests (46 nodes, 104 directed edges).}
 \label{fig:road-network}
@@ -42,17 +42,17 @@ The correctness test program for Jargo's storage interface uses a series of
 positive tests to check that the storage interface is functioning correctly.
 These tests pass if the output from the storage interface matches with what is
 expected. A database storing a test ridesharing state is provided in
-{\tt{}data/db}.  The test road network is shown in Figure~\ref{fig:road-network}.
-The vertex coordinates can be found in {\tt{}data/small-directed-dummy.rnet}.
-Keep in mind that the tests are not comprehensive and do not guarantee bug-free
-code. Not all possible inputs to the storage interface methods are tested,
-although more comprehensive testing may be added in the future.
-The test program is developed using the
-Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
-programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
-({\tt{}src/StorageTest.nw}) is the source for both the documentation
-({\tt{}doc/StorageTest.tex}) and the Java code ({\tt{}StorageTest.java})\footnote{See the
-{\tt{}Makefile} for build details.}.
+{\tt{}data/db}.  The test road network is shown in
+Figure~\ref{fig:road-network}.  The vertex coordinates can be found in the
+Storage Test Generator program ({\tt{}generator/data/test.rnet}).  Beware, the
+tests are not comprehensive and do not guarantee bug-free code. Not all
+possible inputs to the storage interface methods are tested, although more
+comprehensive testing may be added in the future.  The test program is
+developed using the Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}}
+literate programming\footnote{\url{http://literateprogramming.com/}} tool.
+This file ({\tt{}src/StorageTest.nw}) is the source for both the documentation
+({\tt{}doc/StorageTest.tex}) and the Java code ({\tt{}StorageTest.java})\footnote{See
+the {\tt{}Makefile} for build details.}.
 \nwfilename{src/StorageTest.nw}\nwbegincode{1}\sublabel{NW2tcW3C-4CXNcc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-4CXNcc-1}}}\moddef{StorageTest.java~{\nwtagstyle{}\subpageref{NW2tcW3C-4CXNcc-1}}}\endmoddef\nwnotused{StorageTest.java}
 \LA{}StorageTest.java preamble~{\nwtagstyle{}\subpageref{NW2tcW3C-2FnbX5-1}}\RA{}
 \LA{}\code{}StorageTest\edoc{} definition~{\nwtagstyle{}\subpageref{NW2tcW3C-2FrK1x-1}}\RA{}
@@ -848,33 +848,33 @@ its count.
 \subsubsection{{\tt{}DBQueryVertex}(1)}
 \nwenddocs{}\nwbegincode{92}\sublabel{NW2tcW3C-HmHFv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-HmHFv-1}}}\moddef{....test \code{}DBQueryVertex\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2tcW3C-HmHFv-1}}}\endmoddef\nwused{\\{NW2tcW3C-2w6SyW-1}}
 \{
-  //int output[] = storage.DBQueryVertex(22);
-  //if (!(output[0] == 1040750029)
-  //  && (output[1] == 306639030)) \{
-  //  Print("[FAIL] DBQueryVertex(1)");
-  //  Print("\\tExpected \{1040750029, 306639030\}; got "
-  //    + "\{"+output[0]+", "+output[1]+"\}");
-  //  count_failed++;
-  //\} else \{
-  //  Print("[PASS] DBQueryVertex(1)");
-  //  count_passed++;
-  //\}
+  int output[] = storage.DBQueryVertex(22);
+  if (!(output[0] == 1040750029)
+    && (output[1] == 306639030)) \{
+    Print("[FAIL] DBQueryVertex(1)");
+    Print("\\tExpected \{1040750029, 306639030\}; got "
+      + "\{"+output[0]+", "+output[1]+"\}");
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryVertex(1)");
+    count_passed++;
+  \}
 \}
 \nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-HmHFv-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-HmHFv-1}\nwendcode{}\nwbegindocs{93}\nwdocspar
 \subsubsection{{\tt{}DBQueryEdge}(2)}
 \nwenddocs{}\nwbegincode{94}\sublabel{NW2tcW3C-4e874K-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-4e874K-1}}}\moddef{....test \code{}DBQueryEdge\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2tcW3C-4e874K-1}}}\endmoddef\nwused{\\{NW2tcW3C-2w6SyW-1}}
 \{
-  //int output[] = storage.DBQueryEdge(22, 1);
-  //if (!(output[0] == 71)
-  //  && (output[1] == 10)) \{
-  //  Print("[FAIL] DBQueryEdge(2)");
-  //  Print("\\tExpected \{71, 10\}; got "
-  //    + "\{"+output[0]+", "+output[1]+"\}");
-  //  count_failed++;
-  //\} else \{
-  //  Print("[PASS] DBQueryEdge(2)");
-  //  count_passed++;
-  //\}
+  int output[] = storage.DBQueryEdge(22, 1);
+  if (!(output[0] == 71)
+    && (output[1] == 10)) \{
+    Print("[FAIL] DBQueryEdge(2)");
+    Print("\\tExpected \{71, 10\}; got "
+      + "\{"+output[0]+", "+output[1]+"\}");
+    count_failed++;
+  \} else \{
+    Print("[PASS] DBQueryEdge(2)");
+    count_passed++;
+  \}
 \}
 \nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-4e874K-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-4e874K-1}\nwendcode{}\nwbegindocs{95}\nwdocspar
 \subsubsection{{\tt{}DBQueryStatisticsEdges}(0)}

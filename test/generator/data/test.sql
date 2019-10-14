@@ -1,6 +1,9 @@
 --------------------------------------------------------------------------------
 -- This file contains the SQL used to manually prepare the test database.
 --------------------------------------------------------------------------------
+-- Connect to a DB preloaded with Jargo data model and test road network
+connect 'jdbc:derby:db;createFrom=temp/jargo';
+autocommit off;
 -- Clear
 delete from cq;
 delete from cpd;
@@ -96,3 +99,7 @@ insert into cw values (2,  10, 500, 45, 5, 10, 45, 28, 5);
 
 --                    sid  sq  se    t1  t2  v2    q1   q2   rid    rq    tp    td    o1 o2
 insert into cq values (2, -10, 10, null, 10, 45, null, -10, null, null, null, null, null, 1);
+-- Commit and Quit
+commit;
+disconnect;
+exit;
