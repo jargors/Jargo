@@ -118,9 +118,7 @@ private Storage storage;
 private Communicator communicator;
 private Tools tools = new Tools();
 private Client client;
-private Map<Integer, int[]> lu_vertices = new HashMap<>();
-private Map<int[], int[]> lu_edges = new HashMap<>();
-@ %def storage communicator tools client lu_vertices lu_edges
+@ %def storage communicator tools client
 \hi{Settings.} Settings objects configure various aspects of the simulation.
 These settings should mostly be set by the evaluation program by using the public
 setters.
@@ -240,8 +238,6 @@ public Controller() {
 <<Set initial world time>>
 <<Set final world time>>
 <<Get world time>>
-<<Get vertices map>>
-<<Get edges map>>
 <<Save backup>>
 <<Load backup>>
 <<Load data model>>
@@ -266,6 +262,7 @@ public Controller() {
 <<Set client>>=
 public void setClient(Client target) {
   client = target;
+  client.setCommunicator(communicator);
 }
 @ %def setClient
 
@@ -289,20 +286,6 @@ public static int getSimulationWorldTime() {
   return world_time;
 }
 @ %def getSimulationWorldTime
-
-\subsubsection{[[getVerticesMap]](0)}
-<<Get vertices map>>=
-public final Map<Integer, int[]> getVerticesMap() {
-  return lu_vertices;
-}
-@ %def getVerticesMap
-
-\subsubsection{[[getEdgesMap]](0)}
-<<Get edges map>>=
-public final Map<int[], int[]> getEdgesMap() {
-  return lu_edges;
-}
-@ %def getEdgesMap
 
 \subsubsection{[[save]](1)}
 <<Save backup>>=
@@ -366,14 +349,8 @@ if (col[2] == 0) {
 }
 @
 <<..insert vertex coordinates>>=
-if (!lu_vertices.containsKey(col[1])) {
-  lu_vertices.put(col[1], new int[] { col[3], col[4] });
-  storage.DBAddNewVertex(col[1], col[3], col[4]);
-}
-if (!lu_vertices.containsKey(col[2])) {
-  lu_vertices.put(col[2], new int[] { col[5], col[6] });
-  storage.DBAddNewVertex(col[2], col[5], col[6]);
-}
+storage.DBAddNewVertex(col[1], col[3], col[4]);
+storage.DBAddNewVertex(col[2], col[5], col[6]);
 @
 We use haversine to compute edge weights\footnote{If the distance between two
 vertices is 0 due to rounding, then we round it up to 1.}.  If one of the
@@ -392,7 +369,6 @@ the future, the speed on each edge may be recorded directly in the road network
 file instead of hardcoded here.}.
 <<..insert edge>>=
 storage.DBAddNewEdge(col[1], col[2], dist, 10);
-lu_edges.put(new int[] { col[1], col[2] }, new int[] { dist, 10 });
 @
 
 \subsubsection{[[loadProblem(1)]]}
@@ -451,8 +427,6 @@ public void loadGTree(String p) {
 <<Start dynamic simulation>>=
 public void start() {
   Print("SIMULATION STARTED");
-
-  client.setCommunicator(communicator);
 
   world_time = initial_world_time;
   Print("Set world time to "+world_time);
@@ -619,6 +593,13 @@ public int[] queryRequestBaseDistanceTotal() throws RuntimeException {
   return storage.DBQueryRequestBaseDistanceTotal();
 }
 @ %def queryRequestBaseDistanceTotal
+
+\subsubsection{[[queryRequestBaseDistanceUnassigned]](0)}
+<<Query various metrics>>=
+public int[] queryRequestBaseDistanceUnassigned() throws RuntimeException {
+  return storage.DBQueryRequestBaseDistanceUnassigned();
+}
+@ %def queryRequestBaseDistanceUnassigned
 
 \subsubsection{[[queryServerTravelDistanceTotal]](0)}
 <<Query various metrics>>=
