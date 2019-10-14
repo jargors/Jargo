@@ -2297,7 +2297,7 @@ se = output[1];
 <<..update route>>=
 <<....delete remaining route from w>>
 <<....insert new remaining route into w>>
-<<....update route endpoint in cw>>
+<<....update route endpoint in cw, cpd>>
 @
 <<....delete remaining route from w>>=
 PreparedStatement pS76 = PS(conn, "S76");
@@ -2309,12 +2309,16 @@ The chunk for inserting [[route]] into Table W uses [[uid]], so we set it here.
 int uid = sid;
 <<Procedure to insert [[route]] into Table W>>
 @
-<<....update route endpoint in cw>>=
+<<....update route endpoint in cw, cpd>>=
 PreparedStatement pS77 = PS(conn, "S77");
+PreparedStatement pS139 = PS(conn, "S139");
 int te = route[(route.length - 2)];
 int ve = route[(route.length - 1)];
+Print("UPDATE CW SET te="+te+", ve="+ve+" WHERE sid="+sid);
+Print("UPDATE CPD SET te="+te+" WHERE sid="+sid);
 PSAdd(pS77, te, ve, sid);
-PSSubmit(pS77);
+PSAdd(pS139, te, sid);
+PSSubmit(pS77, pS139);
 @
 If a table needs to be accessed multiple times, the [[SELECT]] statements
 should go before any [[INSERT]], [[UPDATE]], or [[DELETE]] statements in
@@ -3458,6 +3462,7 @@ private static void PSInit() {
   <<S136>>
   <<S137>>
   <<S138>>
+  <<S139>>
 }
 @ %def PSInit
 <<S0>>=
@@ -3727,7 +3732,9 @@ pstr.put("S137", SEL+"* FROM E");
 <<S138>>=
 pstr.put("S138", SEL+"val FROM dist_r_unassigned");
 @ %def S138
-
+<<S139>>=
+pstr.put("S139", UPD+"CPD SET te=? WHERE sid=?");
+@ %def S139
 \appendix
 
 \section{Appendix: List of Chunks}

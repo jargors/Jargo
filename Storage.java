@@ -606,10 +606,14 @@ public class Storage {
       }
       PSSubmit(pS10);
       PreparedStatement pS77 = PS(conn, "S77");
+      PreparedStatement pS139 = PS(conn, "S139");
       int te = route[(route.length - 2)];
       int ve = route[(route.length - 1)];
+      Print("UPDATE CW SET te="+te+", ve="+ve+" WHERE sid="+sid);
+      Print("UPDATE CPD SET te="+te+" WHERE sid="+sid);
       PSAdd(pS77, te, ve, sid);
-      PSSubmit(pS77);
+      PSAdd(pS139, te, sid);
+      PSSubmit(pS77, pS139);
       if (sched.length > 0) {
         Map<Integer, int[]> cache = new HashMap<>();
         int bound = (sched.length/3);
@@ -713,10 +717,14 @@ public class Storage {
       }
       PSSubmit(pS10);
       PreparedStatement pS77 = PS(conn, "S77");
+      PreparedStatement pS139 = PS(conn, "S139");
       int te = route[(route.length - 2)];
       int ve = route[(route.length - 1)];
+      Print("UPDATE CW SET te="+te+", ve="+ve+" WHERE sid="+sid);
+      Print("UPDATE CPD SET te="+te+" WHERE sid="+sid);
       PSAdd(pS77, te, ve, sid);
-      PSSubmit(pS77);
+      PSAdd(pS139, te, sid);
+      PSSubmit(pS77, pS139);
       int bound = (sched.length/3);
       PreparedStatement pS82 = PS(conn, "S82");
       PreparedStatement pS83 = PS(conn, "S83");
@@ -862,10 +870,14 @@ public class Storage {
       }
       PSSubmit(pS10);
       PreparedStatement pS77 = PS(conn, "S77");
+      PreparedStatement pS139 = PS(conn, "S139");
       int te = route[(route.length - 2)];
       int ve = route[(route.length - 1)];
+      Print("UPDATE CW SET te="+te+", ve="+ve+" WHERE sid="+sid);
+      Print("UPDATE CPD SET te="+te+" WHERE sid="+sid);
       PSAdd(pS77, te, ve, sid);
-      PSSubmit(pS77);
+      PSAdd(pS139, te, sid);
+      PSSubmit(pS77, pS139);
       int bound = (sched.length/3);
       PreparedStatement pS82 = PS(conn, "S82");
       PreparedStatement pS83 = PS(conn, "S83");
@@ -1695,6 +1707,7 @@ public class Storage {
       pstr.put("S136", SEL+"* FROM V");
       pstr.put("S137", SEL+"* FROM E");
       pstr.put("S138", SEL+"val FROM dist_r_unassigned");
+      pstr.put("S139", UPD+"CPD SET te=? WHERE sid=?");
     }
     private PreparedStatement PS(Connection conn, String k) throws SQLException {
       PreparedStatement p = null;

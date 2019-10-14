@@ -2297,7 +2297,7 @@ se = output[1];
 \nwenddocs{}\nwbegincode{156}\sublabel{NW27XAxz-4LV9nl-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4LV9nl-1}}}\moddef{..update route~{\nwtagstyle{}\subpageref{NW27XAxz-4LV9nl-1}}}\endmoddef\nwused{\\{NW27XAxz-4VFddh-1}\\{NW27XAxz-y828a-1}\\{NW27XAxz-lMiTm-1}}
 \LA{}....delete remaining route from w~{\nwtagstyle{}\subpageref{NW27XAxz-1n0DBP-1}}\RA{}
 \LA{}....insert new remaining route into w~{\nwtagstyle{}\subpageref{NW27XAxz-2BaQBV-1}}\RA{}
-\LA{}....update route endpoint in cw~{\nwtagstyle{}\subpageref{NW27XAxz-2JeImF-1}}\RA{}
+\LA{}....update route endpoint in cw, cpd~{\nwtagstyle{}\subpageref{NW27XAxz-1ZiLuE-1}}\RA{}
 \nwendcode{}\nwbegindocs{157}\nwdocspar
 \nwenddocs{}\nwbegincode{158}\sublabel{NW27XAxz-1n0DBP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1n0DBP-1}}}\moddef{....delete remaining route from w~{\nwtagstyle{}\subpageref{NW27XAxz-1n0DBP-1}}}\endmoddef\nwused{\\{NW27XAxz-4LV9nl-1}}
 PreparedStatement pS76 = PS(conn, "S76");
@@ -2309,13 +2309,17 @@ The chunk for inserting {\tt{}route} into Table W uses {\tt{}uid}, so we set it 
 int uid = sid;
 \LA{}Procedure to insert \code{}route\edoc{} into Table W~{\nwtagstyle{}\subpageref{NW27XAxz-1EP7t-1}}\RA{}
 \nwendcode{}\nwbegindocs{161}\nwdocspar
-\nwenddocs{}\nwbegincode{162}\sublabel{NW27XAxz-2JeImF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2JeImF-1}}}\moddef{....update route endpoint in cw~{\nwtagstyle{}\subpageref{NW27XAxz-2JeImF-1}}}\endmoddef\nwused{\\{NW27XAxz-4LV9nl-1}}
+\nwenddocs{}\nwbegincode{162}\sublabel{NW27XAxz-1ZiLuE-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1ZiLuE-1}}}\moddef{....update route endpoint in cw, cpd~{\nwtagstyle{}\subpageref{NW27XAxz-1ZiLuE-1}}}\endmoddef\nwused{\\{NW27XAxz-4LV9nl-1}}
 PreparedStatement pS77 = PS(conn, "S77");
+PreparedStatement pS139 = PS(conn, "S139");
 int te = route[(route.length - 2)];
 int ve = route[(route.length - 1)];
+Print("UPDATE CW SET te="+te+", ve="+ve+" WHERE sid="+sid);
+Print("UPDATE CPD SET te="+te+" WHERE sid="+sid);
 PSAdd(pS77, te, ve, sid);
-PSSubmit(pS77);
-\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S77}{S77}}}\nwindexuse{PS}{PS}{NW27XAxz-2JeImF-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-2JeImF-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-2JeImF-1}\nwindexuse{S77}{S77}{NW27XAxz-2JeImF-1}\nwendcode{}\nwbegindocs{163}\nwdocspar
+PSAdd(pS139, te, sid);
+PSSubmit(pS77, pS139);
+\nwidentuses{\\{{Print}{Print}}\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S139}{S139}}\\{{S77}{S77}}}\nwindexuse{Print}{Print}{NW27XAxz-1ZiLuE-1}\nwindexuse{PS}{PS}{NW27XAxz-1ZiLuE-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-1ZiLuE-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-1ZiLuE-1}\nwindexuse{S139}{S139}{NW27XAxz-1ZiLuE-1}\nwindexuse{S77}{S77}{NW27XAxz-1ZiLuE-1}\nwendcode{}\nwbegindocs{163}\nwdocspar
 If a table needs to be accessed multiple times, the {\tt{}SELECT} statements
 should go before any {\tt{}INSERT}, {\tt{}UPDATE}, or {\tt{}DELETE} statements in
 order to avoid locking issues.
@@ -3458,8 +3462,9 @@ private static void PSInit() \{
   \LA{}S136~{\nwtagstyle{}\subpageref{NW27XAxz-26ZLfn-1}}\RA{}
   \LA{}S137~{\nwtagstyle{}\subpageref{NW27XAxz-2UPebD-1}}\RA{}
   \LA{}S138~{\nwtagstyle{}\subpageref{NW27XAxz-nWs2N-1}}\RA{}
+  \LA{}S139~{\nwtagstyle{}\subpageref{NW27XAxz-44lfAZ-1}}\RA{}
 \}
-\nosublabel{NW27XAxz-1g2xnv-1-u82}\nwindexdefn{PSInit}{PSInit}{NW27XAxz-1g2xnv-1}\eatline
+\nosublabel{NW27XAxz-1g2xnv-1-u83}\nwindexdefn{PSInit}{PSInit}{NW27XAxz-1g2xnv-1}\eatline
 \nwidentdefs{\\{{PSInit}{PSInit}}}\nwidentuses{\\{{pstr}{pstr}}}\nwindexuse{pstr}{pstr}{NW27XAxz-1g2xnv-1}\nwendcode{}\nwbegincode{323}\sublabel{NW27XAxz-9czRY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-9czRY-1}}}\moddef{S0~{\nwtagstyle{}\subpageref{NW27XAxz-9czRY-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 pstr.put("S0", INS+"V VALUES "+q3);
 \nwindexdefn{S0}{S0}{NW27XAxz-9czRY-1}\eatline
@@ -3727,7 +3732,10 @@ pstr.put("S137", SEL+"* FROM E");
 \nwidentdefs{\\{{S137}{S137}}}\nwidentuses{\\{{pstr}{pstr}}}\nwindexuse{pstr}{pstr}{NW27XAxz-2UPebD-1}\nwendcode{}\nwbegincode{404}\sublabel{NW27XAxz-nWs2N-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-nWs2N-1}}}\moddef{S138~{\nwtagstyle{}\subpageref{NW27XAxz-nWs2N-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 pstr.put("S138", SEL+"val FROM dist_r_unassigned");
 \nwindexdefn{S138}{S138}{NW27XAxz-nWs2N-1}\eatline
-\nwidentdefs{\\{{S138}{S138}}}\nwidentuses{\\{{pstr}{pstr}}}\nwindexuse{pstr}{pstr}{NW27XAxz-nWs2N-1}\nwendcode{}
+\nwidentdefs{\\{{S138}{S138}}}\nwidentuses{\\{{pstr}{pstr}}}\nwindexuse{pstr}{pstr}{NW27XAxz-nWs2N-1}\nwendcode{}\nwbegincode{405}\sublabel{NW27XAxz-44lfAZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-44lfAZ-1}}}\moddef{S139~{\nwtagstyle{}\subpageref{NW27XAxz-44lfAZ-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+pstr.put("S139", UPD+"CPD SET te=? WHERE sid=?");
+\nwindexdefn{S139}{S139}{NW27XAxz-44lfAZ-1}\eatline
+\nwidentdefs{\\{{S139}{S139}}}\nwidentuses{\\{{pstr}{pstr}}}\nwindexuse{pstr}{pstr}{NW27XAxz-44lfAZ-1}\nwendcode{}
 
 \nwixlogsorted{c}{{......check if new job}{NW27XAxz-2Hq38w-1}{\nwixu{NW27XAxz-10xBjT-1}\nwixd{NW27XAxz-2Hq38w-1}}}%
 \nwixlogsorted{c}{{......get tp, vp, td, vd of new job}{NW27XAxz-pddDf-1}{\nwixu{NW27XAxz-10xBjT-1}\nwixd{NW27XAxz-pddDf-1}}}%
@@ -3739,7 +3747,7 @@ pstr.put("S138", SEL+"val FROM dist_r_unassigned");
 \nwixlogsorted{c}{{....populate the tp, td cache}{NW27XAxz-2G68mE-1}{\nwixu{NW27XAxz-2NqWTJ-1}\nwixd{NW27XAxz-2G68mE-1}}}%
 \nwixlogsorted{c}{{....populate the tp, td cache and vp, vd cache}{NW27XAxz-10xBjT-1}{\nwixu{NW27XAxz-2VQLMF-1}\nwixd{NW27XAxz-10xBjT-1}}}%
 \nwixlogsorted{c}{{....select latest order number}{NW27XAxz-1gWfDY-1}{\nwixu{NW27XAxz-2NqWTJ-1}\nwixd{NW27XAxz-1gWfDY-1}\nwixu{NW27XAxz-2VQLMF-1}}}%
-\nwixlogsorted{c}{{....update route endpoint in cw}{NW27XAxz-2JeImF-1}{\nwixu{NW27XAxz-4LV9nl-1}\nwixd{NW27XAxz-2JeImF-1}}}%
+\nwixlogsorted{c}{{....update route endpoint in cw, cpd}{NW27XAxz-1ZiLuE-1}{\nwixu{NW27XAxz-4LV9nl-1}\nwixd{NW27XAxz-1ZiLuE-1}}}%
 \nwixlogsorted{c}{{....update times in pd and cpd}{NW27XAxz-1cwA5Z-1}{\nwixu{NW27XAxz-2NqWTJ-1}\nwixd{NW27XAxz-1cwA5Z-1}\nwixu{NW27XAxz-2VQLMF-1}}}%
 \nwixlogsorted{c}{{..commit and close}{NW27XAxz-3pffr6-1}{\nwixd{NW27XAxz-3pffr6-1}\nwixu{NW27XAxz-28BJIM-1}\nwixu{NW27XAxz-1r65Fb-1}\nwixu{NW27XAxz-3SpUqj-1}\nwixu{NW27XAxz-4ISWm4-1}\nwixu{NW27XAxz-IYVQQ-1}\nwixu{NW27XAxz-4VFddh-1}\nwixu{NW27XAxz-y828a-1}\nwixu{NW27XAxz-lMiTm-1}}}%
 \nwixlogsorted{c}{{..configure database properties}{NW27XAxz-2WrnDp-1}{\nwixu{NW27XAxz-b3Hn1-1}\nwixu{NW27XAxz-33Wt2A-1}\nwixd{NW27XAxz-2WrnDp-1}}}%
@@ -3892,6 +3900,7 @@ pstr.put("S138", SEL+"val FROM dist_r_unassigned");
 \nwixlogsorted{c}{{S136}{NW27XAxz-26ZLfn-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-26ZLfn-1}}}%
 \nwixlogsorted{c}{{S137}{NW27XAxz-2UPebD-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-2UPebD-1}}}%
 \nwixlogsorted{c}{{S138}{NW27XAxz-nWs2N-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-nWs2N-1}}}%
+\nwixlogsorted{c}{{S139}{NW27XAxz-44lfAZ-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-44lfAZ-1}}}%
 \nwixlogsorted{c}{{S14}{NW27XAxz-yU48q-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-yU48q-1}}}%
 \nwixlogsorted{c}{{S15}{NW27XAxz-3WJ2Si-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-3WJ2Si-1}}}%
 \nwixlogsorted{c}{{S2}{NW27XAxz-26Y6r2-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-26Y6r2-1}}}%
@@ -4062,6 +4071,7 @@ pstr.put("S138", SEL+"val FROM dist_r_unassigned");
 \nwixlogsorted{i}{{S136}{S136}}%
 \nwixlogsorted{i}{{S137}{S137}}%
 \nwixlogsorted{i}{{S138}{S138}}%
+\nwixlogsorted{i}{{S139}{S139}}%
 \nwixlogsorted{i}{{S14}{S14}}%
 \nwixlogsorted{i}{{S15}{S15}}%
 \nwixlogsorted{i}{{S2}{S2}}%
@@ -4103,8 +4113,7 @@ pstr.put("S138", SEL+"val FROM dist_r_unassigned");
 \nwixlogsorted{i}{{setupDriver}{setupDriver}}%
 \nwixlogsorted{i}{{STATEMENTS{\char95}MAX{\char95}COUNT}{STATEMENTS:unMAX:unCOUNT}}%
 \nwixlogsorted{i}{{VERSION}{VERSION}}%
-\nwbegindocs{405}\nwdocspar
-\appendix
+\nwbegindocs{406}\appendix
 
 \section{Appendix: List of Chunks}
 \label{ap:list-of-chunks}
