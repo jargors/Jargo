@@ -78,21 +78,14 @@ public abstract class Client {
 @
 
 \subsection{Member Variables}
-We define two containers for requests and server locations obtained from the
-simulation engine. We also define the collection periods, in seconds. By
-default, requests and server locations are collected every second.
 <<[[Client]] member variables>>=
-protected int[] requests;
-protected int[] locations;
 protected int r_collection_period = 1;
 protected int s_collection_period = 10;
 protected Communicator communicator;
 protected Tools tools = new Tools();
-@ %def requests locations r_collection_period s_collection_period communicator tools
+@ %def r_collection_period s_collection_period communicator tools
 
 \subsection{Constructor}
-An actual algorithm might override the default constructor to perform
-preprocessing tasks such as building a road network index.
 <<[[Client]] constructor>>=
 public Client() { }
 @
@@ -105,7 +98,7 @@ public Client() { }
   <<Get/set request collection period>>
   <<Get/set server location collection period>>
   <<Load GTree>>
-  <<Compute haversine>>
+  <<Load road network>>
 @
 
 \subsection{Obtaining Requests and Server Locations}
@@ -134,8 +127,8 @@ After copying [[src]] into [[requests]], the [[endCollectRequests]](0) method
 is executed.
 <<Collect requests>>=
 public void collectRequests(int[] src) {
-  requests = src.clone();
-  endCollectRequests();
+  int[] requests = src.clone();
+  endCollectRequests(requests);
 }
 @ %def collectRequests
 
@@ -162,8 +155,8 @@ copying [[src]] into [[locations]], the [[endCollectServerLocations]](0) method
 is executed.
 <<Collect server locations>>=
 public void collectServerLocations(int[] src) {
-  locations = src.clone();
-  endCollectServerLocations();
+  int[] locations = src.clone();
+  endCollectServerLocations(locations);
 }
 @ %def collectServerLocations
 
@@ -211,14 +204,17 @@ public void loadGTree(String p) {
 }
 @ %def loadGTree
 
-\subsubsection{[[computeHaversine]](2)}
-<<Compute haversine>>=
-public int computeHaversine(int u, int v) {
-  int[] U = communicator.queryVertex(u);
-  int[] V = communicator.queryVertex(v);
-  return tools.computeHaversine(U[0], U[1], V[0], V[1]);
+\subsubsection{[[loadRoadNetwork]](0)}
+Be mindful, the Client [[loadRoadNetwork]](0) method is different
+from the Controller [[loadRoadNetwork]](1) method. The Client method registers
+the vertices and edges cache from Storage into Tools, while the Controller
+method populates the cache and Storage with the on-disk road network file.
+<<Load road network>>=
+public void loadRoadNetwork() {
+  tools.registerVertices(communicator.getReferenceVerticesCache());
+  tools.registerEdges(communicator.getReferenceEdgesCache());
 }
-@ %def computeHaversine
+@ %def loadRoadNetwork
 
 \section{Private Methods}
 <<[[Client]] protected methods>>=
@@ -231,9 +227,8 @@ public int computeHaversine(int u, int v) {
 @
 
 \subsection{[[endCollectRequests]](0)}
-After requests are collected, [[handleRequest]](1) is executed on each one.
 <<End collect requests>>=
-protected void endCollectRequests() {
+protected void endCollectRequests(int[] requests) {
   for (int i = 0; i < (requests.length - 6); i += 7) {
     handleRequest(new int[] {
       requests[i],
@@ -252,7 +247,7 @@ protected void endCollectRequests() {
 After server locations are collected, [[handleServerLocation]](1) is executed
 on each one.
 <<End collect server locations>>=
-protected void endCollectServerLocations() {
+protected void endCollectServerLocations(int[] locations) {
   for (int i = 0; i < (locations.length - 2); i += 3) {
     handleServerLocation(new int[] {
       locations[i],

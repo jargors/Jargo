@@ -4,20 +4,18 @@ import com.github.jargors.Tools;
 import java.util.function.Supplier;
 import java.time.LocalDateTime;
 public abstract class Client {
-  protected int[] requests;
-  protected int[] locations;
   protected int r_collection_period = 1;
   protected int s_collection_period = 10;
   protected Communicator communicator;
   protected Tools tools = new Tools();
   public Client() { }
     public void collectRequests(int[] src) {
-      requests = src.clone();
-      endCollectRequests();
+      int[] requests = src.clone();
+      endCollectRequests(requests);
     }
     public void collectServerLocations(int[] src) {
-      locations = src.clone();
-      endCollectServerLocations();
+      int[] locations = src.clone();
+      endCollectServerLocations(locations);
     }
     public void setCommunicator(Communicator src) {
       communicator = src;
@@ -37,12 +35,11 @@ public abstract class Client {
     public void loadGTree(String p) {
       tools.loadGTree(p);
     }
-    public int computeHaversine(int u, int v) {
-      int[] U = communicator.queryVertex(u);
-      int[] V = communicator.queryVertex(v);
-      return tools.computeHaversine(U[0], U[1], V[0], V[1]);
+    public void loadRoadNetwork() {
+      tools.registerVertices(communicator.getReferenceVerticesCache());
+      tools.registerEdges(communicator.getReferenceEdgesCache());
     }
-    protected void endCollectRequests() {
+    protected void endCollectRequests(int[] requests) {
       for (int i = 0; i < (requests.length - 6); i += 7) {
         handleRequest(new int[] {
           requests[i],
@@ -55,7 +52,7 @@ public abstract class Client {
         });
       }
     }
-    protected void endCollectServerLocations() {
+    protected void endCollectServerLocations(int[] locations) {
       for (int i = 0; i < (locations.length - 2); i += 3) {
         handleServerLocation(new int[] {
           locations[i],

@@ -78,21 +78,14 @@ public abstract class Client \{
 \nwendcode{}\nwbegindocs{8}\nwdocspar
 
 \subsection{Member Variables}
-We define two containers for requests and server locations obtained from the
-simulation engine. We also define the collection periods, in seconds. By
-default, requests and server locations are collected every second.
 \nwenddocs{}\nwbegincode{9}\sublabel{NW2q3QGT-3qCSiR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-3qCSiR-1}}}\moddef{\code{}Client\edoc{} member variables~{\nwtagstyle{}\subpageref{NW2q3QGT-3qCSiR-1}}}\endmoddef\nwused{\\{NW2q3QGT-3hr6Rs-1}}
-protected int[] requests;
-protected int[] locations;
 protected int r_collection_period = 1;
 protected int s_collection_period = 10;
 protected Communicator communicator;
 protected Tools tools = new Tools();
-\nwindexdefn{requests}{requests}{NW2q3QGT-3qCSiR-1}\nwindexdefn{locations}{locations}{NW2q3QGT-3qCSiR-1}\nwindexdefn{r{\char95}collection{\char95}period}{r:uncollection:unperiod}{NW2q3QGT-3qCSiR-1}\nwindexdefn{s{\char95}collection{\char95}period}{s:uncollection:unperiod}{NW2q3QGT-3qCSiR-1}\nwindexdefn{communicator}{communicator}{NW2q3QGT-3qCSiR-1}\nwindexdefn{tools}{tools}{NW2q3QGT-3qCSiR-1}\eatline
-\nwidentdefs{\\{{communicator}{communicator}}\\{{locations}{locations}}\\{{r{\char95}collection{\char95}period}{r:uncollection:unperiod}}\\{{requests}{requests}}\\{{s{\char95}collection{\char95}period}{s:uncollection:unperiod}}\\{{tools}{tools}}}\nwendcode{}\nwbegindocs{10}\nwdocspar
+\nwindexdefn{r{\char95}collection{\char95}period}{r:uncollection:unperiod}{NW2q3QGT-3qCSiR-1}\nwindexdefn{s{\char95}collection{\char95}period}{s:uncollection:unperiod}{NW2q3QGT-3qCSiR-1}\nwindexdefn{communicator}{communicator}{NW2q3QGT-3qCSiR-1}\nwindexdefn{tools}{tools}{NW2q3QGT-3qCSiR-1}\eatline
+\nwidentdefs{\\{{communicator}{communicator}}\\{{r{\char95}collection{\char95}period}{r:uncollection:unperiod}}\\{{s{\char95}collection{\char95}period}{s:uncollection:unperiod}}\\{{tools}{tools}}}\nwendcode{}\nwbegindocs{10}\nwdocspar
 \subsection{Constructor}
-An actual algorithm might override the default constructor to perform
-preprocessing tasks such as building a road network index.
 \nwenddocs{}\nwbegincode{11}\sublabel{NW2q3QGT-2crckK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-2crckK-1}}}\moddef{\code{}Client\edoc{} constructor~{\nwtagstyle{}\subpageref{NW2q3QGT-2crckK-1}}}\endmoddef\nwused{\\{NW2q3QGT-3hr6Rs-1}}
 public Client() \{ \}
 \nwendcode{}\nwbegindocs{12}\nwdocspar
@@ -105,7 +98,7 @@ public Client() \{ \}
   \LA{}Get/set request collection period~{\nwtagstyle{}\subpageref{NW2q3QGT-4fmrsw-1}}\RA{}
   \LA{}Get/set server location collection period~{\nwtagstyle{}\subpageref{NW2q3QGT-DxGq5-1}}\RA{}
   \LA{}Load GTree~{\nwtagstyle{}\subpageref{NW2q3QGT-b7Jka-1}}\RA{}
-  \LA{}Compute haversine~{\nwtagstyle{}\subpageref{NW2q3QGT-1XfngC-1}}\RA{}
+  \LA{}Load road network~{\nwtagstyle{}\subpageref{NW2q3QGT-1JUvcB-1}}\RA{}
 \nwendcode{}\nwbegindocs{14}\nwdocspar
 
 \subsection{Obtaining Requests and Server Locations}
@@ -130,15 +123,15 @@ Array {\tt{}src} =
 
 \noindent containing all $r$ queued to be assigned\footnote{See
 \url{https://github.com/jargors/Storage} to learn about Jargo's data model.}.
-After copying {\tt{}src} into {\tt{}\protect\nwindexuse{requests}{requests}{NW2q3QGT-3qCSiR-1}requests}, the {\tt{}\protect\nwindexuse{endCollectRequests}{endCollectRequests}{NW2q3QGT-2fY8iU-1}endCollectRequests}(0) method
+After copying {\tt{}src} into {\tt{}requests}, the {\tt{}\protect\nwindexuse{endCollectRequests}{endCollectRequests}{NW2q3QGT-2fY8iU-1}endCollectRequests}(0) method
 is executed.
 \nwenddocs{}\nwbegincode{15}\sublabel{NW2q3QGT-3Db6qU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-3Db6qU-1}}}\moddef{Collect requests~{\nwtagstyle{}\subpageref{NW2q3QGT-3Db6qU-1}}}\endmoddef\nwused{\\{NW2q3QGT-4VlNed-1}}
 public void collectRequests(int[] src) \{
-  requests = src.clone();
-  endCollectRequests();
+  int[] requests = src.clone();
+  endCollectRequests(requests);
 \}
 \nwindexdefn{collectRequests}{collectRequests}{NW2q3QGT-3Db6qU-1}\eatline
-\nwidentdefs{\\{{collectRequests}{collectRequests}}}\nwidentuses{\\{{endCollectRequests}{endCollectRequests}}\\{{requests}{requests}}}\nwindexuse{endCollectRequests}{endCollectRequests}{NW2q3QGT-3Db6qU-1}\nwindexuse{requests}{requests}{NW2q3QGT-3Db6qU-1}\nwendcode{}\nwbegindocs{16}\nwdocspar
+\nwidentdefs{\\{{collectRequests}{collectRequests}}}\nwidentuses{\\{{endCollectRequests}{endCollectRequests}}}\nwindexuse{endCollectRequests}{endCollectRequests}{NW2q3QGT-3Db6qU-1}\nwendcode{}\nwbegindocs{16}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{collectServerLocations}{collectServerLocations}{NW2q3QGT-wbUkp-1}collectServerLocations}(1)}
 Array {\tt{}src} =
 
@@ -158,15 +151,15 @@ time, then formally the last location for server $s$ is defined as waypoint
 $(t,v)$ that satisfies $t=\textrm{argmin}_{(t,v)\in w_{\leq t'}} (t-t')$, where
 $w_{\leq t'}$ is the server's traveled route.  In other words the last location
 is the waypoint in the server's traveled route that is nearest $t'$.  After
-copying {\tt{}src} into {\tt{}\protect\nwindexuse{locations}{locations}{NW2q3QGT-3qCSiR-1}locations}, the {\tt{}\protect\nwindexuse{endCollectServerLocations}{endCollectServerLocations}{NW2q3QGT-2d6rGZ-1}endCollectServerLocations}(0) method
+copying {\tt{}src} into {\tt{}locations}, the {\tt{}\protect\nwindexuse{endCollectServerLocations}{endCollectServerLocations}{NW2q3QGT-2d6rGZ-1}endCollectServerLocations}(0) method
 is executed.
 \nwenddocs{}\nwbegincode{17}\sublabel{NW2q3QGT-wbUkp-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-wbUkp-1}}}\moddef{Collect server locations~{\nwtagstyle{}\subpageref{NW2q3QGT-wbUkp-1}}}\endmoddef\nwused{\\{NW2q3QGT-4VlNed-1}}
 public void collectServerLocations(int[] src) \{
-  locations = src.clone();
-  endCollectServerLocations();
+  int[] locations = src.clone();
+  endCollectServerLocations(locations);
 \}
 \nwindexdefn{collectServerLocations}{collectServerLocations}{NW2q3QGT-wbUkp-1}\eatline
-\nwidentdefs{\\{{collectServerLocations}{collectServerLocations}}}\nwidentuses{\\{{endCollectServerLocations}{endCollectServerLocations}}\\{{locations}{locations}}}\nwindexuse{endCollectServerLocations}{endCollectServerLocations}{NW2q3QGT-wbUkp-1}\nwindexuse{locations}{locations}{NW2q3QGT-wbUkp-1}\nwendcode{}\nwbegindocs{18}\nwdocspar
+\nwidentdefs{\\{{collectServerLocations}{collectServerLocations}}}\nwidentuses{\\{{endCollectServerLocations}{endCollectServerLocations}}}\nwindexuse{endCollectServerLocations}{endCollectServerLocations}{NW2q3QGT-wbUkp-1}\nwendcode{}\nwbegindocs{18}\nwdocspar
 \subsection{Getters and Setters}
 
 \subsubsection{{\tt{}\protect\nwindexuse{setCommunicator}{setCommunicator}{NW2q3QGT-4etKpU-1}setCommunicator}(1)}
@@ -211,15 +204,18 @@ public void loadGTree(String p) \{
 \}
 \nwindexdefn{loadGTree}{loadGTree}{NW2q3QGT-b7Jka-1}\eatline
 \nwidentdefs{\\{{loadGTree}{loadGTree}}}\nwidentuses{\\{{tools}{tools}}}\nwindexuse{tools}{tools}{NW2q3QGT-b7Jka-1}\nwendcode{}\nwbegindocs{30}\nwdocspar
-\subsubsection{{\tt{}\protect\nwindexuse{computeHaversine}{computeHaversine}{NW2q3QGT-1XfngC-1}computeHaversine}(2)}
-\nwenddocs{}\nwbegincode{31}\sublabel{NW2q3QGT-1XfngC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-1XfngC-1}}}\moddef{Compute haversine~{\nwtagstyle{}\subpageref{NW2q3QGT-1XfngC-1}}}\endmoddef\nwused{\\{NW2q3QGT-4VlNed-1}}
-public int computeHaversine(int u, int v) \{
-  int[] U = communicator.queryVertex(u);
-  int[] V = communicator.queryVertex(v);
-  return tools.computeHaversine(U[0], U[1], V[0], V[1]);
+\subsubsection{{\tt{}\protect\nwindexuse{loadRoadNetwork}{loadRoadNetwork}{NW2q3QGT-1JUvcB-1}loadRoadNetwork}(0)}
+Be mindful, the Client {\tt{}\protect\nwindexuse{loadRoadNetwork}{loadRoadNetwork}{NW2q3QGT-1JUvcB-1}loadRoadNetwork}(0) method is different
+from the Controller {\tt{}\protect\nwindexuse{loadRoadNetwork}{loadRoadNetwork}{NW2q3QGT-1JUvcB-1}loadRoadNetwork}(1) method. The Client method registers
+the vertices and edges cache from Storage into Tools, while the Controller
+method populates the cache and Storage with the on-disk road network file.
+\nwenddocs{}\nwbegincode{31}\sublabel{NW2q3QGT-1JUvcB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-1JUvcB-1}}}\moddef{Load road network~{\nwtagstyle{}\subpageref{NW2q3QGT-1JUvcB-1}}}\endmoddef\nwused{\\{NW2q3QGT-4VlNed-1}}
+public void loadRoadNetwork() \{
+  tools.registerVertices(communicator.getReferenceVerticesCache());
+  tools.registerEdges(communicator.getReferenceEdgesCache());
 \}
-\nwindexdefn{computeHaversine}{computeHaversine}{NW2q3QGT-1XfngC-1}\eatline
-\nwidentdefs{\\{{computeHaversine}{computeHaversine}}}\nwidentuses{\\{{communicator}{communicator}}\\{{tools}{tools}}}\nwindexuse{communicator}{communicator}{NW2q3QGT-1XfngC-1}\nwindexuse{tools}{tools}{NW2q3QGT-1XfngC-1}\nwendcode{}\nwbegindocs{32}\nwdocspar
+\nwindexdefn{loadRoadNetwork}{loadRoadNetwork}{NW2q3QGT-1JUvcB-1}\eatline
+\nwidentdefs{\\{{loadRoadNetwork}{loadRoadNetwork}}}\nwidentuses{\\{{communicator}{communicator}}\\{{tools}{tools}}}\nwindexuse{communicator}{communicator}{NW2q3QGT-1JUvcB-1}\nwindexuse{tools}{tools}{NW2q3QGT-1JUvcB-1}\nwendcode{}\nwbegindocs{32}\nwdocspar
 \section{Private Methods}
 \nwenddocs{}\nwbegincode{33}\sublabel{NW2q3QGT-4EUu6m-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-4EUu6m-1}}}\moddef{\code{}Client\edoc{} protected methods~{\nwtagstyle{}\subpageref{NW2q3QGT-4EUu6m-1}}}\endmoddef\nwused{\\{NW2q3QGT-3hr6Rs-1}}
   \LA{}End collect requests~{\nwtagstyle{}\subpageref{NW2q3QGT-2fY8iU-1}}\RA{}
@@ -231,9 +227,8 @@ public int computeHaversine(int u, int v) \{
 \nwendcode{}\nwbegindocs{34}\nwdocspar
 
 \subsection{{\tt{}\protect\nosublabel{NW2q3QGT-4EUu6m-1-u5}\protect\nwindexuse{endCollectRequests}{endCollectRequests}{NW2q3QGT-2fY8iU-1}endCollectRequests}(0)}
-After requests are collected, {\tt{}\protect\nwindexuse{handleRequest}{handleRequest}{NW2q3QGT-2856ar-1}handleRequest}(1) is executed on each one.
 \nwenddocs{}\nwbegincode{35}\sublabel{NW2q3QGT-2fY8iU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-2fY8iU-1}}}\moddef{End collect requests~{\nwtagstyle{}\subpageref{NW2q3QGT-2fY8iU-1}}}\endmoddef\nwused{\\{NW2q3QGT-4EUu6m-1}}
-protected void endCollectRequests() \{
+protected void endCollectRequests(int[] requests) \{
   for (int i = 0; i < (requests.length - 6); i += 7) \{
     handleRequest(new int[] \{
       requests[i],
@@ -247,12 +242,12 @@ protected void endCollectRequests() \{
   \}
 \}
 \nwindexdefn{endCollectRequests}{endCollectRequests}{NW2q3QGT-2fY8iU-1}\eatline
-\nwidentdefs{\\{{endCollectRequests}{endCollectRequests}}}\nwidentuses{\\{{handleRequest}{handleRequest}}\\{{requests}{requests}}}\nwindexuse{handleRequest}{handleRequest}{NW2q3QGT-2fY8iU-1}\nwindexuse{requests}{requests}{NW2q3QGT-2fY8iU-1}\nwendcode{}\nwbegindocs{36}\nwdocspar
+\nwidentdefs{\\{{endCollectRequests}{endCollectRequests}}}\nwidentuses{\\{{handleRequest}{handleRequest}}}\nwindexuse{handleRequest}{handleRequest}{NW2q3QGT-2fY8iU-1}\nwendcode{}\nwbegindocs{36}\nwdocspar
 \subsection{{\tt{}\protect\nwindexuse{endCollectServerLocations}{endCollectServerLocations}{NW2q3QGT-2d6rGZ-1}endCollectServerLocations}(0)}
 After server locations are collected, {\tt{}\protect\nwindexuse{handleServerLocation}{handleServerLocation}{NW2q3QGT-2xqRZA-1}handleServerLocation}(1) is executed
 on each one.
 \nwenddocs{}\nwbegincode{37}\sublabel{NW2q3QGT-2d6rGZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-2d6rGZ-1}}}\moddef{End collect server locations~{\nwtagstyle{}\subpageref{NW2q3QGT-2d6rGZ-1}}}\endmoddef\nwused{\\{NW2q3QGT-4EUu6m-1}}
-protected void endCollectServerLocations() \{
+protected void endCollectServerLocations(int[] locations) \{
   for (int i = 0; i < (locations.length - 2); i += 3) \{
     handleServerLocation(new int[] \{
       locations[i],
@@ -262,7 +257,7 @@ protected void endCollectServerLocations() \{
   \}
 \}
 \nwindexdefn{endCollectServerLocations}{endCollectServerLocations}{NW2q3QGT-2d6rGZ-1}\eatline
-\nwidentdefs{\\{{endCollectServerLocations}{endCollectServerLocations}}}\nwidentuses{\\{{handleServerLocation}{handleServerLocation}}\\{{locations}{locations}}}\nwindexuse{handleServerLocation}{handleServerLocation}{NW2q3QGT-2d6rGZ-1}\nwindexuse{locations}{locations}{NW2q3QGT-2d6rGZ-1}\nwendcode{}\nwbegindocs{38}\nwdocspar
+\nwidentdefs{\\{{endCollectServerLocations}{endCollectServerLocations}}}\nwidentuses{\\{{handleServerLocation}{handleServerLocation}}}\nwindexuse{handleServerLocation}{handleServerLocation}{NW2q3QGT-2d6rGZ-1}\nwendcode{}\nwbegindocs{38}\nwdocspar
 \subsection{{\tt{}\protect\nwindexuse{handleRequest}{handleRequest}{NW2q3QGT-2856ar-1}handleRequest}(1)}
 Array {\tt{}r} =
 
@@ -313,7 +308,6 @@ protected void Print(String msg) \{
 \nwixlogsorted{c}{{Client.java preamble}{NW2q3QGT-xBgX1-1}{\nwixu{NW2q3QGT-bpC9O-1}\nwixd{NW2q3QGT-xBgX1-1}\nwixd{NW2q3QGT-xBgX1-2}}}%
 \nwixlogsorted{c}{{Collect requests}{NW2q3QGT-3Db6qU-1}{\nwixu{NW2q3QGT-4VlNed-1}\nwixd{NW2q3QGT-3Db6qU-1}}}%
 \nwixlogsorted{c}{{Collect server locations}{NW2q3QGT-wbUkp-1}{\nwixu{NW2q3QGT-4VlNed-1}\nwixd{NW2q3QGT-wbUkp-1}}}%
-\nwixlogsorted{c}{{Compute haversine}{NW2q3QGT-1XfngC-1}{\nwixu{NW2q3QGT-4VlNed-1}\nwixd{NW2q3QGT-1XfngC-1}}}%
 \nwixlogsorted{c}{{End collect requests}{NW2q3QGT-2fY8iU-1}{\nwixu{NW2q3QGT-4EUu6m-1}\nwixd{NW2q3QGT-2fY8iU-1}}}%
 \nwixlogsorted{c}{{End collect server locations}{NW2q3QGT-2d6rGZ-1}{\nwixu{NW2q3QGT-4EUu6m-1}\nwixd{NW2q3QGT-2d6rGZ-1}}}%
 \nwixlogsorted{c}{{Get/set request collection period}{NW2q3QGT-4fmrsw-1}{\nwixu{NW2q3QGT-4VlNed-1}\nwixd{NW2q3QGT-4fmrsw-1}\nwixd{NW2q3QGT-4fmrsw-2}}}%
@@ -321,12 +315,12 @@ protected void Print(String msg) \{
 \nwixlogsorted{c}{{Handle request}{NW2q3QGT-2856ar-1}{\nwixu{NW2q3QGT-4EUu6m-1}\nwixd{NW2q3QGT-2856ar-1}}}%
 \nwixlogsorted{c}{{Handle server location}{NW2q3QGT-2xqRZA-1}{\nwixu{NW2q3QGT-4EUu6m-1}\nwixd{NW2q3QGT-2xqRZA-1}}}%
 \nwixlogsorted{c}{{Load GTree}{NW2q3QGT-b7Jka-1}{\nwixu{NW2q3QGT-4VlNed-1}\nwixd{NW2q3QGT-b7Jka-1}}}%
+\nwixlogsorted{c}{{Load road network}{NW2q3QGT-1JUvcB-1}{\nwixu{NW2q3QGT-4VlNed-1}\nwixd{NW2q3QGT-1JUvcB-1}}}%
 \nwixlogsorted{c}{{Print a message}{NW2q3QGT-2wEn3G-1}{\nwixu{NW2q3QGT-4EUu6m-1}\nwixd{NW2q3QGT-2wEn3G-1}}}%
 \nwixlogsorted{c}{{Set simulation interface}{NW2q3QGT-4etKpU-1}{\nwixu{NW2q3QGT-4VlNed-1}\nwixd{NW2q3QGT-4etKpU-1}}}%
 \nwixlogsorted{i}{{collectRequests}{collectRequests}}%
 \nwixlogsorted{i}{{collectServerLocations}{collectServerLocations}}%
 \nwixlogsorted{i}{{communicator}{communicator}}%
-\nwixlogsorted{i}{{computeHaversine}{computeHaversine}}%
 \nwixlogsorted{i}{{endCollectRequests}{endCollectRequests}}%
 \nwixlogsorted{i}{{endCollectServerLocations}{endCollectServerLocations}}%
 \nwixlogsorted{i}{{getRequestCollectionPeriod}{getRequestCollectionPeriod}}%
@@ -334,10 +328,9 @@ protected void Print(String msg) \{
 \nwixlogsorted{i}{{handleRequest}{handleRequest}}%
 \nwixlogsorted{i}{{handleServerLocation}{handleServerLocation}}%
 \nwixlogsorted{i}{{loadGTree}{loadGTree}}%
-\nwixlogsorted{i}{{locations}{locations}}%
+\nwixlogsorted{i}{{loadRoadNetwork}{loadRoadNetwork}}%
 \nwixlogsorted{i}{{Print}{Print}}%
 \nwixlogsorted{i}{{r{\char95}collection{\char95}period}{r:uncollection:unperiod}}%
-\nwixlogsorted{i}{{requests}{requests}}%
 \nwixlogsorted{i}{{s{\char95}collection{\char95}period}{s:uncollection:unperiod}}%
 \nwixlogsorted{i}{{setCommunicator}{setCommunicator}}%
 \nwixlogsorted{i}{{setRequestCollectionPeriod}{setRequestCollectionPeriod}}%
