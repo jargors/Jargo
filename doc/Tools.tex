@@ -52,6 +52,7 @@ private G_Tree gtree;
 private boolean flag_gtree_loaded = false;
 private Map<Integer, int[]> lu_vertices = new HashMap<>();
 private Map<Integer, Map<Integer, int[]>> lu_edges = new HashMap<>();
+private final double CSHIFT = 10000000.0;
 \nwendcode{}\nwbegindocs{8}\nwdocspar
 
 \nwenddocs{}\nwbegincode{9}\sublabel{NW3zOIuJ-4exbaU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-4exbaU-1}}}\moddef{Constructor~{\nwtagstyle{}\subpageref{NW3zOIuJ-4exbaU-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1xm30x-1}}
@@ -137,11 +138,13 @@ if (d == 0 && (lng1 != lng2 || lat1 != lat2)) \{
 \nwendcode{}\nwbegindocs{22}\nwdocspar
 
 \subsection{{\tt{}\protect\nwindexuse{computeHaversine}{computeHaversine}{NW3zOIuJ-1XfngC-1}computeHaversine}(2)}
+Beware, the coordinates in {\tt{}lu{\char95}vertices} have their decimal places shifted by
+{\tt{}CSHIFT}.
 \nwenddocs{}\nwbegincode{23}\sublabel{NW3zOIuJ-1XfngC-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1XfngC-2}}}\moddef{Compute haversine~{\nwtagstyle{}\subpageref{NW3zOIuJ-1XfngC-1}}}\plusendmoddef
 public int computeHaversine(int u, int v) \{
   return computeHaversine(
-    lu_vertices.get(u)[0], lu_vertices.get(u)[1],
-    lu_vertices.get(v)[0], lu_vertices.get(v)[1]);
+    lu_vertices.get(u)[0]/CSHIFT, lu_vertices.get(u)[1]/CSHIFT,
+    lu_vertices.get(v)[0]/CSHIFT, lu_vertices.get(v)[1]/CSHIFT);
 \}
 \nwidentuses{\\{{computeHaversine}{computeHaversine}}}\nwindexuse{computeHaversine}{computeHaversine}{NW3zOIuJ-1XfngC-2}\nwendcode{}\nwbegindocs{24}\nwdocspar
 

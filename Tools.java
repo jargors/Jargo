@@ -8,6 +8,7 @@ public class Tools {
   private boolean flag_gtree_loaded = false;
   private Map<Integer, int[]> lu_vertices = new HashMap<>();
   private Map<Integer, Map<Integer, int[]>> lu_edges = new HashMap<>();
+  private final double CSHIFT = 10000000.0;
   public Tools() { }
     public void loadGTree(String p) {
       try {
@@ -47,8 +48,8 @@ public class Tools {
     }
     public int computeHaversine(int u, int v) {
       return computeHaversine(
-        lu_vertices.get(u)[0], lu_vertices.get(u)[1],
-        lu_vertices.get(v)[0], lu_vertices.get(v)[1]);
+        lu_vertices.get(u)[0]/CSHIFT, lu_vertices.get(u)[1]/CSHIFT,
+        lu_vertices.get(v)[0]/CSHIFT, lu_vertices.get(v)[1]/CSHIFT);
     }
     public int[] computeShortestPath(int u, int v) {
       int[] output = null;
