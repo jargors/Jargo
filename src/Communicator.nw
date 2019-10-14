@@ -60,6 +60,8 @@ package com.github.jargors;
 import com.github.jargors.Storage;
 import java.util.function.Supplier;
 import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.HashMap;
 @
 
 \subsection{Class Definition}
@@ -93,6 +95,8 @@ public Communicator() { }
 <<[[Communicator]] public methods>>=
 <<Set storage>>
 <<Set/get simulation world time>>
+<<Get reference to vertices cache>>
+<<Get reference to edges cache>>
 @
 \hi{Write Methods.}
 <<[[Communicator]] public methods>>=
@@ -136,6 +140,20 @@ public int getSimulationWorldTime() {
   return world_time;
 }
 @ %def getSimulationWorldTime
+
+\subsubsection{[[getReferenceVerticesCache]](0)}
+<<Get reference to vertices cache>>=
+public final Map<Integer, int[]> getReferenceVerticesCache() {
+  return storage.getReferenceVerticesCache();
+}
+@ %def getReferenceVerticesCache
+
+\subsubsection{[[getReferenceEdgesCache]](0)}
+<<Get reference to edges cache>>=
+public final Map<Integer, Map<Integer, int[]>> getReferenceEdgesCache() {
+  return storage.getReferenceEdgesCache();
+}
+@ %def getReferenceEdgesCache
 
 \subsection{Write Methods}
 \label{sec:write-methods}

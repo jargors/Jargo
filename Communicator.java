@@ -2,6 +2,8 @@ package com.github.jargors;
 import com.github.jargors.Storage;
 import java.util.function.Supplier;
 import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.HashMap;
 public class Communicator {
   private Storage storage;
   private int world_time = 0;
@@ -14,6 +16,12 @@ public class Communicator {
   }
   public int getSimulationWorldTime() {
     return world_time;
+  }
+  public final Map<Integer, int[]> getReferenceVerticesCache() {
+    return storage.getReferenceVerticesCache();
+  }
+  public final Map<Integer, Map<Integer, int[]>> getReferenceEdgesCache() {
+    return storage.getReferenceEdgesCache();
   }
   public void updateServerRoute(int sid, int[] route, int[] sched) {
     storage.DBUpdateServerRoute(sid, route, sched);
