@@ -73,6 +73,8 @@ programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
 \begin{minipage}[t]{0.4\textwidth}
 \hi{Utilities}
 <<[[Storage]] public methods>>=
+<<Get reference to vertices cache>>
+<<Get reference to edges cache>>
 <<Load data model>>
 <<Load backup>>
 <<Save backup>>
@@ -104,6 +106,18 @@ programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
 <<Query routes>>
 <<Query schedules>>
 <<Query current load>>
+<<Query count of vertices>>
+<<Query count of edges>>
+<<Query vertex>>
+<<Query all vertices>>
+<<Query edge>>
+<<Query all edges>>
+<<Query edge statistics>>
+<<Query MBR>>
+<<Query count of servers>>
+<<Query count of requests>>
+<<Query server pending assignments>>
+<<Query server completed assignments>>
 <<Query various metrics>>
 <<Query custom statement>>
 @
@@ -1580,7 +1594,7 @@ To list assigned requests $\mathcal{R^\textrm{ok}}$:
 To list service rate $\mu$:
 <<Create View service\_rate statement (Eq.~\ref{eq:service-rate})>>=
 "CREATE VIEW service_rate (val) AS "
-  + "SELECT CAST(CAST(A.NUM AS FLOAT) / CAST(A.DENOM AS FLOAT) * 100 as INT)"
+  + "SELECT CAST(CAST(A.NUM AS FLOAT) / CAST(A.DENOM AS FLOAT) * 10000 as INT)"
   + "FROM ( "
   + "SELECT (SELECT COUNT(*) FROM assignments_r) AS NUM, "
   + "       (SELECT COUNT(*) FROM R) AS DENOM "
@@ -1618,6 +1632,13 @@ To list base distances $d$ of all requests:
 <<Create View dist\_r\_base statement>>=
 "CREATE VIEW dist_r_base (val) AS "
   + "SELECT SUM (rb) FROM R"
+@
+To list base distances $d$ of all unassigned requests:
+<<Create View dist\_r\_unassigned statement>>=
+"CREATE VIEW dist_r_unassigned (val) AS "
+  + "SELECT SUM (rb) FROM R LEFT JOIN assignments_r "
+  + "  ON R.rid = assignments_r.rid "
+  + "WHERE assignments_r.rid IS NULL"
 @
 To list detour distances $D^\textrm{detour}$ of all requests:
 <<Create View dist\_r\_detour statement (Eq.~\ref{eq:detour-distance})>>=
@@ -1796,6 +1817,24 @@ value at index 1 is $b$; the value at index 2 is $c$.
 \subsection{Utilities}
 \label{sec:utilities}
 
+\subsubsection{[[getReferenceVerticesCache]](0)}
+This method returns a read-only reference to the vertices cache,
+[[lu_vertices]].
+<<Get reference to vertices cache>>=
+public final Map<Integer, int[]> getReferenceVerticesCache() {
+  return lu_vertices;
+}
+@ %def getReferenceVerticesCache
+
+\subsubsection{[[getReferenceEdgesCache]](0)}
+This method returns a read-only reference to the edges cache,
+[[lu_edges]].
+<<Get reference to edges cache>>=
+public final Map<Integer, Map<Integer, int[]>> getReferenceEdgesCache() {
+  return lu_edges;
+}
+@ %def getReferenceEdgesCache
+
 \subsubsection{[[DBLoadDataModel]](0)}
 The [[DBLoadDataModel]](0) method loads the tables and views in
 \S\ref{sec:ridesharing-data-model} into the database. If the model already
@@ -1835,6 +1874,7 @@ public void DBLoadDataModel() throws RuntimeException {
     stmt.addBatch(<<Create View dist\_s\_service statement (Eq.~\ref{eq:service-distance})>>);
     stmt.addBatch(<<Create View dist\_s\_base statement>>);
     stmt.addBatch(<<Create View dist\_r\_base statement>>);
+    stmt.addBatch(<<Create View dist\_r\_unassigned statement>>);
     stmt.addBatch(<<Create View dist\_r\_transit statement (Eq.~\ref{eq:transit-distance})>>);
     stmt.addBatch(<<Create View dist\_r\_detour statement (Eq.~\ref{eq:detour-distance})>>);
     stmt.addBatch(<<Create View dur\_s\_travel statement>>);
@@ -1865,10 +1905,33 @@ public void DBLoadBackup(String p) throws RuntimeException {
     CONNECTIONS_URL = "jdbc:derby:memory:jargobak;createFrom="+p;
     setupDriver();
     <<..configure database properties>>
+    if (lu_vertices.isEmpty()) {
+      <<..load road network from database>>
+    }
   }
   <<Catch and print [[SQLException]]>>
 }
 @ %def DBLoadBackup
+<<..load road network from database>>=
+int[] output = DBQueryAllVertices();
+for (int i = 0; i < (output.length/3); i++) {
+  int v = output[(3*i)];
+  int lng = output[(3*i + 1)];
+  int lat = output[(3*i + 2)];
+  lu_vertices.put(v, new int[] { lng, lat });
+}
+output = DBQueryAllEdges();
+for (int i = 0; i < (output.length/4); i++) {
+  int v1 = output[(4*i)];
+  int v2 = output[(4*i + 1)];
+  int dd = output[(4*i + 2)];
+  int nu = output[(4*i + 3)];
+  if (!lu_edges.containsKey(v1)) {
+    lu_edges.put(v1, new HashMap<>());
+  }
+  lu_edges.get(v1).put(v2, new int[] { dd, nu });
+}
+@
 
 \subsubsection{[[DBSaveBackup]](1)}
 The [[DBSaveBackup]](1) method can save a database snapshot to disk.
@@ -2403,7 +2466,7 @@ throws RuntimeException {
   Print("  schedule.length="+sched.length);
   Print("  rid=");
   for (int r : rid)
-    System.out.print(r+" ");
+    System.out.print(r+", ");
   System.out.println();
 
   int[] output = new int[] { };
@@ -2501,7 +2564,7 @@ for (int r : rid) {
   pd = cache2.get(r);
   PSAdd(pS12, sid, qpd[1], pd[0], r);
   PSAdd(pS12, sid, qpd[2], pd[1], r);
-  Print("INSERT INTO CPD VALUES "+sid+", "+se+", "+route[(route.length - 2)]
+  Print("INSERT INTO CPD VALUES ("+sid+", "+se+", "+route[(route.length - 2)]
     +", "+qpd[1]+", "+pd[0]+", "+qpd[2]+", "+pd[1]+", "+r+", "+re+", "+rl
     +", "+ro+", "+rd+")");
   PSAdd(pS13, sid, se, route[(route.length - 2)], qpd[1], pd[0], qpd[2], pd[1],
@@ -2752,7 +2815,7 @@ public int[] DBQueryCurrentLoad(int sid, int t) throws RuntimeException {
 @ %def DBQueryCurrentLoad
 
 \subsubsection{[[DBQueryCountVertices]](0)}
-<<Query various metrics>>=
+<<Query count of vertices>>=
 public int[] DBQueryCountVertices() throws RuntimeException {
   <<..read prepare>>
   output = DBFetch("S62", 1);
@@ -2761,7 +2824,7 @@ public int[] DBQueryCountVertices() throws RuntimeException {
 @ %def DBQueryCountVertices
 
 \subsubsection{[[DBQueryCountEdges]](0)}
-<<Query various metrics>>=
+<<Query count of edges>>=
 public int[] DBQueryCountEdges() throws RuntimeException {
   <<..read prepare>>
   output = DBFetch("S63", 1);
@@ -2782,11 +2845,20 @@ Returned array =
 \end{tikzpicture}
 
 \noindent where parameter [[v]] provides $v$.
-<<Query various metrics>>=
+<<Query vertex>>=
 public int[] DBQueryVertex(int v) throws RuntimeException {
   return lu_vertices.get(v);
 }
 @ %def DBQueryVertex
+
+\subsubsection{[[DBQueryAllVertices]](0)}
+<<Query all vertices>>=
+public int[] DBQueryAllVertices() throws RuntimeException {
+  <<..read prepare>>
+  output = DBFetch("S136", 3);
+  <<..read return>>
+}
+@ %def DBQueryAllVertices
 
 \subsubsection{[[DBQueryEdge]](2)}
 Returned array =
@@ -2801,17 +2873,26 @@ Returned array =
 
 \noindent where parameter [[v1]] provides $v_1$ and parameter
 [[v2]] provides $v_2$.
-<<Query various metrics>>=
+<<Query edge>>=
 public int[] DBQueryEdge(int v1, int v2) throws RuntimeException {
   return lu_edges.get(v1).get(v2);
 }
 @ %def DBQueryEdge
 
+\subsubsection{[[DBQueryAllEdges]](0)}
+<<Query all edges>>=
+public int[] DBQueryAllEdges() throws RuntimeException {
+  <<..read prepare>>
+  output = DBFetch("S137", 4);
+  <<..read return>>
+}
+@ %def DBQueryAllEdges
+
 \subsubsection{[[DBQueryStatisticsEdges]](0)}
 The following method returns six statistics: minimum edge weight,
 maximum edge weight, average edge weight, minimum edge speed, maximum edge speed,
 average edge speed.
-<<Query various metrics>>=
+<<Query edge statistics>>=
 public int[] DBQueryStatisticsEdges() throws RuntimeException {
   <<..read prepare>>
   output = DBFetch("S65", 6);
@@ -2823,7 +2904,7 @@ public int[] DBQueryStatisticsEdges() throws RuntimeException {
 The minimum bounding rectangle is
 returned as four numbers: minimum longitude, maximum longitude, minimum
 latitude, maximum latitude.
-<<Query various metrics>>=
+<<Query MBR>>=
 public int[] DBQueryMBR() throws RuntimeException {
   <<..read prepare>>
   output = DBFetch("S64", 4);
@@ -2832,7 +2913,7 @@ public int[] DBQueryMBR() throws RuntimeException {
 @ %def DBQueryMBR
 
 \subsubsection{[[DBQueryCountServers]](0)}
-<<Query various metrics>>=
+<<Query count of servers>>=
 public int[] DBQueryCountServers() throws RuntimeException {
   <<..read prepare>>
   output = DBFetch("S66", 1);
@@ -2841,7 +2922,7 @@ public int[] DBQueryCountServers() throws RuntimeException {
 @ %def DBQueryCountServers
 
 \subsubsection{[[DBQueryCountRequests]](0)}
-<<Query various metrics>>=
+<<Query count of requests>>=
 public int[] DBQueryCountRequests() throws RuntimeException {
   <<..read prepare>>
   output = DBFetch("S67", 1);
@@ -2850,7 +2931,7 @@ public int[] DBQueryCountRequests() throws RuntimeException {
 @ %def DBQueryCountRequests
 
 \subsubsection{[[DBQueryServerPendingAssignments]](2)}
-<<Query various metrics>>=
+<<Query server pending assignments>>=
 public int[] DBQueryServerPendingAssignments(int sid, int t) throws RuntimeException {
   <<..read prepare>>
   output = DBFetch("S100", 1, t, sid);
@@ -2859,7 +2940,7 @@ public int[] DBQueryServerPendingAssignments(int sid, int t) throws RuntimeExcep
 @ %def DBQueryServerPendingAssignments
 
 \subsubsection{[[DBQueryServerCompletedAssignments]](2)}
-<<Query various metrics>>=
+<<Query server completed assignments>>=
 public int[] DBQueryServerCompletedAssignments(int sid, int t) throws RuntimeException {
   <<..read prepare>>
   output = DBFetch("S101", 1, t, sid);
@@ -2868,6 +2949,8 @@ public int[] DBQueryServerCompletedAssignments(int sid, int t) throws RuntimeExc
 @ %def DBQueryServerCompletedAssignments
 
 \subsubsection{[[DBQueryServiceRate]](0)}
+The service rate $\mu$ is returned as integer $10000\mu$, for example
+if $\mu=.1234$, then [[DBQueryServiceRate]](0) returns $1234$.
 <<Query various metrics>>=
 public int[] DBQueryServiceRate() throws RuntimeException {
   <<..read prepare>>
@@ -2902,6 +2985,15 @@ public int[] DBQueryRequestBaseDistanceTotal() throws RuntimeException {
   <<..read return>>
 }
 @ %def DBQueryRequestBaseDistanceTotal
+
+\subsubsection{[[DBQueryRequestBaseDistanceUnassigned]](0)}
+<<Query various metrics>>=
+public int[] DBQueryRequestBaseDistanceUnassigned() throws RuntimeException {
+  <<..read prepare>>
+  output = DBFetch("S138", 1);
+  <<..read return>>
+}
+@ %def DBQueryRequestBaseDistanceUnassigned
 
 \subsubsection{[[DBQueryServerTravelDistance]](1)}
 <<Query various metrics>>=
@@ -3363,6 +3455,9 @@ private static void PSInit() {
   <<S133>>
   <<S134>>
   <<S135>>
+  <<S136>>
+  <<S137>>
+  <<S138>>
 }
 @ %def PSInit
 <<S0>>=
@@ -3623,6 +3718,15 @@ pstr.put("S134", SEL+"sid FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
 pstr.put("S135", SEL+"t2, v2 FROM W WHERE t2<=? AND v2<>0 AND sid=? "
       + "ORDER BY t2 DESC FETCH FIRST ROW ONLY");
 @ %def S135
+<<S136>>=
+pstr.put("S136", SEL+"* FROM V");
+@ %def S136
+<<S137>>=
+pstr.put("S137", SEL+"* FROM E");
+@ %def S137
+<<S138>>=
+pstr.put("S138", SEL+"val FROM dist_r_unassigned");
+@ %def S138
 
 \appendix
 

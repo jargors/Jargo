@@ -38,6 +38,12 @@ public class Storage {
       e.printStackTrace();
     }
   }
+  public final Map<Integer, int[]> getReferenceVerticesCache() {
+    return lu_vertices;
+  }
+  public final Map<Integer, Map<Integer, int[]>> getReferenceEdgesCache() {
+    return lu_edges;
+  }
   public void DBLoadDataModel() throws RuntimeException {
     Print("Load data model");
     try {
@@ -301,7 +307,7 @@ public class Storage {
       stmt.addBatch("CREATE VIEW assignments_r (t, rid) AS "
                       + "SELECT t, rid FROM assignments");
       stmt.addBatch("CREATE VIEW service_rate (val) AS "
-                      + "SELECT CAST(CAST(A.NUM AS FLOAT) / CAST(A.DENOM AS FLOAT) * 100 as INT)"
+                      + "SELECT CAST(CAST(A.NUM AS FLOAT) / CAST(A.DENOM AS FLOAT) * 10000 as INT)"
                       + "FROM ( "
                       + "SELECT (SELECT COUNT(*) FROM assignments_r) AS NUM, "
                       + "       (SELECT COUNT(*) FROM R) AS DENOM "
@@ -321,6 +327,10 @@ public class Storage {
                       + "SELECT SUM (sb) FROM S");
       stmt.addBatch("CREATE VIEW dist_r_base (val) AS "
                       + "SELECT SUM (rb) FROM R");
+      stmt.addBatch("CREATE VIEW dist_r_unassigned (val) AS "
+                      + "SELECT SUM (rb) FROM R LEFT JOIN assignments_r "
+                      + "  ON R.rid = assignments_r.rid "
+                      + "WHERE assignments_r.rid IS NULL");
       stmt.addBatch("CREATE VIEW dist_r_transit (rid, val) AS "
                       + "SELECT rid, SUM (COALESCE (dd, 0)) "
                       + "FROM CPD JOIN W ON CPD.sid = W.sid AND CPD.tp < W.t2 AND W.t2 <= CPD.td "
@@ -365,6 +375,26 @@ public class Storage {
       cs.setInt(2, DERBY_PAGECACHESIZE);
       cs.execute();
       conn.close();
+      if (lu_vertices.isEmpty()) {
+        int[] output = DBQueryAllVertices();
+        for (int i = 0; i < (output.length/3); i++) {
+          int v = output[(3*i)];
+          int lng = output[(3*i + 1)];
+          int lat = output[(3*i + 2)];
+          lu_vertices.put(v, new int[] { lng, lat });
+        }
+        output = DBQueryAllEdges();
+        for (int i = 0; i < (output.length/4); i++) {
+          int v1 = output[(4*i)];
+          int v2 = output[(4*i + 1)];
+          int dd = output[(4*i + 2)];
+          int nu = output[(4*i + 3)];
+          if (!lu_edges.containsKey(v1)) {
+            lu_edges.put(v1, new HashMap<>());
+          }
+          lu_edges.get(v1).put(v2, new int[] { dd, nu });
+        }
+      }
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -654,7 +684,7 @@ public class Storage {
     Print("  schedule.length="+sched.length);
     Print("  rid=");
     for (int r : rid)
-      System.out.print(r+" ");
+      System.out.print(r+", ");
     System.out.println();
 
     int[] output = new int[] { };
@@ -788,7 +818,7 @@ public class Storage {
         pd = cache2.get(r);
         PSAdd(pS12, sid, qpd[1], pd[0], r);
         PSAdd(pS12, sid, qpd[2], pd[1], r);
-        Print("INSERT INTO CPD VALUES "+sid+", "+se+", "+route[(route.length - 2)]
+        Print("INSERT INTO CPD VALUES ("+sid+", "+se+", "+route[(route.length - 2)]
           +", "+qpd[1]+", "+pd[0]+", "+qpd[2]+", "+pd[1]+", "+r+", "+re+", "+rl
           +", "+ro+", "+rd+")");
         PSAdd(pS13, sid, se, route[(route.length - 2)], qpd[1], pd[0], qpd[2], pd[1],
@@ -1074,8 +1104,32 @@ public class Storage {
   public int[] DBQueryVertex(int v) throws RuntimeException {
     return lu_vertices.get(v);
   }
+  public int[] DBQueryAllVertices() throws RuntimeException {
+    int[] output = new int[] { };
+    try {
+    output = DBFetch("S136", 3);
+    }
+    catch (SQLException e1) {
+      printSQLException(e1);
+      DBSaveBackup(DERBY_DUMPNAME);
+      throw new RuntimeException("database failure");
+    }
+    return output;
+  }
   public int[] DBQueryEdge(int v1, int v2) throws RuntimeException {
     return lu_edges.get(v1).get(v2);
+  }
+  public int[] DBQueryAllEdges() throws RuntimeException {
+    int[] output = new int[] { };
+    try {
+    output = DBFetch("S137", 4);
+    }
+    catch (SQLException e1) {
+      printSQLException(e1);
+      DBSaveBackup(DERBY_DUMPNAME);
+      throw new RuntimeException("database failure");
+    }
+    return output;
   }
   public int[] DBQueryStatisticsEdges() throws RuntimeException {
     int[] output = new int[] { };
@@ -1189,6 +1243,18 @@ public class Storage {
     int[] output = new int[] { };
     try {
     output = DBFetch("S111", 1);
+    }
+    catch (SQLException e1) {
+      printSQLException(e1);
+      DBSaveBackup(DERBY_DUMPNAME);
+      throw new RuntimeException("database failure");
+    }
+    return output;
+  }
+  public int[] DBQueryRequestBaseDistanceUnassigned() throws RuntimeException {
+    int[] output = new int[] { };
+    try {
+    output = DBFetch("S138", 1);
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1626,6 +1692,9 @@ public class Storage {
       pstr.put("S134", SEL+"sid FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
       pstr.put("S135", SEL+"t2, v2 FROM W WHERE t2<=? AND v2<>0 AND sid=? "
             + "ORDER BY t2 DESC FETCH FIRST ROW ONLY");
+      pstr.put("S136", SEL+"* FROM V");
+      pstr.put("S137", SEL+"* FROM E");
+      pstr.put("S138", SEL+"val FROM dist_r_unassigned");
     }
     private PreparedStatement PS(Connection conn, String k) throws SQLException {
       PreparedStatement p = null;
