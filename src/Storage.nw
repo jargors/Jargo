@@ -1844,6 +1844,7 @@ public void DBLoadDataModel() throws RuntimeException {
   Print("Load data model");
   try {
     Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    Print("Open connection "+conn.toString());
     Statement stmt = conn.createStatement();
     stmt.clearBatch();
     stmt.addBatch(<<Create Table V statement>>);
@@ -1887,6 +1888,7 @@ public void DBLoadDataModel() throws RuntimeException {
     stmt.addBatch(<<Create View t\_s\_arrive statement (Eq.~\ref{eq:arrival-time})>>);
     stmt.executeBatch();
     conn.commit();
+    Print("Close connection "+conn.toString());
     conn.close();
   }
   <<Catch and print [[SQLException]]>>
@@ -1939,10 +1941,12 @@ The [[DBSaveBackup]](1) method can save a database snapshot to disk.
 public void DBSaveBackup(String p) throws RuntimeException {
   try {
     Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    Print("Open connection "+conn.toString());
     CallableStatement cs = conn.prepareCall(
       "CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE(?)");
     cs.setString(1, p);
     cs.execute();
+    Print("Close connection "+conn.toString());
     conn.close();
   }
   <<Catch and print [[SQLException]]>>
@@ -2013,6 +2017,7 @@ All write methods do a commit-and-close on a database connection. To save
 a little bit of space, we put this procedure into its own chunk here.
 <<..commit and close>>=
 conn.commit();
+Print("Close connection "+conn.toString());
 conn.close();
 @
 
@@ -2025,6 +2030,7 @@ public void DBAddNewVertex(int v, int lng, int lat) throws RuntimeException {
   if (!lu_vertices.containsKey(v)) {
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
       PreparedStatement pS0 = PS(conn, "S0");
       PSAdd(pS0, v, lng, lat);
       PSSubmit(pS0);
@@ -2047,6 +2053,7 @@ public void DBAddNewEdge(int v1, int v2, int dd, int nu) throws RuntimeException
   if (!lu_edges.get(v1).containsKey(v2)) {
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
       PreparedStatement pS1 = PS(conn, "S1");
       PSAdd(pS1, v1, v2, dd, nu);
       PSSubmit(pS1);
@@ -2065,6 +2072,7 @@ edge in the road network (in meters per second).
 public void DBUpdateEdgeSpeed(int v1, int v2, int nu) throws RuntimeException {
   try {
     Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    Print("Open connection "+conn.toString());
     PreparedStatement pS15 = PS(conn, "S15");
     PreparedStatement pS131 = PS(conn, "S131");
     PSAdd(pS15, nu, v1, v2);
@@ -2101,6 +2109,7 @@ The value of $u_q$ \emph{must} be greater than 0.
 public void DBAddNewRequest(int[] u) throws RuntimeException {
   try {
     Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    Print("Open connection "+conn.toString());
     int uid = u[0];
     <<..insert new user into user tables>>
     <<..insert new request into r>>
@@ -2163,6 +2172,7 @@ The value of $u_q$ \emph{must} be less than 0. Array [[route]] =
 public void DBAddNewServer(int[] u, int[] route) throws RuntimeException {
   try {
     Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    Print("Open connection "+conn.toString());
     int uid = u[0];
     int se = u[2];
     <<..insert new user into user tables>>
@@ -2198,11 +2208,12 @@ for (int i = 0; i < (route.length - 3); i += 2) {
   int v1 = route[(i + 1)];
   int t2 = route[(i + 2)];
   int v2 = route[(i + 3)];
-  output = DBFetch("S46", 2, v1, v2);
+  output = DBFetch(conn, "S46", 2, v1, v2);
   int dd = output[0];
   int nu = output[1];
   PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
 }
+Print("Issue INSERT INTO W (..)");
 PSSubmit(pS10);
 @
 <<..insert new server route into cw>>=
@@ -2278,6 +2289,7 @@ throws RuntimeException {
   int se, sq;
   try {
     Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    Print("Open connection "+conn.toString());
     <<..fetch [[sq]] and [[se]]>>
     <<..update route>>
     if (sched.length > 0) {
@@ -2290,7 +2302,7 @@ throws RuntimeException {
 }
 @ %def DBUpdateServerRoute
 <<..fetch [[sq]] and [[se]]>>=
-output = DBFetch("S48", 2, sid);
+output = DBFetch(conn, "S48", 2, sid);
 sq = output[0];
 se = output[1];
 @
@@ -2302,6 +2314,7 @@ se = output[1];
 <<....delete remaining route from w>>=
 PreparedStatement pS76 = PS(conn, "S76");
 PSAdd(pS76, sid, route[0]);
+Print("Issue DELETE FROM W (..)");
 PSSubmit(pS76);
 @
 The chunk for inserting [[route]] into Table W uses [[uid]], so we set it here.
@@ -2314,15 +2327,12 @@ PreparedStatement pS77 = PS(conn, "S77");
 PreparedStatement pS139 = PS(conn, "S139");
 int te = route[(route.length - 2)];
 int ve = route[(route.length - 1)];
-Print("UPDATE CW SET te="+te+", ve="+ve+" WHERE sid="+sid);
-Print("UPDATE CPD SET te="+te+" WHERE sid="+sid);
 PSAdd(pS77, te, ve, sid);
 PSAdd(pS139, te, sid);
+Print("Issue UPDATE CW (..)");
+Print("Issue UPDATE CPD (..)");
 PSSubmit(pS77, pS139);
 @
-If a table needs to be accessed multiple times, the [[SELECT]] statements
-should go before any [[INSERT]], [[UPDATE]], or [[DELETE]] statements in
-order to avoid locking issues.
 <<..update schedule>>=
 int bound = (sched.length/3);
 <<....update times in pd and cpd>>
@@ -2345,6 +2355,9 @@ for (int j = 0; j < bound; j++) {
     PSAdd(pS84, tj, vj, Lj);
   }
 }
+Print("Issue UPDATE CPD (..)");
+Print("Issue UPDATE CPD (..)");
+Print("Issue UPDATE PD (..)");
 PSSubmit(pS82, pS83, pS84);
 @
 <<....populate the tp, td cache>>=
@@ -2353,8 +2366,8 @@ for (int j = 0; j < bound; j++) {
   if (Lj != sid) {
     int rq, tp, td;
     if (!cache.containsKey(Lj)) {
-      rq = DBFetch("S85", 1, Lj)[0];
-      output = DBFetch("S86", 2, Lj);
+      rq = DBFetch(conn, "S85", 1, Lj)[0];
+      output = DBFetch(conn, "S86", 2, Lj);
       tp = output[0];
       td = output[1];
       cache.put(Lj, new int[] { rq, tp, td });
@@ -2364,7 +2377,7 @@ for (int j = 0; j < bound; j++) {
 @
 <<....select latest order number>>=
 int t1, q1, o1;
-output = DBFetch("S87", 3, sid, sched[0]);
+output = DBFetch(conn, "S87", 3, sid, sched[0]);
 t1 = output[0];
 q1 = output[1];
 o1 = output[2];
@@ -2372,6 +2385,7 @@ o1 = output[2];
 <<....delete remaining schedule from cq>>=
 PreparedStatement pS80 = PS(conn, "S80");
 PSAdd(pS80, sid, route[0]);
+Print("Issue DELETE FROM CQ (..)");
 PSSubmit(pS80);
 @
 <<....insert new remaining schedule into cq>>=
@@ -2391,6 +2405,7 @@ for (int j = 0; j < bound; j++) {
     o1 = o2;
   }
 }
+Print("Issue INSERT INTO CQ (..)");
 PSSubmit(pS14);
 @
 
@@ -2479,6 +2494,7 @@ throws RuntimeException {
   Map<Integer, int[]> cache2 = new HashMap<>();
   try {
     Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    Print("Open connection "+conn.toString());
     <<..fetch [[sq]] and [[se]]>>
     <<..update route>>
     <<..update and add to schedule>>
@@ -2504,13 +2520,13 @@ for (int j = 0; j < bound; j++) {
     int td = -1;
     int vd = -1;
     if (!cache.containsKey(Lj)) {
-      rq = DBFetch("S85", 1, Lj)[0];
+      rq = DBFetch(conn, "S85", 1, Lj)[0];
       boolean flagged = false;
       <<......check if new job>>
       if (flagged) {
         <<......get tp, vp, td, vd of new job>>
       } else {
-        output = DBFetch("S86", 2, Lj);
+        output = DBFetch(conn, "S86", 2, Lj);
         tp = output[0];
         td = output[1];
       }
@@ -2558,7 +2574,7 @@ PreparedStatement pS13 = PS(conn, "S13");
 int rq, re, rl, ro, rd;
 int[] qpd, pd;
 for (int r : rid) {
-  output = DBFetch("S51", 5, r);
+  output = DBFetch(conn, "S51", 5, r);
   rq = output[0];
   re = output[1];
   rl = output[2];
@@ -2574,6 +2590,8 @@ for (int r : rid) {
   PSAdd(pS13, sid, se, route[(route.length - 2)], qpd[1], pd[0], qpd[2], pd[1],
         r, re, rl, ro, rd);
 }
+Print("Issue INSERT INTO PD (..)");
+Print("Issue INSERT INTO CPD (..)");
 PSSubmit(pS12, pS13);
 @
 
@@ -2652,6 +2670,7 @@ throws RuntimeException {
   Map<Integer, int[]> cache = new HashMap<>();
   try {
     Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    Print("Open connection "+conn.toString());
     <<..fetch [[sq]] and [[se]]>>
     <<..update route>>
     <<..update schedule>>
@@ -2679,8 +2698,12 @@ common portions here in order to emphasize [[DBFetch]].
 <<..read prepare>>=
 int[] output = new int[] { };
 try {
+  Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+  Print("Open connection "+conn.toString());
 @
 <<..read return>>=
+  Print("Close connection "+conn.toString());
+  conn.close();
 }
 <<Catch and print [[SQLException]]>>
 return output;
@@ -2692,13 +2715,13 @@ second parameter indicates the number of columns in the [[SELECT]] statement.
 <<Query custom statement>>=
 public int[] DBQuery(String sql, int ncols) throws RuntimeException {
   <<..read prepare>>
-  Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
   Statement stmt = conn.createStatement(
     ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
   ResultSet res = stmt.executeQuery(sql);
   if (res.last()) {
     <<..flatten results>>
   }
+  Print("Close connection "+conn.toString());
   conn.close();
   <<..read return>>
 }
@@ -2708,7 +2731,7 @@ public int[] DBQuery(String sql, int ncols) throws RuntimeException {
 <<Query ridesharing user>>=
 public int[] DBQueryServer(int sid) throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S70", 7, sid);
+  output = DBFetch(conn, "S70", 7, sid);
   <<..read return>>
 }
 @ %def DBQueryServer
@@ -2717,7 +2740,7 @@ public int[] DBQueryServer(int sid) throws RuntimeException {
 <<Query ridesharing user>>=
 public int[] DBQueryRequest(int rid) throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S75", 7, rid);
+  output = DBFetch(conn, "S75", 7, rid);
   <<..read return>>
 }
 @ %def DBQueryRequest
@@ -2726,7 +2749,7 @@ public int[] DBQueryRequest(int rid) throws RuntimeException {
 <<Query request status>>=
 public int[] DBQueryRequestStatus(int rid, int t) throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S133", 1, rid, t);
+  output = DBFetch(conn, "S133", 1, rid, t);
   <<..read return>>
 }
 @ %def DBQueryRequestStatus
@@ -2735,7 +2758,7 @@ public int[] DBQueryRequestStatus(int rid, int t) throws RuntimeException {
 <<Query queued requests>>=
 public int[] DBQueryQueuedRequests(int t) throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S68", 7, t, t);
+  output = DBFetch(conn, "S68", 7, t, t);
   <<..read return>>
 }
 @ %def DBQueryQueuedRequests
@@ -2744,7 +2767,7 @@ public int[] DBQueryQueuedRequests(int t) throws RuntimeException {
 <<Query all server locations>>=
 public int[] DBQueryServerLocationsAll(int t) throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S59", 3, t, t, t, t);
+  output = DBFetch(conn, "S59", 3, t, t, t, t);
   <<..read return>>
 }
 @ %def DBQueryServerLocationsAll
@@ -2756,15 +2779,18 @@ public int[] DBQueryServerLocationsActive(int t) throws RuntimeException {
   int[] temp1 = new int[] { };
   int[] temp2 = new int[] { };
   try {
-    temp1 = DBFetch("S134", 1, t, t, t);
+    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    Print("Open connection "+conn.toString());
+    temp1 = DBFetch(conn, "S134", 1, t, t, t);
     output = new int[(temp1.length*3)];
     for (int i = 0; i < temp1.length; i++) {
       int sid = temp1[i];
       output[3*i] = sid;
-      temp2 = DBFetch("S135", 2, t, sid);
+      temp2 = DBFetch(conn, "S135", 2, t, sid);
       output[(3*i + 1)] = temp2[0];
       output[(3*i + 2)] = temp2[1];
     }
+    conn.close();
   }
   <<Catch and print [[SQLException]]>>
   return output;
@@ -2775,7 +2801,7 @@ public int[] DBQueryServerLocationsActive(int t) throws RuntimeException {
 <<Query routes>>=
 public int[] DBQueryRoute(int sid) throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S60", 2, sid);
+  output = DBFetch(conn, "S60", 2, sid);
   <<..read return>>
 }
 @ %def DBQueryRoute
@@ -2784,7 +2810,7 @@ public int[] DBQueryRoute(int sid) throws RuntimeException {
 <<Query routes>>=
 public int[] DBQueryRouteRemaining(int sid, int t) throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S129", 2, sid, t);
+  output = DBFetch(conn, "S129", 2, sid, t);
   <<..read return>>
 }
 @ %def DBQueryRouteRemaining
@@ -2795,7 +2821,7 @@ as a 0 in the output array due to [[getInt]] in [[DBFetch]].
 <<Query schedules>>=
 public int[] DBQuerySchedule(int sid) throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S61", 4, sid);
+  output = DBFetch(conn, "S61", 4, sid);
   <<..read return>>
 }
 @ %def DBQuerySchedule
@@ -2804,7 +2830,7 @@ public int[] DBQuerySchedule(int sid) throws RuntimeException {
 <<Query schedules>>=
 public int[] DBQueryScheduleRemaining(int sid, int t) throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S69", 4, sid, t);
+  output = DBFetch(conn, "S69", 4, sid, t);
   <<..read return>>
 }
 @ %def DBQueryScheduleRemaining
@@ -2813,7 +2839,7 @@ public int[] DBQueryScheduleRemaining(int sid, int t) throws RuntimeException {
 <<Query current load>>=
 public int[] DBQueryCurrentLoad(int sid, int t) throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S73", 1, sid, t);
+  output = DBFetch(conn, "S73", 1, sid, t);
   <<..read return>>
 }
 @ %def DBQueryCurrentLoad
@@ -2822,7 +2848,7 @@ public int[] DBQueryCurrentLoad(int sid, int t) throws RuntimeException {
 <<Query count of vertices>>=
 public int[] DBQueryCountVertices() throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S62", 1);
+  output = DBFetch(conn, "S62", 1);
   <<..read return>>
 }
 @ %def DBQueryCountVertices
@@ -2831,7 +2857,7 @@ public int[] DBQueryCountVertices() throws RuntimeException {
 <<Query count of edges>>=
 public int[] DBQueryCountEdges() throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S63", 1);
+  output = DBFetch(conn, "S63", 1);
   <<..read return>>
 }
 @ %def DBQueryCountEdges
@@ -2859,7 +2885,7 @@ public int[] DBQueryVertex(int v) throws RuntimeException {
 <<Query all vertices>>=
 public int[] DBQueryAllVertices() throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S136", 3);
+  output = DBFetch(conn, "S136", 3);
   <<..read return>>
 }
 @ %def DBQueryAllVertices
@@ -2887,7 +2913,7 @@ public int[] DBQueryEdge(int v1, int v2) throws RuntimeException {
 <<Query all edges>>=
 public int[] DBQueryAllEdges() throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S137", 4);
+  output = DBFetch(conn, "S137", 4);
   <<..read return>>
 }
 @ %def DBQueryAllEdges
@@ -2899,7 +2925,7 @@ average edge speed.
 <<Query edge statistics>>=
 public int[] DBQueryStatisticsEdges() throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S65", 6);
+  output = DBFetch(conn, "S65", 6);
   <<..read return>>
 }
 @ %def DBQueryStatisticsEdges
@@ -2911,7 +2937,7 @@ latitude, maximum latitude.
 <<Query MBR>>=
 public int[] DBQueryMBR() throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S64", 4);
+  output = DBFetch(conn, "S64", 4);
   <<..read return>>
 }
 @ %def DBQueryMBR
@@ -2920,7 +2946,7 @@ public int[] DBQueryMBR() throws RuntimeException {
 <<Query count of servers>>=
 public int[] DBQueryCountServers() throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S66", 1);
+  output = DBFetch(conn, "S66", 1);
   <<..read return>>
 }
 @ %def DBQueryCountServers
@@ -2929,7 +2955,7 @@ public int[] DBQueryCountServers() throws RuntimeException {
 <<Query count of requests>>=
 public int[] DBQueryCountRequests() throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S67", 1);
+  output = DBFetch(conn, "S67", 1);
   <<..read return>>
 }
 @ %def DBQueryCountRequests
@@ -2938,7 +2964,7 @@ public int[] DBQueryCountRequests() throws RuntimeException {
 <<Query server pending assignments>>=
 public int[] DBQueryServerPendingAssignments(int sid, int t) throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S100", 1, t, sid);
+  output = DBFetch(conn, "S100", 1, t, sid);
   <<..read return>>
 }
 @ %def DBQueryServerPendingAssignments
@@ -2947,7 +2973,7 @@ public int[] DBQueryServerPendingAssignments(int sid, int t) throws RuntimeExcep
 <<Query server completed assignments>>=
 public int[] DBQueryServerCompletedAssignments(int sid, int t) throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S101", 1, t, sid);
+  output = DBFetch(conn, "S101", 1, t, sid);
   <<..read return>>
 }
 @ %def DBQueryServerCompletedAssignments
@@ -2958,7 +2984,7 @@ if $\mu=.1234$, then [[DBQueryServiceRate]](0) returns $1234$.
 <<Query various metrics>>=
 public int[] DBQueryServiceRate() throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S102", 1);
+  output = DBFetch(conn, "S102", 1);
   <<..read return>>
 }
 @ %def DBQueryServiceRate
@@ -2967,7 +2993,7 @@ public int[] DBQueryServiceRate() throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryBaseDistanceTotal() throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S103", 1);
+  output = DBFetch(conn, "S103", 1);
   <<..read return>>
 }
 @ %def DBQueryBaseDistanceTotal
@@ -2976,7 +3002,7 @@ public int[] DBQueryBaseDistanceTotal() throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryServerBaseDistanceTotal() throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S110", 1);
+  output = DBFetch(conn, "S110", 1);
   <<..read return>>
 }
 @ %def DBQueryServerBaseDistanceTotal
@@ -2985,7 +3011,7 @@ public int[] DBQueryServerBaseDistanceTotal() throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryRequestBaseDistanceTotal() throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S111", 1);
+  output = DBFetch(conn, "S111", 1);
   <<..read return>>
 }
 @ %def DBQueryRequestBaseDistanceTotal
@@ -2994,7 +3020,7 @@ public int[] DBQueryRequestBaseDistanceTotal() throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryRequestBaseDistanceUnassigned() throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S138", 1);
+  output = DBFetch(conn, "S138", 1);
   <<..read return>>
 }
 @ %def DBQueryRequestBaseDistanceUnassigned
@@ -3003,7 +3029,7 @@ public int[] DBQueryRequestBaseDistanceUnassigned() throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryServerTravelDistance(int sid) throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S104", 1, sid);
+  output = DBFetch(conn, "S104", 1, sid);
   <<..read return>>
 }
 @ %def DBQueryServerTravelDistance
@@ -3012,7 +3038,7 @@ public int[] DBQueryServerTravelDistance(int sid) throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryServerTravelDistanceTotal() throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S105", 1);
+  output = DBFetch(conn, "S105", 1);
   <<..read return>>
 }
 @ %def DBQueryServerTravelDistanceTotal
@@ -3021,7 +3047,7 @@ public int[] DBQueryServerTravelDistanceTotal() throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryServerCruisingDistance(int sid) throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S106", 1, sid);
+  output = DBFetch(conn, "S106", 1, sid);
   <<..read return>>
 }
 @ %def DBQueryServerCruisingDistance
@@ -3030,7 +3056,7 @@ public int[] DBQueryServerCruisingDistance(int sid) throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryServerCruisingDistanceTotal() throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S107", 1);
+  output = DBFetch(conn, "S107", 1);
   <<..read return>>
 }
 @ %def DBQueryServerCruisingDistanceTotal
@@ -3039,7 +3065,7 @@ public int[] DBQueryServerCruisingDistanceTotal() throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryServerServiceDistance(int sid) throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S108", 1, sid);
+  output = DBFetch(conn, "S108", 1, sid);
   <<..read return>>
 }
 @ %def DBQueryServerServiceDistance
@@ -3048,7 +3074,7 @@ public int[] DBQueryServerServiceDistance(int sid) throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryServerServiceDistanceTotal() throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S109", 1);
+  output = DBFetch(conn, "S109", 1);
   <<..read return>>
 }
 @ %def DBQueryServerServiceDistanceTotal
@@ -3057,7 +3083,7 @@ public int[] DBQueryServerServiceDistanceTotal() throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryRequestDetourDistance(int rid) throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S112", 1, rid);
+  output = DBFetch(conn, "S112", 1, rid);
   <<..read return>>
 }
 @ %def DBQueryRequestDetourDistance
@@ -3066,7 +3092,7 @@ public int[] DBQueryRequestDetourDistance(int rid) throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryRequestDetourDistanceTotal() throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S113", 1);
+  output = DBFetch(conn, "S113", 1);
   <<..read return>>
 }
 @ %def DBQueryRequestDetourDistanceTotal
@@ -3075,7 +3101,7 @@ public int[] DBQueryRequestDetourDistanceTotal() throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryRequestTransitDistance(int rid) throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S114", 1, rid);
+  output = DBFetch(conn, "S114", 1, rid);
   <<..read return>>
 }
 @ %def DBQueryRequestTransitDistance
@@ -3084,7 +3110,7 @@ public int[] DBQueryRequestTransitDistance(int rid) throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryRequestTransitDistanceTotal() throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S115", 1);
+  output = DBFetch(conn, "S115", 1);
   <<..read return>>
 }
 @ %def DBQueryRequestTransitDistanceTotal
@@ -3093,7 +3119,7 @@ public int[] DBQueryRequestTransitDistanceTotal() throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryServerTravelDuration(int sid) throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S116", 1, sid);
+  output = DBFetch(conn, "S116", 1, sid);
   <<..read return>>
 }
 @ %def DBQueryServerTravelDuration
@@ -3102,7 +3128,7 @@ public int[] DBQueryServerTravelDuration(int sid) throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryServerTravelDurationTotal() throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S117", 1);
+  output = DBFetch(conn, "S117", 1);
   <<..read return>>
 }
 @ %def DBQueryServerTravelDurationTotal
@@ -3111,7 +3137,7 @@ public int[] DBQueryServerTravelDurationTotal() throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryRequestPickupDuration(int rid) throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S118", 1, rid);
+  output = DBFetch(conn, "S118", 1, rid);
   <<..read return>>
 }
 @ %def DBQueryRequestPickupDuration
@@ -3120,7 +3146,7 @@ public int[] DBQueryRequestPickupDuration(int rid) throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryRequestPickupDurationTotal() throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S119", 1);
+  output = DBFetch(conn, "S119", 1);
   <<..read return>>
 }
 @ %def DBQueryRequestPickupDurationTotal
@@ -3129,7 +3155,7 @@ public int[] DBQueryRequestPickupDurationTotal() throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryRequestTransitDuration(int rid) throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S120", 1, rid);
+  output = DBFetch(conn, "S120", 1, rid);
   <<..read return>>
 }
 @ %def DBQueryRequestTransitDuration
@@ -3138,7 +3164,7 @@ public int[] DBQueryRequestTransitDuration(int rid) throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryRequestTransitDurationTotal() throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S121", 1);
+  output = DBFetch(conn, "S121", 1);
   <<..read return>>
 }
 @ %def DBQueryRequestTransitDurationTotal
@@ -3147,7 +3173,7 @@ public int[] DBQueryRequestTransitDurationTotal() throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryRequestTravelDuration(int rid) throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S122", 1, rid);
+  output = DBFetch(conn, "S122", 1, rid);
   <<..read return>>
 }
 @ %def DBQueryRequestTravelDuration
@@ -3156,7 +3182,7 @@ public int[] DBQueryRequestTravelDuration(int rid) throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryRequestTravelDurationTotal() throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S123", 1);
+  output = DBFetch(conn, "S123", 1);
   <<..read return>>
 }
 @ %def DBQueryRequestTravelDurationTotal
@@ -3165,7 +3191,7 @@ public int[] DBQueryRequestTravelDurationTotal() throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryRequestDepartureTime(int rid) throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S124", 1, rid);
+  output = DBFetch(conn, "S124", 1, rid);
   <<..read return>>
 }
 @ %def DBQueryRequestDepartureTime
@@ -3174,7 +3200,7 @@ public int[] DBQueryRequestDepartureTime(int rid) throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryServerDepartureTime(int sid) throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S125", 1, sid);
+  output = DBFetch(conn, "S125", 1, sid);
   <<..read return>>
 }
 @ %def DBQueryServerDepartureTime
@@ -3183,7 +3209,7 @@ public int[] DBQueryServerDepartureTime(int sid) throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryRequestArrivalTime(int rid) throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S126", 1, rid);
+  output = DBFetch(conn, "S126", 1, rid);
   <<..read return>>
 }
 @ %def DBQueryRequestArrivalTime
@@ -3192,7 +3218,7 @@ public int[] DBQueryRequestArrivalTime(int rid) throws RuntimeException {
 <<Query various metrics>>=
 public int[] DBQueryServerArrivalTime(int sid) throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch("S127", 1, sid);
+  output = DBFetch(conn, "S127", 1, sid);
   <<..read return>>
 }
 @ %def DBQueryServerArrivalTime
@@ -3259,11 +3285,13 @@ We increase the page size\footnote{Even though the database is in-memory, the
 page size still needs to be set; see the Derby Tuning Guide for details.}.
 <<..configure database properties>>=
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+Print("Open connection "+conn.toString());
 CallableStatement cs = conn.prepareCall(
   "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
 cs.setString(1, "derby.storage.pageCacheSize");
 cs.setInt(2, DERBY_PAGECACHESIZE);
 cs.execute();
+Print("Close connection "+conn.toString());
 conn.close();
 @
 
@@ -3286,16 +3314,17 @@ private PreparedStatement PS(Connection conn, String k) throws SQLException {
 @ %def PS
 
 \subsection{[[DBFetch]](3...)}
-The [[DBFetch]](3...) method executes queries against the database.  Query
+The [[DBFetch]](3...) method executes queries against the database. Query
 results are serialized into arrays so that callers do not need to deal with
 JDBC [[ResultSet]]s. For debugging purposes, some commented [[Print]] commands
 are inside the method.
 <<Fetch items from database>>=
-private int[] DBFetch(String k, int ncols, Integer... values) throws SQLException {
-  Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+private int[] DBFetch(Connection conn,
+    String k, int ncols, Integer... values) throws SQLException {
+  // Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
   PreparedStatement p = PS(conn, k);
   // FOR DEBUGGING
-  // Print("DBFetch("+pstr.get(k)+")");
+  Print("DBFetch("+pstr.get(k)+")");
   // Print("DBFetch use conn "+conn.toString());
   // Print("DBFetch use thread "+Thread.currentThread().getName());
   int[] output = new int[] { };
@@ -3310,7 +3339,7 @@ private int[] DBFetch(String k, int ncols, Integer... values) throws SQLExceptio
   <<Catch and throw [[SQLException]]>>
   p.close();
   // Print("DBFetch close conn "+conn.toString());
-  conn.close();
+  // conn.close();
   if (output.length == 0) {
     Print("WARNING: DBFetch(3...) returned empty!");
   }

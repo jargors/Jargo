@@ -48,6 +48,7 @@ public class Storage {
     Print("Load data model");
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
       Statement stmt = conn.createStatement();
       stmt.clearBatch();
       stmt.addBatch("CREATE TABLE V ("
@@ -355,6 +356,7 @@ public class Storage {
                       + "SELECT sid, te FROM CW");
       stmt.executeBatch();
       conn.commit();
+      Print("Close connection "+conn.toString());
       conn.close();
     }
     catch (SQLException e1) {
@@ -369,11 +371,13 @@ public class Storage {
       CONNECTIONS_URL = "jdbc:derby:memory:jargobak;createFrom="+p;
       setupDriver();
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
       CallableStatement cs = conn.prepareCall(
         "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
       cs.setString(1, "derby.storage.pageCacheSize");
       cs.setInt(2, DERBY_PAGECACHESIZE);
       cs.execute();
+      Print("Close connection "+conn.toString());
       conn.close();
       if (lu_vertices.isEmpty()) {
         int[] output = DBQueryAllVertices();
@@ -405,10 +409,12 @@ public class Storage {
   public void DBSaveBackup(String p) throws RuntimeException {
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
       CallableStatement cs = conn.prepareCall(
         "CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE(?)");
       cs.setString(1, p);
       cs.execute();
+      Print("Close connection "+conn.toString());
       conn.close();
     }
     catch (SQLException e1) {
@@ -443,10 +449,12 @@ public class Storage {
     if (!lu_vertices.containsKey(v)) {
       try {
         Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+        Print("Open connection "+conn.toString());
         PreparedStatement pS0 = PS(conn, "S0");
         PSAdd(pS0, v, lng, lat);
         PSSubmit(pS0);
         conn.commit();
+        Print("Close connection "+conn.toString());
         conn.close();
         lu_vertices.put(v, new int[] { lng, lat });
       }
@@ -464,10 +472,12 @@ public class Storage {
     if (!lu_edges.get(v1).containsKey(v2)) {
       try {
         Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+        Print("Open connection "+conn.toString());
         PreparedStatement pS1 = PS(conn, "S1");
         PSAdd(pS1, v1, v2, dd, nu);
         PSSubmit(pS1);
         conn.commit();
+        Print("Close connection "+conn.toString());
         conn.close();
         lu_edges.get(v1).put(v2, new int[] { dd, nu });
       }
@@ -481,6 +491,7 @@ public class Storage {
   public void DBAddNewRequest(int[] u) throws RuntimeException {
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
       int uid = u[0];
       PreparedStatement pS2 = PS(conn, "S2");
       PreparedStatement pS3 = PS(conn, "S3");
@@ -499,6 +510,7 @@ public class Storage {
       PSAdd(pS9, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
       PSSubmit(pS9);
       conn.commit();
+      Print("Close connection "+conn.toString());
       conn.close();
     }
     catch (SQLException e1) {
@@ -510,6 +522,7 @@ public class Storage {
   public void DBAddNewServer(int[] u, int[] route) throws RuntimeException {
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
       int uid = u[0];
       int se = u[2];
       PreparedStatement pS2 = PS(conn, "S2");
@@ -535,11 +548,12 @@ public class Storage {
         int v1 = route[(i + 1)];
         int t2 = route[(i + 2)];
         int v2 = route[(i + 3)];
-        output = DBFetch("S46", 2, v1, v2);
+        output = DBFetch(conn, "S46", 2, v1, v2);
         int dd = output[0];
         int nu = output[1];
         PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
       }
+      Print("Issue INSERT INTO W (..)");
       PSSubmit(pS10);
       pS10 = PS(conn, "S10");
       PSAdd(pS10, uid, se, null, null, route[0], route[1], null, null);
@@ -553,6 +567,7 @@ public class Storage {
           null, null, null, null, null, 1);
       PSSubmit(pS14);
       conn.commit();
+      Print("Close connection "+conn.toString());
       conn.close();
     }
     catch (SQLException e1) {
@@ -564,12 +579,14 @@ public class Storage {
   public void DBUpdateEdgeSpeed(int v1, int v2, int nu) throws RuntimeException {
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
       PreparedStatement pS15 = PS(conn, "S15");
       PreparedStatement pS131 = PS(conn, "S131");
       PSAdd(pS15, nu, v1, v2);
       PSAdd(pS131, nu, v1, v2);
       PSSubmit(pS15, pS131);
       conn.commit();
+      Print("Close connection "+conn.toString());
       conn.close();
       int dd = lu_edges.get(v1).get(v2)[0];
       lu_edges.get(v1).put(v2, new int[] { dd, nu });
@@ -586,11 +603,13 @@ public class Storage {
     int se, sq;
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      output = DBFetch("S48", 2, sid);
+      Print("Open connection "+conn.toString());
+      output = DBFetch(conn, "S48", 2, sid);
       sq = output[0];
       se = output[1];
       PreparedStatement pS76 = PS(conn, "S76");
       PSAdd(pS76, sid, route[0]);
+      Print("Issue DELETE FROM W (..)");
       PSSubmit(pS76);
       int uid = sid;
       PreparedStatement pS10 = PS(conn, "S10");
@@ -599,20 +618,21 @@ public class Storage {
         int v1 = route[(i + 1)];
         int t2 = route[(i + 2)];
         int v2 = route[(i + 3)];
-        output = DBFetch("S46", 2, v1, v2);
+        output = DBFetch(conn, "S46", 2, v1, v2);
         int dd = output[0];
         int nu = output[1];
         PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
       }
+      Print("Issue INSERT INTO W (..)");
       PSSubmit(pS10);
       PreparedStatement pS77 = PS(conn, "S77");
       PreparedStatement pS139 = PS(conn, "S139");
       int te = route[(route.length - 2)];
       int ve = route[(route.length - 1)];
-      Print("UPDATE CW SET te="+te+", ve="+ve+" WHERE sid="+sid);
-      Print("UPDATE CPD SET te="+te+" WHERE sid="+sid);
       PSAdd(pS77, te, ve, sid);
       PSAdd(pS139, te, sid);
+      Print("Issue UPDATE CW (..)");
+      Print("Issue UPDATE CPD (..)");
       PSSubmit(pS77, pS139);
       if (sched.length > 0) {
         Map<Integer, int[]> cache = new HashMap<>();
@@ -630,14 +650,17 @@ public class Storage {
             PSAdd(pS84, tj, vj, Lj);
           }
         }
+        Print("Issue UPDATE CPD (..)");
+        Print("Issue UPDATE CPD (..)");
+        Print("Issue UPDATE PD (..)");
         PSSubmit(pS82, pS83, pS84);
         for (int j = 0; j < bound; j++) {
           int Lj = sched[(3*j + 2)];
           if (Lj != sid) {
             int rq, tp, td;
             if (!cache.containsKey(Lj)) {
-              rq = DBFetch("S85", 1, Lj)[0];
-              output = DBFetch("S86", 2, Lj);
+              rq = DBFetch(conn, "S85", 1, Lj)[0];
+              output = DBFetch(conn, "S86", 2, Lj);
               tp = output[0];
               td = output[1];
               cache.put(Lj, new int[] { rq, tp, td });
@@ -645,12 +668,13 @@ public class Storage {
           }
         }
         int t1, q1, o1;
-        output = DBFetch("S87", 3, sid, sched[0]);
+        output = DBFetch(conn, "S87", 3, sid, sched[0]);
         t1 = output[0];
         q1 = output[1];
         o1 = output[2];
         PreparedStatement pS80 = PS(conn, "S80");
         PSAdd(pS80, sid, route[0]);
+        Print("Issue DELETE FROM CQ (..)");
         PSSubmit(pS80);
         PreparedStatement pS14 = PS(conn, "S14");
         for (int j = 0; j < bound; j++) {
@@ -668,9 +692,11 @@ public class Storage {
             o1 = o2;
           }
         }
+        Print("Issue INSERT INTO CQ (..)");
         PSSubmit(pS14);
       }
       conn.commit();
+      Print("Close connection "+conn.toString());
       conn.close();
     }
     catch (SQLException e1) {
@@ -697,11 +723,13 @@ public class Storage {
     Map<Integer, int[]> cache2 = new HashMap<>();
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      output = DBFetch("S48", 2, sid);
+      Print("Open connection "+conn.toString());
+      output = DBFetch(conn, "S48", 2, sid);
       sq = output[0];
       se = output[1];
       PreparedStatement pS76 = PS(conn, "S76");
       PSAdd(pS76, sid, route[0]);
+      Print("Issue DELETE FROM W (..)");
       PSSubmit(pS76);
       int uid = sid;
       PreparedStatement pS10 = PS(conn, "S10");
@@ -710,20 +738,21 @@ public class Storage {
         int v1 = route[(i + 1)];
         int t2 = route[(i + 2)];
         int v2 = route[(i + 3)];
-        output = DBFetch("S46", 2, v1, v2);
+        output = DBFetch(conn, "S46", 2, v1, v2);
         int dd = output[0];
         int nu = output[1];
         PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
       }
+      Print("Issue INSERT INTO W (..)");
       PSSubmit(pS10);
       PreparedStatement pS77 = PS(conn, "S77");
       PreparedStatement pS139 = PS(conn, "S139");
       int te = route[(route.length - 2)];
       int ve = route[(route.length - 1)];
-      Print("UPDATE CW SET te="+te+", ve="+ve+" WHERE sid="+sid);
-      Print("UPDATE CPD SET te="+te+" WHERE sid="+sid);
       PSAdd(pS77, te, ve, sid);
       PSAdd(pS139, te, sid);
+      Print("Issue UPDATE CW (..)");
+      Print("Issue UPDATE CPD (..)");
       PSSubmit(pS77, pS139);
       int bound = (sched.length/3);
       PreparedStatement pS82 = PS(conn, "S82");
@@ -739,6 +768,9 @@ public class Storage {
           PSAdd(pS84, tj, vj, Lj);
         }
       }
+      Print("Issue UPDATE CPD (..)");
+      Print("Issue UPDATE CPD (..)");
+      Print("Issue UPDATE PD (..)");
       PSSubmit(pS82, pS83, pS84);
       for (int j = 0; j < bound; j++) {
         int Lj = sched[(3*j + 2)];
@@ -747,7 +779,7 @@ public class Storage {
           int td = -1;
           int vd = -1;
           if (!cache.containsKey(Lj)) {
-            rq = DBFetch("S85", 1, Lj)[0];
+            rq = DBFetch(conn, "S85", 1, Lj)[0];
             boolean flagged = false;
             for (int r : rid) {
               if (Lj == r) {
@@ -777,7 +809,7 @@ public class Storage {
               Print("set vd="+vd);
               cache2.put(Lj, new int[] { vp, vd });
             } else {
-              output = DBFetch("S86", 2, Lj);
+              output = DBFetch(conn, "S86", 2, Lj);
               tp = output[0];
               td = output[1];
             }
@@ -787,12 +819,13 @@ public class Storage {
         }
       }
       int t1, q1, o1;
-      output = DBFetch("S87", 3, sid, sched[0]);
+      output = DBFetch(conn, "S87", 3, sid, sched[0]);
       t1 = output[0];
       q1 = output[1];
       o1 = output[2];
       PreparedStatement pS80 = PS(conn, "S80");
       PSAdd(pS80, sid, route[0]);
+      Print("Issue DELETE FROM CQ (..)");
       PSSubmit(pS80);
       PreparedStatement pS14 = PS(conn, "S14");
       for (int j = 0; j < bound; j++) {
@@ -810,13 +843,14 @@ public class Storage {
           o1 = o2;
         }
       }
+      Print("Issue INSERT INTO CQ (..)");
       PSSubmit(pS14);
       PreparedStatement pS12 = PS(conn, "S12");
       PreparedStatement pS13 = PS(conn, "S13");
       int rq, re, rl, ro, rd;
       int[] qpd, pd;
       for (int r : rid) {
-        output = DBFetch("S51", 5, r);
+        output = DBFetch(conn, "S51", 5, r);
         rq = output[0];
         re = output[1];
         rl = output[2];
@@ -832,8 +866,11 @@ public class Storage {
         PSAdd(pS13, sid, se, route[(route.length - 2)], qpd[1], pd[0], qpd[2], pd[1],
               r, re, rl, ro, rd);
       }
+      Print("Issue INSERT INTO PD (..)");
+      Print("Issue INSERT INTO CPD (..)");
       PSSubmit(pS12, pS13);
       conn.commit();
+      Print("Close connection "+conn.toString());
       conn.close();
     }
     catch (SQLException e1) {
@@ -850,11 +887,13 @@ public class Storage {
     Map<Integer, int[]> cache = new HashMap<>();
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      output = DBFetch("S48", 2, sid);
+      Print("Open connection "+conn.toString());
+      output = DBFetch(conn, "S48", 2, sid);
       sq = output[0];
       se = output[1];
       PreparedStatement pS76 = PS(conn, "S76");
       PSAdd(pS76, sid, route[0]);
+      Print("Issue DELETE FROM W (..)");
       PSSubmit(pS76);
       int uid = sid;
       PreparedStatement pS10 = PS(conn, "S10");
@@ -863,20 +902,21 @@ public class Storage {
         int v1 = route[(i + 1)];
         int t2 = route[(i + 2)];
         int v2 = route[(i + 3)];
-        output = DBFetch("S46", 2, v1, v2);
+        output = DBFetch(conn, "S46", 2, v1, v2);
         int dd = output[0];
         int nu = output[1];
         PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
       }
+      Print("Issue INSERT INTO W (..)");
       PSSubmit(pS10);
       PreparedStatement pS77 = PS(conn, "S77");
       PreparedStatement pS139 = PS(conn, "S139");
       int te = route[(route.length - 2)];
       int ve = route[(route.length - 1)];
-      Print("UPDATE CW SET te="+te+", ve="+ve+" WHERE sid="+sid);
-      Print("UPDATE CPD SET te="+te+" WHERE sid="+sid);
       PSAdd(pS77, te, ve, sid);
       PSAdd(pS139, te, sid);
+      Print("Issue UPDATE CW (..)");
+      Print("Issue UPDATE CPD (..)");
       PSSubmit(pS77, pS139);
       int bound = (sched.length/3);
       PreparedStatement pS82 = PS(conn, "S82");
@@ -892,14 +932,17 @@ public class Storage {
           PSAdd(pS84, tj, vj, Lj);
         }
       }
+      Print("Issue UPDATE CPD (..)");
+      Print("Issue UPDATE CPD (..)");
+      Print("Issue UPDATE PD (..)");
       PSSubmit(pS82, pS83, pS84);
       for (int j = 0; j < bound; j++) {
         int Lj = sched[(3*j + 2)];
         if (Lj != sid) {
           int rq, tp, td;
           if (!cache.containsKey(Lj)) {
-            rq = DBFetch("S85", 1, Lj)[0];
-            output = DBFetch("S86", 2, Lj);
+            rq = DBFetch(conn, "S85", 1, Lj)[0];
+            output = DBFetch(conn, "S86", 2, Lj);
             tp = output[0];
             td = output[1];
             cache.put(Lj, new int[] { rq, tp, td });
@@ -907,12 +950,13 @@ public class Storage {
         }
       }
       int t1, q1, o1;
-      output = DBFetch("S87", 3, sid, sched[0]);
+      output = DBFetch(conn, "S87", 3, sid, sched[0]);
       t1 = output[0];
       q1 = output[1];
       o1 = output[2];
       PreparedStatement pS80 = PS(conn, "S80");
       PSAdd(pS80, sid, route[0]);
+      Print("Issue DELETE FROM CQ (..)");
       PSSubmit(pS80);
       PreparedStatement pS14 = PS(conn, "S14");
       for (int j = 0; j < bound; j++) {
@@ -930,6 +974,7 @@ public class Storage {
           o1 = o2;
         }
       }
+      Print("Issue INSERT INTO CQ (..)");
       PSSubmit(pS14);
       PreparedStatement pS42 = PS(conn, "S42");
       PreparedStatement pS43 = PS(conn, "S43");
@@ -939,6 +984,7 @@ public class Storage {
       }
       PSSubmit(pS42, pS43);
       conn.commit();
+      Print("Close connection "+conn.toString());
       conn.close();
     }
     catch (SQLException e1) {
@@ -950,7 +996,11 @@ public class Storage {
   public int[] DBQueryServer(int sid) throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S70", 7, sid);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S70", 7, sid);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -962,7 +1012,11 @@ public class Storage {
   public int[] DBQueryRequest(int rid) throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S75", 7, rid);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S75", 7, rid);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -974,7 +1028,11 @@ public class Storage {
   public int[] DBQueryRequestStatus(int rid, int t) throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S133", 1, rid, t);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S133", 1, rid, t);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -986,7 +1044,11 @@ public class Storage {
   public int[] DBQueryQueuedRequests(int t) throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S68", 7, t, t);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S68", 7, t, t);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -998,7 +1060,11 @@ public class Storage {
   public int[] DBQueryServerLocationsAll(int t) throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S59", 3, t, t, t, t);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S59", 3, t, t, t, t);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1012,15 +1078,18 @@ public class Storage {
     int[] temp1 = new int[] { };
     int[] temp2 = new int[] { };
     try {
-      temp1 = DBFetch("S134", 1, t, t, t);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+      temp1 = DBFetch(conn, "S134", 1, t, t, t);
       output = new int[(temp1.length*3)];
       for (int i = 0; i < temp1.length; i++) {
         int sid = temp1[i];
         output[3*i] = sid;
-        temp2 = DBFetch("S135", 2, t, sid);
+        temp2 = DBFetch(conn, "S135", 2, t, sid);
         output[(3*i + 1)] = temp2[0];
         output[(3*i + 2)] = temp2[1];
       }
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1032,7 +1101,11 @@ public class Storage {
   public int[] DBQueryRoute(int sid) throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S60", 2, sid);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S60", 2, sid);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1044,7 +1117,11 @@ public class Storage {
   public int[] DBQueryRouteRemaining(int sid, int t) throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S129", 2, sid, t);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S129", 2, sid, t);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1056,7 +1133,11 @@ public class Storage {
   public int[] DBQuerySchedule(int sid) throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S61", 4, sid);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S61", 4, sid);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1068,7 +1149,11 @@ public class Storage {
   public int[] DBQueryScheduleRemaining(int sid, int t) throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S69", 4, sid, t);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S69", 4, sid, t);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1080,7 +1165,11 @@ public class Storage {
   public int[] DBQueryCurrentLoad(int sid, int t) throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S73", 1, sid, t);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S73", 1, sid, t);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1092,7 +1181,11 @@ public class Storage {
   public int[] DBQueryCountVertices() throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S62", 1);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S62", 1);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1104,7 +1197,11 @@ public class Storage {
   public int[] DBQueryCountEdges() throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S63", 1);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S63", 1);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1119,7 +1216,11 @@ public class Storage {
   public int[] DBQueryAllVertices() throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S136", 3);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S136", 3);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1134,7 +1235,11 @@ public class Storage {
   public int[] DBQueryAllEdges() throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S137", 4);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S137", 4);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1146,7 +1251,11 @@ public class Storage {
   public int[] DBQueryStatisticsEdges() throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S65", 6);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S65", 6);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1158,7 +1267,11 @@ public class Storage {
   public int[] DBQueryMBR() throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S64", 4);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S64", 4);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1170,7 +1283,11 @@ public class Storage {
   public int[] DBQueryCountServers() throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S66", 1);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S66", 1);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1182,7 +1299,11 @@ public class Storage {
   public int[] DBQueryCountRequests() throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S67", 1);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S67", 1);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1194,7 +1315,11 @@ public class Storage {
   public int[] DBQueryServerPendingAssignments(int sid, int t) throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S100", 1, t, sid);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S100", 1, t, sid);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1206,7 +1331,11 @@ public class Storage {
   public int[] DBQueryServerCompletedAssignments(int sid, int t) throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S101", 1, t, sid);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S101", 1, t, sid);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1218,7 +1347,11 @@ public class Storage {
   public int[] DBQueryServiceRate() throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S102", 1);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S102", 1);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1230,7 +1363,11 @@ public class Storage {
   public int[] DBQueryBaseDistanceTotal() throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S103", 1);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S103", 1);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1242,7 +1379,11 @@ public class Storage {
   public int[] DBQueryServerBaseDistanceTotal() throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S110", 1);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S110", 1);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1254,7 +1395,11 @@ public class Storage {
   public int[] DBQueryRequestBaseDistanceTotal() throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S111", 1);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S111", 1);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1266,7 +1411,11 @@ public class Storage {
   public int[] DBQueryRequestBaseDistanceUnassigned() throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S138", 1);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S138", 1);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1278,7 +1427,11 @@ public class Storage {
   public int[] DBQueryServerTravelDistance(int sid) throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S104", 1, sid);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S104", 1, sid);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1290,7 +1443,11 @@ public class Storage {
   public int[] DBQueryServerTravelDistanceTotal() throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S105", 1);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S105", 1);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1302,7 +1459,11 @@ public class Storage {
   public int[] DBQueryServerCruisingDistance(int sid) throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S106", 1, sid);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S106", 1, sid);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1314,7 +1475,11 @@ public class Storage {
   public int[] DBQueryServerCruisingDistanceTotal() throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S107", 1);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S107", 1);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1326,7 +1491,11 @@ public class Storage {
   public int[] DBQueryServerServiceDistance(int sid) throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S108", 1, sid);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S108", 1, sid);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1338,7 +1507,11 @@ public class Storage {
   public int[] DBQueryServerServiceDistanceTotal() throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S109", 1);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S109", 1);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1350,7 +1523,11 @@ public class Storage {
   public int[] DBQueryRequestDetourDistance(int rid) throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S112", 1, rid);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S112", 1, rid);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1362,7 +1539,11 @@ public class Storage {
   public int[] DBQueryRequestDetourDistanceTotal() throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S113", 1);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S113", 1);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1374,7 +1555,11 @@ public class Storage {
   public int[] DBQueryRequestTransitDistance(int rid) throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S114", 1, rid);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S114", 1, rid);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1386,7 +1571,11 @@ public class Storage {
   public int[] DBQueryRequestTransitDistanceTotal() throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S115", 1);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S115", 1);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1398,7 +1587,11 @@ public class Storage {
   public int[] DBQueryServerTravelDuration(int sid) throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S116", 1, sid);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S116", 1, sid);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1410,7 +1603,11 @@ public class Storage {
   public int[] DBQueryServerTravelDurationTotal() throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S117", 1);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S117", 1);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1422,7 +1619,11 @@ public class Storage {
   public int[] DBQueryRequestPickupDuration(int rid) throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S118", 1, rid);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S118", 1, rid);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1434,7 +1635,11 @@ public class Storage {
   public int[] DBQueryRequestPickupDurationTotal() throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S119", 1);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S119", 1);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1446,7 +1651,11 @@ public class Storage {
   public int[] DBQueryRequestTransitDuration(int rid) throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S120", 1, rid);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S120", 1, rid);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1458,7 +1667,11 @@ public class Storage {
   public int[] DBQueryRequestTransitDurationTotal() throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S121", 1);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S121", 1);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1470,7 +1683,11 @@ public class Storage {
   public int[] DBQueryRequestTravelDuration(int rid) throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S122", 1, rid);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S122", 1, rid);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1482,7 +1699,11 @@ public class Storage {
   public int[] DBQueryRequestTravelDurationTotal() throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S123", 1);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S123", 1);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1494,7 +1715,11 @@ public class Storage {
   public int[] DBQueryRequestDepartureTime(int rid) throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S124", 1, rid);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S124", 1, rid);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1506,7 +1731,11 @@ public class Storage {
   public int[] DBQueryServerDepartureTime(int sid) throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S125", 1, sid);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S125", 1, sid);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1518,7 +1747,11 @@ public class Storage {
   public int[] DBQueryRequestArrivalTime(int rid) throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S126", 1, rid);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S126", 1, rid);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1530,7 +1763,11 @@ public class Storage {
   public int[] DBQueryServerArrivalTime(int sid) throws RuntimeException {
     int[] output = new int[] { };
     try {
-    output = DBFetch("S127", 1, sid);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S127", 1, sid);
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1542,7 +1779,8 @@ public class Storage {
   public int[] DBQuery(String sql, int ncols) throws RuntimeException {
     int[] output = new int[] { };
     try {
-    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
     Statement stmt = conn.createStatement(
       ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
     ResultSet res = stmt.executeQuery(sql);
@@ -1555,7 +1793,10 @@ public class Storage {
         }
       } while (res.next());
     }
+    Print("Close connection "+conn.toString());
     conn.close();
+      Print("Close connection "+conn.toString());
+      conn.close();
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1580,11 +1821,13 @@ public class Storage {
         driver = (PoolingDriver) DriverManager.getDriver(CONNECTIONS_DRIVER_URL);
         driver.registerPool(CONNECTIONS_POOL_NAME, pool);
         Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+        Print("Open connection "+conn.toString());
         CallableStatement cs = conn.prepareCall(
           "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
         cs.setString(1, "derby.storage.pageCacheSize");
         cs.setInt(2, DERBY_PAGECACHESIZE);
         cs.execute();
+        Print("Close connection "+conn.toString());
         conn.close();
       } catch (Exception e) {
         throw new RuntimeException(e);
@@ -1722,11 +1965,12 @@ public class Storage {
       }
       return p;
     }
-    private int[] DBFetch(String k, int ncols, Integer... values) throws SQLException {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    private int[] DBFetch(Connection conn,
+        String k, int ncols, Integer... values) throws SQLException {
+      // Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
       PreparedStatement p = PS(conn, k);
       // FOR DEBUGGING
-      // Print("DBFetch("+pstr.get(k)+")");
+      Print("DBFetch("+pstr.get(k)+")");
       // Print("DBFetch use conn "+conn.toString());
       // Print("DBFetch use thread "+Thread.currentThread().getName());
       int[] output = new int[] { };
@@ -1755,7 +1999,7 @@ public class Storage {
       }
       p.close();
       // Print("DBFetch close conn "+conn.toString());
-      conn.close();
+      // conn.close();
       if (output.length == 0) {
         Print("WARNING: DBFetch(3...) returned empty!");
       }
