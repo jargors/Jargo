@@ -654,6 +654,7 @@ public class Storage {
         Print("Issue UPDATE CPD (..)");
         Print("Issue UPDATE PD (..)");
         PSSubmit(pS82, pS83, pS84);
+        PreparedStatement pS140 = PS(conn, "S140");
         for (int j = 0; j < bound; j++) {
           int Lj = sched[(3*j + 2)];
           if (Lj != sid) {
@@ -664,9 +665,11 @@ public class Storage {
               tp = output[0];
               td = output[1];
               cache.put(Lj, new int[] { rq, tp, td });
+              PSAdd(pS140, tp, td, Lj);
             }
           }
         }
+        PSSubmit(pS140);
         int t1, q1, o1;
         output = DBFetch(conn, "S87", 3, sid, sched[0]);
         t1 = output[0];
@@ -772,6 +775,7 @@ public class Storage {
       Print("Issue UPDATE CPD (..)");
       Print("Issue UPDATE PD (..)");
       PSSubmit(pS82, pS83, pS84);
+      PreparedStatement pS140 = PS(conn, "S140");
       for (int j = 0; j < bound; j++) {
         int Lj = sched[(3*j + 2)];
         if (Lj != sid) {
@@ -812,12 +816,14 @@ public class Storage {
               output = DBFetch(conn, "S86", 2, Lj);
               tp = output[0];
               td = output[1];
+              PSAdd(pS140, tp, td, Lj);
             }
             Print("cache.put("+Lj+", { "+rq+", "+tp+", "+td+" })");
             cache.put(Lj, new int[] { rq, tp, td });
           }
         }
       }
+      PSSubmit(pS140);
       int t1, q1, o1;
       output = DBFetch(conn, "S87", 3, sid, sched[0]);
       t1 = output[0];
@@ -936,6 +942,7 @@ public class Storage {
       Print("Issue UPDATE CPD (..)");
       Print("Issue UPDATE PD (..)");
       PSSubmit(pS82, pS83, pS84);
+      PreparedStatement pS140 = PS(conn, "S140");
       for (int j = 0; j < bound; j++) {
         int Lj = sched[(3*j + 2)];
         if (Lj != sid) {
@@ -946,9 +953,11 @@ public class Storage {
             tp = output[0];
             td = output[1];
             cache.put(Lj, new int[] { rq, tp, td });
+            PSAdd(pS140, tp, td, Lj);
           }
         }
       }
+      PSSubmit(pS140);
       int t1, q1, o1;
       output = DBFetch(conn, "S87", 3, sid, sched[0]);
       t1 = output[0];
@@ -1951,6 +1960,7 @@ public class Storage {
       pstr.put("S137", SEL+"* FROM E");
       pstr.put("S138", SEL+"val FROM dist_r_unassigned");
       pstr.put("S139", UPD+"CPD SET te=? WHERE sid=?");
+      pstr.put("S140", UPD+"CQ SET tp=?, td=? WHERE rid=?");
     }
     private PreparedStatement PS(Connection conn, String k) throws SQLException {
       PreparedStatement p = null;
