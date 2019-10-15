@@ -665,19 +665,20 @@ public class Storage {
               tp = output[0];
               td = output[1];
               cache.put(Lj, new int[] { rq, tp, td });
+              Print("UPDATE CQ SET tp="+tp+", td="+td+" WHERE rid="+Lj);
               PSAdd(pS140, tp, td, Lj);
             }
           }
         }
         PSSubmit(pS140);
         int t1, q1, o1;
-        output = DBFetch(conn, "S87", 3, sid, sched[0]);
+        output = DBFetch(conn, "S87", 3, sid, route[0]);
         t1 = output[0];
         q1 = output[1];
         o1 = output[2];
         PreparedStatement pS80 = PS(conn, "S80");
         PSAdd(pS80, sid, route[0]);
-        Print("Issue DELETE FROM CQ (..)");
+        Print("Issue DELETE FROM CQ WHERE sid="+sid+" AND t2>"+route[0]);
         PSSubmit(pS80);
         PreparedStatement pS14 = PS(conn, "S14");
         for (int j = 0; j < bound; j++) {
@@ -688,6 +689,9 @@ public class Storage {
             int[] qpd = cache.get(Lj);
             int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
             int o2 = o1 + 1;
+            Print("Issue INSERT INTO CQ VALUES "+sid+", "+sq+", "+se+", "+t1+", "+t2
+                +", "+v2+", "+q1+", "+q2+", "+Lj+", "+qpd[0]+", "+qpd[1]+", "+qpd[2]
+                +", "+o1+", "+o2);
             PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
                   qpd[0], qpd[1], qpd[2], o1, o2);
             t1 = t2;
@@ -695,7 +699,6 @@ public class Storage {
             o1 = o2;
           }
         }
-        Print("Issue INSERT INTO CQ (..)");
         PSSubmit(pS14);
       }
       conn.commit();
@@ -825,13 +828,13 @@ public class Storage {
       }
       PSSubmit(pS140);
       int t1, q1, o1;
-      output = DBFetch(conn, "S87", 3, sid, sched[0]);
+      output = DBFetch(conn, "S87", 3, sid, route[0]);
       t1 = output[0];
       q1 = output[1];
       o1 = output[2];
       PreparedStatement pS80 = PS(conn, "S80");
       PSAdd(pS80, sid, route[0]);
-      Print("Issue DELETE FROM CQ (..)");
+      Print("Issue DELETE FROM CQ WHERE sid="+sid+" AND t2>"+route[0]);
       PSSubmit(pS80);
       PreparedStatement pS14 = PS(conn, "S14");
       for (int j = 0; j < bound; j++) {
@@ -842,6 +845,9 @@ public class Storage {
           int[] qpd = cache.get(Lj);
           int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
           int o2 = o1 + 1;
+          Print("Issue INSERT INTO CQ VALUES "+sid+", "+sq+", "+se+", "+t1+", "+t2
+              +", "+v2+", "+q1+", "+q2+", "+Lj+", "+qpd[0]+", "+qpd[1]+", "+qpd[2]
+              +", "+o1+", "+o2);
           PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
                 qpd[0], qpd[1], qpd[2], o1, o2);
           t1 = t2;
@@ -849,7 +855,6 @@ public class Storage {
           o1 = o2;
         }
       }
-      Print("Issue INSERT INTO CQ (..)");
       PSSubmit(pS14);
       PreparedStatement pS12 = PS(conn, "S12");
       PreparedStatement pS13 = PS(conn, "S13");
@@ -953,19 +958,20 @@ public class Storage {
             tp = output[0];
             td = output[1];
             cache.put(Lj, new int[] { rq, tp, td });
+            Print("UPDATE CQ SET tp="+tp+", td="+td+" WHERE rid="+Lj);
             PSAdd(pS140, tp, td, Lj);
           }
         }
       }
       PSSubmit(pS140);
       int t1, q1, o1;
-      output = DBFetch(conn, "S87", 3, sid, sched[0]);
+      output = DBFetch(conn, "S87", 3, sid, route[0]);
       t1 = output[0];
       q1 = output[1];
       o1 = output[2];
       PreparedStatement pS80 = PS(conn, "S80");
       PSAdd(pS80, sid, route[0]);
-      Print("Issue DELETE FROM CQ (..)");
+      Print("Issue DELETE FROM CQ WHERE sid="+sid+" AND t2>"+route[0]);
       PSSubmit(pS80);
       PreparedStatement pS14 = PS(conn, "S14");
       for (int j = 0; j < bound; j++) {
@@ -976,6 +982,9 @@ public class Storage {
           int[] qpd = cache.get(Lj);
           int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
           int o2 = o1 + 1;
+          Print("Issue INSERT INTO CQ VALUES "+sid+", "+sq+", "+se+", "+t1+", "+t2
+              +", "+v2+", "+q1+", "+q2+", "+Lj+", "+qpd[0]+", "+qpd[1]+", "+qpd[2]
+              +", "+o1+", "+o2);
           PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
                 qpd[0], qpd[1], qpd[2], o1, o2);
           t1 = t2;
@@ -983,7 +992,6 @@ public class Storage {
           o1 = o2;
         }
       }
-      Print("Issue INSERT INTO CQ (..)");
       PSSubmit(pS14);
       PreparedStatement pS42 = PS(conn, "S42");
       PreparedStatement pS43 = PS(conn, "S43");
@@ -1921,7 +1929,7 @@ public class Storage {
       pstr.put("S86", SEL+"tp, td FROM CPD WHERE rid=?");
       pstr.put("S73", SEL+"q2 FROM CQ WHERE sid=? AND t2<=? "
             + "ORDER BY t2 DESC, o2 DESC FETCH FIRST ROW ONLY");
-      pstr.put("S87", SEL+"t2, q2, o2 FROM CQ WHERE sid=? AND t2<? "
+      pstr.put("S87", SEL+"t2, q2, o2 FROM CQ WHERE sid=? AND t2<=? "
             + "ORDER BY t2 DESC, o2 DESC FETCH FIRST ROW ONLY");
       pstr.put("S100", SEL+"rid FROM assignments WHERE t>? AND sid=?");
       pstr.put("S101", SEL+"rid FROM assignments WHERE t<=? AND sid=?");

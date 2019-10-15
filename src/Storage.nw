@@ -2372,6 +2372,7 @@ for (int j = 0; j < bound; j++) {
       tp = output[0];
       td = output[1];
       cache.put(Lj, new int[] { rq, tp, td });
+      Print("UPDATE CQ SET tp="+tp+", td="+td+" WHERE rid="+Lj);
       PSAdd(pS140, tp, td, Lj);
     }
   }
@@ -2380,7 +2381,7 @@ PSSubmit(pS140);
 @
 <<....select latest order number>>=
 int t1, q1, o1;
-output = DBFetch(conn, "S87", 3, sid, sched[0]);
+output = DBFetch(conn, "S87", 3, sid, route[0]);
 t1 = output[0];
 q1 = output[1];
 o1 = output[2];
@@ -2388,7 +2389,7 @@ o1 = output[2];
 <<....delete remaining schedule from cq>>=
 PreparedStatement pS80 = PS(conn, "S80");
 PSAdd(pS80, sid, route[0]);
-Print("Issue DELETE FROM CQ (..)");
+Print("Issue DELETE FROM CQ WHERE sid="+sid+" AND t2>"+route[0]);
 PSSubmit(pS80);
 @
 <<....insert new remaining schedule into cq>>=
@@ -2401,6 +2402,9 @@ for (int j = 0; j < bound; j++) {
     int[] qpd = cache.get(Lj);
     int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
     int o2 = o1 + 1;
+    Print("Issue INSERT INTO CQ VALUES "+sid+", "+sq+", "+se+", "+t1+", "+t2
+        +", "+v2+", "+q1+", "+q2+", "+Lj+", "+qpd[0]+", "+qpd[1]+", "+qpd[2]
+        +", "+o1+", "+o2);
     PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
           qpd[0], qpd[1], qpd[2], o1, o2);
     t1 = t2;
@@ -2408,7 +2412,6 @@ for (int j = 0; j < bound; j++) {
     o1 = o2;
   }
 }
-Print("Issue INSERT INTO CQ (..)");
 PSSubmit(pS14);
 @
 
@@ -3661,7 +3664,7 @@ pstr.put("S73", SEL+"q2 FROM CQ WHERE sid=? AND t2<=? "
       + "ORDER BY t2 DESC, o2 DESC FETCH FIRST ROW ONLY");
 @ %def S73
 <<S87>>=
-pstr.put("S87", SEL+"t2, q2, o2 FROM CQ WHERE sid=? AND t2<? "
+pstr.put("S87", SEL+"t2, q2, o2 FROM CQ WHERE sid=? AND t2<=? "
       + "ORDER BY t2 DESC, o2 DESC FETCH FIRST ROW ONLY");
 @ %def S87
 <<S100>>=
