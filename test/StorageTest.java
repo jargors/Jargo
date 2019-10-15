@@ -707,9 +707,9 @@ public class StorageTest {
       }
     {
       int output[] = storage.DBQueryServiceRate();
-      if (!(output[0] == 50)) {
+      if (!(output[0] == 5000)) {
         Print("[FAIL] DBQueryServiceRate(0)");
-        Print("\tExpected 50; got "+output[0]);
+        Print("\tExpected 5000; got "+output[0]);
         count_failed++;
       } else {
         Print("[PASS] DBQueryServiceRate(0)");
