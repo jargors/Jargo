@@ -126,7 +126,8 @@ setters.
 Ultimately we want everything in the database to be an integer so we don't have
 to fiddle around with data types when we do reads and writes. We use [[CSHIFT]]
 to shift the decimal places of latitude and longitude coordinates left and
-right by multiplication or division.
+right by multiplication or division\footnote{Beware, if [[CSHIFT]] is changed
+here, it should also be changed in Tools.}.
 <<Settings objects>>=
 private final double CSHIFT = 10000000.0;
 private static int world_time = 0;
@@ -150,46 +151,42 @@ here, running in parallel. They are executed using Java's
 \subsubsection{Clock Loop}
 This loop advances the simulation world time.
 <<Definition of clock loop>>=
-private Runnable ClockLoop = new Runnable() {
-  public void run() {
-    communicator.setSimulationWorldTime(++world_time);
-    storage.printSQLDriverStatistics();
-  }
+private Runnable ClockLoop = () -> {
+  communicator.setSimulationWorldTime(++world_time);
+  storage.printSQLDriverStatistics();
 };
 @ %def ClockLoop
 
 \subsubsection{Engine Loop}
 <<Definition of engine loop>>=
-private Runnable EngineLoop = new Runnable() {
-  public void run() {
-    // Print("I am EngineLoop running on "+Thread.currentThread().getName());
+private Runnable EngineLoop = () -> {
+  // Print("I am EngineLoop running on "+Thread.currentThread().getName());
 
-    /* Here is where traffic, route deviations, and breakdowns happen.
-     * Traffic is the most important one because it is most prevalent in the
-     * real world. Deviations and breakdowns have less chance to occur, so
-     * their impacts on ridesharing algorithm quality are probably small.
-     */
+  /* Here is where traffic, route deviations, and breakdowns happen.
+   * Traffic is the most important one because it is most prevalent in the
+   * real world. Deviations and breakdowns have less chance to occur, so
+   * their impacts on ridesharing algorithm quality are probably small.
+   */
 
-    // applyTraffic(world_time);
+  // applyTraffic(world_time);
 
-    /* The method applyTraffic(1) works by changing the timing of the waypoints
-     * in the affected routes to simulate slowdowns and speedups due to
-     * traffic. Naive algorithm:
-     *   1. load the traffic profile (list of all edges with their flow speeds)
-     *   2. servers <- storage.DBQueryActiveServerLocations(world_time)
-     *   3. for each server:
-     *   4.   route <- storage.DBQueryRemainingRoute(server id)
-     *   5.   for each edge in route:
-     *   6.     if edge speed exceeds new flow speed,
-     *   7.       change waypoint time so speed is less than flow speed
-     *   8.     optionally, if speed is below flow speed,
-     *   9.       change waypoint time so speed is at flow speed
-     *  10.   storage.DBUpdateServerRoute(server id, new route, new sched)
-     */
+  /* The method applyTraffic(1) works by changing the timing of the waypoints
+   * in the affected routes to simulate slowdowns and speedups due to
+   * traffic. Naive algorithm:
+   *   1. load the traffic profile (list of all edges with their flow speeds)
+   *   2. servers <- storage.DBQueryActiveServerLocations(world_time)
+   *   3. for each server:
+   *   4.   route <- storage.DBQueryRemainingRoute(server id)
+   *   5.   for each edge in route:
+   *   6.     if edge speed exceeds new flow speed,
+   *   7.       change waypoint time so speed is less than flow speed
+   *   8.     optionally, if speed is below flow speed,
+   *   9.       change waypoint time so speed is at flow speed
+   *  10.   storage.DBUpdateServerRoute(server id, new route, new sched)
+   */
 
-    // applyDeviation(world_time);
-    // applyBreakdown(world_time);
-  }
+  // applyDeviation(world_time);
+  // applyBreakdown(world_time);
 };
 @ %def EngineLoop
 
