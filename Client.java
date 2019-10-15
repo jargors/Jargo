@@ -35,7 +35,7 @@ public abstract class Client {
     public void loadGTree(String p) {
       tools.loadGTree(p);
     }
-    public void loadRoadNetwork() {
+    public void registerRoadNetwork() {
       tools.registerVertices(communicator.getReferenceVerticesCache());
       tools.registerEdges(communicator.getReferenceEdgesCache());
     }

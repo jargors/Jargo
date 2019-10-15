@@ -98,7 +98,7 @@ public Client() { }
   <<Get/set request collection period>>
   <<Get/set server location collection period>>
   <<Load GTree>>
-  <<Load road network>>
+  <<Register road network>>
 @
 
 \subsection{Obtaining Requests and Server Locations}
@@ -205,12 +205,8 @@ public void loadGTree(String p) {
 @ %def loadGTree
 
 \subsubsection{[[loadRoadNetwork]](0)}
-Be mindful, the Client [[loadRoadNetwork]](0) method is different
-from the Controller [[loadRoadNetwork]](1) method. The Client method registers
-the vertices and edges cache from Storage into Tools, while the Controller
-method populates the cache and Storage with the on-disk road network file.
-<<Load road network>>=
-public void loadRoadNetwork() {
+<<Register road network>>=
+public void registerRoadNetwork() {
   tools.registerVertices(communicator.getReferenceVerticesCache());
   tools.registerEdges(communicator.getReferenceEdgesCache());
 }
