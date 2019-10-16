@@ -25,6 +25,13 @@
 
 \section{Introduction}
 \label{sec:introduction}
+We supply a Tools class that provides some common procedures for developing
+ridesharing algorithms.  The Tools class is developed using the
+Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
+programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
+({\tt{}src/Tools.nw}) is the source for both the documentation ({\tt{}doc/Tools.tex})
+and the Java code (Tools.java)\footnote{See the {\tt{}Makefile} for build
+details.}.
 
 \section{Implementation Overview}
 \nwfilename{src/Tools.nw}\nwbegincode{1}\sublabel{NW3zOIuJ-2Vh5vZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-2Vh5vZ-1}}}\moddef{Tools.java~{\nwtagstyle{}\subpageref{NW3zOIuJ-2Vh5vZ-1}}}\endmoddef\nwnotused{Tools.java}
@@ -32,6 +39,8 @@
 \LA{}\code{}Tools\edoc{} definition~{\nwtagstyle{}\subpageref{NW3zOIuJ-1xm30x-1}}\RA{}
 \nwendcode{}\nwbegindocs{2}\nwdocspar
 
+\subsection{Preamble}
+The preamble declares the package and imports dependencies.
 \nwenddocs{}\nwbegincode{3}\sublabel{NW3zOIuJ-1ANZ96-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1ANZ96-1}}}\moddef{Tools.java preamble~{\nwtagstyle{}\subpageref{NW3zOIuJ-1ANZ96-1}}}\endmoddef\nwused{\\{NW3zOIuJ-2Vh5vZ-1}}
 package com.github.jargors;
 import com.github.jargors.gtreeJNI.*;
@@ -39,31 +48,31 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Arrays;
 \nwendcode{}\nwbegindocs{4}\nwdocspar
+
+\subsection{Class Definition}
 \nwenddocs{}\nwbegincode{5}\sublabel{NW3zOIuJ-1xm30x-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1xm30x-1}}}\moddef{\code{}Tools\edoc{} definition~{\nwtagstyle{}\subpageref{NW3zOIuJ-1xm30x-1}}}\endmoddef\nwused{\\{NW3zOIuJ-2Vh5vZ-1}}
 public class Tools \{
   \LA{}Member variables~{\nwtagstyle{}\subpageref{NW3zOIuJ-aPohW-1}}\RA{}
-  \LA{}Constructor~{\nwtagstyle{}\subpageref{NW3zOIuJ-4exbaU-1}}\RA{}
   \LA{}Public methods~{\nwtagstyle{}\subpageref{NW3zOIuJ-1eKCCy-1}}\RA{}
 \}
 \nwendcode{}\nwbegindocs{6}\nwdocspar
 
+\subsection{Member Variables}
 \nwenddocs{}\nwbegincode{7}\sublabel{NW3zOIuJ-aPohW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-aPohW-1}}}\moddef{Member variables~{\nwtagstyle{}\subpageref{NW3zOIuJ-aPohW-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1xm30x-1}}
 private G_Tree gtree;
 private boolean flag_gtree_loaded = false;
 private Map<Integer, int[]> lu_vertices = new HashMap<>();
 private Map<Integer, Map<Integer, int[]>> lu_edges = new HashMap<>();
+private Map<Integer, int[]> lu_users = new HashMap<>();
 private final double CSHIFT = 10000000.0;
-\nwendcode{}\nwbegindocs{8}\nwdocspar
-
-\nwenddocs{}\nwbegincode{9}\sublabel{NW3zOIuJ-4exbaU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-4exbaU-1}}}\moddef{Constructor~{\nwtagstyle{}\subpageref{NW3zOIuJ-4exbaU-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1xm30x-1}}
-public Tools() \{ \}
-\nwendcode{}\nwbegindocs{10}\nwdocspar
-
+\nwindexdefn{gtree}{gtree}{NW3zOIuJ-aPohW-1}\nwindexdefn{flag{\char95}gtree{\char95}loaded}{flag:ungtree:unloaded}{NW3zOIuJ-aPohW-1}\nwindexdefn{lu{\char95}vertices}{lu:unvertices}{NW3zOIuJ-aPohW-1}\nwindexdefn{lu{\char95}edges}{lu:unedges}{NW3zOIuJ-aPohW-1}\nwindexdefn{lu{\char95}users}{lu:unusers}{NW3zOIuJ-aPohW-1}\nwindexdefn{CSHIFT}{CSHIFT}{NW3zOIuJ-aPohW-1}\eatline
+\nwidentdefs{\\{{CSHIFT}{CSHIFT}}\\{{flag{\char95}gtree{\char95}loaded}{flag:ungtree:unloaded}}\\{{gtree}{gtree}}\\{{lu{\char95}edges}{lu:unedges}}\\{{lu{\char95}users}{lu:unusers}}\\{{lu{\char95}vertices}{lu:unvertices}}}\nwendcode{}\nwbegindocs{8}\nwdocspar
 \section{Public Methods}
-\nwenddocs{}\nwbegincode{11}\sublabel{NW3zOIuJ-1eKCCy-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1eKCCy-1}}}\moddef{Public methods~{\nwtagstyle{}\subpageref{NW3zOIuJ-1eKCCy-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1xm30x-1}}
+\nwenddocs{}\nwbegincode{9}\sublabel{NW3zOIuJ-1eKCCy-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1eKCCy-1}}}\moddef{Public methods~{\nwtagstyle{}\subpageref{NW3zOIuJ-1eKCCy-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1xm30x-1}}
   \LA{}Load GTree~{\nwtagstyle{}\subpageref{NW3zOIuJ-b7Jka-1}}\RA{}
   \LA{}Register vertices~{\nwtagstyle{}\subpageref{NW3zOIuJ-2ZKKW-1}}\RA{}
   \LA{}Register edges~{\nwtagstyle{}\subpageref{NW3zOIuJ-3Nu1Fg-1}}\RA{}
+  \LA{}Register users~{\nwtagstyle{}\subpageref{NW3zOIuJ-UKHEr-1}}\RA{}
   \LA{}Compute haversine~{\nwtagstyle{}\subpageref{NW3zOIuJ-1XfngC-1}}\RA{}
   \LA{}Compute shortest path~{\nwtagstyle{}\subpageref{NW3zOIuJ-1XAjSF-1}}\RA{}
   \LA{}Compute shortest path distance~{\nwtagstyle{}\subpageref{NW3zOIuJ-1A9hi2-1}}\RA{}
@@ -72,12 +81,12 @@ public Tools() \{ \}
   \LA{}Print path~{\nwtagstyle{}\subpageref{NW3zOIuJ-3QvbXQ-1}}\RA{}
   \LA{}Print route~{\nwtagstyle{}\subpageref{NW3zOIuJ-2sTsm3-1}}\RA{}
   \LA{}Print schedule~{\nwtagstyle{}\subpageref{NW3zOIuJ-45oGvT-1}}\RA{}
-\nwendcode{}\nwbegindocs{12}\nwdocspar
+\nwendcode{}\nwbegindocs{10}\nwdocspar
 
-\subsection{{\tt{}\protect\nosublabel{NW3zOIuJ-1eKCCy-1-u11}\protect\nwindexuse{loadGTree}{loadGTree}{NW3zOIuJ-b7Jka-1}loadGTree}(1)}
+\subsection{{\tt{}\protect\nosublabel{NW3zOIuJ-1eKCCy-1-u12}\protect\nwindexuse{loadGTree}{loadGTree}{NW3zOIuJ-b7Jka-1}loadGTree}(1)}
 The {\tt{}gtreeJNI.load}(1) method can do strange things if {\tt{}f{\char95}gtree} is empty,
 so we do some basic validation here before proceeding.
-\nwenddocs{}\nwbegincode{13}\sublabel{NW3zOIuJ-b7Jka-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-b7Jka-1}}}\moddef{Load GTree~{\nwtagstyle{}\subpageref{NW3zOIuJ-b7Jka-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
+\nwenddocs{}\nwbegincode{11}\sublabel{NW3zOIuJ-b7Jka-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-b7Jka-1}}}\moddef{Load GTree~{\nwtagstyle{}\subpageref{NW3zOIuJ-b7Jka-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
 public void loadGTree(String p) \{
   try \{
     System.loadLibrary("gtree");
@@ -94,23 +103,31 @@ public void loadGTree(String p) \{
   \}
 \}
 \nwindexdefn{loadGTree}{loadGTree}{NW3zOIuJ-b7Jka-1}\eatline
-\nwidentdefs{\\{{loadGTree}{loadGTree}}}\nwendcode{}\nwbegindocs{14}\nwdocspar
+\nwidentdefs{\\{{loadGTree}{loadGTree}}}\nwidentuses{\\{{flag{\char95}gtree{\char95}loaded}{flag:ungtree:unloaded}}\\{{gtree}{gtree}}}\nwindexuse{flag{\char95}gtree{\char95}loaded}{flag:ungtree:unloaded}{NW3zOIuJ-b7Jka-1}\nwindexuse{gtree}{gtree}{NW3zOIuJ-b7Jka-1}\nwendcode{}\nwbegindocs{12}\nwdocspar
 \subsection{{\tt{}\protect\nwindexuse{registerVertices}{registerVertices}{NW3zOIuJ-2ZKKW-1}registerVertices}(1)}
-Be mindful, any change to {\tt{}src} will appear in {\tt{}lu{\char95}vertices}.
-\nwenddocs{}\nwbegincode{15}\sublabel{NW3zOIuJ-2ZKKW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-2ZKKW-1}}}\moddef{Register vertices~{\nwtagstyle{}\subpageref{NW3zOIuJ-2ZKKW-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
+Be mindful, any change to {\tt{}src} will appear in {\tt{}\protect\nwindexuse{lu{\char95}vertices}{lu:unvertices}{NW3zOIuJ-aPohW-1}lu{\char95}vertices}.
+\nwenddocs{}\nwbegincode{13}\sublabel{NW3zOIuJ-2ZKKW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-2ZKKW-1}}}\moddef{Register vertices~{\nwtagstyle{}\subpageref{NW3zOIuJ-2ZKKW-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
 public void registerVertices(Map<Integer, int[]> src) \{
   lu_vertices = src;
 \}
 \nwindexdefn{registerVertices}{registerVertices}{NW3zOIuJ-2ZKKW-1}\eatline
-\nwidentdefs{\\{{registerVertices}{registerVertices}}}\nwendcode{}\nwbegindocs{16}\nwdocspar
+\nwidentdefs{\\{{registerVertices}{registerVertices}}}\nwidentuses{\\{{lu{\char95}vertices}{lu:unvertices}}}\nwindexuse{lu{\char95}vertices}{lu:unvertices}{NW3zOIuJ-2ZKKW-1}\nwendcode{}\nwbegindocs{14}\nwdocspar
 \subsection{{\tt{}\protect\nwindexuse{registerEdges}{registerEdges}{NW3zOIuJ-3Nu1Fg-1}registerEdges}(1)}
-Be mindful, any change to {\tt{}src} will appear in {\tt{}lu{\char95}edges}.
-\nwenddocs{}\nwbegincode{17}\sublabel{NW3zOIuJ-3Nu1Fg-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-3Nu1Fg-1}}}\moddef{Register edges~{\nwtagstyle{}\subpageref{NW3zOIuJ-3Nu1Fg-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
+Be mindful, any change to {\tt{}src} will appear in {\tt{}\protect\nwindexuse{lu{\char95}edges}{lu:unedges}{NW3zOIuJ-aPohW-1}lu{\char95}edges}.
+\nwenddocs{}\nwbegincode{15}\sublabel{NW3zOIuJ-3Nu1Fg-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-3Nu1Fg-1}}}\moddef{Register edges~{\nwtagstyle{}\subpageref{NW3zOIuJ-3Nu1Fg-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
 public void registerEdges(Map<Integer, Map<Integer, int[]>> src) \{
   lu_edges = src;
 \}
 \nwindexdefn{registerEdges}{registerEdges}{NW3zOIuJ-3Nu1Fg-1}\eatline
-\nwidentdefs{\\{{registerEdges}{registerEdges}}}\nwendcode{}\nwbegindocs{18}\nwdocspar
+\nwidentdefs{\\{{registerEdges}{registerEdges}}}\nwidentuses{\\{{lu{\char95}edges}{lu:unedges}}}\nwindexuse{lu{\char95}edges}{lu:unedges}{NW3zOIuJ-3Nu1Fg-1}\nwendcode{}\nwbegindocs{16}\nwdocspar
+\subsection{{\tt{}\protect\nwindexuse{registerUsers}{registerUsers}{NW3zOIuJ-UKHEr-1}registerUsers}(1)}
+Be mindful, any change to {\tt{}src} will appear in {\tt{}\protect\nwindexuse{lu{\char95}users}{lu:unusers}{NW3zOIuJ-aPohW-1}lu{\char95}users}.
+\nwenddocs{}\nwbegincode{17}\sublabel{NW3zOIuJ-UKHEr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-UKHEr-1}}}\moddef{Register users~{\nwtagstyle{}\subpageref{NW3zOIuJ-UKHEr-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
+public void registerUsers(Map<Integer, int[]> src) \{
+  lu_users = src;
+\}
+\nwindexdefn{registerUsers}{registerUsers}{NW3zOIuJ-UKHEr-1}\eatline
+\nwidentdefs{\\{{registerUsers}{registerUsers}}}\nwidentuses{\\{{lu{\char95}users}{lu:unusers}}}\nwindexuse{lu{\char95}users}{lu:unusers}{NW3zOIuJ-UKHEr-1}\nwendcode{}\nwbegindocs{18}\nwdocspar
 \subsection{{\tt{}\protect\nwindexuse{computeHaversine}{computeHaversine}{NW3zOIuJ-1XfngC-1}computeHaversine}(4)}
 Most of this code is Copyright 2017 Juliano Macedo and is licensed under the
 MIT License. It has been modified from its original form.
@@ -138,18 +155,19 @@ if (d == 0 && (lng1 != lng2 || lat1 != lat2)) \{
 \nwendcode{}\nwbegindocs{22}\nwdocspar
 
 \subsection{{\tt{}\protect\nwindexuse{computeHaversine}{computeHaversine}{NW3zOIuJ-1XfngC-1}computeHaversine}(2)}
-Beware, the coordinates in {\tt{}lu{\char95}vertices} have their decimal places shifted by
-{\tt{}CSHIFT}.
+Beware, the coordinates in {\tt{}\protect\nwindexuse{lu{\char95}vertices}{lu:unvertices}{NW3zOIuJ-aPohW-1}lu{\char95}vertices} have their decimal places shifted by
+{\tt{}\protect\nwindexuse{CSHIFT}{CSHIFT}{NW3zOIuJ-aPohW-1}CSHIFT}. This function is the reason why we register {\tt{}\protect\nwindexuse{lu{\char95}vertices}{lu:unvertices}{NW3zOIuJ-aPohW-1}lu{\char95}vertices}.
+By registering it, we save making a couple of database calls.
 \nwenddocs{}\nwbegincode{23}\sublabel{NW3zOIuJ-1XfngC-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1XfngC-2}}}\moddef{Compute haversine~{\nwtagstyle{}\subpageref{NW3zOIuJ-1XfngC-1}}}\plusendmoddef
 public int computeHaversine(int u, int v) \{
   return computeHaversine(
     lu_vertices.get(u)[0]/CSHIFT, lu_vertices.get(u)[1]/CSHIFT,
     lu_vertices.get(v)[0]/CSHIFT, lu_vertices.get(v)[1]/CSHIFT);
 \}
-\nwidentuses{\\{{computeHaversine}{computeHaversine}}}\nwindexuse{computeHaversine}{computeHaversine}{NW3zOIuJ-1XfngC-2}\nwendcode{}\nwbegindocs{24}\nwdocspar
+\nwidentuses{\\{{computeHaversine}{computeHaversine}}\\{{CSHIFT}{CSHIFT}}\\{{lu{\char95}vertices}{lu:unvertices}}}\nwindexuse{computeHaversine}{computeHaversine}{NW3zOIuJ-1XfngC-2}\nwindexuse{CSHIFT}{CSHIFT}{NW3zOIuJ-1XfngC-2}\nwindexuse{lu{\char95}vertices}{lu:unvertices}{NW3zOIuJ-1XfngC-2}\nwendcode{}\nwbegindocs{24}\nwdocspar
 
 \subsection{{\tt{}\protect\nwindexuse{computeShortestPath}{computeShortestPath}{NW3zOIuJ-1XAjSF-1}computeShortestPath}(2)}
-Two important notes:
+Beware, two important notes:
 \begin{itemize}
 \item The vertices in G-tree are 0-indexed while they are 1-indexed in Jargo.  To
 compensate, at location {\tt{}L1} we subtract 1 from {\tt{}u} and {\tt{}v}, and at
@@ -183,13 +201,13 @@ public int[] computeShortestPath(int u, int v) \{
   return output;
 \}
 \nwindexdefn{computeShortestPath}{computeShortestPath}{NW3zOIuJ-1XAjSF-1}\eatline
-\nwidentdefs{\\{{computeShortestPath}{computeShortestPath}}}\nwendcode{}\nwbegindocs{26}\nwdocspar
-\subsection{{\tt{}computeShortestPathDistance}(2)}
-Two important notes:
+\nwidentdefs{\\{{computeShortestPath}{computeShortestPath}}}\nwidentuses{\\{{flag{\char95}gtree{\char95}loaded}{flag:ungtree:unloaded}}\\{{gtree}{gtree}}}\nwindexuse{flag{\char95}gtree{\char95}loaded}{flag:ungtree:unloaded}{NW3zOIuJ-1XAjSF-1}\nwindexuse{gtree}{gtree}{NW3zOIuJ-1XAjSF-1}\nwendcode{}\nwbegindocs{26}\nwdocspar
+\subsection{{\tt{}\protect\nwindexuse{computeShortestPathDistance}{computeShortestPathDistance}{NW3zOIuJ-1A9hi2-1}computeShortestPathDistance}(2)}
+Beware, two important notes:
 \begin{itemize}
 \item The vertices in G-tree are 0-indexed while they are 1-indexed in Jargo.
 To compensate, at we subtract 1 from {\tt{}u} and {\tt{}v} when calling
-{\tt{}gtree.search}(2).
+{\tt{}\protect\nwindexuse{gtree}{gtree}{NW3zOIuJ-aPohW-1}gtree.search}(2).
 \item We consider vertex 0 to be a dummy vertex. The distance to this vertex
 is always 0.
 \end{itemize}
@@ -206,9 +224,35 @@ public int computeShortestPathDistance(int u, int v) \{
   \}
   return d;
 \}
-\nwendcode{}\nwbegindocs{28}\nwdocspar
-
+\nwindexdefn{computeShortestPathDistance}{computeShortestPathDistance}{NW3zOIuJ-1A9hi2-1}\eatline
+\nwidentdefs{\\{{computeShortestPathDistance}{computeShortestPathDistance}}}\nwidentuses{\\{{flag{\char95}gtree{\char95}loaded}{flag:ungtree:unloaded}}\\{{gtree}{gtree}}}\nwindexuse{flag{\char95}gtree{\char95}loaded}{flag:ungtree:unloaded}{NW3zOIuJ-1A9hi2-1}\nwindexuse{gtree}{gtree}{NW3zOIuJ-1A9hi2-1}\nwendcode{}\nwbegindocs{28}\nwdocspar
 \subsection{{\tt{}\protect\nwindexuse{filterByHaversine}{filterByHaversine}{NW3zOIuJ-1bwZd1-1}filterByHaversine}(3)}
+This function takes a request origin {\tt{}ro}, a locations array {\tt{}locs}, and
+a distance threshold {\tt{}threshold} as input, and returns a copy of {\tt{}locs}
+that keeps only those location triplets where the haversine distance between
+the location in the triplet and {\tt{}ro} is within {\tt{}threshold}.
+
+Locations array {\tt{}locs} =
+
+\noindent
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:\texttt{sid}\textrm{ of server }s_1$};
+ &\node[draw] {$1:\pi_t(w_{|w_{\leq t}|})\textrm{ of server }s_1$};
+ &\node[draw] {$2:\pi_v(w_{|w_{\leq t}|})\textrm{ of server }s_1$};\\
+  \node[draw] {$3:\texttt{sid}\textrm{ of server }s_2$};
+ &\node[draw] {$4:\pi_t(w_{|w_{\leq t}|})\textrm{ of server }s_2$};
+ &\node[draw] {$5:\pi_v(w_{|w_{\leq t}|})\textrm{ of server }s_2$};\\
+  \node {$...$ and so on,};\\
+};
+\end{tikzpicture}
+
+\noindent
+where $\pi_t(w_{|w_{\leq t}|})$ gives the time component of a server's
+last-visited waypoint, and $\pi_v(w_{|w_{\leq t}|})$ gives the vertex
+component.
+
 \nwenddocs{}\nwbegincode{29}\sublabel{NW3zOIuJ-1bwZd1-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1bwZd1-1}}}\moddef{Filter locs by haversine distance~{\nwtagstyle{}\subpageref{NW3zOIuJ-1bwZd1-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
 public int[] filterByHaversine(int ro, int[] locs, int threshold) \{
   int n = (locs.length/3);
@@ -273,7 +317,6 @@ public void printSchedule(int[] b) \{
 \nwixlogsorted{c}{{Compute haversine}{NW3zOIuJ-1XfngC-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-1XfngC-1}\nwixd{NW3zOIuJ-1XfngC-2}}}%
 \nwixlogsorted{c}{{Compute shortest path}{NW3zOIuJ-1XAjSF-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-1XAjSF-1}}}%
 \nwixlogsorted{c}{{Compute shortest path distance}{NW3zOIuJ-1A9hi2-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-1A9hi2-1}}}%
-\nwixlogsorted{c}{{Constructor}{NW3zOIuJ-4exbaU-1}{\nwixu{NW3zOIuJ-1xm30x-1}\nwixd{NW3zOIuJ-4exbaU-1}}}%
 \nwixlogsorted{c}{{Filter locs by haversine distance}{NW3zOIuJ-1bwZd1-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-1bwZd1-1}}}%
 \nwixlogsorted{c}{{Load GTree}{NW3zOIuJ-b7Jka-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-b7Jka-1}}}%
 \nwixlogsorted{c}{{Member variables}{NW3zOIuJ-aPohW-1}{\nwixu{NW3zOIuJ-1xm30x-1}\nwixd{NW3zOIuJ-aPohW-1}}}%
@@ -283,18 +326,27 @@ public void printSchedule(int[] b) \{
 \nwixlogsorted{c}{{Print user}{NW3zOIuJ-3sWW32-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-3sWW32-1}}}%
 \nwixlogsorted{c}{{Public methods}{NW3zOIuJ-1eKCCy-1}{\nwixu{NW3zOIuJ-1xm30x-1}\nwixd{NW3zOIuJ-1eKCCy-1}}}%
 \nwixlogsorted{c}{{Register edges}{NW3zOIuJ-3Nu1Fg-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-3Nu1Fg-1}}}%
+\nwixlogsorted{c}{{Register users}{NW3zOIuJ-UKHEr-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-UKHEr-1}}}%
 \nwixlogsorted{c}{{Register vertices}{NW3zOIuJ-2ZKKW-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-2ZKKW-1}}}%
 \nwixlogsorted{c}{{Tools.java}{NW3zOIuJ-2Vh5vZ-1}{\nwixd{NW3zOIuJ-2Vh5vZ-1}}}%
 \nwixlogsorted{c}{{Tools.java preamble}{NW3zOIuJ-1ANZ96-1}{\nwixu{NW3zOIuJ-2Vh5vZ-1}\nwixd{NW3zOIuJ-1ANZ96-1}}}%
 \nwixlogsorted{i}{{computeHaversine}{computeHaversine}}%
 \nwixlogsorted{i}{{computeShortestPath}{computeShortestPath}}%
+\nwixlogsorted{i}{{computeShortestPathDistance}{computeShortestPathDistance}}%
+\nwixlogsorted{i}{{CSHIFT}{CSHIFT}}%
 \nwixlogsorted{i}{{filterByHaversine}{filterByHaversine}}%
+\nwixlogsorted{i}{{flag{\char95}gtree{\char95}loaded}{flag:ungtree:unloaded}}%
+\nwixlogsorted{i}{{gtree}{gtree}}%
 \nwixlogsorted{i}{{loadGTree}{loadGTree}}%
+\nwixlogsorted{i}{{lu{\char95}edges}{lu:unedges}}%
+\nwixlogsorted{i}{{lu{\char95}users}{lu:unusers}}%
+\nwixlogsorted{i}{{lu{\char95}vertices}{lu:unvertices}}%
 \nwixlogsorted{i}{{printPath}{printPath}}%
 \nwixlogsorted{i}{{printRoute}{printRoute}}%
 \nwixlogsorted{i}{{printSchedule}{printSchedule}}%
 \nwixlogsorted{i}{{printUser}{printUser}}%
 \nwixlogsorted{i}{{registerEdges}{registerEdges}}%
+\nwixlogsorted{i}{{registerUsers}{registerUsers}}%
 \nwixlogsorted{i}{{registerVertices}{registerVertices}}%
 \nwbegindocs{38}\nwdocspar
 

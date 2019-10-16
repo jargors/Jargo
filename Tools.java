@@ -8,8 +8,8 @@ public class Tools {
   private boolean flag_gtree_loaded = false;
   private Map<Integer, int[]> lu_vertices = new HashMap<>();
   private Map<Integer, Map<Integer, int[]>> lu_edges = new HashMap<>();
+  private Map<Integer, int[]> lu_users = new HashMap<>();
   private final double CSHIFT = 10000000.0;
-  public Tools() { }
     public void loadGTree(String p) {
       try {
         System.loadLibrary("gtree");
@@ -30,6 +30,9 @@ public class Tools {
     }
     public void registerEdges(Map<Integer, Map<Integer, int[]>> src) {
       lu_edges = src;
+    }
+    public void registerUsers(Map<Integer, int[]> src) {
+      lu_users = src;
     }
     public int computeHaversine(double lng1, double lat1, double lng2, double lat2) {
       double dlat = Math.toRadians(lat2 - lat1);

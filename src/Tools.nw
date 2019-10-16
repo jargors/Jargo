@@ -25,6 +25,13 @@
 
 \section{Introduction}
 \label{sec:introduction}
+We supply a Tools class that provides some common procedures for developing
+ridesharing algorithms.  The Tools class is developed using the
+Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
+programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
+([[src/Tools.nw]]) is the source for both the documentation ([[doc/Tools.tex]])
+and the Java code (Tools.java)\footnote{See the [[Makefile]] for build
+details.}.
 
 \section{Implementation Overview}
 <<Tools.java>>=
@@ -32,6 +39,8 @@
 <<[[Tools]] definition>>
 @
 
+\subsection{Preamble}
+The preamble declares the package and imports dependencies.
 <<Tools.java preamble>>=
 package com.github.jargors;
 import com.github.jargors.gtreeJNI.*;
@@ -39,31 +48,31 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Arrays;
 @
+
+\subsection{Class Definition}
 <<[[Tools]] definition>>=
 public class Tools {
   <<Member variables>>
-  <<Constructor>>
   <<Public methods>>
 }
 @
 
+\subsection{Member Variables}
 <<Member variables>>=
 private G_Tree gtree;
 private boolean flag_gtree_loaded = false;
 private Map<Integer, int[]> lu_vertices = new HashMap<>();
 private Map<Integer, Map<Integer, int[]>> lu_edges = new HashMap<>();
+private Map<Integer, int[]> lu_users = new HashMap<>();
 private final double CSHIFT = 10000000.0;
-@
-
-<<Constructor>>=
-public Tools() { }
-@
+@ %def gtree flag_gtree_loaded lu_vertices lu_edges lu_users CSHIFT
 
 \section{Public Methods}
 <<Public methods>>=
   <<Load GTree>>
   <<Register vertices>>
   <<Register edges>>
+  <<Register users>>
   <<Compute haversine>>
   <<Compute shortest path>>
   <<Compute shortest path distance>>
@@ -111,6 +120,14 @@ public void registerEdges(Map<Integer, Map<Integer, int[]>> src) {
 }
 @ %def registerEdges
 
+\subsection{[[registerUsers]](1)}
+Be mindful, any change to [[src]] will appear in [[lu_users]].
+<<Register users>>=
+public void registerUsers(Map<Integer, int[]> src) {
+  lu_users = src;
+}
+@ %def registerUsers
+
 \subsection{[[computeHaversine]](4)}
 Most of this code is Copyright 2017 Juliano Macedo and is licensed under the
 MIT License. It has been modified from its original form.
@@ -139,7 +156,8 @@ if (d == 0 && (lng1 != lng2 || lat1 != lat2)) {
 
 \subsection{[[computeHaversine]](2)}
 Beware, the coordinates in [[lu_vertices]] have their decimal places shifted by
-[[CSHIFT]].
+[[CSHIFT]]. This function is the reason why we register [[lu_vertices]].
+By registering it, we save making a couple of database calls.
 <<Compute haversine>>=
 public int computeHaversine(int u, int v) {
   return computeHaversine(
@@ -149,7 +167,7 @@ public int computeHaversine(int u, int v) {
 @
 
 \subsection{[[computeShortestPath]](2)}
-Two important notes:
+Beware, two important notes:
 \begin{itemize}
 \item The vertices in G-tree are 0-indexed while they are 1-indexed in Jargo.  To
 compensate, at location [[L1]] we subtract 1 from [[u]] and [[v]], and at
@@ -185,7 +203,7 @@ public int[] computeShortestPath(int u, int v) {
 @ %def computeShortestPath
 
 \subsection{[[computeShortestPathDistance]](2)}
-Two important notes:
+Beware, two important notes:
 \begin{itemize}
 \item The vertices in G-tree are 0-indexed while they are 1-indexed in Jargo.
 To compensate, at we subtract 1 from [[u]] and [[v]] when calling
@@ -206,9 +224,35 @@ public int computeShortestPathDistance(int u, int v) {
   }
   return d;
 }
-@
+@ %def computeShortestPathDistance
 
 \subsection{[[filterByHaversine]](3)}
+This function takes a request origin [[ro]], a locations array [[locs]], and
+a distance threshold [[threshold]] as input, and returns a copy of [[locs]]
+that keeps only those location triplets where the haversine distance between
+the location in the triplet and [[ro]] is within [[threshold]].
+
+Locations array [[locs]] =
+
+\noindent
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:\texttt{sid}\textrm{ of server }s_1$};
+ &\node[draw] {$1:\pi_t(w_{|w_{\leq t}|})\textrm{ of server }s_1$};
+ &\node[draw] {$2:\pi_v(w_{|w_{\leq t}|})\textrm{ of server }s_1$};\\
+  \node[draw] {$3:\texttt{sid}\textrm{ of server }s_2$};
+ &\node[draw] {$4:\pi_t(w_{|w_{\leq t}|})\textrm{ of server }s_2$};
+ &\node[draw] {$5:\pi_v(w_{|w_{\leq t}|})\textrm{ of server }s_2$};\\
+  \node {$...$ and so on,};\\
+};
+\end{tikzpicture}
+
+\noindent
+where $\pi_t(w_{|w_{\leq t}|})$ gives the time component of a server's
+last-visited waypoint, and $\pi_v(w_{|w_{\leq t}|})$ gives the vertex
+component.
+
 <<Filter locs by haversine distance>>=
 public int[] filterByHaversine(int ro, int[] locs, int threshold) {
   int n = (locs.length/3);
