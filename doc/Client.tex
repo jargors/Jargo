@@ -99,11 +99,12 @@ public Client() \{ \}
   \LA{}Get/set server location collection period~{\nwtagstyle{}\subpageref{NW2q3QGT-DxGq5-1}}\RA{}
   \LA{}Load GTree~{\nwtagstyle{}\subpageref{NW2q3QGT-b7Jka-1}}\RA{}
   \LA{}Register road network~{\nwtagstyle{}\subpageref{NW2q3QGT-3hO9hR-1}}\RA{}
+  \LA{}Register users~{\nwtagstyle{}\subpageref{NW2q3QGT-UKHEr-1}}\RA{}
 \nwendcode{}\nwbegindocs{14}\nwdocspar
 
 \subsection{Obtaining Requests and Server Locations}
 To obtain unassigned customer requests and server locations, we depend on
-the simulation engine to push the data to the client. The {\tt{}\protect\nosublabel{NW2q3QGT-4VlNed-1-u7}\protect\nwindexuse{collectRequests}{collectRequests}{NW2q3QGT-3Db6qU-1}collectRequests}(1)
+the simulation engine to push the data to the client. The {\tt{}\protect\nosublabel{NW2q3QGT-4VlNed-1-u8}\protect\nwindexuse{collectRequests}{collectRequests}{NW2q3QGT-3Db6qU-1}collectRequests}(1)
 and {\tt{}\protect\nwindexuse{collectServerLocations}{collectServerLocations}{NW2q3QGT-wbUkp-1}collectServerLocations}(1) methods simply copy {\tt{}src} into
 the client's working memory.
 
@@ -204,26 +205,33 @@ public void loadGTree(String p) \{
 \}
 \nwindexdefn{loadGTree}{loadGTree}{NW2q3QGT-b7Jka-1}\eatline
 \nwidentdefs{\\{{loadGTree}{loadGTree}}}\nwidentuses{\\{{tools}{tools}}}\nwindexuse{tools}{tools}{NW2q3QGT-b7Jka-1}\nwendcode{}\nwbegindocs{30}\nwdocspar
-\subsubsection{{\tt{}\protect\nwindexuse{loadRoadNetwork}{loadRoadNetwork}{NW2q3QGT-3hO9hR-1}loadRoadNetwork}(0)}
+\subsubsection{{\tt{}\protect\nwindexuse{registerRoadNetwork}{registerRoadNetwork}{NW2q3QGT-3hO9hR-1}registerRoadNetwork}(0)}
 \nwenddocs{}\nwbegincode{31}\sublabel{NW2q3QGT-3hO9hR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-3hO9hR-1}}}\moddef{Register road network~{\nwtagstyle{}\subpageref{NW2q3QGT-3hO9hR-1}}}\endmoddef\nwused{\\{NW2q3QGT-4VlNed-1}}
 public void registerRoadNetwork() \{
   tools.registerVertices(communicator.getReferenceVerticesCache());
   tools.registerEdges(communicator.getReferenceEdgesCache());
 \}
-\nwindexdefn{loadRoadNetwork}{loadRoadNetwork}{NW2q3QGT-3hO9hR-1}\eatline
-\nwidentdefs{\\{{loadRoadNetwork}{loadRoadNetwork}}}\nwidentuses{\\{{communicator}{communicator}}\\{{tools}{tools}}}\nwindexuse{communicator}{communicator}{NW2q3QGT-3hO9hR-1}\nwindexuse{tools}{tools}{NW2q3QGT-3hO9hR-1}\nwendcode{}\nwbegindocs{32}\nwdocspar
+\nwindexdefn{registerRoadNetwork}{registerRoadNetwork}{NW2q3QGT-3hO9hR-1}\eatline
+\nwidentdefs{\\{{registerRoadNetwork}{registerRoadNetwork}}}\nwidentuses{\\{{communicator}{communicator}}\\{{tools}{tools}}}\nwindexuse{communicator}{communicator}{NW2q3QGT-3hO9hR-1}\nwindexuse{tools}{tools}{NW2q3QGT-3hO9hR-1}\nwendcode{}\nwbegindocs{32}\nwdocspar
+\subsubsection{{\tt{}\protect\nwindexuse{registerUsers}{registerUsers}{NW2q3QGT-UKHEr-1}registerUsers}(0)}
+\nwenddocs{}\nwbegincode{33}\sublabel{NW2q3QGT-UKHEr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-UKHEr-1}}}\moddef{Register users~{\nwtagstyle{}\subpageref{NW2q3QGT-UKHEr-1}}}\endmoddef\nwused{\\{NW2q3QGT-4VlNed-1}}
+public void registerUsers() \{
+  tools.registerUsers(communicator.getReferenceUsersCache());
+\}
+\nwindexdefn{registerUsers}{registerUsers}{NW2q3QGT-UKHEr-1}\eatline
+\nwidentdefs{\\{{registerUsers}{registerUsers}}}\nwidentuses{\\{{communicator}{communicator}}\\{{tools}{tools}}}\nwindexuse{communicator}{communicator}{NW2q3QGT-UKHEr-1}\nwindexuse{tools}{tools}{NW2q3QGT-UKHEr-1}\nwendcode{}\nwbegindocs{34}\nwdocspar
 \section{Private Methods}
-\nwenddocs{}\nwbegincode{33}\sublabel{NW2q3QGT-4EUu6m-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-4EUu6m-1}}}\moddef{\code{}Client\edoc{} protected methods~{\nwtagstyle{}\subpageref{NW2q3QGT-4EUu6m-1}}}\endmoddef\nwused{\\{NW2q3QGT-3hr6Rs-1}}
+\nwenddocs{}\nwbegincode{35}\sublabel{NW2q3QGT-4EUu6m-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-4EUu6m-1}}}\moddef{\code{}Client\edoc{} protected methods~{\nwtagstyle{}\subpageref{NW2q3QGT-4EUu6m-1}}}\endmoddef\nwused{\\{NW2q3QGT-3hr6Rs-1}}
   \LA{}End collect requests~{\nwtagstyle{}\subpageref{NW2q3QGT-2fY8iU-1}}\RA{}
   \LA{}End collect server locations~{\nwtagstyle{}\subpageref{NW2q3QGT-2d6rGZ-1}}\RA{}
   \LA{}Handle request~{\nwtagstyle{}\subpageref{NW2q3QGT-2856ar-1}}\RA{}
   \LA{}Handle server location~{\nwtagstyle{}\subpageref{NW2q3QGT-2xqRZA-1}}\RA{}
   \LA{}Print a message~{\nwtagstyle{}\subpageref{NW2q3QGT-2wEn3G-1}}\RA{}
 
-\nwendcode{}\nwbegindocs{34}\nwdocspar
+\nwendcode{}\nwbegindocs{36}\nwdocspar
 
 \subsection{{\tt{}\protect\nosublabel{NW2q3QGT-4EUu6m-1-u5}\protect\nwindexuse{endCollectRequests}{endCollectRequests}{NW2q3QGT-2fY8iU-1}endCollectRequests}(0)}
-\nwenddocs{}\nwbegincode{35}\sublabel{NW2q3QGT-2fY8iU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-2fY8iU-1}}}\moddef{End collect requests~{\nwtagstyle{}\subpageref{NW2q3QGT-2fY8iU-1}}}\endmoddef\nwused{\\{NW2q3QGT-4EUu6m-1}}
+\nwenddocs{}\nwbegincode{37}\sublabel{NW2q3QGT-2fY8iU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-2fY8iU-1}}}\moddef{End collect requests~{\nwtagstyle{}\subpageref{NW2q3QGT-2fY8iU-1}}}\endmoddef\nwused{\\{NW2q3QGT-4EUu6m-1}}
 protected void endCollectRequests(int[] requests) \{
   for (int i = 0; i < (requests.length - 6); i += 7) \{
     handleRequest(new int[] \{
@@ -238,11 +246,11 @@ protected void endCollectRequests(int[] requests) \{
   \}
 \}
 \nwindexdefn{endCollectRequests}{endCollectRequests}{NW2q3QGT-2fY8iU-1}\eatline
-\nwidentdefs{\\{{endCollectRequests}{endCollectRequests}}}\nwidentuses{\\{{handleRequest}{handleRequest}}}\nwindexuse{handleRequest}{handleRequest}{NW2q3QGT-2fY8iU-1}\nwendcode{}\nwbegindocs{36}\nwdocspar
+\nwidentdefs{\\{{endCollectRequests}{endCollectRequests}}}\nwidentuses{\\{{handleRequest}{handleRequest}}}\nwindexuse{handleRequest}{handleRequest}{NW2q3QGT-2fY8iU-1}\nwendcode{}\nwbegindocs{38}\nwdocspar
 \subsection{{\tt{}\protect\nwindexuse{endCollectServerLocations}{endCollectServerLocations}{NW2q3QGT-2d6rGZ-1}endCollectServerLocations}(0)}
 After server locations are collected, {\tt{}\protect\nwindexuse{handleServerLocation}{handleServerLocation}{NW2q3QGT-2xqRZA-1}handleServerLocation}(1) is executed
 on each one.
-\nwenddocs{}\nwbegincode{37}\sublabel{NW2q3QGT-2d6rGZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-2d6rGZ-1}}}\moddef{End collect server locations~{\nwtagstyle{}\subpageref{NW2q3QGT-2d6rGZ-1}}}\endmoddef\nwused{\\{NW2q3QGT-4EUu6m-1}}
+\nwenddocs{}\nwbegincode{39}\sublabel{NW2q3QGT-2d6rGZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-2d6rGZ-1}}}\moddef{End collect server locations~{\nwtagstyle{}\subpageref{NW2q3QGT-2d6rGZ-1}}}\endmoddef\nwused{\\{NW2q3QGT-4EUu6m-1}}
 protected void endCollectServerLocations(int[] locations) \{
   for (int i = 0; i < (locations.length - 2); i += 3) \{
     handleServerLocation(new int[] \{
@@ -253,7 +261,7 @@ protected void endCollectServerLocations(int[] locations) \{
   \}
 \}
 \nwindexdefn{endCollectServerLocations}{endCollectServerLocations}{NW2q3QGT-2d6rGZ-1}\eatline
-\nwidentdefs{\\{{endCollectServerLocations}{endCollectServerLocations}}}\nwidentuses{\\{{handleServerLocation}{handleServerLocation}}}\nwindexuse{handleServerLocation}{handleServerLocation}{NW2q3QGT-2d6rGZ-1}\nwendcode{}\nwbegindocs{38}\nwdocspar
+\nwidentdefs{\\{{endCollectServerLocations}{endCollectServerLocations}}}\nwidentuses{\\{{handleServerLocation}{handleServerLocation}}}\nwindexuse{handleServerLocation}{handleServerLocation}{NW2q3QGT-2d6rGZ-1}\nwendcode{}\nwbegindocs{40}\nwdocspar
 \subsection{{\tt{}\protect\nwindexuse{handleRequest}{handleRequest}{NW2q3QGT-2856ar-1}handleRequest}(1)}
 Array {\tt{}r} =
 
@@ -266,10 +274,10 @@ Array {\tt{}r} =
 };
 \end{tikzpicture}
 
-\nwenddocs{}\nwbegincode{39}\sublabel{NW2q3QGT-2856ar-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-2856ar-1}}}\moddef{Handle request~{\nwtagstyle{}\subpageref{NW2q3QGT-2856ar-1}}}\endmoddef\nwused{\\{NW2q3QGT-4EUu6m-1}}
+\nwenddocs{}\nwbegincode{41}\sublabel{NW2q3QGT-2856ar-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-2856ar-1}}}\moddef{Handle request~{\nwtagstyle{}\subpageref{NW2q3QGT-2856ar-1}}}\endmoddef\nwused{\\{NW2q3QGT-4EUu6m-1}}
 protected void handleRequest(int[] r) \{ \}
 \nwindexdefn{handleRequest}{handleRequest}{NW2q3QGT-2856ar-1}\eatline
-\nwidentdefs{\\{{handleRequest}{handleRequest}}}\nwendcode{}\nwbegindocs{40}\nwdocspar
+\nwidentdefs{\\{{handleRequest}{handleRequest}}}\nwendcode{}\nwbegindocs{42}\nwdocspar
 \subsection{{\tt{}\protect\nwindexuse{handleServerLocation}{handleServerLocation}{NW2q3QGT-2xqRZA-1}handleServerLocation}(1)}
 Array {\tt{}loc} =
 
@@ -282,12 +290,12 @@ Array {\tt{}loc} =
 };
 \end{tikzpicture}
 
-\nwenddocs{}\nwbegincode{41}\sublabel{NW2q3QGT-2xqRZA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-2xqRZA-1}}}\moddef{Handle server location~{\nwtagstyle{}\subpageref{NW2q3QGT-2xqRZA-1}}}\endmoddef\nwused{\\{NW2q3QGT-4EUu6m-1}}
+\nwenddocs{}\nwbegincode{43}\sublabel{NW2q3QGT-2xqRZA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-2xqRZA-1}}}\moddef{Handle server location~{\nwtagstyle{}\subpageref{NW2q3QGT-2xqRZA-1}}}\endmoddef\nwused{\\{NW2q3QGT-4EUu6m-1}}
 protected void handleServerLocation(int[] loc) \{ \}
 \nwindexdefn{handleServerLocation}{handleServerLocation}{NW2q3QGT-2xqRZA-1}\eatline
-\nwidentdefs{\\{{handleServerLocation}{handleServerLocation}}}\nwendcode{}\nwbegindocs{42}\nwdocspar
+\nwidentdefs{\\{{handleServerLocation}{handleServerLocation}}}\nwendcode{}\nwbegindocs{44}\nwdocspar
 \subsection{{\tt{}\protect\nwindexuse{Print}{Print}{NW2q3QGT-2wEn3G-1}Print}(1)}
-\nwenddocs{}\nwbegincode{43}\sublabel{NW2q3QGT-2wEn3G-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-2wEn3G-1}}}\moddef{Print a message~{\nwtagstyle{}\subpageref{NW2q3QGT-2wEn3G-1}}}\endmoddef\nwused{\\{NW2q3QGT-4EUu6m-1}}
+\nwenddocs{}\nwbegincode{45}\sublabel{NW2q3QGT-2wEn3G-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-2wEn3G-1}}}\moddef{Print a message~{\nwtagstyle{}\subpageref{NW2q3QGT-2wEn3G-1}}}\endmoddef\nwused{\\{NW2q3QGT-4EUu6m-1}}
 protected void Print(String msg) \{
   System.out.println("[Client]["+LocalDateTime.now()+"]"
     + "[t="+communicator.getSimulationWorldTime()+"] "+msg);
@@ -313,6 +321,7 @@ protected void Print(String msg) \{
 \nwixlogsorted{c}{{Load GTree}{NW2q3QGT-b7Jka-1}{\nwixu{NW2q3QGT-4VlNed-1}\nwixd{NW2q3QGT-b7Jka-1}}}%
 \nwixlogsorted{c}{{Print a message}{NW2q3QGT-2wEn3G-1}{\nwixu{NW2q3QGT-4EUu6m-1}\nwixd{NW2q3QGT-2wEn3G-1}}}%
 \nwixlogsorted{c}{{Register road network}{NW2q3QGT-3hO9hR-1}{\nwixu{NW2q3QGT-4VlNed-1}\nwixd{NW2q3QGT-3hO9hR-1}}}%
+\nwixlogsorted{c}{{Register users}{NW2q3QGT-UKHEr-1}{\nwixu{NW2q3QGT-4VlNed-1}\nwixd{NW2q3QGT-UKHEr-1}}}%
 \nwixlogsorted{c}{{Set simulation interface}{NW2q3QGT-4etKpU-1}{\nwixu{NW2q3QGT-4VlNed-1}\nwixd{NW2q3QGT-4etKpU-1}}}%
 \nwixlogsorted{i}{{collectRequests}{collectRequests}}%
 \nwixlogsorted{i}{{collectServerLocations}{collectServerLocations}}%
@@ -324,15 +333,16 @@ protected void Print(String msg) \{
 \nwixlogsorted{i}{{handleRequest}{handleRequest}}%
 \nwixlogsorted{i}{{handleServerLocation}{handleServerLocation}}%
 \nwixlogsorted{i}{{loadGTree}{loadGTree}}%
-\nwixlogsorted{i}{{loadRoadNetwork}{loadRoadNetwork}}%
 \nwixlogsorted{i}{{Print}{Print}}%
 \nwixlogsorted{i}{{r{\char95}collection{\char95}period}{r:uncollection:unperiod}}%
+\nwixlogsorted{i}{{registerRoadNetwork}{registerRoadNetwork}}%
+\nwixlogsorted{i}{{registerUsers}{registerUsers}}%
 \nwixlogsorted{i}{{s{\char95}collection{\char95}period}{s:uncollection:unperiod}}%
 \nwixlogsorted{i}{{setCommunicator}{setCommunicator}}%
 \nwixlogsorted{i}{{setRequestCollectionPeriod}{setRequestCollectionPeriod}}%
 \nwixlogsorted{i}{{setServerLocationCollectionPeriod}{setServerLocationCollectionPeriod}}%
 \nwixlogsorted{i}{{tools}{tools}}%
-\nwbegindocs{44}\nwdocspar
+\nwbegindocs{46}\nwdocspar
 \appendix
 
 \section{Appendix: List of Chunks}

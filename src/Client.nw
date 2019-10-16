@@ -99,6 +99,7 @@ public Client() { }
   <<Get/set server location collection period>>
   <<Load GTree>>
   <<Register road network>>
+  <<Register users>>
 @
 
 \subsection{Obtaining Requests and Server Locations}
@@ -204,13 +205,20 @@ public void loadGTree(String p) {
 }
 @ %def loadGTree
 
-\subsubsection{[[loadRoadNetwork]](0)}
+\subsubsection{[[registerRoadNetwork]](0)}
 <<Register road network>>=
 public void registerRoadNetwork() {
   tools.registerVertices(communicator.getReferenceVerticesCache());
   tools.registerEdges(communicator.getReferenceEdgesCache());
 }
-@ %def loadRoadNetwork
+@ %def registerRoadNetwork
+
+\subsubsection{[[registerUsers]](0)}
+<<Register users>>=
+public void registerUsers() {
+  tools.registerUsers(communicator.getReferenceUsersCache());
+}
+@ %def registerUsers
 
 \section{Private Methods}
 <<[[Client]] protected methods>>=

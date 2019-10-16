@@ -39,6 +39,9 @@ public abstract class Client {
       tools.registerVertices(communicator.getReferenceVerticesCache());
       tools.registerEdges(communicator.getReferenceEdgesCache());
     }
+    public void registerUsers() {
+      tools.registerUsers(communicator.getReferenceUsersCache());
+    }
     protected void endCollectRequests(int[] requests) {
       for (int i = 0; i < (requests.length - 6); i += 7) {
         handleRequest(new int[] {
