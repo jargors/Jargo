@@ -242,10 +242,10 @@ public class Controller {
     return storage.DBQueryRequest(rid);
   }
   public int[] queryRoute(int sid) throws RuntimeException {
-    return storage.DBQueryRoute(sid);
+    return storage.DBQueryServerRoute(sid);
   }
   public int[] querySchedule(int sid) throws RuntimeException {
-    return storage.DBQuerySchedule(sid);
+    return storage.DBQueryServerSchedule(sid);
   }
   public int[] queryCountVertices() throws RuntimeException {
     return storage.DBQueryCountVertices();
