@@ -32,18 +32,164 @@
 \LA{}\code{}Desktop\edoc{} definition~{\nwtagstyle{}\subpageref{NW3LjJZB-2XYKcG-1}}\RA{}
 \nwendcode{}\nwbegindocs{2}\nwdocspar
 
+\subsection{Preamble}
 \nwenddocs{}\nwbegincode{3}\sublabel{NW3LjJZB-VRMKS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3LjJZB-VRMKS-1}}}\moddef{Desktop.java preamble~{\nwtagstyle{}\subpageref{NW3LjJZB-VRMKS-1}}}\endmoddef\nwused{\\{NW3LjJZB-aTRGs-1}}
-package com.github.jargors;
+import javafx.application.Application;
+import javafx.stage.Stage;
+import javafx.scene.Scene;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.Menu;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.Tab;
 \nwendcode{}\nwbegindocs{4}\nwdocspar
+
+\subsection{Class Definition}
 \nwenddocs{}\nwbegincode{5}\sublabel{NW3LjJZB-2XYKcG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3LjJZB-2XYKcG-1}}}\moddef{\code{}Desktop\edoc{} definition~{\nwtagstyle{}\subpageref{NW3LjJZB-2XYKcG-1}}}\endmoddef\nwused{\\{NW3LjJZB-aTRGs-1}}
-public class Desktop \{
+public class Desktop extends Application \{
+  \LA{}Member variables~{\nwtagstyle{}\subpageref{NW3LjJZB-aPohW-1}}\RA{}
+  \LA{}Start routine~{\nwtagstyle{}\subpageref{NW3LjJZB-2eCm8Y-1}}\RA{}
 \}
+\nwendcode{}\nwbegindocs{6}\nwdocspar
+
+\subsection{Member Variables}
+\nwenddocs{}\nwbegincode{7}\sublabel{NW3LjJZB-aPohW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3LjJZB-aPohW-1}}}\moddef{Member variables~{\nwtagstyle{}\subpageref{NW3LjJZB-aPohW-1}}}\endmoddef\nwused{\\{NW3LjJZB-2XYKcG-1}}
+final int MIN_WIDTH = 1280;
+final int MIN_HEIGHT = 720;
+final String TITLE_STRING = "Jargo Desktop";
+\nwendcode{}\nwbegindocs{8}\nwdocspar
+
+\subsection{Start Routine}
+\nwenddocs{}\nwbegincode{9}\sublabel{NW3LjJZB-2eCm8Y-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3LjJZB-2eCm8Y-1}}}\moddef{Start routine~{\nwtagstyle{}\subpageref{NW3LjJZB-2eCm8Y-1}}}\endmoddef\nwused{\\{NW3LjJZB-2XYKcG-1}}
+public void start(Stage stage) \{
+  \LA{}Design the top pane~{\nwtagstyle{}\subpageref{NW3LjJZB-2ywp04-1}}\RA{}
+  \LA{}Design the center pane~{\nwtagstyle{}\subpageref{NW3LjJZB-1T5LsW-1}}\RA{}
+  \LA{}Design the right pane~{\nwtagstyle{}\subpageref{NW3LjJZB-38sUsg-1}}\RA{}
+  \LA{}Design the bottom pane~{\nwtagstyle{}\subpageref{NW3LjJZB-2gFBEh-1}}\RA{}
+  \LA{}Set the layout~{\nwtagstyle{}\subpageref{NW3LjJZB-4C5h63-1}}\RA{}
+  \LA{}Set the scene~{\nwtagstyle{}\subpageref{NW3LjJZB-2cWR2V-1}}\RA{}
+  \LA{}Set the stage~{\nwtagstyle{}\subpageref{NW3LjJZB-2MyULC-1}}\RA{}
+\}
+\nwendcode{}\nwbegindocs{10}\nwdocspar
+
+\section{Top Pane: Menu Bar}
+The top pane contains a menu bar.
+\nwenddocs{}\nwbegincode{11}\sublabel{NW3LjJZB-2ywp04-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3LjJZB-2ywp04-1}}}\moddef{Design the top pane~{\nwtagstyle{}\subpageref{NW3LjJZB-2ywp04-1}}}\endmoddef\nwused{\\{NW3LjJZB-2eCm8Y-1}}
+\LA{}Design the File menu~{\nwtagstyle{}\subpageref{NW3LjJZB-j4uyU-1}}\RA{}
+MenuBar menubar = new MenuBar(
+  menu_file
+);
+\nwendcode{}\nwbegindocs{12}\nwdocspar
+
+\subsection{File Menu}
+\nwenddocs{}\nwbegincode{13}\sublabel{NW3LjJZB-j4uyU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3LjJZB-j4uyU-1}}}\moddef{Design the File menu~{\nwtagstyle{}\subpageref{NW3LjJZB-j4uyU-1}}}\endmoddef\nwused{\\{NW3LjJZB-2ywp04-1}}
+Menu menu_file = new Menu("File");
+\LA{}Construct menuitem new~{\nwtagstyle{}\subpageref{NW3LjJZB-2TgWZu-1}}\RA{}
+\LA{}Construct menuitem load~{\nwtagstyle{}\subpageref{NW3LjJZB-1LgpVF-1}}\RA{}
+\LA{}Construct menuitem save~{\nwtagstyle{}\subpageref{NW3LjJZB-3JRIFS-1}}\RA{}
+\LA{}Construct menuitem exit~{\nwtagstyle{}\subpageref{NW3LjJZB-1BUNDa-1}}\RA{}
+SeparatorMenuItem separator = new SeparatorMenuItem();
+menu_file.getItems().addAll(
+    menu_file_new,
+    menu_file_load,
+    menu_file_save,
+    separator,
+    menu_file_exit
+);
+\nwendcode{}\nwbegindocs{14}\nwdocspar
+
+\subsubsection{Menu Item: New}
+\nwenddocs{}\nwbegincode{15}\sublabel{NW3LjJZB-2TgWZu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3LjJZB-2TgWZu-1}}}\moddef{Construct menuitem new~{\nwtagstyle{}\subpageref{NW3LjJZB-2TgWZu-1}}}\endmoddef\nwused{\\{NW3LjJZB-j4uyU-1}}
+MenuItem menu_file_new = new MenuItem("New Jargo Instance");
+\nwendcode{}\nwbegindocs{16}\nwdocspar
+
+\subsubsection{Menu Item: Load}
+\nwenddocs{}\nwbegincode{17}\sublabel{NW3LjJZB-1LgpVF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3LjJZB-1LgpVF-1}}}\moddef{Construct menuitem load~{\nwtagstyle{}\subpageref{NW3LjJZB-1LgpVF-1}}}\endmoddef\nwused{\\{NW3LjJZB-j4uyU-1}}
+MenuItem menu_file_load = new MenuItem("Restore from Backup...");
+\nwendcode{}\nwbegindocs{18}\nwdocspar
+
+\subsubsection{Menu Item: Save}
+\nwenddocs{}\nwbegincode{19}\sublabel{NW3LjJZB-3JRIFS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3LjJZB-3JRIFS-1}}}\moddef{Construct menuitem save~{\nwtagstyle{}\subpageref{NW3LjJZB-3JRIFS-1}}}\endmoddef\nwused{\\{NW3LjJZB-j4uyU-1}}
+MenuItem menu_file_save = new MenuItem("Export...");
+\nwendcode{}\nwbegindocs{20}\nwdocspar
+
+\subsubsection{Menu Item: Exit}
+\nwenddocs{}\nwbegincode{21}\sublabel{NW3LjJZB-1BUNDa-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3LjJZB-1BUNDa-1}}}\moddef{Construct menuitem exit~{\nwtagstyle{}\subpageref{NW3LjJZB-1BUNDa-1}}}\endmoddef\nwused{\\{NW3LjJZB-j4uyU-1}}
+MenuItem menu_file_exit = new MenuItem("Quit");
+menu_file_exit.setOnAction(e -> System.exit(0));
+\nwendcode{}\nwbegindocs{22}\nwdocspar
+
+\section{Center Pane: Map and Log Tabs}
+The center pane contains the tabs pane. This pane contains two tabs, one for
+displaying the road network map and the other for showing output logs.
+\nwenddocs{}\nwbegincode{23}\sublabel{NW3LjJZB-1T5LsW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3LjJZB-1T5LsW-1}}}\moddef{Design the center pane~{\nwtagstyle{}\subpageref{NW3LjJZB-1T5LsW-1}}}\endmoddef\nwused{\\{NW3LjJZB-2eCm8Y-1}}
+TabPane container_tabs = new TabPane();
+Tab tab_map = new Tab("Map");
+Tab tab_log = new Tab("Log");
+container_tabs.getTabs().add(tab_map);
+container_tabs.getTabs().add(tab_log);
+\nwendcode{}\nwbegindocs{24}\nwdocspar
+
+\section{Right Pane: Settings Controls}
+The right pane contains the settings controls.
+\nwenddocs{}\nwbegincode{25}\sublabel{NW3LjJZB-38sUsg-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3LjJZB-38sUsg-1}}}\moddef{Design the right pane~{\nwtagstyle{}\subpageref{NW3LjJZB-38sUsg-1}}}\endmoddef\nwused{\\{NW3LjJZB-2eCm8Y-1}}
+VBox container_settings = new VBox(new Label("Settings"));
+\nwendcode{}\nwbegindocs{26}\nwdocspar
+
+\section{Bottom Pane: Status Bar}
+The bottom pane contains the status bar.
+\nwenddocs{}\nwbegincode{27}\sublabel{NW3LjJZB-2gFBEh-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3LjJZB-2gFBEh-1}}}\moddef{Design the bottom pane~{\nwtagstyle{}\subpageref{NW3LjJZB-2gFBEh-1}}}\endmoddef\nwused{\\{NW3LjJZB-2eCm8Y-1}}
+Label status_msg = new Label("Status bar");
+HBox statusbar = new HBox(status_msg);
+\nwendcode{}\nwbegindocs{28}\nwdocspar
+
+\section{Layout, Scene, and Stage}
+We add the panes to a {\tt{}BorderPane} layout.
+\nwenddocs{}\nwbegincode{29}\sublabel{NW3LjJZB-4C5h63-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3LjJZB-4C5h63-1}}}\moddef{Set the layout~{\nwtagstyle{}\subpageref{NW3LjJZB-4C5h63-1}}}\endmoddef\nwused{\\{NW3LjJZB-2eCm8Y-1}}
+BorderPane layout = new BorderPane();
+layout.setTop(menubar);
+layout.setCenter(container_tabs);
+layout.setRight(container_settings);
+layout.setBottom(statusbar);
+\nwendcode{}\nwbegindocs{30}\nwdocspar
+
+We add the layout to a new scene.
+\nwenddocs{}\nwbegincode{31}\sublabel{NW3LjJZB-2cWR2V-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3LjJZB-2cWR2V-1}}}\moddef{Set the scene~{\nwtagstyle{}\subpageref{NW3LjJZB-2cWR2V-1}}}\endmoddef\nwused{\\{NW3LjJZB-2eCm8Y-1}}
+Scene scene = new Scene(layout);
+\nwendcode{}\nwbegindocs{32}\nwdocspar
+
+We add the scene to the stage and we show the stage.
+\nwenddocs{}\nwbegincode{33}\sublabel{NW3LjJZB-2MyULC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3LjJZB-2MyULC-1}}}\moddef{Set the stage~{\nwtagstyle{}\subpageref{NW3LjJZB-2MyULC-1}}}\endmoddef\nwused{\\{NW3LjJZB-2eCm8Y-1}}
+stage.setScene(scene);
+stage.setTitle(TITLE_STRING);
+stage.setMinWidth(MIN_WIDTH);
+stage.setMinHeight(MIN_HEIGHT);
+stage.show();
 \nwendcode{}
 
 \nwixlogsorted{c}{{\code{}Desktop\edoc{} definition}{NW3LjJZB-2XYKcG-1}{\nwixu{NW3LjJZB-aTRGs-1}\nwixd{NW3LjJZB-2XYKcG-1}}}%
+\nwixlogsorted{c}{{Construct menuitem exit}{NW3LjJZB-1BUNDa-1}{\nwixu{NW3LjJZB-j4uyU-1}\nwixd{NW3LjJZB-1BUNDa-1}}}%
+\nwixlogsorted{c}{{Construct menuitem load}{NW3LjJZB-1LgpVF-1}{\nwixu{NW3LjJZB-j4uyU-1}\nwixd{NW3LjJZB-1LgpVF-1}}}%
+\nwixlogsorted{c}{{Construct menuitem new}{NW3LjJZB-2TgWZu-1}{\nwixu{NW3LjJZB-j4uyU-1}\nwixd{NW3LjJZB-2TgWZu-1}}}%
+\nwixlogsorted{c}{{Construct menuitem save}{NW3LjJZB-3JRIFS-1}{\nwixu{NW3LjJZB-j4uyU-1}\nwixd{NW3LjJZB-3JRIFS-1}}}%
+\nwixlogsorted{c}{{Design the bottom pane}{NW3LjJZB-2gFBEh-1}{\nwixu{NW3LjJZB-2eCm8Y-1}\nwixd{NW3LjJZB-2gFBEh-1}}}%
+\nwixlogsorted{c}{{Design the center pane}{NW3LjJZB-1T5LsW-1}{\nwixu{NW3LjJZB-2eCm8Y-1}\nwixd{NW3LjJZB-1T5LsW-1}}}%
+\nwixlogsorted{c}{{Design the File menu}{NW3LjJZB-j4uyU-1}{\nwixu{NW3LjJZB-2ywp04-1}\nwixd{NW3LjJZB-j4uyU-1}}}%
+\nwixlogsorted{c}{{Design the right pane}{NW3LjJZB-38sUsg-1}{\nwixu{NW3LjJZB-2eCm8Y-1}\nwixd{NW3LjJZB-38sUsg-1}}}%
+\nwixlogsorted{c}{{Design the top pane}{NW3LjJZB-2ywp04-1}{\nwixu{NW3LjJZB-2eCm8Y-1}\nwixd{NW3LjJZB-2ywp04-1}}}%
 \nwixlogsorted{c}{{Desktop.java}{NW3LjJZB-aTRGs-1}{\nwixd{NW3LjJZB-aTRGs-1}}}%
 \nwixlogsorted{c}{{Desktop.java preamble}{NW3LjJZB-VRMKS-1}{\nwixu{NW3LjJZB-aTRGs-1}\nwixd{NW3LjJZB-VRMKS-1}}}%
-\nwbegindocs{6}\nwdocspar
+\nwixlogsorted{c}{{Member variables}{NW3LjJZB-aPohW-1}{\nwixu{NW3LjJZB-2XYKcG-1}\nwixd{NW3LjJZB-aPohW-1}}}%
+\nwixlogsorted{c}{{Set the layout}{NW3LjJZB-4C5h63-1}{\nwixu{NW3LjJZB-2eCm8Y-1}\nwixd{NW3LjJZB-4C5h63-1}}}%
+\nwixlogsorted{c}{{Set the scene}{NW3LjJZB-2cWR2V-1}{\nwixu{NW3LjJZB-2eCm8Y-1}\nwixd{NW3LjJZB-2cWR2V-1}}}%
+\nwixlogsorted{c}{{Set the stage}{NW3LjJZB-2MyULC-1}{\nwixu{NW3LjJZB-2eCm8Y-1}\nwixd{NW3LjJZB-2MyULC-1}}}%
+\nwixlogsorted{c}{{Start routine}{NW3LjJZB-2eCm8Y-1}{\nwixu{NW3LjJZB-2XYKcG-1}\nwixd{NW3LjJZB-2eCm8Y-1}}}%
+\nwbegindocs{34}\nwdocspar
 
 \appendix
 

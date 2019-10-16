@@ -7,11 +7,10 @@ VERSION=1.0.0
 
 .PHONY : all clean
 
-all : pdf jar
+all : pdf class
 
-jar : java
-	javac -Xlint:deprecation -d . -cp .:$(CLASSPATH)/* $(WIDGET).java
-	jar cvf $(CLASSPATH)/jargors-$(WIDGET)-$(VERSION).jar com
+class : java
+	javac -Xlint:deprecation -d . -cp .:$(CLASSPATH)/* --module-path $(CLASSPATH) --add-modules javafx.controls $(WIDGET).java
 
 java : src/$(WIDGET).nw
 	notangle -R$(WIDGET).java src/$(WIDGET).nw > $(WIDGET).java
@@ -25,6 +24,6 @@ tex : src/$(WIDGET).nw
 clean :
 	rm -f $(WIDGET).pdf
 	rm -f $(WIDGET).java
-	rm -rf com/
+	rm -f $(WIDGET).class
 	latexmk -f -c doc/$(WIDGET).tex
 	rm -f doc/$(WIDGET).tex
