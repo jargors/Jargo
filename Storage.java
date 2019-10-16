@@ -1029,171 +1029,25 @@ public class Storage {
       throw new RuntimeException("database failure");
     }
   }
-  public int[] DBQueryAllUsers() throws RuntimeException {
+  public int[] DBQuery(String sql, int ncols) throws RuntimeException {
     int[] output = new int[] { };
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
       Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S141", 7);
-      Print("Close connection "+conn.toString());
-      conn.close();
+    Statement stmt = conn.createStatement(
+      ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+    ResultSet res = stmt.executeQuery(sql);
+    if (res.last()) {
+      output = new int[(ncols*res.getRow())];
+      res.first();
+      do {
+        for (int j = 1; j <= ncols; j++) {
+          output[((res.getRow() - 1)*ncols + (j - 1))] = res.getInt(j);
+        }
+      } while (res.next());
     }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
-    }
-    return output;
-  }
-  public final int[] DBQueryServer(int sid) throws RuntimeException {
-    return lu_users.get(sid);
-  }
-  public final int[] DBQueryRequest(int rid) throws RuntimeException {
-    return lu_users.get(rid);
-  }
-  public int[] DBQueryRequestStatus(int rid, int t) throws RuntimeException {
-    int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S133", 1, rid, t);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
-    }
-    return output;
-  }
-  public int[] DBQueryQueuedRequests(int t) throws RuntimeException {
-    int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S68", 7, t, t);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
-    }
-    return output;
-  }
-  public int[] DBQueryServerLocationsAll(int t) throws RuntimeException {
-    int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S59", 3, t, t, t, t);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
-    }
-    return output;
-  }
-  public int[] DBQueryServerLocationsActive(int t) throws RuntimeException {
-    int[] output = new int[] { };
-    int[] temp1 = new int[] { };
-    int[] temp2 = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-      temp1 = DBFetch(conn, "S134", 1, t, t, t);
-      output = new int[(temp1.length*3)];
-      for (int i = 0; i < temp1.length; i++) {
-        int sid = temp1[i];
-        output[3*i] = sid;
-        temp2 = DBFetch(conn, "S135", 2, t, sid);
-        output[(3*i + 1)] = temp2[0];
-        output[(3*i + 2)] = temp2[1];
-      }
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
-    }
-    return output;
-  }
-  public int[] DBQueryRoute(int sid) throws RuntimeException {
-    int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S60", 2, sid);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
-    }
-    return output;
-  }
-  public int[] DBQueryRouteRemaining(int sid, int t) throws RuntimeException {
-    int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S129", 2, sid, t);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
-    }
-    return output;
-  }
-  public int[] DBQuerySchedule(int sid) throws RuntimeException {
-    int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S61", 4, sid);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
-    }
-    return output;
-  }
-  public int[] DBQueryScheduleRemaining(int sid, int t) throws RuntimeException {
-    int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S69", 4, sid, t);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
-    }
-    return output;
-  }
-  public int[] DBQueryCurrentLoad(int sid, int t) throws RuntimeException {
-    int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S73", 1, sid, t);
+    Print("Close connection "+conn.toString());
+    conn.close();
       Print("Close connection "+conn.toString());
       conn.close();
     }
@@ -1328,6 +1182,217 @@ public class Storage {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
       Print("Open connection "+conn.toString());
     output = DBFetch(conn, "S67", 1);
+      Print("Close connection "+conn.toString());
+      conn.close();
+    }
+    catch (SQLException e1) {
+      printSQLException(e1);
+      DBSaveBackup(DERBY_DUMPNAME);
+      throw new RuntimeException("database failure");
+    }
+    return output;
+  }
+  public int[] DBQueryAllUsers() throws RuntimeException {
+    int[] output = new int[] { };
+    try {
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S141", 7);
+      Print("Close connection "+conn.toString());
+      conn.close();
+    }
+    catch (SQLException e1) {
+      printSQLException(e1);
+      DBSaveBackup(DERBY_DUMPNAME);
+      throw new RuntimeException("database failure");
+    }
+    return output;
+  }
+  public final int[] DBQueryServer(int sid) throws RuntimeException {
+    return lu_users.get(sid);
+  }
+  public final int[] DBQueryRequest(int rid) throws RuntimeException {
+    return lu_users.get(rid);
+  }
+  public int[] DBQueryRequestStatus(int rid, int t) throws RuntimeException {
+    int[] output = new int[] { };
+    try {
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S133", 1, rid, t);
+      Print("Close connection "+conn.toString());
+      conn.close();
+    }
+    catch (SQLException e1) {
+      printSQLException(e1);
+      DBSaveBackup(DERBY_DUMPNAME);
+      throw new RuntimeException("database failure");
+    }
+    return output;
+  }
+  public int[] DBQueryQueuedRequests(int t) throws RuntimeException {
+    int[] output = new int[] { };
+    try {
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S68", 7, t, t);
+      Print("Close connection "+conn.toString());
+      conn.close();
+    }
+    catch (SQLException e1) {
+      printSQLException(e1);
+      DBSaveBackup(DERBY_DUMPNAME);
+      throw new RuntimeException("database failure");
+    }
+    return output;
+  }
+  public int[] DBQueryServerLocationsAll(int t) throws RuntimeException {
+    int[] output = new int[] { };
+    try {
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S59", 3, t, t, t, t);
+      Print("Close connection "+conn.toString());
+      conn.close();
+    }
+    catch (SQLException e1) {
+      printSQLException(e1);
+      DBSaveBackup(DERBY_DUMPNAME);
+      throw new RuntimeException("database failure");
+    }
+    return output;
+  }
+  public int[] DBQueryServerLocationsActive(int t) throws RuntimeException {
+    int[] output = new int[] { };
+    int[] temp1 = new int[] { };
+    int[] temp2 = new int[] { };
+    try {
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+      temp1 = DBFetch(conn, "S134", 1, t, t, t);
+      output = new int[(temp1.length*3)];
+      for (int i = 0; i < temp1.length; i++) {
+        int sid = temp1[i];
+        output[3*i] = sid;
+        temp2 = DBFetch(conn, "S135", 2, t, sid);
+        output[(3*i + 1)] = temp2[0];
+        output[(3*i + 2)] = temp2[1];
+      }
+      conn.close();
+    }
+    catch (SQLException e1) {
+      printSQLException(e1);
+      DBSaveBackup(DERBY_DUMPNAME);
+      throw new RuntimeException("database failure");
+    }
+    return output;
+  }
+  public int[] DBQueryServerRoute(int sid) throws RuntimeException {
+    int[] output = new int[] { };
+    try {
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S60", 2, sid);
+      Print("Close connection "+conn.toString());
+      conn.close();
+    }
+    catch (SQLException e1) {
+      printSQLException(e1);
+      DBSaveBackup(DERBY_DUMPNAME);
+      throw new RuntimeException("database failure");
+    }
+    return output;
+  }
+  public int[] DBQueryServerSchedule(int sid) throws RuntimeException {
+    int[] output = new int[] { };
+    try {
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S61", 4, sid);
+      Print("Close connection "+conn.toString());
+      conn.close();
+    }
+    catch (SQLException e1) {
+      printSQLException(e1);
+      DBSaveBackup(DERBY_DUMPNAME);
+      throw new RuntimeException("database failure");
+    }
+    return output;
+  }
+  public int[] DBQueryServerRemainingRoute(int sid, int t) throws RuntimeException {
+    int[] output = new int[] { };
+    try {
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S129", 2, sid, t);
+      Print("Close connection "+conn.toString());
+      conn.close();
+    }
+    catch (SQLException e1) {
+      printSQLException(e1);
+      DBSaveBackup(DERBY_DUMPNAME);
+      throw new RuntimeException("database failure");
+    }
+    return output;
+  }
+  public int[] DBQueryServerRemainingSchedule(int sid, int t)
+  throws RuntimeException {
+    int[] output = new int[] { };
+    try {
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S69", 4, sid, t);
+      Print("Close connection "+conn.toString());
+      conn.close();
+    }
+    catch (SQLException e1) {
+      printSQLException(e1);
+      DBSaveBackup(DERBY_DUMPNAME);
+      throw new RuntimeException("database failure");
+    }
+    return output;
+  }
+  public int[] DBQueryServerRemainingDistance(int sid, int t)
+  throws RuntimeException {
+    int[] output = new int[] { };
+    try {
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S142", 1, sid, t);
+      Print("Close connection "+conn.toString());
+      conn.close();
+    }
+    catch (SQLException e1) {
+      printSQLException(e1);
+      DBSaveBackup(DERBY_DUMPNAME);
+      throw new RuntimeException("database failure");
+    }
+    return output;
+  }
+  public int[] DBQueryServerRemainingDuration(int sid, int t)
+  throws RuntimeException {
+    int[] output = new int[] { };
+    try {
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S127", 1, sid, t);
+    output[0] -= t;
+      Print("Close connection "+conn.toString());
+      conn.close();
+    }
+    catch (SQLException e1) {
+      printSQLException(e1);
+      DBSaveBackup(DERBY_DUMPNAME);
+      throw new RuntimeException("database failure");
+    }
+    return output;
+  }
+  public int[] DBQueryServerCurrentLoad(int sid, int t) throws RuntimeException {
+    int[] output = new int[] { };
+    try {
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S73", 1, sid, t);
       Print("Close connection "+conn.toString());
       conn.close();
     }
@@ -1802,35 +1867,6 @@ public class Storage {
     }
     return output;
   }
-  public int[] DBQuery(String sql, int ncols) throws RuntimeException {
-    int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    Statement stmt = conn.createStatement(
-      ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-    ResultSet res = stmt.executeQuery(sql);
-    if (res.last()) {
-      output = new int[(ncols*res.getRow())];
-      res.first();
-      do {
-        for (int j = 1; j <= ncols; j++) {
-          output[((res.getRow() - 1)*ncols + (j - 1))] = res.getInt(j);
-        }
-      } while (res.next());
-    }
-    Print("Close connection "+conn.toString());
-    conn.close();
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
-    }
-    return output;
-  }
     private void Print(String msg) {
       System.out.println("[Jargo][Storage]["+LocalDateTime.now()+"] "+msg);
     }
@@ -1979,6 +2015,7 @@ public class Storage {
       pstr.put("S139", UPD+"CPD SET te=? WHERE sid=?");
       pstr.put("S140", UPD+"CQ SET tp=?, td=? WHERE rid=?");
       pstr.put("S141", SEL+"* FROM r_user");
+      pstr.put("S142", SEL+"SUM (dd) FROM W WHERE sid=? AND t2>?");
     }
     private PreparedStatement PS(Connection conn, String k) throws SQLException {
       PreparedStatement p = null;

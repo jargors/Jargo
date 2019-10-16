@@ -99,14 +99,7 @@ programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
 \begin{minipage}[t]{0.4\textwidth}
 \hi{Read Methods}
 <<[[Storage]] public methods>>=
-<<Query ridesharing user>>
-<<Query request status>>
-<<Query queued requests>>
-<<Query all server locations>>
-<<Query active server locations>>
-<<Query routes>>
-<<Query schedules>>
-<<Query current load>>
+<<Query custom statement>>
 <<Query count of vertices>>
 <<Query count of edges>>
 <<Query vertex>>
@@ -117,10 +110,21 @@ programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
 <<Query MBR>>
 <<Query count of servers>>
 <<Query count of requests>>
+<<Query ridesharing user>>
+<<Query request status>>
+<<Query queued requests>>
+<<Query all server locations>>
+<<Query active server locations>>
+<<Query routes>>
+<<Query schedules>>
+<<Query remaining routes>>
+<<Query remaining schedules>>
+<<Query remaining distance>>
+<<Query remaining duration>>
+<<Query current load>>
 <<Query server pending assignments>>
 <<Query server completed assignments>>
 <<Query various metrics>>
-<<Query custom statement>>
 @
 \end{minipage}
 }
@@ -2764,128 +2768,6 @@ public int[] DBQuery(String sql, int ncols) throws RuntimeException {
 }
 @ % def DBQuery
 
-\subsubsection{[[DBQueryAllUsers]](0)}
-<<Query ridesharing user>>=
-public int[] DBQueryAllUsers() throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S141", 7);
-  <<..read return>>
-}
-@ %def DBQueryAllUsers
-
-\subsubsection{[[DBQueryServer]](1)}
-<<Query ridesharing user>>=
-public final int[] DBQueryServer(int sid) throws RuntimeException {
-  return lu_users.get(sid);
-}
-@ %def DBQueryServer
-
-\subsubsection{[[DBQueryRequest]](1)}
-<<Query ridesharing user>>=
-public final int[] DBQueryRequest(int rid) throws RuntimeException {
-  return lu_users.get(rid);
-}
-@ %def DBQueryRequest
-
-\subsubsection{[[DBQueryRequestStatus]](2)}
-<<Query request status>>=
-public int[] DBQueryRequestStatus(int rid, int t) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S133", 1, rid, t);
-  <<..read return>>
-}
-@ %def DBQueryRequestStatus
-
-\subsubsection{[[DBQueryQueuedRequests]](1)}
-<<Query queued requests>>=
-public int[] DBQueryQueuedRequests(int t) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S68", 7, t, t);
-  <<..read return>>
-}
-@ %def DBQueryQueuedRequests
-
-\subsubsection{[[DBQueryServerLocationsAll]](1)}
-<<Query all server locations>>=
-public int[] DBQueryServerLocationsAll(int t) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S59", 3, t, t, t, t);
-  <<..read return>>
-}
-@ %def DBQueryServerLocationsAll
-
-\subsubsection{[[DBQueryServerLocationsActive]](1)}
-<<Query active server locations>>=
-public int[] DBQueryServerLocationsActive(int t) throws RuntimeException {
-  int[] output = new int[] { };
-  int[] temp1 = new int[] { };
-  int[] temp2 = new int[] { };
-  try {
-    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-    Print("Open connection "+conn.toString());
-    temp1 = DBFetch(conn, "S134", 1, t, t, t);
-    output = new int[(temp1.length*3)];
-    for (int i = 0; i < temp1.length; i++) {
-      int sid = temp1[i];
-      output[3*i] = sid;
-      temp2 = DBFetch(conn, "S135", 2, t, sid);
-      output[(3*i + 1)] = temp2[0];
-      output[(3*i + 2)] = temp2[1];
-    }
-    conn.close();
-  }
-  <<Catch and print [[SQLException]]>>
-  return output;
-}
-@ %def DBQueryServerLocationsActive
-
-\subsubsection{[[DBQueryRoute]](1)}
-<<Query routes>>=
-public int[] DBQueryRoute(int sid) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S60", 2, sid);
-  <<..read return>>
-}
-@ %def DBQueryRoute
-
-\subsubsection{[[DBQueryRouteRemaining]](2)}
-<<Query routes>>=
-public int[] DBQueryRouteRemaining(int sid, int t) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S129", 2, sid, t);
-  <<..read return>>
-}
-@ %def DBQueryRouteRemaining
-
-\subsubsection{[[DBQuerySchedule]](1)}
-Schedules may contain [[null]] values in the labels. A null is recorded
-as a 0 in the output array due to [[getInt]] in [[DBFetch]].
-<<Query schedules>>=
-public int[] DBQuerySchedule(int sid) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S61", 4, sid);
-  <<..read return>>
-}
-@ %def DBQuerySchedule
-
-\subsubsection{[[DBQueryScheduleRemaining]](2)}
-<<Query schedules>>=
-public int[] DBQueryScheduleRemaining(int sid, int t) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S69", 4, sid, t);
-  <<..read return>>
-}
-@ %def DBQueryScheduleRemaining
-
-\subsubsection{[[DBQueryCurrentLoad]](2)}
-<<Query current load>>=
-public int[] DBQueryCurrentLoad(int sid, int t) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S73", 1, sid, t);
-  <<..read return>>
-}
-@ %def DBQueryCurrentLoad
-
 \subsubsection{[[DBQueryCountVertices]](0)}
 <<Query count of vertices>>=
 public int[] DBQueryCountVertices() throws RuntimeException {
@@ -3001,6 +2883,151 @@ public int[] DBQueryCountRequests() throws RuntimeException {
   <<..read return>>
 }
 @ %def DBQueryCountRequests
+
+
+\subsubsection{[[DBQueryAllUsers]](0)}
+<<Query ridesharing user>>=
+public int[] DBQueryAllUsers() throws RuntimeException {
+  <<..read prepare>>
+  output = DBFetch(conn, "S141", 7);
+  <<..read return>>
+}
+@ %def DBQueryAllUsers
+
+\subsubsection{[[DBQueryServer]](1)}
+<<Query ridesharing user>>=
+public final int[] DBQueryServer(int sid) throws RuntimeException {
+  return lu_users.get(sid);
+}
+@ %def DBQueryServer
+
+\subsubsection{[[DBQueryRequest]](1)}
+<<Query ridesharing user>>=
+public final int[] DBQueryRequest(int rid) throws RuntimeException {
+  return lu_users.get(rid);
+}
+@ %def DBQueryRequest
+
+\subsubsection{[[DBQueryRequestStatus]](2)}
+<<Query request status>>=
+public int[] DBQueryRequestStatus(int rid, int t) throws RuntimeException {
+  <<..read prepare>>
+  output = DBFetch(conn, "S133", 1, rid, t);
+  <<..read return>>
+}
+@ %def DBQueryRequestStatus
+
+\subsubsection{[[DBQueryQueuedRequests]](1)}
+<<Query queued requests>>=
+public int[] DBQueryQueuedRequests(int t) throws RuntimeException {
+  <<..read prepare>>
+  output = DBFetch(conn, "S68", 7, t, t);
+  <<..read return>>
+}
+@ %def DBQueryQueuedRequests
+
+\subsubsection{[[DBQueryServerLocationsAll]](1)}
+<<Query all server locations>>=
+public int[] DBQueryServerLocationsAll(int t) throws RuntimeException {
+  <<..read prepare>>
+  output = DBFetch(conn, "S59", 3, t, t, t, t);
+  <<..read return>>
+}
+@ %def DBQueryServerLocationsAll
+
+\subsubsection{[[DBQueryServerLocationsActive]](1)}
+<<Query active server locations>>=
+public int[] DBQueryServerLocationsActive(int t) throws RuntimeException {
+  int[] output = new int[] { };
+  int[] temp1 = new int[] { };
+  int[] temp2 = new int[] { };
+  try {
+    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    Print("Open connection "+conn.toString());
+    temp1 = DBFetch(conn, "S134", 1, t, t, t);
+    output = new int[(temp1.length*3)];
+    for (int i = 0; i < temp1.length; i++) {
+      int sid = temp1[i];
+      output[3*i] = sid;
+      temp2 = DBFetch(conn, "S135", 2, t, sid);
+      output[(3*i + 1)] = temp2[0];
+      output[(3*i + 2)] = temp2[1];
+    }
+    conn.close();
+  }
+  <<Catch and print [[SQLException]]>>
+  return output;
+}
+@ %def DBQueryServerLocationsActive
+
+\subsubsection{[[DBQueryServerRoute]](1)}
+<<Query routes>>=
+public int[] DBQueryServerRoute(int sid) throws RuntimeException {
+  <<..read prepare>>
+  output = DBFetch(conn, "S60", 2, sid);
+  <<..read return>>
+}
+@ %def DBQueryServerRoute
+
+\subsubsection{[[DBQueryServerSchedule]](1)}
+Schedules may contain [[null]] values in the labels. A null is recorded
+as a 0 in the output array due to [[getInt]] in [[DBFetch]].
+<<Query schedules>>=
+public int[] DBQueryServerSchedule(int sid) throws RuntimeException {
+  <<..read prepare>>
+  output = DBFetch(conn, "S61", 4, sid);
+  <<..read return>>
+}
+@ %def DBQueryServerSchedule
+
+\subsubsection{[[DBQueryServerRemainingRoute]](2)}
+<<Query remaining routes>>=
+public int[] DBQueryServerRemainingRoute(int sid, int t) throws RuntimeException {
+  <<..read prepare>>
+  output = DBFetch(conn, "S129", 2, sid, t);
+  <<..read return>>
+}
+@ %def DBQueryServerRemainingRoute
+
+\subsubsection{[[DBQueryServerRemainingSchedule]](2)}
+<<Query remaining schedules>>=
+public int[] DBQueryServerRemainingSchedule(int sid, int t)
+throws RuntimeException {
+  <<..read prepare>>
+  output = DBFetch(conn, "S69", 4, sid, t);
+  <<..read return>>
+}
+@ %def DBQueryServerRemainingSchedule
+
+\subsubsection{[[DBQueryServerRemainingDistance]](2)}
+<<Query remaining distance>>=
+public int[] DBQueryServerRemainingDistance(int sid, int t)
+throws RuntimeException {
+  <<..read prepare>>
+  output = DBFetch(conn, "S142", 1, sid, t);
+  <<..read return>>
+}
+@ %def DBQueryServerRemainingDistance
+
+\subsubsection{[[DBQueryServerRemainingDuration]](2)}
+<<Query remaining duration>>=
+public int[] DBQueryServerRemainingDuration(int sid, int t)
+throws RuntimeException {
+  <<..read prepare>>
+  output = DBFetch(conn, "S127", 1, sid, t);
+  output[0] -= t;
+  <<..read return>>
+}
+@ %def DBQueryServerRemainingDuration
+
+\subsubsection{[[DBQueryServerCurrentLoad]](2)}
+<<Query current load>>=
+public int[] DBQueryServerCurrentLoad(int sid, int t) throws RuntimeException {
+  <<..read prepare>>
+  output = DBFetch(conn, "S73", 1, sid, t);
+  <<..read return>>
+}
+@ %def DBQueryServerCurrentLoad
 
 \subsubsection{[[DBQueryServerPendingAssignments]](2)}
 <<Query server pending assignments>>=
@@ -3536,6 +3563,7 @@ private static void PSInit() {
   <<S139>>
   <<S140>>
   <<S141>>
+  <<S142>>
 }
 @ %def PSInit
 <<S0>>=
@@ -3814,6 +3842,9 @@ pstr.put("S140", UPD+"CQ SET tp=?, td=? WHERE rid=?");
 <<S141>>=
 pstr.put("S141", SEL+"* FROM r_user");
 @ %def S141
+<<S142>>=
+pstr.put("S142", SEL+"SUM (dd) FROM W WHERE sid=? AND t2>?");
+@ %def S142
 \appendix
 
 \section{Appendix: List of Chunks}

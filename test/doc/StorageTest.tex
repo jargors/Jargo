@@ -107,11 +107,11 @@ private static void Print(String msg) \{
 \LA{}....test \code{}DBQueryQueuedRequests\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2tcW3C-1Ao9lm-1}}\RA{}
 \LA{}....test \code{}DBQueryServerLocationsAll\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2tcW3C-2dAmyn-1}}\RA{}
 \LA{}....test \code{}DBQueryServerLocationsActive\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2tcW3C-3GrgPk-1}}\RA{}
-\LA{}....test \code{}DBQueryRoute\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2tcW3C-4TWZqG-1}}\RA{}
-\LA{}....test \code{}DBQueryRouteRemaining\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2tcW3C-1LMBE6-1}}\RA{}
-\LA{}....test \code{}DBQuerySchedule\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2tcW3C-3I1Rij-1}}\RA{}
-\LA{}....test \code{}DBQueryScheduleRemaining\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2tcW3C-3vhAZd-1}}\RA{}
-\LA{}....test \code{}DBQueryCurrentLoad\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2tcW3C-2jSLg0-1}}\RA{}
+\LA{}....test \code{}DBQueryServerRoute\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2tcW3C-4cMII0-1}}\RA{}
+\LA{}....test \code{}DBQueryServerRemainingRoute\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2tcW3C-3MRLuN-1}}\RA{}
+\LA{}....test \code{}DBQueryServerSchedule\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2tcW3C-2wzOyL-1}}\RA{}
+\LA{}....test \code{}DBQueryServerRemainingSchedule\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2tcW3C-COaZk-1}}\RA{}
+\LA{}....test \code{}DBQueryServerCurrentLoad\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2tcW3C-4gLSY4-1}}\RA{}
 \LA{}....test \code{}DBQueryCountVertices\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2tcW3C-2FbhMk-1}}\RA{}
 \LA{}....test \code{}DBQueryCountEdges\edoc{}(0)~{\nwtagstyle{}\subpageref{NW2tcW3C-fMEma-1}}\RA{}
 \LA{}....test \code{}DBQueryVertex\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2tcW3C-HmHFv-1}}\RA{}
@@ -498,12 +498,12 @@ Server 1 officially ends service at $t=500$ due to late window.
   \}
 \}
 \nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-1MX5TS-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-1MX5TS-1}\nwendcode{}\nwbegindocs{53}\nwdocspar
-\subsubsection{{\tt{}DBQueryRoute}(1)}
-\nwenddocs{}\nwbegincode{54}\sublabel{NW2tcW3C-4TWZqG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-4TWZqG-1}}}\moddef{....test \code{}DBQueryRoute\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2tcW3C-4TWZqG-1}}}\endmoddef\nwused{\\{NW2tcW3C-2w6SyW-1}}
+\subsubsection{{\tt{}DBQueryServerRoute}(1)}
+\nwenddocs{}\nwbegincode{54}\sublabel{NW2tcW3C-4cMII0-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-4cMII0-1}}}\moddef{....test \code{}DBQueryServerRoute\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2tcW3C-4cMII0-1}}}\endmoddef\nwused{\\{NW2tcW3C-2w6SyW-1}}
 \{
-  int output[] = storage.DBQueryRoute(2);
+  int output[] = storage.DBQueryServerRoute(2);
   if (!(output.length == 6)) \{
-    Print("[FAIL] DBQueryRoute(1)");
+    Print("[FAIL] DBQueryServerRoute(1)");
     Print("\\tExpected 6; got "+output.length);
     count_failed++;
   \} else if (!(output[0] == 10)
@@ -512,32 +512,32 @@ Server 1 officially ends service at $t=500$ due to late window.
     && (output[3] == 40)
     && (output[4] == 28)
     && (output[5] == 5)) \{
-    Print("[FAIL] DBQueryRoute(1)");
+    Print("[FAIL] DBQueryServerRoute(1)");
     Print("\\tExpected (10, 45) (19, 40) (28, 5); got ");
     tools.printRoute(output);
     count_failed++;
   \} else \{
-    Print("[PASS] DBQueryRoute(1)");
+    Print("[PASS] DBQueryServerRoute(1)");
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-4TWZqG-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-4TWZqG-1}\nwendcode{}\nwbegindocs{55}\nwdocspar
-\subsubsection{{\tt{}DBQueryRouteRemaining}(2)}
-We use Server 2 to test {\tt{}DBQueryRouteRemaining}. Server 2 appears at $t=10$.
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-4cMII0-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-4cMII0-1}\nwendcode{}\nwbegindocs{55}\nwdocspar
+\subsubsection{{\tt{}DBQueryServerRemainingRoute}(2)}
+We use Server 2 to test {\tt{}DBQueryServerRemainingRoute}. Server 2 appears at $t=10$.
 We expect the remaining route to not include its origin when $t>=10$, but
 include the origin when $t<10$. Even though Server 2 is not in service when
 $t<10$, we can still query its remaining route in case the simulation engine
 wants to make adjustments to the route.
-\nwenddocs{}\nwbegincode{56}\sublabel{NW2tcW3C-1LMBE6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-1LMBE6-1}}}\moddef{....test \code{}DBQueryRouteRemaining\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2tcW3C-1LMBE6-1}}}\endmoddef\nwused{\\{NW2tcW3C-2w6SyW-1}}
-  \LA{}......test \code{}DBQueryRouteRemaining\edoc{}(2) at $t=9$~{\nwtagstyle{}\subpageref{NW2tcW3C-3Kf6AF-1}}\RA{}
-  \LA{}......test \code{}DBQueryRouteRemaining\edoc{}(2) at $t=10$~{\nwtagstyle{}\subpageref{NW2tcW3C-3AIjLv-1}}\RA{}
-  \LA{}......test \code{}DBQueryRouteRemaining\edoc{}(2) at $t=11$~{\nwtagstyle{}\subpageref{NW2tcW3C-39Mi27-1}}\RA{}
+\nwenddocs{}\nwbegincode{56}\sublabel{NW2tcW3C-3MRLuN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-3MRLuN-1}}}\moddef{....test \code{}DBQueryServerRemainingRoute\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2tcW3C-3MRLuN-1}}}\endmoddef\nwused{\\{NW2tcW3C-2w6SyW-1}}
+  \LA{}......test \code{}DBQueryServerRemainingRoute\edoc{}(2) at $t=9$~{\nwtagstyle{}\subpageref{NW2tcW3C-3etE3f-1}}\RA{}
+  \LA{}......test \code{}DBQueryServerRemainingRoute\edoc{}(2) at $t=10$~{\nwtagstyle{}\subpageref{NW2tcW3C-3Iu91I-1}}\RA{}
+  \LA{}......test \code{}DBQueryServerRemainingRoute\edoc{}(2) at $t=11$~{\nwtagstyle{}\subpageref{NW2tcW3C-3IxAYe-1}}\RA{}
 \nwendcode{}\nwbegindocs{57}\nwdocspar
-\nwenddocs{}\nwbegincode{58}\sublabel{NW2tcW3C-3Kf6AF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-3Kf6AF-1}}}\moddef{......test \code{}DBQueryRouteRemaining\edoc{}(2) at $t=9$~{\nwtagstyle{}\subpageref{NW2tcW3C-3Kf6AF-1}}}\endmoddef\nwused{\\{NW2tcW3C-1LMBE6-1}}
+\nwenddocs{}\nwbegincode{58}\sublabel{NW2tcW3C-3etE3f-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-3etE3f-1}}}\moddef{......test \code{}DBQueryServerRemainingRoute\edoc{}(2) at $t=9$~{\nwtagstyle{}\subpageref{NW2tcW3C-3etE3f-1}}}\endmoddef\nwused{\\{NW2tcW3C-3MRLuN-1}}
 \{
-  int output[] = storage.DBQueryRouteRemaining(2, 9);
+  int output[] = storage.DBQueryServerRemainingRoute(2, 9);
   if (!(output.length == 6)) \{
-    Print("[FAIL] DBQueryRouteRemaining(2) (1/3)");
+    Print("[FAIL] DBQueryServerRemainingRoute(2) (1/3)");
     Print("\\tExpected 6; got "+output.length);
     count_failed++;
   \} else if (!(output[0] == 10
@@ -546,64 +546,64 @@ wants to make adjustments to the route.
     && output[3] == 40
     && output[4] == 28
     && output[5] == 5)) \{
-    Print("[FAIL] DBQueryRouteRemaining(2) (1/3)");
+    Print("[FAIL] DBQueryServerRemainingRoute(2) (1/3)");
     Print("\\tExpected (10, 45) (19, 40) (28 5); got ");
     tools.printRoute(output);
     count_failed++;
   \} else \{
-    Print("[PASS] DBQueryRouteRemaining(2) (1/3)");
+    Print("[PASS] DBQueryServerRemainingRoute(2) (1/3)");
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-3Kf6AF-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-3Kf6AF-1}\nwendcode{}\nwbegindocs{59}\nwdocspar
-\nwenddocs{}\nwbegincode{60}\sublabel{NW2tcW3C-3AIjLv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-3AIjLv-1}}}\moddef{......test \code{}DBQueryRouteRemaining\edoc{}(2) at $t=10$~{\nwtagstyle{}\subpageref{NW2tcW3C-3AIjLv-1}}}\endmoddef\nwused{\\{NW2tcW3C-1LMBE6-1}}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-3etE3f-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-3etE3f-1}\nwendcode{}\nwbegindocs{59}\nwdocspar
+\nwenddocs{}\nwbegincode{60}\sublabel{NW2tcW3C-3Iu91I-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-3Iu91I-1}}}\moddef{......test \code{}DBQueryServerRemainingRoute\edoc{}(2) at $t=10$~{\nwtagstyle{}\subpageref{NW2tcW3C-3Iu91I-1}}}\endmoddef\nwused{\\{NW2tcW3C-3MRLuN-1}}
 \{
-  int output[] = storage.DBQueryRouteRemaining(2, 10);
+  int output[] = storage.DBQueryServerRemainingRoute(2, 10);
   if (!(output.length == 4)) \{
-    Print("[FAIL] DBQueryRouteRemaining(2) (2/3)");
+    Print("[FAIL] DBQueryServerRemainingRoute(2) (2/3)");
     Print("\\tExpected 4; got "+output.length);
     count_failed++;
   \} else if (!(output[0] == 19
     && output[1] == 40
     && output[2] == 28
     && output[3] == 5)) \{
-    Print("[FAIL] DBQueryRouteRemaining(2) (2/3)");
+    Print("[FAIL] DBQueryServerRemainingRoute(2) (2/3)");
     Print("\\tExpected (19, 40) (28 5); got ");
     tools.printRoute(output);
     count_failed++;
   \} else \{
-    Print("[PASS] DBQueryRouteRemaining(2) (2/3)");
+    Print("[PASS] DBQueryServerRemainingRoute(2) (2/3)");
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-3AIjLv-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-3AIjLv-1}\nwendcode{}\nwbegindocs{61}\nwdocspar
-\nwenddocs{}\nwbegincode{62}\sublabel{NW2tcW3C-39Mi27-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-39Mi27-1}}}\moddef{......test \code{}DBQueryRouteRemaining\edoc{}(2) at $t=11$~{\nwtagstyle{}\subpageref{NW2tcW3C-39Mi27-1}}}\endmoddef\nwused{\\{NW2tcW3C-1LMBE6-1}}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-3Iu91I-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-3Iu91I-1}\nwendcode{}\nwbegindocs{61}\nwdocspar
+\nwenddocs{}\nwbegincode{62}\sublabel{NW2tcW3C-3IxAYe-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-3IxAYe-1}}}\moddef{......test \code{}DBQueryServerRemainingRoute\edoc{}(2) at $t=11$~{\nwtagstyle{}\subpageref{NW2tcW3C-3IxAYe-1}}}\endmoddef\nwused{\\{NW2tcW3C-3MRLuN-1}}
 \{
-  int output[] = storage.DBQueryRouteRemaining(2, 11);
+  int output[] = storage.DBQueryServerRemainingRoute(2, 11);
   if (!(output.length == 4)) \{
-    Print("[FAIL] DBQueryRouteRemaining(2) (3/3)");
+    Print("[FAIL] DBQueryServerRemainingRoute(2) (3/3)");
     Print("\\tExpected 4; got "+output.length);
     count_failed++;
   \} else if (!(output[0] == 19
     && output[1] == 40
     && output[2] == 28
     && output[3] == 5)) \{
-    Print("[FAIL] DBQueryRouteRemaining(2) (3/3)");
+    Print("[FAIL] DBQueryServerRemainingRoute(2) (3/3)");
     Print("\\tExpected (19, 40) (28 5); got ");
     tools.printRoute(output);
     count_failed++;
   \} else \{
-    Print("[PASS] DBQueryRouteRemaining(2) (3/3)");
+    Print("[PASS] DBQueryServerRemainingRoute(2) (3/3)");
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-39Mi27-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-39Mi27-1}\nwendcode{}\nwbegindocs{63}\nwdocspar
-\subsubsection{{\tt{}DBQuerySchedule}(1)}
-\nwenddocs{}\nwbegincode{64}\sublabel{NW2tcW3C-3I1Rij-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-3I1Rij-1}}}\moddef{....test \code{}DBQuerySchedule\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2tcW3C-3I1Rij-1}}}\endmoddef\nwused{\\{NW2tcW3C-2w6SyW-1}}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-3IxAYe-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-3IxAYe-1}\nwendcode{}\nwbegindocs{63}\nwdocspar
+\subsubsection{{\tt{}DBQueryServerSchedule}(1)}
+\nwenddocs{}\nwbegincode{64}\sublabel{NW2tcW3C-2wzOyL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-2wzOyL-1}}}\moddef{....test \code{}DBQueryServerSchedule\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2tcW3C-2wzOyL-1}}}\endmoddef\nwused{\\{NW2tcW3C-2w6SyW-1}}
 \{
-  int output[] = storage.DBQuerySchedule(1);
+  int output[] = storage.DBQueryServerSchedule(1);
   if (!(output.length == 16)) \{
-    Print("[FAIL] DBQuerySchedule(1)");
+    Print("[FAIL] DBQueryServerSchedule(1)");
     Print("\\tExpected 16; got "+output.length);
     count_failed++;
   \} else if (!(output[0] == 1
@@ -622,34 +622,34 @@ wants to make adjustments to the route.
     && output[13] == 0
     && output[14] == 1
     && output[15] == 0)) \{
-    Print("[FAIL] DBQuerySchedule(1)");
+    Print("[FAIL] DBQueryServerSchedule(1)");
     Print("\\tExpected (1, 22, 1, 0) (25, 4, 0, 10) "
       + "(44, 30, 0, 10) (45, 0, 1, 0); got ");
     tools.printSchedule(output);
     count_failed++;
   \} else \{
-    Print("[PASS] DBQuerySchedule(1)");
+    Print("[PASS] DBQueryServerSchedule(1)");
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-3I1Rij-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-3I1Rij-1}\nwendcode{}\nwbegindocs{65}\nwdocspar
-\subsubsection{{\tt{}DBQueryScheduleRemaining}(2)}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-2wzOyL-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-2wzOyL-1}\nwendcode{}\nwbegindocs{65}\nwdocspar
+\subsubsection{{\tt{}DBQueryServerRemainingSchedule}(2)}
 The key here is that a dummy stop is \emph{always} returned if it exists,
 because a dummy is not a real destination, in other words the server has not
 really ended service yet.
-\nwenddocs{}\nwbegincode{66}\sublabel{NW2tcW3C-3vhAZd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-3vhAZd-1}}}\moddef{....test \code{}DBQueryScheduleRemaining\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2tcW3C-3vhAZd-1}}}\endmoddef\nwused{\\{NW2tcW3C-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{66}\sublabel{NW2tcW3C-COaZk-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-COaZk-1}}}\moddef{....test \code{}DBQueryServerRemainingSchedule\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2tcW3C-COaZk-1}}}\endmoddef\nwused{\\{NW2tcW3C-2w6SyW-1}}
 \{
-  \LA{}......test \code{}DBQueryScheduleRemaining\edoc{}(2) when $t=43$~{\nwtagstyle{}\subpageref{NW2tcW3C-qvLii-1}}\RA{}
-  \LA{}......test \code{}DBQueryScheduleRemaining\edoc{}(2) when $t=44$~{\nwtagstyle{}\subpageref{NW2tcW3C-qQtYO-1}}\RA{}
-  \LA{}......test \code{}DBQueryScheduleRemaining\edoc{}(2) when $t=45$~{\nwtagstyle{}\subpageref{NW2tcW3C-rCT0y-1}}\RA{}
-  \LA{}......test \code{}DBQueryScheduleRemaining\edoc{}(2) when $t=46$~{\nwtagstyle{}\subpageref{NW2tcW3C-qbTw8-1}}\RA{}
+  \LA{}......test \code{}DBQueryServerRemainingSchedule\edoc{}(2) when $t=43$~{\nwtagstyle{}\subpageref{NW2tcW3C-2R8S0U-1}}\RA{}
+  \LA{}......test \code{}DBQueryServerRemainingSchedule\edoc{}(2) when $t=44$~{\nwtagstyle{}\subpageref{NW2tcW3C-2RmWsw-1}}\RA{}
+  \LA{}......test \code{}DBQueryServerRemainingSchedule\edoc{}(2) when $t=45$~{\nwtagstyle{}\subpageref{NW2tcW3C-2RPhpG-1}}\RA{}
+  \LA{}......test \code{}DBQueryServerRemainingSchedule\edoc{}(2) when $t=46$~{\nwtagstyle{}\subpageref{NW2tcW3C-2Rx7Gg-1}}\RA{}
 \}
 \nwendcode{}\nwbegindocs{67}\nwdocspar
-\nwenddocs{}\nwbegincode{68}\sublabel{NW2tcW3C-qvLii-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-qvLii-1}}}\moddef{......test \code{}DBQueryScheduleRemaining\edoc{}(2) when $t=43$~{\nwtagstyle{}\subpageref{NW2tcW3C-qvLii-1}}}\endmoddef\nwused{\\{NW2tcW3C-3vhAZd-1}}
+\nwenddocs{}\nwbegincode{68}\sublabel{NW2tcW3C-2R8S0U-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-2R8S0U-1}}}\moddef{......test \code{}DBQueryServerRemainingSchedule\edoc{}(2) when $t=43$~{\nwtagstyle{}\subpageref{NW2tcW3C-2R8S0U-1}}}\endmoddef\nwused{\\{NW2tcW3C-COaZk-1}}
 \{
-  int output[] = storage.DBQueryScheduleRemaining(1, 43);
+  int output[] = storage.DBQueryServerRemainingSchedule(1, 43);
   if (!(output.length == 8)) \{
-    Print("[FAIL] DBQueryScheduleRemaining(2) (1/4)");
+    Print("[FAIL] DBQueryServerRemainingSchedule(2) (1/4)");
     Print("\\tExpected 8; got "+output.length);
     count_failed++;
   \} else if (!(output[0] == 44
@@ -660,159 +660,159 @@ really ended service yet.
     && output[5] == 0
     && output[6] == 1
     && output[7] == 0)) \{
-    Print("[FAIL] DBQueryScheduleRemaining(2) (1/4)");
+    Print("[FAIL] DBQueryServerRemainingSchedule(2) (1/4)");
     Print("\\tExpected (44, 30, 0, 10) (45, 0, 1, 0); got ");
     tools.printSchedule(output);
     count_failed++;
   \} else \{
-    Print("[PASS] DBQueryScheduleRemaining(2) (1/4)");
+    Print("[PASS] DBQueryServerRemainingSchedule(2) (1/4)");
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-qvLii-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-qvLii-1}\nwendcode{}\nwbegindocs{69}\nwdocspar
-\nwenddocs{}\nwbegincode{70}\sublabel{NW2tcW3C-qQtYO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-qQtYO-1}}}\moddef{......test \code{}DBQueryScheduleRemaining\edoc{}(2) when $t=44$~{\nwtagstyle{}\subpageref{NW2tcW3C-qQtYO-1}}}\endmoddef\nwused{\\{NW2tcW3C-3vhAZd-1}}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-2R8S0U-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-2R8S0U-1}\nwendcode{}\nwbegindocs{69}\nwdocspar
+\nwenddocs{}\nwbegincode{70}\sublabel{NW2tcW3C-2RmWsw-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-2RmWsw-1}}}\moddef{......test \code{}DBQueryServerRemainingSchedule\edoc{}(2) when $t=44$~{\nwtagstyle{}\subpageref{NW2tcW3C-2RmWsw-1}}}\endmoddef\nwused{\\{NW2tcW3C-COaZk-1}}
 \{
-  int output[] = storage.DBQueryScheduleRemaining(1, 44);
+  int output[] = storage.DBQueryServerRemainingSchedule(1, 44);
   if (!(output.length == 4)) \{
-    Print("[FAIL] DBQueryScheduleRemaining(2) (2/4)");
+    Print("[FAIL] DBQueryServerRemainingSchedule(2) (2/4)");
     Print("\\tExpected 4; got "+output.length);
     count_failed++;
   \} else if (!(output[0] == 45
     && output[1] == 0
     && output[2] == 1
     && output[3] == 0)) \{
-    Print("[FAIL] DBQueryScheduleRemaining(2) (2/4)");
+    Print("[FAIL] DBQueryServerRemainingSchedule(2) (2/4)");
     Print("\\tExpected (45, 0, 1, 0); got ");
     tools.printSchedule(output);
     count_failed++;
   \} else \{
-    Print("[PASS] DBQueryScheduleRemaining(2) (2/4)");
+    Print("[PASS] DBQueryServerRemainingSchedule(2) (2/4)");
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-qQtYO-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-qQtYO-1}\nwendcode{}\nwbegindocs{71}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-2RmWsw-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-2RmWsw-1}\nwendcode{}\nwbegindocs{71}\nwdocspar
 At $t=45$, Server 1 has just arrived at its dummy destination. We are still
 going to return this destination as its remaining schedule.
-\nwenddocs{}\nwbegincode{72}\sublabel{NW2tcW3C-rCT0y-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-rCT0y-1}}}\moddef{......test \code{}DBQueryScheduleRemaining\edoc{}(2) when $t=45$~{\nwtagstyle{}\subpageref{NW2tcW3C-rCT0y-1}}}\endmoddef\nwused{\\{NW2tcW3C-3vhAZd-1}}
+\nwenddocs{}\nwbegincode{72}\sublabel{NW2tcW3C-2RPhpG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-2RPhpG-1}}}\moddef{......test \code{}DBQueryServerRemainingSchedule\edoc{}(2) when $t=45$~{\nwtagstyle{}\subpageref{NW2tcW3C-2RPhpG-1}}}\endmoddef\nwused{\\{NW2tcW3C-COaZk-1}}
 \{
-  int output[] = storage.DBQueryScheduleRemaining(1, 45);
+  int output[] = storage.DBQueryServerRemainingSchedule(1, 45);
   if (!(output.length == 4)) \{
-    Print("[FAIL] DBQueryScheduleRemaining(2) (3/4)");
+    Print("[FAIL] DBQueryServerRemainingSchedule(2) (3/4)");
     Print("\\tExpected 4; got "+output.length);
     count_failed++;
   \} else if (!(output[0] == 45
     && output[1] == 0
     && output[2] == 1
     && output[3] == 0)) \{
-    Print("[FAIL] DBQueryScheduleRemaining(2) (3/4)");
+    Print("[FAIL] DBQueryServerRemainingSchedule(2) (3/4)");
     Print("\\tExpected (45, 0, 1, 0); got ");
     tools.printSchedule(output);
     count_failed++;
   \} else \{
-    Print("[PASS] DBQueryScheduleRemaining(2) (3/4)");
+    Print("[PASS] DBQueryServerRemainingSchedule(2) (3/4)");
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-rCT0y-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-rCT0y-1}\nwendcode{}\nwbegindocs{73}\nwdocspar
-\nwenddocs{}\nwbegincode{74}\sublabel{NW2tcW3C-qbTw8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-qbTw8-1}}}\moddef{......test \code{}DBQueryScheduleRemaining\edoc{}(2) when $t=46$~{\nwtagstyle{}\subpageref{NW2tcW3C-qbTw8-1}}}\endmoddef\nwused{\\{NW2tcW3C-3vhAZd-1}}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-2RPhpG-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-2RPhpG-1}\nwendcode{}\nwbegindocs{73}\nwdocspar
+\nwenddocs{}\nwbegincode{74}\sublabel{NW2tcW3C-2Rx7Gg-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-2Rx7Gg-1}}}\moddef{......test \code{}DBQueryServerRemainingSchedule\edoc{}(2) when $t=46$~{\nwtagstyle{}\subpageref{NW2tcW3C-2Rx7Gg-1}}}\endmoddef\nwused{\\{NW2tcW3C-COaZk-1}}
 \{
-  int output[] = storage.DBQueryScheduleRemaining(1, 46);
+  int output[] = storage.DBQueryServerRemainingSchedule(1, 46);
   if (!(output.length == 4)) \{
-    Print("[FAIL] DBQueryScheduleRemaining(2) (4/4)");
+    Print("[FAIL] DBQueryServerRemainingSchedule(2) (4/4)");
     Print("\\tExpected 4; got "+output.length);
     count_failed++;
   \} else if (!(output[0] == 45
     && output[1] == 0
     && output[2] == 1
     && output[3] == 0)) \{
-    Print("[FAIL] DBQueryScheduleRemaining(2) (4/4)");
+    Print("[FAIL] DBQueryServerRemainingSchedule(2) (4/4)");
     Print("\\tExpected (45, 0, 1, 0); got ");
     tools.printSchedule(output);
     count_failed++;
   \} else \{
-    Print("[PASS] DBQueryScheduleRemaining(2) (4/4)");
+    Print("[PASS] DBQueryServerRemainingSchedule(2) (4/4)");
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-qbTw8-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-qbTw8-1}\nwendcode{}\nwbegindocs{75}\nwdocspar
-\subsubsection{{\tt{}DBQueryCurrentLoad}(2)}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-2Rx7Gg-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-2Rx7Gg-1}\nwendcode{}\nwbegindocs{75}\nwdocspar
+\subsubsection{{\tt{}DBQueryServerCurrentLoad}(2)}
 Load changes happen right as a server arrives at a pick-up or drop-off.
 Server 1 makes a pick-up at $t=25$ and a drop-off at $t=44$. At $t=0$, Server 1
 has not appeared yet and its current load is empty.
-\nwenddocs{}\nwbegincode{76}\sublabel{NW2tcW3C-2jSLg0-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-2jSLg0-1}}}\moddef{....test \code{}DBQueryCurrentLoad\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2tcW3C-2jSLg0-1}}}\endmoddef\nwused{\\{NW2tcW3C-2w6SyW-1}}
+\nwenddocs{}\nwbegincode{76}\sublabel{NW2tcW3C-4gLSY4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-4gLSY4-1}}}\moddef{....test \code{}DBQueryServerCurrentLoad\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2tcW3C-4gLSY4-1}}}\endmoddef\nwused{\\{NW2tcW3C-2w6SyW-1}}
 \{
-  \LA{}......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=0$~{\nwtagstyle{}\subpageref{NW2tcW3C-GriL0-1}}\RA{}
-  \LA{}......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=24$~{\nwtagstyle{}\subpageref{NW2tcW3C-1zadoG-1}}\RA{}
-  \LA{}......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=25$~{\nwtagstyle{}\subpageref{NW2tcW3C-1yp4Lg-1}}\RA{}
-  \LA{}......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=26$~{\nwtagstyle{}\subpageref{NW2tcW3C-1zLee0-1}}\RA{}
-  \LA{}......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=44$~{\nwtagstyle{}\subpageref{NW2tcW3C-1zaa1w-1}}\RA{}
+  \LA{}......test \code{}DBQueryServerCurrentLoad\edoc{}(2) when $t=0$~{\nwtagstyle{}\subpageref{NW2tcW3C-xm11O-1}}\RA{}
+  \LA{}......test \code{}DBQueryServerCurrentLoad\edoc{}(2) when $t=24$~{\nwtagstyle{}\subpageref{NW2tcW3C-1jybE1-1}}\RA{}
+  \LA{}......test \code{}DBQueryServerCurrentLoad\edoc{}(2) when $t=25$~{\nwtagstyle{}\subpageref{NW2tcW3C-1kucXp-1}}\RA{}
+  \LA{}......test \code{}DBQueryServerCurrentLoad\edoc{}(2) when $t=26$~{\nwtagstyle{}\subpageref{NW2tcW3C-1kIoJt-1}}\RA{}
+  \LA{}......test \code{}DBQueryServerCurrentLoad\edoc{}(2) when $t=44$~{\nwtagstyle{}\subpageref{NW2tcW3C-1jyeyH-1}}\RA{}
 \}
 \nwendcode{}\nwbegindocs{77}\nwdocspar
-\nwenddocs{}\nwbegincode{78}\sublabel{NW2tcW3C-GriL0-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-GriL0-1}}}\moddef{......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=0$~{\nwtagstyle{}\subpageref{NW2tcW3C-GriL0-1}}}\endmoddef\nwused{\\{NW2tcW3C-2jSLg0-1}}
+\nwenddocs{}\nwbegincode{78}\sublabel{NW2tcW3C-xm11O-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-xm11O-1}}}\moddef{......test \code{}DBQueryServerCurrentLoad\edoc{}(2) when $t=0$~{\nwtagstyle{}\subpageref{NW2tcW3C-xm11O-1}}}\endmoddef\nwused{\\{NW2tcW3C-4gLSY4-1}}
 \{
-  int output[] = storage.DBQueryCurrentLoad(1, 0);
+  int output[] = storage.DBQueryServerCurrentLoad(1, 0);
   if (!(output.length == 0)) \{
-    Print("[FAIL] DBQueryCurrentLoad(2) (1/5)");
+    Print("[FAIL] DBQueryServerCurrentLoad(2) (1/5)");
     Print("\\tExpected empty; got "+output[0]);
     count_failed++;
   \} else \{
-    Print("[PASS] DBQueryCurrentLoad(2) (1/5)");
+    Print("[PASS] DBQueryServerCurrentLoad(2) (1/5)");
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-GriL0-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-GriL0-1}\nwendcode{}\nwbegindocs{79}\nwdocspar
-\nwenddocs{}\nwbegincode{80}\sublabel{NW2tcW3C-1zadoG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-1zadoG-1}}}\moddef{......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=24$~{\nwtagstyle{}\subpageref{NW2tcW3C-1zadoG-1}}}\endmoddef\nwused{\\{NW2tcW3C-2jSLg0-1}}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-xm11O-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-xm11O-1}\nwendcode{}\nwbegindocs{79}\nwdocspar
+\nwenddocs{}\nwbegincode{80}\sublabel{NW2tcW3C-1jybE1-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-1jybE1-1}}}\moddef{......test \code{}DBQueryServerCurrentLoad\edoc{}(2) when $t=24$~{\nwtagstyle{}\subpageref{NW2tcW3C-1jybE1-1}}}\endmoddef\nwused{\\{NW2tcW3C-4gLSY4-1}}
 \{
-  int output[] = storage.DBQueryCurrentLoad(1, 24);
+  int output[] = storage.DBQueryServerCurrentLoad(1, 24);
   if (!(output[0] == -10)) \{
-    Print("[FAIL] DBQueryCurrentLoad(2) (2/5)");
+    Print("[FAIL] DBQueryServerCurrentLoad(2) (2/5)");
     Print("\\tExpected -10; got "+output[0]);
     count_failed++;
   \} else \{
-    Print("[PASS] DBQueryCurrentLoad(2) (2/5)");
+    Print("[PASS] DBQueryServerCurrentLoad(2) (2/5)");
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-1zadoG-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-1zadoG-1}\nwendcode{}\nwbegindocs{81}\nwdocspar
-\nwenddocs{}\nwbegincode{82}\sublabel{NW2tcW3C-1yp4Lg-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-1yp4Lg-1}}}\moddef{......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=25$~{\nwtagstyle{}\subpageref{NW2tcW3C-1yp4Lg-1}}}\endmoddef\nwused{\\{NW2tcW3C-2jSLg0-1}}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-1jybE1-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-1jybE1-1}\nwendcode{}\nwbegindocs{81}\nwdocspar
+\nwenddocs{}\nwbegincode{82}\sublabel{NW2tcW3C-1kucXp-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-1kucXp-1}}}\moddef{......test \code{}DBQueryServerCurrentLoad\edoc{}(2) when $t=25$~{\nwtagstyle{}\subpageref{NW2tcW3C-1kucXp-1}}}\endmoddef\nwused{\\{NW2tcW3C-4gLSY4-1}}
 \{
-  int output[] = storage.DBQueryCurrentLoad(1, 25);
+  int output[] = storage.DBQueryServerCurrentLoad(1, 25);
   if (!(output[0] == -9)) \{
-    Print("[FAIL] DBQueryCurrentLoad(2) (3/5)");
+    Print("[FAIL] DBQueryServerCurrentLoad(2) (3/5)");
     Print("\\tExpected -9; got "+output[0]);
     count_failed++;
   \} else \{
-    Print("[PASS] DBQueryCurrentLoad(2) (3/5)");
+    Print("[PASS] DBQueryServerCurrentLoad(2) (3/5)");
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-1yp4Lg-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-1yp4Lg-1}\nwendcode{}\nwbegindocs{83}\nwdocspar
-\nwenddocs{}\nwbegincode{84}\sublabel{NW2tcW3C-1zLee0-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-1zLee0-1}}}\moddef{......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=26$~{\nwtagstyle{}\subpageref{NW2tcW3C-1zLee0-1}}}\endmoddef\nwused{\\{NW2tcW3C-2jSLg0-1}}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-1kucXp-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-1kucXp-1}\nwendcode{}\nwbegindocs{83}\nwdocspar
+\nwenddocs{}\nwbegincode{84}\sublabel{NW2tcW3C-1kIoJt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-1kIoJt-1}}}\moddef{......test \code{}DBQueryServerCurrentLoad\edoc{}(2) when $t=26$~{\nwtagstyle{}\subpageref{NW2tcW3C-1kIoJt-1}}}\endmoddef\nwused{\\{NW2tcW3C-4gLSY4-1}}
 \{
-  int output[] = storage.DBQueryCurrentLoad(1, 26);
+  int output[] = storage.DBQueryServerCurrentLoad(1, 26);
   if (!(output[0] == -9)) \{
-    Print("[FAIL] DBQueryCurrentLoad(2) (4/5)");
+    Print("[FAIL] DBQueryServerCurrentLoad(2) (4/5)");
     Print("\\tExpected -9; got "+output[0]);
     count_failed++;
   \} else \{
-    Print("[PASS] DBQueryCurrentLoad(2) (4/5)");
+    Print("[PASS] DBQueryServerCurrentLoad(2) (4/5)");
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-1zLee0-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-1zLee0-1}\nwendcode{}\nwbegindocs{85}\nwdocspar
-\nwenddocs{}\nwbegincode{86}\sublabel{NW2tcW3C-1zaa1w-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-1zaa1w-1}}}\moddef{......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=44$~{\nwtagstyle{}\subpageref{NW2tcW3C-1zaa1w-1}}}\endmoddef\nwused{\\{NW2tcW3C-2jSLg0-1}}
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-1kIoJt-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-1kIoJt-1}\nwendcode{}\nwbegindocs{85}\nwdocspar
+\nwenddocs{}\nwbegincode{86}\sublabel{NW2tcW3C-1jyeyH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-1jyeyH-1}}}\moddef{......test \code{}DBQueryServerCurrentLoad\edoc{}(2) when $t=44$~{\nwtagstyle{}\subpageref{NW2tcW3C-1jyeyH-1}}}\endmoddef\nwused{\\{NW2tcW3C-4gLSY4-1}}
 \{
-  int output[] = storage.DBQueryCurrentLoad(1, 44);
+  int output[] = storage.DBQueryServerCurrentLoad(1, 44);
   if (!(output[0] == -10)) \{
-    Print("[FAIL] DBQueryCurrentLoad(2) (5/5)");
+    Print("[FAIL] DBQueryServerCurrentLoad(2) (5/5)");
     Print("\\tExpected -10; got "+output[0]);
     count_failed++;
   \} else \{
-    Print("[PASS] DBQueryCurrentLoad(2) (5/5)");
+    Print("[PASS] DBQueryServerCurrentLoad(2) (5/5)");
     count_passed++;
   \}
 \}
-\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-1zaa1w-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-1zaa1w-1}\nwendcode{}\nwbegindocs{87}\nwdocspar
+\nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-1jyeyH-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-1jyeyH-1}\nwendcode{}\nwbegindocs{87}\nwdocspar
 \subsubsection{{\tt{}DBQueryCountVertices}(0)}
 Method {\tt{}DBQueryCountVertices}(0) does not include the dummy vertex 0 in its
 count.
@@ -1483,7 +1483,7 @@ travel duration is $44-0=44$.
     tools.printUser(output);
     count_failed++;
   \} else \{
-    output = storage.DBQueryRoute(13);
+    output = storage.DBQueryServerRoute(13);
     if (!(output[0] == 0
       && output[1] == 27
       && output[2] == 1
@@ -1493,7 +1493,7 @@ travel duration is $44-0=44$.
       tools.printRoute(output);
       count_failed++;
     \} else \{
-      output = storage.DBQuerySchedule(13);
+      output = storage.DBQueryServerSchedule(13);
       if (!(output[0] == 0
         && output[1] == 27
         && output[2] == 13
@@ -1521,7 +1521,7 @@ We try to update the route for newly-inserted Server 13.
   storage.DBUpdateServerRoute(13,
     new int[] \{ 0, 27, 7, 44, 14, 45, 15, 0 \},
     new int[] \{ \});
-  int[] output = storage.DBQueryRoute(13);
+  int[] output = storage.DBQueryServerRoute(13);
   if (!(output[0] == 0
     && output[1] == 27
     && output[2] == 7
@@ -1556,7 +1556,7 @@ schedule, and status of Request 12.
     new int[] \{ 7, 44, 14, 45, 21, 24, 22, 0 \},
     new int[] \{ 14, 45, 12, 21, 24, 12, 22, 0, 13 \},
     new int[] \{ 12 \});
-  int[] output = storage.DBQueryRoute(13);
+  int[] output = storage.DBQueryServerRoute(13);
   if (!(output[0] == 0
     && output[1] == 27
     && output[2] == 7
@@ -1579,7 +1579,7 @@ schedule, and status of Request 12.
 \nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-3GEMZN-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-3GEMZN-1}\nwendcode{}\nwbegindocs{185}\nwdocspar
 \nwenddocs{}\nwbegincode{186}\sublabel{NW2tcW3C-2MZ5fS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-2MZ5fS-1}}}\moddef{......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) schedule~{\nwtagstyle{}\subpageref{NW2tcW3C-2MZ5fS-1}}}\endmoddef\nwused{\\{NW2tcW3C-3t5oWt-1}}
 \{
-  int[] output = storage.DBQuerySchedule(13);
+  int[] output = storage.DBQueryServerSchedule(13);
   if (!(output[0] == 0
     && output[1] == 27
     && output[2] == 13
@@ -1661,7 +1661,7 @@ Now it's time to remove Request 12 from Server 13...
     new int[] \{ 0, 27, 1, 0 \},
     new int[] \{ 1, 0, 13 \},
     new int[] \{ 12 \});
-  int[] output = storage.DBQueryRoute(13);
+  int[] output = storage.DBQueryServerRoute(13);
   if (!(output[0] == 0
     && output[1] == 27
     && output[2] == 1
@@ -1678,7 +1678,7 @@ Now it's time to remove Request 12 from Server 13...
 \nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-FrKh7-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-FrKh7-1}\nwendcode{}\nwbegindocs{197}\nwdocspar
 \nwenddocs{}\nwbegincode{198}\sublabel{NW2tcW3C-OXZaD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-OXZaD-1}}}\moddef{......test \code{}DBUpdateServerRemoveFromSchedule\edoc{}(4) schedule~{\nwtagstyle{}\subpageref{NW2tcW3C-OXZaD-1}}}\endmoddef\nwused{\\{NW2tcW3C-2DOHvZ-1}}
 \{
-  int[] output = storage.DBQuerySchedule(13);
+  int[] output = storage.DBQueryServerSchedule(13);
   if (!(output[0] == 0
     && output[1] == 27
     && output[2] == 13
@@ -1737,25 +1737,18 @@ Now it's time to remove Request 12 from Server 13...
 \}
 \nwidentuses{\\{{count{\char95}failed}{count:unfailed}}\\{{count{\char95}passed}{count:unpassed}}}\nwindexuse{count{\char95}failed}{count:unfailed}{NW2tcW3C-2QQxy6-1}\nwindexuse{count{\char95}passed}{count:unpassed}{NW2tcW3C-2QQxy6-1}\nwendcode{}
 
-\nwixlogsorted{c}{{......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=0$}{NW2tcW3C-GriL0-1}{\nwixu{NW2tcW3C-2jSLg0-1}\nwixd{NW2tcW3C-GriL0-1}}}%
-\nwixlogsorted{c}{{......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=24$}{NW2tcW3C-1zadoG-1}{\nwixu{NW2tcW3C-2jSLg0-1}\nwixd{NW2tcW3C-1zadoG-1}}}%
-\nwixlogsorted{c}{{......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=25$}{NW2tcW3C-1yp4Lg-1}{\nwixu{NW2tcW3C-2jSLg0-1}\nwixd{NW2tcW3C-1yp4Lg-1}}}%
-\nwixlogsorted{c}{{......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=26$}{NW2tcW3C-1zLee0-1}{\nwixu{NW2tcW3C-2jSLg0-1}\nwixd{NW2tcW3C-1zLee0-1}}}%
-\nwixlogsorted{c}{{......test \code{}DBQueryCurrentLoad\edoc{}(2) when $t=44$}{NW2tcW3C-1zaa1w-1}{\nwixu{NW2tcW3C-2jSLg0-1}\nwixd{NW2tcW3C-1zaa1w-1}}}%
 \nwixlogsorted{c}{{......test \code{}DBQueryQueuedRequests\edoc{}(1) at t=0}{NW2tcW3C-2K5XSE-1}{\nwixu{NW2tcW3C-1Ao9lm-1}\nwixd{NW2tcW3C-2K5XSE-1}}}%
 \nwixlogsorted{c}{{......test \code{}DBQueryQueuedRequests\edoc{}(1) at t=35}{NW2tcW3C-3GJyuc-1}{\nwixu{NW2tcW3C-1Ao9lm-1}\nwixd{NW2tcW3C-3GJyuc-1}}}%
 \nwixlogsorted{c}{{......test \code{}DBQueryQueuedRequests\edoc{}(1) at t=36}{NW2tcW3C-182uIY-1}{\nwixu{NW2tcW3C-1Ao9lm-1}\nwixd{NW2tcW3C-182uIY-1}}}%
 \nwixlogsorted{c}{{......test \code{}DBQueryQueuedRequests\edoc{}(1) at t=5}{NW2tcW3C-3LO5Sc-1}{\nwixu{NW2tcW3C-1Ao9lm-1}\nwixd{NW2tcW3C-3LO5Sc-1}}}%
-\nwixlogsorted{c}{{......test \code{}DBQueryRouteRemaining\edoc{}(2) at $t=10$}{NW2tcW3C-3AIjLv-1}{\nwixu{NW2tcW3C-1LMBE6-1}\nwixd{NW2tcW3C-3AIjLv-1}}}%
-\nwixlogsorted{c}{{......test \code{}DBQueryRouteRemaining\edoc{}(2) at $t=11$}{NW2tcW3C-39Mi27-1}{\nwixu{NW2tcW3C-1LMBE6-1}\nwixd{NW2tcW3C-39Mi27-1}}}%
-\nwixlogsorted{c}{{......test \code{}DBQueryRouteRemaining\edoc{}(2) at $t=9$}{NW2tcW3C-3Kf6AF-1}{\nwixu{NW2tcW3C-1LMBE6-1}\nwixd{NW2tcW3C-3Kf6AF-1}}}%
-\nwixlogsorted{c}{{......test \code{}DBQueryScheduleRemaining\edoc{}(2) when $t=43$}{NW2tcW3C-qvLii-1}{\nwixu{NW2tcW3C-3vhAZd-1}\nwixd{NW2tcW3C-qvLii-1}}}%
-\nwixlogsorted{c}{{......test \code{}DBQueryScheduleRemaining\edoc{}(2) when $t=44$}{NW2tcW3C-qQtYO-1}{\nwixu{NW2tcW3C-3vhAZd-1}\nwixd{NW2tcW3C-qQtYO-1}}}%
-\nwixlogsorted{c}{{......test \code{}DBQueryScheduleRemaining\edoc{}(2) when $t=45$}{NW2tcW3C-rCT0y-1}{\nwixu{NW2tcW3C-3vhAZd-1}\nwixd{NW2tcW3C-rCT0y-1}}}%
-\nwixlogsorted{c}{{......test \code{}DBQueryScheduleRemaining\edoc{}(2) when $t=46$}{NW2tcW3C-qbTw8-1}{\nwixu{NW2tcW3C-3vhAZd-1}\nwixd{NW2tcW3C-qbTw8-1}}}%
 \nwixlogsorted{c}{{......test \code{}DBQueryServerCompletedAssignments\edoc{}(2) when $t=43$}{NW2tcW3C-29NaUg-1}{\nwixu{NW2tcW3C-1HkuSf-1}\nwixd{NW2tcW3C-29NaUg-1}}}%
 \nwixlogsorted{c}{{......test \code{}DBQueryServerCompletedAssignments\edoc{}(2) when $t=44$}{NW2tcW3C-29kLI6-1}{\nwixu{NW2tcW3C-1HkuSf-1}\nwixd{NW2tcW3C-29kLI6-1}}}%
 \nwixlogsorted{c}{{......test \code{}DBQueryServerCompletedAssignments\edoc{}(2) when $t=45$}{NW2tcW3C-297ZOY-1}{\nwixu{NW2tcW3C-1HkuSf-1}\nwixd{NW2tcW3C-297ZOY-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerCurrentLoad\edoc{}(2) when $t=0$}{NW2tcW3C-xm11O-1}{\nwixu{NW2tcW3C-4gLSY4-1}\nwixd{NW2tcW3C-xm11O-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerCurrentLoad\edoc{}(2) when $t=24$}{NW2tcW3C-1jybE1-1}{\nwixu{NW2tcW3C-4gLSY4-1}\nwixd{NW2tcW3C-1jybE1-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerCurrentLoad\edoc{}(2) when $t=25$}{NW2tcW3C-1kucXp-1}{\nwixu{NW2tcW3C-4gLSY4-1}\nwixd{NW2tcW3C-1kucXp-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerCurrentLoad\edoc{}(2) when $t=26$}{NW2tcW3C-1kIoJt-1}{\nwixu{NW2tcW3C-4gLSY4-1}\nwixd{NW2tcW3C-1kIoJt-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerCurrentLoad\edoc{}(2) when $t=44$}{NW2tcW3C-1jyeyH-1}{\nwixu{NW2tcW3C-4gLSY4-1}\nwixd{NW2tcW3C-1jyeyH-1}}}%
 \nwixlogsorted{c}{{......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=0$}{NW2tcW3C-1JQJiP-1}{\nwixu{NW2tcW3C-3GrgPk-1}\nwixd{NW2tcW3C-1JQJiP-1}}}%
 \nwixlogsorted{c}{{......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=1$}{NW2tcW3C-1Iuh5h-1}{\nwixu{NW2tcW3C-3GrgPk-1}\nwixd{NW2tcW3C-1Iuh5h-1}}}%
 \nwixlogsorted{c}{{......test \code{}DBQueryServerLocationsActive\edoc{}(1) when $t=44$}{NW2tcW3C-4O1SEc-1}{\nwixu{NW2tcW3C-3GrgPk-1}\nwixd{NW2tcW3C-4O1SEc-1}}}%
@@ -1768,6 +1761,13 @@ Now it's time to remove Request 12 from Server 13...
 \nwixlogsorted{c}{{......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=43$}{NW2tcW3C-Fmx82-1}{\nwixu{NW2tcW3C-g6QHQ-1}\nwixd{NW2tcW3C-Fmx82-1}}}%
 \nwixlogsorted{c}{{......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=44$}{NW2tcW3C-FA6yE-1}{\nwixu{NW2tcW3C-g6QHQ-1}\nwixd{NW2tcW3C-FA6yE-1}}}%
 \nwixlogsorted{c}{{......test \code{}DBQueryServerPendingAssignments\edoc{}(2) when $t=45$}{NW2tcW3C-FXU7y-1}{\nwixu{NW2tcW3C-g6QHQ-1}\nwixd{NW2tcW3C-FXU7y-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerRemainingRoute\edoc{}(2) at $t=10$}{NW2tcW3C-3Iu91I-1}{\nwixu{NW2tcW3C-3MRLuN-1}\nwixd{NW2tcW3C-3Iu91I-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerRemainingRoute\edoc{}(2) at $t=11$}{NW2tcW3C-3IxAYe-1}{\nwixu{NW2tcW3C-3MRLuN-1}\nwixd{NW2tcW3C-3IxAYe-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerRemainingRoute\edoc{}(2) at $t=9$}{NW2tcW3C-3etE3f-1}{\nwixu{NW2tcW3C-3MRLuN-1}\nwixd{NW2tcW3C-3etE3f-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerRemainingSchedule\edoc{}(2) when $t=43$}{NW2tcW3C-2R8S0U-1}{\nwixu{NW2tcW3C-COaZk-1}\nwixd{NW2tcW3C-2R8S0U-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerRemainingSchedule\edoc{}(2) when $t=44$}{NW2tcW3C-2RmWsw-1}{\nwixu{NW2tcW3C-COaZk-1}\nwixd{NW2tcW3C-2RmWsw-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerRemainingSchedule\edoc{}(2) when $t=45$}{NW2tcW3C-2RPhpG-1}{\nwixu{NW2tcW3C-COaZk-1}\nwixd{NW2tcW3C-2RPhpG-1}}}%
+\nwixlogsorted{c}{{......test \code{}DBQueryServerRemainingSchedule\edoc{}(2) when $t=46$}{NW2tcW3C-2Rx7Gg-1}{\nwixu{NW2tcW3C-COaZk-1}\nwixd{NW2tcW3C-2Rx7Gg-1}}}%
 \nwixlogsorted{c}{{......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) request status when $t=13$}{NW2tcW3C-1AIKSX-1}{\nwixu{NW2tcW3C-3t5oWt-1}\nwixd{NW2tcW3C-1AIKSX-1}}}%
 \nwixlogsorted{c}{{......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) request status when $t=14$}{NW2tcW3C-19fLmD-1}{\nwixu{NW2tcW3C-3t5oWt-1}\nwixd{NW2tcW3C-19fLmD-1}}}%
 \nwixlogsorted{c}{{......test \code{}DBUpdateServerAddToSchedule\edoc{}(4) request status when $t=21$}{NW2tcW3C-1ATroX-1}{\nwixu{NW2tcW3C-3t5oWt-1}\nwixd{NW2tcW3C-1ATroX-1}}}%
@@ -1786,7 +1786,6 @@ Now it's time to remove Request 12 from Server 13...
 \nwixlogsorted{c}{{....test \code{}DBQueryCountRequests\edoc{}(0)}{NW2tcW3C-3azEeu-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-3azEeu-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryCountServers\edoc{}(0)}{NW2tcW3C-2qdA7h-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-2qdA7h-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryCountVertices\edoc{}(0)}{NW2tcW3C-2FbhMk-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-2FbhMk-1}}}%
-\nwixlogsorted{c}{{....test \code{}DBQueryCurrentLoad\edoc{}(2)}{NW2tcW3C-2jSLg0-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-2jSLg0-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryEdge\edoc{}(2)}{NW2tcW3C-4e874K-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-4e874K-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryMBR\edoc{}(0)}{NW2tcW3C-2Yf5B8-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-2Yf5B8-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryQueuedRequests\edoc{}(1)}{NW2tcW3C-1Ao9lm-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-1Ao9lm-1}}}%
@@ -1804,20 +1803,21 @@ Now it's time to remove Request 12 from Server 13...
 \nwixlogsorted{c}{{....test \code{}DBQueryRequestTransitDurationTotal\edoc{}(0)}{NW2tcW3C-PQhaD-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-PQhaD-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryRequestTravelDuration\edoc{}(1)}{NW2tcW3C-4MzTFA-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-4MzTFA-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryRequestTravelDurationTotal\edoc{}(0)}{NW2tcW3C-ALSer-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-ALSer-1}}}%
-\nwixlogsorted{c}{{....test \code{}DBQueryRoute\edoc{}(1)}{NW2tcW3C-4TWZqG-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-4TWZqG-1}}}%
-\nwixlogsorted{c}{{....test \code{}DBQueryRouteRemaining\edoc{}(2)}{NW2tcW3C-1LMBE6-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-1LMBE6-1}}}%
-\nwixlogsorted{c}{{....test \code{}DBQuerySchedule\edoc{}(1)}{NW2tcW3C-3I1Rij-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-3I1Rij-1}}}%
-\nwixlogsorted{c}{{....test \code{}DBQueryScheduleRemaining\edoc{}(2)}{NW2tcW3C-3vhAZd-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-3vhAZd-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryServer\edoc{}(1)}{NW2tcW3C-3O8MFc-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-3O8MFc-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryServerArrivalTime\edoc{}(1)}{NW2tcW3C-1angPN-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-1angPN-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryServerBaseDistanceTotal\edoc{}(0)}{NW2tcW3C-1BF5dX-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-1BF5dX-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryServerCompletedAssignments\edoc{}(2)}{NW2tcW3C-1HkuSf-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-1HkuSf-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryServerCruisingDistance\edoc{}(1)}{NW2tcW3C-okQ1Q-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-okQ1Q-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryServerCruisingDistanceTotal\edoc{}(0)}{NW2tcW3C-1RB1yH-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-1RB1yH-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryServerCurrentLoad\edoc{}(2)}{NW2tcW3C-4gLSY4-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-4gLSY4-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryServerDepartureTime\edoc{}(1)}{NW2tcW3C-1TCj44-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-1TCj44-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryServerLocationsActive\edoc{}(1)}{NW2tcW3C-3GrgPk-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-3GrgPk-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryServerLocationsAll\edoc{}(1)}{NW2tcW3C-2dAmyn-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-2dAmyn-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryServerPendingAssignments\edoc{}(2)}{NW2tcW3C-g6QHQ-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-g6QHQ-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryServerRemainingRoute\edoc{}(2)}{NW2tcW3C-3MRLuN-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-3MRLuN-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryServerRemainingSchedule\edoc{}(2)}{NW2tcW3C-COaZk-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-COaZk-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryServerRoute\edoc{}(1)}{NW2tcW3C-4cMII0-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-4cMII0-1}}}%
+\nwixlogsorted{c}{{....test \code{}DBQueryServerSchedule\edoc{}(1)}{NW2tcW3C-2wzOyL-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-2wzOyL-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryServerServiceDistance\edoc{}(1)}{NW2tcW3C-3T7Ecl-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-3T7Ecl-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryServerServiceDistanceTotal\edoc{}(0)}{NW2tcW3C-2c14Sj-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-2c14Sj-1}}}%
 \nwixlogsorted{c}{{....test \code{}DBQueryServerTravelDistance\edoc{}(1)}{NW2tcW3C-R0me6-1}{\nwixu{NW2tcW3C-2w6SyW-1}\nwixd{NW2tcW3C-R0me6-1}}}%

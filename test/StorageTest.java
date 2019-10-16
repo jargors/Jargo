@@ -275,9 +275,9 @@ public class StorageTest {
       }
     }
     {
-      int output[] = storage.DBQueryRoute(2);
+      int output[] = storage.DBQueryServerRoute(2);
       if (!(output.length == 6)) {
-        Print("[FAIL] DBQueryRoute(1)");
+        Print("[FAIL] DBQueryServerRoute(1)");
         Print("\tExpected 6; got "+output.length);
         count_failed++;
       } else if (!(output[0] == 10)
@@ -286,19 +286,19 @@ public class StorageTest {
         && (output[3] == 40)
         && (output[4] == 28)
         && (output[5] == 5)) {
-        Print("[FAIL] DBQueryRoute(1)");
+        Print("[FAIL] DBQueryServerRoute(1)");
         Print("\tExpected (10, 45) (19, 40) (28, 5); got ");
         tools.printRoute(output);
         count_failed++;
       } else {
-        Print("[PASS] DBQueryRoute(1)");
+        Print("[PASS] DBQueryServerRoute(1)");
         count_passed++;
       }
     }
       {
-        int output[] = storage.DBQueryRouteRemaining(2, 9);
+        int output[] = storage.DBQueryServerRemainingRoute(2, 9);
         if (!(output.length == 6)) {
-          Print("[FAIL] DBQueryRouteRemaining(2) (1/3)");
+          Print("[FAIL] DBQueryServerRemainingRoute(2) (1/3)");
           Print("\tExpected 6; got "+output.length);
           count_failed++;
         } else if (!(output[0] == 10
@@ -307,57 +307,57 @@ public class StorageTest {
           && output[3] == 40
           && output[4] == 28
           && output[5] == 5)) {
-          Print("[FAIL] DBQueryRouteRemaining(2) (1/3)");
+          Print("[FAIL] DBQueryServerRemainingRoute(2) (1/3)");
           Print("\tExpected (10, 45) (19, 40) (28 5); got ");
           tools.printRoute(output);
           count_failed++;
         } else {
-          Print("[PASS] DBQueryRouteRemaining(2) (1/3)");
+          Print("[PASS] DBQueryServerRemainingRoute(2) (1/3)");
           count_passed++;
         }
       }
       {
-        int output[] = storage.DBQueryRouteRemaining(2, 10);
+        int output[] = storage.DBQueryServerRemainingRoute(2, 10);
         if (!(output.length == 4)) {
-          Print("[FAIL] DBQueryRouteRemaining(2) (2/3)");
+          Print("[FAIL] DBQueryServerRemainingRoute(2) (2/3)");
           Print("\tExpected 4; got "+output.length);
           count_failed++;
         } else if (!(output[0] == 19
           && output[1] == 40
           && output[2] == 28
           && output[3] == 5)) {
-          Print("[FAIL] DBQueryRouteRemaining(2) (2/3)");
+          Print("[FAIL] DBQueryServerRemainingRoute(2) (2/3)");
           Print("\tExpected (19, 40) (28 5); got ");
           tools.printRoute(output);
           count_failed++;
         } else {
-          Print("[PASS] DBQueryRouteRemaining(2) (2/3)");
+          Print("[PASS] DBQueryServerRemainingRoute(2) (2/3)");
           count_passed++;
         }
       }
       {
-        int output[] = storage.DBQueryRouteRemaining(2, 11);
+        int output[] = storage.DBQueryServerRemainingRoute(2, 11);
         if (!(output.length == 4)) {
-          Print("[FAIL] DBQueryRouteRemaining(2) (3/3)");
+          Print("[FAIL] DBQueryServerRemainingRoute(2) (3/3)");
           Print("\tExpected 4; got "+output.length);
           count_failed++;
         } else if (!(output[0] == 19
           && output[1] == 40
           && output[2] == 28
           && output[3] == 5)) {
-          Print("[FAIL] DBQueryRouteRemaining(2) (3/3)");
+          Print("[FAIL] DBQueryServerRemainingRoute(2) (3/3)");
           Print("\tExpected (19, 40) (28 5); got ");
           tools.printRoute(output);
           count_failed++;
         } else {
-          Print("[PASS] DBQueryRouteRemaining(2) (3/3)");
+          Print("[PASS] DBQueryServerRemainingRoute(2) (3/3)");
           count_passed++;
         }
       }
     {
-      int output[] = storage.DBQuerySchedule(1);
+      int output[] = storage.DBQueryServerSchedule(1);
       if (!(output.length == 16)) {
-        Print("[FAIL] DBQuerySchedule(1)");
+        Print("[FAIL] DBQueryServerSchedule(1)");
         Print("\tExpected 16; got "+output.length);
         count_failed++;
       } else if (!(output[0] == 1
@@ -376,21 +376,21 @@ public class StorageTest {
         && output[13] == 0
         && output[14] == 1
         && output[15] == 0)) {
-        Print("[FAIL] DBQuerySchedule(1)");
+        Print("[FAIL] DBQueryServerSchedule(1)");
         Print("\tExpected (1, 22, 1, 0) (25, 4, 0, 10) "
           + "(44, 30, 0, 10) (45, 0, 1, 0); got ");
         tools.printSchedule(output);
         count_failed++;
       } else {
-        Print("[PASS] DBQuerySchedule(1)");
+        Print("[PASS] DBQueryServerSchedule(1)");
         count_passed++;
       }
     }
     {
       {
-        int output[] = storage.DBQueryScheduleRemaining(1, 43);
+        int output[] = storage.DBQueryServerRemainingSchedule(1, 43);
         if (!(output.length == 8)) {
-          Print("[FAIL] DBQueryScheduleRemaining(2) (1/4)");
+          Print("[FAIL] DBQueryServerRemainingSchedule(2) (1/4)");
           Print("\tExpected 8; got "+output.length);
           count_failed++;
         } else if (!(output[0] == 44
@@ -401,126 +401,126 @@ public class StorageTest {
           && output[5] == 0
           && output[6] == 1
           && output[7] == 0)) {
-          Print("[FAIL] DBQueryScheduleRemaining(2) (1/4)");
+          Print("[FAIL] DBQueryServerRemainingSchedule(2) (1/4)");
           Print("\tExpected (44, 30, 0, 10) (45, 0, 1, 0); got ");
           tools.printSchedule(output);
           count_failed++;
         } else {
-          Print("[PASS] DBQueryScheduleRemaining(2) (1/4)");
+          Print("[PASS] DBQueryServerRemainingSchedule(2) (1/4)");
           count_passed++;
         }
       }
       {
-        int output[] = storage.DBQueryScheduleRemaining(1, 44);
+        int output[] = storage.DBQueryServerRemainingSchedule(1, 44);
         if (!(output.length == 4)) {
-          Print("[FAIL] DBQueryScheduleRemaining(2) (2/4)");
+          Print("[FAIL] DBQueryServerRemainingSchedule(2) (2/4)");
           Print("\tExpected 4; got "+output.length);
           count_failed++;
         } else if (!(output[0] == 45
           && output[1] == 0
           && output[2] == 1
           && output[3] == 0)) {
-          Print("[FAIL] DBQueryScheduleRemaining(2) (2/4)");
+          Print("[FAIL] DBQueryServerRemainingSchedule(2) (2/4)");
           Print("\tExpected (45, 0, 1, 0); got ");
           tools.printSchedule(output);
           count_failed++;
         } else {
-          Print("[PASS] DBQueryScheduleRemaining(2) (2/4)");
+          Print("[PASS] DBQueryServerRemainingSchedule(2) (2/4)");
           count_passed++;
         }
       }
       {
-        int output[] = storage.DBQueryScheduleRemaining(1, 45);
+        int output[] = storage.DBQueryServerRemainingSchedule(1, 45);
         if (!(output.length == 4)) {
-          Print("[FAIL] DBQueryScheduleRemaining(2) (3/4)");
+          Print("[FAIL] DBQueryServerRemainingSchedule(2) (3/4)");
           Print("\tExpected 4; got "+output.length);
           count_failed++;
         } else if (!(output[0] == 45
           && output[1] == 0
           && output[2] == 1
           && output[3] == 0)) {
-          Print("[FAIL] DBQueryScheduleRemaining(2) (3/4)");
+          Print("[FAIL] DBQueryServerRemainingSchedule(2) (3/4)");
           Print("\tExpected (45, 0, 1, 0); got ");
           tools.printSchedule(output);
           count_failed++;
         } else {
-          Print("[PASS] DBQueryScheduleRemaining(2) (3/4)");
+          Print("[PASS] DBQueryServerRemainingSchedule(2) (3/4)");
           count_passed++;
         }
       }
       {
-        int output[] = storage.DBQueryScheduleRemaining(1, 46);
+        int output[] = storage.DBQueryServerRemainingSchedule(1, 46);
         if (!(output.length == 4)) {
-          Print("[FAIL] DBQueryScheduleRemaining(2) (4/4)");
+          Print("[FAIL] DBQueryServerRemainingSchedule(2) (4/4)");
           Print("\tExpected 4; got "+output.length);
           count_failed++;
         } else if (!(output[0] == 45
           && output[1] == 0
           && output[2] == 1
           && output[3] == 0)) {
-          Print("[FAIL] DBQueryScheduleRemaining(2) (4/4)");
+          Print("[FAIL] DBQueryServerRemainingSchedule(2) (4/4)");
           Print("\tExpected (45, 0, 1, 0); got ");
           tools.printSchedule(output);
           count_failed++;
         } else {
-          Print("[PASS] DBQueryScheduleRemaining(2) (4/4)");
+          Print("[PASS] DBQueryServerRemainingSchedule(2) (4/4)");
           count_passed++;
         }
       }
     }
     {
       {
-        int output[] = storage.DBQueryCurrentLoad(1, 0);
+        int output[] = storage.DBQueryServerCurrentLoad(1, 0);
         if (!(output.length == 0)) {
-          Print("[FAIL] DBQueryCurrentLoad(2) (1/5)");
+          Print("[FAIL] DBQueryServerCurrentLoad(2) (1/5)");
           Print("\tExpected empty; got "+output[0]);
           count_failed++;
         } else {
-          Print("[PASS] DBQueryCurrentLoad(2) (1/5)");
+          Print("[PASS] DBQueryServerCurrentLoad(2) (1/5)");
           count_passed++;
         }
       }
       {
-        int output[] = storage.DBQueryCurrentLoad(1, 24);
+        int output[] = storage.DBQueryServerCurrentLoad(1, 24);
         if (!(output[0] == -10)) {
-          Print("[FAIL] DBQueryCurrentLoad(2) (2/5)");
+          Print("[FAIL] DBQueryServerCurrentLoad(2) (2/5)");
           Print("\tExpected -10; got "+output[0]);
           count_failed++;
         } else {
-          Print("[PASS] DBQueryCurrentLoad(2) (2/5)");
+          Print("[PASS] DBQueryServerCurrentLoad(2) (2/5)");
           count_passed++;
         }
       }
       {
-        int output[] = storage.DBQueryCurrentLoad(1, 25);
+        int output[] = storage.DBQueryServerCurrentLoad(1, 25);
         if (!(output[0] == -9)) {
-          Print("[FAIL] DBQueryCurrentLoad(2) (3/5)");
+          Print("[FAIL] DBQueryServerCurrentLoad(2) (3/5)");
           Print("\tExpected -9; got "+output[0]);
           count_failed++;
         } else {
-          Print("[PASS] DBQueryCurrentLoad(2) (3/5)");
+          Print("[PASS] DBQueryServerCurrentLoad(2) (3/5)");
           count_passed++;
         }
       }
       {
-        int output[] = storage.DBQueryCurrentLoad(1, 26);
+        int output[] = storage.DBQueryServerCurrentLoad(1, 26);
         if (!(output[0] == -9)) {
-          Print("[FAIL] DBQueryCurrentLoad(2) (4/5)");
+          Print("[FAIL] DBQueryServerCurrentLoad(2) (4/5)");
           Print("\tExpected -9; got "+output[0]);
           count_failed++;
         } else {
-          Print("[PASS] DBQueryCurrentLoad(2) (4/5)");
+          Print("[PASS] DBQueryServerCurrentLoad(2) (4/5)");
           count_passed++;
         }
       }
       {
-        int output[] = storage.DBQueryCurrentLoad(1, 44);
+        int output[] = storage.DBQueryServerCurrentLoad(1, 44);
         if (!(output[0] == -10)) {
-          Print("[FAIL] DBQueryCurrentLoad(2) (5/5)");
+          Print("[FAIL] DBQueryServerCurrentLoad(2) (5/5)");
           Print("\tExpected -10; got "+output[0]);
           count_failed++;
         } else {
-          Print("[PASS] DBQueryCurrentLoad(2) (5/5)");
+          Print("[PASS] DBQueryServerCurrentLoad(2) (5/5)");
           count_passed++;
         }
       }
@@ -1039,7 +1039,7 @@ public class StorageTest {
         tools.printUser(output);
         count_failed++;
       } else {
-        output = storage.DBQueryRoute(13);
+        output = storage.DBQueryServerRoute(13);
         if (!(output[0] == 0
           && output[1] == 27
           && output[2] == 1
@@ -1049,7 +1049,7 @@ public class StorageTest {
           tools.printRoute(output);
           count_failed++;
         } else {
-          output = storage.DBQuerySchedule(13);
+          output = storage.DBQueryServerSchedule(13);
           if (!(output[0] == 0
             && output[1] == 27
             && output[2] == 13
@@ -1073,7 +1073,7 @@ public class StorageTest {
       storage.DBUpdateServerRoute(13,
         new int[] { 0, 27, 7, 44, 14, 45, 15, 0 },
         new int[] { });
-      int[] output = storage.DBQueryRoute(13);
+      int[] output = storage.DBQueryServerRoute(13);
       if (!(output[0] == 0
         && output[1] == 27
         && output[2] == 7
@@ -1096,7 +1096,7 @@ public class StorageTest {
           new int[] { 7, 44, 14, 45, 21, 24, 22, 0 },
           new int[] { 14, 45, 12, 21, 24, 12, 22, 0, 13 },
           new int[] { 12 });
-        int[] output = storage.DBQueryRoute(13);
+        int[] output = storage.DBQueryServerRoute(13);
         if (!(output[0] == 0
           && output[1] == 27
           && output[2] == 7
@@ -1117,7 +1117,7 @@ public class StorageTest {
         }
       }
       {
-        int[] output = storage.DBQuerySchedule(13);
+        int[] output = storage.DBQueryServerSchedule(13);
         if (!(output[0] == 0
           && output[1] == 27
           && output[2] == 13
@@ -1182,7 +1182,7 @@ public class StorageTest {
           new int[] { 0, 27, 1, 0 },
           new int[] { 1, 0, 13 },
           new int[] { 12 });
-        int[] output = storage.DBQueryRoute(13);
+        int[] output = storage.DBQueryServerRoute(13);
         if (!(output[0] == 0
           && output[1] == 27
           && output[2] == 1
@@ -1197,7 +1197,7 @@ public class StorageTest {
         }
       }
       {
-        int[] output = storage.DBQuerySchedule(13);
+        int[] output = storage.DBQueryServerSchedule(13);
         if (!(output[0] == 0
           && output[1] == 27
           && output[2] == 13
