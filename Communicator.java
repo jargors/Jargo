@@ -82,8 +82,8 @@ public class Communicator {
   public int[] queryServerRemainingDuration(int sid, int t) throws RuntimeException {
     return storage.DBQueryServerRemainingDuration(sid, t);
   }
-  public int[] queryServerCurrentLoad(int sid, int t) throws RuntimeException {
-    return storage.DBQueryServerCurrentLoad(sid, t);
+  public int[] queryServerMaxLoad(int sid, int t) throws RuntimeException {
+    return storage.DBQueryServerMaxLoad(sid, t);
   }
   private void Print(String msg) {
     System.out.println("[Jargo][Communicator]["+LocalDateTime.now()+"] "+msg);
