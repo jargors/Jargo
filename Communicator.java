@@ -52,13 +52,13 @@ public class Communicator {
   public int[] queryServerLocationsActive(int t) throws RuntimeException {
     return storage.DBQueryServerLocationsActive(t);
   }
-  public int[] queryRouteRemaining(int sid, int t) throws RuntimeException {
+  public int[] queryServerRemainingRoute(int sid, int t) throws RuntimeException {
     return storage.DBQueryServerRemainingRoute(sid, t);
   }
-  public int[] queryScheduleRemaining(int sid, int t) throws RuntimeException {
+  public int[] queryServerRemainingSchedule(int sid, int t) throws RuntimeException {
     return storage.DBQueryServerRemainingSchedule(sid, t);
   }
-  public int[] queryCurrentLoad(int sid, int t) throws RuntimeException {
+  public int[] queryServerCurrentLoad(int sid, int t) throws RuntimeException {
     return storage.DBQueryServerCurrentLoad(sid, t);
   }
   private void Print(String msg) {
