@@ -23,6 +23,9 @@ public class Communicator {
   public final Map<Integer, Map<Integer, int[]>> getReferenceEdgesCache() {
     return storage.getReferenceEdgesCache();
   }
+  public final Map<Integer, int[]> getReferenceUsersCache() {
+    return storage.getReferenceUsersCache();
+  }
   public void updateServerRoute(int sid, int[] route, int[] sched) {
     storage.DBUpdateServerRoute(sid, route, sched);
   }
