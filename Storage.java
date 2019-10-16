@@ -17,6 +17,7 @@ public class Storage {
   private static Map<String, String> pstr = new HashMap<>();
   private Map<Integer, int[]> lu_vertices = new HashMap<>();
   private Map<Integer, Map<Integer, int[]>> lu_edges = new HashMap<>();
+  private Map<Integer, int[]> lu_users = new HashMap<>();
   private String CONNECTIONS_URL = "jdbc:derby:memory:jargo;create=true";
   private final String CONNECTIONS_DRIVER_URL = "jdbc:apache:commons:dbcp:";
   private final String CONNECTIONS_POOL_NAME = "jargo";
@@ -43,6 +44,9 @@ public class Storage {
   }
   public final Map<Integer, Map<Integer, int[]>> getReferenceEdgesCache() {
     return lu_edges;
+  }
+  public final Map<Integer, int[]> getReferenceUsersCache() {
+    return lu_users;
   }
   public void DBLoadDataModel() throws RuntimeException {
     Print("Load data model");
@@ -399,6 +403,19 @@ public class Storage {
           lu_edges.get(v1).put(v2, new int[] { dd, nu });
         }
       }
+     if (lu_users.isEmpty()) {
+        int[] output = DBQueryAllUsers();
+        for (int i = 0; i < (output.length/7); i++) {
+          int uid = output[(7*i)];
+          int uq = output[(7*i + 1)];
+          int ue = output[(7*i + 2)];
+          int ul = output[(7*i + 3)];
+          int uo = output[(7*i + 4)];
+          int ud = output[(7*i + 5)];
+          int ub = output[(7*i + 6)];
+          lu_users.put(uid, new int[] { uid, uq, ue, ul, uo, ud, ub });
+        }
+     }
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -512,6 +529,7 @@ public class Storage {
       conn.commit();
       Print("Close connection "+conn.toString());
       conn.close();
+      lu_users.put(u[0], u.clone());
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -569,6 +587,7 @@ public class Storage {
       conn.commit();
       Print("Close connection "+conn.toString());
       conn.close();
+      lu_users.put(u[0], u.clone());
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1010,12 +1029,12 @@ public class Storage {
       throw new RuntimeException("database failure");
     }
   }
-  public int[] DBQueryServer(int sid) throws RuntimeException {
+  public int[] DBQueryAllUsers() throws RuntimeException {
     int[] output = new int[] { };
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
       Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S70", 7, sid);
+    output = DBFetch(conn, "S141", 7);
       Print("Close connection "+conn.toString());
       conn.close();
     }
@@ -1026,21 +1045,11 @@ public class Storage {
     }
     return output;
   }
-  public int[] DBQueryRequest(int rid) throws RuntimeException {
-    int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S75", 7, rid);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
-    }
-    return output;
+  public final int[] DBQueryServer(int sid) throws RuntimeException {
+    return lu_users.get(sid);
+  }
+  public final int[] DBQueryRequest(int rid) throws RuntimeException {
+    return lu_users.get(rid);
   }
   public int[] DBQueryRequestStatus(int rid, int t) throws RuntimeException {
     int[] output = new int[] { };
@@ -1227,7 +1236,7 @@ public class Storage {
     }
     return output;
   }
-  public int[] DBQueryVertex(int v) throws RuntimeException {
+  public final int[] DBQueryVertex(int v) throws RuntimeException {
     return lu_vertices.get(v);
   }
   public int[] DBQueryAllVertices() throws RuntimeException {
@@ -1246,7 +1255,7 @@ public class Storage {
     }
     return output;
   }
-  public int[] DBQueryEdge(int v1, int v2) throws RuntimeException {
+  public final int[] DBQueryEdge(int v1, int v2) throws RuntimeException {
     return lu_edges.get(v1).get(v2);
   }
   public int[] DBQueryAllEdges() throws RuntimeException {
@@ -1969,6 +1978,7 @@ public class Storage {
       pstr.put("S138", SEL+"val FROM dist_r_unassigned");
       pstr.put("S139", UPD+"CPD SET te=? WHERE sid=?");
       pstr.put("S140", UPD+"CQ SET tp=?, td=? WHERE rid=?");
+      pstr.put("S141", SEL+"* FROM r_user");
     }
     private PreparedStatement PS(Connection conn, String k) throws SQLException {
       PreparedStatement p = null;

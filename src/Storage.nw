@@ -75,6 +75,7 @@ programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
 <<[[Storage]] public methods>>=
 <<Get reference to vertices cache>>
 <<Get reference to edges cache>>
+<<Get reference to users cache>>
 <<Load data model>>
 <<Load backup>>
 <<Save backup>>
@@ -1752,13 +1753,13 @@ public class Storage {
 \subsection{Member Variables}
 \label{sec:member-variables}
 \begin{itemize}
-\item We use a map to store statement strings, keyed by a string identifier.
-We also cache the road network vertices and edges.
+\item We use maps to cache various things.
 <<[[Storage]] member variables>>=
 private static Map<String, String> pstr = new HashMap<>();
 private Map<Integer, int[]> lu_vertices = new HashMap<>();
 private Map<Integer, Map<Integer, int[]>> lu_edges = new HashMap<>();
-@ %def pstr lu_vertices lu_edges
+private Map<Integer, int[]> lu_users = new HashMap<>();
+@ %def pstr lu_vertices lu_edges lu_users
 \item We declare configuration settings.
 <<[[Storage]] member variables>>=
 private String CONNECTIONS_URL = "jdbc:derby:memory:jargo;create=true";
@@ -1835,6 +1836,15 @@ public final Map<Integer, Map<Integer, int[]>> getReferenceEdgesCache() {
 }
 @ %def getReferenceEdgesCache
 
+\subsubsection{[[getReferenceUsersCache]](0)}
+This method returns a read-only reference to the users cache,
+[[lu_users]].
+<<Get reference to users cache>>=
+public final Map<Integer, int[]> getReferenceUsersCache() {
+  return lu_users;
+}
+@ %def getReferenceUsersCache
+
 \subsubsection{[[DBLoadDataModel]](0)}
 The [[DBLoadDataModel]](0) method loads the tables and views in
 \S\ref{sec:ridesharing-data-model} into the database. If the model already
@@ -1910,6 +1920,9 @@ public void DBLoadBackup(String p) throws RuntimeException {
     if (lu_vertices.isEmpty()) {
       <<..load road network from database>>
     }
+   if (lu_users.isEmpty()) {
+      <<..load users from database>>
+   }
   }
   <<Catch and print [[SQLException]]>>
 }
@@ -1932,6 +1945,19 @@ for (int i = 0; i < (output.length/4); i++) {
     lu_edges.put(v1, new HashMap<>());
   }
   lu_edges.get(v1).put(v2, new int[] { dd, nu });
+}
+@
+<<..load users from database>>=
+int[] output = DBQueryAllUsers();
+for (int i = 0; i < (output.length/7); i++) {
+  int uid = output[(7*i)];
+  int uq = output[(7*i + 1)];
+  int ue = output[(7*i + 2)];
+  int ul = output[(7*i + 3)];
+  int uo = output[(7*i + 4)];
+  int ud = output[(7*i + 5)];
+  int ub = output[(7*i + 6)];
+  lu_users.put(uid, new int[] { uid, uq, ue, ul, uo, ud, ub });
 }
 @
 
@@ -2114,6 +2140,7 @@ public void DBAddNewRequest(int[] u) throws RuntimeException {
     <<..insert new user into user tables>>
     <<..insert new request into r>>
     <<..commit and close>>
+    lu_users.put(u[0], u.clone());
   }
   <<Catch and print [[SQLException]]>>
 }
@@ -2181,6 +2208,7 @@ public void DBAddNewServer(int[] u, int[] route) throws RuntimeException {
     <<..insert new server route into cw>>
     <<..insert new server into cq>>
     <<..commit and close>>
+    lu_users.put(u[0], u.clone());
   }
   <<Catch and print [[SQLException]]>>
 }
@@ -2736,21 +2764,26 @@ public int[] DBQuery(String sql, int ncols) throws RuntimeException {
 }
 @ % def DBQuery
 
+\subsubsection{[[DBQueryAllUsers]](0)}
+<<Query ridesharing user>>=
+public int[] DBQueryAllUsers() throws RuntimeException {
+  <<..read prepare>>
+  output = DBFetch(conn, "S141", 7);
+  <<..read return>>
+}
+@ %def DBQueryAllUsers
+
 \subsubsection{[[DBQueryServer]](1)}
 <<Query ridesharing user>>=
-public int[] DBQueryServer(int sid) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S70", 7, sid);
-  <<..read return>>
+public final int[] DBQueryServer(int sid) throws RuntimeException {
+  return lu_users.get(sid);
 }
 @ %def DBQueryServer
 
 \subsubsection{[[DBQueryRequest]](1)}
 <<Query ridesharing user>>=
-public int[] DBQueryRequest(int rid) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S75", 7, rid);
-  <<..read return>>
+public final int[] DBQueryRequest(int rid) throws RuntimeException {
+  return lu_users.get(rid);
 }
 @ %def DBQueryRequest
 
@@ -2885,7 +2918,7 @@ Returned array =
 
 \noindent where parameter [[v]] provides $v$.
 <<Query vertex>>=
-public int[] DBQueryVertex(int v) throws RuntimeException {
+public final int[] DBQueryVertex(int v) throws RuntimeException {
   return lu_vertices.get(v);
 }
 @ %def DBQueryVertex
@@ -2913,7 +2946,7 @@ Returned array =
 \noindent where parameter [[v1]] provides $v_1$ and parameter
 [[v2]] provides $v_2$.
 <<Query edge>>=
-public int[] DBQueryEdge(int v1, int v2) throws RuntimeException {
+public final int[] DBQueryEdge(int v1, int v2) throws RuntimeException {
   return lu_edges.get(v1).get(v2);
 }
 @ %def DBQueryEdge
@@ -3502,6 +3535,7 @@ private static void PSInit() {
   <<S138>>
   <<S139>>
   <<S140>>
+  <<S141>>
 }
 @ %def PSInit
 <<S0>>=
@@ -3777,6 +3811,9 @@ pstr.put("S139", UPD+"CPD SET te=? WHERE sid=?");
 <<S140>>=
 pstr.put("S140", UPD+"CQ SET tp=?, td=? WHERE rid=?");
 @ %def S140
+<<S141>>=
+pstr.put("S141", SEL+"* FROM r_user");
+@ %def S141
 \appendix
 
 \section{Appendix: List of Chunks}
