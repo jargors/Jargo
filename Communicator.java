@@ -53,13 +53,13 @@ public class Communicator {
     return storage.DBQueryServerLocationsActive(t);
   }
   public int[] queryRouteRemaining(int sid, int t) throws RuntimeException {
-    return storage.DBQueryRouteRemaining(sid, t);
+    return storage.DBQueryServerRemainingRoute(sid, t);
   }
   public int[] queryScheduleRemaining(int sid, int t) throws RuntimeException {
-    return storage.DBQueryScheduleRemaining(sid, t);
+    return storage.DBQueryServerRemainingSchedule(sid, t);
   }
   public int[] queryCurrentLoad(int sid, int t) throws RuntimeException {
-    return storage.DBQueryCurrentLoad(sid, t);
+    return storage.DBQueryServerCurrentLoad(sid, t);
   }
   private void Print(String msg) {
     System.out.println("[Jargo][Communicator]["+LocalDateTime.now()+"] "+msg);
