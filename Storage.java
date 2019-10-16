@@ -1387,7 +1387,7 @@ public class Storage {
     }
     return output;
   }
-  public int[] DBQueryServerCurrentLoad(int sid, int t) throws RuntimeException {
+  public int[] DBQueryServerMaxLoad(int sid, int t) throws RuntimeException {
     int[] output = new int[] { };
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
@@ -1973,7 +1973,7 @@ public class Storage {
       pstr.put("S85", SEL+"uq FROM UQ WHERE uid=?");
       pstr.put("S86", SEL+"tp, td FROM CPD WHERE rid=?");
       pstr.put("S73", SEL+"q2 FROM CQ WHERE sid=? AND t2<=? "
-            + "ORDER BY t2 DESC, o2 DESC FETCH FIRST ROW ONLY");
+            + "ORDER BY t2 DESC, q2 DESC FETCH FIRST ROW ONLY");
       pstr.put("S87", SEL+"t2, q2, o2 FROM CQ WHERE sid=? AND t2<=? "
             + "ORDER BY t2 DESC, o2 DESC FETCH FIRST ROW ONLY");
       pstr.put("S100", SEL+"rid FROM assignments WHERE t>? AND sid=?");

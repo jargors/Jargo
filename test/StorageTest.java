@@ -470,57 +470,57 @@ public class StorageTest {
     }
     {
       {
-        int output[] = storage.DBQueryServerCurrentLoad(1, 0);
+        int output[] = storage.DBQueryServerMaxLoad(1, 0);
         if (!(output.length == 0)) {
-          Print("[FAIL] DBQueryServerCurrentLoad(2) (1/5)");
+          Print("[FAIL] DBQueryServerMaxLoad(2) (1/5)");
           Print("\tExpected empty; got "+output[0]);
           count_failed++;
         } else {
-          Print("[PASS] DBQueryServerCurrentLoad(2) (1/5)");
+          Print("[PASS] DBQueryServerMaxLoad(2) (1/5)");
           count_passed++;
         }
       }
       {
-        int output[] = storage.DBQueryServerCurrentLoad(1, 24);
+        int output[] = storage.DBQueryServerMaxLoad(1, 24);
         if (!(output[0] == -10)) {
-          Print("[FAIL] DBQueryServerCurrentLoad(2) (2/5)");
+          Print("[FAIL] DBQueryServerMaxLoad(2) (2/5)");
           Print("\tExpected -10; got "+output[0]);
           count_failed++;
         } else {
-          Print("[PASS] DBQueryServerCurrentLoad(2) (2/5)");
+          Print("[PASS] DBQueryServerMaxLoad(2) (2/5)");
           count_passed++;
         }
       }
       {
-        int output[] = storage.DBQueryServerCurrentLoad(1, 25);
+        int output[] = storage.DBQueryServerMaxLoad(1, 25);
         if (!(output[0] == -9)) {
-          Print("[FAIL] DBQueryServerCurrentLoad(2) (3/5)");
+          Print("[FAIL] DBQueryServerMaxLoad(2) (3/5)");
           Print("\tExpected -9; got "+output[0]);
           count_failed++;
         } else {
-          Print("[PASS] DBQueryServerCurrentLoad(2) (3/5)");
+          Print("[PASS] DBQueryServerMaxLoad(2) (3/5)");
           count_passed++;
         }
       }
       {
-        int output[] = storage.DBQueryServerCurrentLoad(1, 26);
+        int output[] = storage.DBQueryServerMaxLoad(1, 26);
         if (!(output[0] == -9)) {
-          Print("[FAIL] DBQueryServerCurrentLoad(2) (4/5)");
+          Print("[FAIL] DBQueryServerMaxLoad(2) (4/5)");
           Print("\tExpected -9; got "+output[0]);
           count_failed++;
         } else {
-          Print("[PASS] DBQueryServerCurrentLoad(2) (4/5)");
+          Print("[PASS] DBQueryServerMaxLoad(2) (4/5)");
           count_passed++;
         }
       }
       {
-        int output[] = storage.DBQueryServerCurrentLoad(1, 44);
+        int output[] = storage.DBQueryServerMaxLoad(1, 44);
         if (!(output[0] == -10)) {
-          Print("[FAIL] DBQueryServerCurrentLoad(2) (5/5)");
+          Print("[FAIL] DBQueryServerMaxLoad(2) (5/5)");
           Print("\tExpected -10; got "+output[0]);
           count_failed++;
         } else {
-          Print("[PASS] DBQueryServerCurrentLoad(2) (5/5)");
+          Print("[PASS] DBQueryServerMaxLoad(2) (5/5)");
           count_passed++;
         }
       }

@@ -111,7 +111,7 @@ private static void Print(String msg) {
 <<....test [[DBQueryServerRemainingRoute]](2)>>
 <<....test [[DBQueryServerSchedule]](1)>>
 <<....test [[DBQueryServerRemainingSchedule]](2)>>
-<<....test [[DBQueryServerCurrentLoad]](2)>>
+<<....test [[DBQueryServerMaxLoad]](2)>>
 <<....test [[DBQueryCountVertices]](0)>>
 <<....test [[DBQueryCountEdges]](0)>>
 <<....test [[DBQueryVertex]](1)>>
@@ -735,80 +735,80 @@ going to return this destination as its remaining schedule.
   }
 }
 @
-\subsubsection{[[DBQueryServerCurrentLoad]](2)}
+\subsubsection{[[DBQueryServerMaxLoad]](2)}
 Load changes happen right as a server arrives at a pick-up or drop-off.
 Server 1 makes a pick-up at $t=25$ and a drop-off at $t=44$. At $t=0$, Server 1
 has not appeared yet and its current load is empty.
-<<....test [[DBQueryServerCurrentLoad]](2)>>=
+<<....test [[DBQueryServerMaxLoad]](2)>>=
 {
-  <<......test [[DBQueryServerCurrentLoad]](2) when $t=0$>>
-  <<......test [[DBQueryServerCurrentLoad]](2) when $t=24$>>
-  <<......test [[DBQueryServerCurrentLoad]](2) when $t=25$>>
-  <<......test [[DBQueryServerCurrentLoad]](2) when $t=26$>>
-  <<......test [[DBQueryServerCurrentLoad]](2) when $t=44$>>
+  <<......test [[DBQueryServerMaxLoad]](2) when $t=0$>>
+  <<......test [[DBQueryServerMaxLoad]](2) when $t=24$>>
+  <<......test [[DBQueryServerMaxLoad]](2) when $t=25$>>
+  <<......test [[DBQueryServerMaxLoad]](2) when $t=26$>>
+  <<......test [[DBQueryServerMaxLoad]](2) when $t=44$>>
 }
 @
-<<......test [[DBQueryServerCurrentLoad]](2) when $t=0$>>=
+<<......test [[DBQueryServerMaxLoad]](2) when $t=0$>>=
 {
-  int output[] = storage.DBQueryServerCurrentLoad(1, 0);
+  int output[] = storage.DBQueryServerMaxLoad(1, 0);
   if (!(output.length == 0)) {
-    Print("[FAIL] DBQueryServerCurrentLoad(2) (1/5)");
+    Print("[FAIL] DBQueryServerMaxLoad(2) (1/5)");
     Print("\tExpected empty; got "+output[0]);
     count_failed++;
   } else {
-    Print("[PASS] DBQueryServerCurrentLoad(2) (1/5)");
+    Print("[PASS] DBQueryServerMaxLoad(2) (1/5)");
     count_passed++;
   }
 }
 @
-<<......test [[DBQueryServerCurrentLoad]](2) when $t=24$>>=
+<<......test [[DBQueryServerMaxLoad]](2) when $t=24$>>=
 {
-  int output[] = storage.DBQueryServerCurrentLoad(1, 24);
+  int output[] = storage.DBQueryServerMaxLoad(1, 24);
   if (!(output[0] == -10)) {
-    Print("[FAIL] DBQueryServerCurrentLoad(2) (2/5)");
+    Print("[FAIL] DBQueryServerMaxLoad(2) (2/5)");
     Print("\tExpected -10; got "+output[0]);
     count_failed++;
   } else {
-    Print("[PASS] DBQueryServerCurrentLoad(2) (2/5)");
+    Print("[PASS] DBQueryServerMaxLoad(2) (2/5)");
     count_passed++;
   }
 }
 @
-<<......test [[DBQueryServerCurrentLoad]](2) when $t=25$>>=
+<<......test [[DBQueryServerMaxLoad]](2) when $t=25$>>=
 {
-  int output[] = storage.DBQueryServerCurrentLoad(1, 25);
+  int output[] = storage.DBQueryServerMaxLoad(1, 25);
   if (!(output[0] == -9)) {
-    Print("[FAIL] DBQueryServerCurrentLoad(2) (3/5)");
+    Print("[FAIL] DBQueryServerMaxLoad(2) (3/5)");
     Print("\tExpected -9; got "+output[0]);
     count_failed++;
   } else {
-    Print("[PASS] DBQueryServerCurrentLoad(2) (3/5)");
+    Print("[PASS] DBQueryServerMaxLoad(2) (3/5)");
     count_passed++;
   }
 }
 @
-<<......test [[DBQueryServerCurrentLoad]](2) when $t=26$>>=
+<<......test [[DBQueryServerMaxLoad]](2) when $t=26$>>=
 {
-  int output[] = storage.DBQueryServerCurrentLoad(1, 26);
+  int output[] = storage.DBQueryServerMaxLoad(1, 26);
   if (!(output[0] == -9)) {
-    Print("[FAIL] DBQueryServerCurrentLoad(2) (4/5)");
+    Print("[FAIL] DBQueryServerMaxLoad(2) (4/5)");
     Print("\tExpected -9; got "+output[0]);
     count_failed++;
   } else {
-    Print("[PASS] DBQueryServerCurrentLoad(2) (4/5)");
+    Print("[PASS] DBQueryServerMaxLoad(2) (4/5)");
     count_passed++;
   }
 }
 @
-<<......test [[DBQueryServerCurrentLoad]](2) when $t=44$>>=
+<<......test [[DBQueryServerMaxLoad]](2) when $t=44$>>=
 {
-  int output[] = storage.DBQueryServerCurrentLoad(1, 44);
+  int output[] = storage.DBQueryServerMaxLoad(1, 44);
   if (!(output[0] == -10)) {
-    Print("[FAIL] DBQueryServerCurrentLoad(2) (5/5)");
+    Print("[FAIL] DBQueryServerMaxLoad(2) (5/5)");
     Print("\tExpected -10; got "+output[0]);
     count_failed++;
   } else {
-    Print("[PASS] DBQueryServerCurrentLoad(2) (5/5)");
+    Print("[PASS] DBQueryServerMaxLoad(2) (5/5)");
     count_passed++;
   }
 }

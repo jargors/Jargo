@@ -121,7 +121,7 @@ programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
 <<Query remaining schedules>>
 <<Query remaining distance>>
 <<Query remaining duration>>
-<<Query current load>>
+<<Query max load>>
 <<Query server pending assignments>>
 <<Query server completed assignments>>
 <<Query various metrics>>
@@ -3020,14 +3020,14 @@ throws RuntimeException {
 }
 @ %def DBQueryServerRemainingDuration
 
-\subsubsection{[[DBQueryServerCurrentLoad]](2)}
-<<Query current load>>=
-public int[] DBQueryServerCurrentLoad(int sid, int t) throws RuntimeException {
+\subsubsection{[[DBQueryServerMaxLoad]](2)}
+<<Query max load>>=
+public int[] DBQueryServerMaxLoad(int sid, int t) throws RuntimeException {
   <<..read prepare>>
   output = DBFetch(conn, "S73", 1, sid, t);
   <<..read return>>
 }
-@ %def DBQueryServerCurrentLoad
+@ %def DBQueryServerMaxLoad
 
 \subsubsection{[[DBQueryServerPendingAssignments]](2)}
 <<Query server pending assignments>>=
@@ -3723,7 +3723,7 @@ pstr.put("S86", SEL+"tp, td FROM CPD WHERE rid=?");
 @ %def S86
 <<S73>>=
 pstr.put("S73", SEL+"q2 FROM CQ WHERE sid=? AND t2<=? "
-      + "ORDER BY t2 DESC, o2 DESC FETCH FIRST ROW ONLY");
+      + "ORDER BY t2 DESC, q2 DESC FETCH FIRST ROW ONLY");
 @ %def S73
 <<S87>>=
 pstr.put("S87", SEL+"t2, q2, o2 FROM CQ WHERE sid=? AND t2<=? "
