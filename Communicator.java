@@ -7,9 +7,13 @@ import java.util.HashMap;
 public class Communicator {
   private Storage storage;
   private int world_time = 0;
+  private boolean ENFORCE_STRICT_ROUTE_UPDATES = false;  // todo
   public Communicator() { }
   public void setStorage(Storage src) {
     storage = src;
+  }
+  public void setStrictRouteUpdates(boolean flag) {
+    ENFORCE_STRICT_ROUTE_UPDATES = flag;
   }
   public void setSimulationWorldTime(int t) {
     world_time = t;
@@ -26,16 +30,30 @@ public class Communicator {
   public final Map<Integer, int[]> getReferenceUsersCache() {
     return storage.getReferenceUsersCache();
   }
-  public void updateServerRoute(int sid, int[] route, int[] sched) {
-    storage.DBUpdateServerRoute(sid, route, sched);
+  public boolean updateServerRoute(int sid, int[] route, int[] sched) {
+    boolean success = false;
+    if (!ENFORCE_STRICT_ROUTE_UPDATES || route[0] > world_time) {
+      storage.DBUpdateServerRoute(sid, route, sched);
+      success = true;
+    }
+    return success;
   }
-  public void updateServerAddToSchedule(
+  public boolean updateServerAddToSchedule(
       int sid, int[] route, int[] sched, int[] rid) {
-    storage.DBUpdateServerAddToSchedule(sid, route, sched, rid);
+    boolean success = false;
+    if (!ENFORCE_STRICT_ROUTE_UPDATES || route[0] > world_time) {
+      storage.DBUpdateServerAddToSchedule(sid, route, sched, rid);
+      success = true;
+    }
+    return success;
   }
-  public void updateServerRemoveFromSchedule(
+  public boolean updateServerRemoveFromSchedule(
       int sid, int[] route, int[] sched, int[] rid) {
-    storage.DBUpdateServerRemoveFromSchedule(sid, route, sched, rid);
+    boolean success = false;
+    if (!ENFORCE_STRICT_ROUTE_UPDATES || route[0] > world_time) {
+      storage.DBUpdateServerRemoveFromSchedule(sid, route, sched, rid);
+    }
+    return success;
   }
   public int[] queryVertex(int v) throws RuntimeException {
     return storage.DBQueryVertex(v);
@@ -57,6 +75,12 @@ public class Communicator {
   }
   public int[] queryServerRemainingSchedule(int sid, int t) throws RuntimeException {
     return storage.DBQueryServerRemainingSchedule(sid, t);
+  }
+  public int[] queryServerRemainingDistance(int sid, int t) throws RuntimeException {
+    return storage.DBQueryServerRemainingDistance(sid, t);
+  }
+  public int[] queryServerRemainingDuration(int sid, int t) throws RuntimeException {
+    return storage.DBQueryServerRemainingDuration(sid, t);
   }
   public int[] queryServerCurrentLoad(int sid, int t) throws RuntimeException {
     return storage.DBQueryServerCurrentLoad(sid, t);

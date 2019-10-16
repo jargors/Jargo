@@ -81,6 +81,7 @@ We define a [[Storage]] and a container for the simulation world time.
 <<[[Communicator]] member variables>>=
 private Storage storage;
 private int world_time = 0;
+private boolean ENFORCE_STRICT_ROUTE_UPDATES = false;  // todo
 @ %def storage world_time
 
 \subsection{Constructor}
@@ -94,6 +95,7 @@ public Communicator() { }
 \hi{General Methods.}
 <<[[Communicator]] public methods>>=
 <<Set storage>>
+<<Set option for strict route updates>>
 <<Set/get simulation world time>>
 <<Get reference to vertices cache>>
 <<Get reference to edges cache>>
@@ -113,6 +115,8 @@ public Communicator() { }
 <<Query active server locations>>
 <<Query routes>>
 <<Query schedules>>
+<<Query remaining distance>>
+<<Query remaining duration>>
 <<Query current load>>
 @
 
@@ -125,6 +129,13 @@ public void setStorage(Storage src) {
   storage = src;
 }
 @ %def setStorage
+
+\subsubsection{[[setStrictRouteUpdates]](1)}
+<<Set option for strict route updates>>=
+public void setStrictRouteUpdates(boolean flag) {
+  ENFORCE_STRICT_ROUTE_UPDATES = flag;
+}
+@ %def setStrictRouteUpdates
 
 \subsubsection{[[setSimulationWorldTime]](1)}
 We depend on the controller to tell the simulation interface about the current
@@ -168,24 +179,38 @@ public final Map<Integer, int[]> getReferenceUsersCache() {
 
 \subsubsection{[[updateServerRoute]](3)}
 <<Update server route>>=
-public void updateServerRoute(int sid, int[] route, int[] sched) {
-  storage.DBUpdateServerRoute(sid, route, sched);
+public boolean updateServerRoute(int sid, int[] route, int[] sched) {
+  boolean success = false;
+  if (!ENFORCE_STRICT_ROUTE_UPDATES || route[0] > world_time) {
+    storage.DBUpdateServerRoute(sid, route, sched);
+    success = true;
+  }
+  return success;
 }
 @ %def updateServerRoute
 
 \subsubsection{[[updateServerAddToSchedule]](4)}
 <<Update server add to schedule>>=
-public void updateServerAddToSchedule(
+public boolean updateServerAddToSchedule(
     int sid, int[] route, int[] sched, int[] rid) {
-  storage.DBUpdateServerAddToSchedule(sid, route, sched, rid);
+  boolean success = false;
+  if (!ENFORCE_STRICT_ROUTE_UPDATES || route[0] > world_time) {
+    storage.DBUpdateServerAddToSchedule(sid, route, sched, rid);
+    success = true;
+  }
+  return success;
 }
 @ %def updateServerAddToSchedule
 
 \subsubsection{[[updateServerRemoveFromSchedule]](4)}
 <<Update server remove from schedule>>=
-public void updateServerRemoveFromSchedule(
+public boolean updateServerRemoveFromSchedule(
     int sid, int[] route, int[] sched, int[] rid) {
-  storage.DBUpdateServerRemoveFromSchedule(sid, route, sched, rid);
+  boolean success = false;
+  if (!ENFORCE_STRICT_ROUTE_UPDATES || route[0] > world_time) {
+    storage.DBUpdateServerRemoveFromSchedule(sid, route, sched, rid);
+  }
+  return success;
 }
 @ %def updateServerRemoveFromSchedule
 
@@ -240,6 +265,18 @@ public int[] queryServerRemainingSchedule(int sid, int t) throws RuntimeExceptio
   return storage.DBQueryServerRemainingSchedule(sid, t);
 }
 @ %def queryServerRemainingSchedule
+
+<<Query remaining distance>>=
+public int[] queryServerRemainingDistance(int sid, int t) throws RuntimeException {
+  return storage.DBQueryServerRemainingDistance(sid, t);
+}
+@ %def queryServerRemainingDistance
+
+<<Query remaining duration>>=
+public int[] queryServerRemainingDuration(int sid, int t) throws RuntimeException {
+  return storage.DBQueryServerRemainingDuration(sid, t);
+}
+@ %def queryServerRemainingDuration
 
 \subsubsection{[[queryServerCurrentLoad]](2)}
 <<Query current load>>=
