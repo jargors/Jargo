@@ -1966,10 +1966,12 @@ public class Storage {
       pstr.put("S129", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC");
       pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
             + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC");
-      // Always return a dummy destination
-      pstr.put("S69", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=? "
-            + "AND (t>? OR v=0) "
-            + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC");
+      pstr.put("S69", SEL+"t, v, Ls, Lr "
+            + "FROM r_server LEFT JOIN CQ ON t=t2 and v=v2 and Lr=rid "
+            + "WHERE r_server.sid=?"
+            + "   AND (t>? OR v=0)"
+            + "   AND (Ls IS NOT NULL OR Lr IS NOT NULL)"
+            + "ORDER BY t ASC, o2 ASC");
       // A "timeout" of 30 seconds is hard-coded here
       pstr.put("S68", SEL+"* FROM R WHERE re<=? AND ?<=re+30 AND rid NOT IN  "
             + "(SELECT rid FROM assignments_r)");

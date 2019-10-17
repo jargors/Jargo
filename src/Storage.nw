@@ -3708,11 +3708,13 @@ pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
       + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC");
 @ %def S61
 <<S69>>=
-// Always return a dummy destination
-pstr.put("S69", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=? "
-      + "AND (t>? OR v=0) "
-      + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC");
-@ %def S69
+pstr.put("S69", SEL+"t, v, Ls, Lr "
+      + "FROM r_server LEFT JOIN CQ ON t=t2 and v=v2 and Lr=rid "
+      + "WHERE r_server.sid=?"
+      + "   AND (t>? OR v=0)"
+      + "   AND (Ls IS NOT NULL OR Lr IS NOT NULL)"
+      + "ORDER BY t ASC, o2 ASC");
+@
 <<S68>>=
 // A "timeout" of 30 seconds is hard-coded here
 pstr.put("S68", SEL+"* FROM R WHERE re<=? AND ?<=re+30 AND rid NOT IN  "
