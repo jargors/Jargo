@@ -12,7 +12,7 @@ public class StorageTestGenerator {
     + "  1. Launch ij (derbytools.jar)\n"
     + "  2. Enter the command\n"
     + "       ij> run 'data/test.sql';\n"
-    + "  3. Use newly-loaded 'test' database for Storage test program.\n"
+    + "  3. Use newly-loaded 'db' database for Storage test program.\n"
     );
   }
 }

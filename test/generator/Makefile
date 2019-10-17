@@ -1,6 +1,6 @@
 # Storage Test Generator
 # - Set CLASSPATH environmental variable before running `make`.
-# - BEWARE: `make clean` will remove the generated test databases `db`, `temp`
+# - BEWARE: `make clean` will not remove the generated test databases `db`
 WIDGET=StorageTestGenerator
 
 .PHONY : all clean
@@ -12,6 +12,5 @@ class : $(WIDGET).java
 
 clean :
 	rm -f $(WIDGET).class
-	rm -rf db/
 	rm -rf temp/
 	rm -rf derby.log
