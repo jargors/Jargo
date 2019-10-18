@@ -114,6 +114,7 @@ This file ([[src/Storage.nw]]) is the source for both the documentation
 @
 \hi{Utilities}
 <<[[Storage]] public methods>>=
+<<Set debug flag>>
 <<Get reference to vertices cache>>
 <<Get reference to edges cache>>
 <<Get reference to users cache>>
@@ -1776,10 +1777,11 @@ private PoolableConnectionFactory poolableconnection_factory;
 private ObjectPool<PoolableConnection> pool;
 private PoolingDriver driver;
 @
-\item We declare a version string.
+\item We declare a version string and a debug flag.
 <<[[Storage]] member variables>>=
 private final String VERSION = "1.0.0";
-@ %def VERSION
+private boolean DEBUG = false;
+@ %def VERSION DEBUG
 \end{itemize}
 
 \subsection{Constructor}
@@ -1801,8 +1803,8 @@ public Storage() {
 \section{Public Methods}
 \label{sec:public-methods}
 This section introduces array diagrams to illustrate the expected shape of some
-method parameters. These diagrams show each element in a box, with the contents
-of each box taking the form $\textit{index}:\textit{value}$. For example,
+method parameters. These diagrams show each array element in a box, with the contents
+of each box taking the form $\textit{position}:\textit{value}$. For example,
 
 \begin{tikzpicture}
 \small
@@ -1811,15 +1813,24 @@ of each box taking the form $\textit{index}:\textit{value}$. For example,
 };
 \end{tikzpicture}
 
-\noindent shows an array with three elements. The value at index 0 is $a$; the
-value at index 1 is $b$; the value at index 2 is $c$.
+\noindent shows an array with three elements. The value at position 0 is $a$; the
+value at position 1 is $b$; the value at position 2 is $c$.
 
 \subsection{Utilities}
 \label{sec:utilities}
 
+\subsubsection{[[setDebug]](1)}
+<<Set debug flag>>=
+public void setDebug(boolean flag) {
+  DEBUG = flag;
+}
+@ %def setDebug
+
 \subsubsection{[[getReferenceVerticesCache]](0)}
 This method returns a read-only reference to the vertices cache,
-[[lu_vertices]].
+[[lu_vertices]]. It is used by Communicator so that vertex lookups performed by
+Client can use the cache directly instead of asking Storage. Real-world
+ridesharing algorithm clients likely have a similar vertex cache available.
 <<Get reference to vertices cache>>=
 public final Map<Integer, int[]> getReferenceVerticesCache() {
   return lu_vertices;
@@ -1827,8 +1838,9 @@ public final Map<Integer, int[]> getReferenceVerticesCache() {
 @ %def getReferenceVerticesCache
 
 \subsubsection{[[getReferenceEdgesCache]](0)}
-This method returns a read-only reference to the edges cache,
-[[lu_edges]].
+This method returns a read-only reference to the edges cache, [[lu_edges]].
+Like [[getReferenceVerticesCache]](0), it is used by Communicator to support
+fast edge lookups by Client.
 <<Get reference to edges cache>>=
 public final Map<Integer, Map<Integer, int[]>> getReferenceEdgesCache() {
   return lu_edges;
@@ -1836,8 +1848,9 @@ public final Map<Integer, Map<Integer, int[]>> getReferenceEdgesCache() {
 @ %def getReferenceEdgesCache
 
 \subsubsection{[[getReferenceUsersCache]](0)}
-This method returns a read-only reference to the users cache,
-[[lu_users]].
+This method returns a read-only reference to the users cache, [[lu_users]].
+Like [[getReferenceVerticesCache]](0), and [[getReferenceEdgesCache]](0), it is
+used by Communicator to support fast user lookups by Client.
 <<Get reference to users cache>>=
 public final Map<Integer, int[]> getReferenceUsersCache() {
   return lu_users;
@@ -1846,8 +1859,7 @@ public final Map<Integer, int[]> getReferenceUsersCache() {
 
 \subsubsection{[[DBLoadDataModel]](0)}
 The [[DBLoadDataModel]](0) method loads the tables and views in
-\S\ref{sec:ridesharing-data-model} into the database. If the model already
-exists in the database, the method throws a [[RuntimeException]].
+\S\ref{sec:ridesharing-data-model} into the database.
 <<Load data model>>=
 public void DBLoadDataModel() throws RuntimeException {
   Print("Load data model");
@@ -2238,9 +2250,10 @@ for (int i = 0; i < (route.length - 3); i += 2) {
   output = DBFetch(conn, "S46", 2, v1, v2);
   int dd = output[0];
   int nu = output[1];
+  Print("Issue INSERT INTO W VALUES ("+uid+", "+se+", "+t1+", "+v1+", "+t2+", "
+    +v2+", "+dd+", "+nu+")");
   PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
 }
-Print("Issue INSERT INTO W (..)");
 PSSubmit(pS10);
 @
 <<..insert new server route into cw>>=
@@ -2341,7 +2354,7 @@ se = output[1];
 <<....delete remaining route from w>>=
 PreparedStatement pS76 = PS(conn, "S76");
 PSAdd(pS76, sid, route[0]);
-Print("Issue DELETE FROM W (..)");
+Print("Issue DELETE FROM W WHERE sid="+sid+" AND t2>"+route[0]);
 PSSubmit(pS76);
 @
 The chunk for inserting [[route]] into Table W uses [[uid]], so we set it here.
@@ -2356,8 +2369,8 @@ int te = route[(route.length - 2)];
 int ve = route[(route.length - 1)];
 PSAdd(pS77, te, ve, sid);
 PSAdd(pS139, te, sid);
-Print("Issue UPDATE CW (..)");
-Print("Issue UPDATE CPD (..)");
+Print("Issue UPDATE CW SET te="+te+", ve="+ve+" WHERE sid="+sid);
+Print("Issue UPDATE CPD SET te="+te+" WHERE sid="+sid);
 PSSubmit(pS77, pS139);
 @
 <<..update schedule>>=
@@ -2377,14 +2390,14 @@ for (int j = 0; j < bound; j++) {
   int vj = sched[(3*j + 1)];
   int Lj = sched[(3*j + 2)];
   if (Lj != sid) {
+    Print("UPDATE CPD SET tp="+tj+" WHERE vp="+vj+" AND rid="+Lj);
+    Print("UPDATE CPD SET td="+tj+" WHERE vd="+vj+" AND rid="+Lj);
+    Print("UPDATE PD SET t2="+tj+" WHERE v2="+vj+" AND rid="+Lj);
     PSAdd(pS82, tj, vj, Lj);
     PSAdd(pS83, tj, vj, Lj);
     PSAdd(pS84, tj, vj, Lj);
   }
 }
-Print("Issue UPDATE CPD (..)");
-Print("Issue UPDATE CPD (..)");
-Print("Issue UPDATE PD (..)");
 PSSubmit(pS82, pS83, pS84);
 @
 <<....populate the tp, td cache and update cq>>=
@@ -2563,6 +2576,7 @@ for (int j = 0; j < bound; j++) {
         output = DBFetch(conn, "S86", 2, Lj);
         tp = output[0];
         td = output[1];
+        Print("UPDATE CQ SET tp="+tp+", td="+td+" WHERE rid="+Lj);
         PSAdd(pS140, tp, td, Lj);
       }
       Print("cache.put("+Lj+", { "+rq+", "+tp+", "+td+" })");
@@ -2618,6 +2632,8 @@ for (int r : rid) {
   rd = output[4];
   qpd = cache.get(r);
   pd = cache2.get(r);
+  Print("INSERT INTO PD VALUES ("+sid+", "+qpd[1]+", "+pd[0]+", "+r+")");
+  Print("INSERT INTO PD VALUES ("+sid+", "+qpd[2]+", "+pd[1]+", "+r+")");
   PSAdd(pS12, sid, qpd[1], pd[0], r);
   PSAdd(pS12, sid, qpd[2], pd[1], r);
   Print("INSERT INTO CPD VALUES ("+sid+", "+se+", "+route[(route.length - 2)]
@@ -2626,8 +2642,6 @@ for (int r : rid) {
   PSAdd(pS13, sid, se, route[(route.length - 2)], qpd[1], pd[0], qpd[2], pd[1],
         r, re, rl, ro, rd);
 }
-Print("Issue INSERT INTO PD (..)");
-Print("Issue INSERT INTO CPD (..)");
 PSSubmit(pS12, pS13);
 @
 
@@ -3300,9 +3314,12 @@ public int[] DBQueryServerArrivalTime(int sid) throws RuntimeException {
 @
 
 \subsection{[[Print]](1)}
+If [[DEBUG]] is on, the [[Print]](1) method prints a message to standard out.
 <<Print a message>>=
 private void Print(String msg) {
-  System.out.println("[Jargo][Storage]["+LocalDateTime.now()+"] "+msg);
+  if (DEBUG) {
+    System.out.println("[Jargo][Storage]["+LocalDateTime.now()+"] "+msg);
+  }
 }
 @ %def Print
 
@@ -3316,6 +3333,7 @@ thread in the simulation controller is performing updates on server routes
 in response to simulated traffic.
 <<Setup JDBC driver>>=
 private void setupDriver() throws RuntimeException {
+  Print("Initialize JDBC driver");
   try {
     <<..initialize connection factory>>
     <<..initialize poolable-connection factory using connection factory>>
@@ -3328,18 +3346,22 @@ private void setupDriver() throws RuntimeException {
 }
 @ %def setupDriver
 <<..initialize connection factory>>=
+Print("..initialize connection factory");
 connection_factory = new DriverManagerConnectionFactory(CONNECTIONS_URL);
 @
 <<..initialize poolable-connection factory using connection factory>>=
+Print("..initialize poolable-connection factory");
 poolableconnection_factory = new PoolableConnectionFactory(connection_factory, null);
 poolableconnection_factory.setPoolStatements(true);
 poolableconnection_factory.setDefaultAutoCommit(false);
 poolableconnection_factory.setMaxOpenPreparedStatements(STATEMENTS_MAX_COUNT);
 @
 <<..initialize connection pool using poolable-connection factory>>=
+Print("..initialize connection pool");
 pool = new GenericObjectPool<>(poolableconnection_factory);
 @
 <<..register pool to poolable-connection factory and driver>>=
+Print("..register connection pool to driver");
 poolableconnection_factory.setPool(pool);
 Class.forName("org.apache.commons.dbcp2.PoolingDriver");
 driver = (PoolingDriver) DriverManager.getDriver(CONNECTIONS_DRIVER_URL);
@@ -3352,6 +3374,7 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
 Print("Open connection "+conn.toString());
 CallableStatement cs = conn.prepareCall(
   "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
+Print("..set derby.storage.pageCacheSize="+DERBY_PAGECACHESIZE);
 cs.setString(1, "derby.storage.pageCacheSize");
 cs.setInt(2, DERBY_PAGECACHESIZE);
 cs.execute();
@@ -3365,6 +3388,7 @@ We retrieve the statement string from [[pstr]].  We set the result set to
 scroll-insensitive and read-only in order to allow cursor movements.
 <<Prepare a prepared statement>>=
 private PreparedStatement PS(Connection conn, String k) throws SQLException {
+  Print("Prepare statement "+k);
   PreparedStatement p = null;
   try {
     p = conn.prepareStatement(pstr.get(k),
@@ -3385,12 +3409,10 @@ are inside the method.
 <<Fetch items from database>>=
 private int[] DBFetch(Connection conn,
     String k, int ncols, Integer... values) throws SQLException {
-  // Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
   PreparedStatement p = PS(conn, k);
-  // FOR DEBUGGING
   Print("DBFetch("+pstr.get(k)+")");
-  // Print("DBFetch use conn "+conn.toString());
-  // Print("DBFetch use thread "+Thread.currentThread().getName());
+  Print("DBFetch use conn "+conn.toString());
+  Print("DBFetch use thread "+Thread.currentThread().getName());
   int[] output = new int[] { };
   <<..set values for statement>>
   try {
@@ -3402,8 +3424,7 @@ private int[] DBFetch(Connection conn,
   }
   <<Catch and throw [[SQLException]]>>
   p.close();
-  // Print("DBFetch close conn "+conn.toString());
-  // conn.close();
+  Print("DBFetch close conn "+conn.toString());
   if (output.length == 0) {
     Print("WARNING: DBFetch(3...) returned empty!");
   }
@@ -3414,8 +3435,10 @@ private int[] DBFetch(Connection conn,
 for (int i = 0; i < values.length; i++) {
   if (values[i] == null) {
     p.setNull((i + 1), java.sql.Types.INTEGER);
+    Print("Set param"+i+"=NULL");
   } else {
     p.setInt ((i + 1), values[i]);
+    Print("Set param"+(i + 1)+"="+values[i]);
   }
 }
 @
@@ -3460,6 +3483,7 @@ statement is placed in its own chunk so it can be referenced wherever the
 statement is used.
 <<Initialize statements>>=
 private void PSInit() {
+  Print("Initialize prepared statement strings");
   pstr = new HashMap<>();
   String INS = "INSERT INTO ";
   String UPD = "UPDATE ";

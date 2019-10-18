@@ -30,6 +30,7 @@ public class Storage {
   private ObjectPool<PoolableConnection> pool;
   private PoolingDriver driver;
   private final String VERSION = "1.0.0";
+  private boolean DEBUG = false;
   public Storage() {
     Print("Initialize Storage Interface "+VERSION);
     try {
@@ -984,9 +985,10 @@ public class Storage {
         output = DBFetch(conn, "S46", 2, v1, v2);
         int dd = output[0];
         int nu = output[1];
+        Print("Issue INSERT INTO W VALUES ("+uid+", "+se+", "+t1+", "+v1+", "+t2+", "
+          +v2+", "+dd+", "+nu+")");
         PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
       }
-      Print("Issue INSERT INTO W (..)");
       PSSubmit(pS10);
       pS10 = PS(conn, "S10");
       PSAdd(pS10, uid, se, null, null, route[0], route[1], null, null);
@@ -1043,7 +1045,7 @@ public class Storage {
       se = output[1];
       PreparedStatement pS76 = PS(conn, "S76");
       PSAdd(pS76, sid, route[0]);
-      Print("Issue DELETE FROM W (..)");
+      Print("Issue DELETE FROM W WHERE sid="+sid+" AND t2>"+route[0]);
       PSSubmit(pS76);
       int uid = sid;
       PreparedStatement pS10 = PS(conn, "S10");
@@ -1055,9 +1057,10 @@ public class Storage {
         output = DBFetch(conn, "S46", 2, v1, v2);
         int dd = output[0];
         int nu = output[1];
+        Print("Issue INSERT INTO W VALUES ("+uid+", "+se+", "+t1+", "+v1+", "+t2+", "
+          +v2+", "+dd+", "+nu+")");
         PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
       }
-      Print("Issue INSERT INTO W (..)");
       PSSubmit(pS10);
       PreparedStatement pS77 = PS(conn, "S77");
       PreparedStatement pS139 = PS(conn, "S139");
@@ -1065,8 +1068,8 @@ public class Storage {
       int ve = route[(route.length - 1)];
       PSAdd(pS77, te, ve, sid);
       PSAdd(pS139, te, sid);
-      Print("Issue UPDATE CW (..)");
-      Print("Issue UPDATE CPD (..)");
+      Print("Issue UPDATE CW SET te="+te+", ve="+ve+" WHERE sid="+sid);
+      Print("Issue UPDATE CPD SET te="+te+" WHERE sid="+sid);
       PSSubmit(pS77, pS139);
       if (sched.length > 0) {
         Map<Integer, int[]> cache = new HashMap<>();
@@ -1079,14 +1082,14 @@ public class Storage {
           int vj = sched[(3*j + 1)];
           int Lj = sched[(3*j + 2)];
           if (Lj != sid) {
+            Print("UPDATE CPD SET tp="+tj+" WHERE vp="+vj+" AND rid="+Lj);
+            Print("UPDATE CPD SET td="+tj+" WHERE vd="+vj+" AND rid="+Lj);
+            Print("UPDATE PD SET t2="+tj+" WHERE v2="+vj+" AND rid="+Lj);
             PSAdd(pS82, tj, vj, Lj);
             PSAdd(pS83, tj, vj, Lj);
             PSAdd(pS84, tj, vj, Lj);
           }
         }
-        Print("Issue UPDATE CPD (..)");
-        Print("Issue UPDATE CPD (..)");
-        Print("Issue UPDATE PD (..)");
         PSSubmit(pS82, pS83, pS84);
         PreparedStatement pS140 = PS(conn, "S140");
         for (int j = 0; j < bound; j++) {
@@ -1169,7 +1172,7 @@ public class Storage {
       se = output[1];
       PreparedStatement pS76 = PS(conn, "S76");
       PSAdd(pS76, sid, route[0]);
-      Print("Issue DELETE FROM W (..)");
+      Print("Issue DELETE FROM W WHERE sid="+sid+" AND t2>"+route[0]);
       PSSubmit(pS76);
       int uid = sid;
       PreparedStatement pS10 = PS(conn, "S10");
@@ -1181,9 +1184,10 @@ public class Storage {
         output = DBFetch(conn, "S46", 2, v1, v2);
         int dd = output[0];
         int nu = output[1];
+        Print("Issue INSERT INTO W VALUES ("+uid+", "+se+", "+t1+", "+v1+", "+t2+", "
+          +v2+", "+dd+", "+nu+")");
         PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
       }
-      Print("Issue INSERT INTO W (..)");
       PSSubmit(pS10);
       PreparedStatement pS77 = PS(conn, "S77");
       PreparedStatement pS139 = PS(conn, "S139");
@@ -1191,8 +1195,8 @@ public class Storage {
       int ve = route[(route.length - 1)];
       PSAdd(pS77, te, ve, sid);
       PSAdd(pS139, te, sid);
-      Print("Issue UPDATE CW (..)");
-      Print("Issue UPDATE CPD (..)");
+      Print("Issue UPDATE CW SET te="+te+", ve="+ve+" WHERE sid="+sid);
+      Print("Issue UPDATE CPD SET te="+te+" WHERE sid="+sid);
       PSSubmit(pS77, pS139);
       int bound = (sched.length/3);
       PreparedStatement pS82 = PS(conn, "S82");
@@ -1203,14 +1207,14 @@ public class Storage {
         int vj = sched[(3*j + 1)];
         int Lj = sched[(3*j + 2)];
         if (Lj != sid) {
+          Print("UPDATE CPD SET tp="+tj+" WHERE vp="+vj+" AND rid="+Lj);
+          Print("UPDATE CPD SET td="+tj+" WHERE vd="+vj+" AND rid="+Lj);
+          Print("UPDATE PD SET t2="+tj+" WHERE v2="+vj+" AND rid="+Lj);
           PSAdd(pS82, tj, vj, Lj);
           PSAdd(pS83, tj, vj, Lj);
           PSAdd(pS84, tj, vj, Lj);
         }
       }
-      Print("Issue UPDATE CPD (..)");
-      Print("Issue UPDATE CPD (..)");
-      Print("Issue UPDATE PD (..)");
       PSSubmit(pS82, pS83, pS84);
       PreparedStatement pS140 = PS(conn, "S140");
       for (int j = 0; j < bound; j++) {
@@ -1253,6 +1257,7 @@ public class Storage {
               output = DBFetch(conn, "S86", 2, Lj);
               tp = output[0];
               td = output[1];
+              Print("UPDATE CQ SET tp="+tp+", td="+td+" WHERE rid="+Lj);
               PSAdd(pS140, tp, td, Lj);
             }
             Print("cache.put("+Lj+", { "+rq+", "+tp+", "+td+" })");
@@ -1303,6 +1308,8 @@ public class Storage {
         rd = output[4];
         qpd = cache.get(r);
         pd = cache2.get(r);
+        Print("INSERT INTO PD VALUES ("+sid+", "+qpd[1]+", "+pd[0]+", "+r+")");
+        Print("INSERT INTO PD VALUES ("+sid+", "+qpd[2]+", "+pd[1]+", "+r+")");
         PSAdd(pS12, sid, qpd[1], pd[0], r);
         PSAdd(pS12, sid, qpd[2], pd[1], r);
         Print("INSERT INTO CPD VALUES ("+sid+", "+se+", "+route[(route.length - 2)]
@@ -1311,8 +1318,6 @@ public class Storage {
         PSAdd(pS13, sid, se, route[(route.length - 2)], qpd[1], pd[0], qpd[2], pd[1],
               r, re, rl, ro, rd);
       }
-      Print("Issue INSERT INTO PD (..)");
-      Print("Issue INSERT INTO CPD (..)");
       PSSubmit(pS12, pS13);
       conn.commit();
       Print("Close connection "+conn.toString());
@@ -1338,7 +1343,7 @@ public class Storage {
       se = output[1];
       PreparedStatement pS76 = PS(conn, "S76");
       PSAdd(pS76, sid, route[0]);
-      Print("Issue DELETE FROM W (..)");
+      Print("Issue DELETE FROM W WHERE sid="+sid+" AND t2>"+route[0]);
       PSSubmit(pS76);
       int uid = sid;
       PreparedStatement pS10 = PS(conn, "S10");
@@ -1350,9 +1355,10 @@ public class Storage {
         output = DBFetch(conn, "S46", 2, v1, v2);
         int dd = output[0];
         int nu = output[1];
+        Print("Issue INSERT INTO W VALUES ("+uid+", "+se+", "+t1+", "+v1+", "+t2+", "
+          +v2+", "+dd+", "+nu+")");
         PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
       }
-      Print("Issue INSERT INTO W (..)");
       PSSubmit(pS10);
       PreparedStatement pS77 = PS(conn, "S77");
       PreparedStatement pS139 = PS(conn, "S139");
@@ -1360,8 +1366,8 @@ public class Storage {
       int ve = route[(route.length - 1)];
       PSAdd(pS77, te, ve, sid);
       PSAdd(pS139, te, sid);
-      Print("Issue UPDATE CW (..)");
-      Print("Issue UPDATE CPD (..)");
+      Print("Issue UPDATE CW SET te="+te+", ve="+ve+" WHERE sid="+sid);
+      Print("Issue UPDATE CPD SET te="+te+" WHERE sid="+sid);
       PSSubmit(pS77, pS139);
       int bound = (sched.length/3);
       PreparedStatement pS82 = PS(conn, "S82");
@@ -1372,14 +1378,14 @@ public class Storage {
         int vj = sched[(3*j + 1)];
         int Lj = sched[(3*j + 2)];
         if (Lj != sid) {
+          Print("UPDATE CPD SET tp="+tj+" WHERE vp="+vj+" AND rid="+Lj);
+          Print("UPDATE CPD SET td="+tj+" WHERE vd="+vj+" AND rid="+Lj);
+          Print("UPDATE PD SET t2="+tj+" WHERE v2="+vj+" AND rid="+Lj);
           PSAdd(pS82, tj, vj, Lj);
           PSAdd(pS83, tj, vj, Lj);
           PSAdd(pS84, tj, vj, Lj);
         }
       }
-      Print("Issue UPDATE CPD (..)");
-      Print("Issue UPDATE CPD (..)");
-      Print("Issue UPDATE PD (..)");
       PSSubmit(pS82, pS83, pS84);
       PreparedStatement pS140 = PS(conn, "S140");
       for (int j = 0; j < bound; j++) {
@@ -1443,6 +1449,9 @@ public class Storage {
       DBSaveBackup(DERBY_DUMPNAME);
       throw new RuntimeException("database failure");
     }
+  }
+  public void setDebug(boolean flag) {
+    DEBUG = flag;
   }
   public final Map<Integer, int[]> getReferenceVerticesCache() {
     return lu_vertices;
@@ -1781,6 +1790,7 @@ public class Storage {
       Print("Open connection "+conn.toString());
       CallableStatement cs = conn.prepareCall(
         "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
+      Print("..set derby.storage.pageCacheSize="+DERBY_PAGECACHESIZE);
       cs.setString(1, "derby.storage.pageCacheSize");
       cs.setInt(2, DERBY_PAGECACHESIZE);
       cs.execute();
@@ -1866,16 +1876,23 @@ public class Storage {
     }
   }
     private void Print(String msg) {
-      System.out.println("[Jargo][Storage]["+LocalDateTime.now()+"] "+msg);
+      if (DEBUG) {
+        System.out.println("[Jargo][Storage]["+LocalDateTime.now()+"] "+msg);
+      }
     }
     private void setupDriver() throws RuntimeException {
+      Print("Initialize JDBC driver");
       try {
+        Print("..initialize connection factory");
         connection_factory = new DriverManagerConnectionFactory(CONNECTIONS_URL);
+        Print("..initialize poolable-connection factory");
         poolableconnection_factory = new PoolableConnectionFactory(connection_factory, null);
         poolableconnection_factory.setPoolStatements(true);
         poolableconnection_factory.setDefaultAutoCommit(false);
         poolableconnection_factory.setMaxOpenPreparedStatements(STATEMENTS_MAX_COUNT);
+        Print("..initialize connection pool");
         pool = new GenericObjectPool<>(poolableconnection_factory);
+        Print("..register connection pool to driver");
         poolableconnection_factory.setPool(pool);
         Class.forName("org.apache.commons.dbcp2.PoolingDriver");
         driver = (PoolingDriver) DriverManager.getDriver(CONNECTIONS_DRIVER_URL);
@@ -1884,6 +1901,7 @@ public class Storage {
         Print("Open connection "+conn.toString());
         CallableStatement cs = conn.prepareCall(
           "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
+        Print("..set derby.storage.pageCacheSize="+DERBY_PAGECACHESIZE);
         cs.setString(1, "derby.storage.pageCacheSize");
         cs.setInt(2, DERBY_PAGECACHESIZE);
         cs.execute();
@@ -1894,6 +1912,7 @@ public class Storage {
       }
     }
     private void PSInit() {
+      Print("Initialize prepared statement strings");
       pstr = new HashMap<>();
       String INS = "INSERT INTO ";
       String UPD = "UPDATE ";
@@ -2018,6 +2037,7 @@ public class Storage {
       pstr.put("S142", SEL+"SUM (dd) FROM W WHERE sid=? AND t2>?");
     }
     private PreparedStatement PS(Connection conn, String k) throws SQLException {
+      Print("Prepare statement "+k);
       PreparedStatement p = null;
       try {
         p = conn.prepareStatement(pstr.get(k),
@@ -2032,18 +2052,18 @@ public class Storage {
     }
     private int[] DBFetch(Connection conn,
         String k, int ncols, Integer... values) throws SQLException {
-      // Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
       PreparedStatement p = PS(conn, k);
-      // FOR DEBUGGING
       Print("DBFetch("+pstr.get(k)+")");
-      // Print("DBFetch use conn "+conn.toString());
-      // Print("DBFetch use thread "+Thread.currentThread().getName());
+      Print("DBFetch use conn "+conn.toString());
+      Print("DBFetch use thread "+Thread.currentThread().getName());
       int[] output = new int[] { };
       for (int i = 0; i < values.length; i++) {
         if (values[i] == null) {
           p.setNull((i + 1), java.sql.Types.INTEGER);
+          Print("Set param"+i+"=NULL");
         } else {
           p.setInt ((i + 1), values[i]);
+          Print("Set param"+(i + 1)+"="+values[i]);
         }
       }
       try {
@@ -2063,8 +2083,7 @@ public class Storage {
         throw e;
       }
       p.close();
-      // Print("DBFetch close conn "+conn.toString());
-      // conn.close();
+      Print("DBFetch close conn "+conn.toString());
       if (output.length == 0) {
         Print("WARNING: DBFetch(3...) returned empty!");
       }
@@ -2075,8 +2094,10 @@ public class Storage {
       for (int i = 0; i < values.length; i++) {
         if (values[i] == null) {
           p.setNull((i + 1), java.sql.Types.INTEGER);
+          Print("Set param"+i+"=NULL");
         } else {
           p.setInt ((i + 1), values[i]);
+          Print("Set param"+(i + 1)+"="+values[i]);
         }
       }
       try {
