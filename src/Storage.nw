@@ -47,17 +47,16 @@ Jargo's storage interface is a data access layer (Figure~\ref{fig:storage}) for
 Jargo to record the ground-truth state of ridesharing users (customers and
 vehicles) as they evolve over time, and to query analytical metrics about the
 state.  The storage engine is Apache
-Derby\footnote{\url{https://db.apache.org/derby}}, chosen for its (apparently
-rare) ability to defer table and column constraints until the end of a
-transaction\footnote{...as specified by the SQL standard!}.  This ability is
-needed during some write operations that may temporarily cause the simulation
-to be in an invalid state. At all other times, Jargo's data model guarantees
-the integrity of the simulation. The storage interface is written in Java so it
-can communicate with Derby using JDBC. A listing of the public methods is shown
-in Figure~\ref{fig:methods}.  The storage interface is developed using the
-Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
-programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
-([[src/Storage.nw]]) is the source for both the documentation
+Derby\footnote{\url{https://db.apache.org/derby}}, chosen for its ability to
+defer table and column constraints until the end of a transaction.  This
+ability is needed during some write operations that may temporarily cause the
+simulation to be in an invalid state. At all other times, Jargo's data model
+guarantees the integrity of the simulation. The storage interface is written in
+Java so it can communicate with Derby using JDBC. A listing of the public
+methods is shown in Figure~\ref{fig:methods}.  The storage interface is
+developed using the Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}}
+literate programming\footnote{\url{http://literateprogramming.com/}} tool.
+This file ([[src/Storage.nw]]) is the source for both the documentation
 ([[doc/Storage.tex]]) and the Java code ([[Storage.java]])\footnote{See the
 [[Makefile]] for build details.}.
 
@@ -69,34 +68,8 @@ programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
 \end{figure}
 
 \begin{figure}
-\adjustbox{scale=0.85}{
-\begin{minipage}[t]{0.4\textwidth}
-\hi{Utilities}
-<<[[Storage]] public methods>>=
-<<Get reference to vertices cache>>
-<<Get reference to edges cache>>
-<<Get reference to users cache>>
-<<Load data model>>
-<<Load backup>>
-<<Save backup>>
-<<Print SQL driver statistics>>
-<<Print SQL exception>>
-@
-\end{minipage}
-\begin{minipage}[t]{0.4\textwidth}
-\hi{Write Methods}
-<<[[Storage]] public methods>>=
-<<Add new vertex>>
-<<Add new edge>>
-<<Add new request>>
-<<Add new server>>
-<<Update edge speed>>
-<<Update server route>>
-<<Update server add to schedule>>
-<<Update server remove from schedule>>
-@
-\end{minipage}
-\begin{minipage}[t]{0.4\textwidth}
+\adjustbox{scale=1.00}{
+\begin{minipage}[t]{0.5\textwidth}
 \hi{Read Methods}
 <<[[Storage]] public methods>>=
 <<Query custom statement>>
@@ -125,6 +98,30 @@ programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
 <<Query server pending assignments>>
 <<Query server completed assignments>>
 <<Query various metrics>>
+@
+\end{minipage}
+\begin{minipage}[t]{0.5\textwidth}
+\hi{Write Methods}
+<<[[Storage]] public methods>>=
+<<Add new vertex>>
+<<Add new edge>>
+<<Add new request>>
+<<Add new server>>
+<<Update edge speed>>
+<<Update server route>>
+<<Update server add to schedule>>
+<<Update server remove from schedule>>
+@
+\hi{Utilities}
+<<[[Storage]] public methods>>=
+<<Get reference to vertices cache>>
+<<Get reference to edges cache>>
+<<Get reference to users cache>>
+<<Load data model>>
+<<Load backup>>
+<<Save backup>>
+<<Print SQL driver statistics>>
+<<Print SQL exception>>
 @
 \end{minipage}
 }
@@ -1757,7 +1754,7 @@ public class Storage {
 \begin{itemize}
 \item We use maps to cache various things.
 <<[[Storage]] member variables>>=
-private static Map<String, String> pstr = new HashMap<>();
+private Map<String, String> pstr = new HashMap<>();
 private Map<Integer, int[]> lu_vertices = new HashMap<>();
 private Map<Integer, Map<Integer, int[]>> lu_edges = new HashMap<>();
 private Map<Integer, int[]> lu_users = new HashMap<>();
@@ -3462,7 +3459,7 @@ The [[PSInit]](0) method initializes the statement cache [[pstr]]. Each
 statement is placed in its own chunk so it can be referenced wherever the
 statement is used.
 <<Initialize statements>>=
-private static void PSInit() {
+private void PSInit() {
   pstr = new HashMap<>();
   String INS = "INSERT INTO ";
   String UPD = "UPDATE ";
