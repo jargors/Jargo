@@ -79,6 +79,9 @@ public class Controller {
     communicator = new Communicator();
     communicator.setStorage(storage);
   }
+  public void setDebugStorage(boolean flag) {
+    storage.setDebug(flag);
+  }
   public void setClient(Client target) {
     client = target;
     client.setCommunicator(communicator);
