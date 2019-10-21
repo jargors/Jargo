@@ -1078,7 +1078,7 @@ public class Storage {
         PreparedStatement pS83 = PS(conn, "S83");
         PreparedStatement pS84 = PS(conn, "S84");
         for (int j = 0; j < bound; j++) {
-          int tj = sched[(3*j)];
+          int tj = sched[(3*j + 0)];
           int vj = sched[(3*j + 1)];
           int Lj = sched[(3*j + 2)];
           if (Lj != sid) {
@@ -1203,7 +1203,7 @@ public class Storage {
       PreparedStatement pS83 = PS(conn, "S83");
       PreparedStatement pS84 = PS(conn, "S84");
       for (int j = 0; j < bound; j++) {
-        int tj = sched[(3*j)];
+        int tj = sched[(3*j + 0)];
         int vj = sched[(3*j + 1)];
         int Lj = sched[(3*j + 2)];
         if (Lj != sid) {
@@ -1374,7 +1374,7 @@ public class Storage {
       PreparedStatement pS83 = PS(conn, "S83");
       PreparedStatement pS84 = PS(conn, "S84");
       for (int j = 0; j < bound; j++) {
-        int tj = sched[(3*j)];
+        int tj = sched[(3*j + 0)];
         int vj = sched[(3*j + 1)];
         int Lj = sched[(3*j + 2)];
         if (Lj != sid) {
@@ -1691,7 +1691,8 @@ public class Storage {
                       + "  END"
                       + ") INITIALLY DEFERRED,"
                       + "CONSTRAINT  C99 CHECK (CASE WHEN t2 = tp THEN q2 = q1 + rq END) INITIALLY DEFERRED,"
-                      + "CONSTRAINT C100 CHECK (CASE WHEN t2 = td THEN q2 = q1 - rq END) INITIALLY DEFERRED"
+                      + "CONSTRAINT C100 CHECK (CASE WHEN t2 = td THEN q2 = q1 - rq END) INITIALLY DEFERRED,"
+                      + "CONSTRAINT C101 UNIQUE (t2, v2, rid)"
                       + ")");
       stmt.addBatch("CREATE VIEW r_user (uid, uq, ue, ul, uo, ud, ub) AS "
                       + "SELECT * from S UNION SELECT * from R");

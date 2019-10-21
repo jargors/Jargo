@@ -1518,7 +1518,8 @@ rq & & \\
   + "  END"
   + ") INITIALLY DEFERRED,"
   + "CONSTRAINT  C99 CHECK (CASE WHEN t2 = tp THEN q2 = q1 + rq END) INITIALLY DEFERRED,"
-  + "CONSTRAINT C100 CHECK (CASE WHEN t2 = td THEN q2 = q1 - rq END) INITIALLY DEFERRED"
+  + "CONSTRAINT C100 CHECK (CASE WHEN t2 = td THEN q2 = q1 - rq END) INITIALLY DEFERRED,"
+  + "CONSTRAINT C101 UNIQUE (t2, v2, rid)"
   + ")"
 @
 
@@ -2386,7 +2387,7 @@ PreparedStatement pS82 = PS(conn, "S82");
 PreparedStatement pS83 = PS(conn, "S83");
 PreparedStatement pS84 = PS(conn, "S84");
 for (int j = 0; j < bound; j++) {
-  int tj = sched[(3*j)];
+  int tj = sched[(3*j + 0)];
   int vj = sched[(3*j + 1)];
   int Lj = sched[(3*j + 2)];
   if (Lj != sid) {
@@ -3730,7 +3731,7 @@ pstr.put("S69", SEL+"t, v, Ls, Lr "
       + "   AND (t>? OR v=0)"
       + "   AND (Ls IS NOT NULL OR Lr IS NOT NULL)"
       + "ORDER BY t ASC, o2 ASC");
-@
+@ %def S69
 <<S68>>=
 // A "timeout" of 30 seconds is hard-coded here
 pstr.put("S68", SEL+"* FROM R WHERE re<=? AND ?<=re+30 AND rid NOT IN  "
