@@ -233,6 +233,8 @@ public class Controller {
       RequestLoop.run();
     }
 
+    client.end();
+
     Print("SIMULATION ENDED");
   }
   public int[] query(String sql, int ncols) throws RuntimeException {
