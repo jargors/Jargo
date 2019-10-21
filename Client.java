@@ -64,11 +64,11 @@ public abstract class Client {
         });
       }
     }
+    protected void end() { }
     protected void handleRequest(int[] r) { }
     protected void handleServerLocation(int[] loc) { }
     protected void Print(String msg) {
       System.out.println("[Client]["+LocalDateTime.now()+"]"
         + "[t="+communicator.getSimulationWorldTime()+"] "+msg);
     }
-
 }
