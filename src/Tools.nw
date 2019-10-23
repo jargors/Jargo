@@ -74,6 +74,7 @@ private final double CSHIFT = 10000000.0;
   <<Register edges>>
   <<Register users>>
   <<Compute haversine>>
+  <<Compute duration>>
   <<Compute shortest path>>
   <<Compute shortest path distance>>
   <<Filter locs by haversine distance>>
@@ -165,6 +166,15 @@ public int computeHaversine(int u, int v) {
     lu_vertices.get(v)[0]/CSHIFT, lu_vertices.get(v)[1]/CSHIFT);
 }
 @
+
+\subsection{[[computeDuration]](2)}
+<<Compute duration>>=
+public int computeDuration(int dd, int nu) {
+  int d = (int) Math.ceil(dd/(float) nu);
+  return (d == 0 ? 1 : d);
+}
+@
+
 
 \subsection{[[computeShortestPath]](2)}
 Beware, two important notes:

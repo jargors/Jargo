@@ -54,6 +54,10 @@ public class Tools {
         lu_vertices.get(u)[0]/CSHIFT, lu_vertices.get(u)[1]/CSHIFT,
         lu_vertices.get(v)[0]/CSHIFT, lu_vertices.get(v)[1]/CSHIFT);
     }
+    public int computeDuration(int dd, int nu) {
+      int d = (int) Math.ceil(dd/(float) nu);
+      return (d == 0 ? 1 : d);
+    }
     public int[] computeShortestPath(int u, int v) {
       int[] output = null;
       if (!flag_gtree_loaded) {
