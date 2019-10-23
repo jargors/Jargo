@@ -170,7 +170,7 @@ Test {\tt{}DBQuery}(2) with a simple select statement. The road network has
 \subsubsection{{\tt{}DBQueryServer}(1)}
 \nwenddocs{}\nwbegincode{18}\sublabel{NW2tcW3C-3O8MFc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-3O8MFc-1}}}\moddef{....test \code{}DBQueryServer\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2tcW3C-3O8MFc-1}}}\endmoddef\nwused{\\{NW2tcW3C-2w6SyW-1}}
 \{
-  int output[] = storage.DBQueryServer(1);
+  int output[] = storage.DBQueryUser(1);
   if (!(output[0] == 1
      && output[1] == -10
      && output[2] == 1
@@ -178,12 +178,12 @@ Test {\tt{}DBQuery}(2) with a simple select statement. The road network has
      && output[4] == 22
      && output[5] == 0
      && output[6] == 0)) \{
-    Print("[FAIL] DBQueryServer(1)");
+    Print("[FAIL] DBQueryUser(1)");
     Print("\\tExpected \{uid=1, q=-10, e=1, l=500, o=22, d=0, b=0\}; got");
     tools.printUser(output);
     count_failed++;
   \} else \{
-    Print("[PASS] DBQueryServer(1)");
+    Print("[PASS] DBQueryUser(1)");
     count_passed++;
   \}
 \}
@@ -191,7 +191,7 @@ Test {\tt{}DBQuery}(2) with a simple select statement. The road network has
 \subsubsection{{\tt{}DBQueryRequest}(1)}
 \nwenddocs{}\nwbegincode{20}\sublabel{NW2tcW3C-1C0pk3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-1C0pk3-1}}}\moddef{....test \code{}DBQueryRequest\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2tcW3C-1C0pk3-1}}}\endmoddef\nwused{\\{NW2tcW3C-2w6SyW-1}}
 \{
-  int output[] = storage.DBQueryRequest(10);
+  int output[] = storage.DBQueryUser(10);
   if (!(output[0] == 10
      && output[1] == 1
      && output[2] == 0
@@ -199,12 +199,12 @@ Test {\tt{}DBQuery}(2) with a simple select statement. The road network has
      && output[4] == 4
      && output[5] == 30
      && output[6] == 172)) \{
-    Print("[FAIL] DBQueryRequest(1)");
+    Print("[FAIL] DBQueryUser(1)");
     Print("\\tExpected \{uid=10, q=1, e=0, l=500, o=4, d=30, b=172\}; got");
     tools.printUser(output);
     count_failed++;
   \} else \{
-    Print("[PASS] DBQueryRequest(1)");
+    Print("[PASS] DBQueryUser(1)");
     count_passed++;
   \}
 \}
@@ -1425,7 +1425,7 @@ travel duration is $44-0=44$.
 \LA{}....test \code{}DBAddNewServer\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2tcW3C-3pzOz8-1}}\RA{}
 \LA{}....test \code{}DBUpdateServerRoute\edoc{}(2)~{\nwtagstyle{}\subpageref{NW2tcW3C-1e7qm0-1}}\RA{}
 \LA{}....test \code{}DBUpdateServerAddToSchedule\edoc{}(4)~{\nwtagstyle{}\subpageref{NW2tcW3C-3t5oWt-1}}\RA{}
-\LA{}....test \code{}DBUpdateServerRemoveFromSchedule\edoc{}(4)~{\nwtagstyle{}\subpageref{NW2tcW3C-2DOHvZ-1}}\RA{}
+/*\LA{}....test \code{}DBUpdateServerRemoveFromSchedule\edoc{}(4)~{\nwtagstyle{}\subpageref{NW2tcW3C-2DOHvZ-1}}\RA{}*/
 \nwendcode{}\nwbegindocs{173}\nwdocspar
 \subsubsection{{\tt{}DBUpdateEdgeSpeed}(3)}
 \nwenddocs{}\nwbegincode{174}\sublabel{NW2tcW3C-4FqPVU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-4FqPVU-1}}}\moddef{....test \code{}DBUpdateEdgeSpeed\edoc{}(3)~{\nwtagstyle{}\subpageref{NW2tcW3C-4FqPVU-1}}}\endmoddef\nwused{\\{NW2tcW3C-4HcfWS-1}}
@@ -1446,7 +1446,7 @@ travel duration is $44-0=44$.
 \nwenddocs{}\nwbegincode{176}\sublabel{NW2tcW3C-BAsgV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2tcW3C-BAsgV-1}}}\moddef{....test \code{}DBAddNewRequest\edoc{}(1)~{\nwtagstyle{}\subpageref{NW2tcW3C-BAsgV-1}}}\endmoddef\nwused{\\{NW2tcW3C-4HcfWS-1}}
 \{
   storage.DBAddNewRequest(new int[] \{ 12, 1, 0, 200, 45, 24, 63 \});
-  int[] output = storage.DBQueryRequest(12);
+  int[] output = storage.DBQueryUser(12);
   if (!(output[0] == 12
     && output[1] == 1
     && output[2] == 0
@@ -1470,7 +1470,7 @@ travel duration is $44-0=44$.
   int[] u = new int[] \{ 13, -1, 0, 200, 27, 0, 0 \};
   int[] r = new int[] \{ 0, 27, 1, 0 \};
   storage.DBAddNewServer(u, r);
-  int[] output = storage.DBQueryServer(13);
+  int[] output = storage.DBQueryUser(13);
   if (!(output[0] == 13
     && output[1] == -1
     && output[2] == 0

@@ -21,7 +21,7 @@ public class StorageTest {
       }
     }
     {
-      int output[] = storage.DBQueryServer(1);
+      int output[] = storage.DBQueryUser(1);
       if (!(output[0] == 1
          && output[1] == -10
          && output[2] == 1
@@ -29,17 +29,17 @@ public class StorageTest {
          && output[4] == 22
          && output[5] == 0
          && output[6] == 0)) {
-        Print("[FAIL] DBQueryServer(1)");
+        Print("[FAIL] DBQueryUser(1)");
         Print("\tExpected {uid=1, q=-10, e=1, l=500, o=22, d=0, b=0}; got");
         tools.printUser(output);
         count_failed++;
       } else {
-        Print("[PASS] DBQueryServer(1)");
+        Print("[PASS] DBQueryUser(1)");
         count_passed++;
       }
     }
     {
-      int output[] = storage.DBQueryRequest(10);
+      int output[] = storage.DBQueryUser(10);
       if (!(output[0] == 10
          && output[1] == 1
          && output[2] == 0
@@ -47,12 +47,12 @@ public class StorageTest {
          && output[4] == 4
          && output[5] == 30
          && output[6] == 172)) {
-        Print("[FAIL] DBQueryRequest(1)");
+        Print("[FAIL] DBQueryUser(1)");
         Print("\tExpected {uid=10, q=1, e=0, l=500, o=4, d=30, b=172}; got");
         tools.printUser(output);
         count_failed++;
       } else {
-        Print("[PASS] DBQueryRequest(1)");
+        Print("[PASS] DBQueryUser(1)");
         count_passed++;
       }
     }
@@ -1005,7 +1005,7 @@ public class StorageTest {
     }
     {
       storage.DBAddNewRequest(new int[] { 12, 1, 0, 200, 45, 24, 63 });
-      int[] output = storage.DBQueryRequest(12);
+      int[] output = storage.DBQueryUser(12);
       if (!(output[0] == 12
         && output[1] == 1
         && output[2] == 0
@@ -1026,7 +1026,7 @@ public class StorageTest {
       int[] u = new int[] { 13, -1, 0, 200, 27, 0, 0 };
       int[] r = new int[] { 0, 27, 1, 0 };
       storage.DBAddNewServer(u, r);
-      int[] output = storage.DBQueryServer(13);
+      int[] output = storage.DBQueryUser(13);
       if (!(output[0] == 13
         && output[1] == -1
         && output[2] == 0
@@ -1177,77 +1177,77 @@ public class StorageTest {
           count_passed++;
         }
       }
-      {
-        storage.DBUpdateServerRemoveFromSchedule(13,
-          new int[] { 0, 27, 1, 0 },
-          new int[] { 1, 0, 13 },
-          new int[] { 12 });
-        int[] output = storage.DBQueryServerRoute(13);
-        if (!(output[0] == 0
-          && output[1] == 27
-          && output[2] == 1
-          && output[3] == 0)) {
-          Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (1/5)");
-          Print("\tExpected (0, 27) (1, 0); got ");
-          tools.printRoute(output);
-          count_failed++;
-        } else {
-          Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (1/5)");
-          count_passed++;
+    /*  {
+          storage.DBUpdateServerRemoveFromSchedule(13,
+            new int[] { 0, 27, 1, 0 },
+            new int[] { 1, 0, 13 },
+            new int[] { 12 });
+          int[] output = storage.DBQueryServerRoute(13);
+          if (!(output[0] == 0
+            && output[1] == 27
+            && output[2] == 1
+            && output[3] == 0)) {
+            Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (1/5)");
+            Print("\tExpected (0, 27) (1, 0); got ");
+            tools.printRoute(output);
+            count_failed++;
+          } else {
+            Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (1/5)");
+            count_passed++;
+          }
         }
-      }
-      {
-        int[] output = storage.DBQueryServerSchedule(13);
-        if (!(output[0] == 0
-          && output[1] == 27
-          && output[2] == 13
-          && output[3] == 0
-          && output[4] == 1
-          && output[5] == 0
-          && output[6] == 13
-          && output[7] == 0)) {
-          Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (2/5)");
-          Print("\tExpected (0, 27, 13, 0) (1, 0, 13, 0); got ");
-          tools.printSchedule(output);
-          count_failed++;
-        } else {
-          Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (2/5)");
-          count_passed++;
+        {
+          int[] output = storage.DBQueryServerSchedule(13);
+          if (!(output[0] == 0
+            && output[1] == 27
+            && output[2] == 13
+            && output[3] == 0
+            && output[4] == 1
+            && output[5] == 0
+            && output[6] == 13
+            && output[7] == 0)) {
+            Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (2/5)");
+            Print("\tExpected (0, 27, 13, 0) (1, 0, 13, 0); got ");
+            tools.printSchedule(output);
+            count_failed++;
+          } else {
+            Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (2/5)");
+            count_passed++;
+          }
         }
-      }
-      {
-        int[] output = storage.DBQueryRequestStatus(12, 13);
-        if (!(output.length == 0)) {
-          Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (3/5)");
-          Print("\tExpected 0; got "+output.length);
-          count_failed++;
-        } else {
-          Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (3/5)");
-          count_passed++;
+        {
+          int[] output = storage.DBQueryRequestStatus(12, 13);
+          if (!(output.length == 0)) {
+            Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (3/5)");
+            Print("\tExpected 0; got "+output.length);
+            count_failed++;
+          } else {
+            Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (3/5)");
+            count_passed++;
+          }
         }
-      }
-      {
-        int[] output = storage.DBQueryRequestStatus(12, 14);
-        if (!(output.length == 0)) {
-          Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (4/5)");
-          Print("\tExpected 0; got "+output.length);
-          count_failed++;
-        } else {
-          Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (4/5)");
-          count_passed++;
+        {
+          int[] output = storage.DBQueryRequestStatus(12, 14);
+          if (!(output.length == 0)) {
+            Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (4/5)");
+            Print("\tExpected 0; got "+output.length);
+            count_failed++;
+          } else {
+            Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (4/5)");
+            count_passed++;
+          }
         }
-      }
-      {
-        int[] output = storage.DBQueryRequestStatus(12, 21);
-        if (!(output.length == 0)) {
-          Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (5/5)");
-          Print("\tExpected 0; got "+output.length);
-          count_failed++;
-        } else {
-          Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (5/5)");
-          count_passed++;
-        }
-      }
+        {
+          int[] output = storage.DBQueryRequestStatus(12, 21);
+          if (!(output.length == 0)) {
+            Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (5/5)");
+            Print("\tExpected 0; got "+output.length);
+            count_failed++;
+          } else {
+            Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (5/5)");
+            count_passed++;
+          }
+        }*/
     Print("Complete! Passed: "+count_passed+"; Failed: "+count_failed);
   }
   private static void Print(String msg) {

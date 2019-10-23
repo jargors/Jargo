@@ -2348,10 +2348,15 @@ sq = output[0];
 se = output[1];
 @
 <<..update route>>=
+Print("B1");
 <<....delete remaining route from w>>
+Print("B2");
 <<....insert new remaining route into w>>
+Print("B3");
 <<....update route endpoint in cw, cpd>>
+Print("B4");
 @
+Using greater-than preserves the predecessor already recorded for ([[route[0]]]. [[route[1]]]).
 <<....delete remaining route from w>>=
 PreparedStatement pS76 = PS(conn, "S76");
 PSAdd(pS76, sid, route[0]);
@@ -2422,10 +2427,16 @@ PSSubmit(pS140);
 @
 <<....select latest order number>>=
 int t1, q1, o1;
-output = DBFetch(conn, "S87", 3, sid, route[0]);
-t1 = output[0];
-q1 = output[1];
-o1 = output[2];
+if (route[0] == 0) {
+  t1 = 0;
+  q1 = sq;
+  o1 = 1;
+} else {
+  output = DBFetch(conn, "S87", 3, sid, route[0]);
+  t1 = output[0];
+  q1 = output[1];
+  o1 = output[2];
+}
 @
 <<....delete remaining schedule from cq>>=
 PreparedStatement pS80 = PS(conn, "S80");
@@ -2530,10 +2541,12 @@ throws RuntimeException {
   Print("  sid="+sid);
   Print("  route.length="+route.length);
   Print("  schedule.length="+sched.length);
-  Print("  rid=");
-  for (int r : rid)
-    System.out.print(r+", ");
-  System.out.println();
+  for (int i = 0; i < route.length; i++)
+    Print("route["+i+"]="+route[i]);
+  for (int i = 0; i < sched.length; i++)
+    Print("sched["+i+"]="+sched[i]);
+  for (int i = 0; i < rid.length; i++)
+    Print("rid["+i+"]="+rid[i]);
 
   int[] output = new int[] { };
   int se, sq;
@@ -2542,22 +2555,34 @@ throws RuntimeException {
   try {
     Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
     Print("Open connection "+conn.toString());
+    Print("A1");
     <<..fetch [[sq]] and [[se]]>>
+    Print("A2");
     <<..update route>>
+    Print("A3");
     <<..update and add to schedule>>
+    Print("A4");
     <<..commit and close>>
+    Print("A5");
   }
   <<Catch and print [[SQLException]]>>
 }
 @ %def DBUpdateServerAddToSchedule
 <<..update and add to schedule>>=
 int bound = (sched.length/3);
+Print("C1");
 <<....update times in pd and cpd>>
+Print("C2");
 <<....populate the tp, td cache and vp, vd cache and update cq>>
+Print("C3");
 <<....select latest order number>>
+Print("C4");
 <<....delete remaining schedule from cq>>
+Print("C5");
 <<....insert new remaining schedule into cq>>
+Print("C6");
 <<....insert into pd, cpd>>
+Print("C7");
 @
 <<....populate the tp, td cache and vp, vd cache and update cq>>=
 PreparedStatement pS140 = PS(conn, "S140");
@@ -2904,19 +2929,12 @@ public int[] DBQueryAllUsers() throws RuntimeException {
 }
 @ %def DBQueryAllUsers
 
-\subsubsection{[[DBQueryServer]](1)}
+\subsubsection{[[DBQueryUser]](1)}
 <<Query ridesharing user>>=
-public final int[] DBQueryServer(int sid) throws RuntimeException {
-  return lu_users.get(sid);
+public final int[] DBQueryUser(int uid) throws RuntimeException {
+  return lu_users.get(uid);
 }
-@ %def DBQueryServer
-
-\subsubsection{[[DBQueryRequest]](1)}
-<<Query ridesharing user>>=
-public final int[] DBQueryRequest(int rid) throws RuntimeException {
-  return lu_users.get(rid);
-}
-@ %def DBQueryRequest
+@ %def DBQueryUser
 
 \subsubsection{[[DBQueryRequestStatus]](2)}
 <<Query request status>>=

@@ -219,11 +219,8 @@ public class Storage {
     }
     return output;
   }
-  public final int[] DBQueryServer(int sid) throws RuntimeException {
-    return lu_users.get(sid);
-  }
-  public final int[] DBQueryRequest(int rid) throws RuntimeException {
-    return lu_users.get(rid);
+  public final int[] DBQueryUser(int uid) throws RuntimeException {
+    return lu_users.get(uid);
   }
   public int[] DBQueryRequestStatus(int rid, int t) throws RuntimeException {
     int[] output = new int[] { };
@@ -1043,10 +1040,12 @@ public class Storage {
       output = DBFetch(conn, "S48", 2, sid);
       sq = output[0];
       se = output[1];
+      Print("B1");
       PreparedStatement pS76 = PS(conn, "S76");
       PSAdd(pS76, sid, route[0]);
       Print("Issue DELETE FROM W WHERE sid="+sid+" AND t2>"+route[0]);
       PSSubmit(pS76);
+      Print("B2");
       int uid = sid;
       PreparedStatement pS10 = PS(conn, "S10");
       for (int i = 0; i < (route.length - 3); i += 2) {
@@ -1062,6 +1061,7 @@ public class Storage {
         PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
       }
       PSSubmit(pS10);
+      Print("B3");
       PreparedStatement pS77 = PS(conn, "S77");
       PreparedStatement pS139 = PS(conn, "S139");
       int te = route[(route.length - 2)];
@@ -1071,6 +1071,7 @@ public class Storage {
       Print("Issue UPDATE CW SET te="+te+", ve="+ve+" WHERE sid="+sid);
       Print("Issue UPDATE CPD SET te="+te+" WHERE sid="+sid);
       PSSubmit(pS77, pS139);
+      Print("B4");
       if (sched.length > 0) {
         Map<Integer, int[]> cache = new HashMap<>();
         int bound = (sched.length/3);
@@ -1109,10 +1110,16 @@ public class Storage {
         }
         PSSubmit(pS140);
         int t1, q1, o1;
-        output = DBFetch(conn, "S87", 3, sid, route[0]);
-        t1 = output[0];
-        q1 = output[1];
-        o1 = output[2];
+        if (route[0] == 0) {
+          t1 = 0;
+          q1 = sq;
+          o1 = 1;
+        } else {
+          output = DBFetch(conn, "S87", 3, sid, route[0]);
+          t1 = output[0];
+          q1 = output[1];
+          o1 = output[2];
+        }
         PreparedStatement pS80 = PS(conn, "S80");
         PSAdd(pS80, sid, route[0]);
         Print("Issue DELETE FROM CQ WHERE sid="+sid+" AND t2>"+route[0]);
@@ -1155,10 +1162,12 @@ public class Storage {
     Print("  sid="+sid);
     Print("  route.length="+route.length);
     Print("  schedule.length="+sched.length);
-    Print("  rid=");
-    for (int r : rid)
-      System.out.print(r+", ");
-    System.out.println();
+    for (int i = 0; i < route.length; i++)
+      Print("route["+i+"]="+route[i]);
+    for (int i = 0; i < sched.length; i++)
+      Print("sched["+i+"]="+sched[i]);
+    for (int i = 0; i < rid.length; i++)
+      Print("rid["+i+"]="+rid[i]);
 
     int[] output = new int[] { };
     int se, sq;
@@ -1167,13 +1176,17 @@ public class Storage {
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
       Print("Open connection "+conn.toString());
+      Print("A1");
       output = DBFetch(conn, "S48", 2, sid);
       sq = output[0];
       se = output[1];
+      Print("A2");
+      Print("B1");
       PreparedStatement pS76 = PS(conn, "S76");
       PSAdd(pS76, sid, route[0]);
       Print("Issue DELETE FROM W WHERE sid="+sid+" AND t2>"+route[0]);
       PSSubmit(pS76);
+      Print("B2");
       int uid = sid;
       PreparedStatement pS10 = PS(conn, "S10");
       for (int i = 0; i < (route.length - 3); i += 2) {
@@ -1189,6 +1202,7 @@ public class Storage {
         PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
       }
       PSSubmit(pS10);
+      Print("B3");
       PreparedStatement pS77 = PS(conn, "S77");
       PreparedStatement pS139 = PS(conn, "S139");
       int te = route[(route.length - 2)];
@@ -1198,7 +1212,10 @@ public class Storage {
       Print("Issue UPDATE CW SET te="+te+", ve="+ve+" WHERE sid="+sid);
       Print("Issue UPDATE CPD SET te="+te+" WHERE sid="+sid);
       PSSubmit(pS77, pS139);
+      Print("B4");
+      Print("A3");
       int bound = (sched.length/3);
+      Print("C1");
       PreparedStatement pS82 = PS(conn, "S82");
       PreparedStatement pS83 = PS(conn, "S83");
       PreparedStatement pS84 = PS(conn, "S84");
@@ -1216,6 +1233,7 @@ public class Storage {
         }
       }
       PSSubmit(pS82, pS83, pS84);
+      Print("C2");
       PreparedStatement pS140 = PS(conn, "S140");
       for (int j = 0; j < bound; j++) {
         int Lj = sched[(3*j + 2)];
@@ -1266,15 +1284,24 @@ public class Storage {
         }
       }
       PSSubmit(pS140);
+      Print("C3");
       int t1, q1, o1;
-      output = DBFetch(conn, "S87", 3, sid, route[0]);
-      t1 = output[0];
-      q1 = output[1];
-      o1 = output[2];
+      if (route[0] == 0) {
+        t1 = 0;
+        q1 = sq;
+        o1 = 1;
+      } else {
+        output = DBFetch(conn, "S87", 3, sid, route[0]);
+        t1 = output[0];
+        q1 = output[1];
+        o1 = output[2];
+      }
+      Print("C4");
       PreparedStatement pS80 = PS(conn, "S80");
       PSAdd(pS80, sid, route[0]);
       Print("Issue DELETE FROM CQ WHERE sid="+sid+" AND t2>"+route[0]);
       PSSubmit(pS80);
+      Print("C5");
       PreparedStatement pS14 = PS(conn, "S14");
       for (int j = 0; j < bound; j++) {
         int t2 = sched[(3*j)];
@@ -1295,6 +1322,7 @@ public class Storage {
         }
       }
       PSSubmit(pS14);
+      Print("C6");
       PreparedStatement pS12 = PS(conn, "S12");
       PreparedStatement pS13 = PS(conn, "S13");
       int rq, re, rl, ro, rd;
@@ -1319,9 +1347,12 @@ public class Storage {
               r, re, rl, ro, rd);
       }
       PSSubmit(pS12, pS13);
+      Print("C7");
+      Print("A4");
       conn.commit();
       Print("Close connection "+conn.toString());
       conn.close();
+      Print("A5");
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -1341,10 +1372,12 @@ public class Storage {
       output = DBFetch(conn, "S48", 2, sid);
       sq = output[0];
       se = output[1];
+      Print("B1");
       PreparedStatement pS76 = PS(conn, "S76");
       PSAdd(pS76, sid, route[0]);
       Print("Issue DELETE FROM W WHERE sid="+sid+" AND t2>"+route[0]);
       PSSubmit(pS76);
+      Print("B2");
       int uid = sid;
       PreparedStatement pS10 = PS(conn, "S10");
       for (int i = 0; i < (route.length - 3); i += 2) {
@@ -1360,6 +1393,7 @@ public class Storage {
         PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
       }
       PSSubmit(pS10);
+      Print("B3");
       PreparedStatement pS77 = PS(conn, "S77");
       PreparedStatement pS139 = PS(conn, "S139");
       int te = route[(route.length - 2)];
@@ -1369,6 +1403,7 @@ public class Storage {
       Print("Issue UPDATE CW SET te="+te+", ve="+ve+" WHERE sid="+sid);
       Print("Issue UPDATE CPD SET te="+te+" WHERE sid="+sid);
       PSSubmit(pS77, pS139);
+      Print("B4");
       int bound = (sched.length/3);
       PreparedStatement pS82 = PS(conn, "S82");
       PreparedStatement pS83 = PS(conn, "S83");
@@ -1405,10 +1440,16 @@ public class Storage {
       }
       PSSubmit(pS140);
       int t1, q1, o1;
-      output = DBFetch(conn, "S87", 3, sid, route[0]);
-      t1 = output[0];
-      q1 = output[1];
-      o1 = output[2];
+      if (route[0] == 0) {
+        t1 = 0;
+        q1 = sq;
+        o1 = 1;
+      } else {
+        output = DBFetch(conn, "S87", 3, sid, route[0]);
+        t1 = output[0];
+        q1 = output[1];
+        o1 = output[2];
+      }
       PreparedStatement pS80 = PS(conn, "S80");
       PSAdd(pS80, sid, route[0]);
       Print("Issue DELETE FROM CQ WHERE sid="+sid+" AND t2>"+route[0]);
