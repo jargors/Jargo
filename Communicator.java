@@ -7,13 +7,10 @@ import java.util.HashMap;
 public class Communicator {
   private Storage storage;
   private int world_time = 0;
-  private boolean ENFORCE_STRICT_ROUTE_UPDATES = false;  // todo
+  private final boolean DEBUG = false;
   public Communicator() { }
   public void setStorage(Storage src) {
     storage = src;
-  }
-  public void setStrictRouteUpdates(boolean flag) {
-    ENFORCE_STRICT_ROUTE_UPDATES = flag;
   }
   public void setSimulationWorldTime(int t) {
     world_time = t;
@@ -32,7 +29,7 @@ public class Communicator {
   }
   public boolean updateServerRoute(int sid, int[] route, int[] sched) {
     boolean success = false;
-    if (!ENFORCE_STRICT_ROUTE_UPDATES || route[0] > world_time) {
+    if (route[0] >= world_time) {
       storage.DBUpdateServerRoute(sid, route, sched);
       success = true;
     }
@@ -40,17 +37,48 @@ public class Communicator {
   }
   public boolean updateServerAddToSchedule(
       int sid, int[] route, int[] sched, int[] rid) {
-    boolean success = false;
-    if (!ENFORCE_STRICT_ROUTE_UPDATES || route[0] > world_time) {
-      storage.DBUpdateServerAddToSchedule(sid, route, sched, rid);
-      success = true;
+    final int t = world_time;
+    final int[] current = storage.DBQueryServerRoute(sid);
+    int i = 0;
+    Print("Set i=0");
+    Print("Set current <length>="+current.length);
+    for (int q = 0; q < (current.length - 1); q += 2) {
+      System.out.print("("+current[q]+", "+current[(q + 1)]+") ");
     }
-    return success;
+    System.out.println();
+    while (i < current.length && current[i] != route[0]) {
+      Print("Detected current["+i+"]!=route[0] ("+current[i]+"!="+route[0]+")");
+      i += 2;
+    }
+    Print("Got i="+i);
+    if (i == current.length) {
+      // branch point not found
+      Print("Branch point not found");
+      return false;
+    } else {
+      Print("Found branch point at i="+i);
+    }
+    int j = 0;
+    while (j < route.length && route[j] <= t) {
+      if (current[i] != route[j] || current[(i + 1)] != route[(j + 1)]) {
+        // overwrite history occurred
+        Print("Overwrite history detected, i="+i+", j="+j+" ("+current[i]+"!="+route[j]+", "
+          +current[(i + 1)]+"!="+route[(j + 1)]+")");
+        return false;
+      } else {
+        Print("Detected matching history, i="+i+", j="+j+" ("+current[i]+"="+route[j]+", "
+          +current[(i + 1)]+"="+route[(j + 1)]+")");
+      }
+      i += 2;
+      j += 2;
+    }
+    storage.DBUpdateServerAddToSchedule(sid, route, sched, rid);
+    return true;
   }
   public boolean updateServerRemoveFromSchedule(
       int sid, int[] route, int[] sched, int[] rid) {
     boolean success = false;
-    if (!ENFORCE_STRICT_ROUTE_UPDATES || route[0] > world_time) {
+    if (route[0] >= world_time) {
       storage.DBUpdateServerRemoveFromSchedule(sid, route, sched, rid);
     }
     return success;
@@ -61,11 +89,8 @@ public class Communicator {
   public int[] queryEdge(int v1, int v2) throws RuntimeException {
     return storage.DBQueryEdge(v1, v2);
   }
-  public int[] queryServer(int sid) throws RuntimeException {
-    return storage.DBQueryServer(sid);
-  }
-  public int[] queryRequest(int rid) throws RuntimeException {
-    return storage.DBQueryRequest(rid);
+  public int[] queryUser(int uid) throws RuntimeException {
+    return storage.DBQueryUser(uid);
   }
   public int[] queryServerLocationsActive(int t) throws RuntimeException {
     return storage.DBQueryServerLocationsActive(t);
@@ -86,6 +111,8 @@ public class Communicator {
     return storage.DBQueryServerMaxLoad(sid, t);
   }
   private void Print(String msg) {
-    System.out.println("[Jargo][Communicator]["+LocalDateTime.now()+"] "+msg);
+    if (DEBUG) {
+      System.out.println("[Jargo][Communicator]["+LocalDateTime.now()+"] "+msg);
+    }
   }
 }

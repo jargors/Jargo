@@ -27,6 +27,7 @@
 \label{sec:introduction}
 Jargo's communicator intends to be the sole way for Jargo clients to interact
 with the Jargo simulated world (Figure~\ref{fig:interface-fig}). The
+
 communicator exposes only the subset of Jargo's storage interface API that a
 client would possibly have access to in the real world, including querying and
 submitting server routes and schedules.  The communicator is developed using
@@ -81,7 +82,7 @@ We define a [[Storage]] and a container for the simulation world time.
 <<[[Communicator]] member variables>>=
 private Storage storage;
 private int world_time = 0;
-private boolean ENFORCE_STRICT_ROUTE_UPDATES = false;  // todo
+private final boolean DEBUG = false;
 @ %def storage world_time
 
 \subsection{Constructor}
@@ -95,7 +96,6 @@ public Communicator() { }
 \hi{General Methods.}
 <<[[Communicator]] public methods>>=
 <<Set storage>>
-<<Set option for strict route updates>>
 <<Set/get simulation world time>>
 <<Get reference to vertices cache>>
 <<Get reference to edges cache>>
@@ -129,13 +129,6 @@ public void setStorage(Storage src) {
   storage = src;
 }
 @ %def setStorage
-
-\subsubsection{[[setStrictRouteUpdates]](1)}
-<<Set option for strict route updates>>=
-public void setStrictRouteUpdates(boolean flag) {
-  ENFORCE_STRICT_ROUTE_UPDATES = flag;
-}
-@ %def setStrictRouteUpdates
 
 \subsubsection{[[setSimulationWorldTime]](1)}
 We depend on the controller to tell the simulation interface about the current
@@ -177,11 +170,17 @@ public final Map<Integer, int[]> getReferenceUsersCache() {
 \subsection{Write Methods}
 \label{sec:write-methods}
 
+If the submitted route results in overwriting waypoints that a server has
+already visited, in other words if [[route[0]]] is less than [[world_time]],
+then Communicator rejects the write. The client should be aware and handle
+appropriately. To reduce rejections, ensure any submitted route does not
+overwrite traveled waypoints.
+
 \subsubsection{[[updateServerRoute]](3)}
 <<Update server route>>=
 public boolean updateServerRoute(int sid, int[] route, int[] sched) {
   boolean success = false;
-  if (!ENFORCE_STRICT_ROUTE_UPDATES || route[0] > world_time) {
+  if (route[0] >= world_time) {
     storage.DBUpdateServerRoute(sid, route, sched);
     success = true;
   }
@@ -190,15 +189,48 @@ public boolean updateServerRoute(int sid, int[] route, int[] sched) {
 @ %def updateServerRoute
 
 \subsubsection{[[updateServerAddToSchedule]](4)}
+Beware, [[sched]] is 3-element per stop, not 4-element like returned from the query
+methods. Maybe should make consistent in the future.
 <<Update server add to schedule>>=
 public boolean updateServerAddToSchedule(
     int sid, int[] route, int[] sched, int[] rid) {
-  boolean success = false;
-  if (!ENFORCE_STRICT_ROUTE_UPDATES || route[0] > world_time) {
-    storage.DBUpdateServerAddToSchedule(sid, route, sched, rid);
-    success = true;
+  final int t = world_time;
+  final int[] current = storage.DBQueryServerRoute(sid);
+  int i = 0;
+  Print("Set i=0");
+  Print("Set current <length>="+current.length);
+  for (int q = 0; q < (current.length - 1); q += 2) {
+    System.out.print("("+current[q]+", "+current[(q + 1)]+") ");
   }
-  return success;
+  System.out.println();
+  while (i < current.length && current[i] != route[0]) {
+    Print("Detected current["+i+"]!=route[0] ("+current[i]+"!="+route[0]+")");
+    i += 2;
+  }
+  Print("Got i="+i);
+  if (i == current.length) {
+    // branch point not found
+    Print("Branch point not found");
+    return false;
+  } else {
+    Print("Found branch point at i="+i);
+  }
+  int j = 0;
+  while (j < route.length && route[j] <= t) {
+    if (current[i] != route[j] || current[(i + 1)] != route[(j + 1)]) {
+      // overwrite history occurred
+      Print("Overwrite history detected, i="+i+", j="+j+" ("+current[i]+"!="+route[j]+", "
+        +current[(i + 1)]+"!="+route[(j + 1)]+")");
+      return false;
+    } else {
+      Print("Detected matching history, i="+i+", j="+j+" ("+current[i]+"="+route[j]+", "
+        +current[(i + 1)]+"="+route[(j + 1)]+")");
+    }
+    i += 2;
+    j += 2;
+  }
+  storage.DBUpdateServerAddToSchedule(sid, route, sched, rid);
+  return true;
 }
 @ %def updateServerAddToSchedule
 
@@ -207,7 +239,7 @@ public boolean updateServerAddToSchedule(
 public boolean updateServerRemoveFromSchedule(
     int sid, int[] route, int[] sched, int[] rid) {
   boolean success = false;
-  if (!ENFORCE_STRICT_ROUTE_UPDATES || route[0] > world_time) {
+  if (route[0] >= world_time) {
     storage.DBUpdateServerRemoveFromSchedule(sid, route, sched, rid);
   }
   return success;
@@ -231,19 +263,12 @@ public int[] queryEdge(int v1, int v2) throws RuntimeException {
 }
 @ %def queryEdge
 
-\subsubsection{[[queryServer]](1)}
+\subsubsection{[[queryUser]](1)}
 <<Query ridesharing user>>=
-public int[] queryServer(int sid) throws RuntimeException {
-  return storage.DBQueryServer(sid);
+public int[] queryUser(int uid) throws RuntimeException {
+  return storage.DBQueryUser(uid);
 }
-@ %def queryServer
-
-\subsubsection{[[queryRequest]](1)}
-<<Query ridesharing user>>=
-public int[] queryRequest(int rid) throws RuntimeException {
-  return storage.DBQueryRequest(rid);
-}
-@ %def queryRequest
+@ %def queryUser
 
 \subsubsection{[[queryServerLocationsActive]](1)}
 <<Query active server locations>>=
@@ -291,7 +316,9 @@ public int[] queryServerMaxLoad(int sid, int t) throws RuntimeException {
 \subsection{[[Print]](1)}
 <<[[Communicator]] private methods>>=
 private void Print(String msg) {
-  System.out.println("[Jargo][Communicator]["+LocalDateTime.now()+"] "+msg);
+  if (DEBUG) {
+    System.out.println("[Jargo][Communicator]["+LocalDateTime.now()+"] "+msg);
+  }
 }
 @ %def Print
 
