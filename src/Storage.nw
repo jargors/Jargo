@@ -1734,6 +1734,7 @@ import org.apache.commons.pool2.impl.GenericObjectPool;
 <<Storage.java preamble>>=
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Arrays;
 @ \item date-time class for printing timestamps.
 <<Storage.java preamble>>=
 import java.time.LocalDateTime;
@@ -1760,7 +1761,8 @@ private Map<String, String> pstr = new HashMap<>();
 private Map<Integer, int[]> lu_vertices = new HashMap<>();
 private Map<Integer, Map<Integer, int[]>> lu_edges = new HashMap<>();
 private Map<Integer, int[]> lu_users = new HashMap<>();
-@ %def pstr lu_vertices lu_edges lu_users
+private Map<Integer, Boolean> lu_rstatus = new HashMap<>();
+@ %def pstr lu_vertices lu_edges lu_users lu_rstatus
 \item We declare configuration settings.
 <<[[Storage]] member variables>>=
 private String CONNECTIONS_URL = "jdbc:derby:memory:jargo;create=true";
@@ -1770,6 +1772,7 @@ private String CONNECTIONS_POOL_URL = (CONNECTIONS_DRIVER_URL + CONNECTIONS_POOL
 private final int STATEMENTS_MAX_COUNT = 20;
 private final int DERBY_PAGECACHESIZE = 8000;  // default=1000
 private final String DERBY_DUMPNAME = "db-lastgood";
+private final int REQUEST_TIMEOUT = 30;  // if still unassigned after re+REQUEST_TIMEOUT, do not try again
 @ %def CONNECTIONS_URL CONNECTIONS_DRIVER_URL CONNECTIONS_POOL_NAME STATEMENTS_MAX_COUNT DERBY_PAGECACHESIZE DERBY_DUMPNAME
 \item We declare connection pool and factories.
 <<[[Storage]] member variables>>=
@@ -2153,6 +2156,7 @@ public void DBAddNewRequest(int[] u) throws RuntimeException {
     <<..insert new request into r>>
     <<..commit and close>>
     lu_users.put(u[0], u.clone());
+    lu_rstatus.put(u[0], false);
   }
   <<Catch and print [[SQLException]]>>
 }
@@ -2248,9 +2252,8 @@ for (int i = 0; i < (route.length - 3); i += 2) {
   int v1 = route[(i + 1)];
   int t2 = route[(i + 2)];
   int v2 = route[(i + 3)];
-  output = DBFetch(conn, "S46", 2, v1, v2);
-  int dd = output[0];
-  int nu = output[1];
+  int dd = lu_edges.get(v1).get(v2)[0];
+  int nu = lu_edges.get(v1).get(v2)[1];
   Print("Issue INSERT INTO W VALUES ("+uid+", "+se+", "+t1+", "+v1+", "+t2+", "
     +v2+", "+dd+", "+nu+")");
   PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
@@ -2343,9 +2346,8 @@ throws RuntimeException {
 }
 @ %def DBUpdateServerRoute
 <<..fetch [[sq]] and [[se]]>>=
-output = DBFetch(conn, "S48", 2, sid);
-sq = output[0];
-se = output[1];
+sq = lu_users.get(sid)[1];
+se = lu_users.get(sid)[2];
 @
 <<..update route>>=
 Print("B1");
@@ -2566,6 +2568,9 @@ throws RuntimeException {
     Print("A5");
   }
   <<Catch and print [[SQLException]]>>
+  for (int i = 0; i < rid.length; i++) {
+    lu_rstatus.put(rid[i], true);
+  }
 }
 @ %def DBUpdateServerAddToSchedule
 <<..update and add to schedule>>=
@@ -2593,7 +2598,8 @@ for (int j = 0; j < bound; j++) {
     int td = -1;
     int vd = -1;
     if (!cache.containsKey(Lj)) {
-      rq = DBFetch(conn, "S85", 1, Lj)[0];
+      // rq = DBFetch(conn, "S85", 1, Lj)[0];
+      rq = lu_users.get(Lj)[1];
       boolean flagged = false;
       <<......check if new job>>
       if (flagged) {
@@ -2949,10 +2955,41 @@ public int[] DBQueryRequestStatus(int rid, int t) throws RuntimeException {
 <<Query queued requests>>=
 public int[] DBQueryQueuedRequests(int t) throws RuntimeException {
   <<..read prepare>>
-  output = DBFetch(conn, "S68", 7, t, t);
+  output = DBFetch(conn, "S68", 7, t, t);  // slows over time! (> 10 sec)
   <<..read return>>
 }
 @ %def DBQueryQueuedRequests
+
+\subsubsection{[[DBQueryQueuedRequests2]](1)}
+<<Query queued requests>>=
+public int[] DBQueryQueuedRequests2(int t) throws RuntimeException {
+  int[] output = new int[] { };
+  int[] temp = new int[] { };
+  int j = 0;
+  try {
+    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S143", 7, t, t, REQUEST_TIMEOUT);
+    temp = new int[output.length];
+    for (int i = 0; i < (output.length - 6); i += 7) {
+      if (lu_rstatus.get(output[i]) == false) {
+        temp[(j + 0)] = output[(i + 0)];
+        temp[(j + 1)] = output[(i + 1)];
+        temp[(j + 2)] = output[(i + 2)];
+        temp[(j + 3)] = output[(i + 3)];
+        temp[(j + 4)] = output[(i + 4)];
+        temp[(j + 5)] = output[(i + 5)];
+        temp[(j + 6)] = output[(i + 6)];
+        j += 7;
+      }
+    }
+    Print("Close connection "+conn.toString());
+    conn.close();
+  }
+  <<Catch and print [[SQLException]]>>
+  return Arrays.copyOf(temp, j);
+}
+@ %def DBQueryQueuedRequests2
 
 \subsubsection{[[DBQueryServerLocationsAll]](1)}
 <<Query all server locations>>=
@@ -3602,6 +3639,7 @@ private void PSInit() {
   <<S140>>
   <<S141>>
   <<S142>>
+  <<S143>>
 }
 @ %def PSInit
 <<S0>>=
@@ -3886,6 +3924,9 @@ pstr.put("S141", SEL+"* FROM r_user");
 pstr.put("S142", SEL+"SUM (dd) FROM W WHERE sid=? AND t2>?");
 @ %def S142
 \appendix
+<<S143>>=
+pstr.put("S143", SEL+"* FROM R WHERE re<=? AND ?<=re+?");
+@ %def S143
 
 \section{Appendix: List of Chunks}
 \label{ap:list-of-chunks}

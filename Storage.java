@@ -12,12 +12,14 @@ import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Arrays;
 import java.time.LocalDateTime;
 public class Storage {
   private Map<String, String> pstr = new HashMap<>();
   private Map<Integer, int[]> lu_vertices = new HashMap<>();
   private Map<Integer, Map<Integer, int[]>> lu_edges = new HashMap<>();
   private Map<Integer, int[]> lu_users = new HashMap<>();
+  private Map<Integer, Boolean> lu_rstatus = new HashMap<>();
   private String CONNECTIONS_URL = "jdbc:derby:memory:jargo;create=true";
   private final String CONNECTIONS_DRIVER_URL = "jdbc:apache:commons:dbcp:";
   private final String CONNECTIONS_POOL_NAME = "jargo";
@@ -25,6 +27,7 @@ public class Storage {
   private final int STATEMENTS_MAX_COUNT = 20;
   private final int DERBY_PAGECACHESIZE = 8000;  // default=1000
   private final String DERBY_DUMPNAME = "db-lastgood";
+  private final int REQUEST_TIMEOUT = 30;  // if still unassigned after re+REQUEST_TIMEOUT, do not try again
   private ConnectionFactory connection_factory;
   private PoolableConnectionFactory poolableconnection_factory;
   private ObjectPool<PoolableConnection> pool;
@@ -243,7 +246,7 @@ public class Storage {
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
       Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S68", 7, t, t);
+    output = DBFetch(conn, "S68", 7, t, t);  // slows over time! (> 10 sec)
       Print("Close connection "+conn.toString());
       conn.close();
     }
@@ -253,6 +256,37 @@ public class Storage {
       throw new RuntimeException("database failure");
     }
     return output;
+  }
+  public int[] DBQueryQueuedRequests2(int t) throws RuntimeException {
+    int[] output = new int[] { };
+    int[] temp = new int[] { };
+    int j = 0;
+    try {
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+      output = DBFetch(conn, "S143", 7, t, t, REQUEST_TIMEOUT);
+      temp = new int[output.length];
+      for (int i = 0; i < (output.length - 6); i += 7) {
+        if (lu_rstatus.get(output[i]) == false) {
+          temp[(j + 0)] = output[(i + 0)];
+          temp[(j + 1)] = output[(i + 1)];
+          temp[(j + 2)] = output[(i + 2)];
+          temp[(j + 3)] = output[(i + 3)];
+          temp[(j + 4)] = output[(i + 4)];
+          temp[(j + 5)] = output[(i + 5)];
+          temp[(j + 6)] = output[(i + 6)];
+          j += 7;
+        }
+      }
+      Print("Close connection "+conn.toString());
+      conn.close();
+    }
+    catch (SQLException e1) {
+      printSQLException(e1);
+      DBSaveBackup(DERBY_DUMPNAME);
+      throw new RuntimeException("database failure");
+    }
+    return Arrays.copyOf(temp, j);
   }
   public int[] DBQueryServerLocationsAll(int t) throws RuntimeException {
     int[] output = new int[] { };
@@ -943,6 +977,7 @@ public class Storage {
       Print("Close connection "+conn.toString());
       conn.close();
       lu_users.put(u[0], u.clone());
+      lu_rstatus.put(u[0], false);
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -979,9 +1014,8 @@ public class Storage {
         int v1 = route[(i + 1)];
         int t2 = route[(i + 2)];
         int v2 = route[(i + 3)];
-        output = DBFetch(conn, "S46", 2, v1, v2);
-        int dd = output[0];
-        int nu = output[1];
+        int dd = lu_edges.get(v1).get(v2)[0];
+        int nu = lu_edges.get(v1).get(v2)[1];
         Print("Issue INSERT INTO W VALUES ("+uid+", "+se+", "+t1+", "+v1+", "+t2+", "
           +v2+", "+dd+", "+nu+")");
         PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
@@ -1037,9 +1071,8 @@ public class Storage {
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
       Print("Open connection "+conn.toString());
-      output = DBFetch(conn, "S48", 2, sid);
-      sq = output[0];
-      se = output[1];
+      sq = lu_users.get(sid)[1];
+      se = lu_users.get(sid)[2];
       Print("B1");
       PreparedStatement pS76 = PS(conn, "S76");
       PSAdd(pS76, sid, route[0]);
@@ -1053,9 +1086,8 @@ public class Storage {
         int v1 = route[(i + 1)];
         int t2 = route[(i + 2)];
         int v2 = route[(i + 3)];
-        output = DBFetch(conn, "S46", 2, v1, v2);
-        int dd = output[0];
-        int nu = output[1];
+        int dd = lu_edges.get(v1).get(v2)[0];
+        int nu = lu_edges.get(v1).get(v2)[1];
         Print("Issue INSERT INTO W VALUES ("+uid+", "+se+", "+t1+", "+v1+", "+t2+", "
           +v2+", "+dd+", "+nu+")");
         PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
@@ -1177,9 +1209,8 @@ public class Storage {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
       Print("Open connection "+conn.toString());
       Print("A1");
-      output = DBFetch(conn, "S48", 2, sid);
-      sq = output[0];
-      se = output[1];
+      sq = lu_users.get(sid)[1];
+      se = lu_users.get(sid)[2];
       Print("A2");
       Print("B1");
       PreparedStatement pS76 = PS(conn, "S76");
@@ -1194,9 +1225,8 @@ public class Storage {
         int v1 = route[(i + 1)];
         int t2 = route[(i + 2)];
         int v2 = route[(i + 3)];
-        output = DBFetch(conn, "S46", 2, v1, v2);
-        int dd = output[0];
-        int nu = output[1];
+        int dd = lu_edges.get(v1).get(v2)[0];
+        int nu = lu_edges.get(v1).get(v2)[1];
         Print("Issue INSERT INTO W VALUES ("+uid+", "+se+", "+t1+", "+v1+", "+t2+", "
           +v2+", "+dd+", "+nu+")");
         PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
@@ -1242,7 +1272,8 @@ public class Storage {
           int td = -1;
           int vd = -1;
           if (!cache.containsKey(Lj)) {
-            rq = DBFetch(conn, "S85", 1, Lj)[0];
+            // rq = DBFetch(conn, "S85", 1, Lj)[0];
+            rq = lu_users.get(Lj)[1];
             boolean flagged = false;
             for (int r : rid) {
               if (Lj == r) {
@@ -1359,6 +1390,9 @@ public class Storage {
       DBSaveBackup(DERBY_DUMPNAME);
       throw new RuntimeException("database failure");
     }
+    for (int i = 0; i < rid.length; i++) {
+      lu_rstatus.put(rid[i], true);
+    }
   }
   public void DBUpdateServerRemoveFromSchedule(
       int sid, int[] route, int[] sched, int[] rid)
@@ -1369,9 +1403,8 @@ public class Storage {
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
       Print("Open connection "+conn.toString());
-      output = DBFetch(conn, "S48", 2, sid);
-      sq = output[0];
-      se = output[1];
+      sq = lu_users.get(sid)[1];
+      se = lu_users.get(sid)[2];
       Print("B1");
       PreparedStatement pS76 = PS(conn, "S76");
       PSAdd(pS76, sid, route[0]);
@@ -1385,9 +1418,8 @@ public class Storage {
         int v1 = route[(i + 1)];
         int t2 = route[(i + 2)];
         int v2 = route[(i + 3)];
-        output = DBFetch(conn, "S46", 2, v1, v2);
-        int dd = output[0];
-        int nu = output[1];
+        int dd = lu_edges.get(v1).get(v2)[0];
+        int nu = lu_edges.get(v1).get(v2)[1];
         Print("Issue INSERT INTO W VALUES ("+uid+", "+se+", "+t1+", "+v1+", "+t2+", "
           +v2+", "+dd+", "+nu+")");
         PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
@@ -2077,6 +2109,7 @@ public class Storage {
       pstr.put("S140", UPD+"CQ SET tp=?, td=? WHERE rid=?");
       pstr.put("S141", SEL+"* FROM r_user");
       pstr.put("S142", SEL+"SUM (dd) FROM W WHERE sid=? AND t2>?");
+      pstr.put("S143", SEL+"* FROM R WHERE re<=? AND ?<=re+?");
     }
     private PreparedStatement PS(Connection conn, String k) throws SQLException {
       Print("Prepare statement "+k);
