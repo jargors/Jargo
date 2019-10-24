@@ -83,6 +83,7 @@ protected int r_collection_period = 1;
 protected int s_collection_period = 10;
 protected Communicator communicator;
 protected Tools tools = new Tools();
+protected boolean DEBUG = false;
 @ %def r_collection_period s_collection_period communicator tools
 
 \subsection{Constructor}
@@ -95,6 +96,7 @@ public Client() { }
   <<Collect requests>>
   <<Collect server locations>>
   <<Set simulation interface>>
+  <<Set debug flag>>
   <<Get/set request collection period>>
   <<Get/set server location collection period>>
   <<Load GTree>>
@@ -169,6 +171,13 @@ public void setCommunicator(Communicator src) {
   communicator = src;
 }
 @ %def setCommunicator
+
+\subsubsection{[[setDebug]](1)}
+<<Set debug flag>>=
+public void setDebug(boolean flag) {
+  DEBUG = flag;
+}
+@ %def setDebug
 
 \subsubsection{[[getRequestCollectionPeriod]](0)}
 <<Get/set request collection period>>=
@@ -302,8 +311,10 @@ protected void handleServerLocation(int[] loc) { }
 \subsection{[[Print]](1)}
 <<Print a message>>=
 protected void Print(String msg) {
-  System.out.println("[Client]["+LocalDateTime.now()+"]"
-    + "[t="+communicator.getSimulationWorldTime()+"] "+msg);
+  if (DEBUG) {
+    System.out.println("[Client]["+LocalDateTime.now()+"]"
+      + "[t="+communicator.getSimulationWorldTime()+"] "+msg);
+  }
 }
 @ %def Print
 

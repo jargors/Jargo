@@ -8,6 +8,7 @@ public abstract class Client {
   protected int s_collection_period = 10;
   protected Communicator communicator;
   protected Tools tools = new Tools();
+  protected boolean DEBUG = false;
   public Client() { }
     public void collectRequests(int[] src) {
       int[] requests = src.clone();
@@ -19,6 +20,9 @@ public abstract class Client {
     }
     public void setCommunicator(Communicator src) {
       communicator = src;
+    }
+    public void setDebug(boolean flag) {
+      DEBUG = flag;
     }
     public int getRequestCollectionPeriod() {
       return r_collection_period;
@@ -68,7 +72,9 @@ public abstract class Client {
     protected void handleRequest(int[] r) { }
     protected void handleServerLocation(int[] loc) { }
     protected void Print(String msg) {
-      System.out.println("[Client]["+LocalDateTime.now()+"]"
-        + "[t="+communicator.getSimulationWorldTime()+"] "+msg);
+      if (DEBUG) {
+        System.out.println("[Client]["+LocalDateTime.now()+"]"
+          + "[t="+communicator.getSimulationWorldTime()+"] "+msg);
+      }
     }
 }
