@@ -61,16 +61,22 @@ public class Controller {
     // applyBreakdown(world_time);
   };
   private Runnable RequestLoop = () -> {
+    long A0 = System.currentTimeMillis();
     final int t0 = world_time;
-    int[] output = storage.DBQueryQueuedRequests(world_time);
+    int[] output = storage.DBQueryQueuedRequests2(world_time);
     final int t1 = world_time;
+    long A1 = System.currentTimeMillis();
+    Print("Time RL: "+(A1 - A0)+" ms");
     Print("RequestLoop t0="+t0+", t1="+t1+", # of requests="+output.length/7);
     client.collectRequests(output);
   };
   private Runnable ServerLoop = () -> {
+    long A0 = System.currentTimeMillis();
     final int t0 = world_time;
     int[] output = storage.DBQueryServerLocationsActive(world_time);
     final int t1 = world_time;
+    long A1 = System.currentTimeMillis();
+    Print("Time SL: "+(A1 - A0)+" ms");
     Print("ServerLoop t0="+t0+", t1="+t1+", # of servers="+output.length/3);
     client.collectServerLocations(output);
   };
@@ -81,6 +87,9 @@ public class Controller {
   }
   public void setDebugStorage(boolean flag) {
     storage.setDebug(flag);
+  }
+  public void setDebugClient(boolean flag) {
+    client.setDebug(flag);
   }
   public void setClient(Client target) {
     client = target;
@@ -240,11 +249,8 @@ public class Controller {
   public int[] query(String sql, int ncols) throws RuntimeException {
     return storage.DBQuery(sql, ncols);
   }
-  public int[] queryServer(int sid) throws RuntimeException {
-    return storage.DBQueryServer(sid);
-  }
-  public int[] queryRequest(int rid) throws RuntimeException {
-    return storage.DBQueryRequest(rid);
+  public int[] queryUser(int rid) throws RuntimeException {
+    return storage.DBQueryUser(rid);
   }
   public int[] queryRoute(int sid) throws RuntimeException {
     return storage.DBQueryServerRoute(sid);

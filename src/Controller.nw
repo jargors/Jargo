@@ -194,9 +194,12 @@ private Runnable EngineLoop = () -> {
 This loop ``pushes'' queued requests to the client.
 <<Definition of request collection loop>>=
 private Runnable RequestLoop = () -> {
+  long A0 = System.currentTimeMillis();
   final int t0 = world_time;
-  int[] output = storage.DBQueryQueuedRequests(world_time);
+  int[] output = storage.DBQueryQueuedRequests2(world_time);
   final int t1 = world_time;
+  long A1 = System.currentTimeMillis();
+  Print("Time RL: "+(A1 - A0)+" ms");
   Print("RequestLoop t0="+t0+", t1="+t1+", # of requests="+output.length/7);
   client.collectRequests(output);
 };
@@ -210,9 +213,12 @@ Option B. Change the query to use one query to get active vehicles, then
   of using join.
 <<Definition of server collection loop>>=
 private Runnable ServerLoop = () -> {
+  long A0 = System.currentTimeMillis();
   final int t0 = world_time;
   int[] output = storage.DBQueryServerLocationsActive(world_time);
   final int t1 = world_time;
+  long A1 = System.currentTimeMillis();
+  Print("Time SL: "+(A1 - A0)+" ms");
   Print("ServerLoop t0="+t0+", t1="+t1+", # of servers="+output.length/3);
   client.collectServerLocations(output);
 };
@@ -232,6 +238,7 @@ public Controller() {
 \hi{General methods.}
 <<[[Controller]] public methods>>=
 <<Set storage debug>>
+<<Set client debug>>
 <<Set client>>
 <<Set initial world time>>
 <<Set final world time>>
@@ -262,6 +269,13 @@ public void setDebugStorage(boolean flag) {
   storage.setDebug(flag);
 }
 @ %def setDebugStorage
+
+\subsubsection{[[setDebugClient]](1)}
+<<Set client debug>>=
+public void setDebugClient(boolean flag) {
+  client.setDebug(flag);
+}
+@ %def setDebugClient
 
 \subsubsection{[[setClient]](1)}
 <<Set client>>=
@@ -503,19 +517,12 @@ public int[] query(String sql, int ncols) throws RuntimeException {
 }
 @ %def query
 
-\subsubsection{[[queryServer]](1)}
+\subsubsection{[[queryUser]](1)}
 <<Query ridesharing user>>=
-public int[] queryServer(int sid) throws RuntimeException {
-  return storage.DBQueryServer(sid);
+public int[] queryUser(int rid) throws RuntimeException {
+  return storage.DBQueryUser(rid);
 }
-@ %def queryServer
-
-\subsubsection{[[queryRequest]](1)}
-<<Query ridesharing user>>=
-public int[] queryRequest(int rid) throws RuntimeException {
-  return storage.DBQueryRequest(rid);
-}
-@ %def queryRequest
+@ %def queryUser
 
 \subsubsection{[[queryRoute]](1)}
 <<Query routes>>=
