@@ -19,7 +19,7 @@ public class Storage {
   private Map<Integer, int[]> lu_vertices = new HashMap<>();
   private Map<Integer, Map<Integer, int[]>> lu_edges = new HashMap<>();
   private Map<Integer, int[]> lu_users = new HashMap<>();
-  private Map<Integer, Boolean> lu_rstatus = new HashMap<>();
+  private Map<Integer, Boolean> lu_rstatus = new HashMap<>();  // <--*no guarantees
   private String CONNECTIONS_URL = "jdbc:derby:memory:jargo;create=true";
   private final String CONNECTIONS_DRIVER_URL = "jdbc:apache:commons:dbcp:";
   private final String CONNECTIONS_POOL_NAME = "jargo";
@@ -383,7 +383,7 @@ public class Storage {
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
       Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S69", 4, sid, t);
+      output = DBFetch(conn, "S69", 4, sid, t);
       Print("Close connection "+conn.toString());
       conn.close();
     }
@@ -953,94 +953,98 @@ public class Storage {
     }
   }
   public void DBAddNewRequest(int[] u) throws RuntimeException {
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-      int uid = u[0];
-      PreparedStatement pS2 = PS(conn, "S2");
-      PreparedStatement pS3 = PS(conn, "S3");
-      PreparedStatement pS4 = PS(conn, "S4");
-      PreparedStatement pS5 = PS(conn, "S5");
-      PreparedStatement pS6 = PS(conn, "S6");
-      PreparedStatement pS7 = PS(conn, "S7");
-      PSAdd(pS2, uid, u[1]);
-      PSAdd(pS3, uid, u[2]);
-      PSAdd(pS4, uid, u[3]);
-      PSAdd(pS5, uid, u[4]);
-      PSAdd(pS6, uid, u[5]);
-      PSAdd(pS7, uid, u[6]);
-      PSSubmit(pS2, pS3, pS4, pS5, pS6, pS7);
-      PreparedStatement pS9 = PS(conn, "S9");
-      PSAdd(pS9, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
-      PSSubmit(pS9);
-      conn.commit();
-      Print("Close connection "+conn.toString());
-      conn.close();
-      lu_users.put(u[0], u.clone());
-      lu_rstatus.put(u[0], false);
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    if (!lu_users.containsKey(u[0])) {
+      try {
+        Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+        Print("Open connection "+conn.toString());
+        int uid = u[0];
+        PreparedStatement pS2 = PS(conn, "S2");
+        PreparedStatement pS3 = PS(conn, "S3");
+        PreparedStatement pS4 = PS(conn, "S4");
+        PreparedStatement pS5 = PS(conn, "S5");
+        PreparedStatement pS6 = PS(conn, "S6");
+        PreparedStatement pS7 = PS(conn, "S7");
+        PSAdd(pS2, uid, u[1]);
+        PSAdd(pS3, uid, u[2]);
+        PSAdd(pS4, uid, u[3]);
+        PSAdd(pS5, uid, u[4]);
+        PSAdd(pS6, uid, u[5]);
+        PSAdd(pS7, uid, u[6]);
+        PSSubmit(pS2, pS3, pS4, pS5, pS6, pS7);
+        PreparedStatement pS9 = PS(conn, "S9");
+        PSAdd(pS9, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
+        PSSubmit(pS9);
+        conn.commit();
+        Print("Close connection "+conn.toString());
+        conn.close();
+        lu_users.put(u[0], u.clone());
+        lu_rstatus.put(u[0], false);
+      }
+      catch (SQLException e1) {
+        printSQLException(e1);
+        DBSaveBackup(DERBY_DUMPNAME);
+        throw new RuntimeException("database failure");
+      }
     }
   }
   public void DBAddNewServer(int[] u, int[] route) throws RuntimeException {
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-      int uid = u[0];
-      int se = u[2];
-      PreparedStatement pS2 = PS(conn, "S2");
-      PreparedStatement pS3 = PS(conn, "S3");
-      PreparedStatement pS4 = PS(conn, "S4");
-      PreparedStatement pS5 = PS(conn, "S5");
-      PreparedStatement pS6 = PS(conn, "S6");
-      PreparedStatement pS7 = PS(conn, "S7");
-      PSAdd(pS2, uid, u[1]);
-      PSAdd(pS3, uid, u[2]);
-      PSAdd(pS4, uid, u[3]);
-      PSAdd(pS5, uid, u[4]);
-      PSAdd(pS6, uid, u[5]);
-      PSAdd(pS7, uid, u[6]);
-      PSSubmit(pS2, pS3, pS4, pS5, pS6, pS7);
-      PreparedStatement pS8 = PS(conn, "S8");
-      PSAdd(pS8, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
-      PSSubmit(pS8);
-      int[] output = new int[] { };
-      PreparedStatement pS10 = PS(conn, "S10");
-      for (int i = 0; i < (route.length - 3); i += 2) {
-        int t1 = route[i];
-        int v1 = route[(i + 1)];
-        int t2 = route[(i + 2)];
-        int v2 = route[(i + 3)];
-        int dd = lu_edges.get(v1).get(v2)[0];
-        int nu = lu_edges.get(v1).get(v2)[1];
-        Print("Issue INSERT INTO W VALUES ("+uid+", "+se+", "+t1+", "+v1+", "+t2+", "
-          +v2+", "+dd+", "+nu+")");
-        PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
+    if (!lu_users.containsKey(u[0])) {
+      try {
+        Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+        Print("Open connection "+conn.toString());
+        int uid = u[0];
+        int se = u[2];
+        PreparedStatement pS2 = PS(conn, "S2");
+        PreparedStatement pS3 = PS(conn, "S3");
+        PreparedStatement pS4 = PS(conn, "S4");
+        PreparedStatement pS5 = PS(conn, "S5");
+        PreparedStatement pS6 = PS(conn, "S6");
+        PreparedStatement pS7 = PS(conn, "S7");
+        PSAdd(pS2, uid, u[1]);
+        PSAdd(pS3, uid, u[2]);
+        PSAdd(pS4, uid, u[3]);
+        PSAdd(pS5, uid, u[4]);
+        PSAdd(pS6, uid, u[5]);
+        PSAdd(pS7, uid, u[6]);
+        PSSubmit(pS2, pS3, pS4, pS5, pS6, pS7);
+        PreparedStatement pS8 = PS(conn, "S8");
+        PSAdd(pS8, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
+        PSSubmit(pS8);
+        int[] output = new int[] { };
+        PreparedStatement pS10 = PS(conn, "S10");
+        for (int i = 0; i < (route.length - 3); i += 2) {
+          int t1 = route[i];
+          int v1 = route[(i + 1)];
+          int t2 = route[(i + 2)];
+          int v2 = route[(i + 3)];
+          int dd = lu_edges.get(v1).get(v2)[0];
+          int nu = lu_edges.get(v1).get(v2)[1];
+          Print("Issue INSERT INTO W VALUES ("+uid+", "+se+", "+t1+", "+v1+", "+t2+", "
+            +v2+", "+dd+", "+nu+")");
+          PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
+        }
+        PSSubmit(pS10);
+        pS10 = PS(conn, "S10");
+        PSAdd(pS10, uid, se, null, null, route[0], route[1], null, null);
+        PSSubmit(pS10);
+        PreparedStatement pS11 = PS(conn, "S11");
+        int te = route[(route.length - 2)];
+        PSAdd(pS11, uid, u[2], u[3], u[4], u[5], u[2], u[4], te, u[5]);
+        PSSubmit(pS11);
+        PreparedStatement pS14 = PS(conn, "S14");
+        PSAdd(pS14, uid, u[1], u[2], null, u[2], u[4], null, u[1],
+            null, null, null, null, null, 1);
+        PSSubmit(pS14);
+        conn.commit();
+        Print("Close connection "+conn.toString());
+        conn.close();
+        lu_users.put(u[0], u.clone());
       }
-      PSSubmit(pS10);
-      pS10 = PS(conn, "S10");
-      PSAdd(pS10, uid, se, null, null, route[0], route[1], null, null);
-      PSSubmit(pS10);
-      PreparedStatement pS11 = PS(conn, "S11");
-      int te = route[(route.length - 2)];
-      PSAdd(pS11, uid, u[2], u[3], u[4], u[5], u[2], u[4], te, u[5]);
-      PSSubmit(pS11);
-      PreparedStatement pS14 = PS(conn, "S14");
-      PSAdd(pS14, uid, u[1], u[2], null, u[2], u[4], null, u[1],
-          null, null, null, null, null, 1);
-      PSSubmit(pS14);
-      conn.commit();
-      Print("Close connection "+conn.toString());
-      conn.close();
-      lu_users.put(u[0], u.clone());
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+      catch (SQLException e1) {
+        printSQLException(e1);
+        DBSaveBackup(DERBY_DUMPNAME);
+        throw new RuntimeException("database failure");
+      }
     }
   }
   public void DBUpdateEdgeSpeed(int v1, int v2, int nu) throws RuntimeException {
@@ -1390,8 +1394,8 @@ public class Storage {
       DBSaveBackup(DERBY_DUMPNAME);
       throw new RuntimeException("database failure");
     }
-    for (int i = 0; i < rid.length; i++) {
-      lu_rstatus.put(rid[i], true);
+    for (int r : rid) {
+      lu_rstatus.put(r, true);
     }
   }
   public void DBUpdateServerRemoveFromSchedule(
@@ -1521,6 +1525,9 @@ public class Storage {
       printSQLException(e1);
       DBSaveBackup(DERBY_DUMPNAME);
       throw new RuntimeException("database failure");
+    }
+    for (int r : rid) {
+      lu_rstatus.remove(r);
     }
   }
   public void setDebug(boolean flag) {

@@ -1755,13 +1755,14 @@ public class Storage {
 \subsection{Member Variables}
 \label{sec:member-variables}
 \begin{itemize}
-\item We use maps to cache various things.
+\item We use maps to cache various things. (BEWARE, I may need to change these
+to ConcurrentHashMap, investigate the access patterns)
 <<[[Storage]] member variables>>=
 private Map<String, String> pstr = new HashMap<>();
 private Map<Integer, int[]> lu_vertices = new HashMap<>();
 private Map<Integer, Map<Integer, int[]>> lu_edges = new HashMap<>();
 private Map<Integer, int[]> lu_users = new HashMap<>();
-private Map<Integer, Boolean> lu_rstatus = new HashMap<>();
+private Map<Integer, Boolean> lu_rstatus = new HashMap<>();  // <--*no guarantees
 @ %def pstr lu_vertices lu_edges lu_users lu_rstatus
 \item We declare configuration settings.
 <<[[Storage]] member variables>>=
@@ -2148,17 +2149,19 @@ The value of $u_q$ \emph{must} be greater than 0.
 
 <<Add new request>>=
 public void DBAddNewRequest(int[] u) throws RuntimeException {
-  try {
-    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-    Print("Open connection "+conn.toString());
-    int uid = u[0];
-    <<..insert new user into user tables>>
-    <<..insert new request into r>>
-    <<..commit and close>>
-    lu_users.put(u[0], u.clone());
-    lu_rstatus.put(u[0], false);
+  if (!lu_users.containsKey(u[0])) {
+    try {
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+      int uid = u[0];
+      <<..insert new user into user tables>>
+      <<..insert new request into r>>
+      <<..commit and close>>
+      lu_users.put(u[0], u.clone());
+      lu_rstatus.put(u[0], false);
+    }
+    <<Catch and print [[SQLException]]>>
   }
-  <<Catch and print [[SQLException]]>>
 }
 @ %def DBAddNewRequest
 <<..insert new user into user tables>>=
@@ -2213,20 +2216,22 @@ The value of $u_q$ \emph{must} be less than 0. Array [[route]] =
 
 <<Add new server>>=
 public void DBAddNewServer(int[] u, int[] route) throws RuntimeException {
-  try {
-    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-    Print("Open connection "+conn.toString());
-    int uid = u[0];
-    int se = u[2];
-    <<..insert new user into user tables>>
-    <<..insert new server into s>>
-    <<..insert new server route into w>>
-    <<..insert new server route into cw>>
-    <<..insert new server into cq>>
-    <<..commit and close>>
-    lu_users.put(u[0], u.clone());
+  if (!lu_users.containsKey(u[0])) {
+    try {
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+      int uid = u[0];
+      int se = u[2];
+      <<..insert new user into user tables>>
+      <<..insert new server into s>>
+      <<..insert new server route into w>>
+      <<..insert new server route into cw>>
+      <<..insert new server into cq>>
+      <<..commit and close>>
+      lu_users.put(u[0], u.clone());
+    }
+    <<Catch and print [[SQLException]]>>
   }
-  <<Catch and print [[SQLException]]>>
 }
 @ %def DBAddNewServer
 <<..insert new server into s>>=
@@ -2568,8 +2573,8 @@ throws RuntimeException {
     Print("A5");
   }
   <<Catch and print [[SQLException]]>>
-  for (int i = 0; i < rid.length; i++) {
-    lu_rstatus.put(rid[i], true);
+  for (int r : rid) {
+    lu_rstatus.put(r, true);
   }
 }
 @ %def DBUpdateServerAddToSchedule
@@ -2760,6 +2765,9 @@ throws RuntimeException {
     <<..commit and close>>
   }
   <<Catch and print [[SQLException]]>>
+  for (int r : rid) {
+    lu_rstatus.remove(r);
+  }
 }
 @ %def DBUpdateServerRemoveFromSchedule
 <<..remove jobs from pd, cpd>>=
@@ -3055,12 +3063,20 @@ public int[] DBQueryServerRemainingRoute(int sid, int t) throws RuntimeException
 @ %def DBQueryServerRemainingRoute
 
 \subsubsection{[[DBQueryServerRemainingSchedule]](2)}
+Aggressively invalidate the cache.
 <<Query remaining schedules>>=
 public int[] DBQueryServerRemainingSchedule(int sid, int t)
 throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S69", 4, sid, t);
-  <<..read return>>
+  int[] output = new int[] { };
+  try {
+    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S69", 4, sid, t);
+    Print("Close connection "+conn.toString());
+    conn.close();
+  }
+  <<Catch and print [[SQLException]]>>
+  return output;
 }
 @ %def DBQueryServerRemainingSchedule
 
@@ -3780,6 +3796,8 @@ pstr.put("S129", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC");
 pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
       + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC");
 @ %def S61
+Need to join CQ in order to sort by order number [[o2]]. This query has
+worse performance after W (r\_server), CQ, PD grow.
 <<S69>>=
 pstr.put("S69", SEL+"t, v, Ls, Lr "
       + "FROM r_server LEFT JOIN CQ ON t=t2 and v=v2 and Lr=rid "
