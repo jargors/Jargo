@@ -243,38 +243,27 @@ public class Storage {
   }
   public int[] DBQueryQueuedRequests(int t) throws RuntimeException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S68", 7, t, t);  // slows over time! (> 10 sec)
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
-    }
-    return output;
-  }
-  public int[] DBQueryQueuedRequests2(int t) throws RuntimeException {
-    int[] output = new int[] { };
-    int[] temp = new int[] { };
+    int[] temp1 = new int[] { };
+    int[] temp2 = new int[] { };
     int j = 0;
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
       Print("Open connection "+conn.toString());
       output = DBFetch(conn, "S143", 7, t, t, REQUEST_TIMEOUT);
-      temp = new int[output.length];
+      temp1 = new int[output.length];
       for (int i = 0; i < (output.length - 6); i += 7) {
+        if (!lu_rstatus.containsKey(output[i])) {
+          temp2 = DBFetch(conn, "S148", 1, output[i]);
+          lu_rstatus.put(output[i], (temp2.length > 0 ? true : false));
+        }
         if (lu_rstatus.get(output[i]) == false) {
-          temp[(j + 0)] = output[(i + 0)];
-          temp[(j + 1)] = output[(i + 1)];
-          temp[(j + 2)] = output[(i + 2)];
-          temp[(j + 3)] = output[(i + 3)];
-          temp[(j + 4)] = output[(i + 4)];
-          temp[(j + 5)] = output[(i + 5)];
-          temp[(j + 6)] = output[(i + 6)];
+          temp1[(j + 0)] = output[(i + 0)];
+          temp1[(j + 1)] = output[(i + 1)];
+          temp1[(j + 2)] = output[(i + 2)];
+          temp1[(j + 3)] = output[(i + 3)];
+          temp1[(j + 4)] = output[(i + 4)];
+          temp1[(j + 5)] = output[(i + 5)];
+          temp1[(j + 6)] = output[(i + 6)];
           j += 7;
         }
       }
@@ -286,7 +275,7 @@ public class Storage {
       DBSaveBackup(DERBY_DUMPNAME);
       throw new RuntimeException("database failure");
     }
-    return Arrays.copyOf(temp, j);
+    return Arrays.copyOf(temp1, j);
   }
   public int[] DBQueryServerLocationsAll(int t) throws RuntimeException {
     int[] output = new int[] { };
@@ -316,9 +305,24 @@ public class Storage {
       for (int i = 0; i < temp1.length; i++) {
         int sid = temp1[i];
         output[3*i] = sid;
-        temp2 = DBFetch(conn, "S135", 2, t, sid);
-        output[(3*i + 1)] = temp2[0];
-        output[(3*i + 2)] = temp2[1];
+        temp2 = DBFetch(conn, "S146", 2, sid, t);
+        // First check if server just arrived at a vertex at time t
+        if (temp2.length > 0) {
+          output[(3*i + 1)] = temp2[0];
+          output[(3*i + 2)] = temp2[1];
+        } else {
+          // Next check if server passed a vertex at time t, and get that vertex
+          temp2 = DBFetch(conn, "S135", 2, sid, sid, t);
+          if (temp2.length > 0) {
+            output[(3*i + 1)] = temp2[0];
+            output[(3*i + 2)] = temp2[1];
+          } else {
+            // Finally get the server's last-known vertex because this guy is idle
+            temp2 = DBFetch(conn, "S147", 2, sid, sid);
+            output[(3*i + 1)] = temp2[0];
+            output[(3*i + 2)] = temp2[1];
+          }
+        }
       }
       conn.close();
     }
@@ -380,10 +384,25 @@ public class Storage {
   public int[] DBQueryServerRemainingSchedule(int sid, int t)
   throws RuntimeException {
     int[] output = new int[] { };
+    int[] temp = new int[] { };
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
       Print("Open connection "+conn.toString());
-      output = DBFetch(conn, "S69", 4, sid, t);
+      temp = DBFetch(conn, "S144", 3, sid, t);
+      output = new int[4*temp.length/3 + 4];
+      int j = 0;
+      for (int i = 0; i < temp.length - 2; i += 3) {
+        output[(j + 0)] = temp[(i + 0)];
+        output[(j + 1)] = temp[(i + 1)];
+        output[(j + 2)] = 0;
+        output[(j + 3)] = temp[(i + 2)];
+        j += 4;
+      }
+      temp = DBFetch(conn, "S145", 2, sid);
+      output[(j + 0)] = temp[0];
+      output[(j + 1)] = temp[1];
+      output[(j + 2)] = sid;
+      output[(j + 3)] = 0;
       Print("Close connection "+conn.toString());
       conn.close();
     }
@@ -2107,8 +2126,8 @@ public class Storage {
       pstr.put("S133", SEL+"val FROM f_status WHERE rid=? AND t<=? "
           + "ORDER BY t DESC FETCH FIRST ROW ONLY");
       pstr.put("S134", SEL+"sid FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
-      pstr.put("S135", SEL+"t2, v2 FROM W WHERE t2<=? AND v2<>0 AND sid=? "
-            + "ORDER BY t2 DESC FETCH FIRST ROW ONLY");
+      pstr.put("S135", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
+          + "SELECT t1 FROM W WHERE sid=? AND ? BETWEEN t1 AND t2)");
       pstr.put("S136", SEL+"* FROM V");
       pstr.put("S137", SEL+"* FROM E");
       pstr.put("S138", SEL+"val FROM dist_r_unassigned");
@@ -2117,6 +2136,12 @@ public class Storage {
       pstr.put("S141", SEL+"* FROM r_user");
       pstr.put("S142", SEL+"SUM (dd) FROM W WHERE sid=? AND t2>?");
       pstr.put("S143", SEL+"* FROM R WHERE re<=? AND ?<=re+?");
+      pstr.put("S144", SEL+"t2, v2, rid FROM CQ WHERE sid=? AND t2>? ORDER BY o2 ASC");
+      pstr.put("S145", SEL+"te, ve FROM CW WHERE sid=?");
+      pstr.put("S146", SEL+"t2, v2 FROM W WHERE sid=? AND t2=? AND v2<>0");
+      pstr.put("S147", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
+          + "SELECT MAX (t2) FROM W WHERE sid=? AND v2<>0)");
+      pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
     }
     private PreparedStatement PS(Connection conn, String k) throws SQLException {
       Print("Prepare statement "+k);
