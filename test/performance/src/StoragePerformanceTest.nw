@@ -1,0 +1,103 @@
+\documentclass{article}
+
+\usepackage{../../noweb}
+\noweboptions{smallcode,longchunks}
+
+\usepackage[a4paper,margin=1in]{geometry}
+
+\usepackage{colortbl}
+\usepackage[colorlinks=true]{hyperref}
+\usepackage{graphicx}
+
+% Remove noweb page break penalty
+\def\nwendcode{\endtrivlist \endgroup}
+\let\nwdocspar=\par
+
+\title{Jargo Storage Interface
+  and Data Model\footnote{\url{https://github.com/jargors/Storage}}\\
+  \vspace{.5em}
+  \Large{\textbf{Performance Test Program}}}
+\author{James J. Pan\\
+  \small{\href{mailto:jamesjpan@outlook.com}{jamesjpan@outlook.com}}
+}
+
+\begin{document}
+\maketitle
+\pagestyle{noweb}
+
+%\begin{figure}[h]
+%\centering
+%\fbox{\includegraphics[width=\textwidth]{data/test.png}}
+%\caption{Portion of a road network in Chengdu, China,
+%    used for tests (46 nodes, 104 directed edges).}
+%\label{fig:road-network}
+%\end{figure}
+%\newpage
+
+\tableofcontents
+
+\section{Introduction}
+\label{sec:introduction}
+The test program is developed using the
+Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
+programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
+([[src/StoragePerformanceTest.nw]]) is the source for both the documentation
+([[doc/StoragePerformanceTest.tex]]) and the Java code
+([[StoragePerformanceTest.java]])\footnote{See the [[Makefile]] for build
+details.}.
+<<StoragePerformanceTest.java>>=
+<<StoragePerformanceTest.java preamble>>
+<<[[StoragePerformanceTest]] definition>>
+@
+
+<<StoragePerformanceTest.java preamble>>=
+import com.github.jargors.Storage;
+import java.time.LocalDateTime;
+@
+
+<<[[StoragePerformanceTest]] definition>>=
+public class StoragePerformanceTest {
+  <<[[StoragePerformanceTest]] member variables>>
+  <<[[StoragePerformanceTest]] main routine>>
+  <<[[StoragePerformanceTest]] private methods>>
+}
+@
+<<[[StoragePerformanceTest]] member variables>>=
+@ %def
+
+<<[[StoragePerformanceTest]] main routine>>=
+public static void main(String[] args) {
+  Print("Starting storage performance tests");
+  Storage storage = new Storage();
+  <<Load test database>>
+  Print("Complete!");
+}
+@ %def main
+
+We load a manually prepared test database.
+<<Load test database>>=
+storage.DBLoadBackup("data/db");
+@
+
+<<[[StoragePerformanceTest]] private methods>>=
+private static void Print(String msg) {
+  System.out.println("[StoragePerformanceTest]["+LocalDateTime.now()+"] "+msg);
+}
+@
+
+\section{Tests}
+\label{sec:tests}
+
+
+\appendix
+
+\section{Appendix: List of Chunks}
+\label{ap:list-of-chunks}
+\nowebchunks
+
+\section{Appendix: List of Identifiers}
+\label{ap:list-of-identifiers}
+\nowebindex
+
+\end{document}
+

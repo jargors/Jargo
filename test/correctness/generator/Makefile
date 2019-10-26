@@ -1,7 +1,7 @@
-# Storage Test Generator
+# Storage Correctness Test Generator
 # - Set CLASSPATH environmental variable before running `make`.
 # - BEWARE: `make clean` will not remove the generated test databases `db`
-WIDGET=StorageTestGenerator
+WIDGET=StorageCorrectnessTestGenerator
 
 .PHONY : all clean
 

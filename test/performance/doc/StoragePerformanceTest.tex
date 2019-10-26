@@ -1,0 +1,114 @@
+\documentclass{article}
+
+\usepackage{../../noweb}
+\noweboptions{smallcode,longchunks}
+
+\usepackage[a4paper,margin=1in]{geometry}
+
+\usepackage{colortbl}
+\usepackage[colorlinks=true]{hyperref}
+\usepackage{graphicx}
+
+% Remove noweb page break penalty
+\def\nwendcode{\endtrivlist \endgroup}
+\let\nwdocspar=\par
+
+\title{Jargo Storage Interface
+  and Data Model\footnote{\url{https://github.com/jargors/Storage}}\\
+  \vspace{.5em}
+  \Large{\textbf{Performance Test Program}}}
+\author{James J. Pan\\
+  \small{\href{mailto:jamesjpan@outlook.com}{jamesjpan@outlook.com}}
+}
+
+\begin{document}
+\maketitle
+\pagestyle{noweb}
+
+%\begin{figure}[h]
+%\centering
+%\fbox{\includegraphics[width=\textwidth]{data/test.png}}
+%\caption{Portion of a road network in Chengdu, China,
+%    used for tests (46 nodes, 104 directed edges).}
+%\label{fig:road-network}
+%\end{figure}
+%\newpage
+
+\tableofcontents
+
+\section{Introduction}
+\label{sec:introduction}
+The test program is developed using the
+Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
+programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
+({\tt{}src/StoragePerformanceTest.nw}) is the source for both the documentation
+({\tt{}doc/StoragePerformanceTest.tex}) and the Java code
+({\tt{}StoragePerformanceTest.java})\footnote{See the {\tt{}Makefile} for build
+details.}.
+\nwfilename{src/StoragePerformanceTest.nw}\nwbegincode{1}\sublabel{NW3iKWou-40YM6y-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-40YM6y-1}}}\moddef{StoragePerformanceTest.java~{\nwtagstyle{}\subpageref{NW3iKWou-40YM6y-1}}}\endmoddef\nwnotused{StoragePerformanceTest.java}
+\LA{}StoragePerformanceTest.java preamble~{\nwtagstyle{}\subpageref{NW3iKWou-2PlaJO-1}}\RA{}
+\LA{}\code{}StoragePerformanceTest\edoc{} definition~{\nwtagstyle{}\subpageref{NW3iKWou-490CRJ-1}}\RA{}
+\nwendcode{}\nwbegindocs{2}\nwdocspar
+
+\nwenddocs{}\nwbegincode{3}\sublabel{NW3iKWou-2PlaJO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-2PlaJO-1}}}\moddef{StoragePerformanceTest.java preamble~{\nwtagstyle{}\subpageref{NW3iKWou-2PlaJO-1}}}\endmoddef\nwused{\\{NW3iKWou-40YM6y-1}}
+import com.github.jargors.Storage;
+import java.time.LocalDateTime;
+\nwendcode{}\nwbegindocs{4}\nwdocspar
+
+\nwenddocs{}\nwbegincode{5}\sublabel{NW3iKWou-490CRJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-490CRJ-1}}}\moddef{\code{}StoragePerformanceTest\edoc{} definition~{\nwtagstyle{}\subpageref{NW3iKWou-490CRJ-1}}}\endmoddef\nwused{\\{NW3iKWou-40YM6y-1}}
+public class StoragePerformanceTest \{
+  \LA{}\code{}StoragePerformanceTest\edoc{} member variables~{\nwtagstyle{}\subpageref{NW3iKWou-5sgeP-1}}\RA{}
+  \LA{}\code{}StoragePerformanceTest\edoc{} main routine~{\nwtagstyle{}\subpageref{NW3iKWou-2hjWc8-1}}\RA{}
+  \LA{}\code{}StoragePerformanceTest\edoc{} private methods~{\nwtagstyle{}\subpageref{NW3iKWou-1GKv5n-1}}\RA{}
+\}
+\nwendcode{}\nwbegindocs{6}\nwdocspar
+\nwenddocs{}\nwbegincode{7}\sublabel{NW3iKWou-5sgeP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-5sgeP-1}}}\moddef{\code{}StoragePerformanceTest\edoc{} member variables~{\nwtagstyle{}\subpageref{NW3iKWou-5sgeP-1}}}\endmoddef\nwused{\\{NW3iKWou-490CRJ-1}}
+\nwendcode{}\nwbegindocs{8}%def
+
+\nwenddocs{}\nwbegincode{9}\sublabel{NW3iKWou-2hjWc8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-2hjWc8-1}}}\moddef{\code{}StoragePerformanceTest\edoc{} main routine~{\nwtagstyle{}\subpageref{NW3iKWou-2hjWc8-1}}}\endmoddef\nwused{\\{NW3iKWou-490CRJ-1}}
+public static void main(String[] args) \{
+  Print("Starting storage performance tests");
+  Storage storage = new Storage();
+  \LA{}Load test database~{\nwtagstyle{}\subpageref{NW3iKWou-3tpa1X-1}}\RA{}
+  Print("Complete!");
+\}
+\nosublabel{NW3iKWou-2hjWc8-1-u1}\nwindexdefn{main}{main}{NW3iKWou-2hjWc8-1}\eatline
+\nwidentdefs{\\{{main}{main}}}\nwendcode{}\nwbegindocs{10}\nwdocspar
+We load a manually prepared test database.
+\nwenddocs{}\nwbegincode{11}\sublabel{NW3iKWou-3tpa1X-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-3tpa1X-1}}}\moddef{Load test database~{\nwtagstyle{}\subpageref{NW3iKWou-3tpa1X-1}}}\endmoddef\nwused{\\{NW3iKWou-2hjWc8-1}}
+storage.DBLoadBackup("data/db");
+\nwendcode{}\nwbegindocs{12}\nwdocspar
+
+\nwenddocs{}\nwbegincode{13}\sublabel{NW3iKWou-1GKv5n-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-1GKv5n-1}}}\moddef{\code{}StoragePerformanceTest\edoc{} private methods~{\nwtagstyle{}\subpageref{NW3iKWou-1GKv5n-1}}}\endmoddef\nwused{\\{NW3iKWou-490CRJ-1}}
+private static void Print(String msg) \{
+  System.out.println("[StoragePerformanceTest]["+LocalDateTime.now()+"] "+msg);
+\}
+\nwendcode{}
+
+\nwixlogsorted{c}{{\code{}StoragePerformanceTest\edoc{} definition}{NW3iKWou-490CRJ-1}{\nwixu{NW3iKWou-40YM6y-1}\nwixd{NW3iKWou-490CRJ-1}}}%
+\nwixlogsorted{c}{{\code{}StoragePerformanceTest\edoc{} main routine}{NW3iKWou-2hjWc8-1}{\nwixu{NW3iKWou-490CRJ-1}\nwixd{NW3iKWou-2hjWc8-1}}}%
+\nwixlogsorted{c}{{\code{}StoragePerformanceTest\edoc{} member variables}{NW3iKWou-5sgeP-1}{\nwixu{NW3iKWou-490CRJ-1}\nwixd{NW3iKWou-5sgeP-1}}}%
+\nwixlogsorted{c}{{\code{}StoragePerformanceTest\edoc{} private methods}{NW3iKWou-1GKv5n-1}{\nwixu{NW3iKWou-490CRJ-1}\nwixd{NW3iKWou-1GKv5n-1}}}%
+\nwixlogsorted{c}{{Load test database}{NW3iKWou-3tpa1X-1}{\nwixu{NW3iKWou-2hjWc8-1}\nwixd{NW3iKWou-3tpa1X-1}}}%
+\nwixlogsorted{c}{{StoragePerformanceTest.java}{NW3iKWou-40YM6y-1}{\nwixd{NW3iKWou-40YM6y-1}}}%
+\nwixlogsorted{c}{{StoragePerformanceTest.java preamble}{NW3iKWou-2PlaJO-1}{\nwixu{NW3iKWou-40YM6y-1}\nwixd{NW3iKWou-2PlaJO-1}}}%
+\nwixlogsorted{i}{{main}{main}}%
+\nwbegindocs{14}\nwdocspar
+
+\section{Tests}
+\label{sec:tests}
+
+
+\appendix
+
+\section{Appendix: List of Chunks}
+\label{ap:list-of-chunks}
+\nowebchunks
+
+\section{Appendix: List of Identifiers}
+\label{ap:list-of-identifiers}
+\nowebindex
+
+\end{document}
+
+\nwenddocs{}

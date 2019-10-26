@@ -1,6 +1,6 @@
 import com.github.jargors.Controller;
 
-public class StorageTestGenerator {
+public class StorageCorrectnessTestGenerator {
   public static void main(String[] args) {
     Controller controller = new Controller();
     controller.loadDataModel();

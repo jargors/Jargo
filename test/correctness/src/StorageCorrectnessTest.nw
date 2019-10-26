@@ -1,6 +1,6 @@
 \documentclass{article}
 
-\usepackage{noweb}
+\usepackage{../../noweb}
 \noweboptions{smallcode,longchunks}
 
 \usepackage[a4paper,margin=1in]{geometry}
@@ -42,56 +42,57 @@ The correctness test program for Jargo's storage interface uses a series of
 positive tests to check that the storage interface is functioning correctly.
 These tests pass if the output from the storage interface matches with what is
 expected. A database storing a test ridesharing state is provided in
-[[data/db]].  The test road network is shown in
-Figure~\ref{fig:road-network}.  The vertex coordinates can be found in the
-Storage Test Generator program ([[generator/data/test.rnet]]).  Beware, the
-tests are not comprehensive and do not guarantee bug-free code. Not all
-possible inputs to the storage interface methods are tested, although more
-comprehensive testing may be added in the future.  The test program is
-developed using the Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}}
-literate programming\footnote{\url{http://literateprogramming.com/}} tool.
-This file ([[src/StorageTest.nw]]) is the source for both the documentation
-([[doc/StorageTest.tex]]) and the Java code ([[StorageTest.java]])\footnote{See
-the [[Makefile]] for build details.}.
-<<StorageTest.java>>=
-<<StorageTest.java preamble>>
-<<[[StorageTest]] definition>>
+[[data/db]].  The test road network is shown in Figure~\ref{fig:road-network}.
+The vertex coordinates can be found in the Storage Test Generator program
+([[generator/data/test.rnet]]).  Beware, the tests are not comprehensive and do
+not guarantee bug-free code. Not all possible inputs to the storage interface
+methods are tested, although more comprehensive testing may be added in the
+future.  The test program is developed using the
+Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
+programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
+([[src/StorageCorrectnessTest.nw]]) is the source for both the documentation
+([[doc/StorageCorrectnessTest.tex]]) and the Java code
+([[StorageCorrectnessTest.java]])\footnote{See the [[Makefile]] for build
+details.}.
+<<StorageCorrectnessTest.java>>=
+<<StorageCorrectnessTest.java preamble>>
+<<[[StorageCorrectnessTest]] definition>>
 @
 
-<<StorageTest.java preamble>>=
+<<StorageCorrectnessTest.java preamble>>=
 import com.github.jargors.Storage;
 import com.github.jargors.Tools;
 import java.time.LocalDateTime;
 @
-<<[[StorageTest]] definition>>=
-public class StorageTest {
-  <<[[StorageTest]] member variables>>
-  <<[[StorageTest]] main routine>>
-  <<[[StorageTest]] private methods>>
+<<[[StorageCorrectnessTest]] definition>>=
+public class StorageCorrectnessTest {
+  <<[[StorageCorrectnessTest]] member variables>>
+  <<[[StorageCorrectnessTest]] main routine>>
+  <<[[StorageCorrectnessTest]] private methods>>
 }
 @
-<<[[StorageTest]] member variables>>=
+<<[[StorageCorrectnessTest]] member variables>>=
 private static int count_passed = 0;
 private static int count_failed = 0;
 @ %def count_passed count_failed
-<<[[StorageTest]] main routine>>=
+<<[[StorageCorrectnessTest]] main routine>>=
 public static void main(String[] args) {
   Print("Starting storage interface tests");
   Storage storage = new Storage();
   Tools tools = new Tools();
-  <<..load test database>>
-  <<..run read tests>>
-  <<..run write tests>>
+  <<Load test database>>
+  <<Run read tests>>
+  <<Run write tests>>
   Print("Complete! Passed: "+count_passed+"; Failed: "+count_failed);
 }
 @ %def main
 We load a manually prepared test database.
-<<..load test database>>=
+<<Load test database>>=
 storage.DBLoadBackup("data/db");
 @
-<<[[StorageTest]] private methods>>=
+<<[[StorageCorrectnessTest]] private methods>>=
 private static void Print(String msg) {
-  System.out.println("[StorageTest]["+LocalDateTime.now()+"] "+msg);
+  System.out.println("[StorageCorrectnessTest]["+LocalDateTime.now()+"] "+msg);
 }
 @
 
@@ -100,60 +101,60 @@ private static void Print(String msg) {
 
 \subsection{Read Tests}
 \label{sec:read-tests}
-<<..run read tests>>=
-<<....test [[DBQuery]](2)>>
-<<....test [[DBQueryServer]](1)>>
-<<....test [[DBQueryRequest]](1)>>
-<<....test [[DBQueryQueuedRequests]](1)>>
-<<....test [[DBQueryServerLocationsAll]](1)>>
-<<....test [[DBQueryServerLocationsActive]](1)>>
-<<....test [[DBQueryServerRoute]](1)>>
-<<....test [[DBQueryServerRemainingRoute]](2)>>
-<<....test [[DBQueryServerSchedule]](1)>>
-<<....test [[DBQueryServerRemainingSchedule]](2)>>
-<<....test [[DBQueryServerMaxLoad]](2)>>
-<<....test [[DBQueryCountVertices]](0)>>
-<<....test [[DBQueryCountEdges]](0)>>
-<<....test [[DBQueryVertex]](1)>>
-<<....test [[DBQueryEdge]](2)>>
-<<....test [[DBQueryStatisticsEdges]](0)>>
-<<....test [[DBQueryMBR]](0)>>
-<<....test [[DBQueryCountServers]](0)>>
-<<....test [[DBQueryCountRequests]](0)>>
-<<....test [[DBQueryServerPendingAssignments]](2)>>
-<<....test [[DBQueryServerCompletedAssignments]](2)>>
-<<....test [[DBQueryServiceRate]](0)>>
-<<....test [[DBQueryBaseDistanceTotal]](0)>>
-<<....test [[DBQueryServerBaseDistanceTotal]](0)>>
-<<....test [[DBQueryRequestBaseDistanceTotal]](0)>>
-<<....test [[DBQueryServerTravelDistance]](1)>>
-<<....test [[DBQueryServerTravelDistanceTotal]](0)>>
-<<....test [[DBQueryServerCruisingDistance]](1)>>
-<<....test [[DBQueryServerCruisingDistanceTotal]](0)>>
-<<....test [[DBQueryServerServiceDistance]](1)>>
-<<....test [[DBQueryServerServiceDistanceTotal]](0)>>
-<<....test [[DBQueryRequestDetourDistance]](1)>>
-<<....test [[DBQueryRequestDetourDistanceTotal]](0)>>
-<<....test [[DBQueryRequestTransitDistance]](1)>>
-<<....test [[DBQueryRequestTransitDistanceTotal]](0)>>
-<<....test [[DBQueryServerTravelDuration]](1)>>
-<<....test [[DBQueryServerTravelDurationTotal]](0)>>
-<<....test [[DBQueryRequestPickupDuration]](1)>>
-<<....test [[DBQueryRequestPickupDurationTotal]](0)>>
-<<....test [[DBQueryRequestTransitDuration]](1)>>
-<<....test [[DBQueryRequestTransitDurationTotal]](0)>>
-<<....test [[DBQueryRequestTravelDuration]](1)>>
-<<....test [[DBQueryRequestTravelDurationTotal]](0)>>
-<<....test [[DBQueryRequestDepartureTime]](1)>>
-<<....test [[DBQueryServerDepartureTime]](1)>>
-<<....test [[DBQueryRequestArrivalTime]](1)>>
-<<....test [[DBQueryServerArrivalTime]](1)>>
+<<Run read tests>>=
+<<Test [[DBQuery]](2)>>
+<<Test [[DBQueryServer]](1)>>
+<<Test [[DBQueryRequest]](1)>>
+<<Test [[DBQueryQueuedRequests]](1)>>
+<<Test [[DBQueryServerLocationsAll]](1)>>
+<<Test [[DBQueryServerLocationsActive]](1)>>
+<<Test [[DBQueryServerRoute]](1)>>
+<<Test [[DBQueryServerRemainingRoute]](2)>>
+<<Test [[DBQueryServerSchedule]](1)>>
+<<Test [[DBQueryServerRemainingSchedule]](2)>>
+<<Test [[DBQueryServerMaxLoad]](2)>>
+<<Test [[DBQueryCountVertices]](0)>>
+<<Test [[DBQueryCountEdges]](0)>>
+<<Test [[DBQueryVertex]](1)>>
+<<Test [[DBQueryEdge]](2)>>
+<<Test [[DBQueryStatisticsEdges]](0)>>
+<<Test [[DBQueryMBR]](0)>>
+<<Test [[DBQueryCountServers]](0)>>
+<<Test [[DBQueryCountRequests]](0)>>
+<<Test [[DBQueryServerPendingAssignments]](2)>>
+<<Test [[DBQueryServerCompletedAssignments]](2)>>
+<<Test [[DBQueryServiceRate]](0)>>
+<<Test [[DBQueryBaseDistanceTotal]](0)>>
+<<Test [[DBQueryServerBaseDistanceTotal]](0)>>
+<<Test [[DBQueryRequestBaseDistanceTotal]](0)>>
+<<Test [[DBQueryServerTravelDistance]](1)>>
+<<Test [[DBQueryServerTravelDistanceTotal]](0)>>
+<<Test [[DBQueryServerCruisingDistance]](1)>>
+<<Test [[DBQueryServerCruisingDistanceTotal]](0)>>
+<<Test [[DBQueryServerServiceDistance]](1)>>
+<<Test [[DBQueryServerServiceDistanceTotal]](0)>>
+<<Test [[DBQueryRequestDetourDistance]](1)>>
+<<Test [[DBQueryRequestDetourDistanceTotal]](0)>>
+<<Test [[DBQueryRequestTransitDistance]](1)>>
+<<Test [[DBQueryRequestTransitDistanceTotal]](0)>>
+<<Test [[DBQueryServerTravelDuration]](1)>>
+<<Test [[DBQueryServerTravelDurationTotal]](0)>>
+<<Test [[DBQueryRequestPickupDuration]](1)>>
+<<Test [[DBQueryRequestPickupDurationTotal]](0)>>
+<<Test [[DBQueryRequestTransitDuration]](1)>>
+<<Test [[DBQueryRequestTransitDurationTotal]](0)>>
+<<Test [[DBQueryRequestTravelDuration]](1)>>
+<<Test [[DBQueryRequestTravelDurationTotal]](0)>>
+<<Test [[DBQueryRequestDepartureTime]](1)>>
+<<Test [[DBQueryServerDepartureTime]](1)>>
+<<Test [[DBQueryRequestArrivalTime]](1)>>
+<<Test [[DBQueryServerArrivalTime]](1)>>
 @
 
 \subsubsection{[[DBQuery]](2)}
 Test [[DBQuery]](2) with a simple select statement. The road network has
 46 vertices, plus 1 dummy vertex for a total of 47 vertices.
-<<....test [[DBQuery]](2)>>=
+<<Test [[DBQuery]](2)>>=
 {
   int output[] = storage.DBQuery("SELECT COUNT (*) FROM V", 1);
   if (output[0] != 47) {
@@ -168,7 +169,7 @@ Test [[DBQuery]](2) with a simple select statement. The road network has
 @
 
 \subsubsection{[[DBQueryServer]](1)}
-<<....test [[DBQueryServer]](1)>>=
+<<Test [[DBQueryServer]](1)>>=
 {
   int output[] = storage.DBQueryUser(1);
   if (!(output[0] == 1
@@ -189,7 +190,7 @@ Test [[DBQuery]](2) with a simple select statement. The road network has
 }
 @
 \subsubsection{[[DBQueryRequest]](1)}
-<<....test [[DBQueryRequest]](1)>>=
+<<Test [[DBQueryRequest]](1)>>=
 {
   int output[] = storage.DBQueryUser(10);
   if (!(output[0] == 10
@@ -212,17 +213,17 @@ Test [[DBQuery]](2) with a simple select statement. The road network has
 \subsubsection{[[DBQueryQueuedRequests]](1)}
 In the test database, Request 11 is never assigned. It appears
 at $t=5$ and times out after $t=35$.
-<<....test [[DBQueryQueuedRequests]](1)>>=
+<<Test [[DBQueryQueuedRequests]](1)>>=
 {
-  <<......test [[DBQueryQueuedRequests]](1) at t=0>>
-  <<......test [[DBQueryQueuedRequests]](1) at t=5>>
-  <<......test [[DBQueryQueuedRequests]](1) at t=35>>
-  <<......test [[DBQueryQueuedRequests]](1) at t=36>>
+  <<..test [[DBQueryQueuedRequests]](1) at t=0>>
+  <<..test [[DBQueryQueuedRequests]](1) at t=5>>
+  <<..test [[DBQueryQueuedRequests]](1) at t=35>>
+  <<..test [[DBQueryQueuedRequests]](1) at t=36>>
 }
 @
 As Request 11 has not appeared yet at $t=0$, we expect
 [[DBQueryQueuedRequests]] to return nothing.
-<<......test [[DBQueryQueuedRequests]](1) at t=0>>=
+<<..test [[DBQueryQueuedRequests]](1) at t=0>>=
 {
   int output[] = storage.DBQueryQueuedRequests(0);
   if (!(output.length/7 == 0)) {
@@ -236,7 +237,7 @@ As Request 11 has not appeared yet at $t=0$, we expect
 }
 @
 At $t=5$, Request 11 should have just appeared and be queued up.
-<<......test [[DBQueryQueuedRequests]](1) at t=5>>=
+<<..test [[DBQueryQueuedRequests]](1) at t=5>>=
 {
   int output[] = storage.DBQueryQueuedRequests(5);
   if (!(output.length/7 == 1)) {
@@ -261,7 +262,7 @@ At $t=5$, Request 11 should have just appeared and be queued up.
 }
 @
 At $t=35$, Request 11 should be just about to time out but still in the queue.
-<<......test [[DBQueryQueuedRequests]](1) at t=35>>=
+<<..test [[DBQueryQueuedRequests]](1) at t=35>>=
 {
   int output[] = storage.DBQueryQueuedRequests(35);
   if (!(output.length/7 == 1)) {
@@ -287,7 +288,7 @@ At $t=35$, Request 11 should be just about to time out but still in the queue.
 @
 At $t>35$, Request 11 should be timed out and there should be no queued
 requests.
-<<......test [[DBQueryQueuedRequests]](1) at t=36>>=
+<<..test [[DBQueryQueuedRequests]](1) at t=36>>=
 {
   int output[] = storage.DBQueryQueuedRequests(36);
   if (!(output.length/7 == 0)) {
@@ -306,15 +307,15 @@ and we expect no locations to be returned. When $t=44$, Server 2 is out of
 server, and Server 1 has just arrived at vertex 30. When $t=45$, Server 1
 has just ended service. When $t=46$, both Server 1 and Server 2 are out of
 service.
-<<....test [[DBQueryServerLocationsAll]](1)>>=
+<<Test [[DBQueryServerLocationsAll]](1)>>=
 {
-  <<......test [[DBQueryServerLocationsAll]](1) when $t=0$>>
-  <<......test [[DBQueryServerLocationsAll]](1) when $t=44$>>
-  <<......test [[DBQueryServerLocationsAll]](1) when $t=45$>>
-  <<......test [[DBQueryServerLocationsAll]](1) when $t=46$>>
+  <<..test [[DBQueryServerLocationsAll]](1) when $t=0$>>
+  <<..test [[DBQueryServerLocationsAll]](1) when $t=44$>>
+  <<..test [[DBQueryServerLocationsAll]](1) when $t=45$>>
+  <<..test [[DBQueryServerLocationsAll]](1) when $t=46$>>
 }
 @
-<<......test [[DBQueryServerLocationsAll]](1) when $t=0$>>=
+<<..test [[DBQueryServerLocationsAll]](1) when $t=0$>>=
 {
   int output[] = storage.DBQueryServerLocationsAll(0);
   if (!(output.length/3 == 0)) {
@@ -329,7 +330,7 @@ service.
 @
 Keep an out of for false fail due to wrong ordering that we assume out
 the [[output]] array.
-<<......test [[DBQueryServerLocationsAll]](1) when $t=44$>>=
+<<..test [[DBQueryServerLocationsAll]](1) when $t=44$>>=
 {
   int output[] = storage.DBQueryServerLocationsAll(44);
   if (!(output.length/3 == 2)) {
@@ -357,7 +358,7 @@ At $t=45$, Server 1 has just ended service and is now at the dummy vertex.
 Its last known location was at vertex 30 at $t=44$. We expect to see vertex
 30 returned here.
 Again keep an eye out for false fail due to ordering.
-<<......test [[DBQueryServerLocationsAll]](1) when $t=45$>>=
+<<..test [[DBQueryServerLocationsAll]](1) when $t=45$>>=
 {
   int output[] = storage.DBQueryServerLocationsAll(45);
   if (!(output.length/3 == 2)) {
@@ -382,7 +383,7 @@ Again keep an eye out for false fail due to ordering.
 }
 @
 We should get the same output at $t=45$ and at $t=46$.
-<<......test [[DBQueryServerLocationsAll]](1) when $t=46$>>=
+<<..test [[DBQueryServerLocationsAll]](1) when $t=46$>>=
 {
   int output[] = storage.DBQueryServerLocationsAll(45);
   if (!(output.length/3 == 2)) {
@@ -407,16 +408,16 @@ We should get the same output at $t=45$ and at $t=46$.
 }
 @
 \subsubsection{[[DBQueryServerLocationsActive]](1)}
-<<....test [[DBQueryServerLocationsActive]](1)>>=
+<<Test [[DBQueryServerLocationsActive]](1)>>=
 {
-  <<......test [[DBQueryServerLocationsActive]](1) when $t=0$>>
-  <<......test [[DBQueryServerLocationsActive]](1) when $t=1$>>
-  <<......test [[DBQueryServerLocationsActive]](1) when $t=44$>>
-  <<......test [[DBQueryServerLocationsActive]](1) when $t=45$>>
-  <<......test [[DBQueryServerLocationsActive]](1) when $t=500$>>
+  <<..test [[DBQueryServerLocationsActive]](1) when $t=0$>>
+  <<..test [[DBQueryServerLocationsActive]](1) when $t=1$>>
+  <<..test [[DBQueryServerLocationsActive]](1) when $t=44$>>
+  <<..test [[DBQueryServerLocationsActive]](1) when $t=45$>>
+  <<..test [[DBQueryServerLocationsActive]](1) when $t=500$>>
 }
 @
-<<......test [[DBQueryServerLocationsActive]](1) when $t=0$>>=
+<<..test [[DBQueryServerLocationsActive]](1) when $t=0$>>=
 {
   int output[] = storage.DBQueryServerLocationsActive(0);
   if (!(output.length/3 == 0)) {
@@ -429,7 +430,7 @@ We should get the same output at $t=45$ and at $t=46$.
   }
 }
 @
-<<......test [[DBQueryServerLocationsActive]](1) when $t=1$>>=
+<<..test [[DBQueryServerLocationsActive]](1) when $t=1$>>=
 {
   int output[] = storage.DBQueryServerLocationsActive(1);
   if (!(output.length/3 == 1)) {
@@ -449,7 +450,7 @@ We should get the same output at $t=45$ and at $t=46$.
   }
 }
 @
-<<......test [[DBQueryServerLocationsActive]](1) when $t=44$>>=
+<<..test [[DBQueryServerLocationsActive]](1) when $t=44$>>=
 {
   int output[] = storage.DBQueryServerLocationsActive(44);
   if (!(output.length/3 == 1)) {
@@ -471,7 +472,7 @@ We should get the same output at $t=45$ and at $t=46$.
 @
 Server 1 ends service at $t=45$, but is at a dummy vertex and is still
 eligible for future requests.
-<<......test [[DBQueryServerLocationsActive]](1) when $t=45$>>=
+<<..test [[DBQueryServerLocationsActive]](1) when $t=45$>>=
 {
   int output[] = storage.DBQueryServerLocationsActive(45);
   if (!(output.length/3 == 1)) {
@@ -485,7 +486,7 @@ eligible for future requests.
 }
 @
 Server 1 officially ends service at $t=500$ due to late window.
-<<......test [[DBQueryServerLocationsActive]](1) when $t=500$>>=
+<<..test [[DBQueryServerLocationsActive]](1) when $t=500$>>=
 {
   int output[] = storage.DBQueryServerLocationsActive(500);
   if (!(output.length/3 == 0)) {
@@ -499,7 +500,7 @@ Server 1 officially ends service at $t=500$ due to late window.
 }
 @
 \subsubsection{[[DBQueryServerRoute]](1)}
-<<....test [[DBQueryServerRoute]](1)>>=
+<<Test [[DBQueryServerRoute]](1)>>=
 {
   int output[] = storage.DBQueryServerRoute(2);
   if (!(output.length == 6)) {
@@ -528,12 +529,12 @@ We expect the remaining route to not include its origin when $t>=10$, but
 include the origin when $t<10$. Even though Server 2 is not in service when
 $t<10$, we can still query its remaining route in case the simulation engine
 wants to make adjustments to the route.
-<<....test [[DBQueryServerRemainingRoute]](2)>>=
-  <<......test [[DBQueryServerRemainingRoute]](2) at $t=9$>>
-  <<......test [[DBQueryServerRemainingRoute]](2) at $t=10$>>
-  <<......test [[DBQueryServerRemainingRoute]](2) at $t=11$>>
+<<Test [[DBQueryServerRemainingRoute]](2)>>=
+  <<..test [[DBQueryServerRemainingRoute]](2) at $t=9$>>
+  <<..test [[DBQueryServerRemainingRoute]](2) at $t=10$>>
+  <<..test [[DBQueryServerRemainingRoute]](2) at $t=11$>>
 @
-<<......test [[DBQueryServerRemainingRoute]](2) at $t=9$>>=
+<<..test [[DBQueryServerRemainingRoute]](2) at $t=9$>>=
 {
   int output[] = storage.DBQueryServerRemainingRoute(2, 9);
   if (!(output.length == 6)) {
@@ -556,7 +557,7 @@ wants to make adjustments to the route.
   }
 }
 @
-<<......test [[DBQueryServerRemainingRoute]](2) at $t=10$>>=
+<<..test [[DBQueryServerRemainingRoute]](2) at $t=10$>>=
 {
   int output[] = storage.DBQueryServerRemainingRoute(2, 10);
   if (!(output.length == 4)) {
@@ -577,7 +578,7 @@ wants to make adjustments to the route.
   }
 }
 @
-<<......test [[DBQueryServerRemainingRoute]](2) at $t=11$>>=
+<<..test [[DBQueryServerRemainingRoute]](2) at $t=11$>>=
 {
   int output[] = storage.DBQueryServerRemainingRoute(2, 11);
   if (!(output.length == 4)) {
@@ -599,7 +600,7 @@ wants to make adjustments to the route.
 }
 @
 \subsubsection{[[DBQueryServerSchedule]](1)}
-<<....test [[DBQueryServerSchedule]](1)>>=
+<<Test [[DBQueryServerSchedule]](1)>>=
 {
   int output[] = storage.DBQueryServerSchedule(1);
   if (!(output.length == 16)) {
@@ -637,15 +638,15 @@ wants to make adjustments to the route.
 The key here is that a dummy stop is \emph{always} returned if it exists,
 because a dummy is not a real destination, in other words the server has not
 really ended service yet.
-<<....test [[DBQueryServerRemainingSchedule]](2)>>=
+<<Test [[DBQueryServerRemainingSchedule]](2)>>=
 {
-  <<......test [[DBQueryServerRemainingSchedule]](2) when $t=43$>>
-  <<......test [[DBQueryServerRemainingSchedule]](2) when $t=44$>>
-  <<......test [[DBQueryServerRemainingSchedule]](2) when $t=45$>>
-  <<......test [[DBQueryServerRemainingSchedule]](2) when $t=46$>>
+  <<..test [[DBQueryServerRemainingSchedule]](2) when $t=43$>>
+  <<..test [[DBQueryServerRemainingSchedule]](2) when $t=44$>>
+  <<..test [[DBQueryServerRemainingSchedule]](2) when $t=45$>>
+  <<..test [[DBQueryServerRemainingSchedule]](2) when $t=46$>>
 }
 @
-<<......test [[DBQueryServerRemainingSchedule]](2) when $t=43$>>=
+<<..test [[DBQueryServerRemainingSchedule]](2) when $t=43$>>=
 {
   int output[] = storage.DBQueryServerRemainingSchedule(1, 43);
   if (!(output.length == 8)) {
@@ -670,7 +671,7 @@ really ended service yet.
   }
 }
 @
-<<......test [[DBQueryServerRemainingSchedule]](2) when $t=44$>>=
+<<..test [[DBQueryServerRemainingSchedule]](2) when $t=44$>>=
 {
   int output[] = storage.DBQueryServerRemainingSchedule(1, 44);
   if (!(output.length == 4)) {
@@ -693,7 +694,7 @@ really ended service yet.
 @
 At $t=45$, Server 1 has just arrived at its dummy destination. We are still
 going to return this destination as its remaining schedule.
-<<......test [[DBQueryServerRemainingSchedule]](2) when $t=45$>>=
+<<..test [[DBQueryServerRemainingSchedule]](2) when $t=45$>>=
 {
   int output[] = storage.DBQueryServerRemainingSchedule(1, 45);
   if (!(output.length == 4)) {
@@ -714,7 +715,7 @@ going to return this destination as its remaining schedule.
   }
 }
 @
-<<......test [[DBQueryServerRemainingSchedule]](2) when $t=46$>>=
+<<..test [[DBQueryServerRemainingSchedule]](2) when $t=46$>>=
 {
   int output[] = storage.DBQueryServerRemainingSchedule(1, 46);
   if (!(output.length == 4)) {
@@ -739,16 +740,16 @@ going to return this destination as its remaining schedule.
 Load changes happen right as a server arrives at a pick-up or drop-off.
 Server 1 makes a pick-up at $t=25$ and a drop-off at $t=44$. At $t=0$, Server 1
 has not appeared yet and its current load is empty.
-<<....test [[DBQueryServerMaxLoad]](2)>>=
+<<Test [[DBQueryServerMaxLoad]](2)>>=
 {
-  <<......test [[DBQueryServerMaxLoad]](2) when $t=0$>>
-  <<......test [[DBQueryServerMaxLoad]](2) when $t=24$>>
-  <<......test [[DBQueryServerMaxLoad]](2) when $t=25$>>
-  <<......test [[DBQueryServerMaxLoad]](2) when $t=26$>>
-  <<......test [[DBQueryServerMaxLoad]](2) when $t=44$>>
+  <<..test [[DBQueryServerMaxLoad]](2) when $t=0$>>
+  <<..test [[DBQueryServerMaxLoad]](2) when $t=24$>>
+  <<..test [[DBQueryServerMaxLoad]](2) when $t=25$>>
+  <<..test [[DBQueryServerMaxLoad]](2) when $t=26$>>
+  <<..test [[DBQueryServerMaxLoad]](2) when $t=44$>>
 }
 @
-<<......test [[DBQueryServerMaxLoad]](2) when $t=0$>>=
+<<..test [[DBQueryServerMaxLoad]](2) when $t=0$>>=
 {
   int output[] = storage.DBQueryServerMaxLoad(1, 0);
   if (!(output.length == 0)) {
@@ -761,7 +762,7 @@ has not appeared yet and its current load is empty.
   }
 }
 @
-<<......test [[DBQueryServerMaxLoad]](2) when $t=24$>>=
+<<..test [[DBQueryServerMaxLoad]](2) when $t=24$>>=
 {
   int output[] = storage.DBQueryServerMaxLoad(1, 24);
   if (!(output[0] == -10)) {
@@ -774,7 +775,7 @@ has not appeared yet and its current load is empty.
   }
 }
 @
-<<......test [[DBQueryServerMaxLoad]](2) when $t=25$>>=
+<<..test [[DBQueryServerMaxLoad]](2) when $t=25$>>=
 {
   int output[] = storage.DBQueryServerMaxLoad(1, 25);
   if (!(output[0] == -9)) {
@@ -787,7 +788,7 @@ has not appeared yet and its current load is empty.
   }
 }
 @
-<<......test [[DBQueryServerMaxLoad]](2) when $t=26$>>=
+<<..test [[DBQueryServerMaxLoad]](2) when $t=26$>>=
 {
   int output[] = storage.DBQueryServerMaxLoad(1, 26);
   if (!(output[0] == -9)) {
@@ -800,7 +801,7 @@ has not appeared yet and its current load is empty.
   }
 }
 @
-<<......test [[DBQueryServerMaxLoad]](2) when $t=44$>>=
+<<..test [[DBQueryServerMaxLoad]](2) when $t=44$>>=
 {
   int output[] = storage.DBQueryServerMaxLoad(1, 44);
   if (!(output[0] == -10)) {
@@ -816,7 +817,7 @@ has not appeared yet and its current load is empty.
 \subsubsection{[[DBQueryCountVertices]](0)}
 Method [[DBQueryCountVertices]](0) does not include the dummy vertex 0 in its
 count.
-<<....test [[DBQueryCountVertices]](0)>>=
+<<Test [[DBQueryCountVertices]](0)>>=
 {
   int output[] = storage.DBQueryCountVertices();
   if (!(output[0] == 46)) {
@@ -832,7 +833,7 @@ count.
 \subsubsection{[[DBQueryCountEdges]](0)}
 Method [[DBQueryCountEdges]](0) does not include edges to the dummy vertex 0 in
 its count.
-<<....test [[DBQueryCountEdges]](0)>>=
+<<Test [[DBQueryCountEdges]](0)>>=
 {
   int output[] = storage.DBQueryCountEdges();
   if (!(output[0] == 104)) {
@@ -846,7 +847,7 @@ its count.
 }
 @
 \subsubsection{[[DBQueryVertex]](1)}
-<<....test [[DBQueryVertex]](1)>>=
+<<Test [[DBQueryVertex]](1)>>=
 {
   int output[] = storage.DBQueryVertex(22);
   if (!(output[0] == 1040750029)
@@ -862,7 +863,7 @@ its count.
 }
 @
 \subsubsection{[[DBQueryEdge]](2)}
-<<....test [[DBQueryEdge]](2)>>=
+<<Test [[DBQueryEdge]](2)>>=
 {
   int output[] = storage.DBQueryEdge(22, 1);
   if (!(output[0] == 71)
@@ -878,7 +879,7 @@ its count.
 }
 @
 \subsubsection{[[DBQueryStatisticsEdges]](0)}
-<<....test [[DBQueryStatisticsEdges]](0)>>=
+<<Test [[DBQueryStatisticsEdges]](0)>>=
 {
   int output[] = storage.DBQueryStatisticsEdges();
   if (!(output[0] == 46)
@@ -898,7 +899,7 @@ its count.
 }
 @
 \subsubsection{[[DBQueryMBR]](0)}
-<<....test [[DBQueryMBR]](0)>>=
+<<Test [[DBQueryMBR]](0)>>=
 {
   int output[] = storage.DBQueryMBR();
   if (!(output[0] == 1040738577)
@@ -916,7 +917,7 @@ its count.
 }
 @
 \subsubsection{[[DBQueryCountServers]](0)}
-<<....test [[DBQueryCountServers]](0)>>=
+<<Test [[DBQueryCountServers]](0)>>=
 {
   int output[] = storage.DBQueryCountServers();
   if (!(output[0] == 2)) {
@@ -930,7 +931,7 @@ its count.
 }
 @
 \subsubsection{[[DBQueryCountRequests]](0)}
-<<....test [[DBQueryCountRequests]](0)>>=
+<<Test [[DBQueryCountRequests]](0)>>=
 {
   int output[] = storage.DBQueryCountRequests();
   if (!(output[0] == 2)) {
@@ -947,12 +948,12 @@ its count.
 The [[DBQueryServerPendingAssignments]] method gives the number of requests that
 a server still needs to drop-off (or pick-up and drop-off) at a given time.
 Server 1 makes its drop-off at $t=44$.
-<<....test [[DBQueryServerPendingAssignments]](2)>>=
-  <<......test [[DBQueryServerPendingAssignments]](2) when $t=43$>>
-  <<......test [[DBQueryServerPendingAssignments]](2) when $t=44$>>
-  <<......test [[DBQueryServerPendingAssignments]](2) when $t=45$>>
+<<Test [[DBQueryServerPendingAssignments]](2)>>=
+  <<..test [[DBQueryServerPendingAssignments]](2) when $t=43$>>
+  <<..test [[DBQueryServerPendingAssignments]](2) when $t=44$>>
+  <<..test [[DBQueryServerPendingAssignments]](2) when $t=45$>>
 @
-<<......test [[DBQueryServerPendingAssignments]](2) when $t=43$>>=
+<<..test [[DBQueryServerPendingAssignments]](2) when $t=43$>>=
 {
   int output[] = storage.DBQueryServerPendingAssignments(1, 43);
   if (!(output.length == 1)) {
@@ -969,7 +970,7 @@ Server 1 makes its drop-off at $t=44$.
   }
 }
 @
-<<......test [[DBQueryServerPendingAssignments]](2) when $t=44$>>=
+<<..test [[DBQueryServerPendingAssignments]](2) when $t=44$>>=
 {
   int output[] = storage.DBQueryServerPendingAssignments(1,44);
   if (!(output.length == 0)) {
@@ -982,7 +983,7 @@ Server 1 makes its drop-off at $t=44$.
   }
 }
 @
-<<......test [[DBQueryServerPendingAssignments]](2) when $t=45$>>=
+<<..test [[DBQueryServerPendingAssignments]](2) when $t=45$>>=
 {
   int output[] = storage.DBQueryServerPendingAssignments(1,45);
   if (!(output.length == 0)) {
@@ -996,12 +997,12 @@ Server 1 makes its drop-off at $t=44$.
 }
 @
 \subsubsection{[[DBQueryServerCompletedAssignments]](2)}
-<<....test [[DBQueryServerCompletedAssignments]](2)>>=
-  <<......test [[DBQueryServerCompletedAssignments]](2) when $t=43$>>
-  <<......test [[DBQueryServerCompletedAssignments]](2) when $t=44$>>
-  <<......test [[DBQueryServerCompletedAssignments]](2) when $t=45$>>
+<<Test [[DBQueryServerCompletedAssignments]](2)>>=
+  <<..test [[DBQueryServerCompletedAssignments]](2) when $t=43$>>
+  <<..test [[DBQueryServerCompletedAssignments]](2) when $t=44$>>
+  <<..test [[DBQueryServerCompletedAssignments]](2) when $t=45$>>
 @
-<<......test [[DBQueryServerCompletedAssignments]](2) when $t=43$>>=
+<<..test [[DBQueryServerCompletedAssignments]](2) when $t=43$>>=
 {
   int output[] = storage.DBQueryServerCompletedAssignments(1, 43);
   if (!(output.length == 0)) {
@@ -1014,7 +1015,7 @@ Server 1 makes its drop-off at $t=44$.
   }
 }
 @
-<<......test [[DBQueryServerCompletedAssignments]](2) when $t=44$>>=
+<<..test [[DBQueryServerCompletedAssignments]](2) when $t=44$>>=
 {
   int output[] = storage.DBQueryServerCompletedAssignments(1, 44);
   if (!(output.length == 1)) {
@@ -1031,7 +1032,7 @@ Server 1 makes its drop-off at $t=44$.
   }
 }
 @
-<<......test [[DBQueryServerCompletedAssignments]](2) when $t=45$>>=
+<<..test [[DBQueryServerCompletedAssignments]](2) when $t=45$>>=
 {
   int output[] = storage.DBQueryServerCompletedAssignments(1, 45);
   if (!(output.length == 1)) {
@@ -1049,7 +1050,7 @@ Server 1 makes its drop-off at $t=44$.
 }
 @
 \subsubsection{[[DBQueryServiceRate]](0)}
-<<....test [[DBQueryServiceRate]](0)>>=
+<<Test [[DBQueryServiceRate]](0)>>=
 {
   int output[] = storage.DBQueryServiceRate();
   if (!(output[0] == 5000)) {
@@ -1063,7 +1064,7 @@ Server 1 makes its drop-off at $t=44$.
 }
 @
 \subsubsection{[[DBQueryBaseDistanceTotal]](0)}
-<<....test [[DBQueryBaseDistanceTotal]](0)>>=
+<<Test [[DBQueryBaseDistanceTotal]](0)>>=
 {
   int output[] = storage.DBQueryBaseDistanceTotal();
   if (!(output[0] == 532)) {
@@ -1077,7 +1078,7 @@ Server 1 makes its drop-off at $t=44$.
 }
 @
 \subsubsection{[[DBQueryServerBaseDistanceTotal]](0)}
-<<....test [[DBQueryServerBaseDistanceTotal]](0)>>=
+<<Test [[DBQueryServerBaseDistanceTotal]](0)>>=
 {
   int output[] = storage.DBQueryServerBaseDistanceTotal();
   if (!(output[0] == 166)) {
@@ -1091,7 +1092,7 @@ Server 1 makes its drop-off at $t=44$.
 }
 @
 \subsubsection{[[DBQueryRequestBaseDistanceTotal]](0)}
-<<....test [[DBQueryRequestBaseDistanceTotal]](0)>>=
+<<Test [[DBQueryRequestBaseDistanceTotal]](0)>>=
 {
   int output[] = storage.DBQueryRequestBaseDistanceTotal();
   if (!(output[0] == 366)) {
@@ -1105,7 +1106,7 @@ Server 1 makes its drop-off at $t=44$.
 }
 @
 \subsubsection{[[DBQueryServerTravelDistance]](1)}
-<<....test [[DBQueryServerTravelDistance]](1)>>=
+<<Test [[DBQueryServerTravelDistance]](1)>>=
 {
   int output[] = storage.DBQueryServerTravelDistance(1);
   if (!(output[0] == 387)) {
@@ -1119,7 +1120,7 @@ Server 1 makes its drop-off at $t=44$.
 }
 @
 \subsubsection{[[DBQueryServerTravelDistanceTotal]](0)}
-<<....test [[DBQueryServerTravelDistanceTotal]](0)>>=
+<<Test [[DBQueryServerTravelDistanceTotal]](0)>>=
 {
   int output[] = storage.DBQueryServerTravelDistanceTotal();
   if (!(output[0] == 553)) {
@@ -1133,7 +1134,7 @@ Server 1 makes its drop-off at $t=44$.
 }
 @
 \subsubsection{[[DBQueryServerCruisingDistance]](1)}
-<<....test [[DBQueryServerCruisingDistance]](1)>>=
+<<Test [[DBQueryServerCruisingDistance]](1)>>=
 {
   int output[] = storage.DBQueryServerCruisingDistance(1);
   if (!(output[0] == 213)) {
@@ -1147,7 +1148,7 @@ Server 1 makes its drop-off at $t=44$.
 }
 @
 \subsubsection{[[DBQueryServerCruisingDistanceTotal]](0)}
-<<....test [[DBQueryServerCruisingDistanceTotal]](0)>>=
+<<Test [[DBQueryServerCruisingDistanceTotal]](0)>>=
 {
   int output[] = storage.DBQueryServerCruisingDistanceTotal();
   if (!(output[0] == 379)) {
@@ -1161,7 +1162,7 @@ Server 1 makes its drop-off at $t=44$.
 }
 @
 \subsubsection{[[DBQueryServerServiceDistance]](1)}
-<<....test [[DBQueryServerServiceDistance]](1)>>=
+<<Test [[DBQueryServerServiceDistance]](1)>>=
 {
   int output[] = storage.DBQueryServerServiceDistance(1);
   if (!(output[0] == 174)) {
@@ -1175,7 +1176,7 @@ Server 1 makes its drop-off at $t=44$.
 }
 @
 \subsubsection{[[DBQueryServerServiceDistanceTotal]](0)}
-<<....test [[DBQueryServerServiceDistanceTotal]](0)>>=
+<<Test [[DBQueryServerServiceDistanceTotal]](0)>>=
 {
   int output[] = storage.DBQueryServerServiceDistanceTotal();
   if (!(output[0] == 174)) {
@@ -1189,7 +1190,7 @@ Server 1 makes its drop-off at $t=44$.
 }
 @
 \subsubsection{[[DBQueryRequestDetourDistance]](1)}
-<<....test [[DBQueryRequestDetourDistance]](1)>>=
+<<Test [[DBQueryRequestDetourDistance]](1)>>=
 {
   int output[] = storage.DBQueryRequestDetourDistance(10);
   if (!(output[0] == 2)) {
@@ -1203,7 +1204,7 @@ Server 1 makes its drop-off at $t=44$.
 }
 @
 \subsubsection{[[DBQueryRequestDetourDistanceTotal]](0)}
-<<....test [[DBQueryRequestDetourDistanceTotal]](0)>>=
+<<Test [[DBQueryRequestDetourDistanceTotal]](0)>>=
 {
   int output[] = storage.DBQueryRequestDetourDistanceTotal();
   if (!(output[0] == 2)) {
@@ -1217,7 +1218,7 @@ Server 1 makes its drop-off at $t=44$.
 }
 @
 \subsubsection{[[DBQueryRequestTransitDistance]](1)}
-<<....test [[DBQueryRequestTransitDistance]](1)>>=
+<<Test [[DBQueryRequestTransitDistance]](1)>>=
 {
   int output[] = storage.DBQueryRequestTransitDistance(10);
   if (!(output[0] == 174)) {
@@ -1231,7 +1232,7 @@ Server 1 makes its drop-off at $t=44$.
 }
 @
 \subsubsection{[[DBQueryRequestTransitDistanceTotal]](0)}
-<<....test [[DBQueryRequestTransitDistanceTotal]](0)>>=
+<<Test [[DBQueryRequestTransitDistanceTotal]](0)>>=
 {
   int output[] = storage.DBQueryRequestTransitDistanceTotal();
   if (!(output[0] == 174)) {
@@ -1245,7 +1246,7 @@ Server 1 makes its drop-off at $t=44$.
 }
 @
 \subsubsection{[[DBQueryServerTravelDuration]](1)}
-<<....test [[DBQueryServerTravelDuration]](1)>>=
+<<Test [[DBQueryServerTravelDuration]](1)>>=
 {
   int output[] = storage.DBQueryServerTravelDuration(1);
   if (!(output[0] == 44)) {
@@ -1259,7 +1260,7 @@ Server 1 makes its drop-off at $t=44$.
 }
 @
 \subsubsection{[[DBQueryServerTravelDurationTotal]](0)}
-<<....test [[DBQueryServerTravelDurationTotal]](0)>>=
+<<Test [[DBQueryServerTravelDurationTotal]](0)>>=
 {
   int output[] = storage.DBQueryServerTravelDurationTotal();
   if (!(output[0] == 62)) {
@@ -1274,7 +1275,7 @@ Server 1 makes its drop-off at $t=44$.
 @
 \subsubsection{[[DBQueryRequestPickupDuration]](1)}
 Request 10 gets picked up at $t=25$, but appears on the road network at $t=0$.
-<<....test [[DBQueryRequestPickupDuration]](1)>>=
+<<Test [[DBQueryRequestPickupDuration]](1)>>=
 {
   int output[] = storage.DBQueryRequestPickupDuration(10);
   if (!(output[0] == 25)) {
@@ -1288,7 +1289,7 @@ Request 10 gets picked up at $t=25$, but appears on the road network at $t=0$.
 }
 @
 \subsubsection{[[DBQueryRequestPickupDurationTotal]](0)}
-<<....test [[DBQueryRequestPickupDurationTotal]](0)>>=
+<<Test [[DBQueryRequestPickupDurationTotal]](0)>>=
 {
   int output[] = storage.DBQueryRequestPickupDurationTotal();
   if (!(output[0] == 25)) {
@@ -1303,7 +1304,7 @@ Request 10 gets picked up at $t=25$, but appears on the road network at $t=0$.
 @
 \subsubsection{[[DBQueryRequestTransitDuration]](1)}
 Request 10 is picked up at $t=25$ and dropped off at $t=44$.
-<<....test [[DBQueryRequestTransitDuration]](1)>>=
+<<Test [[DBQueryRequestTransitDuration]](1)>>=
 {
   int output[] = storage.DBQueryRequestTransitDuration(10);
   if (!(output[0] == 19)) {
@@ -1317,7 +1318,7 @@ Request 10 is picked up at $t=25$ and dropped off at $t=44$.
 }
 @
 \subsubsection{[[DBQueryRequestTransitDurationTotal]](0)}
-<<....test [[DBQueryRequestTransitDurationTotal]](0)>>=
+<<Test [[DBQueryRequestTransitDurationTotal]](0)>>=
 {
   int output[] = storage.DBQueryRequestTransitDurationTotal();
   if (!(output[0] == 19)) {
@@ -1333,7 +1334,7 @@ Request 10 is picked up at $t=25$ and dropped off at $t=44$.
 \subsubsection{[[DBQueryRequestTravelDuration]](1)}
 Request 11 appeared at time $t=0$ and was finally dropped off at $t=44$. Its
 travel duration is $44-0=44$.
-<<....test [[DBQueryRequestTravelDuration]](1)>>=
+<<Test [[DBQueryRequestTravelDuration]](1)>>=
 {
   int output[] = storage.DBQueryRequestTravelDuration(10);
   if (!(output[0] == 44)) {
@@ -1347,7 +1348,7 @@ travel duration is $44-0=44$.
 }
 @
 \subsubsection{[[DBQueryRequestTravelDurationTotal]](0)}
-<<....test [[DBQueryRequestTravelDurationTotal]](0)>>=
+<<Test [[DBQueryRequestTravelDurationTotal]](0)>>=
 {
   int output[] = storage.DBQueryRequestTravelDurationTotal();
   if (!(output[0] == 44)) {
@@ -1361,7 +1362,7 @@ travel duration is $44-0=44$.
 }
 @
 \subsubsection{[[DBQueryRequestDepartureTime]](1)}
-<<....test [[DBQueryRequestDepartureTime]](1)>>=
+<<Test [[DBQueryRequestDepartureTime]](1)>>=
 {
   int output[] = storage.DBQueryRequestDepartureTime(10);
   if (!(output[0] == 25)) {
@@ -1375,7 +1376,7 @@ travel duration is $44-0=44$.
 }
 @
 \subsubsection{[[DBQueryServerDepartureTime]](1)}
-<<....test [[DBQueryServerDepartureTime]](1)>>=
+<<Test [[DBQueryServerDepartureTime]](1)>>=
 {
   int output[] = storage.DBQueryServerDepartureTime(1);
   if (!(output[0] == 1)) {
@@ -1389,7 +1390,7 @@ travel duration is $44-0=44$.
 }
 @
 \subsubsection{[[DBQueryRequestArrivalTime]](1)}
-<<....test [[DBQueryRequestArrivalTime]](1)>>=
+<<Test [[DBQueryRequestArrivalTime]](1)>>=
 {
   int output[] = storage.DBQueryRequestArrivalTime(10);
   if (!(output[0] == 44)) {
@@ -1403,7 +1404,7 @@ travel duration is $44-0=44$.
 }
 @
 \subsubsection{[[DBQueryServerArrivalTime]](1)}
-<<....test [[DBQueryServerArrivalTime]](1)>>=
+<<Test [[DBQueryServerArrivalTime]](1)>>=
 {
   int output[] = storage.DBQueryServerArrivalTime(1);
   if (!(output[0] == 45)) {
@@ -1419,31 +1420,31 @@ travel duration is $44-0=44$.
 
 \subsection{Write Tests}
 \label{sec:write-tests}
-<<..run write tests>>=
-<<....test [[DBUpdateEdgeSpeed]](3)>>
-<<....test [[DBAddNewRequest]](1)>>
-<<....test [[DBAddNewServer]](2)>>
-<<....test [[DBUpdateServerRoute]](2)>>
-<<....test [[DBUpdateServerAddToSchedule]](4)>>
-/*<<....test [[DBUpdateServerRemoveFromSchedule]](4)>>*/
+<<Run write tests>>=
+<<Test [[DBUpdateEdgeSpeed]](3)>>
+<<Test [[DBAddNewRequest]](1)>>
+<<Test [[DBAddNewServer]](2)>>
+<<Test [[DBUpdateServerRoute]](2)>>
+<<Test [[DBUpdateServerAddToSchedule]](4)>>
+<<Test [[DBUpdateServerRemoveFromSchedule]](4)>>
 @
 \subsubsection{[[DBUpdateEdgeSpeed]](3)}
-<<....test [[DBUpdateEdgeSpeed]](3)>>=
+<<Test [[DBUpdateEdgeSpeed]](3)>>=
 {
-  //storage.DBUpdateEdgeSpeed(22, 1, 11);
-  //int[] output = storage.DBQueryEdge(22, 1);
-  //if (!(output[1] == 11)) {
-  //  Print("[FAIL] DBUpdateEdgeSpeed(3)");
-  //  Print("\tExpected 11; got "+output[1]);
-  //  count_failed++;
-  //} else {
-  //  Print("[PASS] DBUpdateEdgeSpeed(3)");
-  //  count_passed++;
-  //}
+  storage.DBUpdateEdgeSpeed(22, 1, 11);
+  int[] output = storage.DBQueryEdge(22, 1);
+  if (!(output[1] == 11)) {
+    Print("[FAIL] DBUpdateEdgeSpeed(3)");
+    Print("\tExpected 11; got "+output[1]);
+    count_failed++;
+  } else {
+    Print("[PASS] DBUpdateEdgeSpeed(3)");
+    count_passed++;
+  }
 }
 @
 \subsubsection{[[DBAddNewRequest]](1)}
-<<....test [[DBAddNewRequest]](1)>>=
+<<Test [[DBAddNewRequest]](1)>>=
 {
   storage.DBAddNewRequest(new int[] { 12, 1, 0, 200, 45, 24, 63 });
   int[] output = storage.DBQueryUser(12);
@@ -1465,7 +1466,7 @@ travel duration is $44-0=44$.
 }
 @
 \subsubsection{[[DBAddNewServer]](2)}
-<<....test [[DBAddNewServer]](2)>>=
+<<Test [[DBAddNewServer]](2)>>=
 {
   int[] u = new int[] { 13, -1, 0, 200, 27, 0, 0 };
   int[] r = new int[] { 0, 27, 1, 0 };
@@ -1516,7 +1517,7 @@ travel duration is $44-0=44$.
 @
 \subsubsection{[[DBUpdateServerRoute]](2)}
 We try to update the route for newly-inserted Server 13.
-<<....test [[DBUpdateServerRoute]](2)>>=
+<<Test [[DBUpdateServerRoute]](2)>>=
 {
   storage.DBUpdateServerRoute(13,
     new int[] { 0, 27, 7, 44, 14, 45, 15, 0 },
@@ -1543,14 +1544,14 @@ We try to update the route for newly-inserted Server 13.
 \subsubsection{[[DBUpdateServerAddToSchedule]](4)}
 We try to add Request 12 to Server 13's schedule. Then we check the route,
 schedule, and status of Request 12.
-<<....test [[DBUpdateServerAddToSchedule]](4)>>=
-  <<......test [[DBUpdateServerAddToSchedule]](4) route>>
-  <<......test [[DBUpdateServerAddToSchedule]](4) schedule>>
-  <<......test [[DBUpdateServerAddToSchedule]](4) request status when $t=13$>>
-  <<......test [[DBUpdateServerAddToSchedule]](4) request status when $t=14$>>
-  <<......test [[DBUpdateServerAddToSchedule]](4) request status when $t=21$>>
+<<Test [[DBUpdateServerAddToSchedule]](4)>>=
+  <<..test [[DBUpdateServerAddToSchedule]](4) route>>
+  <<..test [[DBUpdateServerAddToSchedule]](4) schedule>>
+  <<..test [[DBUpdateServerAddToSchedule]](4) request status when $t=13$>>
+  <<..test [[DBUpdateServerAddToSchedule]](4) request status when $t=14$>>
+  <<..test [[DBUpdateServerAddToSchedule]](4) request status when $t=21$>>
 @
-<<......test [[DBUpdateServerAddToSchedule]](4) route>>=
+<<..test [[DBUpdateServerAddToSchedule]](4) route>>=
 {
   storage.DBUpdateServerAddToSchedule(13,
     new int[] { 7, 44, 14, 45, 21, 24, 22, 0 },
@@ -1577,7 +1578,7 @@ schedule, and status of Request 12.
   }
 }
 @
-<<......test [[DBUpdateServerAddToSchedule]](4) schedule>>=
+<<..test [[DBUpdateServerAddToSchedule]](4) schedule>>=
 {
   int[] output = storage.DBQueryServerSchedule(13);
   if (!(output[0] == 0
@@ -1607,7 +1608,7 @@ schedule, and status of Request 12.
   }
 }
 @
-<<......test [[DBUpdateServerAddToSchedule]](4) request status when $t=13$>>=
+<<..test [[DBUpdateServerAddToSchedule]](4) request status when $t=13$>>=
 {
   int[] output = storage.DBQueryRequestStatus(12, 13);
   if (!(output.length == 0)) {
@@ -1620,7 +1621,7 @@ schedule, and status of Request 12.
   }
 }
 @
-<<......test [[DBUpdateServerAddToSchedule]](4) request status when $t=14$>>=
+<<..test [[DBUpdateServerAddToSchedule]](4) request status when $t=14$>>=
 {
   int[] output = storage.DBQueryRequestStatus(12, 14);
   if (!(output[0] == 1)) {
@@ -1633,7 +1634,7 @@ schedule, and status of Request 12.
   }
 }
 @
-<<......test [[DBUpdateServerAddToSchedule]](4) request status when $t=21$>>=
+<<..test [[DBUpdateServerAddToSchedule]](4) request status when $t=21$>>=
 {
   int[] output = storage.DBQueryRequestStatus(12, 21);
   if (!(output[0] == 2)) {
@@ -1648,14 +1649,14 @@ schedule, and status of Request 12.
 @
 \subsubsection{[[DBUpdateServerRemoveFromSchedule]](4)}
 Now it's time to remove Request 12 from Server 13...
-<<....test [[DBUpdateServerRemoveFromSchedule]](4)>>=
-  <<......test [[DBUpdateServerRemoveFromSchedule]](4) route>>
-  <<......test [[DBUpdateServerRemoveFromSchedule]](4) schedule>>
-  <<......test [[DBUpdateServerRemoveFromSchedule]](4) request status when $t=13$>>
-  <<......test [[DBUpdateServerRemoveFromSchedule]](4) request status when $t=14$>>
-  <<......test [[DBUpdateServerRemoveFromSchedule]](4) request status when $t=21$>>
+<<Test [[DBUpdateServerRemoveFromSchedule]](4)>>=
+  <<..test [[DBUpdateServerRemoveFromSchedule]](4) route>>
+  <<..test [[DBUpdateServerRemoveFromSchedule]](4) schedule>>
+  <<..test [[DBUpdateServerRemoveFromSchedule]](4) request status when $t=13$>>
+  <<..test [[DBUpdateServerRemoveFromSchedule]](4) request status when $t=14$>>
+  <<..test [[DBUpdateServerRemoveFromSchedule]](4) request status when $t=21$>>
 @
-<<......test [[DBUpdateServerRemoveFromSchedule]](4) route>>=
+<<..test [[DBUpdateServerRemoveFromSchedule]](4) route>>=
 {
   storage.DBUpdateServerRemoveFromSchedule(13,
     new int[] { 0, 27, 1, 0 },
@@ -1676,7 +1677,7 @@ Now it's time to remove Request 12 from Server 13...
   }
 }
 @
-<<......test [[DBUpdateServerRemoveFromSchedule]](4) schedule>>=
+<<..test [[DBUpdateServerRemoveFromSchedule]](4) schedule>>=
 {
   int[] output = storage.DBQueryServerSchedule(13);
   if (!(output[0] == 0
@@ -1697,7 +1698,7 @@ Now it's time to remove Request 12 from Server 13...
   }
 }
 @
-<<......test [[DBUpdateServerRemoveFromSchedule]](4) request status when $t=13$>>=
+<<..test [[DBUpdateServerRemoveFromSchedule]](4) request status when $t=13$>>=
 {
   int[] output = storage.DBQueryRequestStatus(12, 13);
   if (!(output.length == 0)) {
@@ -1710,7 +1711,7 @@ Now it's time to remove Request 12 from Server 13...
   }
 }
 @
-<<......test [[DBUpdateServerRemoveFromSchedule]](4) request status when $t=14$>>=
+<<..test [[DBUpdateServerRemoveFromSchedule]](4) request status when $t=14$>>=
 {
   int[] output = storage.DBQueryRequestStatus(12, 14);
   if (!(output.length == 0)) {
@@ -1723,7 +1724,7 @@ Now it's time to remove Request 12 from Server 13...
   }
 }
 @
-<<......test [[DBUpdateServerRemoveFromSchedule]](4) request status when $t=21$>>=
+<<..test [[DBUpdateServerRemoveFromSchedule]](4) request status when $t=21$>>=
 {
   int[] output = storage.DBQueryRequestStatus(12, 21);
   if (!(output.length == 0)) {

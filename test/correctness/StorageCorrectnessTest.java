@@ -1,7 +1,7 @@
 import com.github.jargors.Storage;
 import com.github.jargors.Tools;
 import java.time.LocalDateTime;
-public class StorageTest {
+public class StorageCorrectnessTest {
   private static int count_passed = 0;
   private static int count_failed = 0;
   public static void main(String[] args) {
@@ -992,16 +992,16 @@ public class StorageTest {
       }
     }
     {
-      //storage.DBUpdateEdgeSpeed(22, 1, 11);
-      //int[] output = storage.DBQueryEdge(22, 1);
-      //if (!(output[1] == 11)) {
-      //  Print("[FAIL] DBUpdateEdgeSpeed(3)");
-      //  Print("\tExpected 11; got "+output[1]);
-      //  count_failed++;
-      //} else {
-      //  Print("[PASS] DBUpdateEdgeSpeed(3)");
-      //  count_passed++;
-      //}
+      storage.DBUpdateEdgeSpeed(22, 1, 11);
+      int[] output = storage.DBQueryEdge(22, 1);
+      if (!(output[1] == 11)) {
+        Print("[FAIL] DBUpdateEdgeSpeed(3)");
+        Print("\tExpected 11; got "+output[1]);
+        count_failed++;
+      } else {
+        Print("[PASS] DBUpdateEdgeSpeed(3)");
+        count_passed++;
+      }
     }
     {
       storage.DBAddNewRequest(new int[] { 12, 1, 0, 200, 45, 24, 63 });
@@ -1177,80 +1177,80 @@ public class StorageTest {
           count_passed++;
         }
       }
-    /*  {
-          storage.DBUpdateServerRemoveFromSchedule(13,
-            new int[] { 0, 27, 1, 0 },
-            new int[] { 1, 0, 13 },
-            new int[] { 12 });
-          int[] output = storage.DBQueryServerRoute(13);
-          if (!(output[0] == 0
-            && output[1] == 27
-            && output[2] == 1
-            && output[3] == 0)) {
-            Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (1/5)");
-            Print("\tExpected (0, 27) (1, 0); got ");
-            tools.printRoute(output);
-            count_failed++;
-          } else {
-            Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (1/5)");
-            count_passed++;
-          }
+      {
+        storage.DBUpdateServerRemoveFromSchedule(13,
+          new int[] { 0, 27, 1, 0 },
+          new int[] { 1, 0, 13 },
+          new int[] { 12 });
+        int[] output = storage.DBQueryServerRoute(13);
+        if (!(output[0] == 0
+          && output[1] == 27
+          && output[2] == 1
+          && output[3] == 0)) {
+          Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (1/5)");
+          Print("\tExpected (0, 27) (1, 0); got ");
+          tools.printRoute(output);
+          count_failed++;
+        } else {
+          Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (1/5)");
+          count_passed++;
         }
-        {
-          int[] output = storage.DBQueryServerSchedule(13);
-          if (!(output[0] == 0
-            && output[1] == 27
-            && output[2] == 13
-            && output[3] == 0
-            && output[4] == 1
-            && output[5] == 0
-            && output[6] == 13
-            && output[7] == 0)) {
-            Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (2/5)");
-            Print("\tExpected (0, 27, 13, 0) (1, 0, 13, 0); got ");
-            tools.printSchedule(output);
-            count_failed++;
-          } else {
-            Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (2/5)");
-            count_passed++;
-          }
+      }
+      {
+        int[] output = storage.DBQueryServerSchedule(13);
+        if (!(output[0] == 0
+          && output[1] == 27
+          && output[2] == 13
+          && output[3] == 0
+          && output[4] == 1
+          && output[5] == 0
+          && output[6] == 13
+          && output[7] == 0)) {
+          Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (2/5)");
+          Print("\tExpected (0, 27, 13, 0) (1, 0, 13, 0); got ");
+          tools.printSchedule(output);
+          count_failed++;
+        } else {
+          Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (2/5)");
+          count_passed++;
         }
-        {
-          int[] output = storage.DBQueryRequestStatus(12, 13);
-          if (!(output.length == 0)) {
-            Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (3/5)");
-            Print("\tExpected 0; got "+output.length);
-            count_failed++;
-          } else {
-            Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (3/5)");
-            count_passed++;
-          }
+      }
+      {
+        int[] output = storage.DBQueryRequestStatus(12, 13);
+        if (!(output.length == 0)) {
+          Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (3/5)");
+          Print("\tExpected 0; got "+output.length);
+          count_failed++;
+        } else {
+          Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (3/5)");
+          count_passed++;
         }
-        {
-          int[] output = storage.DBQueryRequestStatus(12, 14);
-          if (!(output.length == 0)) {
-            Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (4/5)");
-            Print("\tExpected 0; got "+output.length);
-            count_failed++;
-          } else {
-            Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (4/5)");
-            count_passed++;
-          }
+      }
+      {
+        int[] output = storage.DBQueryRequestStatus(12, 14);
+        if (!(output.length == 0)) {
+          Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (4/5)");
+          Print("\tExpected 0; got "+output.length);
+          count_failed++;
+        } else {
+          Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (4/5)");
+          count_passed++;
         }
-        {
-          int[] output = storage.DBQueryRequestStatus(12, 21);
-          if (!(output.length == 0)) {
-            Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (5/5)");
-            Print("\tExpected 0; got "+output.length);
-            count_failed++;
-          } else {
-            Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (5/5)");
-            count_passed++;
-          }
-        }*/
+      }
+      {
+        int[] output = storage.DBQueryRequestStatus(12, 21);
+        if (!(output.length == 0)) {
+          Print("[FAIL] DBUpdateServerRemoveFromSchedule(4) (5/5)");
+          Print("\tExpected 0; got "+output.length);
+          count_failed++;
+        } else {
+          Print("[PASS] DBUpdateServerRemoveFromSchedule(4) (5/5)");
+          count_passed++;
+        }
+      }
     Print("Complete! Passed: "+count_passed+"; Failed: "+count_failed);
   }
   private static void Print(String msg) {
-    System.out.println("[StorageTest]["+LocalDateTime.now()+"] "+msg);
+    System.out.println("[StorageCorrectnessTest]["+LocalDateTime.now()+"] "+msg);
   }
 }

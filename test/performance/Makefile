@@ -1,6 +1,6 @@
-# Storage Test
+# Storage Performance Test
 # - Set CLASSPATH environmental variable before running `make`.
-WIDGET=StorageTest
+WIDGET=StoragePerformanceTest
 
 .PHONY : all clean
 
