@@ -252,10 +252,6 @@ public class Storage {
       output = DBFetch(conn, "S143", 7, t, t, REQUEST_TIMEOUT);
       temp1 = new int[output.length];
       for (int i = 0; i < (output.length - 6); i += 7) {
-        if (!lu_rstatus.containsKey(output[i])) {
-          temp2 = DBFetch(conn, "S148", 1, output[i]);
-          lu_rstatus.put(output[i], (temp2.length > 0 ? true : false));
-        }
         if (lu_rstatus.get(output[i]) == false) {
           temp1[(j + 0)] = output[(i + 0)];
           temp1[(j + 1)] = output[(i + 1)];
@@ -1917,16 +1913,31 @@ public class Storage {
         }
       }
      if (lu_users.isEmpty()) {
-        int[] output = DBQueryAllUsers();
-        for (int i = 0; i < (output.length/7); i++) {
-          int uid = output[(7*i)];
-          int uq = output[(7*i + 1)];
-          int ue = output[(7*i + 2)];
-          int ul = output[(7*i + 3)];
-          int uo = output[(7*i + 4)];
-          int ud = output[(7*i + 5)];
-          int ub = output[(7*i + 6)];
-          lu_users.put(uid, new int[] { uid, uq, ue, ul, uo, ud, ub });
+        int[] output = new int[] { };
+        try {
+          conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+          Print("Open connection "+conn.toString());
+          output = DBFetch(conn, "S141", 7);
+          for (int i = 0; i < (output.length/7); i++) {
+            int uid = output[(7*i)];
+            int uq = output[(7*i + 1)];
+            int ue = output[(7*i + 2)];
+            int ul = output[(7*i + 3)];
+            int uo = output[(7*i + 4)];
+            int ud = output[(7*i + 5)];
+            int ub = output[(7*i + 6)];
+            lu_users.put(uid, new int[] { uid, uq, ue, ul, uo, ud, ub });
+            if (uq > 0) {
+              lu_rstatus.put(uid, (DBFetch(conn, "S148", 1, uid).length > 0 ? true : false));
+            }
+          }
+          Print("Close connection "+conn.toString());
+          conn.close();
+        }
+        catch (SQLException e1) {
+          printSQLException(e1);
+          DBSaveBackup(DERBY_DUMPNAME);
+          throw new RuntimeException("database failure");
         }
      }
     }

@@ -1964,20 +1964,31 @@ for (int i = 0; i < (output.length/4); i++) \{
 \}
 \nwidentuses{\\{{DBQueryAllEdges}{DBQueryAllEdges}}\\{{DBQueryAllVertices}{DBQueryAllVertices}}\\{{lu{\char95}edges}{lu:unedges}}\\{{lu{\char95}vertices}{lu:unvertices}}}\nwindexuse{DBQueryAllEdges}{DBQueryAllEdges}{NW27XAxz-1xNLJe-1}\nwindexuse{DBQueryAllVertices}{DBQueryAllVertices}{NW27XAxz-1xNLJe-1}\nwindexuse{lu{\char95}edges}{lu:unedges}{NW27XAxz-1xNLJe-1}\nwindexuse{lu{\char95}vertices}{lu:unvertices}{NW27XAxz-1xNLJe-1}\nwendcode{}\nwbegindocs{121}\nwdocspar
 \nwenddocs{}\nwbegincode{122}\sublabel{NW27XAxz-2BAv1P-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2BAv1P-1}}}\moddef{..load users from database~{\nwtagstyle{}\subpageref{NW27XAxz-2BAv1P-1}}}\endmoddef\nwused{\\{NW27XAxz-b3Hn1-1}}
-int[] output = DBQueryAllUsers();
-for (int i = 0; i < (output.length/7); i++) \{
-  int uid = output[(7*i)];
-  int uq = output[(7*i + 1)];
-  int ue = output[(7*i + 2)];
-  int ul = output[(7*i + 3)];
-  int uo = output[(7*i + 4)];
-  int ud = output[(7*i + 5)];
-  int ub = output[(7*i + 6)];
-  lu_users.put(uid, new int[] \{ uid, uq, ue, ul, uo, ud, ub \});
+int[] output = new int[] \{ \};
+try \{
+  conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+  Print("Open connection "+conn.toString());
+  output = DBFetch(conn, "S141", 7);
+  for (int i = 0; i < (output.length/7); i++) \{
+    int uid = output[(7*i)];
+    int uq = output[(7*i + 1)];
+    int ue = output[(7*i + 2)];
+    int ul = output[(7*i + 3)];
+    int uo = output[(7*i + 4)];
+    int ud = output[(7*i + 5)];
+    int ub = output[(7*i + 6)];
+    lu_users.put(uid, new int[] \{ uid, uq, ue, ul, uo, ud, ub \});
+    if (uq > 0) \{
+      lu_rstatus.put(uid, (DBFetch(conn, "S148", 1, uid).length > 0 ? true : false));
+    \}
+  \}
+  Print("Close connection "+conn.toString());
+  conn.close();
 \}
-\nwidentuses{\\{{DBQueryAllUsers}{DBQueryAllUsers}}\\{{lu{\char95}users}{lu:unusers}}}\nwindexuse{DBQueryAllUsers}{DBQueryAllUsers}{NW27XAxz-2BAv1P-1}\nwindexuse{lu{\char95}users}{lu:unusers}{NW27XAxz-2BAv1P-1}\nwendcode{}\nwbegindocs{123}\nwdocspar
+\LA{}Catch and print \code{}SQLException\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-4P0tKA-1}}\RA{}
+\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{lu{\char95}rstatus}{lu:unrstatus}}\\{{lu{\char95}users}{lu:unusers}}\\{{Print}{Print}}\\{{S141}{S141}}\\{{S148}{S148}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-2BAv1P-1}\nwindexuse{lu{\char95}rstatus}{lu:unrstatus}{NW27XAxz-2BAv1P-1}\nwindexuse{lu{\char95}users}{lu:unusers}{NW27XAxz-2BAv1P-1}\nwindexuse{Print}{Print}{NW27XAxz-2BAv1P-1}\nwindexuse{S141}{S141}{NW27XAxz-2BAv1P-1}\nwindexuse{S148}{S148}{NW27XAxz-2BAv1P-1}\nwendcode{}\nwbegindocs{123}\nwdocspar
 
-\subsubsection{{\tt{}\protect\nwindexuse{DBSaveBackup}{DBSaveBackup}{NW27XAxz-2OKmqF-1}DBSaveBackup}(1)}
+\subsubsection{{\tt{}\protect\nosublabel{NW27XAxz-2BAv1P-1-u1}\protect\nwindexuse{DBSaveBackup}{DBSaveBackup}{NW27XAxz-2OKmqF-1}DBSaveBackup}(1)}
 The {\tt{}\protect\nwindexuse{DBSaveBackup}{DBSaveBackup}{NW27XAxz-2OKmqF-1}DBSaveBackup}(1) method can save a database snapshot to disk.
 \nwenddocs{}\nwbegincode{124}\sublabel{NW27XAxz-2OKmqF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2OKmqF-1}}}\moddef{Save backup~{\nwtagstyle{}\subpageref{NW27XAxz-2OKmqF-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-3}}
 public void DBSaveBackup(String p) throws RuntimeException \{
@@ -2033,7 +2044,7 @@ public void printSQLException(SQLException e) \{
 exception. Prints {\tt{}SQLException}s arising out of low-level SQL operations.
 Automatically exports the last good state of the database to disk for offline
 analysis.
-\nwenddocs{}\nwbegincode{130}\sublabel{NW27XAxz-4P0tKA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4P0tKA-1}}}\moddef{Catch and print \code{}SQLException\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-4P0tKA-1}}}\endmoddef\nwused{\\{NW27XAxz-4P4YpK-1}\\{NW27XAxz-b3Hn1-1}\\{NW27XAxz-2OKmqF-1}\\{NW27XAxz-1lVtry-1}\\{NW27XAxz-28BJIM-1}\\{NW27XAxz-1r65Fb-1}\\{NW27XAxz-3SpUqj-1}\\{NW27XAxz-4ISWm4-1}\\{NW27XAxz-IYVQQ-1}\\{NW27XAxz-4VFddh-1}\\{NW27XAxz-y828a-1}\\{NW27XAxz-lMiTm-1}\\{NW27XAxz-1MI9ro-1}\\{NW27XAxz-3AGrxZ-1}\\{NW27XAxz-3UaQCb-1}\\{NW27XAxz-1oPNKc-1}}
+\nwenddocs{}\nwbegincode{130}\sublabel{NW27XAxz-4P0tKA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4P0tKA-1}}}\moddef{Catch and print \code{}SQLException\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-4P0tKA-1}}}\endmoddef\nwused{\\{NW27XAxz-4P4YpK-1}\\{NW27XAxz-b3Hn1-1}\\{NW27XAxz-2BAv1P-1}\\{NW27XAxz-2OKmqF-1}\\{NW27XAxz-1lVtry-1}\\{NW27XAxz-28BJIM-1}\\{NW27XAxz-1r65Fb-1}\\{NW27XAxz-3SpUqj-1}\\{NW27XAxz-4ISWm4-1}\\{NW27XAxz-IYVQQ-1}\\{NW27XAxz-4VFddh-1}\\{NW27XAxz-y828a-1}\\{NW27XAxz-lMiTm-1}\\{NW27XAxz-1MI9ro-1}\\{NW27XAxz-3AGrxZ-1}\\{NW27XAxz-3UaQCb-1}\\{NW27XAxz-1oPNKc-1}}
 catch (SQLException e1) \{
   printSQLException(e1);
   DBSaveBackup(DERBY_DUMPNAME);
@@ -2969,10 +2980,6 @@ public int[] DBQueryQueuedRequests(int t) throws RuntimeException \{
     output = DBFetch(conn, "S143", 7, t, t, REQUEST_TIMEOUT);
     temp1 = new int[output.length];
     for (int i = 0; i < (output.length - 6); i += 7) \{
-      if (!lu_rstatus.containsKey(output[i])) \{
-        temp2 = DBFetch(conn, "S148", 1, output[i]);
-        lu_rstatus.put(output[i], (temp2.length > 0 ? true : false));
-      \}
       if (lu_rstatus.get(output[i]) == false) \{
         temp1[(j + 0)] = output[(i + 0)];
         temp1[(j + 1)] = output[(i + 1)];
@@ -2991,7 +2998,7 @@ public int[] DBQueryQueuedRequests(int t) throws RuntimeException \{
   return Arrays.copyOf(temp1, j);
 \}
 \nosublabel{NW27XAxz-3AGrxZ-1-u1}\nwindexdefn{DBQueryQueuedRequests}{DBQueryQueuedRequests}{NW27XAxz-3AGrxZ-1}\eatline
-\nwidentdefs{\\{{DBQueryQueuedRequests}{DBQueryQueuedRequests}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{lu{\char95}rstatus}{lu:unrstatus}}\\{{Print}{Print}}\\{{S143}{S143}}\\{{S148}{S148}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-3AGrxZ-1}\nwindexuse{lu{\char95}rstatus}{lu:unrstatus}{NW27XAxz-3AGrxZ-1}\nwindexuse{Print}{Print}{NW27XAxz-3AGrxZ-1}\nwindexuse{S143}{S143}{NW27XAxz-3AGrxZ-1}\nwindexuse{S148}{S148}{NW27XAxz-3AGrxZ-1}\nwendcode{}\nwbegindocs{228}\nwdocspar
+\nwidentdefs{\\{{DBQueryQueuedRequests}{DBQueryQueuedRequests}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{lu{\char95}rstatus}{lu:unrstatus}}\\{{Print}{Print}}\\{{S143}{S143}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-3AGrxZ-1}\nwindexuse{lu{\char95}rstatus}{lu:unrstatus}{NW27XAxz-3AGrxZ-1}\nwindexuse{Print}{Print}{NW27XAxz-3AGrxZ-1}\nwindexuse{S143}{S143}{NW27XAxz-3AGrxZ-1}\nwendcode{}\nwbegindocs{228}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServerLocationsAll}{DBQueryServerLocationsAll}{NW27XAxz-rvb17-1}DBQueryServerLocationsAll}(1)}
 \nwenddocs{}\nwbegincode{229}\sublabel{NW27XAxz-rvb17-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-rvb17-1}}}\moddef{Query all server locations~{\nwtagstyle{}\subpageref{NW27XAxz-rvb17-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
 public int[] DBQueryServerLocationsAll(int t) throws RuntimeException \{
@@ -4035,7 +4042,7 @@ pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
 \nwixlogsorted{c}{{Add new request}{NW27XAxz-4ISWm4-1}{\nwixu{NW27XAxz-4PbjF-2}\nwixd{NW27XAxz-4ISWm4-1}}}%
 \nwixlogsorted{c}{{Add new server}{NW27XAxz-IYVQQ-1}{\nwixu{NW27XAxz-4PbjF-2}\nwixd{NW27XAxz-IYVQQ-1}}}%
 \nwixlogsorted{c}{{Add new vertex}{NW27XAxz-28BJIM-1}{\nwixu{NW27XAxz-4PbjF-2}\nwixd{NW27XAxz-28BJIM-1}}}%
-\nwixlogsorted{c}{{Catch and print \code{}SQLException\edoc{}}{NW27XAxz-4P0tKA-1}{\nwixu{NW27XAxz-4P4YpK-1}\nwixu{NW27XAxz-b3Hn1-1}\nwixu{NW27XAxz-2OKmqF-1}\nwixu{NW27XAxz-1lVtry-1}\nwixd{NW27XAxz-4P0tKA-1}\nwixu{NW27XAxz-28BJIM-1}\nwixu{NW27XAxz-1r65Fb-1}\nwixu{NW27XAxz-3SpUqj-1}\nwixu{NW27XAxz-4ISWm4-1}\nwixu{NW27XAxz-IYVQQ-1}\nwixu{NW27XAxz-4VFddh-1}\nwixu{NW27XAxz-y828a-1}\nwixu{NW27XAxz-lMiTm-1}\nwixu{NW27XAxz-1MI9ro-1}\nwixu{NW27XAxz-3AGrxZ-1}\nwixu{NW27XAxz-3UaQCb-1}\nwixu{NW27XAxz-1oPNKc-1}}}%
+\nwixlogsorted{c}{{Catch and print \code{}SQLException\edoc{}}{NW27XAxz-4P0tKA-1}{\nwixu{NW27XAxz-4P4YpK-1}\nwixu{NW27XAxz-b3Hn1-1}\nwixu{NW27XAxz-2BAv1P-1}\nwixu{NW27XAxz-2OKmqF-1}\nwixu{NW27XAxz-1lVtry-1}\nwixd{NW27XAxz-4P0tKA-1}\nwixu{NW27XAxz-28BJIM-1}\nwixu{NW27XAxz-1r65Fb-1}\nwixu{NW27XAxz-3SpUqj-1}\nwixu{NW27XAxz-4ISWm4-1}\nwixu{NW27XAxz-IYVQQ-1}\nwixu{NW27XAxz-4VFddh-1}\nwixu{NW27XAxz-y828a-1}\nwixu{NW27XAxz-lMiTm-1}\nwixu{NW27XAxz-1MI9ro-1}\nwixu{NW27XAxz-3AGrxZ-1}\nwixu{NW27XAxz-3UaQCb-1}\nwixu{NW27XAxz-1oPNKc-1}}}%
 \nwixlogsorted{c}{{Catch and throw \code{}SQLException\edoc{}}{NW27XAxz-2x6EhZ-1}{\nwixd{NW27XAxz-2x6EhZ-1}\nwixu{NW27XAxz-4UQpM2-1}\nwixu{NW27XAxz-17Zt8W-1}\nwixu{NW27XAxz-1ZE0ye-1}\nwixu{NW27XAxz-322zJf-1}}}%
 \nwixlogsorted{c}{{Create Table CPD statement}{NW27XAxz-q5ofx-1}{\nwixd{NW27XAxz-q5ofx-1}\nwixu{NW27XAxz-4P4YpK-1}}}%
 \nwixlogsorted{c}{{Create Table CQ statement}{NW27XAxz-2YsMAX-1}{\nwixd{NW27XAxz-2YsMAX-1}\nwixu{NW27XAxz-4P4YpK-1}}}%
