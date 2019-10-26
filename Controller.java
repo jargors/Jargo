@@ -63,7 +63,7 @@ public class Controller {
   private Runnable RequestLoop = () -> {
     long A0 = System.currentTimeMillis();
     final int t0 = world_time;
-    int[] output = storage.DBQueryQueuedRequests2(world_time);
+    int[] output = storage.DBQueryQueuedRequests(world_time);
     final int t1 = world_time;
     long A1 = System.currentTimeMillis();
     Print("Time RL: "+(A1 - A0)+" ms");
