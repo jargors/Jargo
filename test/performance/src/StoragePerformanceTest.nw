@@ -70,13 +70,61 @@ public static void main(String[] args) {
   Print("Starting storage performance tests");
   Storage storage = new Storage();
   <<Load test database>>
+  <<Load performance tests>>
   Print("Complete!");
 }
 @ %def main
 
-We load a manually prepared test database.
+<<Begin timing block>>=
+long _t0 = System.currentTimeMillis();
+int _count = 0;
+float _dur = 0;
+@
+
+<<Increment call count>>=
+System.out.print("\r          \r"+_count);
+_count++;
+@
+
+<<End timing block>>=
+long _t1 = System.currentTimeMillis();
+_dur=((_t1 - _t0)/(float)(_count == 0 ? 1 : _count));
+System.out.print("\r");
+@
+
 <<Load test database>>=
 storage.DBLoadBackup("data/db");
+@
+
+<<Load performance tests>>=
+<<Test [[DBQueryQueuedRequests]](1)>>
+<<Test [[DBQueryServerLocationsActive]](1)>>
+@
+
+<<Test [[DBQueryQueuedRequests]](1)>>=
+{
+  <<Begin timing block>>
+  int[] output = new int[] { };
+  for (int t = 0; t < 1800; t++) {
+    output = storage.DBQueryQueuedRequests(t);
+    <<Increment call count>>
+  }
+  <<End timing block>>
+  Print("DBQueryQueuedRequests(1): "+_dur+" ms/call");
+}
+@
+
+<<Test [[DBQueryServerLocationsActive]](1)>>=
+{
+  <<Begin timing block>>
+  int[] output = new int[] { };
+  for (int t = 0; t < 1800; t++) {
+    output = storage.DBQueryServerLocationsActive(t);
+    <<Increment call count>>
+  }
+  <<End timing block>>
+  Print("DBQueryServerLocationsActive(1): "+_dur+" ms/call");
+}
 @
 
 <<[[StoragePerformanceTest]] private methods>>=
