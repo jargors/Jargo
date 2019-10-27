@@ -16,8 +16,9 @@ public abstract class Traffic {
   public void registerEdges(Map<Integer, Map<Integer, int[]>> src) {
     lu_edges = src;
   }
-  public void apply(int v1, int v2, int t) {
+  public float apply(int v1, int v2, int t) {
     Print("Call apply("+v1+", "+v2+", "+t+")");
+    return 0;
   }
   protected void Print(String msg) {
     if (DEBUG) {
