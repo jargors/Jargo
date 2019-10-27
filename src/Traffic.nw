@@ -1,0 +1,138 @@
+\documentclass{article}
+
+\usepackage{noweb}
+\noweboptions{smallcode,longchunks}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{colortbl}
+\usepackage[colorlinks=true]{hyperref}
+\usepackage{tikz}
+
+\newcommand{\hi}[1]{\noindent {\bf #1}}     % Define a handy paragraph opener
+
+\def\nwendcode{\endtrivlist \endgroup}      % Remove noweb page break penalty
+\let\nwdocspar=\par
+
+\title{Jargo Client\footnote{
+    \url{https://github.com/jargors/Client}}}
+\author{James J. Pan\\
+  \small{\href{mailto:pan-j16@mails.tsinghua.edu.cn}{pan-j16@mails.tsinghua.edu.cn}}}
+
+\begin{document}
+\maketitle
+\pagestyle{noweb}
+
+\tableofcontents
+
+\section{Introduction}
+\label{sec:introduction}
+We supply an abstract base class for developing Jargo traffic functions.  The
+base class is developed using the
+Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
+programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
+([[src/Traffic.nw]]) is the source for both the documentation
+([[doc/Traffic.tex]]) and the Java code (Traffic.java)\footnote{See the
+[[Makefile]] for build details.}.
+
+
+\section{Implementation Overview}
+<<Traffic.java>>=
+<<Traffic.java preamble>>
+<<[[Traffic]] definition>>
+@
+
+\subsection{Preamble}
+The preamble declares the package and imports dependencies.
+<<Traffic.java preamble>>=
+package com.github.jargors;
+import java.util.Map;
+import java.util.HashMap;
+import java.time.LocalDateTime;
+@
+
+\subsection{Class Definition}
+<<[[Traffic]] definition>>=
+public abstract class Traffic {
+  <<[[Traffic]] member variables>>
+  <<[[Traffic]] constructor>>
+  <<[[Traffic]] public methods>>
+  <<[[Traffic]] protected methods>>
+}
+@
+
+\subsection{Member Variables}
+<<[[Traffic]] member variables>>=
+protected Map<Integer, int[]> lu_vertices = new HashMap<>();
+protected Map<Integer, Map<Integer, int[]>> lu_edges = new HashMap<>();
+protected boolean DEBUG = false;
+@ %def lu_vertices lu_edges DEBUG
+
+
+\subsection{Constructor}
+<<[[Traffic]] constructor>>=
+public Traffic() { }
+@
+
+
+\section{Public Methods}
+<<[[Traffic]] public methods>>=
+<<Set debug flag>>
+<<Register vertices>>
+<<Register edges>>
+<<Apply traffic>>
+@
+
+\subsection{[[setDebug]](1)}
+<<Set debug flag>>=
+public void setDebug(boolean flag) {
+  DEBUG = flag;
+}
+@ %def setDebug
+
+\subsection{[[registerVertices]](1)}
+<<Register vertices>>=
+public void registerVertices(Map<Integer, int[]> src) {
+  lu_vertices = src;
+}
+@ %def registerVertices
+
+\subsection{[[registerEdges]](1)}
+<<Register edges>>=
+public void registerEdges(Map<Integer, Map<Integer, int[]>> src) {
+  lu_edges = src;
+}
+@ %def registerEdges
+
+
+\subsection{[[apply]](1)}
+<<Apply traffic>>=
+public void apply(int v1, int v2, int t) {
+  Print("Call apply("+v1+", "+v2+", "+t+")");
+}
+@
+
+\section{Protected Methods}
+<<[[Traffic]] protected methods>>=
+<<Print a message>>
+@
+
+\subsection{[[Print]](1)}
+<<Print a message>>=
+protected void Print(String msg) {
+  if (DEBUG) {
+    System.out.println("[Traffic]["+LocalDateTime.now()+"] "+msg);
+  }
+}
+@ %def Print
+
+\appendix
+
+\section{Appendix: List of Chunks}
+\label{ap:list-of-chunks}
+\nowebchunks
+
+\section{Appendix: List of Identifiers}
+\label{ap:list-of-identifiers}
+\nowebindex
+
+\end{document}
+
