@@ -1734,7 +1734,6 @@ import org.apache.commons.pool2.impl.GenericObjectPool;
 <<Storage.java preamble>>=
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Arrays;
 @ \item date-time class for printing timestamps.
 <<Storage.java preamble>>=
 import java.time.LocalDateTime;
@@ -1755,37 +1754,51 @@ public class Storage {
 \subsection{Member Variables}
 \label{sec:member-variables}
 \begin{itemize}
-\item We use maps to cache various things. (BEWARE, I may need to change these
-to ConcurrentHashMap, investigate the access patterns)
+\item We use maps to cache various things. BEWARE, IMPORTANT NOTES: (1) should
+I use ConcurrentHashMap? (2) can I guarantee [[lu_rstatus]] is consistent with
+what is in the database?
 <<[[Storage]] member variables>>=
-private Map<String, String> pstr = new HashMap<>();
-private Map<Integer, int[]> lu_vertices = new HashMap<>();
-private Map<Integer, Map<Integer, int[]>> lu_edges = new HashMap<>();
-private Map<Integer, int[]> lu_users = new HashMap<>();
-private Map<Integer, Boolean> lu_rstatus = new HashMap<>();  // <--*no guarantees
-@ %def pstr lu_vertices lu_edges lu_users lu_rstatus
-\item We declare configuration settings.
+private Map<String, String>               lu_pstr       = new HashMap<>();
+private Map<Integer, int[]>               lu_vertices   = new HashMap<>();
+private Map<Integer, Map<Integer, int[]>> lu_edges      = new HashMap<>();
+private Map<Integer, int[]>               lu_users      = new HashMap<>();
+private Map<Integer, Boolean>             lu_rstatus    = new HashMap<>();  //*
+@ %def lu_pstr lu_vertices lu_edges lu_users lu_rstatus
+\item We declare configuration settings. IMPORTANT NOTES: (1) Parameter
+[[STATEMENTS_MAX_COUNT]] gives maximum number of simultaneous prepared
+statements; (2) Parameter [[DERBY_PAGECACHESIZE]] sets the size of each page?
+According to the Derby Tuning Guide, it should be set even if using in-memory;
+the default value is 1000; (3) Parameter [[REQUEST_TIMEOUT]] sets how long a
+client is allowed to try to match a request before the request is automatically
+rejected, in other words if request $r$ is not assigned within
+$\pi_\texttt{e}(r)+\texttt{REQUEST\_TIMEOUT}$, then it is not tried again.
 <<[[Storage]] member variables>>=
-private String CONNECTIONS_URL = "jdbc:derby:memory:jargo;create=true";
+private       String CONNECTIONS_URL        = "jdbc:derby:memory:jargo;create=true";
 private final String CONNECTIONS_DRIVER_URL = "jdbc:apache:commons:dbcp:";
-private final String CONNECTIONS_POOL_NAME = "jargo";
-private String CONNECTIONS_POOL_URL = (CONNECTIONS_DRIVER_URL + CONNECTIONS_POOL_NAME);
-private final int STATEMENTS_MAX_COUNT = 20;
-private final int DERBY_PAGECACHESIZE = 8000;  // default=1000
-private final String DERBY_DUMPNAME = "db-lastgood";
-private final int REQUEST_TIMEOUT = 30;  // if still unassigned after re+REQUEST_TIMEOUT, do not try again
+private final String CONNECTIONS_POOL_NAME  = "jargo";
+private final String CONNECTIONS_POOL_URL   = (CONNECTIONS_DRIVER_URL + CONNECTIONS_POOL_NAME);
+private final int    STATEMENTS_MAX_COUNT   = 20;
+private final int    DERBY_PAGECACHESIZE    = 8000;
+private final String DERBY_DUMPNAME         = "db-lastgood";
+private final int    REQUEST_TIMEOUT        = 30;
 @ %def CONNECTIONS_URL CONNECTIONS_DRIVER_URL CONNECTIONS_POOL_NAME STATEMENTS_MAX_COUNT DERBY_PAGECACHESIZE DERBY_DUMPNAME
-\item We declare connection pool and factories.
+\item We declare connection pool and factories. The [[connection_factory]] is
+an object that returns new connections. The [[poolableconnection_factory]]
+registers [[connection_factory]] and then can return new poolable connections.
+The [[pool]] is an object containing the available poolable connections, and it
+is registered by the [[poolableconnection_factory]]. The [[driver]] is the JDBC
+[[DriverManager]].  We get a reference to [[DriverManager]] in order to
+register the pool.
 <<[[Storage]] member variables>>=
-private ConnectionFactory connection_factory;
-private PoolableConnectionFactory poolableconnection_factory;
-private ObjectPool<PoolableConnection> pool;
-private PoolingDriver driver;
-@
+private ConnectionFactory               connection_factory;
+private PoolableConnectionFactory       poolableconnection_factory;
+private ObjectPool<PoolableConnection>  pool;
+private PoolingDriver                   driver;
+@ %def connection_factory poolableconnection_factory pool driver
 \item We declare a version string and a debug flag.
 <<[[Storage]] member variables>>=
-private final String VERSION = "1.0.0";
-private boolean DEBUG = false;
+private final String  VERSION = "1.0.0";
+private       boolean DEBUG   = false;
 @ %def VERSION DEBUG
 \end{itemize}
 
@@ -1808,8 +1821,9 @@ public Storage() {
 \section{Public Methods}
 \label{sec:public-methods}
 This section introduces array diagrams to illustrate the expected shape of some
-method parameters. These diagrams show each array element in a box, with the contents
-of each box taking the form $\textit{position}:\textit{value}$. For example,
+method parameters. These diagrams show each array element in a box, with the
+contents of each box taking the form $\textit{position}:\textit{value}$. For
+example,
 
 \begin{tikzpicture}
 \small
@@ -1825,6 +1839,8 @@ value at position 1 is $b$; the value at position 2 is $c$.
 \label{sec:utilities}
 
 \subsubsection{[[setDebug]](1)}
+The [[setDebug]](1) method sets the [[DEBUG]] flag. If [[DEBUG]] is set to
+true, then debugging statements will be printed to terminal.
 <<Set debug flag>>=
 public void setDebug(boolean flag) {
   DEBUG = flag;
@@ -1835,7 +1851,8 @@ public void setDebug(boolean flag) {
 This method returns a read-only reference to the vertices cache,
 [[lu_vertices]]. It is used by Communicator so that vertex lookups performed by
 Client can use the cache directly instead of asking Storage. Real-world
-ridesharing algorithm clients likely have a similar vertex cache available.
+ridesharing algorithm clients likely would have a similar vertex cache
+available.
 <<Get reference to vertices cache>>=
 public final Map<Integer, int[]> getReferenceVerticesCache() {
   return lu_vertices;
@@ -1922,10 +1939,10 @@ public void DBLoadDataModel() throws RuntimeException {
 @ %def DBLoadDataModel
 
 \subsubsection{[[DBLoadBackup]](1)}
-The [[DBLoadBackup]](1) method can load a previously saved database snapshot
-into the storage layer. In this case, we need to reset the JDBC driver to use a
-different connection URL that points to the on-disk snapshot. The snapshot is
-then loaded into a new in-memory Derby instance.
+The [[DBLoadBackup]](1) method loads a previously saved database snapshot into
+the storage layer. In this case, we need to reset the JDBC driver to use a
+connection URL that points to the on-disk snapshot. The snapshot is then loaded
+into a new in-memory Derby instance.
 <<Load backup>>=
 public void DBLoadBackup(String p) throws RuntimeException {
   Print("Load database backup ("+p+")");
@@ -2972,7 +2989,6 @@ public int[] DBQueryRequestStatus(int rid, int t) throws RuntimeException {
 public int[] DBQueryQueuedRequests(int t) throws RuntimeException {
   int[] output = new int[] { };
   int[] temp1 = new int[] { };
-  int[] temp2 = new int[] { };
   int j = 0;
   try {
     Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
@@ -2995,7 +3011,17 @@ public int[] DBQueryQueuedRequests(int t) throws RuntimeException {
     conn.close();
   }
   <<Catch and print [[SQLException]]>>
-  return Arrays.copyOf(temp1, j);
+  int[] temp2 = new int[j];
+  for (int i = 0; i < j; i += 7) {
+    temp2[(i + 0)] = temp1[(i + 0)];
+    temp2[(i + 1)] = temp1[(i + 1)];
+    temp2[(i + 2)] = temp1[(i + 2)];
+    temp2[(i + 3)] = temp1[(i + 3)];
+    temp2[(i + 4)] = temp1[(i + 4)];
+    temp2[(i + 5)] = temp1[(i + 5)];
+    temp2[(i + 6)] = temp1[(i + 6)];
+  }
+  return temp2;
 }
 @ %def DBQueryQueuedRequests
 
@@ -3429,10 +3455,7 @@ private void Print(String msg) {
 The following code registers a connection pool to the JDBC driver.  Portions of
 this code are licensed by the Apache Software Foundation.  The connection pool
 allows us to concurrently submit multiple SQL commands against the database
-from different threads. For example, a client ridesharing algorithm in one
-thread may be querying from the database at the same time that the engine
-thread in the simulation controller is performing updates on server routes
-in response to simulated traffic.
+from different threads.
 <<Setup JDBC driver>>=
 private void setupDriver() throws RuntimeException {
   Print("Initialize JDBC driver");
@@ -3486,14 +3509,14 @@ conn.close();
 
 \subsection{[[PS]](1)}
 The [[PS]](1) method is our factory method for generating prepared statements.
-We retrieve the statement string from [[pstr]].  We set the result set to
+We retrieve the statement string from [[lu_pstr]].  We set the result set to
 scroll-insensitive and read-only in order to allow cursor movements.
 <<Prepare a prepared statement>>=
 private PreparedStatement PS(Connection conn, String k) throws SQLException {
   Print("Prepare statement "+k);
   PreparedStatement p = null;
   try {
-    p = conn.prepareStatement(pstr.get(k),
+    p = conn.prepareStatement(lu_pstr.get(k),
       ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
     p.clearBatch();
     p.clearParameters();
@@ -3512,7 +3535,7 @@ are inside the method.
 private int[] DBFetch(Connection conn,
     String k, int ncols, Integer... values) throws SQLException {
   PreparedStatement p = PS(conn, k);
-  Print("DBFetch("+pstr.get(k)+")");
+  Print("DBFetch("+lu_pstr.get(k)+")");
   Print("DBFetch use conn "+conn.toString());
   Print("DBFetch use thread "+Thread.currentThread().getName());
   int[] output = new int[] { };
@@ -3580,13 +3603,13 @@ private void PSSubmit(PreparedStatement... statements) throws SQLException {
 @ %def PSSubmit
 
 \subsection{[[PSInit]](0)}
-The [[PSInit]](0) method initializes the statement cache [[pstr]]. Each
+The [[PSInit]](0) method initializes the statement cache [[lu_pstr]]. Each
 statement is placed in its own chunk so it can be referenced wherever the
 statement is used.
 <<Initialize statements>>=
 private void PSInit() {
   Print("Initialize prepared statement strings");
-  pstr = new HashMap<>();
+  lu_pstr = new HashMap<>();
   String INS = "INSERT INTO ";
   String UPD = "UPDATE ";
   String DEL = "DELETE FROM ";
@@ -3694,127 +3717,127 @@ private void PSInit() {
 }
 @ %def PSInit
 <<S0>>=
-pstr.put("S0", INS+"V VALUES "+q3);
+lu_pstr.put("S0", INS+"V VALUES "+q3);
 @ %def S0
 <<S1>>=
-pstr.put("S1", INS+"E VALUES "+q4);
+lu_pstr.put("S1", INS+"E VALUES "+q4);
 @ %def S1
 <<S2>>=
-pstr.put("S2", INS+"UQ VALUES "+q2);
+lu_pstr.put("S2", INS+"UQ VALUES "+q2);
 @ %def S2
 <<S3>>=
-pstr.put("S3", INS+"UE VALUES "+q2);
+lu_pstr.put("S3", INS+"UE VALUES "+q2);
 @ %def S3
 <<S4>>=
-pstr.put("S4", INS+"UL VALUES "+q2);
+lu_pstr.put("S4", INS+"UL VALUES "+q2);
 @ %def S4
 <<S5>>=
-pstr.put("S5", INS+"UO VALUES "+q2);
+lu_pstr.put("S5", INS+"UO VALUES "+q2);
 @ %def S5
 <<S6>>=
-pstr.put("S6", INS+"UD VALUES "+q2);
+lu_pstr.put("S6", INS+"UD VALUES "+q2);
 @ %def S6
 <<S7>>=
-pstr.put("S7", INS+"UB VALUES "+q2);
+lu_pstr.put("S7", INS+"UB VALUES "+q2);
 @ %def S7
 <<S8>>=
-pstr.put("S8", INS+"S VALUES "+q7);
+lu_pstr.put("S8", INS+"S VALUES "+q7);
 @ %def S8
 <<S9>>=
-pstr.put("S9", INS+"R VALUES "+q7);
+lu_pstr.put("S9", INS+"R VALUES "+q7);
 @ %def S9
 <<S10>>=
-pstr.put("S10", INS+"W VALUES "+q8);
+lu_pstr.put("S10", INS+"W VALUES "+q8);
 @ %def S10
 <<S70>>=
-pstr.put("S70", SEL+"sid, sq, se, sl, so, sd, sb FROM S WHERE sid=?");
+lu_pstr.put("S70", SEL+"sid, sq, se, sl, so, sd, sb FROM S WHERE sid=?");
 @ %def S70
 <<S11>>=
-pstr.put("S11", INS+"CW VALUES "+q9);
+lu_pstr.put("S11", INS+"CW VALUES "+q9);
 @ %def S11
 <<S12>>=
-pstr.put("S12", INS+"PD VALUES "+q4);
+lu_pstr.put("S12", INS+"PD VALUES "+q4);
 @ %def S12
 <<S13>>=
-pstr.put("S13", INS+"CPD VALUES "+q12);
+lu_pstr.put("S13", INS+"CPD VALUES "+q12);
 @ %def S13
 <<S14>>=
-pstr.put("S14", INS+"CQ VALUES "+q14);
+lu_pstr.put("S14", INS+"CQ VALUES "+q14);
 @ %def S14
 <<S15>>=
-pstr.put("S15", UPD+"E SET nu=? WHERE v1=? AND v2=?");
+lu_pstr.put("S15", UPD+"E SET nu=? WHERE v1=? AND v2=?");
 @ %def S15
 <<S131>>=
-pstr.put("S131", UPD+"W SET nu=? WHERE v1=? AND v2=?");
+lu_pstr.put("S131", UPD+"W SET nu=? WHERE v1=? AND v2=?");
 @ %def S131
 <<S77>>=
-pstr.put("S77", UPD+"CW SET te=?, ve=? WHERE sid=?");
+lu_pstr.put("S77", UPD+"CW SET te=?, ve=? WHERE sid=?");
 @ %def S77
 <<S84>>=
-pstr.put("S84", UPD+"PD SET t2=? WHERE v2=? AND rid=?");
+lu_pstr.put("S84", UPD+"PD SET t2=? WHERE v2=? AND rid=?");
 @ %def S84
 <<S82>>=
-pstr.put("S82", UPD+"CPD SET tp=? WHERE vp=? AND rid=?");
+lu_pstr.put("S82", UPD+"CPD SET tp=? WHERE vp=? AND rid=?");
 @ %def S82
 <<S83>>=
-pstr.put("S83", UPD+"CPD SET td=? WHERE vd=? AND rid=?");
+lu_pstr.put("S83", UPD+"CPD SET td=? WHERE vd=? AND rid=?");
 @ %def S83
 <<S76>>=
-pstr.put("S76", DEL+"W WHERE sid=? AND t2>?");
+lu_pstr.put("S76", DEL+"W WHERE sid=? AND t2>?");
 @ %def S76
 <<S42>>=
-pstr.put("S42", DEL+"PD WHERE rid=?");
+lu_pstr.put("S42", DEL+"PD WHERE rid=?");
 @ %def S42
 <<S43>>=
-pstr.put("S43", DEL+"CPD WHERE rid=?");
+lu_pstr.put("S43", DEL+"CPD WHERE rid=?");
 @ %def S43
 <<S80>>=
-pstr.put("S80", DEL+"CQ WHERE sid=? AND t2>?");
+lu_pstr.put("S80", DEL+"CQ WHERE sid=? AND t2>?");
 @ %def S80
 <<S62>>=
-pstr.put("S62", SEL+"COUNT (*) FROM V WHERE v<>0");
+lu_pstr.put("S62", SEL+"COUNT (*) FROM V WHERE v<>0");
 @ %def S62
 <<S64>>=
-pstr.put("S64", SEL+"MIN (lng), MAX (lng), MIN (lat), MAX (lat) "
+lu_pstr.put("S64", SEL+"MIN (lng), MAX (lng), MIN (lat), MAX (lat) "
       + "FROM V WHERE v<>0");
 @ %def S64
 <<S63>>=
-pstr.put("S63", SEL+"COUNT (*) FROM E WHERE v1<>0 AND v2<>0");
+lu_pstr.put("S63", SEL+"COUNT (*) FROM E WHERE v1<>0 AND v2<>0");
 @ %def S63
 <<S65>>=
-pstr.put("S65", SEL+"MIN (dd), MAX (dd), SUM (dd) / COUNT (dd), "
+lu_pstr.put("S65", SEL+"MIN (dd), MAX (dd), SUM (dd) / COUNT (dd), "
       + "MIN (nu), MAX (nu), SUM (nu) / COUNT (nu) "
       + "FROM E WHERE v1<>0 AND v2<>0");
 @ %def S65
 <<S46>>=
-pstr.put("S46", SEL+"dd, nu FROM E WHERE v1=? AND v2=?");
+lu_pstr.put("S46", SEL+"dd, nu FROM E WHERE v1=? AND v2=?");
 @ %def S46
 <<S130>>=
-pstr.put("S130", SEL+"lng, lat FROM V WHERE v=?");
+lu_pstr.put("S130", SEL+"lng, lat FROM V WHERE v=?");
 @ %def S130
 <<S48>>=
-pstr.put("S48", SEL+"sq, se FROM S WHERE sid=?");
+lu_pstr.put("S48", SEL+"sq, se FROM S WHERE sid=?");
 @ %def S48
 <<S66>>=
-pstr.put("S66", SEL+"COUNT (*) FROM S");
+lu_pstr.put("S66", SEL+"COUNT (*) FROM S");
 @ %def S66
 <<S75>>=
-pstr.put("S75", SEL+"rid, rq, re, rl, ro, rd, rb FROM R WHERE rid=?");
+lu_pstr.put("S75", SEL+"rid, rq, re, rl, ro, rd, rb FROM R WHERE rid=?");
 @ %def S75
 <<S51>>=
-pstr.put("S51", SEL+"rq, re, rl, ro, rd FROM R WHERE rid=?");
+lu_pstr.put("S51", SEL+"rq, re, rl, ro, rd FROM R WHERE rid=?");
 @ %def S51
 <<S67>>=
-pstr.put("S67", SEL+"COUNT (*) FROM R");
+lu_pstr.put("S67", SEL+"COUNT (*) FROM R");
 @ %def S67
 <<S59>>=
-pstr.put("S59", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
+lu_pstr.put("S59", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
       + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
       + "GROUP BY sid"
       + ") as b ON a.sid=b.sid AND ABS(a.t2-?)=b.tdiff AND a.t2<=?");
 @ %def S59
 <<S128>>=
-pstr.put("S128", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
+lu_pstr.put("S128", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
       + "SELECT sid FROM CW WHERE te>? OR (ve=0 AND sl>?)"
       + ") as b ON a.sid=b.sid INNER JOIN ("
       + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
@@ -3822,19 +3845,19 @@ pstr.put("S128", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
       + ") as c ON a.sid=c.sid AND ABS(a.t2-?)=c.tdiff AND a.t2<=?");
 @ %def S128
 <<S60>>=
-pstr.put("S60", SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC");
+lu_pstr.put("S60", SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC");
 @ %def S60
 <<S129>>=
-pstr.put("S129", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC");
+lu_pstr.put("S129", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC");
 @ %def S129
 <<S61>>=
-pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
+lu_pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
       + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC");
 @ %def S61
 Need to join CQ in order to sort by order number [[o2]]. This query has
 worse performance after W (r\_server), CQ, PD grow.
 <<S69>>=
-pstr.put("S69", SEL+"t, v, Ls, Lr "
+lu_pstr.put("S69", SEL+"t, v, Ls, Lr "
       + "FROM r_server LEFT JOIN CQ ON t=t2 and v=v2 and Lr=rid "
       + "WHERE r_server.sid=?"
       + "   AND (t>? OR v=0)"
@@ -3843,158 +3866,158 @@ pstr.put("S69", SEL+"t, v, Ls, Lr "
 @ %def S69
 <<S68>>=
 // A "timeout" of 30 seconds is hard-coded here
-pstr.put("S68", SEL+"* FROM R WHERE re<=? AND ?<=re+30 AND rid NOT IN  "
+lu_pstr.put("S68", SEL+"* FROM R WHERE re<=? AND ?<=re+30 AND rid NOT IN  "
       + "(SELECT rid FROM assignments_r)");
 @ %def S68
 <<S85>>=
-pstr.put("S85", SEL+"uq FROM UQ WHERE uid=?");
+lu_pstr.put("S85", SEL+"uq FROM UQ WHERE uid=?");
 @ %def S85
 <<S86>>=
-pstr.put("S86", SEL+"tp, td FROM CPD WHERE rid=?");
+lu_pstr.put("S86", SEL+"tp, td FROM CPD WHERE rid=?");
 @ %def S86
 <<S73>>=
-pstr.put("S73", SEL+"q2 FROM CQ WHERE sid=? AND t2<=? "
+lu_pstr.put("S73", SEL+"q2 FROM CQ WHERE sid=? AND t2<=? "
       + "ORDER BY t2 DESC, q2 DESC FETCH FIRST ROW ONLY");
 @ %def S73
 <<S87>>=
-pstr.put("S87", SEL+"t2, q2, o2 FROM CQ WHERE sid=? AND t2<=? "
+lu_pstr.put("S87", SEL+"t2, q2, o2 FROM CQ WHERE sid=? AND t2<=? "
       + "ORDER BY t2 DESC, o2 DESC FETCH FIRST ROW ONLY");
 @ %def S87
 <<S100>>=
-pstr.put("S100", SEL+"rid FROM assignments WHERE t>? AND sid=?");
+lu_pstr.put("S100", SEL+"rid FROM assignments WHERE t>? AND sid=?");
 @ %def S100
 <<S101>>=
-pstr.put("S101", SEL+"rid FROM assignments WHERE t<=? AND sid=?");
+lu_pstr.put("S101", SEL+"rid FROM assignments WHERE t<=? AND sid=?");
 @ %def S101
 <<S102>>=
-pstr.put("S102", SEL+"* FROM service_rate");
+lu_pstr.put("S102", SEL+"* FROM service_rate");
 @ %def S102
 <<S103>>=
-pstr.put("S103", SEL+"* FROM dist_base");
+lu_pstr.put("S103", SEL+"* FROM dist_base");
 @ %def S103
 <<S104>>=
-pstr.put("S104", SEL+"val FROM dist_s_travel WHERE sid=?");
+lu_pstr.put("S104", SEL+"val FROM dist_s_travel WHERE sid=?");
 @ %def S104
 <<S105>>=
-pstr.put("S105", SEL+"SUM (val) FROM dist_s_travel");
+lu_pstr.put("S105", SEL+"SUM (val) FROM dist_s_travel");
 @ %def S105
 <<S106>>=
-pstr.put("S106", SEL+"val FROM dist_s_cruising WHERE sid=?");
+lu_pstr.put("S106", SEL+"val FROM dist_s_cruising WHERE sid=?");
 @ %def S106
 <<S107>>=
-pstr.put("S107", SEL+"SUM (val) FROM dist_s_cruising");
+lu_pstr.put("S107", SEL+"SUM (val) FROM dist_s_cruising");
 @ %def S107
 <<S108>>=
-pstr.put("S108", SEL+"val FROM dist_s_service WHERE sid=?");
+lu_pstr.put("S108", SEL+"val FROM dist_s_service WHERE sid=?");
 @ %def S108
 <<S109>>=
-pstr.put("S109", SEL+"SUM (val) FROM dist_s_service");
+lu_pstr.put("S109", SEL+"SUM (val) FROM dist_s_service");
 @ %def S109
 <<S110>>=
-pstr.put("S110", SEL+"val FROM dist_s_base");
+lu_pstr.put("S110", SEL+"val FROM dist_s_base");
 @ %def S110
 <<S111>>=
-pstr.put("S111", SEL+"val FROM dist_r_base");
+lu_pstr.put("S111", SEL+"val FROM dist_r_base");
 @ %def S111
 <<S112>>=
-pstr.put("S112", SEL+"val FROM dist_r_detour WHERE rid=?");
+lu_pstr.put("S112", SEL+"val FROM dist_r_detour WHERE rid=?");
 @ %def S112
 <<S113>>=
-pstr.put("S113", SEL+"SUM (val) FROM dist_r_detour");
+lu_pstr.put("S113", SEL+"SUM (val) FROM dist_r_detour");
 @ %def S113
 <<S114>>=
-pstr.put("S114", SEL+"val FROM dist_r_transit WHERE rid=?");
+lu_pstr.put("S114", SEL+"val FROM dist_r_transit WHERE rid=?");
 @ %def S114
 <<S115>>=
-pstr.put("S115", SEL+"SUM (val) FROM dist_r_transit");
+lu_pstr.put("S115", SEL+"SUM (val) FROM dist_r_transit");
 @ %def S115
 <<S116>>=
-pstr.put("S116", SEL+"val FROM dur_s_travel WHERE sid=?");
+lu_pstr.put("S116", SEL+"val FROM dur_s_travel WHERE sid=?");
 @ %def S116
 <<S117>>=
-pstr.put("S117", SEL+"SUM (val) FROM dur_s_travel");
+lu_pstr.put("S117", SEL+"SUM (val) FROM dur_s_travel");
 @ %def S117
 <<S118>>=
-pstr.put("S118", SEL+"val FROM dur_r_pickup WHERE rid=?");
+lu_pstr.put("S118", SEL+"val FROM dur_r_pickup WHERE rid=?");
 @ %def S118
 <<S119>>=
-pstr.put("S119", SEL+"SUM (val) FROM dur_r_pickup");
+lu_pstr.put("S119", SEL+"SUM (val) FROM dur_r_pickup");
 @ %def S119
 <<S120>>=
-pstr.put("S120", SEL+"val FROM dur_r_transit WHERE rid=?");
+lu_pstr.put("S120", SEL+"val FROM dur_r_transit WHERE rid=?");
 @ %def S120
 <<S121>>=
-pstr.put("S121", SEL+"SUM (val) FROM dur_r_transit");
+lu_pstr.put("S121", SEL+"SUM (val) FROM dur_r_transit");
 @ %def S121
 <<S122>>=
-pstr.put("S122", SEL+"val FROM dur_r_travel WHERE rid=?");
+lu_pstr.put("S122", SEL+"val FROM dur_r_travel WHERE rid=?");
 @ %def S122
 <<S123>>=
-pstr.put("S123", SEL+"SUM (val) FROM dur_r_travel");
+lu_pstr.put("S123", SEL+"SUM (val) FROM dur_r_travel");
 @ %def S123
 <<S124>>=
-pstr.put("S124", SEL+"val FROM t_r_depart WHERE rid=?");
+lu_pstr.put("S124", SEL+"val FROM t_r_depart WHERE rid=?");
 @ %def S124
 <<S125>>=
-pstr.put("S125", SEL+"val FROM t_s_depart WHERE sid=?");
+lu_pstr.put("S125", SEL+"val FROM t_s_depart WHERE sid=?");
 @ %def S125
 <<S126>>=
-pstr.put("S126", SEL+"val FROM t_r_arrive WHERE rid=?");
+lu_pstr.put("S126", SEL+"val FROM t_r_arrive WHERE rid=?");
 @ %def S126
 <<S127>>=
-pstr.put("S127", SEL+"val FROM t_s_arrive WHERE sid=?");
+lu_pstr.put("S127", SEL+"val FROM t_s_arrive WHERE sid=?");
 @ %def S127
 <<S133>>=
-pstr.put("S133", SEL+"val FROM f_status WHERE rid=? AND t<=? "
+lu_pstr.put("S133", SEL+"val FROM f_status WHERE rid=? AND t<=? "
     + "ORDER BY t DESC FETCH FIRST ROW ONLY");
 @ %def S133
 <<S134>>=
-pstr.put("S134", SEL+"sid FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
+lu_pstr.put("S134", SEL+"sid FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
 @ %def S134
 <<S135>>=
-pstr.put("S135", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
+lu_pstr.put("S135", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
     + "SELECT t1 FROM W WHERE sid=? AND ? BETWEEN t1 AND t2)");
 @ %def S135
 <<S136>>=
-pstr.put("S136", SEL+"* FROM V");
+lu_pstr.put("S136", SEL+"* FROM V");
 @ %def S136
 <<S137>>=
-pstr.put("S137", SEL+"* FROM E");
+lu_pstr.put("S137", SEL+"* FROM E");
 @ %def S137
 <<S138>>=
-pstr.put("S138", SEL+"val FROM dist_r_unassigned");
+lu_pstr.put("S138", SEL+"val FROM dist_r_unassigned");
 @ %def S138
 <<S139>>=
-pstr.put("S139", UPD+"CPD SET te=? WHERE sid=?");
+lu_pstr.put("S139", UPD+"CPD SET te=? WHERE sid=?");
 @ %def S139
 <<S140>>=
-pstr.put("S140", UPD+"CQ SET tp=?, td=? WHERE rid=?");
+lu_pstr.put("S140", UPD+"CQ SET tp=?, td=? WHERE rid=?");
 @ %def S140
 <<S141>>=
-pstr.put("S141", SEL+"* FROM r_user");
+lu_pstr.put("S141", SEL+"* FROM r_user");
 @ %def S141
 <<S142>>=
-pstr.put("S142", SEL+"SUM (dd) FROM W WHERE sid=? AND t2>?");
+lu_pstr.put("S142", SEL+"SUM (dd) FROM W WHERE sid=? AND t2>?");
 @ %def S142
 \appendix
 <<S143>>=
-pstr.put("S143", SEL+"* FROM R WHERE re<=? AND ?<=re+?");
+lu_pstr.put("S143", SEL+"* FROM R WHERE re<=? AND ?<=re+?");
 @ %def S143
 <<S144>>=
-pstr.put("S144", SEL+"t2, v2, rid FROM CQ WHERE sid=? AND t2>? ORDER BY o2 ASC");
+lu_pstr.put("S144", SEL+"t2, v2, rid FROM CQ WHERE sid=? AND t2>? ORDER BY o2 ASC");
 @ %def S144
 <<S145>>=
-pstr.put("S145", SEL+"te, ve FROM CW WHERE sid=?");
+lu_pstr.put("S145", SEL+"te, ve FROM CW WHERE sid=?");
 @ %def S145
 <<S146>>=
-pstr.put("S146", SEL+"t2, v2 FROM W WHERE sid=? AND t2=? AND v2<>0");
+lu_pstr.put("S146", SEL+"t2, v2 FROM W WHERE sid=? AND t2=? AND v2<>0");
 @ %def S146
 <<S147>>=
-pstr.put("S147", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
+lu_pstr.put("S147", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
     + "SELECT MAX (t2) FROM W WHERE sid=? AND v2<>0)");
 @ %def S147
 <<S148>>=
-pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
+lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
 @ %def S148
 
 \section{Appendix: List of Chunks}

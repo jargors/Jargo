@@ -12,28 +12,27 @@ import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Arrays;
 import java.time.LocalDateTime;
 public class Storage {
-  private Map<String, String> pstr = new HashMap<>();
-  private Map<Integer, int[]> lu_vertices = new HashMap<>();
-  private Map<Integer, Map<Integer, int[]>> lu_edges = new HashMap<>();
-  private Map<Integer, int[]> lu_users = new HashMap<>();
-  private Map<Integer, Boolean> lu_rstatus = new HashMap<>();  // <--*no guarantees
-  private String CONNECTIONS_URL = "jdbc:derby:memory:jargo;create=true";
+  private Map<String, String>               lu_pstr       = new HashMap<>();
+  private Map<Integer, int[]>               lu_vertices   = new HashMap<>();
+  private Map<Integer, Map<Integer, int[]>> lu_edges      = new HashMap<>();
+  private Map<Integer, int[]>               lu_users      = new HashMap<>();
+  private Map<Integer, Boolean>             lu_rstatus    = new HashMap<>();  //*
+  private       String CONNECTIONS_URL        = "jdbc:derby:memory:jargo;create=true";
   private final String CONNECTIONS_DRIVER_URL = "jdbc:apache:commons:dbcp:";
-  private final String CONNECTIONS_POOL_NAME = "jargo";
-  private String CONNECTIONS_POOL_URL = (CONNECTIONS_DRIVER_URL + CONNECTIONS_POOL_NAME);
-  private final int STATEMENTS_MAX_COUNT = 20;
-  private final int DERBY_PAGECACHESIZE = 8000;  // default=1000
-  private final String DERBY_DUMPNAME = "db-lastgood";
-  private final int REQUEST_TIMEOUT = 30;  // if still unassigned after re+REQUEST_TIMEOUT, do not try again
-  private ConnectionFactory connection_factory;
-  private PoolableConnectionFactory poolableconnection_factory;
-  private ObjectPool<PoolableConnection> pool;
-  private PoolingDriver driver;
-  private final String VERSION = "1.0.0";
-  private boolean DEBUG = false;
+  private final String CONNECTIONS_POOL_NAME  = "jargo";
+  private final String CONNECTIONS_POOL_URL   = (CONNECTIONS_DRIVER_URL + CONNECTIONS_POOL_NAME);
+  private final int    STATEMENTS_MAX_COUNT   = 20;
+  private final int    DERBY_PAGECACHESIZE    = 8000;
+  private final String DERBY_DUMPNAME         = "db-lastgood";
+  private final int    REQUEST_TIMEOUT        = 30;
+  private ConnectionFactory               connection_factory;
+  private PoolableConnectionFactory       poolableconnection_factory;
+  private ObjectPool<PoolableConnection>  pool;
+  private PoolingDriver                   driver;
+  private final String  VERSION = "1.0.0";
+  private       boolean DEBUG   = false;
   public Storage() {
     Print("Initialize Storage Interface "+VERSION);
     try {
@@ -244,7 +243,6 @@ public class Storage {
   public int[] DBQueryQueuedRequests(int t) throws RuntimeException {
     int[] output = new int[] { };
     int[] temp1 = new int[] { };
-    int[] temp2 = new int[] { };
     int j = 0;
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
@@ -271,7 +269,17 @@ public class Storage {
       DBSaveBackup(DERBY_DUMPNAME);
       throw new RuntimeException("database failure");
     }
-    return Arrays.copyOf(temp1, j);
+    int[] temp2 = new int[j];
+    for (int i = 0; i < j; i += 7) {
+      temp2[(i + 0)] = temp1[(i + 0)];
+      temp2[(i + 1)] = temp1[(i + 1)];
+      temp2[(i + 2)] = temp1[(i + 2)];
+      temp2[(i + 3)] = temp1[(i + 3)];
+      temp2[(i + 4)] = temp1[(i + 4)];
+      temp2[(i + 5)] = temp1[(i + 5)];
+      temp2[(i + 6)] = temp1[(i + 6)];
+    }
+    return temp2;
   }
   public int[] DBQueryServerLocationsAll(int t) throws RuntimeException {
     int[] output = new int[] { };
@@ -2024,7 +2032,7 @@ public class Storage {
     }
     private void PSInit() {
       Print("Initialize prepared statement strings");
-      pstr = new HashMap<>();
+      lu_pstr = new HashMap<>();
       String INS = "INSERT INTO ";
       String UPD = "UPDATE ";
       String DEL = "DELETE FROM ";
@@ -2037,128 +2045,128 @@ public class Storage {
       String q9  = "(?,?,?,?,?,?,?,?,?)";
       String q12 = "(?,?,?,?,?,?,?,?,?,?,?,?)";
       String q14 = "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-      pstr.put("S0", INS+"V VALUES "+q3);
-      pstr.put("S1", INS+"E VALUES "+q4);
-      pstr.put("S2", INS+"UQ VALUES "+q2);
-      pstr.put("S3", INS+"UE VALUES "+q2);
-      pstr.put("S4", INS+"UL VALUES "+q2);
-      pstr.put("S5", INS+"UO VALUES "+q2);
-      pstr.put("S6", INS+"UD VALUES "+q2);
-      pstr.put("S7", INS+"UB VALUES "+q2);
-      pstr.put("S8", INS+"S VALUES "+q7);
-      pstr.put("S9", INS+"R VALUES "+q7);
-      pstr.put("S10", INS+"W VALUES "+q8);
-      pstr.put("S11", INS+"CW VALUES "+q9);
-      pstr.put("S12", INS+"PD VALUES "+q4);
-      pstr.put("S13", INS+"CPD VALUES "+q12);
-      pstr.put("S14", INS+"CQ VALUES "+q14);
-      pstr.put("S15", UPD+"E SET nu=? WHERE v1=? AND v2=?");
-      pstr.put("S131", UPD+"W SET nu=? WHERE v1=? AND v2=?");
-      pstr.put("S77", UPD+"CW SET te=?, ve=? WHERE sid=?");
-      pstr.put("S84", UPD+"PD SET t2=? WHERE v2=? AND rid=?");
-      pstr.put("S82", UPD+"CPD SET tp=? WHERE vp=? AND rid=?");
-      pstr.put("S83", UPD+"CPD SET td=? WHERE vd=? AND rid=?");
-      pstr.put("S76", DEL+"W WHERE sid=? AND t2>?");
-      pstr.put("S42", DEL+"PD WHERE rid=?");
-      pstr.put("S43", DEL+"CPD WHERE rid=?");
-      pstr.put("S80", DEL+"CQ WHERE sid=? AND t2>?");
-      pstr.put("S62", SEL+"COUNT (*) FROM V WHERE v<>0");
-      pstr.put("S64", SEL+"MIN (lng), MAX (lng), MIN (lat), MAX (lat) "
+      lu_pstr.put("S0", INS+"V VALUES "+q3);
+      lu_pstr.put("S1", INS+"E VALUES "+q4);
+      lu_pstr.put("S2", INS+"UQ VALUES "+q2);
+      lu_pstr.put("S3", INS+"UE VALUES "+q2);
+      lu_pstr.put("S4", INS+"UL VALUES "+q2);
+      lu_pstr.put("S5", INS+"UO VALUES "+q2);
+      lu_pstr.put("S6", INS+"UD VALUES "+q2);
+      lu_pstr.put("S7", INS+"UB VALUES "+q2);
+      lu_pstr.put("S8", INS+"S VALUES "+q7);
+      lu_pstr.put("S9", INS+"R VALUES "+q7);
+      lu_pstr.put("S10", INS+"W VALUES "+q8);
+      lu_pstr.put("S11", INS+"CW VALUES "+q9);
+      lu_pstr.put("S12", INS+"PD VALUES "+q4);
+      lu_pstr.put("S13", INS+"CPD VALUES "+q12);
+      lu_pstr.put("S14", INS+"CQ VALUES "+q14);
+      lu_pstr.put("S15", UPD+"E SET nu=? WHERE v1=? AND v2=?");
+      lu_pstr.put("S131", UPD+"W SET nu=? WHERE v1=? AND v2=?");
+      lu_pstr.put("S77", UPD+"CW SET te=?, ve=? WHERE sid=?");
+      lu_pstr.put("S84", UPD+"PD SET t2=? WHERE v2=? AND rid=?");
+      lu_pstr.put("S82", UPD+"CPD SET tp=? WHERE vp=? AND rid=?");
+      lu_pstr.put("S83", UPD+"CPD SET td=? WHERE vd=? AND rid=?");
+      lu_pstr.put("S76", DEL+"W WHERE sid=? AND t2>?");
+      lu_pstr.put("S42", DEL+"PD WHERE rid=?");
+      lu_pstr.put("S43", DEL+"CPD WHERE rid=?");
+      lu_pstr.put("S80", DEL+"CQ WHERE sid=? AND t2>?");
+      lu_pstr.put("S62", SEL+"COUNT (*) FROM V WHERE v<>0");
+      lu_pstr.put("S64", SEL+"MIN (lng), MAX (lng), MIN (lat), MAX (lat) "
             + "FROM V WHERE v<>0");
-      pstr.put("S63", SEL+"COUNT (*) FROM E WHERE v1<>0 AND v2<>0");
-      pstr.put("S65", SEL+"MIN (dd), MAX (dd), SUM (dd) / COUNT (dd), "
+      lu_pstr.put("S63", SEL+"COUNT (*) FROM E WHERE v1<>0 AND v2<>0");
+      lu_pstr.put("S65", SEL+"MIN (dd), MAX (dd), SUM (dd) / COUNT (dd), "
             + "MIN (nu), MAX (nu), SUM (nu) / COUNT (nu) "
             + "FROM E WHERE v1<>0 AND v2<>0");
-      pstr.put("S46", SEL+"dd, nu FROM E WHERE v1=? AND v2=?");
-      pstr.put("S130", SEL+"lng, lat FROM V WHERE v=?");
-      pstr.put("S70", SEL+"sid, sq, se, sl, so, sd, sb FROM S WHERE sid=?");
-      pstr.put("S48", SEL+"sq, se FROM S WHERE sid=?");
-      pstr.put("S66", SEL+"COUNT (*) FROM S");
-      pstr.put("S75", SEL+"rid, rq, re, rl, ro, rd, rb FROM R WHERE rid=?");
-      pstr.put("S51", SEL+"rq, re, rl, ro, rd FROM R WHERE rid=?");
-      pstr.put("S67", SEL+"COUNT (*) FROM R");
-      pstr.put("S59", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
+      lu_pstr.put("S46", SEL+"dd, nu FROM E WHERE v1=? AND v2=?");
+      lu_pstr.put("S130", SEL+"lng, lat FROM V WHERE v=?");
+      lu_pstr.put("S70", SEL+"sid, sq, se, sl, so, sd, sb FROM S WHERE sid=?");
+      lu_pstr.put("S48", SEL+"sq, se FROM S WHERE sid=?");
+      lu_pstr.put("S66", SEL+"COUNT (*) FROM S");
+      lu_pstr.put("S75", SEL+"rid, rq, re, rl, ro, rd, rb FROM R WHERE rid=?");
+      lu_pstr.put("S51", SEL+"rq, re, rl, ro, rd FROM R WHERE rid=?");
+      lu_pstr.put("S67", SEL+"COUNT (*) FROM R");
+      lu_pstr.put("S59", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
             + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
             + "GROUP BY sid"
             + ") as b ON a.sid=b.sid AND ABS(a.t2-?)=b.tdiff AND a.t2<=?");
-      pstr.put("S128", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
+      lu_pstr.put("S128", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
             + "SELECT sid FROM CW WHERE te>? OR (ve=0 AND sl>?)"
             + ") as b ON a.sid=b.sid INNER JOIN ("
             + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
             + "GROUP BY sid"
             + ") as c ON a.sid=c.sid AND ABS(a.t2-?)=c.tdiff AND a.t2<=?");
-      pstr.put("S60", SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC");
-      pstr.put("S129", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC");
-      pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
+      lu_pstr.put("S60", SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC");
+      lu_pstr.put("S129", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC");
+      lu_pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
             + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC");
-      pstr.put("S69", SEL+"t, v, Ls, Lr "
+      lu_pstr.put("S69", SEL+"t, v, Ls, Lr "
             + "FROM r_server LEFT JOIN CQ ON t=t2 and v=v2 and Lr=rid "
             + "WHERE r_server.sid=?"
             + "   AND (t>? OR v=0)"
             + "   AND (Ls IS NOT NULL OR Lr IS NOT NULL)"
             + "ORDER BY t ASC, o2 ASC");
       // A "timeout" of 30 seconds is hard-coded here
-      pstr.put("S68", SEL+"* FROM R WHERE re<=? AND ?<=re+30 AND rid NOT IN  "
+      lu_pstr.put("S68", SEL+"* FROM R WHERE re<=? AND ?<=re+30 AND rid NOT IN  "
             + "(SELECT rid FROM assignments_r)");
-      pstr.put("S85", SEL+"uq FROM UQ WHERE uid=?");
-      pstr.put("S86", SEL+"tp, td FROM CPD WHERE rid=?");
-      pstr.put("S73", SEL+"q2 FROM CQ WHERE sid=? AND t2<=? "
+      lu_pstr.put("S85", SEL+"uq FROM UQ WHERE uid=?");
+      lu_pstr.put("S86", SEL+"tp, td FROM CPD WHERE rid=?");
+      lu_pstr.put("S73", SEL+"q2 FROM CQ WHERE sid=? AND t2<=? "
             + "ORDER BY t2 DESC, q2 DESC FETCH FIRST ROW ONLY");
-      pstr.put("S87", SEL+"t2, q2, o2 FROM CQ WHERE sid=? AND t2<=? "
+      lu_pstr.put("S87", SEL+"t2, q2, o2 FROM CQ WHERE sid=? AND t2<=? "
             + "ORDER BY t2 DESC, o2 DESC FETCH FIRST ROW ONLY");
-      pstr.put("S100", SEL+"rid FROM assignments WHERE t>? AND sid=?");
-      pstr.put("S101", SEL+"rid FROM assignments WHERE t<=? AND sid=?");
-      pstr.put("S102", SEL+"* FROM service_rate");
-      pstr.put("S103", SEL+"* FROM dist_base");
-      pstr.put("S104", SEL+"val FROM dist_s_travel WHERE sid=?");
-      pstr.put("S105", SEL+"SUM (val) FROM dist_s_travel");
-      pstr.put("S106", SEL+"val FROM dist_s_cruising WHERE sid=?");
-      pstr.put("S107", SEL+"SUM (val) FROM dist_s_cruising");
-      pstr.put("S108", SEL+"val FROM dist_s_service WHERE sid=?");
-      pstr.put("S109", SEL+"SUM (val) FROM dist_s_service");
-      pstr.put("S110", SEL+"val FROM dist_s_base");
-      pstr.put("S111", SEL+"val FROM dist_r_base");
-      pstr.put("S112", SEL+"val FROM dist_r_detour WHERE rid=?");
-      pstr.put("S113", SEL+"SUM (val) FROM dist_r_detour");
-      pstr.put("S114", SEL+"val FROM dist_r_transit WHERE rid=?");
-      pstr.put("S115", SEL+"SUM (val) FROM dist_r_transit");
-      pstr.put("S116", SEL+"val FROM dur_s_travel WHERE sid=?");
-      pstr.put("S117", SEL+"SUM (val) FROM dur_s_travel");
-      pstr.put("S118", SEL+"val FROM dur_r_pickup WHERE rid=?");
-      pstr.put("S119", SEL+"SUM (val) FROM dur_r_pickup");
-      pstr.put("S120", SEL+"val FROM dur_r_transit WHERE rid=?");
-      pstr.put("S121", SEL+"SUM (val) FROM dur_r_transit");
-      pstr.put("S122", SEL+"val FROM dur_r_travel WHERE rid=?");
-      pstr.put("S123", SEL+"SUM (val) FROM dur_r_travel");
-      pstr.put("S124", SEL+"val FROM t_r_depart WHERE rid=?");
-      pstr.put("S125", SEL+"val FROM t_s_depart WHERE sid=?");
-      pstr.put("S126", SEL+"val FROM t_r_arrive WHERE rid=?");
-      pstr.put("S127", SEL+"val FROM t_s_arrive WHERE sid=?");
-      pstr.put("S133", SEL+"val FROM f_status WHERE rid=? AND t<=? "
+      lu_pstr.put("S100", SEL+"rid FROM assignments WHERE t>? AND sid=?");
+      lu_pstr.put("S101", SEL+"rid FROM assignments WHERE t<=? AND sid=?");
+      lu_pstr.put("S102", SEL+"* FROM service_rate");
+      lu_pstr.put("S103", SEL+"* FROM dist_base");
+      lu_pstr.put("S104", SEL+"val FROM dist_s_travel WHERE sid=?");
+      lu_pstr.put("S105", SEL+"SUM (val) FROM dist_s_travel");
+      lu_pstr.put("S106", SEL+"val FROM dist_s_cruising WHERE sid=?");
+      lu_pstr.put("S107", SEL+"SUM (val) FROM dist_s_cruising");
+      lu_pstr.put("S108", SEL+"val FROM dist_s_service WHERE sid=?");
+      lu_pstr.put("S109", SEL+"SUM (val) FROM dist_s_service");
+      lu_pstr.put("S110", SEL+"val FROM dist_s_base");
+      lu_pstr.put("S111", SEL+"val FROM dist_r_base");
+      lu_pstr.put("S112", SEL+"val FROM dist_r_detour WHERE rid=?");
+      lu_pstr.put("S113", SEL+"SUM (val) FROM dist_r_detour");
+      lu_pstr.put("S114", SEL+"val FROM dist_r_transit WHERE rid=?");
+      lu_pstr.put("S115", SEL+"SUM (val) FROM dist_r_transit");
+      lu_pstr.put("S116", SEL+"val FROM dur_s_travel WHERE sid=?");
+      lu_pstr.put("S117", SEL+"SUM (val) FROM dur_s_travel");
+      lu_pstr.put("S118", SEL+"val FROM dur_r_pickup WHERE rid=?");
+      lu_pstr.put("S119", SEL+"SUM (val) FROM dur_r_pickup");
+      lu_pstr.put("S120", SEL+"val FROM dur_r_transit WHERE rid=?");
+      lu_pstr.put("S121", SEL+"SUM (val) FROM dur_r_transit");
+      lu_pstr.put("S122", SEL+"val FROM dur_r_travel WHERE rid=?");
+      lu_pstr.put("S123", SEL+"SUM (val) FROM dur_r_travel");
+      lu_pstr.put("S124", SEL+"val FROM t_r_depart WHERE rid=?");
+      lu_pstr.put("S125", SEL+"val FROM t_s_depart WHERE sid=?");
+      lu_pstr.put("S126", SEL+"val FROM t_r_arrive WHERE rid=?");
+      lu_pstr.put("S127", SEL+"val FROM t_s_arrive WHERE sid=?");
+      lu_pstr.put("S133", SEL+"val FROM f_status WHERE rid=? AND t<=? "
           + "ORDER BY t DESC FETCH FIRST ROW ONLY");
-      pstr.put("S134", SEL+"sid FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
-      pstr.put("S135", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
+      lu_pstr.put("S134", SEL+"sid FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
+      lu_pstr.put("S135", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
           + "SELECT t1 FROM W WHERE sid=? AND ? BETWEEN t1 AND t2)");
-      pstr.put("S136", SEL+"* FROM V");
-      pstr.put("S137", SEL+"* FROM E");
-      pstr.put("S138", SEL+"val FROM dist_r_unassigned");
-      pstr.put("S139", UPD+"CPD SET te=? WHERE sid=?");
-      pstr.put("S140", UPD+"CQ SET tp=?, td=? WHERE rid=?");
-      pstr.put("S141", SEL+"* FROM r_user");
-      pstr.put("S142", SEL+"SUM (dd) FROM W WHERE sid=? AND t2>?");
-      pstr.put("S143", SEL+"* FROM R WHERE re<=? AND ?<=re+?");
-      pstr.put("S144", SEL+"t2, v2, rid FROM CQ WHERE sid=? AND t2>? ORDER BY o2 ASC");
-      pstr.put("S145", SEL+"te, ve FROM CW WHERE sid=?");
-      pstr.put("S146", SEL+"t2, v2 FROM W WHERE sid=? AND t2=? AND v2<>0");
-      pstr.put("S147", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
+      lu_pstr.put("S136", SEL+"* FROM V");
+      lu_pstr.put("S137", SEL+"* FROM E");
+      lu_pstr.put("S138", SEL+"val FROM dist_r_unassigned");
+      lu_pstr.put("S139", UPD+"CPD SET te=? WHERE sid=?");
+      lu_pstr.put("S140", UPD+"CQ SET tp=?, td=? WHERE rid=?");
+      lu_pstr.put("S141", SEL+"* FROM r_user");
+      lu_pstr.put("S142", SEL+"SUM (dd) FROM W WHERE sid=? AND t2>?");
+      lu_pstr.put("S143", SEL+"* FROM R WHERE re<=? AND ?<=re+?");
+      lu_pstr.put("S144", SEL+"t2, v2, rid FROM CQ WHERE sid=? AND t2>? ORDER BY o2 ASC");
+      lu_pstr.put("S145", SEL+"te, ve FROM CW WHERE sid=?");
+      lu_pstr.put("S146", SEL+"t2, v2 FROM W WHERE sid=? AND t2=? AND v2<>0");
+      lu_pstr.put("S147", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
           + "SELECT MAX (t2) FROM W WHERE sid=? AND v2<>0)");
-      pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
+      lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
     }
     private PreparedStatement PS(Connection conn, String k) throws SQLException {
       Print("Prepare statement "+k);
       PreparedStatement p = null;
       try {
-        p = conn.prepareStatement(pstr.get(k),
+        p = conn.prepareStatement(lu_pstr.get(k),
           ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
         p.clearBatch();
         p.clearParameters();
@@ -2171,7 +2179,7 @@ public class Storage {
     private int[] DBFetch(Connection conn,
         String k, int ncols, Integer... values) throws SQLException {
       PreparedStatement p = PS(conn, k);
-      Print("DBFetch("+pstr.get(k)+")");
+      Print("DBFetch("+lu_pstr.get(k)+")");
       Print("DBFetch use conn "+conn.toString());
       Print("DBFetch use thread "+Thread.currentThread().getName());
       int[] output = new int[] { };
