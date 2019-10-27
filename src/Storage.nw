@@ -86,6 +86,7 @@ This file ([[src/Storage.nw]]) is the source for both the documentation
 <<Query ridesharing user>>
 <<Query request status>>
 <<Query queued requests>>
+<<Query active servers>>
 <<Query all server locations>>
 <<Query active server locations>>
 <<Query routes>>
@@ -3024,6 +3025,15 @@ public int[] DBQueryQueuedRequests(int t) throws RuntimeException {
   return temp2;
 }
 @ %def DBQueryQueuedRequests
+
+\subsubsection{[[DBQueryActiveServers]](1)}
+<<Query active servers>>=
+public int[] DBQueryActiveServers(int t) throws RuntimeException {
+  <<..read prepare>>
+  output = DBFetch(conn, "S134", 1, t, t, t);
+  <<..read return>>
+}
+@ %def DBQueryActiveServers
 
 \subsubsection{[[DBQueryServerLocationsAll]](1)}
 <<Query all server locations>>=

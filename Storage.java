@@ -281,6 +281,22 @@ public class Storage {
     }
     return temp2;
   }
+  public int[] DBQueryActiveServers(int t) throws RuntimeException {
+    int[] output = new int[] { };
+    try {
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      Print("Open connection "+conn.toString());
+    output = DBFetch(conn, "S134", 1, t, t, t);
+      Print("Close connection "+conn.toString());
+      conn.close();
+    }
+    catch (SQLException e1) {
+      printSQLException(e1);
+      DBSaveBackup(DERBY_DUMPNAME);
+      throw new RuntimeException("database failure");
+    }
+    return output;
+  }
   public int[] DBQueryServerLocationsAll(int t) throws RuntimeException {
     int[] output = new int[] { };
     try {

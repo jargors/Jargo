@@ -126,6 +126,64 @@ public class StorageCorrectnessTest {
     }
     {
       {
+        int output[] = storage.DBQueryActiveServers(0);
+        if (!(output.length == 0)) {
+          Print("[FAIL] DBQueryActiveServers(1) (1/4)");
+          Print("\tExpected 0; got "+output.length/3);
+          count_failed++;
+        } else {
+          Print("[PASS] DBQueryActiveServers(1) (1/4)");
+          count_passed++;
+        }
+      }
+      {
+        int output[] = storage.DBQueryActiveServers(44);
+        if (!(output.length == 1)) {
+          Print("[FAIL] DBQueryActiveServers(1) (2/4)");
+          Print("\tExpected 1; got "+output.length/3);
+          count_failed++;
+        } else if (!(output[0] == 1)) {
+          Print("[FAIL] DBQueryActiveServers(1) (2/4)");
+          Print("Expected (1); got ("+output[0]+")");
+          count_failed++;
+        } else {
+          Print("[PASS] DBQueryActiveServers(1) (2/4)");
+          count_passed++;
+        }
+      }
+      {
+        int output[] = storage.DBQueryActiveServers(45);
+        if (!(output.length == 1)) {
+          Print("[FAIL] DBQueryActiveServers(1) (3/4)");
+          Print("\tExpected 1; got "+output.length/3);
+          count_failed++;
+        } else if (!(output[0] == 1)) {
+          Print("[FAIL] DBQueryActiveServers(1) (3/4)");
+          Print("Expected (1); got ("+output[0]+")");
+          count_failed++;
+        } else {
+          Print("[PASS] DBQueryActiveServers(1) (3/4)");
+          count_passed++;
+        }
+      }
+      {
+        int output[] = storage.DBQueryActiveServers(46);
+        if (!(output.length == 1)) {
+          Print("[FAIL] DBQueryActiveServers(1) (4/4)");
+          Print("\tExpected 1; got "+output.length/3);
+          count_failed++;
+        } else if (!(output[0] == 1)) {
+          Print("[FAIL] DBQueryActiveServers(1) (4/4)");
+          Print("Expected (1); got ("+output[0]+")");
+          count_failed++;
+        } else {
+          Print("[PASS] DBQueryActiveServers(1) (4/4)");
+          count_passed++;
+        }
+      }
+    }
+    {
+      {
         int output[] = storage.DBQueryServerLocationsAll(0);
         if (!(output.length/3 == 0)) {
           Print("[FAIL] DBQueryServerLocationsAll(1) (1/4)");

@@ -106,6 +106,7 @@ private static void Print(String msg) {
 <<Test [[DBQueryServer]](1)>>
 <<Test [[DBQueryRequest]](1)>>
 <<Test [[DBQueryQueuedRequests]](1)>>
+<<Test [[DBQueryActiveServers]](1)>>
 <<Test [[DBQueryServerLocationsAll]](1)>>
 <<Test [[DBQueryServerLocationsActive]](1)>>
 <<Test [[DBQueryServerRoute]](1)>>
@@ -301,12 +302,88 @@ requests.
   }
 }
 @
-\subsubsection{[[DBQueryServerLocationsAll]](1)}
+
+\subsubsection{[[DBQueryActiveServers]](1)}
 We focus on four cases. When $t=0$, neither service has begun service yet,
 and we expect no locations to be returned. When $t=44$, Server 2 is out of
-server, and Server 1 has just arrived at vertex 30. When $t=45$, Server 1
+service, and Server 1 has just arrived at vertex 30. When $t=45$, Server 1
 has just ended service. When $t=46$, both Server 1 and Server 2 are out of
 service.
+<<Test [[DBQueryActiveServers]](1)>>=
+{
+  <<..test [[DBQueryActiveServers]](1) when $t=0$>>
+  <<..test [[DBQueryActiveServers]](1) when $t=44$>>
+  <<..test [[DBQueryActiveServers]](1) when $t=45$>>
+  <<..test [[DBQueryActiveServers]](1) when $t=46$>>
+}
+@
+<<..test [[DBQueryActiveServers]](1) when $t=0$>>=
+{
+  int output[] = storage.DBQueryActiveServers(0);
+  if (!(output.length == 0)) {
+    Print("[FAIL] DBQueryActiveServers(1) (1/4)");
+    Print("\tExpected 0; got "+output.length/3);
+    count_failed++;
+  } else {
+    Print("[PASS] DBQueryActiveServers(1) (1/4)");
+    count_passed++;
+  }
+}
+@
+<<..test [[DBQueryActiveServers]](1) when $t=44$>>=
+{
+  int output[] = storage.DBQueryActiveServers(44);
+  if (!(output.length == 1)) {
+    Print("[FAIL] DBQueryActiveServers(1) (2/4)");
+    Print("\tExpected 1; got "+output.length/3);
+    count_failed++;
+  } else if (!(output[0] == 1)) {
+    Print("[FAIL] DBQueryActiveServers(1) (2/4)");
+    Print("Expected (1); got ("+output[0]+")");
+    count_failed++;
+  } else {
+    Print("[PASS] DBQueryActiveServers(1) (2/4)");
+    count_passed++;
+  }
+}
+@
+<<..test [[DBQueryActiveServers]](1) when $t=45$>>=
+{
+  int output[] = storage.DBQueryActiveServers(45);
+  if (!(output.length == 1)) {
+    Print("[FAIL] DBQueryActiveServers(1) (3/4)");
+    Print("\tExpected 1; got "+output.length/3);
+    count_failed++;
+  } else if (!(output[0] == 1)) {
+    Print("[FAIL] DBQueryActiveServers(1) (3/4)");
+    Print("Expected (1); got ("+output[0]+")");
+    count_failed++;
+  } else {
+    Print("[PASS] DBQueryActiveServers(1) (3/4)");
+    count_passed++;
+  }
+}
+@
+<<..test [[DBQueryActiveServers]](1) when $t=46$>>=
+{
+  int output[] = storage.DBQueryActiveServers(46);
+  if (!(output.length == 1)) {
+    Print("[FAIL] DBQueryActiveServers(1) (4/4)");
+    Print("\tExpected 1; got "+output.length/3);
+    count_failed++;
+  } else if (!(output[0] == 1)) {
+    Print("[FAIL] DBQueryActiveServers(1) (4/4)");
+    Print("Expected (1); got ("+output[0]+")");
+    count_failed++;
+  } else {
+    Print("[PASS] DBQueryActiveServers(1) (4/4)");
+    count_passed++;
+  }
+}
+@
+
+\subsubsection{[[DBQueryServerLocationsAll]](1)}
+Same cases as [[DBQueryActiveServers]](1).
 <<Test [[DBQueryServerLocationsAll]](1)>>=
 {
   <<..test [[DBQueryServerLocationsAll]](1) when $t=0$>>
