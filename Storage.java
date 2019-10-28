@@ -1994,6 +1994,16 @@ public class Storage {
       e = e.getNextException();
     }
   }
+  public Connection _getConnection() throws RuntimeException {
+    try {
+      return DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    }
+    catch (SQLException e1) {
+      printSQLException(e1);
+      DBSaveBackup(DERBY_DUMPNAME);
+      throw new RuntimeException("database failure");
+    }
+  }
     private void Print(String msg) {
       if (DEBUG) {
         System.out.println("[Jargo][Storage]["+LocalDateTime.now()+"] "+msg);

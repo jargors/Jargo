@@ -123,6 +123,7 @@ This file ([[src/Storage.nw]]) is the source for both the documentation
 <<Save backup>>
 <<Print SQL driver statistics>>
 <<Print SQL exception>>
+<<Get connection (for internal use)>>
 @
 \end{minipage}
 }
@@ -2075,6 +2076,16 @@ catch (SQLException e) {
 }
 @
 \end{itemize}
+
+\subsubsection{[[_getConnection]](0)}
+<<Get connection (for internal use)>>=
+public Connection _getConnection() throws RuntimeException {
+  try {
+    return DriverManager.getConnection(CONNECTIONS_POOL_URL);
+  }
+  <<Catch and print [[SQLException]]>>
+}
+@
 
 \subsection{Write Methods}
 \label{sec:write-methods}
