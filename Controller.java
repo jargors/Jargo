@@ -67,6 +67,9 @@ public class Controller {
   public void setDebugClient(boolean flag) {
     client.setDebug(flag);
   }
+  public void setDebugCommunicator(boolean flag) {
+    communicator.setDebug(flag);
+  }
   public void setClient(Client target) {
     client = target;
     client.setCommunicator(communicator);
