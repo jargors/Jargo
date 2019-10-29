@@ -27,6 +27,7 @@ public class Controller {
   private int loop_delay = 0;
   // private int deviation_rate = 0.02;
   // private int breakdown_rate = 0.005;
+  private boolean DEBUG = false;
   private Runnable ClockLoop = () -> {
     communicator.setSimulationWorldTime(++world_time);
     storage.printSQLDriverStatistics();
@@ -56,6 +57,9 @@ public class Controller {
     storage = new Storage();
     communicator = new Communicator();
     communicator.setStorage(storage);
+  }
+  public void setDebug(boolean flag) {
+    DEBUG = flag;
   }
   public void setDebugStorage(boolean flag) {
     storage.setDebug(flag);

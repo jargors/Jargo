@@ -137,7 +137,8 @@ private int engine_update_period = 10;
 private int loop_delay = 0;
 // private int deviation_rate = 0.02;
 // private int breakdown_rate = 0.005;
-@ %def CSHIFT world_time initial_world_time final_world_time engine_update_period loop_delay
+private boolean DEBUG = false;
+@ %def CSHIFT world_time initial_world_time final_world_time engine_update_period loop_delay DEBUG
 \hi{Loops.} Jargo's simulation environment comprises four ``loops'', defined
 here, running in parallel. They are executed using Java's
 [[ScheduledExecutorService]] to control timing.
@@ -209,6 +210,7 @@ public Controller() {
 \label{sec:public-methods}
 \hi{General methods.}
 <<[[Controller]] public methods>>=
+<<Set debug>>
 <<Set storage debug>>
 <<Set client debug>>
 <<Set client>>
@@ -239,6 +241,12 @@ public Controller() {
 @
 
 \subsection{General methods}
+\subsubsection{[[setDebug]](1)}
+<<Set debug>>=
+public void setDebug(boolean flag) {
+  DEBUG = flag;
+}
+@ %def setDebug
 
 \subsubsection{[[setDebugStorage]](1)}
 <<Set storage debug>>=
