@@ -111,8 +111,8 @@ public class Tools {
           output[0] = starttime;
           output[1] = source;
           for (int i = 1; i < path.length; i++) {
-            u = path[(i - 1)] + 1;
-            v = path[i] + 1;
+            u = path[(i - 1)] ;
+            v = path[(i - 0)];
             edge = lu_edges.get(u).get(v);
             dd = edge[0];
             nu = edge[1];
