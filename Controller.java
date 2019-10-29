@@ -227,6 +227,9 @@ public class Controller {
   public int[] queryUser(int rid) throws RuntimeException {
     return storage.DBQueryUser(rid);
   }
+  public int[] queryQueuedRequests(int t) throws RuntimeException {
+    return storage.DBQueryQueuedRequests(t);
+  }
   public int[] queryRoute(int sid) throws RuntimeException {
     return storage.DBQueryServerRoute(sid);
   }
