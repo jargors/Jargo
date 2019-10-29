@@ -122,6 +122,8 @@ public class Controller {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+    tools.registerVertices(storage.getReferenceVerticesCache());
+    tools.registerEdges(storage.getReferenceEdgesCache());
   }
   public void loadProblem(String p) {
     Print("Load problem ("+p+")");
