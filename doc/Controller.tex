@@ -118,8 +118,8 @@ private Storage storage;
 private Communicator communicator;
 private Tools tools = new Tools();
 private Client client;
-\nwindexdefn{storage}{storage}{NW2ZDXo8-OUspt-1}\nwindexdefn{communicator}{communicator}{NW2ZDXo8-OUspt-1}\nwindexdefn{tools}{tools}{NW2ZDXo8-OUspt-1}\nwindexdefn{client}{client}{NW2ZDXo8-OUspt-1}\eatline
-\nwidentdefs{\\{{client}{client}}\\{{communicator}{communicator}}\\{{storage}{storage}}\\{{tools}{tools}}}\nwendcode{}\nwbegindocs{20}\hi{Settings.} Settings objects configure various aspects of the simulation.
+\nwindexdefn{storage}{storage}{NW2ZDXo8-OUspt-1}\nwindexdefn{communicator}{communicator}{NW2ZDXo8-OUspt-1}\nwindexdefn{tools}{tools}{NW2ZDXo8-OUspt-1}\nwindexdefn{client}{client}{NW2ZDXo8-OUspt-1}\nwindexdefn{traffic}{traffic}{NW2ZDXo8-OUspt-1}\eatline
+\nwidentdefs{\\{{client}{client}}\\{{communicator}{communicator}}\\{{storage}{storage}}\\{{tools}{tools}}\\{{traffic}{traffic}}}\nwendcode{}\nwbegindocs{20}\hi{Settings.} Settings objects configure various aspects of the simulation.
 These settings should mostly be set by the evaluation program by using the public
 setters.
 
@@ -159,37 +159,9 @@ private Runnable ClockLoop = () -> \{
 \nwidentdefs{\\{{ClockLoop}{ClockLoop}}}\nwidentuses{\\{{communicator}{communicator}}\\{{storage}{storage}}\\{{world{\char95}time}{world:untime}}}\nwindexuse{communicator}{communicator}{NW2ZDXo8-2lFPcZ-1}\nwindexuse{storage}{storage}{NW2ZDXo8-2lFPcZ-1}\nwindexuse{world{\char95}time}{world:untime}{NW2ZDXo8-2lFPcZ-1}\nwendcode{}\nwbegindocs{26}\nwdocspar
 \subsubsection{Engine Loop}
 \nwenddocs{}\nwbegincode{27}\sublabel{NW2ZDXo8-3rcRXt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-3rcRXt-1}}}\moddef{Definition of engine loop~{\nwtagstyle{}\subpageref{NW2ZDXo8-3rcRXt-1}}}\endmoddef\nwused{\\{NW2ZDXo8-2e0Sfa-1}}
-private Runnable EngineLoop = () -> \{
-  // Print("I am EngineLoop running on "+Thread.currentThread().getName());
-
-  /* Here is where traffic, route deviations, and breakdowns happen.
-   * Traffic is the most important one because it is most prevalent in the
-   * real world. Deviations and breakdowns have less chance to occur, so
-   * their impacts on ridesharing algorithm quality are probably small.
-   */
-
-  // applyTraffic(world_time);
-
-  /* The method applyTraffic(1) works by changing the timing of the waypoints
-   * in the affected routes to simulate slowdowns and speedups due to
-   * traffic. Naive algorithm:
-   *   1. load the traffic profile (list of all edges with their flow speeds)
-   *   2. servers <- storage.DBQueryActiveServerLocations(world_time)
-   *   3. for each server:
-   *   4.   route <- storage.DBQueryRemainingRoute(server id)
-   *   5.   for each edge in route:
-   *   6.     if edge speed exceeds new flow speed,
-   *   7.       change waypoint time so speed is less than flow speed
-   *   8.     optionally, if speed is below flow speed,
-   *   9.       change waypoint time so speed is at flow speed
-   *  10.   storage.DBUpdateServerRoute(server id, new route, new sched)
-   */
-
-  // applyDeviation(world_time);
-  // applyBreakdown(world_time);
-\};
+private Runnable EngineLoop = () -> \{ \};
 \nwindexdefn{EngineLoop}{EngineLoop}{NW2ZDXo8-3rcRXt-1}\eatline
-\nwidentdefs{\\{{EngineLoop}{EngineLoop}}}\nwidentuses{\\{{Print}{Print}}\\{{storage}{storage}}\\{{world{\char95}time}{world:untime}}}\nwindexuse{Print}{Print}{NW2ZDXo8-3rcRXt-1}\nwindexuse{storage}{storage}{NW2ZDXo8-3rcRXt-1}\nwindexuse{world{\char95}time}{world:untime}{NW2ZDXo8-3rcRXt-1}\nwendcode{}\nwbegindocs{28}\nwdocspar
+\nwidentdefs{\\{{EngineLoop}{EngineLoop}}}\nwendcode{}\nwbegindocs{28}\nwdocspar
 \subsubsection{Request Loop}
 This loop ``pushes'' queued requests to the client.
 \nwenddocs{}\nwbegincode{29}\sublabel{NW2ZDXo8-10L3rI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-10L3rI-1}}}\moddef{Definition of request collection loop~{\nwtagstyle{}\subpageref{NW2ZDXo8-10L3rI-1}}}\endmoddef\nwused{\\{NW2ZDXo8-2e0Sfa-1}}
@@ -411,7 +383,7 @@ public void loadProblem(String p) \{
       int ub = tools.computeShortestPathDistance(uo, ud);
       if (uq < 0) \{
         int[] server = new int[] \{ uid, uq, ue, ul, uo, ud, ub \};
-        int[] route = computeRoute(uo, ud, ue);
+        int[] route = tools.computeRoute(uo, ud, ue);
         storage.DBAddNewServer(server, route);
         Print("Put user "+uid);
       \} else \{
@@ -429,7 +401,7 @@ public void loadProblem(String p) \{
   \}
 \}
 \nwindexdefn{loadProblem}{loadProblem}{NW2ZDXo8-2rtVpi-1}\eatline
-\nwidentdefs{\\{{loadProblem}{loadProblem}}}\nwidentuses{\\{{computeRoute}{computeRoute}}\\{{Print}{Print}}\\{{storage}{storage}}\\{{tools}{tools}}}\nwindexuse{computeRoute}{computeRoute}{NW2ZDXo8-2rtVpi-1}\nwindexuse{Print}{Print}{NW2ZDXo8-2rtVpi-1}\nwindexuse{storage}{storage}{NW2ZDXo8-2rtVpi-1}\nwindexuse{tools}{tools}{NW2ZDXo8-2rtVpi-1}\nwendcode{}\nwbegincode{69}\sublabel{NW2ZDXo8-4FZ4vu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-4FZ4vu-1}}}\moddef{..skip header rows~{\nwtagstyle{}\subpageref{NW2ZDXo8-4FZ4vu-1}}}\endmoddef\nwused{\\{NW2ZDXo8-2rtVpi-1}}
+\nwidentdefs{\\{{loadProblem}{loadProblem}}}\nwidentuses{\\{{Print}{Print}}\\{{storage}{storage}}\\{{tools}{tools}}}\nwindexuse{Print}{Print}{NW2ZDXo8-2rtVpi-1}\nwindexuse{storage}{storage}{NW2ZDXo8-2rtVpi-1}\nwindexuse{tools}{tools}{NW2ZDXo8-2rtVpi-1}\nwendcode{}\nwbegincode{69}\sublabel{NW2ZDXo8-4FZ4vu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-4FZ4vu-1}}}\moddef{..skip header rows~{\nwtagstyle{}\subpageref{NW2ZDXo8-4FZ4vu-1}}}\endmoddef\nwused{\\{NW2ZDXo8-2rtVpi-1}}
 for (int i = 0; i < 6; i++) \{
   sc.nextLine();
 \}
@@ -710,52 +682,13 @@ public int[] queryServerArrivalTime(int sid) throws RuntimeException \{
 \label{sec:private-methods}
 
 \subsection{{\tt{}\protect\nwindexuse{Print}{Print}{NW2ZDXo8-226TDi-1}Print(1)}}
-\nwenddocs{}\nwbegincode{133}\sublabel{NW2ZDXo8-226TDi-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-226TDi-1}}}\moddef{\code{}Controller\edoc{} private methods~{\nwtagstyle{}\subpageref{NW2ZDXo8-226TDi-1}}}\endmoddef\nwalsodefined{\\{NW2ZDXo8-226TDi-2}}\nwused{\\{NW2ZDXo8-3kvp2C-1}}
+\nwenddocs{}\nwbegincode{133}\sublabel{NW2ZDXo8-226TDi-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-226TDi-1}}}\moddef{\code{}Controller\edoc{} private methods~{\nwtagstyle{}\subpageref{NW2ZDXo8-226TDi-1}}}\endmoddef\nwused{\\{NW2ZDXo8-3kvp2C-1}}
 private void Print(String msg) \{
   System.out.println("[Jargo][Controller]["+LocalDateTime.now()+"]"
     + "[t="+world_time+"] "+msg);
 \}
 \nwindexdefn{Print}{Print}{NW2ZDXo8-226TDi-1}\eatline
-\nwidentdefs{\\{{Print}{Print}}}\nwidentuses{\\{{world{\char95}time}{world:untime}}}\nwindexuse{world{\char95}time}{world:untime}{NW2ZDXo8-226TDi-1}\nwendcode{}\nwbegindocs{134}\nwdocspar
-\subsection{{\tt{}\protect\nwindexuse{computeRoute}{computeRoute}{NW2ZDXo8-226TDi-2}computeRoute(3)}}
-The G-tree component doesn't have the best error handling, so we add some input
-validation into this method.  We also need to detect when the target is the
-dummy vertex 0.
-\nwenddocs{}\nwbegincode{135}\sublabel{NW2ZDXo8-226TDi-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-226TDi-2}}}\moddef{\code{}Controller\edoc{} private methods~{\nwtagstyle{}\subpageref{NW2ZDXo8-226TDi-1}}}\plusendmoddef
-private int[] computeRoute(int source, int target, int starttime)
-throws RuntimeException \{
-  int[] output = null;
-  if (source == 0) \{
-    throw new RuntimeException("ERROR computeRoute(3): source cannot be 0!");
-  \} else if (target == 0) \{
-    output = new int[] \{ starttime, source, starttime + 1, target \};
-  \} else \{
-    int[] path = null;
-    int[] edge = null;
-    int u, v, dd, nu, t;
-    path = tools.computeShortestPath(source, target);
-    if (path == null) \{
-      throw new RuntimeException("ERROR computeRoute(3): null path!");
-    \} else \{
-      output = new int[(path.length*2)];
-      output[0] = starttime;
-      output[1] = source;
-      for (int i = 1; i < path.length; i++) \{
-        u = path[(i - 1)] + 1;
-        v = path[i] + 1;
-        edge = storage.DBQueryEdge(u, v);
-        dd = edge[0];
-        nu = edge[1];
-        t = (int) Math.ceil((float) dd/nu);
-        output[(2*i + 0)] = t;
-        output[(2*i + 1)] = v;
-      \}
-    \}
-  \}
-  return output;
-\}
-\nwindexdefn{computeRoute}{computeRoute}{NW2ZDXo8-226TDi-2}\eatline
-\nwidentdefs{\\{{computeRoute}{computeRoute}}}\nwidentuses{\\{{storage}{storage}}\\{{tools}{tools}}}\nwindexuse{storage}{storage}{NW2ZDXo8-226TDi-2}\nwindexuse{tools}{tools}{NW2ZDXo8-226TDi-2}\nwendcode{}
+\nwidentdefs{\\{{Print}{Print}}}\nwidentuses{\\{{world{\char95}time}{world:untime}}}\nwindexuse{world{\char95}time}{world:untime}{NW2ZDXo8-226TDi-1}\nwendcode{}
 
 \nwixlogsorted{c}{{..compute edge weight \code{}dist\edoc{}}{NW2ZDXo8-3oMXI2-1}{\nwixu{NW2ZDXo8-1JUvcB-1}\nwixd{NW2ZDXo8-3oMXI2-1}}}%
 \nwixlogsorted{c}{{..detect dummy vertex}{NW2ZDXo8-28P1q0-1}{\nwixu{NW2ZDXo8-1JUvcB-1}\nwixd{NW2ZDXo8-28P1q0-1}}}%
@@ -766,7 +699,7 @@ throws RuntimeException \{
 \nwixlogsorted{c}{{\code{}Controller\edoc{} constructor}{NW2ZDXo8-3AyyZG-1}{\nwixu{NW2ZDXo8-3kvp2C-1}\nwixd{NW2ZDXo8-3AyyZG-1}}}%
 \nwixlogsorted{c}{{\code{}Controller\edoc{} definition}{NW2ZDXo8-3kvp2C-1}{\nwixu{NW2ZDXo8-34QoYM-1}\nwixd{NW2ZDXo8-3kvp2C-1}}}%
 \nwixlogsorted{c}{{\code{}Controller\edoc{} member variables}{NW2ZDXo8-3yXfwG-1}{\nwixu{NW2ZDXo8-3kvp2C-1}\nwixd{NW2ZDXo8-3yXfwG-1}}}%
-\nwixlogsorted{c}{{\code{}Controller\edoc{} private methods}{NW2ZDXo8-226TDi-1}{\nwixu{NW2ZDXo8-3kvp2C-1}\nwixd{NW2ZDXo8-226TDi-1}\nwixd{NW2ZDXo8-226TDi-2}}}%
+\nwixlogsorted{c}{{\code{}Controller\edoc{} private methods}{NW2ZDXo8-226TDi-1}{\nwixu{NW2ZDXo8-3kvp2C-1}\nwixd{NW2ZDXo8-226TDi-1}}}%
 \nwixlogsorted{c}{{\code{}Controller\edoc{} public methods}{NW2ZDXo8-bF3Hn-1}{\nwixu{NW2ZDXo8-3kvp2C-1}\nwixd{NW2ZDXo8-bF3Hn-1}\nwixd{NW2ZDXo8-bF3Hn-2}}}%
 \nwixlogsorted{c}{{Container objects}{NW2ZDXo8-OUspt-1}{\nwixu{NW2ZDXo8-3yXfwG-1}\nwixd{NW2ZDXo8-OUspt-1}}}%
 \nwixlogsorted{c}{{Controller.java}{NW2ZDXo8-34QoYM-1}{\nwixd{NW2ZDXo8-34QoYM-1}}}%
@@ -799,7 +732,6 @@ throws RuntimeException \{
 \nwixlogsorted{i}{{client}{client}}%
 \nwixlogsorted{i}{{ClockLoop}{ClockLoop}}%
 \nwixlogsorted{i}{{communicator}{communicator}}%
-\nwixlogsorted{i}{{computeRoute}{computeRoute}}%
 \nwixlogsorted{i}{{CSHIFT}{CSHIFT}}%
 \nwixlogsorted{i}{{engine{\char95}update{\char95}period}{engine:unupdate:unperiod}}%
 \nwixlogsorted{i}{{EngineLoop}{EngineLoop}}%
@@ -852,8 +784,9 @@ throws RuntimeException \{
 \nwixlogsorted{i}{{startStatic}{startStatic}}%
 \nwixlogsorted{i}{{storage}{storage}}%
 \nwixlogsorted{i}{{tools}{tools}}%
+\nwixlogsorted{i}{{traffic}{traffic}}%
 \nwixlogsorted{i}{{world{\char95}time}{world:untime}}%
-\nwbegindocs{136}\nwdocspar
+\nwbegindocs{134}\nwdocspar
 \appendix
 
 \section{Appendix: List of Chunks}

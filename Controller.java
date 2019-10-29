@@ -31,35 +31,7 @@ public class Controller {
     communicator.setSimulationWorldTime(++world_time);
     storage.printSQLDriverStatistics();
   };
-  private Runnable EngineLoop = () -> {
-    // Print("I am EngineLoop running on "+Thread.currentThread().getName());
-
-    /* Here is where traffic, route deviations, and breakdowns happen.
-     * Traffic is the most important one because it is most prevalent in the
-     * real world. Deviations and breakdowns have less chance to occur, so
-     * their impacts on ridesharing algorithm quality are probably small.
-     */
-
-    // applyTraffic(world_time);
-
-    /* The method applyTraffic(1) works by changing the timing of the waypoints
-     * in the affected routes to simulate slowdowns and speedups due to
-     * traffic. Naive algorithm:
-     *   1. load the traffic profile (list of all edges with their flow speeds)
-     *   2. servers <- storage.DBQueryActiveServerLocations(world_time)
-     *   3. for each server:
-     *   4.   route <- storage.DBQueryRemainingRoute(server id)
-     *   5.   for each edge in route:
-     *   6.     if edge speed exceeds new flow speed,
-     *   7.       change waypoint time so speed is less than flow speed
-     *   8.     optionally, if speed is below flow speed,
-     *   9.       change waypoint time so speed is at flow speed
-     *  10.   storage.DBUpdateServerRoute(server id, new route, new sched)
-     */
-
-    // applyDeviation(world_time);
-    // applyBreakdown(world_time);
-  };
+  private Runnable EngineLoop = () -> { };
   private Runnable RequestLoop = () -> {
     long A0 = System.currentTimeMillis();
     final int t0 = world_time;
@@ -168,7 +140,7 @@ public class Controller {
         int ub = tools.computeShortestPathDistance(uo, ud);
         if (uq < 0) {
           int[] server = new int[] { uid, uq, ue, ul, uo, ud, ub };
-          int[] route = computeRoute(uo, ud, ue);
+          int[] route = tools.computeRoute(uo, ud, ue);
           storage.DBAddNewServer(server, route);
           Print("Put user "+uid);
         } else {
@@ -333,37 +305,5 @@ public class Controller {
   private void Print(String msg) {
     System.out.println("[Jargo][Controller]["+LocalDateTime.now()+"]"
       + "[t="+world_time+"] "+msg);
-  }
-  private int[] computeRoute(int source, int target, int starttime)
-  throws RuntimeException {
-    int[] output = null;
-    if (source == 0) {
-      throw new RuntimeException("ERROR computeRoute(3): source cannot be 0!");
-    } else if (target == 0) {
-      output = new int[] { starttime, source, starttime + 1, target };
-    } else {
-      int[] path = null;
-      int[] edge = null;
-      int u, v, dd, nu, t;
-      path = tools.computeShortestPath(source, target);
-      if (path == null) {
-        throw new RuntimeException("ERROR computeRoute(3): null path!");
-      } else {
-        output = new int[(path.length*2)];
-        output[0] = starttime;
-        output[1] = source;
-        for (int i = 1; i < path.length; i++) {
-          u = path[(i - 1)] + 1;
-          v = path[i] + 1;
-          edge = storage.DBQueryEdge(u, v);
-          dd = edge[0];
-          nu = edge[1];
-          t = (int) Math.ceil((float) dd/nu);
-          output[(2*i + 0)] = t;
-          output[(2*i + 1)] = v;
-        }
-      }
-    }
-    return output;
   }
 }
