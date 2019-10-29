@@ -77,6 +77,7 @@ private final double CSHIFT = 10000000.0;
   <<Compute duration>>
   <<Compute shortest path>>
   <<Compute shortest path distance>>
+  <<Compute route>>
   <<Filter locs by haversine distance>>
   <<Print user>>
   <<Print path>>
@@ -235,6 +236,41 @@ public int computeShortestPathDistance(int u, int v) {
   return d;
 }
 @ %def computeShortestPathDistance
+
+\subsection{[[computeRoute]](3)}
+<<Compute route>>=
+public int[] computeRoute(int source, int target, int starttime) {
+  int[] output = null;
+  if (source == 0) {
+    throw new RuntimeException("ERROR computeRoute(3): source cannot be 0!");
+  } else if (target == 0) {
+    output = new int[] { starttime, source, starttime + 1, target };
+  } else {
+    int[] path = null;
+    int[] edge = null;
+    int u, v, dd, nu, t;
+    path = computeShortestPath(source, target);
+    if (path == null) {
+      throw new RuntimeException("ERROR computeRoute(3): null path!");
+    } else {
+      output = new int[(path.length*2)];
+      output[0] = starttime;
+      output[1] = source;
+      for (int i = 1; i < path.length; i++) {
+        u = path[(i - 1)] + 1;
+        v = path[i] + 1;
+        edge = lu_edges.get(u).get(v);
+        dd = edge[0];
+        nu = edge[1];
+        t = (int) Math.ceil((float) dd/nu);
+        output[(2*i + 0)] = t;
+        output[(2*i + 1)] = v;
+      }
+    }
+  }
+  return output;
+}
+@ %def computeRoute
 
 \subsection{[[filterByHaversine]](3)}
 This function takes a request origin [[ro]], a locations array [[locs]], and
