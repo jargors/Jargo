@@ -102,23 +102,22 @@ public class Tools {
       } else {
         int[] path = null;
         int[] edge = null;
-        int u, v, dd, nu, t;
+        int u, v, t;
         path = computeShortestPath(source, target);
         if (path == null) {
           throw new RuntimeException("ERROR computeRoute(3): null path!");
         } else {
           output = new int[(path.length*2)];
-          output[0] = starttime;
+          output[0] = t = starttime;
           output[1] = source;
-          for (int i = 1; i < path.length; i++) {
-            u = path[(i - 1)] ;
-            v = path[(i - 0)];
+          int j = 2;
+          for (int i = 0; i < path.length - 1; i++) {
+            u = path[(i + 0)];
+            v = path[(i + 1)];
             edge = lu_edges.get(u).get(v);
-            dd = edge[0];
-            nu = edge[1];
-            t = (int) Math.ceil((float) dd/nu);
-            output[(2*i + 0)] = t;
-            output[(2*i + 1)] = v;
+            output[(j + 0)] = (t += computeDuration(edge[0], edge[1]));
+            output[(j + 1)] = v;
+            j += 2;
           }
         }
       }
