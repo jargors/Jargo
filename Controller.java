@@ -306,7 +306,7 @@ public class Controller {
     return storage.DBQueryServerArrivalTime(sid);
   }
   public void addNewServer(int[] u) {
-    storage.DBAddNewServer(u, tools.computeRoute(u[3], u[4], u[1]));
+    storage.DBAddNewServer(u, tools.computeRoute(u[4], u[5], u[2]));
   }
   public void addNewRequest(int[] u) {
     storage.DBAddNewRequest(u);
