@@ -62,7 +62,7 @@ public class Communicator {
       Print("Found branch point at i="+i);
     }
     int j = 0;
-    while (j < route.length && route[j] <= t) {
+    while (i < current.length && (current[i] <= t && current[(i + 1)] != 0)) {
       if (current[i] != route[j] || current[(i + 1)] != route[(j + 1)]) {
         // overwrite history occurred
         Print("Overwrite history detected, i="+i+", j="+j+" ("+current[i]+"!="+route[j]+", "
