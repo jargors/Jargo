@@ -53,6 +53,7 @@ details.}.
 <<StoragePerformanceTest.java preamble>>=
 import com.github.jargors.Storage;
 import java.time.LocalDateTime;
+import java.sql.Connection;
 @
 
 <<[[StoragePerformanceTest]] definition>>=
@@ -97,8 +98,28 @@ storage.DBLoadBackup("data/db");
 @
 
 <<Load performance tests>>=
+<<Test [[_getConnection]](0)>>
 <<Test [[DBQueryQueuedRequests]](1)>>
 <<Test [[DBQueryServerLocationsActive]](1)>>
+@
+
+<<Test [[_getConnection]](0)>>=
+{
+  final int n = 100000;  // 100,000
+  <<Begin timing block>>
+  Connection[] arr = new Connection[n];
+  for (int i = 0; i < n; i++) {
+    arr[i] = storage._getConnection();
+    <<Increment call count>>
+  }
+  <<End timing block>>
+  Print("_getConnection(0): "+_dur+" ms/call");
+  for (Connection c : arr) {
+    try {
+      c.close();
+    } catch (Exception e) { }
+  }
+}
 @
 
 <<Test [[DBQueryQueuedRequests]](1)>>=

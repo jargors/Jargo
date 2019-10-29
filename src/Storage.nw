@@ -1731,6 +1731,7 @@ import org.apache.commons.dbcp2.PoolableConnectionFactory;
 import org.apache.commons.dbcp2.PoolingDriver;
 import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 @ \item standard map classes for caching various items;
 <<Storage.java preamble>>=
 import java.util.Map;
@@ -3495,7 +3496,11 @@ poolableconnection_factory.setMaxOpenPreparedStatements(STATEMENTS_MAX_COUNT);
 @
 <<..initialize connection pool using poolable-connection factory>>=
 Print("..initialize connection pool");
-pool = new GenericObjectPool<>(poolableconnection_factory);
+GenericObjectPoolConfig cfg = new GenericObjectPoolConfig();
+cfg.setMinIdle(100000);
+cfg.setMaxIdle(100000);
+cfg.setMaxTotal(100000);
+pool = new GenericObjectPool<>(poolableconnection_factory, cfg);
 @
 <<..register pool to poolable-connection factory and driver>>=
 Print("..register connection pool to driver");

@@ -1731,6 +1731,7 @@ import org.apache.commons.dbcp2.PoolableConnectionFactory;
 import org.apache.commons.dbcp2.PoolingDriver;
 import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 \nwendcode{}\nwbegindocs{92}\item standard map classes for caching various items;
 \nwenddocs{}\nwbegincode{93}\sublabel{NW27XAxz-FkGTW-4}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-FkGTW-4}}}\moddef{Storage.java preamble~{\nwtagstyle{}\subpageref{NW27XAxz-FkGTW-1}}}\plusendmoddef
 import java.util.Map;
@@ -3495,7 +3496,11 @@ poolableconnection_factory.setMaxOpenPreparedStatements(STATEMENTS_MAX_COUNT);
 \nwidentuses{\\{{connection{\char95}factory}{connection:unfactory}}\\{{poolableconnection{\char95}factory}{poolableconnection:unfactory}}\\{{Print}{Print}}\\{{STATEMENTS{\char95}MAX{\char95}COUNT}{STATEMENTS:unMAX:unCOUNT}}}\nwindexuse{connection{\char95}factory}{connection:unfactory}{NW27XAxz-3Flrgj-1}\nwindexuse{poolableconnection{\char95}factory}{poolableconnection:unfactory}{NW27XAxz-3Flrgj-1}\nwindexuse{Print}{Print}{NW27XAxz-3Flrgj-1}\nwindexuse{STATEMENTS{\char95}MAX{\char95}COUNT}{STATEMENTS:unMAX:unCOUNT}{NW27XAxz-3Flrgj-1}\nwendcode{}\nwbegindocs{315}\nwdocspar
 \nwenddocs{}\nwbegincode{316}\sublabel{NW27XAxz-4fNbUS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4fNbUS-1}}}\moddef{..initialize connection pool using poolable-connection factory~{\nwtagstyle{}\subpageref{NW27XAxz-4fNbUS-1}}}\endmoddef\nwused{\\{NW27XAxz-33Wt2A-1}}
 Print("..initialize connection pool");
-pool = new GenericObjectPool<>(poolableconnection_factory);
+GenericObjectPoolConfig cfg = new GenericObjectPoolConfig();
+cfg.setMinIdle(100000);
+cfg.setMaxIdle(100000);
+cfg.setMaxTotal(100000);
+pool = new GenericObjectPool<>(poolableconnection_factory, cfg);
 \nwidentuses{\\{{pool}{pool}}\\{{poolableconnection{\char95}factory}{poolableconnection:unfactory}}\\{{Print}{Print}}}\nwindexuse{pool}{pool}{NW27XAxz-4fNbUS-1}\nwindexuse{poolableconnection{\char95}factory}{poolableconnection:unfactory}{NW27XAxz-4fNbUS-1}\nwindexuse{Print}{Print}{NW27XAxz-4fNbUS-1}\nwendcode{}\nwbegindocs{317}\nwdocspar
 \nwenddocs{}\nwbegincode{318}\sublabel{NW27XAxz-MaeyE-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-MaeyE-1}}}\moddef{..register pool to poolable-connection factory and driver~{\nwtagstyle{}\subpageref{NW27XAxz-MaeyE-1}}}\endmoddef\nwused{\\{NW27XAxz-33Wt2A-1}}
 Print("..register connection pool to driver");
