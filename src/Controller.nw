@@ -387,14 +387,11 @@ public void loadProblem(String p) {
       int ul = col[5];
       int ub = tools.computeShortestPathDistance(uo, ud);
       if (uq < 0) {
-        int[] server = new int[] { uid, uq, ue, ul, uo, ud, ub };
-        int[] route = tools.computeRoute(uo, ud, ue);
-        storage.DBAddNewServer(server, route);
-        Print("Put user "+uid);
+        addNewServer(new int[] { uid, uq, ue, ul, uo, ud, ub });
+        Print("Put server "+uid);
       } else {
-        int[] request = new int[] { uid, uq, ue, ul, uo, ud, ub };
-        storage.DBAddNewRequest(request);
-        Print("Put user "+uid);
+        addNewRequest(new int[] { uid, uq, ue, ul, uo, ud, ub });
+        Print("Put request "+uid);
       }
     }
   } catch (FileNotFoundException e) {
