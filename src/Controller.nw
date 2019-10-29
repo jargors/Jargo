@@ -232,6 +232,11 @@ public Controller() {
 <<Query schedules>>
 <<Query various metrics>>
 @
+\hi{Write methods.}
+<<[[Controller]] public methods>>=
+<<Add new server>>
+<<Add new request>>
+@
 
 \subsection{General methods}
 
@@ -677,6 +682,22 @@ public int[] queryServerArrivalTime(int sid) throws RuntimeException {
   return storage.DBQueryServerArrivalTime(sid);
 }
 @ %def queryServerArrivalTime
+
+
+\subsection{Write Methods}
+\subsubsection{[[addNewServer]](2)}
+<<Add new server>>=
+public void addNewServer(int[] u, int[] route) {
+  storage.DBAddNewServer(u, route);
+}
+@ %def addNewServer
+
+\subsubsection{[[addNewRequest]](1)}
+<<Add new request>>=
+public void addNewRequest(int[] u) {
+  storage.DBAddNewRequest(u);
+}
+@ %def addNewRequest
 
 \section{Private Methods}
 \label{sec:private-methods}

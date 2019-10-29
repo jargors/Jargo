@@ -302,6 +302,12 @@ public class Controller {
   public int[] queryServerArrivalTime(int sid) throws RuntimeException {
     return storage.DBQueryServerArrivalTime(sid);
   }
+  public void addNewServer(int[] u, int[] route) {
+    storage.DBAddNewServer(u, route);
+  }
+  public void addNewRequest(int[] u) {
+    storage.DBAddNewRequest(u);
+  }
   private void Print(String msg) {
     System.out.println("[Jargo][Controller]["+LocalDateTime.now()+"]"
       + "[t="+world_time+"] "+msg);
