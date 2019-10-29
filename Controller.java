@@ -302,8 +302,8 @@ public class Controller {
   public int[] queryServerArrivalTime(int sid) throws RuntimeException {
     return storage.DBQueryServerArrivalTime(sid);
   }
-  public void addNewServer(int[] u, int[] route) {
-    storage.DBAddNewServer(u, route);
+  public void addNewServer(int[] u) {
+    storage.DBAddNewServer(u, tools.computeRoute(u[3], u[4], u[1]));
   }
   public void addNewRequest(int[] u) {
     storage.DBAddNewRequest(u);
