@@ -310,7 +310,9 @@ public class Controller {
     storage.DBAddNewRequest(u);
   }
   private void Print(String msg) {
-    System.out.println("[Jargo][Controller]["+LocalDateTime.now()+"]"
-      + "[t="+world_time+"] "+msg);
+    if (DEBUG) {
+      System.out.println("[Jargo][Controller]["+LocalDateTime.now()+"]"
+        + "[t="+world_time+"] "+msg);
+    }
   }
 }
