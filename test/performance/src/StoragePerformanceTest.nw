@@ -51,8 +51,12 @@ details.}.
 @
 
 <<StoragePerformanceTest.java preamble>>=
+import com.github.jargors.Controller;
 import com.github.jargors.Storage;
+import com.github.jargors.Tools;
 import java.time.LocalDateTime;
+import java.sql.Connection;
+import java.sql.Statement;
 @
 
 <<[[StoragePerformanceTest]] definition>>=
@@ -68,8 +72,6 @@ public class StoragePerformanceTest {
 <<[[StoragePerformanceTest]] main routine>>=
 public static void main(String[] args) {
   Print("Starting storage performance tests");
-  Storage storage = new Storage();
-  <<Load test database>>
   <<Load performance tests>>
   Print("Complete!");
 }
@@ -92,21 +94,68 @@ _dur=((_t1 - _t0)/(float)(_count == 0 ? 1 : _count));
 System.out.print("\r");
 @
 
-<<Load test database>>=
-storage.DBLoadBackup("data/db");
-@
-
+Until I figure out how to close the Derby DB after each test, these
+can only be performed one at a time.
 <<Load performance tests>>=
-<<Test [[DBQueryQueuedRequests]](1)>>
+/*<<Test [[_getConnection]](0)>>*/
+/*<<Test [[DBAddNewServer]](1)>>*/
+/*<<Test [[DBQueryQueuedRequests]](1)>>*/
 <<Test [[DBQueryServerLocationsActive]](1)>>
 @
 
+<<Test [[_getConnection]](0)>>=
+{
+  Storage storage = new Storage();
+  final int n = 10000;  // 10,000
+  Connection[] arr = new Connection[n];
+  <<Begin timing block>>
+  for (int i = 0; i < n; i++) {
+    arr[i] = storage._getConnection();
+    <<Increment call count>>
+  }
+  <<End timing block>>
+  Print("_getConnection(0): "+_dur+" ms/call");
+  for (Connection c : arr) {
+    try {
+      c.close();
+    } catch (Exception e) { }
+  }
+}
+@
+
+<<Test [[DBAddNewServer]](1)>>=
+{
+  Controller controller = new Controller();
+  controller.loadDataModel();
+  controller.loadRoadNetwork("data/chengdu.rnet");
+  controller.loadGTree("data/chengdu.gtree");
+  final int n = 1000;  // 1,000
+  <<Begin timing block>>
+  for (int i = 0; i < n; i++) {
+    int o = (int) Math.round(Math.random()*32934);
+    int d = (int) Math.round(Math.random()*32934);
+    controller.addNewServer(new int[] { i, -1, 0, 86400000, o, d, 1 });
+    <<Increment call count>>
+  }
+  <<End timing block>>
+  Print("DBAddNewServer(1): "+_dur+" ms/call");
+}
+@
+
+Even though [[Controller]] falls out of scope from the previous test,
+the Derby database is still live! No need to load data model, road network
+again.
 <<Test [[DBQueryQueuedRequests]](1)>>=
 {
-  <<Begin timing block>>
+  Controller controller = new Controller();
+  controller.loadDataModel();
+  controller.loadRoadNetwork("data/chengdu.rnet");
+  controller.loadGTree("data/chengdu.gtree");
+  controller.loadProblem("data/chengdu.instance");
   int[] output = new int[] { };
+  <<Begin timing block>>
   for (int t = 0; t < 1800; t++) {
-    output = storage.DBQueryQueuedRequests(t);
+    output = controller.queryQueuedRequests(t);
     <<Increment call count>>
   }
   <<End timing block>>
@@ -116,9 +165,23 @@ storage.DBLoadBackup("data/db");
 
 <<Test [[DBQueryServerLocationsActive]](1)>>=
 {
-  <<Begin timing block>>
+  Storage storage = new Storage();
+  storage.DBLoadBackup("data/db");
+  // BACKUP DOS NOT HAVE INDEXES
+  try {
+    Connection conn = storage._getConnection();
+    Statement stmt = conn.createStatement();
+    stmt.addBatch("CREATE INDEX W_sid_t1 ON W (sid, t1)");
+    stmt.addBatch("CREATE INDEX W_sid_t2 ON W (sid, t2)");
+    stmt.addBatch("CREATE INDEX W_sid_v2 ON W (sid, v2)");
+    stmt.addBatch("CREATE INDEX W_sid_t1_t2 ON W (sid, t1, t2)");
+    stmt.executeBatch();
+    conn.commit();
+    conn.close();
+  } catch (Exception e) { }
   int[] output = new int[] { };
-  for (int t = 0; t < 1800; t++) {
+  <<Begin timing block>>
+  for (int t = 0; t < 1800; t+=100) {
     output = storage.DBQueryServerLocationsActive(t);
     <<Increment call count>>
   }

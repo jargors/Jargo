@@ -124,6 +124,7 @@ This file ([[src/Storage.nw]]) is the source for both the documentation
 <<Save backup>>
 <<Print SQL driver statistics>>
 <<Print SQL exception>>
+<<Get connection (for internal use)>>
 @
 \end{minipage}
 }
@@ -1731,6 +1732,7 @@ import org.apache.commons.dbcp2.PoolableConnectionFactory;
 import org.apache.commons.dbcp2.PoolingDriver;
 import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 @ \item standard map classes for caching various items;
 <<Storage.java preamble>>=
 import java.util.Map;
@@ -1930,6 +1932,10 @@ public void DBLoadDataModel() throws RuntimeException {
     stmt.addBatch(<<Create View t\_s\_depart statement (Eq.~\ref{eq:departure-time})>>);
     stmt.addBatch(<<Create View t\_r\_arrive statement (Eq.~\ref{eq:arrival-time})>>);
     stmt.addBatch(<<Create View t\_s\_arrive statement (Eq.~\ref{eq:arrival-time})>>);
+    stmt.addBatch("CREATE INDEX W_sid_t1 ON W (sid, t1)");
+    stmt.addBatch("CREATE INDEX W_sid_t2 ON W (sid, t2)");
+    stmt.addBatch("CREATE INDEX W_sid_v2 ON W (sid, v2)");
+    stmt.addBatch("CREATE INDEX W_sid_t1_t2 ON W (sid, t1, t2)");
     stmt.executeBatch();
     conn.commit();
     Print("Close connection "+conn.toString());
@@ -2076,6 +2082,17 @@ catch (SQLException e) {
 }
 @
 \end{itemize}
+
+\subsubsection{[[_getConnection]](0)}
+For internal use.
+<<Get connection (for internal use)>>=
+public Connection _getConnection() throws RuntimeException {
+  try {
+    return DriverManager.getConnection(CONNECTIONS_POOL_URL);
+  }
+  <<Catch and print [[SQLException]]>>
+}
+@
 
 \subsection{Write Methods}
 \label{sec:write-methods}
@@ -2242,11 +2259,11 @@ The value of $u_q$ \emph{must} be less than 0. Array [[route]] =
 
 <<Add new server>>=
 public void DBAddNewServer(int[] u, int[] route) throws RuntimeException {
-  if (!lu_users.containsKey(u[0])) {
+  int uid = u[0];
+  if (!lu_users.containsKey(uid)) {
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
       Print("Open connection "+conn.toString());
-      int uid = u[0];
       int se = u[2];
       <<..insert new user into user tables>>
       <<..insert new server into s>>
@@ -2254,7 +2271,7 @@ public void DBAddNewServer(int[] u, int[] route) throws RuntimeException {
       <<..insert new server route into cw>>
       <<..insert new server into cq>>
       <<..commit and close>>
-      lu_users.put(u[0], u.clone());
+      lu_users.put(uid, u.clone());
     }
     <<Catch and print [[SQLException]]>>
   }
@@ -2303,7 +2320,6 @@ PSAdd(pS14, uid, u[1], u[2], null, u[2], u[4], null, u[1],
     null, null, null, null, null, 1);
 PSSubmit(pS14);
 @
-
 \subsubsection{[[DBUpdateServerRoute]](3)}
 The [[DBUpdateServerRoute]](3) method can be used to
 \begin{enumerate}
@@ -3050,32 +3066,24 @@ public int[] DBQueryServerLocationsActive(int t) throws RuntimeException {
   int[] output = new int[] { };
   int[] temp1 = new int[] { };
   int[] temp2 = new int[] { };
+  int j = 0;
+  int sid = 0;
+  int te = 0;
   try {
     Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
     Print("Open connection "+conn.toString());
-    temp1 = DBFetch(conn, "S134", 1, t, t, t);
-    output = new int[(temp1.length*3)];
-    for (int i = 0; i < temp1.length; i++) {
-      int sid = temp1[i];
-      output[3*i] = sid;
-      temp2 = DBFetch(conn, "S146", 2, sid, t);
-      // First check if server just arrived at a vertex at time t
-      if (temp2.length > 0) {
-        output[(3*i + 1)] = temp2[0];
-        output[(3*i + 2)] = temp2[1];
-      } else {
-        // Next check if server passed a vertex at time t, and get that vertex
-        temp2 = DBFetch(conn, "S135", 2, sid, sid, t);
-        if (temp2.length > 0) {
-          output[(3*i + 1)] = temp2[0];
-          output[(3*i + 2)] = temp2[1];
-        } else {
-          // Finally get the server's last-known vertex because this guy is idle
-          temp2 = DBFetch(conn, "S147", 2, sid, sid);
-          output[(3*i + 1)] = temp2[0];
-          output[(3*i + 2)] = temp2[1];
-        }
-      }
+    temp1 = DBFetch(conn, "S134", 2, t, t, t);      // <-- 10 ms/call
+    output = new int[(3*(temp1.length/2))];
+    for (int i = 0; i < temp1.length - 1; i += 2) {
+      sid = temp1[(i + 0)];
+       te = temp1[(i + 1)];
+      temp2 = (t < te
+        ? DBFetch(conn, "S135", 2, sid, sid, t, t)  // <-- 0.07-0.15 ms/call
+        : DBFetch(conn, "S147", 2, sid, sid));      // <-- 0.04-0.15 ms/call
+      output[(j + 0)] = sid;
+      output[(j + 1)] = temp2[0];
+      output[(j + 2)] = temp2[1];
+      j += 3;
     }
     conn.close();
   }
@@ -3493,7 +3501,11 @@ poolableconnection_factory.setMaxOpenPreparedStatements(STATEMENTS_MAX_COUNT);
 @
 <<..initialize connection pool using poolable-connection factory>>=
 Print("..initialize connection pool");
-pool = new GenericObjectPool<>(poolableconnection_factory);
+GenericObjectPoolConfig cfg = new GenericObjectPoolConfig();
+cfg.setMinIdle(100000);
+cfg.setMaxIdle(100000);
+cfg.setMaxTotal(100000);
+pool = new GenericObjectPool<>(poolableconnection_factory, cfg);
 @
 <<..register pool to poolable-connection factory and driver>>=
 Print("..register connection pool to driver");
@@ -3721,9 +3733,9 @@ private void PSInit() {
   <<S143>>
   <<S144>>
   <<S145>>
-  <<S146>>
   <<S147>>
   <<S148>>
+  <<S149>>
 }
 @ %def PSInit
 <<S0>>=
@@ -3982,11 +3994,11 @@ lu_pstr.put("S133", SEL+"val FROM f_status WHERE rid=? AND t<=? "
     + "ORDER BY t DESC FETCH FIRST ROW ONLY");
 @ %def S133
 <<S134>>=
-lu_pstr.put("S134", SEL+"sid FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
+lu_pstr.put("S134", SEL+"sid, te FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
 @ %def S134
 <<S135>>=
 lu_pstr.put("S135", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
-    + "SELECT t1 FROM W WHERE sid=? AND ? BETWEEN t1 AND t2)");
+    + "SELECT t1 FROM W WHERE sid=? AND t1 <= ? AND ? < t2)");
 @ %def S135
 <<S136>>=
 lu_pstr.put("S136", SEL+"* FROM V");
@@ -4019,16 +4031,16 @@ lu_pstr.put("S144", SEL+"t2, v2, rid FROM CQ WHERE sid=? AND t2>? ORDER BY o2 AS
 <<S145>>=
 lu_pstr.put("S145", SEL+"te, ve FROM CW WHERE sid=?");
 @ %def S145
-<<S146>>=
-lu_pstr.put("S146", SEL+"t2, v2 FROM W WHERE sid=? AND t2=? AND v2<>0");
-@ %def S146
 <<S147>>=
 lu_pstr.put("S147", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
-    + "SELECT MAX (t2) FROM W WHERE sid=? AND v2<>0)");
+    + "SELECT t1 FROM W WHERE sid=? AND v2=0)");
 @ %def S147
 <<S148>>=
 lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
 @ %def S148
+<<S149>>=
+lu_pstr.put("S149", SEL+"t2, v2 FROM W WHERE sid=? ORDER BY t2 ASC");
+@ %def S149
 
 \section{Appendix: List of Chunks}
 \label{ap:list-of-chunks}

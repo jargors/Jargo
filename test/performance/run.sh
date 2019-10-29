@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-java -cp .:$CLASSPATH/*:$DERBYPATH/derby.jar StoragePerformanceTest $@
+java -Xmx6g -cp .:$CLASSPATH/*:$DERBYPATH/derby.jar StoragePerformanceTest $@

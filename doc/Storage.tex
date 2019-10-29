@@ -124,6 +124,7 @@ This file ({\tt{}src/Storage.nw}) is the source for both the documentation
 \LA{}Save backup~{\nwtagstyle{}\subpageref{NW27XAxz-2OKmqF-1}}\RA{}
 \LA{}Print SQL driver statistics~{\nwtagstyle{}\subpageref{NW27XAxz-1lVtry-1}}\RA{}
 \LA{}Print SQL exception~{\nwtagstyle{}\subpageref{NW27XAxz-31QNBg-1}}\RA{}
+\LA{}Get connection (for internal use)~{\nwtagstyle{}\subpageref{NW27XAxz-3I0i1F-1}}\RA{}
 \nwendcode{}\nwbegindocs{6}\nwdocspar
 \end{minipage}
 }
@@ -1731,6 +1732,7 @@ import org.apache.commons.dbcp2.PoolableConnectionFactory;
 import org.apache.commons.dbcp2.PoolingDriver;
 import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 \nwendcode{}\nwbegindocs{92}\item standard map classes for caching various items;
 \nwenddocs{}\nwbegincode{93}\sublabel{NW27XAxz-FkGTW-4}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-FkGTW-4}}}\moddef{Storage.java preamble~{\nwtagstyle{}\subpageref{NW27XAxz-FkGTW-1}}}\plusendmoddef
 import java.util.Map;
@@ -1930,6 +1932,10 @@ public void DBLoadDataModel() throws RuntimeException \{
     stmt.addBatch(\LA{}Create View t\_s\_depart statement (Eq.~\ref{eq:departure-time})~{\nwtagstyle{}\subpageref{NW27XAxz-2riY0r-1}}\RA{});
     stmt.addBatch(\LA{}Create View t\_r\_arrive statement (Eq.~\ref{eq:arrival-time})~{\nwtagstyle{}\subpageref{NW27XAxz-28E5sQ-1}}\RA{});
     stmt.addBatch(\LA{}Create View t\_s\_arrive statement (Eq.~\ref{eq:arrival-time})~{\nwtagstyle{}\subpageref{NW27XAxz-3oL4CY-1}}\RA{});
+    stmt.addBatch("CREATE INDEX W_sid_t1 ON W (sid, t1)");
+    stmt.addBatch("CREATE INDEX W_sid_t2 ON W (sid, t2)");
+    stmt.addBatch("CREATE INDEX W_sid_v2 ON W (sid, v2)");
+    stmt.addBatch("CREATE INDEX W_sid_t1_t2 ON W (sid, t1, t2)");
     stmt.executeBatch();
     conn.commit();
     Print("Close connection "+conn.toString());
@@ -2062,7 +2068,7 @@ public void printSQLException(SQLException e) \{
 exception. Prints {\tt{}SQLException}s arising out of low-level SQL operations.
 Automatically exports the last good state of the database to disk for offline
 analysis.
-\nwenddocs{}\nwbegincode{130}\sublabel{NW27XAxz-4P0tKA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4P0tKA-1}}}\moddef{Catch and print \code{}SQLException\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-4P0tKA-1}}}\endmoddef\nwused{\\{NW27XAxz-4P4YpK-1}\\{NW27XAxz-b3Hn1-1}\\{NW27XAxz-2BAv1P-1}\\{NW27XAxz-2OKmqF-1}\\{NW27XAxz-1lVtry-1}\\{NW27XAxz-28BJIM-1}\\{NW27XAxz-1r65Fb-1}\\{NW27XAxz-3SpUqj-1}\\{NW27XAxz-4ISWm4-1}\\{NW27XAxz-IYVQQ-1}\\{NW27XAxz-4VFddh-1}\\{NW27XAxz-y828a-1}\\{NW27XAxz-lMiTm-1}\\{NW27XAxz-1MI9ro-1}\\{NW27XAxz-3AGrxZ-1}\\{NW27XAxz-3UaQCb-1}\\{NW27XAxz-1oPNKc-1}}
+\nwenddocs{}\nwbegincode{130}\sublabel{NW27XAxz-4P0tKA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4P0tKA-1}}}\moddef{Catch and print \code{}SQLException\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-4P0tKA-1}}}\endmoddef\nwused{\\{NW27XAxz-4P4YpK-1}\\{NW27XAxz-b3Hn1-1}\\{NW27XAxz-2BAv1P-1}\\{NW27XAxz-2OKmqF-1}\\{NW27XAxz-1lVtry-1}\\{NW27XAxz-3I0i1F-1}\\{NW27XAxz-28BJIM-1}\\{NW27XAxz-1r65Fb-1}\\{NW27XAxz-3SpUqj-1}\\{NW27XAxz-4ISWm4-1}\\{NW27XAxz-IYVQQ-1}\\{NW27XAxz-4VFddh-1}\\{NW27XAxz-y828a-1}\\{NW27XAxz-lMiTm-1}\\{NW27XAxz-1MI9ro-1}\\{NW27XAxz-3AGrxZ-1}\\{NW27XAxz-3UaQCb-1}\\{NW27XAxz-1oPNKc-1}}
 catch (SQLException e1) \{
   printSQLException(e1);
   DBSaveBackup(DERBY_DUMPNAME);
@@ -2077,6 +2083,17 @@ catch (SQLException e) \{
 \nwendcode{}\nwbegindocs{133}\nwdocspar
 \end{itemize}
 
+\subsubsection{{\tt{}{\char95}getConnection}(0)}
+For internal use.
+\nwenddocs{}\nwbegincode{134}\sublabel{NW27XAxz-3I0i1F-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3I0i1F-1}}}\moddef{Get connection (for internal use)~{\nwtagstyle{}\subpageref{NW27XAxz-3I0i1F-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-3}}
+public Connection _getConnection() throws RuntimeException \{
+  try \{
+    return DriverManager.getConnection(CONNECTIONS_POOL_URL);
+  \}
+  \LA{}Catch and print \code{}SQLException\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-4P0tKA-1}}\RA{}
+\}
+\nwendcode{}\nwbegindocs{135}\nwdocspar
+
 \subsection{Write Methods}
 \label{sec:write-methods}
 None of the write methods perform input validation, instead delegating that
@@ -2086,17 +2103,17 @@ method uses catch-and-print (\S\ref{sec:printSQLException(1)}) to throw a
 
 All write methods do a commit-and-close on a database connection. To save
 a little bit of space, we put this procedure into its own chunk here.
-\nwenddocs{}\nwbegincode{134}\sublabel{NW27XAxz-3pffr6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3pffr6-1}}}\moddef{..commit and close~{\nwtagstyle{}\subpageref{NW27XAxz-3pffr6-1}}}\endmoddef\nwused{\\{NW27XAxz-28BJIM-1}\\{NW27XAxz-1r65Fb-1}\\{NW27XAxz-3SpUqj-1}\\{NW27XAxz-4ISWm4-1}\\{NW27XAxz-IYVQQ-1}\\{NW27XAxz-4VFddh-1}\\{NW27XAxz-y828a-1}\\{NW27XAxz-lMiTm-1}}
+\nwenddocs{}\nwbegincode{136}\sublabel{NW27XAxz-3pffr6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3pffr6-1}}}\moddef{..commit and close~{\nwtagstyle{}\subpageref{NW27XAxz-3pffr6-1}}}\endmoddef\nwused{\\{NW27XAxz-28BJIM-1}\\{NW27XAxz-1r65Fb-1}\\{NW27XAxz-3SpUqj-1}\\{NW27XAxz-4ISWm4-1}\\{NW27XAxz-IYVQQ-1}\\{NW27XAxz-4VFddh-1}\\{NW27XAxz-y828a-1}\\{NW27XAxz-lMiTm-1}}
 conn.commit();
 Print("Close connection "+conn.toString());
 conn.close();
-\nwidentuses{\\{{Print}{Print}}}\nwindexuse{Print}{Print}{NW27XAxz-3pffr6-1}\nwendcode{}\nwbegindocs{135}\nwdocspar
+\nwidentuses{\\{{Print}{Print}}}\nwindexuse{Print}{Print}{NW27XAxz-3pffr6-1}\nwendcode{}\nwbegindocs{137}\nwdocspar
 
 \subsubsection{{\tt{}\protect\nwindexuse{DBAddNewVertex}{DBAddNewVertex}{NW27XAxz-28BJIM-1}DBAddNewVertex}(3)}
 The {\tt{}\protect\nwindexuse{DBAddNewVertex}{DBAddNewVertex}{NW27XAxz-28BJIM-1}DBAddNewVertex}(3) method is used by the Controller to load an on-disk
 road network into the database. Duplicate-prevention is included here so the
 Controller doesn't have to.
-\nwenddocs{}\nwbegincode{136}\sublabel{NW27XAxz-28BJIM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-28BJIM-1}}}\moddef{Add new vertex~{\nwtagstyle{}\subpageref{NW27XAxz-28BJIM-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-2}}
+\nwenddocs{}\nwbegincode{138}\sublabel{NW27XAxz-28BJIM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-28BJIM-1}}}\moddef{Add new vertex~{\nwtagstyle{}\subpageref{NW27XAxz-28BJIM-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-2}}
 public void DBAddNewVertex(int v, int lng, int lat) throws RuntimeException \{
   if (!lu_vertices.containsKey(v)) \{
     try \{
@@ -2112,11 +2129,11 @@ public void DBAddNewVertex(int v, int lng, int lat) throws RuntimeException \{
   \}
 \}
 \nosublabel{NW27XAxz-28BJIM-1-u2}\nwindexdefn{DBAddNewVertex}{DBAddNewVertex}{NW27XAxz-28BJIM-1}\eatline
-\nwidentdefs{\\{{DBAddNewVertex}{DBAddNewVertex}}}\nwidentuses{\\{{lu{\char95}vertices}{lu:unvertices}}\\{{Print}{Print}}\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S0}{S0}}}\nwindexuse{lu{\char95}vertices}{lu:unvertices}{NW27XAxz-28BJIM-1}\nwindexuse{Print}{Print}{NW27XAxz-28BJIM-1}\nwindexuse{PS}{PS}{NW27XAxz-28BJIM-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-28BJIM-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-28BJIM-1}\nwindexuse{S0}{S0}{NW27XAxz-28BJIM-1}\nwendcode{}\nwbegindocs{137}\nwdocspar
+\nwidentdefs{\\{{DBAddNewVertex}{DBAddNewVertex}}}\nwidentuses{\\{{lu{\char95}vertices}{lu:unvertices}}\\{{Print}{Print}}\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S0}{S0}}}\nwindexuse{lu{\char95}vertices}{lu:unvertices}{NW27XAxz-28BJIM-1}\nwindexuse{Print}{Print}{NW27XAxz-28BJIM-1}\nwindexuse{PS}{PS}{NW27XAxz-28BJIM-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-28BJIM-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-28BJIM-1}\nwindexuse{S0}{S0}{NW27XAxz-28BJIM-1}\nwendcode{}\nwbegindocs{139}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBAddNewEdge}{DBAddNewEdge}{NW27XAxz-1r65Fb-1}DBAddNewEdge}(4)}
 The {\tt{}\protect\nwindexuse{DBAddNewEdge}{DBAddNewEdge}{NW27XAxz-1r65Fb-1}DBAddNewEdge}(4) method is also used to load an on-disk road network
 into the database.
-\nwenddocs{}\nwbegincode{138}\sublabel{NW27XAxz-1r65Fb-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1r65Fb-1}}}\moddef{Add new edge~{\nwtagstyle{}\subpageref{NW27XAxz-1r65Fb-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-2}}
+\nwenddocs{}\nwbegincode{140}\sublabel{NW27XAxz-1r65Fb-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1r65Fb-1}}}\moddef{Add new edge~{\nwtagstyle{}\subpageref{NW27XAxz-1r65Fb-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-2}}
 public void DBAddNewEdge(int v1, int v2, int dd, int nu) throws RuntimeException \{
   if (!lu_edges.containsKey(v1)) \{
     lu_edges.put(v1, new HashMap<>());
@@ -2135,11 +2152,11 @@ public void DBAddNewEdge(int v1, int v2, int dd, int nu) throws RuntimeException
   \}
 \}
 \nosublabel{NW27XAxz-1r65Fb-1-u2}\nwindexdefn{DBAddNewEdge}{DBAddNewEdge}{NW27XAxz-1r65Fb-1}\eatline
-\nwidentdefs{\\{{DBAddNewEdge}{DBAddNewEdge}}}\nwidentuses{\\{{lu{\char95}edges}{lu:unedges}}\\{{Print}{Print}}\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S1}{S1}}}\nwindexuse{lu{\char95}edges}{lu:unedges}{NW27XAxz-1r65Fb-1}\nwindexuse{Print}{Print}{NW27XAxz-1r65Fb-1}\nwindexuse{PS}{PS}{NW27XAxz-1r65Fb-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-1r65Fb-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-1r65Fb-1}\nwindexuse{S1}{S1}{NW27XAxz-1r65Fb-1}\nwendcode{}\nwbegindocs{139}\nwdocspar
+\nwidentdefs{\\{{DBAddNewEdge}{DBAddNewEdge}}}\nwidentuses{\\{{lu{\char95}edges}{lu:unedges}}\\{{Print}{Print}}\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S1}{S1}}}\nwindexuse{lu{\char95}edges}{lu:unedges}{NW27XAxz-1r65Fb-1}\nwindexuse{Print}{Print}{NW27XAxz-1r65Fb-1}\nwindexuse{PS}{PS}{NW27XAxz-1r65Fb-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-1r65Fb-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-1r65Fb-1}\nwindexuse{S1}{S1}{NW27XAxz-1r65Fb-1}\nwendcode{}\nwbegindocs{141}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBUpdateEdgeSpeed}{DBUpdateEdgeSpeed}{NW27XAxz-3SpUqj-1}DBUpdateEdgeSpeed}(3)}
 The {\tt{}\protect\nwindexuse{DBUpdateEdgeSpeed}{DBUpdateEdgeSpeed}{NW27XAxz-3SpUqj-1}DBUpdateEdgeSpeed}(3) method updates the maximum free-flow speed of an
 edge in the road network (in meters per second).
-\nwenddocs{}\nwbegincode{140}\sublabel{NW27XAxz-3SpUqj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3SpUqj-1}}}\moddef{Update edge speed~{\nwtagstyle{}\subpageref{NW27XAxz-3SpUqj-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-2}}
+\nwenddocs{}\nwbegincode{142}\sublabel{NW27XAxz-3SpUqj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3SpUqj-1}}}\moddef{Update edge speed~{\nwtagstyle{}\subpageref{NW27XAxz-3SpUqj-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-2}}
 public void DBUpdateEdgeSpeed(int v1, int v2, int nu) throws RuntimeException \{
   try \{
     Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
@@ -2156,7 +2173,7 @@ public void DBUpdateEdgeSpeed(int v1, int v2, int nu) throws RuntimeException \{
   \LA{}Catch and print \code{}SQLException\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-4P0tKA-1}}\RA{}
 \}
 \nosublabel{NW27XAxz-3SpUqj-1-u2}\nwindexdefn{DBUpdateEdgeSpeed}{DBUpdateEdgeSpeed}{NW27XAxz-3SpUqj-1}\eatline
-\nwidentdefs{\\{{DBUpdateEdgeSpeed}{DBUpdateEdgeSpeed}}}\nwidentuses{\\{{lu{\char95}edges}{lu:unedges}}\\{{Print}{Print}}\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S131}{S131}}\\{{S15}{S15}}}\nwindexuse{lu{\char95}edges}{lu:unedges}{NW27XAxz-3SpUqj-1}\nwindexuse{Print}{Print}{NW27XAxz-3SpUqj-1}\nwindexuse{PS}{PS}{NW27XAxz-3SpUqj-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-3SpUqj-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-3SpUqj-1}\nwindexuse{S131}{S131}{NW27XAxz-3SpUqj-1}\nwindexuse{S15}{S15}{NW27XAxz-3SpUqj-1}\nwendcode{}\nwbegindocs{141}\nwdocspar
+\nwidentdefs{\\{{DBUpdateEdgeSpeed}{DBUpdateEdgeSpeed}}}\nwidentuses{\\{{lu{\char95}edges}{lu:unedges}}\\{{Print}{Print}}\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S131}{S131}}\\{{S15}{S15}}}\nwindexuse{lu{\char95}edges}{lu:unedges}{NW27XAxz-3SpUqj-1}\nwindexuse{Print}{Print}{NW27XAxz-3SpUqj-1}\nwindexuse{PS}{PS}{NW27XAxz-3SpUqj-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-3SpUqj-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-3SpUqj-1}\nwindexuse{S131}{S131}{NW27XAxz-3SpUqj-1}\nwindexuse{S15}{S15}{NW27XAxz-3SpUqj-1}\nwendcode{}\nwbegindocs{143}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBAddNewRequest}{DBAddNewRequest}{NW27XAxz-4ISWm4-1}DBAddNewRequest}(1)}
 Array {\tt{}u} =
 
@@ -2173,7 +2190,7 @@ Array {\tt{}u} =
 \noindent for user $u$, where $d_u$ is the base distance.
 The value of $u_q$ \emph{must} be greater than 0.
 
-\nwenddocs{}\nwbegincode{142}\sublabel{NW27XAxz-4ISWm4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4ISWm4-1}}}\moddef{Add new request~{\nwtagstyle{}\subpageref{NW27XAxz-4ISWm4-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-2}}
+\nwenddocs{}\nwbegincode{144}\sublabel{NW27XAxz-4ISWm4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4ISWm4-1}}}\moddef{Add new request~{\nwtagstyle{}\subpageref{NW27XAxz-4ISWm4-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-2}}
 public void DBAddNewRequest(int[] u) throws RuntimeException \{
   if (!lu_users.containsKey(u[0])) \{
     try \{
@@ -2190,7 +2207,7 @@ public void DBAddNewRequest(int[] u) throws RuntimeException \{
   \}
 \}
 \nosublabel{NW27XAxz-4ISWm4-1-u4}\nwindexdefn{DBAddNewRequest}{DBAddNewRequest}{NW27XAxz-4ISWm4-1}\eatline
-\nwidentdefs{\\{{DBAddNewRequest}{DBAddNewRequest}}}\nwidentuses{\\{{lu{\char95}rstatus}{lu:unrstatus}}\\{{lu{\char95}users}{lu:unusers}}\\{{Print}{Print}}}\nwindexuse{lu{\char95}rstatus}{lu:unrstatus}{NW27XAxz-4ISWm4-1}\nwindexuse{lu{\char95}users}{lu:unusers}{NW27XAxz-4ISWm4-1}\nwindexuse{Print}{Print}{NW27XAxz-4ISWm4-1}\nwendcode{}\nwbegincode{143}\sublabel{NW27XAxz-4ROa6q-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4ROa6q-1}}}\moddef{..insert new user into user tables~{\nwtagstyle{}\subpageref{NW27XAxz-4ROa6q-1}}}\endmoddef\nwused{\\{NW27XAxz-4ISWm4-1}\\{NW27XAxz-IYVQQ-1}}
+\nwidentdefs{\\{{DBAddNewRequest}{DBAddNewRequest}}}\nwidentuses{\\{{lu{\char95}rstatus}{lu:unrstatus}}\\{{lu{\char95}users}{lu:unusers}}\\{{Print}{Print}}}\nwindexuse{lu{\char95}rstatus}{lu:unrstatus}{NW27XAxz-4ISWm4-1}\nwindexuse{lu{\char95}users}{lu:unusers}{NW27XAxz-4ISWm4-1}\nwindexuse{Print}{Print}{NW27XAxz-4ISWm4-1}\nwendcode{}\nwbegincode{145}\sublabel{NW27XAxz-4ROa6q-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4ROa6q-1}}}\moddef{..insert new user into user tables~{\nwtagstyle{}\subpageref{NW27XAxz-4ROa6q-1}}}\endmoddef\nwused{\\{NW27XAxz-4ISWm4-1}\\{NW27XAxz-IYVQQ-1}}
 PreparedStatement pS2 = PS(conn, "S2");
 PreparedStatement pS3 = PS(conn, "S3");
 PreparedStatement pS4 = PS(conn, "S4");
@@ -2204,12 +2221,12 @@ PSAdd(pS5, uid, u[4]);
 PSAdd(pS6, uid, u[5]);
 PSAdd(pS7, uid, u[6]);
 PSSubmit(pS2, pS3, pS4, pS5, pS6, pS7);
-\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S2}{S2}}\\{{S3}{S3}}\\{{S4}{S4}}\\{{S5}{S5}}\\{{S6}{S6}}\\{{S7}{S7}}}\nwindexuse{PS}{PS}{NW27XAxz-4ROa6q-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-4ROa6q-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-4ROa6q-1}\nwindexuse{S2}{S2}{NW27XAxz-4ROa6q-1}\nwindexuse{S3}{S3}{NW27XAxz-4ROa6q-1}\nwindexuse{S4}{S4}{NW27XAxz-4ROa6q-1}\nwindexuse{S5}{S5}{NW27XAxz-4ROa6q-1}\nwindexuse{S6}{S6}{NW27XAxz-4ROa6q-1}\nwindexuse{S7}{S7}{NW27XAxz-4ROa6q-1}\nwendcode{}\nwbegindocs{144}\nwdocspar
-\nwenddocs{}\nwbegincode{145}\sublabel{NW27XAxz-44Ff7c-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-44Ff7c-1}}}\moddef{..insert new request into r~{\nwtagstyle{}\subpageref{NW27XAxz-44Ff7c-1}}}\endmoddef\nwused{\\{NW27XAxz-4ISWm4-1}}
+\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S2}{S2}}\\{{S3}{S3}}\\{{S4}{S4}}\\{{S5}{S5}}\\{{S6}{S6}}\\{{S7}{S7}}}\nwindexuse{PS}{PS}{NW27XAxz-4ROa6q-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-4ROa6q-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-4ROa6q-1}\nwindexuse{S2}{S2}{NW27XAxz-4ROa6q-1}\nwindexuse{S3}{S3}{NW27XAxz-4ROa6q-1}\nwindexuse{S4}{S4}{NW27XAxz-4ROa6q-1}\nwindexuse{S5}{S5}{NW27XAxz-4ROa6q-1}\nwindexuse{S6}{S6}{NW27XAxz-4ROa6q-1}\nwindexuse{S7}{S7}{NW27XAxz-4ROa6q-1}\nwendcode{}\nwbegindocs{146}\nwdocspar
+\nwenddocs{}\nwbegincode{147}\sublabel{NW27XAxz-44Ff7c-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-44Ff7c-1}}}\moddef{..insert new request into r~{\nwtagstyle{}\subpageref{NW27XAxz-44Ff7c-1}}}\endmoddef\nwused{\\{NW27XAxz-4ISWm4-1}}
 PreparedStatement pS9 = PS(conn, "S9");
 PSAdd(pS9, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
 PSSubmit(pS9);
-\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S9}{S9}}}\nwindexuse{PS}{PS}{NW27XAxz-44Ff7c-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-44Ff7c-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-44Ff7c-1}\nwindexuse{S9}{S9}{NW27XAxz-44Ff7c-1}\nwendcode{}\nwbegindocs{146}\nwdocspar
+\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S9}{S9}}}\nwindexuse{PS}{PS}{NW27XAxz-44Ff7c-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-44Ff7c-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-44Ff7c-1}\nwindexuse{S9}{S9}{NW27XAxz-44Ff7c-1}\nwendcode{}\nwbegindocs{148}\nwdocspar
 
 \subsubsection{{\tt{}\protect\nwindexuse{DBAddNewServer}{DBAddNewServer}{NW27XAxz-IYVQQ-1}DBAddNewServer}(2)}
 Array {\tt{}u} =
@@ -2240,13 +2257,13 @@ The value of $u_q$ \emph{must} be less than 0. Array {\tt{}route} =
 
 \noindent for route $w$.
 
-\nwenddocs{}\nwbegincode{147}\sublabel{NW27XAxz-IYVQQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-IYVQQ-1}}}\moddef{Add new server~{\nwtagstyle{}\subpageref{NW27XAxz-IYVQQ-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-2}}
+\nwenddocs{}\nwbegincode{149}\sublabel{NW27XAxz-IYVQQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-IYVQQ-1}}}\moddef{Add new server~{\nwtagstyle{}\subpageref{NW27XAxz-IYVQQ-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-2}}
 public void DBAddNewServer(int[] u, int[] route) throws RuntimeException \{
-  if (!lu_users.containsKey(u[0])) \{
+  int uid = u[0];
+  if (!lu_users.containsKey(uid)) \{
     try \{
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
       Print("Open connection "+conn.toString());
-      int uid = u[0];
       int se = u[2];
       \LA{}..insert new user into user tables~{\nwtagstyle{}\subpageref{NW27XAxz-4ROa6q-1}}\RA{}
       \LA{}..insert new server into s~{\nwtagstyle{}\subpageref{NW27XAxz-JGp6y-1}}\RA{}
@@ -2254,29 +2271,29 @@ public void DBAddNewServer(int[] u, int[] route) throws RuntimeException \{
       \LA{}..insert new server route into cw~{\nwtagstyle{}\subpageref{NW27XAxz-2GDxmx-1}}\RA{}
       \LA{}..insert new server into cq~{\nwtagstyle{}\subpageref{NW27XAxz-404DhQ-1}}\RA{}
       \LA{}..commit and close~{\nwtagstyle{}\subpageref{NW27XAxz-3pffr6-1}}\RA{}
-      lu_users.put(u[0], u.clone());
+      lu_users.put(uid, u.clone());
     \}
     \LA{}Catch and print \code{}SQLException\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-4P0tKA-1}}\RA{}
   \}
 \}
 \nosublabel{NW27XAxz-IYVQQ-1-u7}\nwindexdefn{DBAddNewServer}{DBAddNewServer}{NW27XAxz-IYVQQ-1}\eatline
-\nwidentdefs{\\{{DBAddNewServer}{DBAddNewServer}}}\nwidentuses{\\{{lu{\char95}users}{lu:unusers}}\\{{Print}{Print}}}\nwindexuse{lu{\char95}users}{lu:unusers}{NW27XAxz-IYVQQ-1}\nwindexuse{Print}{Print}{NW27XAxz-IYVQQ-1}\nwendcode{}\nwbegincode{148}\sublabel{NW27XAxz-JGp6y-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-JGp6y-1}}}\moddef{..insert new server into s~{\nwtagstyle{}\subpageref{NW27XAxz-JGp6y-1}}}\endmoddef\nwused{\\{NW27XAxz-IYVQQ-1}}
+\nwidentdefs{\\{{DBAddNewServer}{DBAddNewServer}}}\nwidentuses{\\{{lu{\char95}users}{lu:unusers}}\\{{Print}{Print}}}\nwindexuse{lu{\char95}users}{lu:unusers}{NW27XAxz-IYVQQ-1}\nwindexuse{Print}{Print}{NW27XAxz-IYVQQ-1}\nwendcode{}\nwbegincode{150}\sublabel{NW27XAxz-JGp6y-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-JGp6y-1}}}\moddef{..insert new server into s~{\nwtagstyle{}\subpageref{NW27XAxz-JGp6y-1}}}\endmoddef\nwused{\\{NW27XAxz-IYVQQ-1}}
 PreparedStatement pS8 = PS(conn, "S8");
 PSAdd(pS8, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
 PSSubmit(pS8);
-\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S8}{S8}}}\nwindexuse{PS}{PS}{NW27XAxz-JGp6y-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-JGp6y-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-JGp6y-1}\nwindexuse{S8}{S8}{NW27XAxz-JGp6y-1}\nwendcode{}\nwbegindocs{149}\nwdocspar
+\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S8}{S8}}}\nwindexuse{PS}{PS}{NW27XAxz-JGp6y-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-JGp6y-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-JGp6y-1}\nwindexuse{S8}{S8}{NW27XAxz-JGp6y-1}\nwendcode{}\nwbegindocs{151}\nwdocspar
 The procedure to insert {\tt{}route} into Table W is written into its own chunk so
 we can re-use it later. The procedure requires an integer array {\tt{}output}.
 After the procedure, we can re-initialize prepared statement {\tt{}pS10} to add the first
 waypoint, with {\tt{}null} as its predecessor, into the database.
-\nwenddocs{}\nwbegincode{150}\sublabel{NW27XAxz-3xg8Fp-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3xg8Fp-1}}}\moddef{..insert new server route into w~{\nwtagstyle{}\subpageref{NW27XAxz-3xg8Fp-1}}}\endmoddef\nwused{\\{NW27XAxz-IYVQQ-1}}
+\nwenddocs{}\nwbegincode{152}\sublabel{NW27XAxz-3xg8Fp-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3xg8Fp-1}}}\moddef{..insert new server route into w~{\nwtagstyle{}\subpageref{NW27XAxz-3xg8Fp-1}}}\endmoddef\nwused{\\{NW27XAxz-IYVQQ-1}}
 int[] output = new int[] \{ \};
 \LA{}Procedure to insert \code{}route\edoc{} into Table W~{\nwtagstyle{}\subpageref{NW27XAxz-1EP7t-1}}\RA{}
 pS10 = PS(conn, "S10");
 PSAdd(pS10, uid, se, null, null, route[0], route[1], null, null);
 PSSubmit(pS10);
-\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S10}{S10}}}\nwindexuse{PS}{PS}{NW27XAxz-3xg8Fp-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-3xg8Fp-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-3xg8Fp-1}\nwindexuse{S10}{S10}{NW27XAxz-3xg8Fp-1}\nwendcode{}\nwbegindocs{151}\nwdocspar
-\nwenddocs{}\nwbegincode{152}\sublabel{NW27XAxz-1EP7t-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1EP7t-1}}}\moddef{Procedure to insert \code{}route\edoc{} into Table W~{\nwtagstyle{}\subpageref{NW27XAxz-1EP7t-1}}}\endmoddef\nwused{\\{NW27XAxz-3xg8Fp-1}\\{NW27XAxz-2BaQBV-1}}
+\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S10}{S10}}}\nwindexuse{PS}{PS}{NW27XAxz-3xg8Fp-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-3xg8Fp-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-3xg8Fp-1}\nwindexuse{S10}{S10}{NW27XAxz-3xg8Fp-1}\nwendcode{}\nwbegindocs{153}\nwdocspar
+\nwenddocs{}\nwbegincode{154}\sublabel{NW27XAxz-1EP7t-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1EP7t-1}}}\moddef{Procedure to insert \code{}route\edoc{} into Table W~{\nwtagstyle{}\subpageref{NW27XAxz-1EP7t-1}}}\endmoddef\nwused{\\{NW27XAxz-3xg8Fp-1}\\{NW27XAxz-2BaQBV-1}}
 PreparedStatement pS10 = PS(conn, "S10");
 for (int i = 0; i < (route.length - 3); i += 2) \{
   int t1 = route[i];
@@ -2290,20 +2307,19 @@ for (int i = 0; i < (route.length - 3); i += 2) \{
   PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
 \}
 PSSubmit(pS10);
-\nwidentuses{\\{{lu{\char95}edges}{lu:unedges}}\\{{Print}{Print}}\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S10}{S10}}}\nwindexuse{lu{\char95}edges}{lu:unedges}{NW27XAxz-1EP7t-1}\nwindexuse{Print}{Print}{NW27XAxz-1EP7t-1}\nwindexuse{PS}{PS}{NW27XAxz-1EP7t-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-1EP7t-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-1EP7t-1}\nwindexuse{S10}{S10}{NW27XAxz-1EP7t-1}\nwendcode{}\nwbegindocs{153}\nwdocspar
-\nwenddocs{}\nwbegincode{154}\sublabel{NW27XAxz-2GDxmx-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2GDxmx-1}}}\moddef{..insert new server route into cw~{\nwtagstyle{}\subpageref{NW27XAxz-2GDxmx-1}}}\endmoddef\nwused{\\{NW27XAxz-IYVQQ-1}}
+\nwidentuses{\\{{lu{\char95}edges}{lu:unedges}}\\{{Print}{Print}}\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S10}{S10}}}\nwindexuse{lu{\char95}edges}{lu:unedges}{NW27XAxz-1EP7t-1}\nwindexuse{Print}{Print}{NW27XAxz-1EP7t-1}\nwindexuse{PS}{PS}{NW27XAxz-1EP7t-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-1EP7t-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-1EP7t-1}\nwindexuse{S10}{S10}{NW27XAxz-1EP7t-1}\nwendcode{}\nwbegindocs{155}\nwdocspar
+\nwenddocs{}\nwbegincode{156}\sublabel{NW27XAxz-2GDxmx-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2GDxmx-1}}}\moddef{..insert new server route into cw~{\nwtagstyle{}\subpageref{NW27XAxz-2GDxmx-1}}}\endmoddef\nwused{\\{NW27XAxz-IYVQQ-1}}
 PreparedStatement pS11 = PS(conn, "S11");
 int te = route[(route.length - 2)];
 PSAdd(pS11, uid, u[2], u[3], u[4], u[5], u[2], u[4], te, u[5]);
 PSSubmit(pS11);
-\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S11}{S11}}}\nwindexuse{PS}{PS}{NW27XAxz-2GDxmx-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-2GDxmx-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-2GDxmx-1}\nwindexuse{S11}{S11}{NW27XAxz-2GDxmx-1}\nwendcode{}\nwbegindocs{155}\nwdocspar
-\nwenddocs{}\nwbegincode{156}\sublabel{NW27XAxz-404DhQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-404DhQ-1}}}\moddef{..insert new server into cq~{\nwtagstyle{}\subpageref{NW27XAxz-404DhQ-1}}}\endmoddef\nwused{\\{NW27XAxz-IYVQQ-1}}
+\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S11}{S11}}}\nwindexuse{PS}{PS}{NW27XAxz-2GDxmx-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-2GDxmx-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-2GDxmx-1}\nwindexuse{S11}{S11}{NW27XAxz-2GDxmx-1}\nwendcode{}\nwbegindocs{157}\nwdocspar
+\nwenddocs{}\nwbegincode{158}\sublabel{NW27XAxz-404DhQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-404DhQ-1}}}\moddef{..insert new server into cq~{\nwtagstyle{}\subpageref{NW27XAxz-404DhQ-1}}}\endmoddef\nwused{\\{NW27XAxz-IYVQQ-1}}
 PreparedStatement pS14 = PS(conn, "S14");
 PSAdd(pS14, uid, u[1], u[2], null, u[2], u[4], null, u[1],
     null, null, null, null, null, 1);
 PSSubmit(pS14);
-\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S14}{S14}}}\nwindexuse{PS}{PS}{NW27XAxz-404DhQ-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-404DhQ-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-404DhQ-1}\nwindexuse{S14}{S14}{NW27XAxz-404DhQ-1}\nwendcode{}\nwbegindocs{157}\nwdocspar
-
+\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S14}{S14}}}\nwindexuse{PS}{PS}{NW27XAxz-404DhQ-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-404DhQ-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-404DhQ-1}\nwindexuse{S14}{S14}{NW27XAxz-404DhQ-1}\nwendcode{}\nwbegindocs{159}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBUpdateServerRoute}{DBUpdateServerRoute}{NW27XAxz-4VFddh-1}DBUpdateServerRoute}(3)}
 The {\tt{}\protect\nwindexuse{DBUpdateServerRoute}{DBUpdateServerRoute}{NW27XAxz-4VFddh-1}DBUpdateServerRoute}(3) method can be used to
 \begin{enumerate}
@@ -2357,7 +2373,7 @@ replaced with those in {\tt{}sched};
 in {\tt{}route} cannot be labeled.
 \end{itemize}
 
-\nwenddocs{}\nwbegincode{158}\sublabel{NW27XAxz-4VFddh-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4VFddh-1}}}\moddef{Update server route~{\nwtagstyle{}\subpageref{NW27XAxz-4VFddh-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-2}}
+\nwenddocs{}\nwbegincode{160}\sublabel{NW27XAxz-4VFddh-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4VFddh-1}}}\moddef{Update server route~{\nwtagstyle{}\subpageref{NW27XAxz-4VFddh-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-2}}
 public void DBUpdateServerRoute(int sid, int[] route, int[] sched)
 throws RuntimeException \{
   int[] output = new int[] \{ \};
@@ -2376,11 +2392,11 @@ throws RuntimeException \{
   \LA{}Catch and print \code{}SQLException\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-4P0tKA-1}}\RA{}
 \}
 \nosublabel{NW27XAxz-4VFddh-1-u5}\nwindexdefn{DBUpdateServerRoute}{DBUpdateServerRoute}{NW27XAxz-4VFddh-1}\eatline
-\nwidentdefs{\\{{DBUpdateServerRoute}{DBUpdateServerRoute}}}\nwidentuses{\\{{Print}{Print}}}\nwindexuse{Print}{Print}{NW27XAxz-4VFddh-1}\nwendcode{}\nwbegincode{159}\sublabel{NW27XAxz-2VNDCH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2VNDCH-1}}}\moddef{..fetch \code{}sq\edoc{} and \code{}se\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-2VNDCH-1}}}\endmoddef\nwused{\\{NW27XAxz-4VFddh-1}\\{NW27XAxz-y828a-1}\\{NW27XAxz-lMiTm-1}}
+\nwidentdefs{\\{{DBUpdateServerRoute}{DBUpdateServerRoute}}}\nwidentuses{\\{{Print}{Print}}}\nwindexuse{Print}{Print}{NW27XAxz-4VFddh-1}\nwendcode{}\nwbegincode{161}\sublabel{NW27XAxz-2VNDCH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2VNDCH-1}}}\moddef{..fetch \code{}sq\edoc{} and \code{}se\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-2VNDCH-1}}}\endmoddef\nwused{\\{NW27XAxz-4VFddh-1}\\{NW27XAxz-y828a-1}\\{NW27XAxz-lMiTm-1}}
 sq = lu_users.get(sid)[1];
 se = lu_users.get(sid)[2];
-\nwidentuses{\\{{lu{\char95}users}{lu:unusers}}}\nwindexuse{lu{\char95}users}{lu:unusers}{NW27XAxz-2VNDCH-1}\nwendcode{}\nwbegindocs{160}\nwdocspar
-\nwenddocs{}\nwbegincode{161}\sublabel{NW27XAxz-4LV9nl-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4LV9nl-1}}}\moddef{..update route~{\nwtagstyle{}\subpageref{NW27XAxz-4LV9nl-1}}}\endmoddef\nwused{\\{NW27XAxz-4VFddh-1}\\{NW27XAxz-y828a-1}\\{NW27XAxz-lMiTm-1}}
+\nwidentuses{\\{{lu{\char95}users}{lu:unusers}}}\nwindexuse{lu{\char95}users}{lu:unusers}{NW27XAxz-2VNDCH-1}\nwendcode{}\nwbegindocs{162}\nwdocspar
+\nwenddocs{}\nwbegincode{163}\sublabel{NW27XAxz-4LV9nl-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4LV9nl-1}}}\moddef{..update route~{\nwtagstyle{}\subpageref{NW27XAxz-4LV9nl-1}}}\endmoddef\nwused{\\{NW27XAxz-4VFddh-1}\\{NW27XAxz-y828a-1}\\{NW27XAxz-lMiTm-1}}
 Print("B1");
 \LA{}....delete remaining route from w~{\nwtagstyle{}\subpageref{NW27XAxz-1n0DBP-1}}\RA{}
 Print("B2");
@@ -2388,20 +2404,20 @@ Print("B2");
 Print("B3");
 \LA{}....update route endpoint in cw, cpd~{\nwtagstyle{}\subpageref{NW27XAxz-1ZiLuE-1}}\RA{}
 Print("B4");
-\nwidentuses{\\{{Print}{Print}}}\nwindexuse{Print}{Print}{NW27XAxz-4LV9nl-1}\nwendcode{}\nwbegindocs{162}\nwdocspar
+\nwidentuses{\\{{Print}{Print}}}\nwindexuse{Print}{Print}{NW27XAxz-4LV9nl-1}\nwendcode{}\nwbegindocs{164}\nwdocspar
 Using greater-than preserves the predecessor already recorded for ({\tt{}route[0]}. {\tt{}route[1]}).
-\nwenddocs{}\nwbegincode{163}\sublabel{NW27XAxz-1n0DBP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1n0DBP-1}}}\moddef{....delete remaining route from w~{\nwtagstyle{}\subpageref{NW27XAxz-1n0DBP-1}}}\endmoddef\nwused{\\{NW27XAxz-4LV9nl-1}}
+\nwenddocs{}\nwbegincode{165}\sublabel{NW27XAxz-1n0DBP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1n0DBP-1}}}\moddef{....delete remaining route from w~{\nwtagstyle{}\subpageref{NW27XAxz-1n0DBP-1}}}\endmoddef\nwused{\\{NW27XAxz-4LV9nl-1}}
 PreparedStatement pS76 = PS(conn, "S76");
 PSAdd(pS76, sid, route[0]);
 Print("Issue DELETE FROM W WHERE sid="+sid+" AND t2>"+route[0]);
 PSSubmit(pS76);
-\nwidentuses{\\{{Print}{Print}}\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S76}{S76}}}\nwindexuse{Print}{Print}{NW27XAxz-1n0DBP-1}\nwindexuse{PS}{PS}{NW27XAxz-1n0DBP-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-1n0DBP-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-1n0DBP-1}\nwindexuse{S76}{S76}{NW27XAxz-1n0DBP-1}\nwendcode{}\nwbegindocs{164}\nwdocspar
+\nwidentuses{\\{{Print}{Print}}\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S76}{S76}}}\nwindexuse{Print}{Print}{NW27XAxz-1n0DBP-1}\nwindexuse{PS}{PS}{NW27XAxz-1n0DBP-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-1n0DBP-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-1n0DBP-1}\nwindexuse{S76}{S76}{NW27XAxz-1n0DBP-1}\nwendcode{}\nwbegindocs{166}\nwdocspar
 The chunk for inserting {\tt{}route} into Table W uses {\tt{}uid}, so we set it here.
-\nwenddocs{}\nwbegincode{165}\sublabel{NW27XAxz-2BaQBV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2BaQBV-1}}}\moddef{....insert new remaining route into w~{\nwtagstyle{}\subpageref{NW27XAxz-2BaQBV-1}}}\endmoddef\nwused{\\{NW27XAxz-4LV9nl-1}}
+\nwenddocs{}\nwbegincode{167}\sublabel{NW27XAxz-2BaQBV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2BaQBV-1}}}\moddef{....insert new remaining route into w~{\nwtagstyle{}\subpageref{NW27XAxz-2BaQBV-1}}}\endmoddef\nwused{\\{NW27XAxz-4LV9nl-1}}
 int uid = sid;
 \LA{}Procedure to insert \code{}route\edoc{} into Table W~{\nwtagstyle{}\subpageref{NW27XAxz-1EP7t-1}}\RA{}
-\nwendcode{}\nwbegindocs{166}\nwdocspar
-\nwenddocs{}\nwbegincode{167}\sublabel{NW27XAxz-1ZiLuE-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1ZiLuE-1}}}\moddef{....update route endpoint in cw, cpd~{\nwtagstyle{}\subpageref{NW27XAxz-1ZiLuE-1}}}\endmoddef\nwused{\\{NW27XAxz-4LV9nl-1}}
+\nwendcode{}\nwbegindocs{168}\nwdocspar
+\nwenddocs{}\nwbegincode{169}\sublabel{NW27XAxz-1ZiLuE-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1ZiLuE-1}}}\moddef{....update route endpoint in cw, cpd~{\nwtagstyle{}\subpageref{NW27XAxz-1ZiLuE-1}}}\endmoddef\nwused{\\{NW27XAxz-4LV9nl-1}}
 PreparedStatement pS77 = PS(conn, "S77");
 PreparedStatement pS139 = PS(conn, "S139");
 int te = route[(route.length - 2)];
@@ -2411,16 +2427,16 @@ PSAdd(pS139, te, sid);
 Print("Issue UPDATE CW SET te="+te+", ve="+ve+" WHERE sid="+sid);
 Print("Issue UPDATE CPD SET te="+te+" WHERE sid="+sid);
 PSSubmit(pS77, pS139);
-\nwidentuses{\\{{Print}{Print}}\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S139}{S139}}\\{{S77}{S77}}}\nwindexuse{Print}{Print}{NW27XAxz-1ZiLuE-1}\nwindexuse{PS}{PS}{NW27XAxz-1ZiLuE-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-1ZiLuE-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-1ZiLuE-1}\nwindexuse{S139}{S139}{NW27XAxz-1ZiLuE-1}\nwindexuse{S77}{S77}{NW27XAxz-1ZiLuE-1}\nwendcode{}\nwbegindocs{168}\nwdocspar
-\nwenddocs{}\nwbegincode{169}\sublabel{NW27XAxz-2NqWTJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2NqWTJ-1}}}\moddef{..update schedule~{\nwtagstyle{}\subpageref{NW27XAxz-2NqWTJ-1}}}\endmoddef\nwused{\\{NW27XAxz-4VFddh-1}\\{NW27XAxz-lMiTm-1}}
+\nwidentuses{\\{{Print}{Print}}\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S139}{S139}}\\{{S77}{S77}}}\nwindexuse{Print}{Print}{NW27XAxz-1ZiLuE-1}\nwindexuse{PS}{PS}{NW27XAxz-1ZiLuE-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-1ZiLuE-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-1ZiLuE-1}\nwindexuse{S139}{S139}{NW27XAxz-1ZiLuE-1}\nwindexuse{S77}{S77}{NW27XAxz-1ZiLuE-1}\nwendcode{}\nwbegindocs{170}\nwdocspar
+\nwenddocs{}\nwbegincode{171}\sublabel{NW27XAxz-2NqWTJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2NqWTJ-1}}}\moddef{..update schedule~{\nwtagstyle{}\subpageref{NW27XAxz-2NqWTJ-1}}}\endmoddef\nwused{\\{NW27XAxz-4VFddh-1}\\{NW27XAxz-lMiTm-1}}
 int bound = (sched.length/3);
 \LA{}....update times in pd and cpd~{\nwtagstyle{}\subpageref{NW27XAxz-1cwA5Z-1}}\RA{}
 \LA{}....populate the tp, td cache and update cq~{\nwtagstyle{}\subpageref{NW27XAxz-1OV3dP-1}}\RA{}
 \LA{}....select latest order number~{\nwtagstyle{}\subpageref{NW27XAxz-1gWfDY-1}}\RA{}
 \LA{}....delete remaining schedule from cq~{\nwtagstyle{}\subpageref{NW27XAxz-4AIXfi-1}}\RA{}
 \LA{}....insert new remaining schedule into cq~{\nwtagstyle{}\subpageref{NW27XAxz-2Ir9Yx-1}}\RA{}
-\nwendcode{}\nwbegindocs{170}\nwdocspar
-\nwenddocs{}\nwbegincode{171}\sublabel{NW27XAxz-1cwA5Z-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1cwA5Z-1}}}\moddef{....update times in pd and cpd~{\nwtagstyle{}\subpageref{NW27XAxz-1cwA5Z-1}}}\endmoddef\nwused{\\{NW27XAxz-2NqWTJ-1}\\{NW27XAxz-2VQLMF-1}}
+\nwendcode{}\nwbegindocs{172}\nwdocspar
+\nwenddocs{}\nwbegincode{173}\sublabel{NW27XAxz-1cwA5Z-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1cwA5Z-1}}}\moddef{....update times in pd and cpd~{\nwtagstyle{}\subpageref{NW27XAxz-1cwA5Z-1}}}\endmoddef\nwused{\\{NW27XAxz-2NqWTJ-1}\\{NW27XAxz-2VQLMF-1}}
 PreparedStatement pS82 = PS(conn, "S82");
 PreparedStatement pS83 = PS(conn, "S83");
 PreparedStatement pS84 = PS(conn, "S84");
@@ -2438,8 +2454,8 @@ for (int j = 0; j < bound; j++) \{
   \}
 \}
 PSSubmit(pS82, pS83, pS84);
-\nwidentuses{\\{{Print}{Print}}\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S82}{S82}}\\{{S83}{S83}}\\{{S84}{S84}}}\nwindexuse{Print}{Print}{NW27XAxz-1cwA5Z-1}\nwindexuse{PS}{PS}{NW27XAxz-1cwA5Z-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-1cwA5Z-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-1cwA5Z-1}\nwindexuse{S82}{S82}{NW27XAxz-1cwA5Z-1}\nwindexuse{S83}{S83}{NW27XAxz-1cwA5Z-1}\nwindexuse{S84}{S84}{NW27XAxz-1cwA5Z-1}\nwendcode{}\nwbegindocs{172}\nwdocspar
-\nwenddocs{}\nwbegincode{173}\sublabel{NW27XAxz-1OV3dP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1OV3dP-1}}}\moddef{....populate the tp, td cache and update cq~{\nwtagstyle{}\subpageref{NW27XAxz-1OV3dP-1}}}\endmoddef\nwused{\\{NW27XAxz-2NqWTJ-1}}
+\nwidentuses{\\{{Print}{Print}}\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S82}{S82}}\\{{S83}{S83}}\\{{S84}{S84}}}\nwindexuse{Print}{Print}{NW27XAxz-1cwA5Z-1}\nwindexuse{PS}{PS}{NW27XAxz-1cwA5Z-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-1cwA5Z-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-1cwA5Z-1}\nwindexuse{S82}{S82}{NW27XAxz-1cwA5Z-1}\nwindexuse{S83}{S83}{NW27XAxz-1cwA5Z-1}\nwindexuse{S84}{S84}{NW27XAxz-1cwA5Z-1}\nwendcode{}\nwbegindocs{174}\nwdocspar
+\nwenddocs{}\nwbegincode{175}\sublabel{NW27XAxz-1OV3dP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1OV3dP-1}}}\moddef{....populate the tp, td cache and update cq~{\nwtagstyle{}\subpageref{NW27XAxz-1OV3dP-1}}}\endmoddef\nwused{\\{NW27XAxz-2NqWTJ-1}}
 PreparedStatement pS140 = PS(conn, "S140");
 for (int j = 0; j < bound; j++) \{
   int Lj = sched[(3*j + 2)];
@@ -2457,8 +2473,8 @@ for (int j = 0; j < bound; j++) \{
   \}
 \}
 PSSubmit(pS140);
-\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{Print}{Print}}\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S140}{S140}}\\{{S85}{S85}}\\{{S86}{S86}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1OV3dP-1}\nwindexuse{Print}{Print}{NW27XAxz-1OV3dP-1}\nwindexuse{PS}{PS}{NW27XAxz-1OV3dP-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-1OV3dP-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-1OV3dP-1}\nwindexuse{S140}{S140}{NW27XAxz-1OV3dP-1}\nwindexuse{S85}{S85}{NW27XAxz-1OV3dP-1}\nwindexuse{S86}{S86}{NW27XAxz-1OV3dP-1}\nwendcode{}\nwbegindocs{174}\nwdocspar
-\nwenddocs{}\nwbegincode{175}\sublabel{NW27XAxz-1gWfDY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1gWfDY-1}}}\moddef{....select latest order number~{\nwtagstyle{}\subpageref{NW27XAxz-1gWfDY-1}}}\endmoddef\nwused{\\{NW27XAxz-2NqWTJ-1}\\{NW27XAxz-2VQLMF-1}}
+\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{Print}{Print}}\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S140}{S140}}\\{{S85}{S85}}\\{{S86}{S86}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1OV3dP-1}\nwindexuse{Print}{Print}{NW27XAxz-1OV3dP-1}\nwindexuse{PS}{PS}{NW27XAxz-1OV3dP-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-1OV3dP-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-1OV3dP-1}\nwindexuse{S140}{S140}{NW27XAxz-1OV3dP-1}\nwindexuse{S85}{S85}{NW27XAxz-1OV3dP-1}\nwindexuse{S86}{S86}{NW27XAxz-1OV3dP-1}\nwendcode{}\nwbegindocs{176}\nwdocspar
+\nwenddocs{}\nwbegincode{177}\sublabel{NW27XAxz-1gWfDY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1gWfDY-1}}}\moddef{....select latest order number~{\nwtagstyle{}\subpageref{NW27XAxz-1gWfDY-1}}}\endmoddef\nwused{\\{NW27XAxz-2NqWTJ-1}\\{NW27XAxz-2VQLMF-1}}
 int t1, q1, o1;
 if (route[0] == 0) \{
   t1 = 0;
@@ -2470,14 +2486,14 @@ if (route[0] == 0) \{
   q1 = output[1];
   o1 = output[2];
 \}
-\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S87}{S87}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1gWfDY-1}\nwindexuse{S87}{S87}{NW27XAxz-1gWfDY-1}\nwendcode{}\nwbegindocs{176}\nwdocspar
-\nwenddocs{}\nwbegincode{177}\sublabel{NW27XAxz-4AIXfi-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4AIXfi-1}}}\moddef{....delete remaining schedule from cq~{\nwtagstyle{}\subpageref{NW27XAxz-4AIXfi-1}}}\endmoddef\nwused{\\{NW27XAxz-2NqWTJ-1}\\{NW27XAxz-2VQLMF-1}}
+\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S87}{S87}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1gWfDY-1}\nwindexuse{S87}{S87}{NW27XAxz-1gWfDY-1}\nwendcode{}\nwbegindocs{178}\nwdocspar
+\nwenddocs{}\nwbegincode{179}\sublabel{NW27XAxz-4AIXfi-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4AIXfi-1}}}\moddef{....delete remaining schedule from cq~{\nwtagstyle{}\subpageref{NW27XAxz-4AIXfi-1}}}\endmoddef\nwused{\\{NW27XAxz-2NqWTJ-1}\\{NW27XAxz-2VQLMF-1}}
 PreparedStatement pS80 = PS(conn, "S80");
 PSAdd(pS80, sid, route[0]);
 Print("Issue DELETE FROM CQ WHERE sid="+sid+" AND t2>"+route[0]);
 PSSubmit(pS80);
-\nwidentuses{\\{{Print}{Print}}\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S80}{S80}}}\nwindexuse{Print}{Print}{NW27XAxz-4AIXfi-1}\nwindexuse{PS}{PS}{NW27XAxz-4AIXfi-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-4AIXfi-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-4AIXfi-1}\nwindexuse{S80}{S80}{NW27XAxz-4AIXfi-1}\nwendcode{}\nwbegindocs{178}\nwdocspar
-\nwenddocs{}\nwbegincode{179}\sublabel{NW27XAxz-2Ir9Yx-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2Ir9Yx-1}}}\moddef{....insert new remaining schedule into cq~{\nwtagstyle{}\subpageref{NW27XAxz-2Ir9Yx-1}}}\endmoddef\nwused{\\{NW27XAxz-2NqWTJ-1}\\{NW27XAxz-2VQLMF-1}}
+\nwidentuses{\\{{Print}{Print}}\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S80}{S80}}}\nwindexuse{Print}{Print}{NW27XAxz-4AIXfi-1}\nwindexuse{PS}{PS}{NW27XAxz-4AIXfi-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-4AIXfi-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-4AIXfi-1}\nwindexuse{S80}{S80}{NW27XAxz-4AIXfi-1}\nwendcode{}\nwbegindocs{180}\nwdocspar
+\nwenddocs{}\nwbegincode{181}\sublabel{NW27XAxz-2Ir9Yx-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2Ir9Yx-1}}}\moddef{....insert new remaining schedule into cq~{\nwtagstyle{}\subpageref{NW27XAxz-2Ir9Yx-1}}}\endmoddef\nwused{\\{NW27XAxz-2NqWTJ-1}\\{NW27XAxz-2VQLMF-1}}
 PreparedStatement pS14 = PS(conn, "S14");
 for (int j = 0; j < bound; j++) \{
   int t2 = sched[(3*j)];
@@ -2498,7 +2514,7 @@ for (int j = 0; j < bound; j++) \{
   \}
 \}
 PSSubmit(pS14);
-\nwidentuses{\\{{Print}{Print}}\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S14}{S14}}}\nwindexuse{Print}{Print}{NW27XAxz-2Ir9Yx-1}\nwindexuse{PS}{PS}{NW27XAxz-2Ir9Yx-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-2Ir9Yx-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-2Ir9Yx-1}\nwindexuse{S14}{S14}{NW27XAxz-2Ir9Yx-1}\nwendcode{}\nwbegindocs{180}\nwdocspar
+\nwidentuses{\\{{Print}{Print}}\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S14}{S14}}}\nwindexuse{Print}{Print}{NW27XAxz-2Ir9Yx-1}\nwindexuse{PS}{PS}{NW27XAxz-2Ir9Yx-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-2Ir9Yx-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-2Ir9Yx-1}\nwindexuse{S14}{S14}{NW27XAxz-2Ir9Yx-1}\nwendcode{}\nwbegindocs{182}\nwdocspar
 
 \subsubsection{{\tt{}\protect\nwindexuse{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}{NW27XAxz-y828a-1}DBUpdateServerAddToSchedule}(4)}
 The {\tt{}\protect\nwindexuse{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}{NW27XAxz-y828a-1}DBUpdateServerAddToSchedule}(4) method can be used to add new labeled
@@ -2566,7 +2582,7 @@ replaced with those in {\tt{}sched};
 in {\tt{}route} cannot be labeled;
 \item array {\tt{}rid} can be in any order.
 \end{itemize}
-\nwenddocs{}\nwbegincode{181}\sublabel{NW27XAxz-y828a-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-y828a-1}}}\moddef{Update server add to schedule~{\nwtagstyle{}\subpageref{NW27XAxz-y828a-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-2}}
+\nwenddocs{}\nwbegincode{183}\sublabel{NW27XAxz-y828a-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-y828a-1}}}\moddef{Update server add to schedule~{\nwtagstyle{}\subpageref{NW27XAxz-y828a-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-2}}
 public void DBUpdateServerAddToSchedule(
     int sid, int[] route, int[] sched, int[] rid)
 throws RuntimeException \{
@@ -2604,7 +2620,7 @@ throws RuntimeException \{
   \}
 \}
 \nwindexdefn{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}{NW27XAxz-y828a-1}\eatline
-\nwidentdefs{\\{{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}}}\nwidentuses{\\{{lu{\char95}rstatus}{lu:unrstatus}}\\{{Print}{Print}}}\nwindexuse{lu{\char95}rstatus}{lu:unrstatus}{NW27XAxz-y828a-1}\nwindexuse{Print}{Print}{NW27XAxz-y828a-1}\nwendcode{}\nwbegincode{182}\sublabel{NW27XAxz-2VQLMF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2VQLMF-1}}}\moddef{..update and add to schedule~{\nwtagstyle{}\subpageref{NW27XAxz-2VQLMF-1}}}\endmoddef\nwused{\\{NW27XAxz-y828a-1}}
+\nwidentdefs{\\{{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}}}\nwidentuses{\\{{lu{\char95}rstatus}{lu:unrstatus}}\\{{Print}{Print}}}\nwindexuse{lu{\char95}rstatus}{lu:unrstatus}{NW27XAxz-y828a-1}\nwindexuse{Print}{Print}{NW27XAxz-y828a-1}\nwendcode{}\nwbegincode{184}\sublabel{NW27XAxz-2VQLMF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2VQLMF-1}}}\moddef{..update and add to schedule~{\nwtagstyle{}\subpageref{NW27XAxz-2VQLMF-1}}}\endmoddef\nwused{\\{NW27XAxz-y828a-1}}
 int bound = (sched.length/3);
 Print("C1");
 \LA{}....update times in pd and cpd~{\nwtagstyle{}\subpageref{NW27XAxz-1cwA5Z-1}}\RA{}
@@ -2619,8 +2635,8 @@ Print("C5");
 Print("C6");
 \LA{}....insert into pd, cpd~{\nwtagstyle{}\subpageref{NW27XAxz-4fUZKI-1}}\RA{}
 Print("C7");
-\nwidentuses{\\{{Print}{Print}}}\nwindexuse{Print}{Print}{NW27XAxz-2VQLMF-1}\nwendcode{}\nwbegindocs{183}\nwdocspar
-\nwenddocs{}\nwbegincode{184}\sublabel{NW27XAxz-42MPAb-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-42MPAb-1}}}\moddef{....populate the tp, td cache and vp, vd cache and update cq~{\nwtagstyle{}\subpageref{NW27XAxz-42MPAb-1}}}\endmoddef\nwused{\\{NW27XAxz-2VQLMF-1}}
+\nwidentuses{\\{{Print}{Print}}}\nwindexuse{Print}{Print}{NW27XAxz-2VQLMF-1}\nwendcode{}\nwbegindocs{185}\nwdocspar
+\nwenddocs{}\nwbegincode{186}\sublabel{NW27XAxz-42MPAb-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-42MPAb-1}}}\moddef{....populate the tp, td cache and vp, vd cache and update cq~{\nwtagstyle{}\subpageref{NW27XAxz-42MPAb-1}}}\endmoddef\nwused{\\{NW27XAxz-2VQLMF-1}}
 PreparedStatement pS140 = PS(conn, "S140");
 for (int j = 0; j < bound; j++) \{
   int Lj = sched[(3*j + 2)];
@@ -2648,8 +2664,8 @@ for (int j = 0; j < bound; j++) \{
   \}
 \}
 PSSubmit(pS140);
-\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{lu{\char95}users}{lu:unusers}}\\{{Print}{Print}}\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S140}{S140}}\\{{S85}{S85}}\\{{S86}{S86}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-42MPAb-1}\nwindexuse{lu{\char95}users}{lu:unusers}{NW27XAxz-42MPAb-1}\nwindexuse{Print}{Print}{NW27XAxz-42MPAb-1}\nwindexuse{PS}{PS}{NW27XAxz-42MPAb-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-42MPAb-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-42MPAb-1}\nwindexuse{S140}{S140}{NW27XAxz-42MPAb-1}\nwindexuse{S85}{S85}{NW27XAxz-42MPAb-1}\nwindexuse{S86}{S86}{NW27XAxz-42MPAb-1}\nwendcode{}\nwbegindocs{185}\nwdocspar
-\nwenddocs{}\nwbegincode{186}\sublabel{NW27XAxz-2Hq38w-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2Hq38w-1}}}\moddef{......check if new job~{\nwtagstyle{}\subpageref{NW27XAxz-2Hq38w-1}}}\endmoddef\nwused{\\{NW27XAxz-42MPAb-1}}
+\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{lu{\char95}users}{lu:unusers}}\\{{Print}{Print}}\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S140}{S140}}\\{{S85}{S85}}\\{{S86}{S86}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-42MPAb-1}\nwindexuse{lu{\char95}users}{lu:unusers}{NW27XAxz-42MPAb-1}\nwindexuse{Print}{Print}{NW27XAxz-42MPAb-1}\nwindexuse{PS}{PS}{NW27XAxz-42MPAb-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-42MPAb-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-42MPAb-1}\nwindexuse{S140}{S140}{NW27XAxz-42MPAb-1}\nwindexuse{S85}{S85}{NW27XAxz-42MPAb-1}\nwindexuse{S86}{S86}{NW27XAxz-42MPAb-1}\nwendcode{}\nwbegindocs{187}\nwdocspar
+\nwenddocs{}\nwbegincode{188}\sublabel{NW27XAxz-2Hq38w-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2Hq38w-1}}}\moddef{......check if new job~{\nwtagstyle{}\subpageref{NW27XAxz-2Hq38w-1}}}\endmoddef\nwused{\\{NW27XAxz-42MPAb-1}}
 for (int r : rid) \{
   if (Lj == r) \{
     Print("set flagged=true");
@@ -2657,10 +2673,10 @@ for (int r : rid) \{
     break;
   \}
 \}
-\nwidentuses{\\{{Print}{Print}}}\nwindexuse{Print}{Print}{NW27XAxz-2Hq38w-1}\nwendcode{}\nwbegindocs{187}\nwdocspar
+\nwidentuses{\\{{Print}{Print}}}\nwindexuse{Print}{Print}{NW27XAxz-2Hq38w-1}\nwendcode{}\nwbegindocs{189}\nwdocspar
 A second cache, {\tt{}cache2}, is introduced to store the pick-up an drop-off
 vertices so that we can use them when we insert into Table PD and CPD.
-\nwenddocs{}\nwbegincode{188}\sublabel{NW27XAxz-pddDf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-pddDf-1}}}\moddef{......get tp, vp, td, vd of new job~{\nwtagstyle{}\subpageref{NW27XAxz-pddDf-1}}}\endmoddef\nwused{\\{NW27XAxz-42MPAb-1}}
+\nwenddocs{}\nwbegincode{190}\sublabel{NW27XAxz-pddDf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-pddDf-1}}}\moddef{......get tp, vp, td, vd of new job~{\nwtagstyle{}\subpageref{NW27XAxz-pddDf-1}}}\endmoddef\nwused{\\{NW27XAxz-42MPAb-1}}
 Print("get tp, vp, td, vd of new job");
 tp = sched[(3*j)];
 vp = sched[(3*j + 1)];
@@ -2680,8 +2696,8 @@ for (int k = (j + 1); k < bound; k++) \{
 Print("set td="+td);
 Print("set vd="+vd);
 cache2.put(Lj, new int[] \{ vp, vd \});
-\nwidentuses{\\{{Print}{Print}}}\nwindexuse{Print}{Print}{NW27XAxz-pddDf-1}\nwendcode{}\nwbegindocs{189}\nwdocspar
-\nwenddocs{}\nwbegincode{190}\sublabel{NW27XAxz-4fUZKI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4fUZKI-1}}}\moddef{....insert into pd, cpd~{\nwtagstyle{}\subpageref{NW27XAxz-4fUZKI-1}}}\endmoddef\nwused{\\{NW27XAxz-2VQLMF-1}}
+\nwidentuses{\\{{Print}{Print}}}\nwindexuse{Print}{Print}{NW27XAxz-pddDf-1}\nwendcode{}\nwbegindocs{191}\nwdocspar
+\nwenddocs{}\nwbegincode{192}\sublabel{NW27XAxz-4fUZKI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4fUZKI-1}}}\moddef{....insert into pd, cpd~{\nwtagstyle{}\subpageref{NW27XAxz-4fUZKI-1}}}\endmoddef\nwused{\\{NW27XAxz-2VQLMF-1}}
 PreparedStatement pS12 = PS(conn, "S12");
 PreparedStatement pS13 = PS(conn, "S13");
 int rq, re, rl, ro, rd;
@@ -2706,7 +2722,7 @@ for (int r : rid) \{
         r, re, rl, ro, rd);
 \}
 PSSubmit(pS12, pS13);
-\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{Print}{Print}}\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S12}{S12}}\\{{S13}{S13}}\\{{S51}{S51}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-4fUZKI-1}\nwindexuse{Print}{Print}{NW27XAxz-4fUZKI-1}\nwindexuse{PS}{PS}{NW27XAxz-4fUZKI-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-4fUZKI-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-4fUZKI-1}\nwindexuse{S12}{S12}{NW27XAxz-4fUZKI-1}\nwindexuse{S13}{S13}{NW27XAxz-4fUZKI-1}\nwindexuse{S51}{S51}{NW27XAxz-4fUZKI-1}\nwendcode{}\nwbegindocs{191}\nwdocspar
+\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{Print}{Print}}\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S12}{S12}}\\{{S13}{S13}}\\{{S51}{S51}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-4fUZKI-1}\nwindexuse{Print}{Print}{NW27XAxz-4fUZKI-1}\nwindexuse{PS}{PS}{NW27XAxz-4fUZKI-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-4fUZKI-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-4fUZKI-1}\nwindexuse{S12}{S12}{NW27XAxz-4fUZKI-1}\nwindexuse{S13}{S13}{NW27XAxz-4fUZKI-1}\nwindexuse{S51}{S51}{NW27XAxz-4fUZKI-1}\nwendcode{}\nwbegindocs{193}\nwdocspar
 
 \subsubsection{{\tt{}\protect\nwindexuse{DBUpdateServerRemoveFromSchedule}{DBUpdateServerRemoveFromSchedule}{NW27XAxz-lMiTm-1}DBUpdateServerRemoveFromSchedule}(4)}
 The {\tt{}\protect\nwindexuse{DBUpdateServerRemoveFromSchedule}{DBUpdateServerRemoveFromSchedule}{NW27XAxz-lMiTm-1}DBUpdateServerRemoveFromSchedule}(4) method can be used to remove
@@ -2774,7 +2790,7 @@ replaced with those in {\tt{}sched};
 in {\tt{}route} cannot be labeled;
 \item array {\tt{}rid} can be in any order.
 \end{itemize}
-\nwenddocs{}\nwbegincode{192}\sublabel{NW27XAxz-lMiTm-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-lMiTm-1}}}\moddef{Update server remove from schedule~{\nwtagstyle{}\subpageref{NW27XAxz-lMiTm-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-2}}
+\nwenddocs{}\nwbegincode{194}\sublabel{NW27XAxz-lMiTm-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-lMiTm-1}}}\moddef{Update server remove from schedule~{\nwtagstyle{}\subpageref{NW27XAxz-lMiTm-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-2}}
 public void DBUpdateServerRemoveFromSchedule(
     int sid, int[] route, int[] sched, int[] rid)
 throws RuntimeException \{
@@ -2796,7 +2812,7 @@ throws RuntimeException \{
   \}
 \}
 \nwindexdefn{DBUpdateServerRemoveFromSchedule}{DBUpdateServerRemoveFromSchedule}{NW27XAxz-lMiTm-1}\eatline
-\nwidentdefs{\\{{DBUpdateServerRemoveFromSchedule}{DBUpdateServerRemoveFromSchedule}}}\nwidentuses{\\{{lu{\char95}rstatus}{lu:unrstatus}}\\{{Print}{Print}}}\nwindexuse{lu{\char95}rstatus}{lu:unrstatus}{NW27XAxz-lMiTm-1}\nwindexuse{Print}{Print}{NW27XAxz-lMiTm-1}\nwendcode{}\nwbegincode{193}\sublabel{NW27XAxz-2PX0wC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2PX0wC-1}}}\moddef{..remove jobs from pd, cpd~{\nwtagstyle{}\subpageref{NW27XAxz-2PX0wC-1}}}\endmoddef\nwused{\\{NW27XAxz-lMiTm-1}}
+\nwidentdefs{\\{{DBUpdateServerRemoveFromSchedule}{DBUpdateServerRemoveFromSchedule}}}\nwidentuses{\\{{lu{\char95}rstatus}{lu:unrstatus}}\\{{Print}{Print}}}\nwindexuse{lu{\char95}rstatus}{lu:unrstatus}{NW27XAxz-lMiTm-1}\nwindexuse{Print}{Print}{NW27XAxz-lMiTm-1}\nwendcode{}\nwbegincode{195}\sublabel{NW27XAxz-2PX0wC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2PX0wC-1}}}\moddef{..remove jobs from pd, cpd~{\nwtagstyle{}\subpageref{NW27XAxz-2PX0wC-1}}}\endmoddef\nwused{\\{NW27XAxz-lMiTm-1}}
 PreparedStatement pS42 = PS(conn, "S42");
 PreparedStatement pS43 = PS(conn, "S43");
 for (int r : rid) \{
@@ -2804,31 +2820,40 @@ for (int r : rid) \{
   PSAdd(pS43, r);
 \}
 PSSubmit(pS42, pS43);
-\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S42}{S42}}\\{{S43}{S43}}}\nwindexuse{PS}{PS}{NW27XAxz-2PX0wC-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-2PX0wC-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-2PX0wC-1}\nwindexuse{S42}{S42}{NW27XAxz-2PX0wC-1}\nwindexuse{S43}{S43}{NW27XAxz-2PX0wC-1}\nwendcode{}\nwbegindocs{194}\nwdocspar
+\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S42}{S42}}\\{{S43}{S43}}}\nwindexuse{PS}{PS}{NW27XAxz-2PX0wC-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-2PX0wC-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-2PX0wC-1}\nwindexuse{S42}{S42}{NW27XAxz-2PX0wC-1}\nwindexuse{S43}{S43}{NW27XAxz-2PX0wC-1}\nwendcode{}\nwbegindocs{196}\nwdocspar
 
 \subsection{Read Methods}
 \label{sec:read-methods}
 Read methods (except for {\tt{}DBQuery}(2)) are implemented by wrapping
 {\tt{}\protect\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-17Zt8W-1}DBFetch}(3...). As they all follow the same format, we chunk out the
 common portions here in order to emphasize {\tt{}\protect\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-17Zt8W-1}DBFetch}.
+<<<<<<< HEAD
 \nwenddocs{}\nwbegincode{195}\sublabel{NW27XAxz-4MoB17-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4MoB17-1}}}\moddef{..read prepare~{\nwtagstyle{}\subpageref{NW27XAxz-4MoB17-1}}}\endmoddef\nwused{\\{NW27XAxz-2FtqIZ-1}\\{NW27XAxz-2YwxVt-1}\\{NW27XAxz-1SFiNd-1}\\{NW27XAxz-1r5OnM-1}\\{NW27XAxz-4ILREc-1}\\{NW27XAxz-F2Kkr-1}\\{NW27XAxz-234rWd-1}\\{NW27XAxz-2FrFih-1}\\{NW27XAxz-3rXeYk-1}\\{NW27XAxz-3isdeu-1}\\{NW27XAxz-1hFvVm-1}\\{NW27XAxz-pt8I9-1}\\{NW27XAxz-rvb17-1}\\{NW27XAxz-1AprqI-1}\\{NW27XAxz-3yA8FQ-1}\\{NW27XAxz-23oLro-1}\\{NW27XAxz-3tQic5-1}\\{NW27XAxz-2cRw59-1}\\{NW27XAxz-3KLGqo-1}\\{NW27XAxz-1UG2Ih-1}\\{NW27XAxz-4CeViM-1}\\{NW27XAxz-1Ang64-1}\\{NW27XAxz-1Ang64-2}\\{NW27XAxz-1Ang64-3}\\{NW27XAxz-1Ang64-4}\\{NW27XAxz-1Ang64-5}\\{NW27XAxz-1Ang64-6}\\{NW27XAxz-1Ang64-7}\\{NW27XAxz-1Ang64-8}\\{NW27XAxz-1Ang64-9}\\{NW27XAxz-1Ang64-A}\\{NW27XAxz-1Ang64-B}\\{NW27XAxz-1Ang64-C}\\{NW27XAxz-1Ang64-D}\\{NW27XAxz-1Ang64-E}\\{NW27XAxz-1Ang64-F}\\{NW27XAxz-1Ang64-G}\\{NW27XAxz-1Ang64-H}\\{NW27XAxz-1Ang64-I}\\{NW27XAxz-1Ang64-J}\\{NW27XAxz-1Ang64-K}\\{NW27XAxz-1Ang64-L}\\{NW27XAxz-1Ang64-M}\\{NW27XAxz-1Ang64-N}\\{NW27XAxz-1Ang64-O}\\{NW27XAxz-1Ang64-P}\\{NW27XAxz-1Ang64-Q}\\{NW27XAxz-1Ang64-R}}
+=======
+\nwenddocs{}\nwbegincode{197}\sublabel{NW27XAxz-4MoB17-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4MoB17-1}}}\moddef{..read prepare~{\nwtagstyle{}\subpageref{NW27XAxz-4MoB17-1}}}\endmoddef\nwused{\\{NW27XAxz-2FtqIZ-1}\\{NW27XAxz-2YwxVt-1}\\{NW27XAxz-1SFiNd-1}\\{NW27XAxz-1r5OnM-1}\\{NW27XAxz-4ILREc-1}\\{NW27XAxz-F2Kkr-1}\\{NW27XAxz-234rWd-1}\\{NW27XAxz-2FrFih-1}\\{NW27XAxz-3rXeYk-1}\\{NW27XAxz-3isdeu-1}\\{NW27XAxz-1hFvVm-1}\\{NW27XAxz-rvb17-1}\\{NW27XAxz-1AprqI-1}\\{NW27XAxz-3yA8FQ-1}\\{NW27XAxz-23oLro-1}\\{NW27XAxz-3tQic5-1}\\{NW27XAxz-2cRw59-1}\\{NW27XAxz-3KLGqo-1}\\{NW27XAxz-1UG2Ih-1}\\{NW27XAxz-4CeViM-1}\\{NW27XAxz-1Ang64-1}\\{NW27XAxz-1Ang64-2}\\{NW27XAxz-1Ang64-3}\\{NW27XAxz-1Ang64-4}\\{NW27XAxz-1Ang64-5}\\{NW27XAxz-1Ang64-6}\\{NW27XAxz-1Ang64-7}\\{NW27XAxz-1Ang64-8}\\{NW27XAxz-1Ang64-9}\\{NW27XAxz-1Ang64-A}\\{NW27XAxz-1Ang64-B}\\{NW27XAxz-1Ang64-C}\\{NW27XAxz-1Ang64-D}\\{NW27XAxz-1Ang64-E}\\{NW27XAxz-1Ang64-F}\\{NW27XAxz-1Ang64-G}\\{NW27XAxz-1Ang64-H}\\{NW27XAxz-1Ang64-I}\\{NW27XAxz-1Ang64-J}\\{NW27XAxz-1Ang64-K}\\{NW27XAxz-1Ang64-L}\\{NW27XAxz-1Ang64-M}\\{NW27XAxz-1Ang64-N}\\{NW27XAxz-1Ang64-O}\\{NW27XAxz-1Ang64-P}\\{NW27XAxz-1Ang64-Q}\\{NW27XAxz-1Ang64-R}}
+>>>>>>> P1-DBQueryServerLocationsActive.1
 int[] output = new int[] \{ \};
 try \{
   Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
   Print("Open connection "+conn.toString());
+<<<<<<< HEAD
 \nwidentuses{\\{{Print}{Print}}}\nwindexuse{Print}{Print}{NW27XAxz-4MoB17-1}\nwendcode{}\nwbegindocs{196}\nwdocspar
 \nwenddocs{}\nwbegincode{197}\sublabel{NW27XAxz-1MI9ro-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1MI9ro-1}}}\moddef{..read return~{\nwtagstyle{}\subpageref{NW27XAxz-1MI9ro-1}}}\endmoddef\nwused{\\{NW27XAxz-2FtqIZ-1}\\{NW27XAxz-2YwxVt-1}\\{NW27XAxz-1SFiNd-1}\\{NW27XAxz-1r5OnM-1}\\{NW27XAxz-4ILREc-1}\\{NW27XAxz-F2Kkr-1}\\{NW27XAxz-234rWd-1}\\{NW27XAxz-2FrFih-1}\\{NW27XAxz-3rXeYk-1}\\{NW27XAxz-3isdeu-1}\\{NW27XAxz-1hFvVm-1}\\{NW27XAxz-pt8I9-1}\\{NW27XAxz-rvb17-1}\\{NW27XAxz-1AprqI-1}\\{NW27XAxz-3yA8FQ-1}\\{NW27XAxz-23oLro-1}\\{NW27XAxz-3tQic5-1}\\{NW27XAxz-2cRw59-1}\\{NW27XAxz-3KLGqo-1}\\{NW27XAxz-1UG2Ih-1}\\{NW27XAxz-4CeViM-1}\\{NW27XAxz-1Ang64-1}\\{NW27XAxz-1Ang64-2}\\{NW27XAxz-1Ang64-3}\\{NW27XAxz-1Ang64-4}\\{NW27XAxz-1Ang64-5}\\{NW27XAxz-1Ang64-6}\\{NW27XAxz-1Ang64-7}\\{NW27XAxz-1Ang64-8}\\{NW27XAxz-1Ang64-9}\\{NW27XAxz-1Ang64-A}\\{NW27XAxz-1Ang64-B}\\{NW27XAxz-1Ang64-C}\\{NW27XAxz-1Ang64-D}\\{NW27XAxz-1Ang64-E}\\{NW27XAxz-1Ang64-F}\\{NW27XAxz-1Ang64-G}\\{NW27XAxz-1Ang64-H}\\{NW27XAxz-1Ang64-I}\\{NW27XAxz-1Ang64-J}\\{NW27XAxz-1Ang64-K}\\{NW27XAxz-1Ang64-L}\\{NW27XAxz-1Ang64-M}\\{NW27XAxz-1Ang64-N}\\{NW27XAxz-1Ang64-O}\\{NW27XAxz-1Ang64-P}\\{NW27XAxz-1Ang64-Q}\\{NW27XAxz-1Ang64-R}}
+=======
+\nwidentuses{\\{{Print}{Print}}}\nwindexuse{Print}{Print}{NW27XAxz-4MoB17-1}\nwendcode{}\nwbegindocs{198}\nwdocspar
+\nwenddocs{}\nwbegincode{199}\sublabel{NW27XAxz-1MI9ro-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1MI9ro-1}}}\moddef{..read return~{\nwtagstyle{}\subpageref{NW27XAxz-1MI9ro-1}}}\endmoddef\nwused{\\{NW27XAxz-2FtqIZ-1}\\{NW27XAxz-2YwxVt-1}\\{NW27XAxz-1SFiNd-1}\\{NW27XAxz-1r5OnM-1}\\{NW27XAxz-4ILREc-1}\\{NW27XAxz-F2Kkr-1}\\{NW27XAxz-234rWd-1}\\{NW27XAxz-2FrFih-1}\\{NW27XAxz-3rXeYk-1}\\{NW27XAxz-3isdeu-1}\\{NW27XAxz-1hFvVm-1}\\{NW27XAxz-rvb17-1}\\{NW27XAxz-1AprqI-1}\\{NW27XAxz-3yA8FQ-1}\\{NW27XAxz-23oLro-1}\\{NW27XAxz-3tQic5-1}\\{NW27XAxz-2cRw59-1}\\{NW27XAxz-3KLGqo-1}\\{NW27XAxz-1UG2Ih-1}\\{NW27XAxz-4CeViM-1}\\{NW27XAxz-1Ang64-1}\\{NW27XAxz-1Ang64-2}\\{NW27XAxz-1Ang64-3}\\{NW27XAxz-1Ang64-4}\\{NW27XAxz-1Ang64-5}\\{NW27XAxz-1Ang64-6}\\{NW27XAxz-1Ang64-7}\\{NW27XAxz-1Ang64-8}\\{NW27XAxz-1Ang64-9}\\{NW27XAxz-1Ang64-A}\\{NW27XAxz-1Ang64-B}\\{NW27XAxz-1Ang64-C}\\{NW27XAxz-1Ang64-D}\\{NW27XAxz-1Ang64-E}\\{NW27XAxz-1Ang64-F}\\{NW27XAxz-1Ang64-G}\\{NW27XAxz-1Ang64-H}\\{NW27XAxz-1Ang64-I}\\{NW27XAxz-1Ang64-J}\\{NW27XAxz-1Ang64-K}\\{NW27XAxz-1Ang64-L}\\{NW27XAxz-1Ang64-M}\\{NW27XAxz-1Ang64-N}\\{NW27XAxz-1Ang64-O}\\{NW27XAxz-1Ang64-P}\\{NW27XAxz-1Ang64-Q}\\{NW27XAxz-1Ang64-R}}
+>>>>>>> P1-DBQueryServerLocationsActive.1
   Print("Close connection "+conn.toString());
   conn.close();
 \}
 \LA{}Catch and print \code{}SQLException\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-4P0tKA-1}}\RA{}
 return output;
-\nwidentuses{\\{{Print}{Print}}}\nwindexuse{Print}{Print}{NW27XAxz-1MI9ro-1}\nwendcode{}\nwbegindocs{198}\nwdocspar
+\nwidentuses{\\{{Print}{Print}}}\nwindexuse{Print}{Print}{NW27XAxz-1MI9ro-1}\nwendcode{}\nwbegindocs{200}\nwdocspar
 
 \subsubsection{{\tt{}DBQuery}(2)}
 Run custom {\tt{}SELECT} queries against the database using {\tt{}DBQuery}. The
 second parameter indicates the number of columns in the {\tt{}SELECT} statement.
-\nwenddocs{}\nwbegincode{199}\sublabel{NW27XAxz-2FtqIZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2FtqIZ-1}}}\moddef{Query custom statement~{\nwtagstyle{}\subpageref{NW27XAxz-2FtqIZ-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
+\nwenddocs{}\nwbegincode{201}\sublabel{NW27XAxz-2FtqIZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2FtqIZ-1}}}\moddef{Query custom statement~{\nwtagstyle{}\subpageref{NW27XAxz-2FtqIZ-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
 public int[] DBQuery(String sql, int ncols) throws RuntimeException \{
   \LA{}..read prepare~{\nwtagstyle{}\subpageref{NW27XAxz-4MoB17-1}}\RA{}
   Statement stmt = conn.createStatement(
@@ -2841,26 +2866,26 @@ public int[] DBQuery(String sql, int ncols) throws RuntimeException \{
   conn.close();
   \LA{}..read return~{\nwtagstyle{}\subpageref{NW27XAxz-1MI9ro-1}}\RA{}
 \}
-\nwidentuses{\\{{Print}{Print}}}\nwindexuse{Print}{Print}{NW27XAxz-2FtqIZ-1}\nwendcode{}\nwbegindocs{200}% def DBQuery
+\nwidentuses{\\{{Print}{Print}}}\nwindexuse{Print}{Print}{NW27XAxz-2FtqIZ-1}\nwendcode{}\nwbegindocs{202}% def DBQuery
 
 \subsubsection{{\tt{}\protect\nosublabel{NW27XAxz-2FtqIZ-1-u3}\protect\nwindexuse{DBQueryCountVertices}{DBQueryCountVertices}{NW27XAxz-2YwxVt-1}DBQueryCountVertices}(0)}
-\nwenddocs{}\nwbegincode{201}\sublabel{NW27XAxz-2YwxVt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2YwxVt-1}}}\moddef{Query count of vertices~{\nwtagstyle{}\subpageref{NW27XAxz-2YwxVt-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
+\nwenddocs{}\nwbegincode{203}\sublabel{NW27XAxz-2YwxVt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2YwxVt-1}}}\moddef{Query count of vertices~{\nwtagstyle{}\subpageref{NW27XAxz-2YwxVt-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
 public int[] DBQueryCountVertices() throws RuntimeException \{
   \LA{}..read prepare~{\nwtagstyle{}\subpageref{NW27XAxz-4MoB17-1}}\RA{}
   output = DBFetch(conn, "S62", 1);
   \LA{}..read return~{\nwtagstyle{}\subpageref{NW27XAxz-1MI9ro-1}}\RA{}
 \}
 \nosublabel{NW27XAxz-2YwxVt-1-u2}\nwindexdefn{DBQueryCountVertices}{DBQueryCountVertices}{NW27XAxz-2YwxVt-1}\eatline
-\nwidentdefs{\\{{DBQueryCountVertices}{DBQueryCountVertices}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S62}{S62}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-2YwxVt-1}\nwindexuse{S62}{S62}{NW27XAxz-2YwxVt-1}\nwendcode{}\nwbegindocs{202}\nwdocspar
+\nwidentdefs{\\{{DBQueryCountVertices}{DBQueryCountVertices}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S62}{S62}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-2YwxVt-1}\nwindexuse{S62}{S62}{NW27XAxz-2YwxVt-1}\nwendcode{}\nwbegindocs{204}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryCountEdges}{DBQueryCountEdges}{NW27XAxz-1SFiNd-1}DBQueryCountEdges}(0)}
-\nwenddocs{}\nwbegincode{203}\sublabel{NW27XAxz-1SFiNd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1SFiNd-1}}}\moddef{Query count of edges~{\nwtagstyle{}\subpageref{NW27XAxz-1SFiNd-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
+\nwenddocs{}\nwbegincode{205}\sublabel{NW27XAxz-1SFiNd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1SFiNd-1}}}\moddef{Query count of edges~{\nwtagstyle{}\subpageref{NW27XAxz-1SFiNd-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
 public int[] DBQueryCountEdges() throws RuntimeException \{
   \LA{}..read prepare~{\nwtagstyle{}\subpageref{NW27XAxz-4MoB17-1}}\RA{}
   output = DBFetch(conn, "S63", 1);
   \LA{}..read return~{\nwtagstyle{}\subpageref{NW27XAxz-1MI9ro-1}}\RA{}
 \}
 \nosublabel{NW27XAxz-1SFiNd-1-u2}\nwindexdefn{DBQueryCountEdges}{DBQueryCountEdges}{NW27XAxz-1SFiNd-1}\eatline
-\nwidentdefs{\\{{DBQueryCountEdges}{DBQueryCountEdges}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S63}{S63}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1SFiNd-1}\nwindexuse{S63}{S63}{NW27XAxz-1SFiNd-1}\nwendcode{}\nwbegindocs{204}\nwdocspar
+\nwidentdefs{\\{{DBQueryCountEdges}{DBQueryCountEdges}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S63}{S63}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1SFiNd-1}\nwindexuse{S63}{S63}{NW27XAxz-1SFiNd-1}\nwendcode{}\nwbegindocs{206}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryVertex}{DBQueryVertex}{NW27XAxz-4IfXsG-1}DBQueryVertex}(1)}
 Returned array =
 
@@ -2874,21 +2899,21 @@ Returned array =
 \end{tikzpicture}
 
 \noindent where parameter {\tt{}v} provides $v$.
-\nwenddocs{}\nwbegincode{205}\sublabel{NW27XAxz-4IfXsG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4IfXsG-1}}}\moddef{Query vertex~{\nwtagstyle{}\subpageref{NW27XAxz-4IfXsG-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
+\nwenddocs{}\nwbegincode{207}\sublabel{NW27XAxz-4IfXsG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4IfXsG-1}}}\moddef{Query vertex~{\nwtagstyle{}\subpageref{NW27XAxz-4IfXsG-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
 public final int[] DBQueryVertex(int v) throws RuntimeException \{
   return lu_vertices.get(v);
 \}
 \nwindexdefn{DBQueryVertex}{DBQueryVertex}{NW27XAxz-4IfXsG-1}\eatline
-\nwidentdefs{\\{{DBQueryVertex}{DBQueryVertex}}}\nwidentuses{\\{{lu{\char95}vertices}{lu:unvertices}}}\nwindexuse{lu{\char95}vertices}{lu:unvertices}{NW27XAxz-4IfXsG-1}\nwendcode{}\nwbegindocs{206}\nwdocspar
+\nwidentdefs{\\{{DBQueryVertex}{DBQueryVertex}}}\nwidentuses{\\{{lu{\char95}vertices}{lu:unvertices}}}\nwindexuse{lu{\char95}vertices}{lu:unvertices}{NW27XAxz-4IfXsG-1}\nwendcode{}\nwbegindocs{208}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryAllVertices}{DBQueryAllVertices}{NW27XAxz-1r5OnM-1}DBQueryAllVertices}(0)}
-\nwenddocs{}\nwbegincode{207}\sublabel{NW27XAxz-1r5OnM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1r5OnM-1}}}\moddef{Query all vertices~{\nwtagstyle{}\subpageref{NW27XAxz-1r5OnM-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
+\nwenddocs{}\nwbegincode{209}\sublabel{NW27XAxz-1r5OnM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1r5OnM-1}}}\moddef{Query all vertices~{\nwtagstyle{}\subpageref{NW27XAxz-1r5OnM-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
 public int[] DBQueryAllVertices() throws RuntimeException \{
   \LA{}..read prepare~{\nwtagstyle{}\subpageref{NW27XAxz-4MoB17-1}}\RA{}
   output = DBFetch(conn, "S136", 3);
   \LA{}..read return~{\nwtagstyle{}\subpageref{NW27XAxz-1MI9ro-1}}\RA{}
 \}
 \nosublabel{NW27XAxz-1r5OnM-1-u2}\nwindexdefn{DBQueryAllVertices}{DBQueryAllVertices}{NW27XAxz-1r5OnM-1}\eatline
-\nwidentdefs{\\{{DBQueryAllVertices}{DBQueryAllVertices}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S136}{S136}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1r5OnM-1}\nwindexuse{S136}{S136}{NW27XAxz-1r5OnM-1}\nwendcode{}\nwbegindocs{208}\nwdocspar
+\nwidentdefs{\\{{DBQueryAllVertices}{DBQueryAllVertices}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S136}{S136}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1r5OnM-1}\nwindexuse{S136}{S136}{NW27XAxz-1r5OnM-1}\nwendcode{}\nwbegindocs{210}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryEdge}{DBQueryEdge}{NW27XAxz-1E2aru-1}DBQueryEdge}(2)}
 Returned array =
 
@@ -2902,91 +2927,91 @@ Returned array =
 
 \noindent where parameter {\tt{}v1} provides $v_1$ and parameter
 {\tt{}v2} provides $v_2$.
-\nwenddocs{}\nwbegincode{209}\sublabel{NW27XAxz-1E2aru-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1E2aru-1}}}\moddef{Query edge~{\nwtagstyle{}\subpageref{NW27XAxz-1E2aru-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
+\nwenddocs{}\nwbegincode{211}\sublabel{NW27XAxz-1E2aru-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1E2aru-1}}}\moddef{Query edge~{\nwtagstyle{}\subpageref{NW27XAxz-1E2aru-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
 public final int[] DBQueryEdge(int v1, int v2) throws RuntimeException \{
   return lu_edges.get(v1).get(v2);
 \}
 \nwindexdefn{DBQueryEdge}{DBQueryEdge}{NW27XAxz-1E2aru-1}\eatline
-\nwidentdefs{\\{{DBQueryEdge}{DBQueryEdge}}}\nwidentuses{\\{{lu{\char95}edges}{lu:unedges}}}\nwindexuse{lu{\char95}edges}{lu:unedges}{NW27XAxz-1E2aru-1}\nwendcode{}\nwbegindocs{210}\nwdocspar
+\nwidentdefs{\\{{DBQueryEdge}{DBQueryEdge}}}\nwidentuses{\\{{lu{\char95}edges}{lu:unedges}}}\nwindexuse{lu{\char95}edges}{lu:unedges}{NW27XAxz-1E2aru-1}\nwendcode{}\nwbegindocs{212}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryAllEdges}{DBQueryAllEdges}{NW27XAxz-4ILREc-1}DBQueryAllEdges}(0)}
-\nwenddocs{}\nwbegincode{211}\sublabel{NW27XAxz-4ILREc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4ILREc-1}}}\moddef{Query all edges~{\nwtagstyle{}\subpageref{NW27XAxz-4ILREc-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
+\nwenddocs{}\nwbegincode{213}\sublabel{NW27XAxz-4ILREc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4ILREc-1}}}\moddef{Query all edges~{\nwtagstyle{}\subpageref{NW27XAxz-4ILREc-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
 public int[] DBQueryAllEdges() throws RuntimeException \{
   \LA{}..read prepare~{\nwtagstyle{}\subpageref{NW27XAxz-4MoB17-1}}\RA{}
   output = DBFetch(conn, "S137", 4);
   \LA{}..read return~{\nwtagstyle{}\subpageref{NW27XAxz-1MI9ro-1}}\RA{}
 \}
 \nosublabel{NW27XAxz-4ILREc-1-u2}\nwindexdefn{DBQueryAllEdges}{DBQueryAllEdges}{NW27XAxz-4ILREc-1}\eatline
-\nwidentdefs{\\{{DBQueryAllEdges}{DBQueryAllEdges}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S137}{S137}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-4ILREc-1}\nwindexuse{S137}{S137}{NW27XAxz-4ILREc-1}\nwendcode{}\nwbegindocs{212}\nwdocspar
+\nwidentdefs{\\{{DBQueryAllEdges}{DBQueryAllEdges}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S137}{S137}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-4ILREc-1}\nwindexuse{S137}{S137}{NW27XAxz-4ILREc-1}\nwendcode{}\nwbegindocs{214}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryStatisticsEdges}{DBQueryStatisticsEdges}{NW27XAxz-F2Kkr-1}DBQueryStatisticsEdges}(0)}
 The following method returns six statistics: minimum edge weight,
 maximum edge weight, average edge weight, minimum edge speed, maximum edge speed,
 average edge speed.
-\nwenddocs{}\nwbegincode{213}\sublabel{NW27XAxz-F2Kkr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-F2Kkr-1}}}\moddef{Query edge statistics~{\nwtagstyle{}\subpageref{NW27XAxz-F2Kkr-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
+\nwenddocs{}\nwbegincode{215}\sublabel{NW27XAxz-F2Kkr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-F2Kkr-1}}}\moddef{Query edge statistics~{\nwtagstyle{}\subpageref{NW27XAxz-F2Kkr-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
 public int[] DBQueryStatisticsEdges() throws RuntimeException \{
   \LA{}..read prepare~{\nwtagstyle{}\subpageref{NW27XAxz-4MoB17-1}}\RA{}
   output = DBFetch(conn, "S65", 6);
   \LA{}..read return~{\nwtagstyle{}\subpageref{NW27XAxz-1MI9ro-1}}\RA{}
 \}
 \nosublabel{NW27XAxz-F2Kkr-1-u2}\nwindexdefn{DBQueryStatisticsEdges}{DBQueryStatisticsEdges}{NW27XAxz-F2Kkr-1}\eatline
-\nwidentdefs{\\{{DBQueryStatisticsEdges}{DBQueryStatisticsEdges}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S65}{S65}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-F2Kkr-1}\nwindexuse{S65}{S65}{NW27XAxz-F2Kkr-1}\nwendcode{}\nwbegindocs{214}\nwdocspar
+\nwidentdefs{\\{{DBQueryStatisticsEdges}{DBQueryStatisticsEdges}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S65}{S65}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-F2Kkr-1}\nwindexuse{S65}{S65}{NW27XAxz-F2Kkr-1}\nwendcode{}\nwbegindocs{216}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryMBR}{DBQueryMBR}{NW27XAxz-234rWd-1}DBQueryMBR}(0)}
 The minimum bounding rectangle is
 returned as four numbers: minimum longitude, maximum longitude, minimum
 latitude, maximum latitude.
-\nwenddocs{}\nwbegincode{215}\sublabel{NW27XAxz-234rWd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-234rWd-1}}}\moddef{Query MBR~{\nwtagstyle{}\subpageref{NW27XAxz-234rWd-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
+\nwenddocs{}\nwbegincode{217}\sublabel{NW27XAxz-234rWd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-234rWd-1}}}\moddef{Query MBR~{\nwtagstyle{}\subpageref{NW27XAxz-234rWd-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
 public int[] DBQueryMBR() throws RuntimeException \{
   \LA{}..read prepare~{\nwtagstyle{}\subpageref{NW27XAxz-4MoB17-1}}\RA{}
   output = DBFetch(conn, "S64", 4);
   \LA{}..read return~{\nwtagstyle{}\subpageref{NW27XAxz-1MI9ro-1}}\RA{}
 \}
 \nosublabel{NW27XAxz-234rWd-1-u2}\nwindexdefn{DBQueryMBR}{DBQueryMBR}{NW27XAxz-234rWd-1}\eatline
-\nwidentdefs{\\{{DBQueryMBR}{DBQueryMBR}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S64}{S64}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-234rWd-1}\nwindexuse{S64}{S64}{NW27XAxz-234rWd-1}\nwendcode{}\nwbegindocs{216}\nwdocspar
+\nwidentdefs{\\{{DBQueryMBR}{DBQueryMBR}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S64}{S64}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-234rWd-1}\nwindexuse{S64}{S64}{NW27XAxz-234rWd-1}\nwendcode{}\nwbegindocs{218}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryCountServers}{DBQueryCountServers}{NW27XAxz-2FrFih-1}DBQueryCountServers}(0)}
-\nwenddocs{}\nwbegincode{217}\sublabel{NW27XAxz-2FrFih-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2FrFih-1}}}\moddef{Query count of servers~{\nwtagstyle{}\subpageref{NW27XAxz-2FrFih-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
+\nwenddocs{}\nwbegincode{219}\sublabel{NW27XAxz-2FrFih-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2FrFih-1}}}\moddef{Query count of servers~{\nwtagstyle{}\subpageref{NW27XAxz-2FrFih-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
 public int[] DBQueryCountServers() throws RuntimeException \{
   \LA{}..read prepare~{\nwtagstyle{}\subpageref{NW27XAxz-4MoB17-1}}\RA{}
   output = DBFetch(conn, "S66", 1);
   \LA{}..read return~{\nwtagstyle{}\subpageref{NW27XAxz-1MI9ro-1}}\RA{}
 \}
 \nosublabel{NW27XAxz-2FrFih-1-u2}\nwindexdefn{DBQueryCountServers}{DBQueryCountServers}{NW27XAxz-2FrFih-1}\eatline
-\nwidentdefs{\\{{DBQueryCountServers}{DBQueryCountServers}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S66}{S66}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-2FrFih-1}\nwindexuse{S66}{S66}{NW27XAxz-2FrFih-1}\nwendcode{}\nwbegindocs{218}\nwdocspar
+\nwidentdefs{\\{{DBQueryCountServers}{DBQueryCountServers}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S66}{S66}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-2FrFih-1}\nwindexuse{S66}{S66}{NW27XAxz-2FrFih-1}\nwendcode{}\nwbegindocs{220}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryCountRequests}{DBQueryCountRequests}{NW27XAxz-3rXeYk-1}DBQueryCountRequests}(0)}
-\nwenddocs{}\nwbegincode{219}\sublabel{NW27XAxz-3rXeYk-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3rXeYk-1}}}\moddef{Query count of requests~{\nwtagstyle{}\subpageref{NW27XAxz-3rXeYk-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
+\nwenddocs{}\nwbegincode{221}\sublabel{NW27XAxz-3rXeYk-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3rXeYk-1}}}\moddef{Query count of requests~{\nwtagstyle{}\subpageref{NW27XAxz-3rXeYk-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
 public int[] DBQueryCountRequests() throws RuntimeException \{
   \LA{}..read prepare~{\nwtagstyle{}\subpageref{NW27XAxz-4MoB17-1}}\RA{}
   output = DBFetch(conn, "S67", 1);
   \LA{}..read return~{\nwtagstyle{}\subpageref{NW27XAxz-1MI9ro-1}}\RA{}
 \}
 \nosublabel{NW27XAxz-3rXeYk-1-u2}\nwindexdefn{DBQueryCountRequests}{DBQueryCountRequests}{NW27XAxz-3rXeYk-1}\eatline
-\nwidentdefs{\\{{DBQueryCountRequests}{DBQueryCountRequests}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S67}{S67}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-3rXeYk-1}\nwindexuse{S67}{S67}{NW27XAxz-3rXeYk-1}\nwendcode{}\nwbegindocs{220}\nwdocspar
+\nwidentdefs{\\{{DBQueryCountRequests}{DBQueryCountRequests}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S67}{S67}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-3rXeYk-1}\nwindexuse{S67}{S67}{NW27XAxz-3rXeYk-1}\nwendcode{}\nwbegindocs{222}\nwdocspar
 
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryAllUsers}{DBQueryAllUsers}{NW27XAxz-3isdeu-1}DBQueryAllUsers}(0)}
-\nwenddocs{}\nwbegincode{221}\sublabel{NW27XAxz-3isdeu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3isdeu-1}}}\moddef{Query ridesharing user~{\nwtagstyle{}\subpageref{NW27XAxz-3isdeu-1}}}\endmoddef\nwalsodefined{\\{NW27XAxz-3isdeu-2}}\nwused{\\{NW27XAxz-4PbjF-1}}
+\nwenddocs{}\nwbegincode{223}\sublabel{NW27XAxz-3isdeu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3isdeu-1}}}\moddef{Query ridesharing user~{\nwtagstyle{}\subpageref{NW27XAxz-3isdeu-1}}}\endmoddef\nwalsodefined{\\{NW27XAxz-3isdeu-2}}\nwused{\\{NW27XAxz-4PbjF-1}}
 public int[] DBQueryAllUsers() throws RuntimeException \{
   \LA{}..read prepare~{\nwtagstyle{}\subpageref{NW27XAxz-4MoB17-1}}\RA{}
   output = DBFetch(conn, "S141", 7);
   \LA{}..read return~{\nwtagstyle{}\subpageref{NW27XAxz-1MI9ro-1}}\RA{}
 \}
 \nosublabel{NW27XAxz-3isdeu-1-u2}\nwindexdefn{DBQueryAllUsers}{DBQueryAllUsers}{NW27XAxz-3isdeu-1}\eatline
-\nwidentdefs{\\{{DBQueryAllUsers}{DBQueryAllUsers}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S141}{S141}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-3isdeu-1}\nwindexuse{S141}{S141}{NW27XAxz-3isdeu-1}\nwendcode{}\nwbegindocs{222}\nwdocspar
+\nwidentdefs{\\{{DBQueryAllUsers}{DBQueryAllUsers}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S141}{S141}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-3isdeu-1}\nwindexuse{S141}{S141}{NW27XAxz-3isdeu-1}\nwendcode{}\nwbegindocs{224}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryUser}{DBQueryUser}{NW27XAxz-3isdeu-2}DBQueryUser}(1)}
-\nwenddocs{}\nwbegincode{223}\sublabel{NW27XAxz-3isdeu-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3isdeu-2}}}\moddef{Query ridesharing user~{\nwtagstyle{}\subpageref{NW27XAxz-3isdeu-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{225}\sublabel{NW27XAxz-3isdeu-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3isdeu-2}}}\moddef{Query ridesharing user~{\nwtagstyle{}\subpageref{NW27XAxz-3isdeu-1}}}\plusendmoddef
 public final int[] DBQueryUser(int uid) throws RuntimeException \{
   return lu_users.get(uid);
 \}
 \nwindexdefn{DBQueryUser}{DBQueryUser}{NW27XAxz-3isdeu-2}\eatline
-\nwidentdefs{\\{{DBQueryUser}{DBQueryUser}}}\nwidentuses{\\{{lu{\char95}users}{lu:unusers}}}\nwindexuse{lu{\char95}users}{lu:unusers}{NW27XAxz-3isdeu-2}\nwendcode{}\nwbegindocs{224}\nwdocspar
+\nwidentdefs{\\{{DBQueryUser}{DBQueryUser}}}\nwidentuses{\\{{lu{\char95}users}{lu:unusers}}}\nwindexuse{lu{\char95}users}{lu:unusers}{NW27XAxz-3isdeu-2}\nwendcode{}\nwbegindocs{226}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryRequestStatus}{DBQueryRequestStatus}{NW27XAxz-1hFvVm-1}DBQueryRequestStatus}(2)}
-\nwenddocs{}\nwbegincode{225}\sublabel{NW27XAxz-1hFvVm-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1hFvVm-1}}}\moddef{Query request status~{\nwtagstyle{}\subpageref{NW27XAxz-1hFvVm-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
+\nwenddocs{}\nwbegincode{227}\sublabel{NW27XAxz-1hFvVm-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1hFvVm-1}}}\moddef{Query request status~{\nwtagstyle{}\subpageref{NW27XAxz-1hFvVm-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
 public int[] DBQueryRequestStatus(int rid, int t) throws RuntimeException \{
   \LA{}..read prepare~{\nwtagstyle{}\subpageref{NW27XAxz-4MoB17-1}}\RA{}
   output = DBFetch(conn, "S133", 1, rid, t);
   \LA{}..read return~{\nwtagstyle{}\subpageref{NW27XAxz-1MI9ro-1}}\RA{}
 \}
 \nosublabel{NW27XAxz-1hFvVm-1-u2}\nwindexdefn{DBQueryRequestStatus}{DBQueryRequestStatus}{NW27XAxz-1hFvVm-1}\eatline
-\nwidentdefs{\\{{DBQueryRequestStatus}{DBQueryRequestStatus}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S133}{S133}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1hFvVm-1}\nwindexuse{S133}{S133}{NW27XAxz-1hFvVm-1}\nwendcode{}\nwbegindocs{226}\nwdocspar
+\nwidentdefs{\\{{DBQueryRequestStatus}{DBQueryRequestStatus}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S133}{S133}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1hFvVm-1}\nwindexuse{S133}{S133}{NW27XAxz-1hFvVm-1}\nwendcode{}\nwbegindocs{228}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryQueuedRequests}{DBQueryQueuedRequests}{NW27XAxz-3AGrxZ-1}DBQueryQueuedRequests}(1)}
-\nwenddocs{}\nwbegincode{227}\sublabel{NW27XAxz-3AGrxZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3AGrxZ-1}}}\moddef{Query queued requests~{\nwtagstyle{}\subpageref{NW27XAxz-3AGrxZ-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
+\nwenddocs{}\nwbegincode{229}\sublabel{NW27XAxz-3AGrxZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3AGrxZ-1}}}\moddef{Query queued requests~{\nwtagstyle{}\subpageref{NW27XAxz-3AGrxZ-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
 public int[] DBQueryQueuedRequests(int t) throws RuntimeException \{
   int[] output = new int[] \{ \};
   int[] temp1 = new int[] \{ \};
@@ -3025,6 +3050,7 @@ public int[] DBQueryQueuedRequests(int t) throws RuntimeException \{
   return temp2;
 \}
 \nosublabel{NW27XAxz-3AGrxZ-1-u1}\nwindexdefn{DBQueryQueuedRequests}{DBQueryQueuedRequests}{NW27XAxz-3AGrxZ-1}\eatline
+<<<<<<< HEAD
 \nwidentdefs{\\{{DBQueryQueuedRequests}{DBQueryQueuedRequests}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{lu{\char95}rstatus}{lu:unrstatus}}\\{{Print}{Print}}\\{{S143}{S143}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-3AGrxZ-1}\nwindexuse{lu{\char95}rstatus}{lu:unrstatus}{NW27XAxz-3AGrxZ-1}\nwindexuse{Print}{Print}{NW27XAxz-3AGrxZ-1}\nwindexuse{S143}{S143}{NW27XAxz-3AGrxZ-1}\nwendcode{}\nwbegindocs{228}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryActiveServers}{DBQueryActiveServers}{NW27XAxz-pt8I9-1}DBQueryActiveServers}(1)}
 \nwenddocs{}\nwbegincode{229}\sublabel{NW27XAxz-pt8I9-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-pt8I9-1}}}\moddef{Query active servers~{\nwtagstyle{}\subpageref{NW27XAxz-pt8I9-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
@@ -3035,6 +3061,9 @@ public int[] DBQueryActiveServers(int t) throws RuntimeException \{
 \}
 \nosublabel{NW27XAxz-pt8I9-1-u2}\nwindexdefn{DBQueryActiveServers}{DBQueryActiveServers}{NW27XAxz-pt8I9-1}\eatline
 \nwidentdefs{\\{{DBQueryActiveServers}{DBQueryActiveServers}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S134}{S134}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-pt8I9-1}\nwindexuse{S134}{S134}{NW27XAxz-pt8I9-1}\nwendcode{}\nwbegindocs{230}\nwdocspar
+=======
+\nwidentdefs{\\{{DBQueryQueuedRequests}{DBQueryQueuedRequests}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{lu{\char95}rstatus}{lu:unrstatus}}\\{{Print}{Print}}\\{{S143}{S143}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-3AGrxZ-1}\nwindexuse{lu{\char95}rstatus}{lu:unrstatus}{NW27XAxz-3AGrxZ-1}\nwindexuse{Print}{Print}{NW27XAxz-3AGrxZ-1}\nwindexuse{S143}{S143}{NW27XAxz-3AGrxZ-1}\nwendcode{}\nwbegindocs{230}\nwdocspar
+>>>>>>> P1-DBQueryServerLocationsActive.1
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServerLocationsAll}{DBQueryServerLocationsAll}{NW27XAxz-rvb17-1}DBQueryServerLocationsAll}(1)}
 \nwenddocs{}\nwbegincode{231}\sublabel{NW27XAxz-rvb17-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-rvb17-1}}}\moddef{Query all server locations~{\nwtagstyle{}\subpageref{NW27XAxz-rvb17-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
 public int[] DBQueryServerLocationsAll(int t) throws RuntimeException \{
@@ -3050,32 +3079,24 @@ public int[] DBQueryServerLocationsActive(int t) throws RuntimeException \{
   int[] output = new int[] \{ \};
   int[] temp1 = new int[] \{ \};
   int[] temp2 = new int[] \{ \};
+  int j = 0;
+  int sid = 0;
+  int te = 0;
   try \{
     Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
     Print("Open connection "+conn.toString());
-    temp1 = DBFetch(conn, "S134", 1, t, t, t);
-    output = new int[(temp1.length*3)];
-    for (int i = 0; i < temp1.length; i++) \{
-      int sid = temp1[i];
-      output[3*i] = sid;
-      temp2 = DBFetch(conn, "S146", 2, sid, t);
-      // First check if server just arrived at a vertex at time t
-      if (temp2.length > 0) \{
-        output[(3*i + 1)] = temp2[0];
-        output[(3*i + 2)] = temp2[1];
-      \} else \{
-        // Next check if server passed a vertex at time t, and get that vertex
-        temp2 = DBFetch(conn, "S135", 2, sid, sid, t);
-        if (temp2.length > 0) \{
-          output[(3*i + 1)] = temp2[0];
-          output[(3*i + 2)] = temp2[1];
-        \} else \{
-          // Finally get the server's last-known vertex because this guy is idle
-          temp2 = DBFetch(conn, "S147", 2, sid, sid);
-          output[(3*i + 1)] = temp2[0];
-          output[(3*i + 2)] = temp2[1];
-        \}
-      \}
+    temp1 = DBFetch(conn, "S134", 2, t, t, t);      // <-- 10 ms/call
+    output = new int[(3*(temp1.length/2))];
+    for (int i = 0; i < temp1.length - 1; i += 2) \{
+      sid = temp1[(i + 0)];
+       te = temp1[(i + 1)];
+      temp2 = (t < te
+        ? DBFetch(conn, "S135", 2, sid, sid, t, t)  // <-- 0.07-0.15 ms/call
+        : DBFetch(conn, "S147", 2, sid, sid));      // <-- 0.04-0.15 ms/call
+      output[(j + 0)] = sid;
+      output[(j + 1)] = temp2[0];
+      output[(j + 2)] = temp2[1];
+      j += 3;
     \}
     conn.close();
   \}
@@ -3083,7 +3104,11 @@ public int[] DBQueryServerLocationsActive(int t) throws RuntimeException \{
   return output;
 \}
 \nosublabel{NW27XAxz-3UaQCb-1-u1}\nwindexdefn{DBQueryServerLocationsActive}{DBQueryServerLocationsActive}{NW27XAxz-3UaQCb-1}\eatline
+<<<<<<< HEAD
 \nwidentdefs{\\{{DBQueryServerLocationsActive}{DBQueryServerLocationsActive}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{Print}{Print}}\\{{S134}{S134}}\\{{S135}{S135}}\\{{S146}{S146}}\\{{S147}{S147}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-3UaQCb-1}\nwindexuse{Print}{Print}{NW27XAxz-3UaQCb-1}\nwindexuse{S134}{S134}{NW27XAxz-3UaQCb-1}\nwindexuse{S135}{S135}{NW27XAxz-3UaQCb-1}\nwindexuse{S146}{S146}{NW27XAxz-3UaQCb-1}\nwindexuse{S147}{S147}{NW27XAxz-3UaQCb-1}\nwendcode{}\nwbegindocs{234}\nwdocspar
+=======
+\nwidentdefs{\\{{DBQueryServerLocationsActive}{DBQueryServerLocationsActive}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{Print}{Print}}\\{{S134}{S134}}\\{{S135}{S135}}\\{{S147}{S147}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-3UaQCb-1}\nwindexuse{Print}{Print}{NW27XAxz-3UaQCb-1}\nwindexuse{S134}{S134}{NW27XAxz-3UaQCb-1}\nwindexuse{S135}{S135}{NW27XAxz-3UaQCb-1}\nwindexuse{S147}{S147}{NW27XAxz-3UaQCb-1}\nwendcode{}\nwbegindocs{234}\nwdocspar
+>>>>>>> P1-DBQueryServerLocationsActive.1
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServerRoute}{DBQueryServerRoute}{NW27XAxz-1AprqI-1}DBQueryServerRoute}(1)}
 \nwenddocs{}\nwbegincode{235}\sublabel{NW27XAxz-1AprqI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1AprqI-1}}}\moddef{Query routes~{\nwtagstyle{}\subpageref{NW27XAxz-1AprqI-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
 public int[] DBQueryServerRoute(int sid) throws RuntimeException \{
@@ -3493,7 +3518,15 @@ poolableconnection_factory.setMaxOpenPreparedStatements(STATEMENTS_MAX_COUNT);
 \nwidentuses{\\{{connection{\char95}factory}{connection:unfactory}}\\{{poolableconnection{\char95}factory}{poolableconnection:unfactory}}\\{{Print}{Print}}\\{{STATEMENTS{\char95}MAX{\char95}COUNT}{STATEMENTS:unMAX:unCOUNT}}}\nwindexuse{connection{\char95}factory}{connection:unfactory}{NW27XAxz-3Flrgj-1}\nwindexuse{poolableconnection{\char95}factory}{poolableconnection:unfactory}{NW27XAxz-3Flrgj-1}\nwindexuse{Print}{Print}{NW27XAxz-3Flrgj-1}\nwindexuse{STATEMENTS{\char95}MAX{\char95}COUNT}{STATEMENTS:unMAX:unCOUNT}{NW27XAxz-3Flrgj-1}\nwendcode{}\nwbegindocs{315}\nwdocspar
 \nwenddocs{}\nwbegincode{316}\sublabel{NW27XAxz-4fNbUS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4fNbUS-1}}}\moddef{..initialize connection pool using poolable-connection factory~{\nwtagstyle{}\subpageref{NW27XAxz-4fNbUS-1}}}\endmoddef\nwused{\\{NW27XAxz-33Wt2A-1}}
 Print("..initialize connection pool");
+<<<<<<< HEAD
 pool = new GenericObjectPool<>(poolableconnection_factory);
+=======
+GenericObjectPoolConfig cfg = new GenericObjectPoolConfig();
+cfg.setMinIdle(100000);
+cfg.setMaxIdle(100000);
+cfg.setMaxTotal(100000);
+pool = new GenericObjectPool<>(poolableconnection_factory, cfg);
+>>>>>>> P1-DBQueryServerLocationsActive.1
 \nwidentuses{\\{{pool}{pool}}\\{{poolableconnection{\char95}factory}{poolableconnection:unfactory}}\\{{Print}{Print}}}\nwindexuse{pool}{pool}{NW27XAxz-4fNbUS-1}\nwindexuse{poolableconnection{\char95}factory}{poolableconnection:unfactory}{NW27XAxz-4fNbUS-1}\nwindexuse{Print}{Print}{NW27XAxz-4fNbUS-1}\nwendcode{}\nwbegindocs{317}\nwdocspar
 \nwenddocs{}\nwbegincode{318}\sublabel{NW27XAxz-MaeyE-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-MaeyE-1}}}\moddef{..register pool to poolable-connection factory and driver~{\nwtagstyle{}\subpageref{NW27XAxz-MaeyE-1}}}\endmoddef\nwused{\\{NW27XAxz-33Wt2A-1}}
 Print("..register connection pool to driver");
@@ -3721,9 +3754,9 @@ private void PSInit() \{
   \LA{}S143~{\nwtagstyle{}\subpageref{NW27XAxz-3PFD2J-1}}\RA{}
   \LA{}S144~{\nwtagstyle{}\subpageref{NW27XAxz-9zboZ-1}}\RA{}
   \LA{}S145~{\nwtagstyle{}\subpageref{NW27XAxz-4eAVHn-1}}\RA{}
-  \LA{}S146~{\nwtagstyle{}\subpageref{NW27XAxz-25mKhn-1}}\RA{}
   \LA{}S147~{\nwtagstyle{}\subpageref{NW27XAxz-2TcddD-1}}\RA{}
   \LA{}S148~{\nwtagstyle{}\subpageref{NW27XAxz-n1SCR-1}}\RA{}
+  \LA{}S149~{\nwtagstyle{}\subpageref{NW27XAxz-44GFKd-1}}\RA{}
 \}
 \nosublabel{NW27XAxz-1g2xnv-1-u92}\nwindexdefn{PSInit}{PSInit}{NW27XAxz-1g2xnv-1}\eatline
 \nwidentdefs{\\{{PSInit}{PSInit}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}\\{{Print}{Print}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-1g2xnv-1}\nwindexuse{Print}{Print}{NW27XAxz-1g2xnv-1}\nwendcode{}\nwbegincode{334}\sublabel{NW27XAxz-9czRY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-9czRY-1}}}\moddef{S0~{\nwtagstyle{}\subpageref{NW27XAxz-9czRY-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
@@ -3982,11 +4015,15 @@ lu_pstr.put("S133", SEL+"val FROM f_status WHERE rid=? AND t<=? "
     + "ORDER BY t DESC FETCH FIRST ROW ONLY");
 \nwindexdefn{S133}{S133}{NW27XAxz-3Q2E0J-1}\eatline
 \nwidentdefs{\\{{S133}{S133}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3Q2E0J-1}\nwendcode{}\nwbegincode{412}\sublabel{NW27XAxz-9eEGJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-9eEGJ-1}}}\moddef{S134~{\nwtagstyle{}\subpageref{NW27XAxz-9eEGJ-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+<<<<<<< HEAD
 lu_pstr.put("S134", SEL+"sid FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
+=======
+lu_pstr.put("S134", SEL+"sid, te FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
+>>>>>>> P1-DBQueryServerLocationsActive.1
 \nwindexdefn{S134}{S134}{NW27XAxz-9eEGJ-1}\eatline
 \nwidentdefs{\\{{S134}{S134}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-9eEGJ-1}\nwendcode{}\nwbegincode{413}\sublabel{NW27XAxz-4dp7jX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4dp7jX-1}}}\moddef{S135~{\nwtagstyle{}\subpageref{NW27XAxz-4dp7jX-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 lu_pstr.put("S135", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
-    + "SELECT t1 FROM W WHERE sid=? AND ? BETWEEN t1 AND t2)");
+    + "SELECT t1 FROM W WHERE sid=? AND t1 <= ? AND ? < t2)");
 \nwindexdefn{S135}{S135}{NW27XAxz-4dp7jX-1}\eatline
 \nwidentdefs{\\{{S135}{S135}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4dp7jX-1}\nwendcode{}\nwbegincode{414}\sublabel{NW27XAxz-26ZLfn-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-26ZLfn-1}}}\moddef{S136~{\nwtagstyle{}\subpageref{NW27XAxz-26ZLfn-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 lu_pstr.put("S136", SEL+"* FROM V");
@@ -4019,17 +4056,28 @@ lu_pstr.put("S144", SEL+"t2, v2, rid FROM CQ WHERE sid=? AND t2>? ORDER BY o2 AS
 \nwidentdefs{\\{{S144}{S144}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-9zboZ-1}\nwendcode{}\nwbegincode{424}\sublabel{NW27XAxz-4eAVHn-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4eAVHn-1}}}\moddef{S145~{\nwtagstyle{}\subpageref{NW27XAxz-4eAVHn-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 lu_pstr.put("S145", SEL+"te, ve FROM CW WHERE sid=?");
 \nwindexdefn{S145}{S145}{NW27XAxz-4eAVHn-1}\eatline
+<<<<<<< HEAD
 \nwidentdefs{\\{{S145}{S145}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4eAVHn-1}\nwendcode{}\nwbegincode{425}\sublabel{NW27XAxz-25mKhn-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-25mKhn-1}}}\moddef{S146~{\nwtagstyle{}\subpageref{NW27XAxz-25mKhn-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 lu_pstr.put("S146", SEL+"t2, v2 FROM W WHERE sid=? AND t2=? AND v2<>0");
 \nwindexdefn{S146}{S146}{NW27XAxz-25mKhn-1}\eatline
 \nwidentdefs{\\{{S146}{S146}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-25mKhn-1}\nwendcode{}\nwbegincode{426}\sublabel{NW27XAxz-2TcddD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2TcddD-1}}}\moddef{S147~{\nwtagstyle{}\subpageref{NW27XAxz-2TcddD-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+=======
+\nwidentdefs{\\{{S145}{S145}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4eAVHn-1}\nwendcode{}\nwbegincode{425}\sublabel{NW27XAxz-2TcddD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2TcddD-1}}}\moddef{S147~{\nwtagstyle{}\subpageref{NW27XAxz-2TcddD-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+>>>>>>> P1-DBQueryServerLocationsActive.1
 lu_pstr.put("S147", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
-    + "SELECT MAX (t2) FROM W WHERE sid=? AND v2<>0)");
+    + "SELECT t1 FROM W WHERE sid=? AND v2=0)");
 \nwindexdefn{S147}{S147}{NW27XAxz-2TcddD-1}\eatline
+<<<<<<< HEAD
 \nwidentdefs{\\{{S147}{S147}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-2TcddD-1}\nwendcode{}\nwbegincode{427}\sublabel{NW27XAxz-n1SCR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-n1SCR-1}}}\moddef{S148~{\nwtagstyle{}\subpageref{NW27XAxz-n1SCR-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+=======
+\nwidentdefs{\\{{S147}{S147}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-2TcddD-1}\nwendcode{}\nwbegincode{426}\sublabel{NW27XAxz-n1SCR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-n1SCR-1}}}\moddef{S148~{\nwtagstyle{}\subpageref{NW27XAxz-n1SCR-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+>>>>>>> P1-DBQueryServerLocationsActive.1
 lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
 \nwindexdefn{S148}{S148}{NW27XAxz-n1SCR-1}\eatline
-\nwidentdefs{\\{{S148}{S148}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-n1SCR-1}\nwendcode{}
+\nwidentdefs{\\{{S148}{S148}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-n1SCR-1}\nwendcode{}\nwbegincode{427}\sublabel{NW27XAxz-44GFKd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-44GFKd-1}}}\moddef{S149~{\nwtagstyle{}\subpageref{NW27XAxz-44GFKd-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+lu_pstr.put("S149", SEL+"t2, v2 FROM W WHERE sid=? ORDER BY t2 ASC");
+\nwindexdefn{S149}{S149}{NW27XAxz-44GFKd-1}\eatline
+\nwidentdefs{\\{{S149}{S149}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-44GFKd-1}\nwendcode{}
 
 \nwixlogsorted{c}{{......check if new job}{NW27XAxz-2Hq38w-1}{\nwixu{NW27XAxz-42MPAb-1}\nwixd{NW27XAxz-2Hq38w-1}}}%
 \nwixlogsorted{c}{{......get tp, vp, td, vd of new job}{NW27XAxz-pddDf-1}{\nwixu{NW27XAxz-42MPAb-1}\nwixd{NW27XAxz-pddDf-1}}}%
@@ -4075,7 +4123,7 @@ lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
 \nwixlogsorted{c}{{Add new request}{NW27XAxz-4ISWm4-1}{\nwixu{NW27XAxz-4PbjF-2}\nwixd{NW27XAxz-4ISWm4-1}}}%
 \nwixlogsorted{c}{{Add new server}{NW27XAxz-IYVQQ-1}{\nwixu{NW27XAxz-4PbjF-2}\nwixd{NW27XAxz-IYVQQ-1}}}%
 \nwixlogsorted{c}{{Add new vertex}{NW27XAxz-28BJIM-1}{\nwixu{NW27XAxz-4PbjF-2}\nwixd{NW27XAxz-28BJIM-1}}}%
-\nwixlogsorted{c}{{Catch and print \code{}SQLException\edoc{}}{NW27XAxz-4P0tKA-1}{\nwixu{NW27XAxz-4P4YpK-1}\nwixu{NW27XAxz-b3Hn1-1}\nwixu{NW27XAxz-2BAv1P-1}\nwixu{NW27XAxz-2OKmqF-1}\nwixu{NW27XAxz-1lVtry-1}\nwixd{NW27XAxz-4P0tKA-1}\nwixu{NW27XAxz-28BJIM-1}\nwixu{NW27XAxz-1r65Fb-1}\nwixu{NW27XAxz-3SpUqj-1}\nwixu{NW27XAxz-4ISWm4-1}\nwixu{NW27XAxz-IYVQQ-1}\nwixu{NW27XAxz-4VFddh-1}\nwixu{NW27XAxz-y828a-1}\nwixu{NW27XAxz-lMiTm-1}\nwixu{NW27XAxz-1MI9ro-1}\nwixu{NW27XAxz-3AGrxZ-1}\nwixu{NW27XAxz-3UaQCb-1}\nwixu{NW27XAxz-1oPNKc-1}}}%
+\nwixlogsorted{c}{{Catch and print \code{}SQLException\edoc{}}{NW27XAxz-4P0tKA-1}{\nwixu{NW27XAxz-4P4YpK-1}\nwixu{NW27XAxz-b3Hn1-1}\nwixu{NW27XAxz-2BAv1P-1}\nwixu{NW27XAxz-2OKmqF-1}\nwixu{NW27XAxz-1lVtry-1}\nwixd{NW27XAxz-4P0tKA-1}\nwixu{NW27XAxz-3I0i1F-1}\nwixu{NW27XAxz-28BJIM-1}\nwixu{NW27XAxz-1r65Fb-1}\nwixu{NW27XAxz-3SpUqj-1}\nwixu{NW27XAxz-4ISWm4-1}\nwixu{NW27XAxz-IYVQQ-1}\nwixu{NW27XAxz-4VFddh-1}\nwixu{NW27XAxz-y828a-1}\nwixu{NW27XAxz-lMiTm-1}\nwixu{NW27XAxz-1MI9ro-1}\nwixu{NW27XAxz-3AGrxZ-1}\nwixu{NW27XAxz-3UaQCb-1}\nwixu{NW27XAxz-1oPNKc-1}}}%
 \nwixlogsorted{c}{{Catch and throw \code{}SQLException\edoc{}}{NW27XAxz-2x6EhZ-1}{\nwixd{NW27XAxz-2x6EhZ-1}\nwixu{NW27XAxz-4UQpM2-1}\nwixu{NW27XAxz-17Zt8W-1}\nwixu{NW27XAxz-1ZE0ye-1}\nwixu{NW27XAxz-322zJf-1}}}%
 \nwixlogsorted{c}{{Create Table CPD statement}{NW27XAxz-q5ofx-1}{\nwixd{NW27XAxz-q5ofx-1}\nwixu{NW27XAxz-4P4YpK-1}}}%
 \nwixlogsorted{c}{{Create Table CQ statement}{NW27XAxz-2YsMAX-1}{\nwixd{NW27XAxz-2YsMAX-1}\nwixu{NW27XAxz-4P4YpK-1}}}%
@@ -4118,6 +4166,7 @@ lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
 \nwixlogsorted{c}{{Create View t\_s\_depart statement (Eq.~\ref{eq:departure-time})}{NW27XAxz-2riY0r-1}{\nwixd{NW27XAxz-2riY0r-1}\nwixu{NW27XAxz-4P4YpK-1}}}%
 \nwixlogsorted{c}{{Fetch items from database}{NW27XAxz-17Zt8W-1}{\nwixu{NW27XAxz-XGFF1-1}\nwixd{NW27XAxz-17Zt8W-1}}}%
 \nwixlogsorted{c}{{Fill prepared statement}{NW27XAxz-1ZE0ye-1}{\nwixu{NW27XAxz-XGFF1-1}\nwixd{NW27XAxz-1ZE0ye-1}}}%
+\nwixlogsorted{c}{{Get connection (for internal use)}{NW27XAxz-3I0i1F-1}{\nwixu{NW27XAxz-4PbjF-3}\nwixd{NW27XAxz-3I0i1F-1}}}%
 \nwixlogsorted{c}{{Get reference to edges cache}{NW27XAxz-3KzwIy-1}{\nwixu{NW27XAxz-4PbjF-3}\nwixd{NW27XAxz-3KzwIy-1}}}%
 \nwixlogsorted{c}{{Get reference to users cache}{NW27XAxz-1EJdXT-1}{\nwixu{NW27XAxz-4PbjF-3}\nwixd{NW27XAxz-1EJdXT-1}}}%
 \nwixlogsorted{c}{{Get reference to vertices cache}{NW27XAxz-21qmOa-1}{\nwixu{NW27XAxz-4PbjF-3}\nwixd{NW27XAxz-21qmOa-1}}}%
@@ -4208,9 +4257,9 @@ lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
 \nwixlogsorted{c}{{S143}{NW27XAxz-3PFD2J-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-3PFD2J-1}}}%
 \nwixlogsorted{c}{{S144}{NW27XAxz-9zboZ-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-9zboZ-1}}}%
 \nwixlogsorted{c}{{S145}{NW27XAxz-4eAVHn-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-4eAVHn-1}}}%
-\nwixlogsorted{c}{{S146}{NW27XAxz-25mKhn-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-25mKhn-1}}}%
 \nwixlogsorted{c}{{S147}{NW27XAxz-2TcddD-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-2TcddD-1}}}%
 \nwixlogsorted{c}{{S148}{NW27XAxz-n1SCR-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-n1SCR-1}}}%
+\nwixlogsorted{c}{{S149}{NW27XAxz-44GFKd-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-44GFKd-1}}}%
 \nwixlogsorted{c}{{S15}{NW27XAxz-3WJ2Si-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-3WJ2Si-1}}}%
 \nwixlogsorted{c}{{S2}{NW27XAxz-26Y6r2-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-26Y6r2-1}}}%
 \nwixlogsorted{c}{{S3}{NW27XAxz-2UOPmS-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-2UOPmS-1}}}%
@@ -4400,9 +4449,9 @@ lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
 \nwixlogsorted{i}{{S143}{S143}}%
 \nwixlogsorted{i}{{S144}{S144}}%
 \nwixlogsorted{i}{{S145}{S145}}%
-\nwixlogsorted{i}{{S146}{S146}}%
 \nwixlogsorted{i}{{S147}{S147}}%
 \nwixlogsorted{i}{{S148}{S148}}%
+\nwixlogsorted{i}{{S149}{S149}}%
 \nwixlogsorted{i}{{S15}{S15}}%
 \nwixlogsorted{i}{{S2}{S2}}%
 \nwixlogsorted{i}{{S3}{S3}}%
