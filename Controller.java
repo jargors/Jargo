@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -166,7 +167,7 @@ public class Controller {
   public void loadGTree(String p) {
     tools.loadGTree(p);
   }
-  public void start() {
+  public void start(Consumer cb) {
     Print("SIMULATION STARTED");
 
     world_time = initial_world_time;
@@ -201,7 +202,9 @@ public class Controller {
       cb3.cancel(false);
       cb4.cancel(false);
       exe.shutdown();
+      client.end();
       Print("SIMULATION ENDED");
+      cb.accept(true);
     }, simulation_duration, TimeUnit.SECONDS);
   }
   public void startStatic() {

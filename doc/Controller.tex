@@ -78,6 +78,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 \nwendcode{}\nwbegindocs{8}\item standard classes for file operations;
 \nwenddocs{}\nwbegincode{9}\sublabel{NW2ZDXo8-m6OHq-4}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-m6OHq-4}}}\moddef{Controller.java preamble~{\nwtagstyle{}\subpageref{NW2ZDXo8-m6OHq-1}}}\plusendmoddef
 import java.util.Scanner;
@@ -437,7 +438,7 @@ public void loadGTree(String p) \{
 \nwidentdefs{\\{{loadGTree}{loadGTree}}}\nwidentuses{\\{{tools}{tools}}}\nwindexuse{tools}{tools}{NW2ZDXo8-b7Jka-1}\nwendcode{}\nwbegindocs{78}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{start}{start}{NW2ZDXo8-43uvLJ-1}start}(0)}
 \nwenddocs{}\nwbegincode{79}\sublabel{NW2ZDXo8-43uvLJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-43uvLJ-1}}}\moddef{Start dynamic simulation~{\nwtagstyle{}\subpageref{NW2ZDXo8-43uvLJ-1}}}\endmoddef\nwused{\\{NW2ZDXo8-bF3Hn-1}}
-public void start() \{
+public void start(Consumer cb) \{
   Print("SIMULATION STARTED");
 
   world_time = initial_world_time;
@@ -472,7 +473,9 @@ public void start() \{
     cb3.cancel(false);
     cb4.cancel(false);
     exe.shutdown();
+    client.end();
     Print("SIMULATION ENDED");
+    cb.accept(true);
   \}, simulation_duration, TimeUnit.SECONDS);
 \}
 \nwindexdefn{start}{start}{NW2ZDXo8-43uvLJ-1}\eatline

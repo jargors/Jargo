@@ -78,6 +78,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 @ \item standard classes for file operations;
 <<Controller.java preamble>>=
 import java.util.Scanner;
@@ -437,7 +438,7 @@ public void loadGTree(String p) {
 
 \subsubsection{[[start]](0)}
 <<Start dynamic simulation>>=
-public void start() {
+public void start(Consumer cb) {
   Print("SIMULATION STARTED");
 
   world_time = initial_world_time;
@@ -472,7 +473,9 @@ public void start() {
     cb3.cancel(false);
     cb4.cancel(false);
     exe.shutdown();
+    client.end();
     Print("SIMULATION ENDED");
+    cb.accept(true);
   }, simulation_duration, TimeUnit.SECONDS);
 }
 @ %def start
