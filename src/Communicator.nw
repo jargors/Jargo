@@ -82,8 +82,8 @@ We define a [[Storage]] and a container for the simulation world time.
 <<[[Communicator]] member variables>>=
 private Storage storage;
 private int world_time = 0;
-private final boolean DEBUG = false;
-@ %def storage world_time
+private boolean DEBUG = false;
+@ %def storage world_time DEBUG
 
 \subsection{Constructor}
 \label{sec:constructor}
@@ -95,6 +95,7 @@ public Communicator() { }
 \label{sec:public-methods}
 \hi{General Methods.}
 <<[[Communicator]] public methods>>=
+<<Set debug>>
 <<Set storage>>
 <<Set/get simulation world time>>
 <<Get reference to vertices cache>>
@@ -122,6 +123,13 @@ public Communicator() { }
 
 \subsection{General Methods}
 \label{sec:general-methods}
+
+\subsubsection{[[setDebug]](1)}
+<<Set debug>>=
+public void setDebug(boolean flag) {
+  DEBUG = flag;
+}
+@ %def setDebug
 
 \subsubsection{[[setStorage]](1)}
 <<Set storage>>=
@@ -199,10 +207,10 @@ public boolean updateServerAddToSchedule(
   int i = 0;
   Print("Set i=0");
   Print("Set current <length>="+current.length);
-  // for (int q = 0; q < (current.length - 1); q += 2) {
-  //   System.out.print("("+current[q]+", "+current[(q + 1)]+") ");
-  // }
-  // System.out.println();
+  for (int q = 0; q < (current.length - 1); q += 2) {
+    System.out.print("("+current[q]+", "+current[(q + 1)]+") ");
+  }
+  System.out.println();
   while (i < current.length && current[i] != route[0]) {
     Print("Detected current["+i+"]!=route[0] ("+current[i]+"!="+route[0]+")");
     i += 2;

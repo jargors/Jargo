@@ -7,8 +7,11 @@ import java.util.HashMap;
 public class Communicator {
   private Storage storage;
   private int world_time = 0;
-  private final boolean DEBUG = false;
+  private boolean DEBUG = false;
   public Communicator() { }
+  public void setDebug(boolean flag) {
+    DEBUG = flag;
+  }
   public void setStorage(Storage src) {
     storage = src;
   }
@@ -42,10 +45,10 @@ public class Communicator {
     int i = 0;
     Print("Set i=0");
     Print("Set current <length>="+current.length);
-    // for (int q = 0; q < (current.length - 1); q += 2) {
-    //   System.out.print("("+current[q]+", "+current[(q + 1)]+") ");
-    // }
-    // System.out.println();
+    for (int q = 0; q < (current.length - 1); q += 2) {
+      System.out.print("("+current[q]+", "+current[(q + 1)]+") ");
+    }
+    System.out.println();
     while (i < current.length && current[i] != route[0]) {
       Print("Detected current["+i+"]!=route[0] ("+current[i]+"!="+route[0]+")");
       i += 2;
