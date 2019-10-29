@@ -302,32 +302,24 @@ public class Storage {
     int[] output = new int[] { };
     int[] temp1 = new int[] { };
     int[] temp2 = new int[] { };
+    int j = 0;
+    int sid = 0;
+    int te = 0;
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
       Print("Open connection "+conn.toString());
-      temp1 = DBFetch(conn, "S134", 1, t, t, t);
-      output = new int[(temp1.length*3)];
-      for (int i = 0; i < temp1.length; i++) {
-        int sid = temp1[i];
-        output[3*i] = sid;
-        temp2 = DBFetch(conn, "S146", 2, sid, t);
-        // First check if server just arrived at a vertex at time t
-        if (temp2.length > 0) {
-          output[(3*i + 1)] = temp2[0];
-          output[(3*i + 2)] = temp2[1];
-        } else {
-          // Next check if server passed a vertex at time t, and get that vertex
-          temp2 = DBFetch(conn, "S135", 2, sid, sid, t);
-          if (temp2.length > 0) {
-            output[(3*i + 1)] = temp2[0];
-            output[(3*i + 2)] = temp2[1];
-          } else {
-            // Finally get the server's last-known vertex because this guy is idle
-            temp2 = DBFetch(conn, "S147", 2, sid, sid);
-            output[(3*i + 1)] = temp2[0];
-            output[(3*i + 2)] = temp2[1];
-          }
-        }
+      temp1 = DBFetch(conn, "S134", 2, t, t, t);      // <-- 10 ms/call
+      output = new int[(3*(temp1.length/2))];
+      for (int i = 0; i < temp1.length - 1; i += 2) {
+        sid = temp1[(i + 0)];
+         te = temp1[(i + 1)];
+        temp2 = (t < te
+          ? DBFetch(conn, "S135", 2, sid, sid, t, t)  // <-- 0.07-0.15 ms/call
+          : DBFetch(conn, "S147", 2, sid, sid));      // <-- 0.04-0.15 ms/call
+        output[(j + 0)] = sid;
+        output[(j + 1)] = temp2[0];
+        output[(j + 2)] = temp2[1];
+        j += 3;
       }
       conn.close();
     }
@@ -1012,11 +1004,11 @@ public class Storage {
     }
   }
   public void DBAddNewServer(int[] u, int[] route) throws RuntimeException {
-    if (!lu_users.containsKey(u[0])) {
+    int uid = u[0];
+    if (!lu_users.containsKey(uid)) {
       try {
         Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
         Print("Open connection "+conn.toString());
-        int uid = u[0];
         int se = u[2];
         PreparedStatement pS2 = PS(conn, "S2");
         PreparedStatement pS3 = PS(conn, "S3");
@@ -1062,7 +1054,7 @@ public class Storage {
         conn.commit();
         Print("Close connection "+conn.toString());
         conn.close();
-        lu_users.put(u[0], u.clone());
+        lu_users.put(uid, u.clone());
       }
       catch (SQLException e1) {
         printSQLException(e1);
@@ -1875,6 +1867,10 @@ public class Storage {
                       + "SELECT rid, td FROM CPD");
       stmt.addBatch("CREATE VIEW t_s_arrive (sid, val) AS "
                       + "SELECT sid, te FROM CW");
+      stmt.addBatch("CREATE INDEX W_sid_t1 ON W (sid, t1)");
+      stmt.addBatch("CREATE INDEX W_sid_t2 ON W (sid, t2)");
+      stmt.addBatch("CREATE INDEX W_sid_v2 ON W (sid, v2)");
+      stmt.addBatch("CREATE INDEX W_sid_t1_t2 ON W (sid, t1, t2)");
       stmt.executeBatch();
       conn.commit();
       Print("Close connection "+conn.toString());
@@ -2159,9 +2155,9 @@ public class Storage {
       lu_pstr.put("S127", SEL+"val FROM t_s_arrive WHERE sid=?");
       lu_pstr.put("S133", SEL+"val FROM f_status WHERE rid=? AND t<=? "
           + "ORDER BY t DESC FETCH FIRST ROW ONLY");
-      lu_pstr.put("S134", SEL+"sid FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
+      lu_pstr.put("S134", SEL+"sid, te FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
       lu_pstr.put("S135", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
-          + "SELECT t1 FROM W WHERE sid=? AND ? BETWEEN t1 AND t2)");
+          + "SELECT t1 FROM W WHERE sid=? AND t1 <= ? AND ? < t2)");
       lu_pstr.put("S136", SEL+"* FROM V");
       lu_pstr.put("S137", SEL+"* FROM E");
       lu_pstr.put("S138", SEL+"val FROM dist_r_unassigned");
@@ -2172,10 +2168,10 @@ public class Storage {
       lu_pstr.put("S143", SEL+"* FROM R WHERE re<=? AND ?<=re+?");
       lu_pstr.put("S144", SEL+"t2, v2, rid FROM CQ WHERE sid=? AND t2>? ORDER BY o2 ASC");
       lu_pstr.put("S145", SEL+"te, ve FROM CW WHERE sid=?");
-      lu_pstr.put("S146", SEL+"t2, v2 FROM W WHERE sid=? AND t2=? AND v2<>0");
       lu_pstr.put("S147", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
-          + "SELECT MAX (t2) FROM W WHERE sid=? AND v2<>0)");
+          + "SELECT t1 FROM W WHERE sid=? AND v2=0)");
       lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
+      lu_pstr.put("S149", SEL+"t2, v2 FROM W WHERE sid=? ORDER BY t2 ASC");
     }
     private PreparedStatement PS(Connection conn, String k) throws SQLException {
       Print("Prepare statement "+k);

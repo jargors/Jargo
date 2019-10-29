@@ -1931,6 +1931,10 @@ public void DBLoadDataModel() throws RuntimeException \{
     stmt.addBatch(\LA{}Create View t\_s\_depart statement (Eq.~\ref{eq:departure-time})~{\nwtagstyle{}\subpageref{NW27XAxz-2riY0r-1}}\RA{});
     stmt.addBatch(\LA{}Create View t\_r\_arrive statement (Eq.~\ref{eq:arrival-time})~{\nwtagstyle{}\subpageref{NW27XAxz-28E5sQ-1}}\RA{});
     stmt.addBatch(\LA{}Create View t\_s\_arrive statement (Eq.~\ref{eq:arrival-time})~{\nwtagstyle{}\subpageref{NW27XAxz-3oL4CY-1}}\RA{});
+    stmt.addBatch("CREATE INDEX W_sid_t1 ON W (sid, t1)");
+    stmt.addBatch("CREATE INDEX W_sid_t2 ON W (sid, t2)");
+    stmt.addBatch("CREATE INDEX W_sid_v2 ON W (sid, v2)");
+    stmt.addBatch("CREATE INDEX W_sid_t1_t2 ON W (sid, t1, t2)");
     stmt.executeBatch();
     conn.commit();
     Print("Close connection "+conn.toString());
@@ -2254,11 +2258,11 @@ The value of $u_q$ \emph{must} be less than 0. Array {\tt{}route} =
 
 \nwenddocs{}\nwbegincode{149}\sublabel{NW27XAxz-IYVQQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-IYVQQ-1}}}\moddef{Add new server~{\nwtagstyle{}\subpageref{NW27XAxz-IYVQQ-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-2}}
 public void DBAddNewServer(int[] u, int[] route) throws RuntimeException \{
-  if (!lu_users.containsKey(u[0])) \{
+  int uid = u[0];
+  if (!lu_users.containsKey(uid)) \{
     try \{
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
       Print("Open connection "+conn.toString());
-      int uid = u[0];
       int se = u[2];
       \LA{}..insert new user into user tables~{\nwtagstyle{}\subpageref{NW27XAxz-4ROa6q-1}}\RA{}
       \LA{}..insert new server into s~{\nwtagstyle{}\subpageref{NW27XAxz-JGp6y-1}}\RA{}
@@ -2266,7 +2270,7 @@ public void DBAddNewServer(int[] u, int[] route) throws RuntimeException \{
       \LA{}..insert new server route into cw~{\nwtagstyle{}\subpageref{NW27XAxz-2GDxmx-1}}\RA{}
       \LA{}..insert new server into cq~{\nwtagstyle{}\subpageref{NW27XAxz-404DhQ-1}}\RA{}
       \LA{}..commit and close~{\nwtagstyle{}\subpageref{NW27XAxz-3pffr6-1}}\RA{}
-      lu_users.put(u[0], u.clone());
+      lu_users.put(uid, u.clone());
     \}
     \LA{}Catch and print \code{}SQLException\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-4P0tKA-1}}\RA{}
   \}
@@ -2315,7 +2319,6 @@ PSAdd(pS14, uid, u[1], u[2], null, u[2], u[4], null, u[1],
     null, null, null, null, null, 1);
 PSSubmit(pS14);
 \nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S14}{S14}}}\nwindexuse{PS}{PS}{NW27XAxz-404DhQ-1}\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-404DhQ-1}\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-404DhQ-1}\nwindexuse{S14}{S14}{NW27XAxz-404DhQ-1}\nwendcode{}\nwbegindocs{159}\nwdocspar
-
 \subsubsection{{\tt{}\protect\nwindexuse{DBUpdateServerRoute}{DBUpdateServerRoute}{NW27XAxz-4VFddh-1}DBUpdateServerRoute}(3)}
 The {\tt{}\protect\nwindexuse{DBUpdateServerRoute}{DBUpdateServerRoute}{NW27XAxz-4VFddh-1}DBUpdateServerRoute}(3) method can be used to
 \begin{enumerate}
@@ -3053,32 +3056,24 @@ public int[] DBQueryServerLocationsActive(int t) throws RuntimeException \{
   int[] output = new int[] \{ \};
   int[] temp1 = new int[] \{ \};
   int[] temp2 = new int[] \{ \};
+  int j = 0;
+  int sid = 0;
+  int te = 0;
   try \{
     Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
     Print("Open connection "+conn.toString());
-    temp1 = DBFetch(conn, "S134", 1, t, t, t);
-    output = new int[(temp1.length*3)];
-    for (int i = 0; i < temp1.length; i++) \{
-      int sid = temp1[i];
-      output[3*i] = sid;
-      temp2 = DBFetch(conn, "S146", 2, sid, t);
-      // First check if server just arrived at a vertex at time t
-      if (temp2.length > 0) \{
-        output[(3*i + 1)] = temp2[0];
-        output[(3*i + 2)] = temp2[1];
-      \} else \{
-        // Next check if server passed a vertex at time t, and get that vertex
-        temp2 = DBFetch(conn, "S135", 2, sid, sid, t);
-        if (temp2.length > 0) \{
-          output[(3*i + 1)] = temp2[0];
-          output[(3*i + 2)] = temp2[1];
-        \} else \{
-          // Finally get the server's last-known vertex because this guy is idle
-          temp2 = DBFetch(conn, "S147", 2, sid, sid);
-          output[(3*i + 1)] = temp2[0];
-          output[(3*i + 2)] = temp2[1];
-        \}
-      \}
+    temp1 = DBFetch(conn, "S134", 2, t, t, t);      // <-- 10 ms/call
+    output = new int[(3*(temp1.length/2))];
+    for (int i = 0; i < temp1.length - 1; i += 2) \{
+      sid = temp1[(i + 0)];
+       te = temp1[(i + 1)];
+      temp2 = (t < te
+        ? DBFetch(conn, "S135", 2, sid, sid, t, t)  // <-- 0.07-0.15 ms/call
+        : DBFetch(conn, "S147", 2, sid, sid));      // <-- 0.04-0.15 ms/call
+      output[(j + 0)] = sid;
+      output[(j + 1)] = temp2[0];
+      output[(j + 2)] = temp2[1];
+      j += 3;
     \}
     conn.close();
   \}
@@ -3086,7 +3081,7 @@ public int[] DBQueryServerLocationsActive(int t) throws RuntimeException \{
   return output;
 \}
 \nosublabel{NW27XAxz-3UaQCb-1-u1}\nwindexdefn{DBQueryServerLocationsActive}{DBQueryServerLocationsActive}{NW27XAxz-3UaQCb-1}\eatline
-\nwidentdefs{\\{{DBQueryServerLocationsActive}{DBQueryServerLocationsActive}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{Print}{Print}}\\{{S134}{S134}}\\{{S135}{S135}}\\{{S146}{S146}}\\{{S147}{S147}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-3UaQCb-1}\nwindexuse{Print}{Print}{NW27XAxz-3UaQCb-1}\nwindexuse{S134}{S134}{NW27XAxz-3UaQCb-1}\nwindexuse{S135}{S135}{NW27XAxz-3UaQCb-1}\nwindexuse{S146}{S146}{NW27XAxz-3UaQCb-1}\nwindexuse{S147}{S147}{NW27XAxz-3UaQCb-1}\nwendcode{}\nwbegindocs{234}\nwdocspar
+\nwidentdefs{\\{{DBQueryServerLocationsActive}{DBQueryServerLocationsActive}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{Print}{Print}}\\{{S134}{S134}}\\{{S135}{S135}}\\{{S147}{S147}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-3UaQCb-1}\nwindexuse{Print}{Print}{NW27XAxz-3UaQCb-1}\nwindexuse{S134}{S134}{NW27XAxz-3UaQCb-1}\nwindexuse{S135}{S135}{NW27XAxz-3UaQCb-1}\nwindexuse{S147}{S147}{NW27XAxz-3UaQCb-1}\nwendcode{}\nwbegindocs{234}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServerRoute}{DBQueryServerRoute}{NW27XAxz-1AprqI-1}DBQueryServerRoute}(1)}
 \nwenddocs{}\nwbegincode{235}\sublabel{NW27XAxz-1AprqI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1AprqI-1}}}\moddef{Query routes~{\nwtagstyle{}\subpageref{NW27XAxz-1AprqI-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
 public int[] DBQueryServerRoute(int sid) throws RuntimeException \{
@@ -3728,9 +3723,9 @@ private void PSInit() \{
   \LA{}S143~{\nwtagstyle{}\subpageref{NW27XAxz-3PFD2J-1}}\RA{}
   \LA{}S144~{\nwtagstyle{}\subpageref{NW27XAxz-9zboZ-1}}\RA{}
   \LA{}S145~{\nwtagstyle{}\subpageref{NW27XAxz-4eAVHn-1}}\RA{}
-  \LA{}S146~{\nwtagstyle{}\subpageref{NW27XAxz-25mKhn-1}}\RA{}
   \LA{}S147~{\nwtagstyle{}\subpageref{NW27XAxz-2TcddD-1}}\RA{}
   \LA{}S148~{\nwtagstyle{}\subpageref{NW27XAxz-n1SCR-1}}\RA{}
+  \LA{}S149~{\nwtagstyle{}\subpageref{NW27XAxz-44GFKd-1}}\RA{}
 \}
 \nosublabel{NW27XAxz-1g2xnv-1-u92}\nwindexdefn{PSInit}{PSInit}{NW27XAxz-1g2xnv-1}\eatline
 \nwidentdefs{\\{{PSInit}{PSInit}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}\\{{Print}{Print}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-1g2xnv-1}\nwindexuse{Print}{Print}{NW27XAxz-1g2xnv-1}\nwendcode{}\nwbegincode{334}\sublabel{NW27XAxz-9czRY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-9czRY-1}}}\moddef{S0~{\nwtagstyle{}\subpageref{NW27XAxz-9czRY-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
@@ -3989,11 +3984,11 @@ lu_pstr.put("S133", SEL+"val FROM f_status WHERE rid=? AND t<=? "
     + "ORDER BY t DESC FETCH FIRST ROW ONLY");
 \nwindexdefn{S133}{S133}{NW27XAxz-3Q2E0J-1}\eatline
 \nwidentdefs{\\{{S133}{S133}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3Q2E0J-1}\nwendcode{}\nwbegincode{412}\sublabel{NW27XAxz-9eEGJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-9eEGJ-1}}}\moddef{S134~{\nwtagstyle{}\subpageref{NW27XAxz-9eEGJ-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
-lu_pstr.put("S134", SEL+"sid FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
+lu_pstr.put("S134", SEL+"sid, te FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
 \nwindexdefn{S134}{S134}{NW27XAxz-9eEGJ-1}\eatline
 \nwidentdefs{\\{{S134}{S134}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-9eEGJ-1}\nwendcode{}\nwbegincode{413}\sublabel{NW27XAxz-4dp7jX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4dp7jX-1}}}\moddef{S135~{\nwtagstyle{}\subpageref{NW27XAxz-4dp7jX-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 lu_pstr.put("S135", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
-    + "SELECT t1 FROM W WHERE sid=? AND ? BETWEEN t1 AND t2)");
+    + "SELECT t1 FROM W WHERE sid=? AND t1 <= ? AND ? < t2)");
 \nwindexdefn{S135}{S135}{NW27XAxz-4dp7jX-1}\eatline
 \nwidentdefs{\\{{S135}{S135}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4dp7jX-1}\nwendcode{}\nwbegincode{414}\sublabel{NW27XAxz-26ZLfn-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-26ZLfn-1}}}\moddef{S136~{\nwtagstyle{}\subpageref{NW27XAxz-26ZLfn-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 lu_pstr.put("S136", SEL+"* FROM V");
@@ -4026,17 +4021,17 @@ lu_pstr.put("S144", SEL+"t2, v2, rid FROM CQ WHERE sid=? AND t2>? ORDER BY o2 AS
 \nwidentdefs{\\{{S144}{S144}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-9zboZ-1}\nwendcode{}\nwbegincode{424}\sublabel{NW27XAxz-4eAVHn-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4eAVHn-1}}}\moddef{S145~{\nwtagstyle{}\subpageref{NW27XAxz-4eAVHn-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 lu_pstr.put("S145", SEL+"te, ve FROM CW WHERE sid=?");
 \nwindexdefn{S145}{S145}{NW27XAxz-4eAVHn-1}\eatline
-\nwidentdefs{\\{{S145}{S145}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4eAVHn-1}\nwendcode{}\nwbegincode{425}\sublabel{NW27XAxz-25mKhn-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-25mKhn-1}}}\moddef{S146~{\nwtagstyle{}\subpageref{NW27XAxz-25mKhn-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
-lu_pstr.put("S146", SEL+"t2, v2 FROM W WHERE sid=? AND t2=? AND v2<>0");
-\nwindexdefn{S146}{S146}{NW27XAxz-25mKhn-1}\eatline
-\nwidentdefs{\\{{S146}{S146}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-25mKhn-1}\nwendcode{}\nwbegincode{426}\sublabel{NW27XAxz-2TcddD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2TcddD-1}}}\moddef{S147~{\nwtagstyle{}\subpageref{NW27XAxz-2TcddD-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S145}{S145}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4eAVHn-1}\nwendcode{}\nwbegincode{425}\sublabel{NW27XAxz-2TcddD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2TcddD-1}}}\moddef{S147~{\nwtagstyle{}\subpageref{NW27XAxz-2TcddD-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 lu_pstr.put("S147", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
-    + "SELECT MAX (t2) FROM W WHERE sid=? AND v2<>0)");
+    + "SELECT t1 FROM W WHERE sid=? AND v2=0)");
 \nwindexdefn{S147}{S147}{NW27XAxz-2TcddD-1}\eatline
-\nwidentdefs{\\{{S147}{S147}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-2TcddD-1}\nwendcode{}\nwbegincode{427}\sublabel{NW27XAxz-n1SCR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-n1SCR-1}}}\moddef{S148~{\nwtagstyle{}\subpageref{NW27XAxz-n1SCR-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S147}{S147}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-2TcddD-1}\nwendcode{}\nwbegincode{426}\sublabel{NW27XAxz-n1SCR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-n1SCR-1}}}\moddef{S148~{\nwtagstyle{}\subpageref{NW27XAxz-n1SCR-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
 \nwindexdefn{S148}{S148}{NW27XAxz-n1SCR-1}\eatline
-\nwidentdefs{\\{{S148}{S148}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-n1SCR-1}\nwendcode{}
+\nwidentdefs{\\{{S148}{S148}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-n1SCR-1}\nwendcode{}\nwbegincode{427}\sublabel{NW27XAxz-44GFKd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-44GFKd-1}}}\moddef{S149~{\nwtagstyle{}\subpageref{NW27XAxz-44GFKd-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+lu_pstr.put("S149", SEL+"t2, v2 FROM W WHERE sid=? ORDER BY t2 ASC");
+\nwindexdefn{S149}{S149}{NW27XAxz-44GFKd-1}\eatline
+\nwidentdefs{\\{{S149}{S149}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-44GFKd-1}\nwendcode{}
 
 \nwixlogsorted{c}{{......check if new job}{NW27XAxz-2Hq38w-1}{\nwixu{NW27XAxz-42MPAb-1}\nwixd{NW27XAxz-2Hq38w-1}}}%
 \nwixlogsorted{c}{{......get tp, vp, td, vd of new job}{NW27XAxz-pddDf-1}{\nwixu{NW27XAxz-42MPAb-1}\nwixd{NW27XAxz-pddDf-1}}}%
@@ -4215,9 +4210,9 @@ lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
 \nwixlogsorted{c}{{S143}{NW27XAxz-3PFD2J-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-3PFD2J-1}}}%
 \nwixlogsorted{c}{{S144}{NW27XAxz-9zboZ-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-9zboZ-1}}}%
 \nwixlogsorted{c}{{S145}{NW27XAxz-4eAVHn-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-4eAVHn-1}}}%
-\nwixlogsorted{c}{{S146}{NW27XAxz-25mKhn-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-25mKhn-1}}}%
 \nwixlogsorted{c}{{S147}{NW27XAxz-2TcddD-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-2TcddD-1}}}%
 \nwixlogsorted{c}{{S148}{NW27XAxz-n1SCR-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-n1SCR-1}}}%
+\nwixlogsorted{c}{{S149}{NW27XAxz-44GFKd-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-44GFKd-1}}}%
 \nwixlogsorted{c}{{S15}{NW27XAxz-3WJ2Si-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-3WJ2Si-1}}}%
 \nwixlogsorted{c}{{S2}{NW27XAxz-26Y6r2-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-26Y6r2-1}}}%
 \nwixlogsorted{c}{{S3}{NW27XAxz-2UOPmS-1}{\nwixu{NW27XAxz-1g2xnv-1}\nwixd{NW27XAxz-2UOPmS-1}}}%
@@ -4406,9 +4401,9 @@ lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
 \nwixlogsorted{i}{{S143}{S143}}%
 \nwixlogsorted{i}{{S144}{S144}}%
 \nwixlogsorted{i}{{S145}{S145}}%
-\nwixlogsorted{i}{{S146}{S146}}%
 \nwixlogsorted{i}{{S147}{S147}}%
 \nwixlogsorted{i}{{S148}{S148}}%
+\nwixlogsorted{i}{{S149}{S149}}%
 \nwixlogsorted{i}{{S15}{S15}}%
 \nwixlogsorted{i}{{S2}{S2}}%
 \nwixlogsorted{i}{{S3}{S3}}%
