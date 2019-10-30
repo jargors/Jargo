@@ -13,13 +13,15 @@ import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.time.LocalDateTime;
 public class Storage {
-  private Map<String, String>               lu_pstr       = new HashMap<>();
-  private Map<Integer, int[]>               lu_vertices   = new HashMap<>();
-  private Map<Integer, Map<Integer, int[]>> lu_edges      = new HashMap<>();
-  private Map<Integer, int[]>               lu_users      = new HashMap<>();
-  private Map<Integer, Boolean>             lu_rstatus    = new HashMap<>();  //*
+  private Map<Integer, Boolean> lu_rstatus = new HashMap<>();  //*
+  private ConcurrentHashMap<String, String> lu_pstr     = new ConcurrentHashMap<>();
+  private ConcurrentHashMap<Integer, int[]> lu_vertices = new ConcurrentHashMap<>();
+  private ConcurrentHashMap<Integer,
+      ConcurrentHashMap<Integer, int[]>>    lu_edges    = new ConcurrentHashMap<>();
+  private ConcurrentHashMap<Integer, int[]> lu_users    = new ConcurrentHashMap<>();
   private       String CONNECTIONS_URL        = "jdbc:derby:memory:jargo;create=true";
   private final String CONNECTIONS_DRIVER_URL = "jdbc:apache:commons:dbcp:";
   private final String CONNECTIONS_POOL_NAME  = "jargo";
@@ -963,7 +965,7 @@ public class Storage {
   }
   public void DBAddNewEdge(int v1, int v2, int dd, int nu) throws RuntimeException {
     if (!lu_edges.containsKey(v1)) {
-      lu_edges.put(v1, new HashMap<>());
+      lu_edges.put(v1, new ConcurrentHashMap());
     }
     if (!lu_edges.get(v1).containsKey(v2)) {
       try {
@@ -1565,13 +1567,14 @@ public class Storage {
   public void setDebug(boolean flag) {
     DEBUG = flag;
   }
-  public final Map<Integer, int[]> getReferenceVerticesCache() {
+  public final ConcurrentHashMap<Integer, int[]> getReferenceVerticesCache() {
     return lu_vertices;
   }
-  public final Map<Integer, Map<Integer, int[]>> getReferenceEdgesCache() {
+  public final ConcurrentHashMap<Integer,
+      ConcurrentHashMap<Integer, int[]>> getReferenceEdgesCache() {
     return lu_edges;
   }
-  public final Map<Integer, int[]> getReferenceUsersCache() {
+  public final ConcurrentHashMap<Integer, int[]> getReferenceUsersCache() {
     return lu_users;
   }
   public void DBLoadDataModel() throws RuntimeException {
@@ -1928,7 +1931,7 @@ public class Storage {
           int dd = output[(4*i + 2)];
           int nu = output[(4*i + 3)];
           if (!lu_edges.containsKey(v1)) {
-            lu_edges.put(v1, new HashMap<>());
+            lu_edges.put(v1, new ConcurrentHashMap());
           }
           lu_edges.get(v1).put(v2, new int[] { dd, nu });
         }
@@ -1989,7 +1992,7 @@ public class Storage {
     try {
       PoolingDriver d = (PoolingDriver) DriverManager.getDriver(CONNECTIONS_DRIVER_URL);
       ObjectPool<? extends Connection> cp = d.getConnectionPool(CONNECTIONS_POOL_NAME);
-      Print("Connections: "+cp.getNumActive()+" active; "+cp.getNumIdle()+" idle");
+      System.out.println("Connections: "+cp.getNumActive()+" active; "+cp.getNumIdle()+" idle");
     }
     catch (SQLException e1) {
       printSQLException(e1);
@@ -2059,7 +2062,6 @@ public class Storage {
     }
     private void PSInit() {
       Print("Initialize prepared statement strings");
-      lu_pstr = new HashMap<>();
       String INS = "INSERT INTO ";
       String UPD = "UPDATE ";
       String DEL = "DELETE FROM ";

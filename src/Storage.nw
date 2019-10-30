@@ -1737,6 +1737,7 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 <<Storage.java preamble>>=
 import java.util.Map;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 @ \item date-time class for printing timestamps.
 <<Storage.java preamble>>=
 import java.time.LocalDateTime;
@@ -1757,16 +1758,18 @@ public class Storage {
 \subsection{Member Variables}
 \label{sec:member-variables}
 \begin{itemize}
-\item We use maps to cache various things. BEWARE, IMPORTANT NOTES: (1) should
-I use ConcurrentHashMap? (2) can I guarantee [[lu_rstatus]] is consistent with
-what is in the database?
+\item Maps accessed by one thread at a time:
 <<[[Storage]] member variables>>=
-private Map<String, String>               lu_pstr       = new HashMap<>();
-private Map<Integer, int[]>               lu_vertices   = new HashMap<>();
-private Map<Integer, Map<Integer, int[]>> lu_edges      = new HashMap<>();
-private Map<Integer, int[]>               lu_users      = new HashMap<>();
-private Map<Integer, Boolean>             lu_rstatus    = new HashMap<>();  //*
-@ %def lu_pstr lu_vertices lu_edges lu_users lu_rstatus
+private Map<Integer, Boolean> lu_rstatus = new HashMap<>();  //*
+@ %def lu_rstatus
+\item Maps that might be accessed concurrently:
+<<[[Storage]] member variables>>=
+private ConcurrentHashMap<String, String> lu_pstr     = new ConcurrentHashMap<>();
+private ConcurrentHashMap<Integer, int[]> lu_vertices = new ConcurrentHashMap<>();
+private ConcurrentHashMap<Integer,
+    ConcurrentHashMap<Integer, int[]>>    lu_edges    = new ConcurrentHashMap<>();
+private ConcurrentHashMap<Integer, int[]> lu_users    = new ConcurrentHashMap<>();
+@ %def lu_pstr lu_vertices lu_edges lu_users
 \item We declare configuration settings. IMPORTANT NOTES: (1) Parameter
 [[STATEMENTS_MAX_COUNT]] gives maximum number of simultaneous prepared
 statements; (2) Parameter [[DERBY_PAGECACHESIZE]] sets the size of each page?
@@ -1857,7 +1860,7 @@ Client can use the cache directly instead of asking Storage. Real-world
 ridesharing algorithm clients likely would have a similar vertex cache
 available.
 <<Get reference to vertices cache>>=
-public final Map<Integer, int[]> getReferenceVerticesCache() {
+public final ConcurrentHashMap<Integer, int[]> getReferenceVerticesCache() {
   return lu_vertices;
 }
 @ %def getReferenceVerticesCache
@@ -1867,7 +1870,8 @@ This method returns a read-only reference to the edges cache, [[lu_edges]].
 Like [[getReferenceVerticesCache]](0), it is used by Communicator to support
 fast edge lookups by Client.
 <<Get reference to edges cache>>=
-public final Map<Integer, Map<Integer, int[]>> getReferenceEdgesCache() {
+public final ConcurrentHashMap<Integer,
+    ConcurrentHashMap<Integer, int[]>> getReferenceEdgesCache() {
   return lu_edges;
 }
 @ %def getReferenceEdgesCache
@@ -1877,7 +1881,7 @@ This method returns a read-only reference to the users cache, [[lu_users]].
 Like [[getReferenceVerticesCache]](0), and [[getReferenceEdgesCache]](0), it is
 used by Communicator to support fast user lookups by Client.
 <<Get reference to users cache>>=
-public final Map<Integer, int[]> getReferenceUsersCache() {
+public final ConcurrentHashMap<Integer, int[]> getReferenceUsersCache() {
   return lu_users;
 }
 @ %def getReferenceUsersCache
@@ -1982,7 +1986,7 @@ for (int i = 0; i < (output.length/4); i++) {
   int dd = output[(4*i + 2)];
   int nu = output[(4*i + 3)];
   if (!lu_edges.containsKey(v1)) {
-    lu_edges.put(v1, new HashMap<>());
+    lu_edges.put(v1, new ConcurrentHashMap());
   }
   lu_edges.get(v1).put(v2, new int[] { dd, nu });
 }
@@ -2039,7 +2043,7 @@ public void printSQLDriverStatistics() {
   try {
     PoolingDriver d = (PoolingDriver) DriverManager.getDriver(CONNECTIONS_DRIVER_URL);
     ObjectPool<? extends Connection> cp = d.getConnectionPool(CONNECTIONS_POOL_NAME);
-    Print("Connections: "+cp.getNumActive()+" active; "+cp.getNumIdle()+" idle");
+    System.out.println("Connections: "+cp.getNumActive()+" active; "+cp.getNumIdle()+" idle");
   }
   <<Catch and print [[SQLException]]>>
 }
@@ -2136,7 +2140,7 @@ into the database.
 <<Add new edge>>=
 public void DBAddNewEdge(int v1, int v2, int dd, int nu) throws RuntimeException {
   if (!lu_edges.containsKey(v1)) {
-    lu_edges.put(v1, new HashMap<>());
+    lu_edges.put(v1, new ConcurrentHashMap());
   }
   if (!lu_edges.get(v1).containsKey(v2)) {
     try {
@@ -3631,7 +3635,6 @@ statement is used.
 <<Initialize statements>>=
 private void PSInit() {
   Print("Initialize prepared statement strings");
-  lu_pstr = new HashMap<>();
   String INS = "INSERT INTO ";
   String UPD = "UPDATE ";
   String DEL = "DELETE FROM ";
