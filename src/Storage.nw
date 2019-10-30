@@ -2068,18 +2068,25 @@ public void printSQLException(SQLException e) {
 @ %def printSQLException
 If [[SQLException]] occurs anywhere in the storage interface, we handle it using:
 \begin{itemize}
-\item Catch-and-print, for top-level operations that can continue after the
-exception. Prints [[SQLException]]s arising out of low-level SQL operations.
-Automatically exports the last good state of the database to disk for offline
-analysis.
+\item Catch-and-print, for failed read operations. Automatically exports the
+last good state of the database to disk for offline analysis.
 <<Catch and print [[SQLException]]>>=
 catch (SQLException e1) {
   printSQLException(e1);
   DBSaveBackup(DERBY_DUMPNAME);
   throw new RuntimeException("database failure");
 }
-@ \item Catch-and-throw, for low-level SQL operations where an exception is
-fatal. Simply re-throws the exception.
+@ \item Catch-and-rollback, for failed write operations. Automatically exports
+the last good state of the database to disk for offline analysis.
+<<Catch and rollback [[SQLException]]>>=
+catch (SQLException e1) {
+  conn.rollback();
+  conn.close();
+  printSQLException(e1);
+  DBSaveBackup(DERBY_DUMPNAME);
+  throw new RuntimeException("database failure");
+}
+@ \item Catch-and-throw, for fatal low-level SQL operations.
 <<Catch and throw [[SQLException]]>>=
 catch (SQLException e) {
   throw e;
@@ -2615,13 +2622,19 @@ throws RuntimeException {
     Print("A3");
     <<..update and add to schedule>>
     Print("A4");
-    <<..commit and close>>
-    Print("A5");
+    try {
+      <<..commit and close>>
+      Print("A5");
+      for (int r : rid) {
+        lu_rstatus.put(r, true);
+      }
+    }
+    // If commit and close fails, we need to rollback the commit
+    // and manually close the connection
+    <<Catch and rollback [[SQLException]]>>
   }
+  // If DriverManager.getConnection fails, we throw a 'database failure'
   <<Catch and print [[SQLException]]>>
-  for (int r : rid) {
-    lu_rstatus.put(r, true);
-  }
 }
 @ %def DBUpdateServerAddToSchedule
 <<..update and add to schedule>>=

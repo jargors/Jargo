@@ -1418,18 +1418,30 @@ public class Storage {
       PSSubmit(pS12, pS13);
       Print("C7");
       Print("A4");
-      conn.commit();
-      Print("Close connection "+conn.toString());
-      conn.close();
-      Print("A5");
+      try {
+        conn.commit();
+        Print("Close connection "+conn.toString());
+        conn.close();
+        Print("A5");
+        for (int r : rid) {
+          lu_rstatus.put(r, true);
+        }
+      }
+      // If commit and close fails, we need to rollback the commit
+      // and manually close the connection
+      catch (SQLException e1) {
+        conn.rollback();
+        conn.close();
+        printSQLException(e1);
+        DBSaveBackup(DERBY_DUMPNAME);
+        throw new RuntimeException("database failure");
+      }
     }
+    // If DriverManager.getConnection fails, we throw a 'database failure'
     catch (SQLException e1) {
       printSQLException(e1);
       DBSaveBackup(DERBY_DUMPNAME);
       throw new RuntimeException("database failure");
-    }
-    for (int r : rid) {
-      lu_rstatus.put(r, true);
     }
   }
   public void DBUpdateServerRemoveFromSchedule(
