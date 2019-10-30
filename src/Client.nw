@@ -61,6 +61,7 @@ logging purposes.
 import com.github.jargors.Communicator;
 import com.github.jargors.Tools;
 import java.util.function.Supplier;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.time.LocalDateTime;
 @
 
@@ -79,12 +80,14 @@ public abstract class Client {
 
 \subsection{Member Variables}
 <<[[Client]] member variables>>=
-protected int r_collection_period = 1;
+protected ConcurrentLinkedQueue<int[]> queue = new ConcurrentLinkedQueue();
+protected int r_collection_period = 1;  // how many sec before collecting new req?
+protected int r_handling_period = 1;  // how many msec before handling queued req?
 protected int s_collection_period = 10;
 protected Communicator communicator;
 protected Tools tools = new Tools();
 protected boolean DEBUG = false;
-@ %def r_collection_period s_collection_period communicator tools
+@ %def queue r_collection_period r_handling_period s_collection_period communicator tools DEBUG
 
 \subsection{Constructor}
 <<[[Client]] constructor>>=
@@ -93,11 +96,13 @@ public Client() { }
 
 \section{Public Methods}
 <<[[Client]] public methods>>=
-  <<Collect requests>>
+  <<Notify new requests>>
+  <<Collect request into queue>>
   <<Collect server locations>>
   <<Set simulation interface>>
   <<Set debug flag>>
   <<Get/set request collection period>>
+  <<Get/set request handling period>>
   <<Get/set server location collection period>>
   <<Load GTree>>
   <<Register road network>>
@@ -105,35 +110,22 @@ public Client() { }
 @
 
 \subsection{Obtaining Requests and Server Locations}
-To obtain unassigned customer requests and server locations, we depend on
-the simulation engine to push the data to the client. The [[collectRequests]](1)
-and [[collectServerLocations]](1) methods simply copy [[src]] into
-the client's working memory.
 
-\subsubsection{[[collectRequests]](1)}
-Array [[src]] =
-
-\noindent
-\begin{tikzpicture}
-\small
-\matrix[nodes={draw,minimum size=6mm}] {
-  \node {$0:\textrm{[[rid]] of request }r$};
- &\node {$1:r_q$}; & \node {$2:r_e$}; & \node {$3:r_l$};
- &\node {$4:r_o$}; & \node {$5:r_d$}; & \node {$6:d_r$};
- &\node[minimum width=12mm] {...};\\
-};
-\end{tikzpicture}
-
-\noindent containing all $r$ queued to be assigned\footnote{See
-\url{https://github.com/jargors/Storage} to learn about Jargo's data model.}.
-After copying [[src]] into [[requests]], the [[endCollectRequests]](0) method
-is executed.
-<<Collect requests>>=
-public void collectRequests(int[] src) {
-  int[] requests = src.clone();
-  endCollectRequests(requests);
+\subsubsection{[[notifyNew]](0)}
+<<Notify new requests>>=
+public void notifyNew() {
+  if (!queue.isEmpty()) {
+    handleRequest(queue.remove());
+  }
 }
-@ %def collectRequests
+@ %def notifyNew
+
+\subsubsection{[[collectRequest]](1)}
+<<Collect request into queue>>=
+public void collectRequest(int[] r) {
+  queue.add(r);
+}
+@ %def addRequest
 
 \subsubsection{[[collectServerLocations]](1)}
 Array [[src]] =
@@ -193,6 +185,20 @@ public void setRequestCollectionPeriod(int t) {
 }
 @ %def setRequestCollectionPeriod
 
+\subsubsection{[[getRequestHandlingPeriod]](1)}
+<<Get/set request handling period>>=
+public int getRequestHandlingPeriod() {
+  return r_handling_period;
+}
+@ %def getRequestHandlingPeriod
+
+\subsubsection{[[setRequestHandlingPeriod]](0)}
+<<Get/set request handling period>>=
+public void setRequestHandlingPeriod(int t) {
+  r_handling_period = t;
+}
+@ %def setRequestHandlingPeriod
+
 \subsubsection{[[getServerLocationCollectionPeriod]](0)}
 <<Get/set server location collection period>>=
 public int getServerLocationCollectionPeriod () {
@@ -231,30 +237,12 @@ public void registerUsers() {
 
 \section{Private Methods}
 <<[[Client]] protected methods>>=
-  <<End collect requests>>
   <<End collect server locations>>
   <<End simulation>>
   <<Handle request>>
   <<Handle server location>>
   <<Print a message>>
 @
-
-\subsection{[[endCollectRequests]](0)}
-<<End collect requests>>=
-protected void endCollectRequests(int[] requests) {
-  for (int i = 0; i < (requests.length - 6); i += 7) {
-    handleRequest(new int[] {
-      requests[i],
-      requests[(i + 1)],
-      requests[(i + 2)],
-      requests[(i + 3)],
-      requests[(i + 4)],
-      requests[(i + 5)],
-      requests[(i + 6)]
-    });
-  }
-}
-@ %def endCollectRequests
 
 \subsection{[[endCollectServerLocations]](0)}
 After server locations are collected, [[handleServerLocation]](1) is executed

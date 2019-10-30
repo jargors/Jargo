@@ -2,17 +2,24 @@ package com.github.jargors;
 import com.github.jargors.Communicator;
 import com.github.jargors.Tools;
 import java.util.function.Supplier;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.time.LocalDateTime;
 public abstract class Client {
-  protected int r_collection_period = 1;
+  protected ConcurrentLinkedQueue<int[]> queue = new ConcurrentLinkedQueue();
+  protected int r_collection_period = 1;  // how many sec before collecting new req?
+  protected int r_handling_period = 1;  // how many msec before handling queued req?
   protected int s_collection_period = 10;
   protected Communicator communicator;
   protected Tools tools = new Tools();
   protected boolean DEBUG = false;
   public Client() { }
-    public void collectRequests(int[] src) {
-      int[] requests = src.clone();
-      endCollectRequests(requests);
+    public void notifyNew() {
+      if (!queue.isEmpty()) {
+        handleRequest(queue.remove());
+      }
+    }
+    public void collectRequest(int[] r) {
+      queue.add(r);
     }
     public void collectServerLocations(int[] src) {
       int[] locations = src.clone();
@@ -30,6 +37,12 @@ public abstract class Client {
     public void setRequestCollectionPeriod(int t) {
       r_collection_period = t;
     }
+    public int getRequestHandlingPeriod() {
+      return r_handling_period;
+    }
+    public void setRequestHandlingPeriod(int t) {
+      r_handling_period = t;
+    }
     public int getServerLocationCollectionPeriod () {
       return s_collection_period;
     }
@@ -45,19 +58,6 @@ public abstract class Client {
     }
     public void registerUsers() {
       tools.registerUsers(communicator.getReferenceUsersCache());
-    }
-    protected void endCollectRequests(int[] requests) {
-      for (int i = 0; i < (requests.length - 6); i += 7) {
-        handleRequest(new int[] {
-          requests[i],
-          requests[(i + 1)],
-          requests[(i + 2)],
-          requests[(i + 3)],
-          requests[(i + 4)],
-          requests[(i + 5)],
-          requests[(i + 6)]
-        });
-      }
     }
     protected void endCollectServerLocations(int[] locations) {
       for (int i = 0; i < (locations.length - 2); i += 3) {
