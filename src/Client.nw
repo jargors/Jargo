@@ -113,9 +113,13 @@ public Client() { }
 
 \subsubsection{[[notifyNew]](0)}
 <<Notify new requests>>=
-public void notifyNew() {
+public void notifyNew() throws RuntimeException {
   if (!queue.isEmpty()) {
-    handleRequest(queue.remove());
+    try {
+      handleRequest(queue.remove());
+    } catch (RuntimeException e) {
+      throw e;
+    }
   }
 }
 @ %def notifyNew
@@ -277,7 +281,7 @@ Array [[r]] =
 \end{tikzpicture}
 
 <<Handle request>>=
-protected void handleRequest(int[] r) { }
+protected void handleRequest(int[] r) throws RuntimeException { }
 @ %def handleRequest
 
 \subsection{[[handleServerLocation]](1)}

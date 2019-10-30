@@ -13,9 +13,13 @@ public abstract class Client {
   protected Tools tools = new Tools();
   protected boolean DEBUG = false;
   public Client() { }
-    public void notifyNew() {
+    public void notifyNew() throws RuntimeException {
       if (!queue.isEmpty()) {
-        handleRequest(queue.remove());
+        try {
+          handleRequest(queue.remove());
+        } catch (RuntimeException e) {
+          throw e;
+        }
       }
     }
     public void collectRequest(int[] r) {
@@ -69,7 +73,7 @@ public abstract class Client {
       }
     }
     protected void end() { }
-    protected void handleRequest(int[] r) { }
+    protected void handleRequest(int[] r) throws RuntimeException { }
     protected void handleServerLocation(int[] loc) { }
     protected void Print(String msg) {
       if (DEBUG) {

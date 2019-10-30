@@ -113,9 +113,13 @@ public Client() \{ \}
 
 \subsubsection{{\tt{}\protect\nosublabel{NW2q3QGT-4VlNed-1-u11}\protect\nwindexuse{notifyNew}{notifyNew}{NW2q3QGT-38hTAx-1}notifyNew}(0)}
 \nwenddocs{}\nwbegincode{15}\sublabel{NW2q3QGT-38hTAx-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-38hTAx-1}}}\moddef{Notify new requests~{\nwtagstyle{}\subpageref{NW2q3QGT-38hTAx-1}}}\endmoddef\nwused{\\{NW2q3QGT-4VlNed-1}}
-public void notifyNew() \{
+public void notifyNew() throws RuntimeException \{
   if (!queue.isEmpty()) \{
-    handleRequest(queue.remove());
+    try \{
+      handleRequest(queue.remove());
+    \} catch (RuntimeException e) \{
+      throw e;
+    \}
   \}
 \}
 \nwindexdefn{notifyNew}{notifyNew}{NW2q3QGT-38hTAx-1}\eatline
@@ -277,7 +281,7 @@ Array {\tt{}r} =
 \end{tikzpicture}
 
 \nwenddocs{}\nwbegincode{49}\sublabel{NW2q3QGT-2856ar-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-2856ar-1}}}\moddef{Handle request~{\nwtagstyle{}\subpageref{NW2q3QGT-2856ar-1}}}\endmoddef\nwused{\\{NW2q3QGT-4EUu6m-1}}
-protected void handleRequest(int[] r) \{ \}
+protected void handleRequest(int[] r) throws RuntimeException \{ \}
 \nwindexdefn{handleRequest}{handleRequest}{NW2q3QGT-2856ar-1}\eatline
 \nwidentdefs{\\{{handleRequest}{handleRequest}}}\nwendcode{}\nwbegindocs{50}\nwdocspar
 \subsection{{\tt{}\protect\nwindexuse{handleServerLocation}{handleServerLocation}{NW2q3QGT-2xqRZA-1}handleServerLocation}(1)}
