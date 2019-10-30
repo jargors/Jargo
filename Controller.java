@@ -20,6 +20,7 @@ public class Controller {
   private Communicator communicator;
   private Tools tools = new Tools();
   private Client client;
+  private Map<Integer, Boolean> lu_seen = new HashMap<>();
   private final double CSHIFT = 10000000.0;
   private static int world_time = 0;
   private int initial_world_time = 0;
@@ -35,15 +36,32 @@ public class Controller {
     Print((world_time % 2 == 0 ? "*ping*" : "*pong*"));
   };
   private Runnable EngineLoop = () -> { };
-  private Runnable RequestLoop = () -> {
+  private Runnable RequestCollectionLoop = () -> {
     long A0 = System.currentTimeMillis();
     final int t0 = world_time;
     int[] output = storage.DBQueryQueuedRequests(world_time);
+    for (int i = 0; i < (output.length - 6); i += 7) {
+      if (!lu_seen.containsKey(output[i]) || lu_seen.get(output[i]) == false) {
+        client.collectRequest(new int[] {
+          output[(i + 0)],
+          output[(i + 1)],
+          output[(i + 2)],
+          output[(i + 3)],
+          output[(i + 4)],
+          output[(i + 5)],
+          output[(i + 6)] });
+        lu_seen.put(output[i], true);
+      }
+    }
     final int t1 = world_time;
     long A1 = System.currentTimeMillis();
-    Print("Time RL: "+(A1 - A0)+" ms");
-    Print("RequestLoop t0="+t0+", t1="+t1+", # of requests="+output.length/7);
-    client.collectRequests(output);
+    Print("Time RCL: "+(A1 - A0)+" ms");
+  };
+  private Runnable RequestHandlingLoop = () -> {
+    long A0 = System.currentTimeMillis();
+    client.notifyNew();
+    long A1 = System.currentTimeMillis();
+    Print("Time RHL: "+(A1 - A0)+" ms");
   };
   private Runnable ServerLoop = () -> {
     long A0 = System.currentTimeMillis();
@@ -59,6 +77,7 @@ public class Controller {
     storage = new Storage();
     communicator = new Communicator();
     communicator.setStorage(storage);
+    communicator.setController(this);
   }
   public void setDebug(boolean flag) {
     DEBUG = flag;
@@ -84,6 +103,9 @@ public class Controller {
   }
   public static int getSimulationWorldTime() {
     return world_time;
+  }
+  public void returnRequest(int rid) {
+    lu_seen.put(rid, false);
   }
   public void saveBackup(String p) {
     storage.DBSaveBackup(p);
@@ -168,7 +190,7 @@ public class Controller {
   public void loadGTree(String p) {
     tools.loadGTree(p);
   }
-  public void start(Consumer cb) {
+  public void start(Consumer app_cb) {
     Print("SIMULATION STARTED");
 
     world_time = initial_world_time;
@@ -177,7 +199,7 @@ public class Controller {
     int simulation_duration = (final_world_time - initial_world_time);
     Print("Set world duration to "+simulation_duration+" (sec)");
 
-    ScheduledExecutorService exe = Executors.newScheduledThreadPool(4);
+    ScheduledExecutorService exe = Executors.newScheduledThreadPool(5);
 
     ScheduledFuture<?> cb1 = exe.scheduleAtFixedRate(
       ClockLoop, 0, 1, TimeUnit.SECONDS);
@@ -189,11 +211,16 @@ public class Controller {
 
     int request_collection_period = client.getRequestCollectionPeriod();
     ScheduledFuture<?> cb3 = exe.scheduleAtFixedRate(
-      RequestLoop, loop_delay, request_collection_period, TimeUnit.SECONDS);
-    Print("Set request-loop period to "+request_collection_period+" (sec)");
+      RequestCollectionLoop, loop_delay, request_collection_period, TimeUnit.SECONDS);
+    Print("Set request-collection-loop period to "+request_collection_period+" (sec)");
+
+    int request_handling_period = client.getRequestHandlingPeriod();
+    ScheduledFuture<?> cb4 = exe.scheduleAtFixedRate(
+      RequestHandlingLoop, loop_delay, request_handling_period, TimeUnit.MILLISECONDS);
+    Print("Set request-handling-loop period to "+request_handling_period+" (msec)");
 
     int server_collection_period = client.getServerLocationCollectionPeriod();
-    ScheduledFuture<?> cb4 = exe.scheduleAtFixedRate(
+    ScheduledFuture<?> cb5 = exe.scheduleAtFixedRate(
       ServerLoop, loop_delay, server_collection_period, TimeUnit.SECONDS);
     Print("Set server-loop period to "+server_collection_period+" (sec)");
 
@@ -202,16 +229,15 @@ public class Controller {
       cb2.cancel(false);
       cb3.cancel(false);
       cb4.cancel(false);
+      cb5.cancel(false);
       exe.shutdown();
       client.end();
       Print("SIMULATION ENDED");
-      cb.accept(true);
+      app_cb.accept(true);
     }, simulation_duration, TimeUnit.SECONDS);
   }
   public void startStatic() {
     Print("SIMULATION STARTED -- STATIC MODE");
-
-    client.setCommunicator(communicator);
 
     world_time = initial_world_time;
     Print("Set world time to "+world_time);
@@ -221,7 +247,8 @@ public class Controller {
       ClockLoop.run();
       EngineLoop.run();
       ServerLoop.run();
-      RequestLoop.run();
+      RequestCollectionLoop.run();
+      RequestHandlingLoop.run();
     }
 
     client.end();

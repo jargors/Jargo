@@ -119,7 +119,9 @@ private Storage storage;
 private Communicator communicator;
 private Tools tools = new Tools();
 private Client client;
-@ %def storage communicator tools client traffic
+private Map<Integer, Boolean> lu_seen = new HashMap<>();
+@ %def storage communicator tools client lu_seen
+
 \hi{Settings.} Settings objects configure various aspects of the simulation.
 These settings should mostly be set by the evaluation program by using the public
 setters.
@@ -140,6 +142,7 @@ private int loop_delay = 0;
 // private int breakdown_rate = 0.005;
 private boolean DEBUG = false;
 @ %def CSHIFT world_time initial_world_time final_world_time engine_update_period loop_delay DEBUG
+
 \hi{Loops.} Jargo's simulation environment comprises four ``loops'', defined
 here, running in parallel. They are executed using Java's
 [[ScheduledExecutorService]] to control timing.
@@ -147,6 +150,7 @@ here, running in parallel. They are executed using Java's
 <<Definition of clock loop>>
 <<Definition of engine loop>>
 <<Definition of request collection loop>>
+<<Definition of request handling loop>>
 <<Definition of server collection loop>>
 @
 
@@ -165,20 +169,40 @@ private Runnable ClockLoop = () -> {
 private Runnable EngineLoop = () -> { };
 @ %def EngineLoop
 
-\subsubsection{Request Loop}
-This loop ``pushes'' queued requests to the client.
+\subsubsection{Request Collection Loop}
 <<Definition of request collection loop>>=
-private Runnable RequestLoop = () -> {
+private Runnable RequestCollectionLoop = () -> {
   long A0 = System.currentTimeMillis();
   final int t0 = world_time;
   int[] output = storage.DBQueryQueuedRequests(world_time);
+  for (int i = 0; i < (output.length - 6); i += 7) {
+    if (!lu_seen.containsKey(output[i]) || lu_seen.get(output[i]) == false) {
+      client.collectRequest(new int[] {
+        output[(i + 0)],
+        output[(i + 1)],
+        output[(i + 2)],
+        output[(i + 3)],
+        output[(i + 4)],
+        output[(i + 5)],
+        output[(i + 6)] });
+      lu_seen.put(output[i], true);
+    }
+  }
   final int t1 = world_time;
   long A1 = System.currentTimeMillis();
-  Print("Time RL: "+(A1 - A0)+" ms");
-  Print("RequestLoop t0="+t0+", t1="+t1+", # of requests="+output.length/7);
-  client.collectRequests(output);
+  Print("Time RCL: "+(A1 - A0)+" ms");
 };
-@ %def RequestLoop
+@ %def RequestCollectionLoop
+
+\subsubsection{Request Handling Loop}
+<<Definition of request handling loop>>=
+private Runnable RequestHandlingLoop = () -> {
+  long A0 = System.currentTimeMillis();
+  client.notifyNew();
+  long A1 = System.currentTimeMillis();
+  Print("Time RHL: "+(A1 - A0)+" ms");
+};
+@ %def RequestHandlingLoop
 
 \subsubsection{Server Loop}
 This loop ``pushes'' server locations to the client.
@@ -205,6 +229,7 @@ public Controller() {
   storage = new Storage();
   communicator = new Communicator();
   communicator.setStorage(storage);
+  communicator.setController(this);
 }
 @
 
@@ -220,6 +245,7 @@ public Controller() {
 <<Set initial world time>>
 <<Set final world time>>
 <<Get world time>>
+<<Return request to queue>>
 <<Save backup>>
 <<Load backup>>
 <<Load data model>>
@@ -301,6 +327,13 @@ public static int getSimulationWorldTime() {
   return world_time;
 }
 @ %def getSimulationWorldTime
+
+\subsubsection{[[returnRequest]](1)}
+<<Return request to queue>>=
+public void returnRequest(int rid) {
+  lu_seen.put(rid, false);
+}
+@ %def returnRequest
 
 \subsubsection{[[save]](1)}
 <<Save backup>>=
@@ -439,7 +472,7 @@ public void loadGTree(String p) {
 
 \subsubsection{[[start]](0)}
 <<Start dynamic simulation>>=
-public void start(Consumer cb) {
+public void start(Consumer app_cb) {
   Print("SIMULATION STARTED");
 
   world_time = initial_world_time;
@@ -448,7 +481,7 @@ public void start(Consumer cb) {
   int simulation_duration = (final_world_time - initial_world_time);
   Print("Set world duration to "+simulation_duration+" (sec)");
 
-  ScheduledExecutorService exe = Executors.newScheduledThreadPool(4);
+  ScheduledExecutorService exe = Executors.newScheduledThreadPool(5);
 
   ScheduledFuture<?> cb1 = exe.scheduleAtFixedRate(
     ClockLoop, 0, 1, TimeUnit.SECONDS);
@@ -460,11 +493,16 @@ public void start(Consumer cb) {
 
   int request_collection_period = client.getRequestCollectionPeriod();
   ScheduledFuture<?> cb3 = exe.scheduleAtFixedRate(
-    RequestLoop, loop_delay, request_collection_period, TimeUnit.SECONDS);
-  Print("Set request-loop period to "+request_collection_period+" (sec)");
+    RequestCollectionLoop, loop_delay, request_collection_period, TimeUnit.SECONDS);
+  Print("Set request-collection-loop period to "+request_collection_period+" (sec)");
+
+  int request_handling_period = client.getRequestHandlingPeriod();
+  ScheduledFuture<?> cb4 = exe.scheduleAtFixedRate(
+    RequestHandlingLoop, loop_delay, request_handling_period, TimeUnit.MILLISECONDS);
+  Print("Set request-handling-loop period to "+request_handling_period+" (msec)");
 
   int server_collection_period = client.getServerLocationCollectionPeriod();
-  ScheduledFuture<?> cb4 = exe.scheduleAtFixedRate(
+  ScheduledFuture<?> cb5 = exe.scheduleAtFixedRate(
     ServerLoop, loop_delay, server_collection_period, TimeUnit.SECONDS);
   Print("Set server-loop period to "+server_collection_period+" (sec)");
 
@@ -473,10 +511,11 @@ public void start(Consumer cb) {
     cb2.cancel(false);
     cb3.cancel(false);
     cb4.cancel(false);
+    cb5.cancel(false);
     exe.shutdown();
     client.end();
     Print("SIMULATION ENDED");
-    cb.accept(true);
+    app_cb.accept(true);
   }, simulation_duration, TimeUnit.SECONDS);
 }
 @ %def start
@@ -486,8 +525,6 @@ public void start(Consumer cb) {
 public void startStatic() {
   Print("SIMULATION STARTED -- STATIC MODE");
 
-  client.setCommunicator(communicator);
-
   world_time = initial_world_time;
   Print("Set world time to "+world_time);
   Print("Set final world time to "+final_world_time+" (sec)");
@@ -496,7 +533,8 @@ public void startStatic() {
     ClockLoop.run();
     EngineLoop.run();
     ServerLoop.run();
-    RequestLoop.run();
+    RequestCollectionLoop.run();
+    RequestHandlingLoop.run();
   }
 
   client.end();
