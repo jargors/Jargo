@@ -1,14 +1,14 @@
 package com.github.jargors;
 import com.github.jargors.gtreeJNI.*;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Arrays;
 public class Tools {
   private G_Tree gtree;
   private boolean flag_gtree_loaded = false;
-  private Map<Integer, int[]> lu_vertices = new HashMap<>();
-  private Map<Integer, Map<Integer, int[]>> lu_edges = new HashMap<>();
-  private Map<Integer, int[]> lu_users = new HashMap<>();
+  private ConcurrentHashMap<Integer, int[]> lu_vertices = new ConcurrentHashMap();
+  private ConcurrentHashMap<Integer,
+      ConcurrentHashMap<Integer, int[]>>    lu_edges    = new ConcurrentHashMap();
+  private ConcurrentHashMap<Integer, int[]> lu_users    = new ConcurrentHashMap();
   private final double CSHIFT = 10000000.0;
     public void loadGTree(String p) {
       try {
@@ -25,13 +25,14 @@ public class Tools {
         System.out.println("Bad path to gtree");
       }
     }
-    public void registerVertices(Map<Integer, int[]> src) {
+    public void registerVertices(ConcurrentHashMap<Integer, int[]> src) {
       lu_vertices = src;
     }
-    public void registerEdges(Map<Integer, Map<Integer, int[]>> src) {
+    public void registerEdges(ConcurrentHashMap<Integer,
+        ConcurrentHashMap<Integer, int[]>> src) {
       lu_edges = src;
     }
-    public void registerUsers(Map<Integer, int[]> src) {
+    public void registerUsers(ConcurrentHashMap<Integer, int[]> src) {
       lu_users = src;
     }
     public int computeHaversine(double lng1, double lat1, double lng2, double lat2) {

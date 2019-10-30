@@ -44,8 +44,7 @@ The preamble declares the package and imports dependencies.
 \nwenddocs{}\nwbegincode{3}\sublabel{NW3zOIuJ-1ANZ96-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1ANZ96-1}}}\moddef{Tools.java preamble~{\nwtagstyle{}\subpageref{NW3zOIuJ-1ANZ96-1}}}\endmoddef\nwused{\\{NW3zOIuJ-2Vh5vZ-1}}
 package com.github.jargors;
 import com.github.jargors.gtreeJNI.*;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Arrays;
 \nwendcode{}\nwbegindocs{4}\nwdocspar
 
@@ -61,9 +60,10 @@ public class Tools \{
 \nwenddocs{}\nwbegincode{7}\sublabel{NW3zOIuJ-aPohW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-aPohW-1}}}\moddef{Member variables~{\nwtagstyle{}\subpageref{NW3zOIuJ-aPohW-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1xm30x-1}}
 private G_Tree gtree;
 private boolean flag_gtree_loaded = false;
-private Map<Integer, int[]> lu_vertices = new HashMap<>();
-private Map<Integer, Map<Integer, int[]>> lu_edges = new HashMap<>();
-private Map<Integer, int[]> lu_users = new HashMap<>();
+private ConcurrentHashMap<Integer, int[]> lu_vertices = new ConcurrentHashMap();
+private ConcurrentHashMap<Integer,
+    ConcurrentHashMap<Integer, int[]>>    lu_edges    = new ConcurrentHashMap();
+private ConcurrentHashMap<Integer, int[]> lu_users    = new ConcurrentHashMap();
 private final double CSHIFT = 10000000.0;
 \nwindexdefn{gtree}{gtree}{NW3zOIuJ-aPohW-1}\nwindexdefn{flag{\char95}gtree{\char95}loaded}{flag:ungtree:unloaded}{NW3zOIuJ-aPohW-1}\nwindexdefn{lu{\char95}vertices}{lu:unvertices}{NW3zOIuJ-aPohW-1}\nwindexdefn{lu{\char95}edges}{lu:unedges}{NW3zOIuJ-aPohW-1}\nwindexdefn{lu{\char95}users}{lu:unusers}{NW3zOIuJ-aPohW-1}\nwindexdefn{CSHIFT}{CSHIFT}{NW3zOIuJ-aPohW-1}\eatline
 \nwidentdefs{\\{{CSHIFT}{CSHIFT}}\\{{flag{\char95}gtree{\char95}loaded}{flag:ungtree:unloaded}}\\{{gtree}{gtree}}\\{{lu{\char95}edges}{lu:unedges}}\\{{lu{\char95}users}{lu:unusers}}\\{{lu{\char95}vertices}{lu:unvertices}}}\nwendcode{}\nwbegindocs{8}\nwdocspar
@@ -109,7 +109,7 @@ public void loadGTree(String p) \{
 \subsection{{\tt{}\protect\nwindexuse{registerVertices}{registerVertices}{NW3zOIuJ-2ZKKW-1}registerVertices}(1)}
 Be mindful, any change to {\tt{}src} will appear in {\tt{}\protect\nwindexuse{lu{\char95}vertices}{lu:unvertices}{NW3zOIuJ-aPohW-1}lu{\char95}vertices}.
 \nwenddocs{}\nwbegincode{13}\sublabel{NW3zOIuJ-2ZKKW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-2ZKKW-1}}}\moddef{Register vertices~{\nwtagstyle{}\subpageref{NW3zOIuJ-2ZKKW-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
-public void registerVertices(Map<Integer, int[]> src) \{
+public void registerVertices(ConcurrentHashMap<Integer, int[]> src) \{
   lu_vertices = src;
 \}
 \nwindexdefn{registerVertices}{registerVertices}{NW3zOIuJ-2ZKKW-1}\eatline
@@ -117,7 +117,8 @@ public void registerVertices(Map<Integer, int[]> src) \{
 \subsection{{\tt{}\protect\nwindexuse{registerEdges}{registerEdges}{NW3zOIuJ-3Nu1Fg-1}registerEdges}(1)}
 Be mindful, any change to {\tt{}src} will appear in {\tt{}\protect\nwindexuse{lu{\char95}edges}{lu:unedges}{NW3zOIuJ-aPohW-1}lu{\char95}edges}.
 \nwenddocs{}\nwbegincode{15}\sublabel{NW3zOIuJ-3Nu1Fg-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-3Nu1Fg-1}}}\moddef{Register edges~{\nwtagstyle{}\subpageref{NW3zOIuJ-3Nu1Fg-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
-public void registerEdges(Map<Integer, Map<Integer, int[]>> src) \{
+public void registerEdges(ConcurrentHashMap<Integer,
+    ConcurrentHashMap<Integer, int[]>> src) \{
   lu_edges = src;
 \}
 \nwindexdefn{registerEdges}{registerEdges}{NW3zOIuJ-3Nu1Fg-1}\eatline
@@ -125,7 +126,7 @@ public void registerEdges(Map<Integer, Map<Integer, int[]>> src) \{
 \subsection{{\tt{}\protect\nwindexuse{registerUsers}{registerUsers}{NW3zOIuJ-UKHEr-1}registerUsers}(1)}
 Be mindful, any change to {\tt{}src} will appear in {\tt{}\protect\nwindexuse{lu{\char95}users}{lu:unusers}{NW3zOIuJ-aPohW-1}lu{\char95}users}.
 \nwenddocs{}\nwbegincode{17}\sublabel{NW3zOIuJ-UKHEr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-UKHEr-1}}}\moddef{Register users~{\nwtagstyle{}\subpageref{NW3zOIuJ-UKHEr-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1eKCCy-1}}
-public void registerUsers(Map<Integer, int[]> src) \{
+public void registerUsers(ConcurrentHashMap<Integer, int[]> src) \{
   lu_users = src;
 \}
 \nwindexdefn{registerUsers}{registerUsers}{NW3zOIuJ-UKHEr-1}\eatline

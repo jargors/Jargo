@@ -44,8 +44,7 @@ The preamble declares the package and imports dependencies.
 <<Tools.java preamble>>=
 package com.github.jargors;
 import com.github.jargors.gtreeJNI.*;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Arrays;
 @
 
@@ -61,9 +60,10 @@ public class Tools {
 <<Member variables>>=
 private G_Tree gtree;
 private boolean flag_gtree_loaded = false;
-private Map<Integer, int[]> lu_vertices = new HashMap<>();
-private Map<Integer, Map<Integer, int[]>> lu_edges = new HashMap<>();
-private Map<Integer, int[]> lu_users = new HashMap<>();
+private ConcurrentHashMap<Integer, int[]> lu_vertices = new ConcurrentHashMap();
+private ConcurrentHashMap<Integer,
+    ConcurrentHashMap<Integer, int[]>>    lu_edges    = new ConcurrentHashMap();
+private ConcurrentHashMap<Integer, int[]> lu_users    = new ConcurrentHashMap();
 private final double CSHIFT = 10000000.0;
 @ %def gtree flag_gtree_loaded lu_vertices lu_edges lu_users CSHIFT
 
@@ -109,7 +109,7 @@ public void loadGTree(String p) {
 \subsection{[[registerVertices]](1)}
 Be mindful, any change to [[src]] will appear in [[lu_vertices]].
 <<Register vertices>>=
-public void registerVertices(Map<Integer, int[]> src) {
+public void registerVertices(ConcurrentHashMap<Integer, int[]> src) {
   lu_vertices = src;
 }
 @ %def registerVertices
@@ -117,7 +117,8 @@ public void registerVertices(Map<Integer, int[]> src) {
 \subsection{[[registerEdges]](1)}
 Be mindful, any change to [[src]] will appear in [[lu_edges]].
 <<Register edges>>=
-public void registerEdges(Map<Integer, Map<Integer, int[]>> src) {
+public void registerEdges(ConcurrentHashMap<Integer,
+    ConcurrentHashMap<Integer, int[]>> src) {
   lu_edges = src;
 }
 @ %def registerEdges
@@ -125,7 +126,7 @@ public void registerEdges(Map<Integer, Map<Integer, int[]>> src) {
 \subsection{[[registerUsers]](1)}
 Be mindful, any change to [[src]] will appear in [[lu_users]].
 <<Register users>>=
-public void registerUsers(Map<Integer, int[]> src) {
+public void registerUsers(ConcurrentHashMap<Integer, int[]> src) {
   lu_users = src;
 }
 @ %def registerUsers
