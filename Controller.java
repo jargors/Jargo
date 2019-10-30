@@ -32,6 +32,7 @@ public class Controller {
   private Runnable ClockLoop = () -> {
     communicator.setSimulationWorldTime(++world_time);
     storage.printSQLDriverStatistics();
+    Print((world_time % 2 == 0 ? "*ping*" : "*pong*"));
   };
   private Runnable EngineLoop = () -> { };
   private Runnable RequestLoop = () -> {
