@@ -198,7 +198,11 @@ private Runnable RequestCollectionLoop = () -> \{
 \nwenddocs{}\nwbegincode{31}\sublabel{NW2ZDXo8-183plv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-183plv-1}}}\moddef{Definition of request handling loop~{\nwtagstyle{}\subpageref{NW2ZDXo8-183plv-1}}}\endmoddef\nwused{\\{NW2ZDXo8-2e0Sfa-1}}
 private Runnable RequestHandlingLoop = () -> \{
   long A0 = System.currentTimeMillis();
-  client.notifyNew();
+  try \{
+    client.notifyNew();
+  \} catch (RuntimeException e) \{
+    System.out.println("client.notifyNew() exception: "+e.toString());
+  \}
   long A1 = System.currentTimeMillis();
   Print("Time RHL: "+(A1 - A0)+" ms");
 \};

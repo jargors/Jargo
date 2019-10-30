@@ -59,7 +59,11 @@ public class Controller {
   };
   private Runnable RequestHandlingLoop = () -> {
     long A0 = System.currentTimeMillis();
-    client.notifyNew();
+    try {
+      client.notifyNew();
+    } catch (RuntimeException e) {
+      System.out.println("client.notifyNew() exception: "+e.toString());
+    }
     long A1 = System.currentTimeMillis();
     Print("Time RHL: "+(A1 - A0)+" ms");
   };
