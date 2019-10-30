@@ -59,10 +59,12 @@ package com.github.jargors;
 @
 <<Communicator.java preamble>>=
 import com.github.jargors.Storage;
+import com.github.jargors.Controller;
 import java.util.function.Supplier;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 @
 
 \subsection{Class Definition}
@@ -81,6 +83,7 @@ public class Communicator {
 We define a [[Storage]] and a container for the simulation world time.
 <<[[Communicator]] member variables>>=
 private Storage storage;
+private Controller controller;
 private int world_time = 0;
 private boolean DEBUG = false;
 @ %def storage world_time DEBUG
@@ -97,10 +100,12 @@ public Communicator() { }
 <<[[Communicator]] public methods>>=
 <<Set debug>>
 <<Set storage>>
+<<Set controller>>
 <<Set/get simulation world time>>
 <<Get reference to vertices cache>>
 <<Get reference to edges cache>>
 <<Get reference to users cache>>
+<<Return request to queue>>
 @
 \hi{Write Methods.}
 <<[[Communicator]] public methods>>=
@@ -138,6 +143,13 @@ public void setStorage(Storage src) {
 }
 @ %def setStorage
 
+\subsubsection{[[setController]](1)}
+<<Set controller>>=
+public void setController(Controller src) {
+  controller = src;
+}
+@ %def setController
+
 \subsubsection{[[setSimulationWorldTime]](1)}
 We depend on the controller to tell the simulation interface about the current
 world time.
@@ -156,24 +168,32 @@ public int getSimulationWorldTime() {
 
 \subsubsection{[[getReferenceVerticesCache]](0)}
 <<Get reference to vertices cache>>=
-public final Map<Integer, int[]> getReferenceVerticesCache() {
+public final ConcurrentHashMap<Integer, int[]> getReferenceVerticesCache() {
   return storage.getReferenceVerticesCache();
 }
 @ %def getReferenceVerticesCache
 
 \subsubsection{[[getReferenceEdgesCache]](0)}
 <<Get reference to edges cache>>=
-public final Map<Integer, Map<Integer, int[]>> getReferenceEdgesCache() {
+public final ConcurrentHashMap<Integer,
+    ConcurrentHashMap<Integer, int[]>> getReferenceEdgesCache() {
   return storage.getReferenceEdgesCache();
 }
 @ %def getReferenceEdgesCache
 
 \subsubsection{[[getReferenceUsersCache]](0)}
 <<Get reference to users cache>>=
-public final Map<Integer, int[]> getReferenceUsersCache() {
+public final ConcurrentHashMap<Integer, int[]> getReferenceUsersCache() {
   return storage.getReferenceUsersCache();
 }
 @ %def getReferenceUsersCache
+
+\subsubsection{[[returnRequest]](1)}
+<<Return request to queue>>=
+public void returnRequest(int rid) {
+  controller.returnRequest(rid);
+}
+@ %def returnRequest
 
 \subsection{Write Methods}
 \label{sec:write-methods}

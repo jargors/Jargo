@@ -1,11 +1,14 @@
 package com.github.jargors;
 import com.github.jargors.Storage;
+import com.github.jargors.Controller;
 import java.util.function.Supplier;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 public class Communicator {
   private Storage storage;
+  private Controller controller;
   private int world_time = 0;
   private boolean DEBUG = false;
   public Communicator() { }
@@ -15,20 +18,27 @@ public class Communicator {
   public void setStorage(Storage src) {
     storage = src;
   }
+  public void setController(Controller src) {
+    controller = src;
+  }
   public void setSimulationWorldTime(int t) {
     world_time = t;
   }
   public int getSimulationWorldTime() {
     return world_time;
   }
-  public final Map<Integer, int[]> getReferenceVerticesCache() {
+  public final ConcurrentHashMap<Integer, int[]> getReferenceVerticesCache() {
     return storage.getReferenceVerticesCache();
   }
-  public final Map<Integer, Map<Integer, int[]>> getReferenceEdgesCache() {
+  public final ConcurrentHashMap<Integer,
+      ConcurrentHashMap<Integer, int[]>> getReferenceEdgesCache() {
     return storage.getReferenceEdgesCache();
   }
-  public final Map<Integer, int[]> getReferenceUsersCache() {
+  public final ConcurrentHashMap<Integer, int[]> getReferenceUsersCache() {
     return storage.getReferenceUsersCache();
+  }
+  public void returnRequest(int rid) {
+    controller.returnRequest(rid);
   }
   public boolean updateServerRoute(int sid, int[] route, int[] sched) {
     boolean success = false;
