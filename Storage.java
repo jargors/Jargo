@@ -1,4 +1,11 @@
 package com.github.jargors;
+import com.github.jargors.exceptions.DuplicateVertexException;
+import com.github.jargors.exceptions.DuplicateEdgeException;
+import com.github.jargors.exceptions.DuplicateUserException;
+import com.github.jargors.exceptions.EdgeNotFoundException;
+import com.github.jargors.exceptions.UserNotFoundException;
+import com.github.jargors.exceptions.VertexNotFoundException;
+import com.github.jargors.Tools;
 import java.sql.CallableStatement;   import java.sql.Connection;
 import java.sql.DriverManager;       import java.sql.PreparedStatement;
 import java.sql.ResultSet;           import java.sql.SQLException;
@@ -34,222 +41,166 @@ public class Storage {
   private PoolableConnectionFactory       poolableconnection_factory;
   private ObjectPool<PoolableConnection>  pool;
   private PoolingDriver                   driver;
-  private final String  VERSION = "1.0.0";
-  private       boolean DEBUG   = false;
   public Storage() {
-    Print("Initialize Storage Interface "+VERSION);
     try {
-      setupDriver();
-      PSInit();
-    } catch (RuntimeException e) {
+      this.setupDriver();
+    } catch (SQLException e) {
+      System.err.println("Storage.Storage(): "+"Encountered catastrophic exception.");
+      Tools.PrintSQLException(e);
+      System.exit(1);
+    } catch (ClassNotFoundException e) {
+      System.err.println("Storage.Storage(): "+"Encountered catastrophic exception.");
       e.printStackTrace();
+      System.exit(1);
     }
+    this.PSInit();
   }
-  public int[] DBQuery(String sql, int ncols) throws RuntimeException {
+  public int[] DBQuery(String sql, int ncols) throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    Statement stmt = conn.createStatement(
-      ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-    ResultSet res = stmt.executeQuery(sql);
-    if (res.last()) {
-      output = new int[(ncols*res.getRow())];
-      res.first();
-      do {
-        for (int j = 1; j <= ncols; j++) {
-          output[((res.getRow() - 1)*ncols + (j - 1))] = res.getInt(j);
-        }
-      } while (res.next());
-    }
-    Print("Close connection "+conn.toString());
-    conn.close();
-      Print("Close connection "+conn.toString());
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      Statement stmt = conn.createStatement(
+        ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+      ResultSet res = stmt.executeQuery(sql);
+      if (res.last()) {
+        output = new int[(ncols*res.getRow())];
+        res.first();
+        do {
+          for (int j = 1; j <= ncols; j++) {
+            output[((res.getRow() - 1)*ncols + (j - 1))] = res.getInt(j);
+          }
+        } while (res.next());
+      }
       conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryCountVertices() throws RuntimeException {
+  public int[] DBQueryCountVertices() throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S62", 1);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S62", 1);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryCountEdges() throws RuntimeException {
+  public int[] DBQueryCountEdges() throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S63", 1);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S63", 1);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public final int[] DBQueryVertex(int v) throws RuntimeException {
+  public final int[] DBQueryVertex(int v)
+  throws VertexNotFoundException, SQLException {
+    if (!lu_vertices.containsKey(v)) {
+      throw new VertexNotFoundException("Vertex "+v+" not found.");
+    }
     return lu_vertices.get(v);
   }
-  public int[] DBQueryAllVertices() throws RuntimeException {
+  public int[] DBQueryAllVertices() throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S136", 3);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S136", 3);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public final int[] DBQueryEdge(int v1, int v2) throws RuntimeException {
+  public final int[] DBQueryEdge(int v1, int v2)
+  throws EdgeNotFoundException, SQLException {
+    if (!(lu_edges.containsKey(v1) && lu_edges.get(v1).containsKey(v2))) {
+      throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
+    }
     return lu_edges.get(v1).get(v2);
   }
-  public int[] DBQueryAllEdges() throws RuntimeException {
+  public int[] DBQueryAllEdges() throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S137", 4);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S137", 4);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryStatisticsEdges() throws RuntimeException {
+  public int[] DBQueryStatisticsEdges() throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S65", 6);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S65", 6);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryMBR() throws RuntimeException {
+  public int[] DBQueryMBR() throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S64", 4);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S64", 4);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryCountServers() throws RuntimeException {
+  public int[] DBQueryCountServers() throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S66", 1);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S66", 1);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryCountRequests() throws RuntimeException {
+  public int[] DBQueryCountRequests() throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S67", 1);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S67", 1);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryAllUsers() throws RuntimeException {
+  public int[] DBQueryAllUsers() throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S141", 7);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S141", 7);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public final int[] DBQueryUser(int uid) throws RuntimeException {
+  public final int[] DBQueryUser(int uid)
+  throws UserNotFoundException, SQLException {
+    if (!lu_users.containsKey(uid)) {
+      throw new UserNotFoundException("User "+uid+" not found.");
+    }
     return lu_users.get(uid);
   }
-  public int[] DBQueryRequestStatus(int rid, int t) throws RuntimeException {
+  public int[] DBQueryRequestStatus(int rid, int t) throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S133", 1, rid, t);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S133", 1, rid, t);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryQueuedRequests(int t) throws RuntimeException {
+  public int[] DBQueryRequestIsAssigned(int rid) throws SQLException {
+    int[] output = new int[] { };
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S148", 1, rid);
+    } catch (SQLException e) {
+      throw e;
+    }
+    return output;
+  }
+  public int[] DBQueryQueuedRequests(int t) throws SQLException {
     int[] output = new int[] { };
     int[] temp1 = new int[] { };
     int j = 0;
-    try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
       output = DBFetch(conn, "S143", 7, t, t, REQUEST_TIMEOUT);
       temp1 = new int[output.length];
       for (int i = 0; i < (output.length - 6); i += 7) {
@@ -264,14 +215,7 @@ public class Storage {
           j += 7;
         }
       }
-      Print("Close connection "+conn.toString());
       conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
-    }
     int[] temp2 = new int[j];
     for (int i = 0; i < j; i += 7) {
       temp2[(i + 0)] = temp1[(i + 0)];
@@ -284,48 +228,32 @@ public class Storage {
     }
     return temp2;
   }
-  public int[] DBQueryActiveServers(int t) throws RuntimeException {
+  public int[] DBQueryActiveServers(int t) throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S134", 1, t, t, t);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S134", 1, t, t, t);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryServerLocationsAll(int t) throws RuntimeException {
+  public int[] DBQueryServerLocationsAll(int t) throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S59", 3, t, t, t, t);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S59", 3, t, t, t, t);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryServerLocationsActive(int t) throws RuntimeException {
+  public int[] DBQueryServerLocationsActive(int t) throws SQLException {
     int[] output = new int[] { };
     int[] temp1 = new int[] { };
     int[] temp2 = new int[] { };
     int j = 0;
     int sid = 0;
     int te = 0;
-    try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
       temp1 = DBFetch(conn, "S134", 2, t, t, t);      // <-- 10 ms/call
       output = new int[(3*(temp1.length/2))];
       for (int i = 0; i < temp1.length - 1; i += 2) {
@@ -340,69 +268,40 @@ public class Storage {
         j += 3;
       }
       conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    return output;
+  }
+  public int[] DBQueryServerRoute(int sid) throws SQLException {
+    int[] output = new int[] { };
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S60", 2, sid);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryServerRoute(int sid) throws RuntimeException {
+  public int[] DBQueryServerSchedule(int sid) throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S60", 2, sid);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S61", 4, sid);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryServerSchedule(int sid) throws RuntimeException {
+  public int[] DBQueryServerRemainingRoute(int sid, int t) throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S61", 4, sid);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
-    }
-    return output;
-  }
-  public int[] DBQueryServerRemainingRoute(int sid, int t) throws RuntimeException {
-    int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S129", 2, sid, t);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S129", 2, sid, t);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
   public int[] DBQueryServerRemainingSchedule(int sid, int t)
-  throws RuntimeException {
+  throws SQLException {
     int[] output = new int[] { };
     int[] temp = new int[] { };
-    try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
       temp = DBFetch(conn, "S144", 3, sid, t);
       output = new int[4*temp.length/3 + 4];
       int j = 0;
@@ -418,580 +317,358 @@ public class Storage {
       output[(j + 1)] = temp[1];
       output[(j + 2)] = sid;
       output[(j + 3)] = 0;
-      Print("Close connection "+conn.toString());
       conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
-    }
     return output;
   }
   public int[] DBQueryServerRemainingDistance(int sid, int t)
-  throws RuntimeException {
+  throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S142", 1, sid, t);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S142", 1, sid, t);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
   public int[] DBQueryServerRemainingDuration(int sid, int t)
-  throws RuntimeException {
+  throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S127", 1, sid, t);
-    output[0] -= t;
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S127", 1, sid, t);
+      output[0] -= t;
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryServerMaxLoad(int sid, int t) throws RuntimeException {
+  public int[] DBQueryServerMaxLoad(int sid, int t) throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S73", 1, sid, t);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S73", 1, sid, t);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryServerPendingAssignments(int sid, int t) throws RuntimeException {
+  public int[] DBQueryServerPendingAssignments(int sid, int t) throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S100", 1, t, sid);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S100", 1, t, sid);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryServerCompletedAssignments(int sid, int t) throws RuntimeException {
+  public int[] DBQueryServerCompletedAssignments(int sid, int t) throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S101", 1, t, sid);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S101", 1, t, sid);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryServiceRate() throws RuntimeException {
+  public int[] DBQueryServiceRate() throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S102", 1);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S102", 1);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryBaseDistanceTotal() throws RuntimeException {
+  public int[] DBQueryBaseDistanceTotal() throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S103", 1);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S103", 1);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryServerBaseDistanceTotal() throws RuntimeException {
+  public int[] DBQueryServerBaseDistanceTotal() throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S110", 1);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S110", 1);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryRequestBaseDistanceTotal() throws RuntimeException {
+  public int[] DBQueryRequestBaseDistanceTotal() throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S111", 1);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S111", 1);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryRequestBaseDistanceUnassigned() throws RuntimeException {
+  public int[] DBQueryRequestBaseDistanceUnassigned() throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S138", 1);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S138", 1);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryServerTravelDistance(int sid) throws RuntimeException {
+  public int[] DBQueryServerTravelDistance(int sid) throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S104", 1, sid);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S104", 1, sid);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryServerTravelDistanceTotal() throws RuntimeException {
+  public int[] DBQueryServerTravelDistanceTotal() throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S105", 1);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S105", 1);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryServerCruisingDistance(int sid) throws RuntimeException {
+  public int[] DBQueryServerCruisingDistance(int sid) throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S106", 1, sid);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S106", 1, sid);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryServerCruisingDistanceTotal() throws RuntimeException {
+  public int[] DBQueryServerCruisingDistanceTotal() throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S107", 1);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S107", 1);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryServerServiceDistance(int sid) throws RuntimeException {
+  public int[] DBQueryServerServiceDistance(int sid) throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S108", 1, sid);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S108", 1, sid);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryServerServiceDistanceTotal() throws RuntimeException {
+  public int[] DBQueryServerServiceDistanceTotal() throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S109", 1);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S109", 1);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryRequestDetourDistance(int rid) throws RuntimeException {
+  public int[] DBQueryRequestDetourDistance(int rid) throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S112", 1, rid);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S112", 1, rid);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryRequestDetourDistanceTotal() throws RuntimeException {
+  public int[] DBQueryRequestDetourDistanceTotal() throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S113", 1);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S113", 1);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryRequestTransitDistance(int rid) throws RuntimeException {
+  public int[] DBQueryRequestTransitDistance(int rid) throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S114", 1, rid);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S114", 1, rid);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryRequestTransitDistanceTotal() throws RuntimeException {
+  public int[] DBQueryRequestTransitDistanceTotal() throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S115", 1);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S115", 1);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryServerTravelDuration(int sid) throws RuntimeException {
+  public int[] DBQueryServerTravelDuration(int sid) throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S116", 1, sid);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S116", 1, sid);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryServerTravelDurationTotal() throws RuntimeException {
+  public int[] DBQueryServerTravelDurationTotal() throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S117", 1);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S117", 1);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryRequestPickupDuration(int rid) throws RuntimeException {
+  public int[] DBQueryRequestPickupDuration(int rid) throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S118", 1, rid);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S118", 1, rid);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryRequestPickupDurationTotal() throws RuntimeException {
+  public int[] DBQueryRequestPickupDurationTotal() throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S119", 1);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S119", 1);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryRequestTransitDuration(int rid) throws RuntimeException {
+  public int[] DBQueryRequestTransitDuration(int rid) throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S120", 1, rid);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S120", 1, rid);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryRequestTransitDurationTotal() throws RuntimeException {
+  public int[] DBQueryRequestTransitDurationTotal() throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S121", 1);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S121", 1);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryRequestTravelDuration(int rid) throws RuntimeException {
+  public int[] DBQueryRequestTravelDuration(int rid) throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S122", 1, rid);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S122", 1, rid);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryRequestTravelDurationTotal() throws RuntimeException {
+  public int[] DBQueryRequestTravelDurationTotal() throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S123", 1);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S123", 1);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryRequestDepartureTime(int rid) throws RuntimeException {
+  public int[] DBQueryRequestDepartureTime(int rid) throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S124", 1, rid);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S124", 1, rid);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryServerDepartureTime(int sid) throws RuntimeException {
+  public int[] DBQueryServerDepartureTime(int sid) throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S125", 1, sid);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S125", 1, sid);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryRequestArrivalTime(int rid) throws RuntimeException {
+  public int[] DBQueryRequestArrivalTime(int rid) throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S126", 1, rid);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S126", 1, rid);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public int[] DBQueryServerArrivalTime(int sid) throws RuntimeException {
+  public int[] DBQueryServerArrivalTime(int sid) throws SQLException {
     int[] output = new int[] { };
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-    output = DBFetch(conn, "S127", 1, sid);
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      output = DBFetch(conn, "S127", 1, sid);
+    } catch (SQLException e) {
+      throw e;
     }
     return output;
   }
-  public void DBAddNewVertex(int v, int lng, int lat) throws RuntimeException {
-    if (!lu_vertices.containsKey(v)) {
+  public void DBAddNewVertex(int v, int lng, int lat)
+  throws DuplicateVertexException, SQLException {
+    if (lu_vertices.containsKey(v)) {
+      throw new DuplicateVertexException("Vertex "+v+" already exists.");
+    }
+    try {
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
       try {
-        Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-        Print("Open connection "+conn.toString());
         PreparedStatement pS0 = PS(conn, "S0");
         PSAdd(pS0, v, lng, lat);
         PSSubmit(pS0);
         conn.commit();
-        Print("Close connection "+conn.toString());
+      } catch (SQLException e) {
+        conn.rollback();
+        throw e;
+      } finally {
         conn.close();
-        lu_vertices.put(v, new int[] { lng, lat });
       }
-      catch (SQLException e1) {
-        printSQLException(e1);
-        DBSaveBackup(DERBY_DUMPNAME);
-        throw new RuntimeException("database failure");
-      }
+    } catch (SQLException e) {
+      throw e;
     }
+    lu_vertices.put(v, new int[] { lng, lat });
   }
-  public void DBAddNewEdge(int v1, int v2, int dd, int nu) throws RuntimeException {
+  public void DBAddNewEdge(int v1, int v2, int dd, int nu)
+  throws DuplicateEdgeException, SQLException {
+    if (lu_edges.containsKey(v1) && lu_edges.get(v1).containsKey(v2)) {
+      throw new DuplicateEdgeException("Edge ("+v1+", "+v2+") already exists.");
+    }
     if (!lu_edges.containsKey(v1)) {
       lu_edges.put(v1, new ConcurrentHashMap());
     }
-    if (!lu_edges.get(v1).containsKey(v2)) {
+    try {
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
       try {
-        Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-        Print("Open connection "+conn.toString());
         PreparedStatement pS1 = PS(conn, "S1");
         PSAdd(pS1, v1, v2, dd, nu);
         PSSubmit(pS1);
         conn.commit();
-        Print("Close connection "+conn.toString());
+      } catch (SQLException e) {
+        conn.rollback();
+        throw e;
+      } finally {
         conn.close();
-        lu_edges.get(v1).put(v2, new int[] { dd, nu });
       }
-      catch (SQLException e1) {
-        printSQLException(e1);
-        DBSaveBackup(DERBY_DUMPNAME);
-        throw new RuntimeException("database failure");
-      }
+    } catch (SQLException e) {
+      throw e;
     }
+    lu_edges.get(v1).put(v2, new int[] { dd, nu });
   }
-  public void DBAddNewRequest(int[] u) throws RuntimeException {
-    if (!lu_users.containsKey(u[0])) {
+  public void DBAddNewRequest(int[] u)
+  throws DuplicateUserException, SQLException {
+    int uid = u[0];
+    if (lu_users.containsKey(uid)) {
+      throw new DuplicateUserException("User "+uid+" already exists.");
+    }
+    try {
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
       try {
-        Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-        Print("Open connection "+conn.toString());
-        int uid = u[0];
         PreparedStatement pS2 = PS(conn, "S2");
         PreparedStatement pS3 = PS(conn, "S3");
         PreparedStatement pS4 = PS(conn, "S4");
@@ -1009,24 +686,27 @@ public class Storage {
         PSAdd(pS9, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
         PSSubmit(pS9);
         conn.commit();
-        Print("Close connection "+conn.toString());
+      } catch (SQLException e) {
+        conn.rollback();
+        throw e;
+      } finally {
         conn.close();
-        lu_users.put(u[0], u.clone());
-        lu_rstatus.put(u[0], false);
       }
-      catch (SQLException e1) {
-        printSQLException(e1);
-        DBSaveBackup(DERBY_DUMPNAME);
-        throw new RuntimeException("database failure");
-      }
+    } catch (SQLException e) {
+      throw e;
     }
+    lu_users.put(u[0], u.clone());
+    lu_rstatus.put(u[0], false);
   }
-  public void DBAddNewServer(int[] u, int[] route) throws RuntimeException {
+  public void DBAddNewServer(int[] u, int[] route)
+  throws DuplicateUserException, EdgeNotFoundException, SQLException {
     int uid = u[0];
-    if (!lu_users.containsKey(uid)) {
+    if (lu_users.containsKey(uid)) {
+      throw new DuplicateUserException("User "+uid+" already exists.");
+    }
+    try {
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
       try {
-        Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-        Print("Open connection "+conn.toString());
         int se = u[2];
         PreparedStatement pS2 = PS(conn, "S2");
         PreparedStatement pS3 = PS(conn, "S3");
@@ -1044,17 +724,17 @@ public class Storage {
         PreparedStatement pS8 = PS(conn, "S8");
         PSAdd(pS8, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
         PSSubmit(pS8);
-        int[] output = new int[] { };
         PreparedStatement pS10 = PS(conn, "S10");
         for (int i = 0; i < (route.length - 3); i += 2) {
-          int t1 = route[i];
+          int t1 = route[(i + 0)];
           int v1 = route[(i + 1)];
           int t2 = route[(i + 2)];
           int v2 = route[(i + 3)];
+          if (!(lu_edges.containsKey(v1) && lu_edges.get(v1).containsKey(v2))) {
+            throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
+          }
           int dd = lu_edges.get(v1).get(v2)[0];
           int nu = lu_edges.get(v1).get(v2)[1];
-          Print("Issue INSERT INTO W VALUES ("+uid+", "+se+", "+t1+", "+v1+", "+t2+", "
-            +v2+", "+dd+", "+nu+")");
           PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
         }
         PSSubmit(pS10);
@@ -1070,92 +750,207 @@ public class Storage {
             null, null, null, null, null, 1);
         PSSubmit(pS14);
         conn.commit();
-        Print("Close connection "+conn.toString());
+      } catch (SQLException e) {
+        conn.rollback();
+        throw e;
+      } finally {
         conn.close();
-        lu_users.put(uid, u.clone());
       }
-      catch (SQLException e1) {
-        printSQLException(e1);
-        DBSaveBackup(DERBY_DUMPNAME);
-        throw new RuntimeException("database failure");
-      }
+    } catch (SQLException e) {
+      throw e;
     }
+    lu_users.put(uid, u.clone());
   }
-  public void DBUpdateEdgeSpeed(int v1, int v2, int nu) throws RuntimeException {
+  public void DBUpdateEdgeSpeed(int v1, int v2, int nu)
+  throws EdgeNotFoundException, SQLException {
+    if (!(lu_edges.containsKey(v1) && lu_edges.get(v1).containsKey(v2))) {
+      throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
+    }
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-      PreparedStatement pS15 = PS(conn, "S15");
-      PreparedStatement pS131 = PS(conn, "S131");
-      PSAdd(pS15, nu, v1, v2);
-      PSAdd(pS131, nu, v1, v2);
-      PSSubmit(pS15, pS131);
-      conn.commit();
-      Print("Close connection "+conn.toString());
-      conn.close();
-      int dd = lu_edges.get(v1).get(v2)[0];
-      lu_edges.get(v1).put(v2, new int[] { dd, nu });
+      try {
+        PreparedStatement pS15 = PS(conn, "S15");
+        PreparedStatement pS131 = PS(conn, "S131");
+        PSAdd(pS15, nu, v1, v2);
+        PSAdd(pS131, nu, v1, v2);
+        PSSubmit(pS15, pS131);
+        conn.commit();
+      } catch (SQLException e) {
+        conn.rollback();
+        throw e;
+      } finally {
+        conn.close();
+      }
+    } catch (SQLException e) {
+      throw e;
     }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
-    }
+    int dd = lu_edges.get(v1).get(v2)[0];
+    lu_edges.get(v1).put(v2, new int[] { dd, nu });
   }
   public void DBUpdateServerRoute(int sid, int[] route, int[] sched)
-  throws RuntimeException {
+  throws UserNotFoundException, EdgeNotFoundException, SQLException {
+    if (!lu_users.containsKey(sid)) {
+      throw new UserNotFoundException("User "+sid+" not found.");
+    }
     int[] output = new int[] { };
     int se, sq;
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-      sq = lu_users.get(sid)[1];
-      se = lu_users.get(sid)[2];
-      Print("B1");
-      PreparedStatement pS76 = PS(conn, "S76");
-      PSAdd(pS76, sid, route[0]);
-      Print("Issue DELETE FROM W WHERE sid="+sid+" AND t2>"+route[0]);
-      PSSubmit(pS76);
-      Print("B2");
-      int uid = sid;
-      PreparedStatement pS10 = PS(conn, "S10");
-      for (int i = 0; i < (route.length - 3); i += 2) {
-        int t1 = route[i];
-        int v1 = route[(i + 1)];
-        int t2 = route[(i + 2)];
-        int v2 = route[(i + 3)];
-        int dd = lu_edges.get(v1).get(v2)[0];
-        int nu = lu_edges.get(v1).get(v2)[1];
-        Print("Issue INSERT INTO W VALUES ("+uid+", "+se+", "+t1+", "+v1+", "+t2+", "
-          +v2+", "+dd+", "+nu+")");
-        PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
+      try {
+        sq = lu_users.get(sid)[1];
+        se = lu_users.get(sid)[2];
+        PreparedStatement pS76 = PS(conn, "S76");
+        PSAdd(pS76, sid, route[0]);
+        PSSubmit(pS76);
+        int uid = sid;
+        PreparedStatement pS10 = PS(conn, "S10");
+        for (int i = 0; i < (route.length - 3); i += 2) {
+          int t1 = route[(i + 0)];
+          int v1 = route[(i + 1)];
+          int t2 = route[(i + 2)];
+          int v2 = route[(i + 3)];
+          if (!(lu_edges.containsKey(v1) && lu_edges.get(v1).containsKey(v2))) {
+            throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
+          }
+          int dd = lu_edges.get(v1).get(v2)[0];
+          int nu = lu_edges.get(v1).get(v2)[1];
+          PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
+        }
+        PSSubmit(pS10);
+        PreparedStatement pS77 = PS(conn, "S77");
+        PreparedStatement pS139 = PS(conn, "S139");
+        int te = route[(route.length - 2)];
+        int ve = route[(route.length - 1)];
+        PSAdd(pS77, te, ve, sid);
+        PSAdd(pS139, te, sid);
+        PSSubmit(pS77, pS139);
+        if (sched.length > 0) {
+          Map<Integer, int[]> cache = new HashMap<>();
+          PreparedStatement pS82 = PS(conn, "S82");
+          PreparedStatement pS83 = PS(conn, "S83");
+          PreparedStatement pS84 = PS(conn, "S84");
+          for (int j = 0; j < (sched.length - 2); j += 3) {
+            int tj = sched[(j + 0)];
+            int vj = sched[(j + 1)];
+            int Lj = sched[(j + 2)];
+            if (Lj != sid) {
+              PSAdd(pS82, tj, vj, Lj);
+              PSAdd(pS83, tj, vj, Lj);
+              PSAdd(pS84, tj, vj, Lj);
+            }
+          }
+          PSSubmit(pS82, pS83, pS84);
+          PreparedStatement pS140 = PS(conn, "S140");
+          for (int j = 0; j < (sched.length - 2); j += 3) {
+            int Lj = sched[(j + 2)];
+            if (Lj != sid) {
+              int rq, tp, td;
+              if (!cache.containsKey(Lj)) {
+                rq = DBFetch(conn, "S85", 1, Lj)[0];
+                output = DBFetch(conn, "S86", 2, Lj);
+                tp = output[0];
+                td = output[1];
+                cache.put(Lj, new int[] { rq, tp, td });
+                PSAdd(pS140, tp, td, Lj);
+              }
+            }
+          }
+          PSSubmit(pS140);
+          int t1, q1, o1;
+          if (route[0] == 0) {
+            t1 = 0;
+            q1 = sq;
+            o1 = 1;
+          } else {
+            output = DBFetch(conn, "S87", 3, sid, route[0]);
+            t1 = output[0];
+            q1 = output[1];
+            o1 = output[2];
+          }
+          PreparedStatement pS80 = PS(conn, "S80");
+          PSAdd(pS80, sid, route[0]);
+          PSSubmit(pS80);
+          PreparedStatement pS14 = PS(conn, "S14");
+          for (int j = 0; j < (sched.length - 2); j += 3) {
+            int t2 = sched[(j + 0)];
+            int v2 = sched[(j + 1)];
+            int Lj = sched[(j + 2)];
+            if (Lj != sid) {
+              int[] qpd = cache.get(Lj);
+              int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
+              int o2 = o1 + 1;
+              PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
+                    qpd[0], qpd[1], qpd[2], o1, o2);
+              t1 = t2;
+              q1 = q2;
+              o1 = o2;
+            }
+          }
+          PSSubmit(pS14);
+        }
+        conn.commit();
+      } catch (SQLException e) {
+        conn.rollback();
+        throw e;
+      } finally {
+        conn.close();
       }
-      PSSubmit(pS10);
-      Print("B3");
-      PreparedStatement pS77 = PS(conn, "S77");
-      PreparedStatement pS139 = PS(conn, "S139");
-      int te = route[(route.length - 2)];
-      int ve = route[(route.length - 1)];
-      PSAdd(pS77, te, ve, sid);
-      PSAdd(pS139, te, sid);
-      Print("Issue UPDATE CW SET te="+te+", ve="+ve+" WHERE sid="+sid);
-      Print("Issue UPDATE CPD SET te="+te+" WHERE sid="+sid);
-      PSSubmit(pS77, pS139);
-      Print("B4");
-      if (sched.length > 0) {
-        Map<Integer, int[]> cache = new HashMap<>();
-        int bound = (sched.length/3);
+    } catch (SQLException e) {
+      throw e;
+    }
+  }
+  public void DBUpdateServerAddToSchedule(int sid, int[] route, int[] sched, int[] rid)
+  throws UserNotFoundException, EdgeNotFoundException, SQLException {
+    if (!lu_users.containsKey(sid)) {
+      throw new UserNotFoundException("User "+sid+" not found.");
+    }
+    for (int r : rid) {
+      if (!lu_users.containsKey(r)) {
+        throw new UserNotFoundException("User "+r+" not found.");
+      }
+    }
+    int[] output = new int[] { };
+    int se, sq;
+    Map<Integer, int[]> cache  = new HashMap<>();
+    Map<Integer, int[]> cache2 = new HashMap<>();
+    try {
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      try {
+        sq = lu_users.get(sid)[1];
+        se = lu_users.get(sid)[2];
+        PreparedStatement pS76 = PS(conn, "S76");
+        PSAdd(pS76, sid, route[0]);
+        PSSubmit(pS76);
+        int uid = sid;
+        PreparedStatement pS10 = PS(conn, "S10");
+        for (int i = 0; i < (route.length - 3); i += 2) {
+          int t1 = route[(i + 0)];
+          int v1 = route[(i + 1)];
+          int t2 = route[(i + 2)];
+          int v2 = route[(i + 3)];
+          if (!(lu_edges.containsKey(v1) && lu_edges.get(v1).containsKey(v2))) {
+            throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
+          }
+          int dd = lu_edges.get(v1).get(v2)[0];
+          int nu = lu_edges.get(v1).get(v2)[1];
+          PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
+        }
+        PSSubmit(pS10);
+        PreparedStatement pS77 = PS(conn, "S77");
+        PreparedStatement pS139 = PS(conn, "S139");
+        int te = route[(route.length - 2)];
+        int ve = route[(route.length - 1)];
+        PSAdd(pS77, te, ve, sid);
+        PSAdd(pS139, te, sid);
+        PSSubmit(pS77, pS139);
         PreparedStatement pS82 = PS(conn, "S82");
         PreparedStatement pS83 = PS(conn, "S83");
         PreparedStatement pS84 = PS(conn, "S84");
-        for (int j = 0; j < bound; j++) {
-          int tj = sched[(3*j + 0)];
-          int vj = sched[(3*j + 1)];
-          int Lj = sched[(3*j + 2)];
+        for (int j = 0; j < (sched.length - 2); j += 3) {
+          int tj = sched[(j + 0)];
+          int vj = sched[(j + 1)];
+          int Lj = sched[(j + 2)];
           if (Lj != sid) {
-            Print("UPDATE CPD SET tp="+tj+" WHERE vp="+vj+" AND rid="+Lj);
-            Print("UPDATE CPD SET td="+tj+" WHERE vd="+vj+" AND rid="+Lj);
-            Print("UPDATE PD SET t2="+tj+" WHERE v2="+vj+" AND rid="+Lj);
             PSAdd(pS82, tj, vj, Lj);
             PSAdd(pS83, tj, vj, Lj);
             PSAdd(pS84, tj, vj, Lj);
@@ -1163,8 +958,166 @@ public class Storage {
         }
         PSSubmit(pS82, pS83, pS84);
         PreparedStatement pS140 = PS(conn, "S140");
-        for (int j = 0; j < bound; j++) {
-          int Lj = sched[(3*j + 2)];
+        for (int j = 0; j < (sched.length - 2); j += 3) {
+          int Lj = sched[(j + 2)];
+          if (Lj != sid) {
+            int rq, tp, vp;
+            int td = -1;
+            int vd = -1;
+            if (!cache.containsKey(Lj)) {
+              rq = lu_users.get(Lj)[1];
+              boolean flagged = false;
+              for (int r : rid) {
+                if (Lj == r) {
+                  flagged = true;
+                  break;
+                }
+              }
+              if (flagged) {
+                tp = sched[(j + 0)];
+                vp = sched[(j + 1)];
+                for (int k = (j + 3); k < (sched.length - 2); k += 3) {
+                  if (Lj == sched[(k + 2)]) {
+                    td = sched[(k + 0)];
+                    vd = sched[(k + 1)];
+                  }
+                }
+                cache2.put(Lj, new int[] { vp, vd });
+              } else {
+                output = DBFetch(conn, "S86", 2, Lj);
+                tp = output[0];
+                td = output[1];
+                PSAdd(pS140, tp, td, Lj);
+              }
+              cache.put(Lj, new int[] { rq, tp, td });
+            }
+          }
+        }
+        PSSubmit(pS140);
+        int t1, q1, o1;
+        if (route[0] == 0) {
+          t1 = 0;
+          q1 = sq;
+          o1 = 1;
+        } else {
+          output = DBFetch(conn, "S87", 3, sid, route[0]);
+          t1 = output[0];
+          q1 = output[1];
+          o1 = output[2];
+        }
+        PreparedStatement pS80 = PS(conn, "S80");
+        PSAdd(pS80, sid, route[0]);
+        PSSubmit(pS80);
+        PreparedStatement pS14 = PS(conn, "S14");
+        for (int j = 0; j < (sched.length - 2); j += 3) {
+          int t2 = sched[(j + 0)];
+          int v2 = sched[(j + 1)];
+          int Lj = sched[(j + 2)];
+          if (Lj != sid) {
+            int[] qpd = cache.get(Lj);
+            int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
+            int o2 = o1 + 1;
+            PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
+                  qpd[0], qpd[1], qpd[2], o1, o2);
+            t1 = t2;
+            q1 = q2;
+            o1 = o2;
+          }
+        }
+        PSSubmit(pS14);
+        PreparedStatement pS12 = PS(conn, "S12");
+        PreparedStatement pS13 = PS(conn, "S13");
+        int rq, re, rl, ro, rd;
+        int[] qpd, pd;
+        for (int r : rid) {
+          output = DBFetch(conn, "S51", 5, r);
+          rq = output[0];
+          re = output[1];
+          rl = output[2];
+          ro = output[3];
+          rd = output[4];
+          qpd = cache.get(r);
+          pd = cache2.get(r);
+          PSAdd(pS12, sid, qpd[1], pd[0], r);
+          PSAdd(pS12, sid, qpd[2], pd[1], r);
+          PSAdd(pS13, sid, se, route[(route.length - 2)], qpd[1], pd[0], qpd[2], pd[1],
+                r, re, rl, ro, rd);
+        }
+        PSSubmit(pS12, pS13);
+        conn.commit();
+      } catch (SQLException e) {
+        conn.rollback();
+        throw e;
+      } finally {
+        conn.close();
+      }
+    } catch (SQLException e) {
+      throw e;
+    }
+    for (int r : rid) {
+      lu_rstatus.put(r, true);
+    }
+  }
+  public void DBUpdateServerRemoveFromSchedule(int sid, int[] route, int[] sched, int[] rid)
+  throws UserNotFoundException, EdgeNotFoundException, SQLException {
+    if (!lu_users.containsKey(sid)) {
+      throw new UserNotFoundException("User "+sid+" not found.");
+    }
+    for (int r : rid) {
+      if (!lu_users.containsKey(r)) {
+        throw new UserNotFoundException("User "+r+" not found.");
+      }
+    }
+    int[] output = new int[] { };
+    int se, sq;
+    Map<Integer, int[]> cache = new HashMap<>();
+    try {
+      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+      try {
+        sq = lu_users.get(sid)[1];
+        se = lu_users.get(sid)[2];
+        PreparedStatement pS76 = PS(conn, "S76");
+        PSAdd(pS76, sid, route[0]);
+        PSSubmit(pS76);
+        int uid = sid;
+        PreparedStatement pS10 = PS(conn, "S10");
+        for (int i = 0; i < (route.length - 3); i += 2) {
+          int t1 = route[(i + 0)];
+          int v1 = route[(i + 1)];
+          int t2 = route[(i + 2)];
+          int v2 = route[(i + 3)];
+          if (!(lu_edges.containsKey(v1) && lu_edges.get(v1).containsKey(v2))) {
+            throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
+          }
+          int dd = lu_edges.get(v1).get(v2)[0];
+          int nu = lu_edges.get(v1).get(v2)[1];
+          PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
+        }
+        PSSubmit(pS10);
+        PreparedStatement pS77 = PS(conn, "S77");
+        PreparedStatement pS139 = PS(conn, "S139");
+        int te = route[(route.length - 2)];
+        int ve = route[(route.length - 1)];
+        PSAdd(pS77, te, ve, sid);
+        PSAdd(pS139, te, sid);
+        PSSubmit(pS77, pS139);
+        PreparedStatement pS82 = PS(conn, "S82");
+        PreparedStatement pS83 = PS(conn, "S83");
+        PreparedStatement pS84 = PS(conn, "S84");
+        for (int j = 0; j < (sched.length - 2); j += 3) {
+          int tj = sched[(j + 0)];
+          int vj = sched[(j + 1)];
+          int Lj = sched[(j + 2)];
+          if (Lj != sid) {
+            PSAdd(pS82, tj, vj, Lj);
+            PSAdd(pS83, tj, vj, Lj);
+            PSAdd(pS84, tj, vj, Lj);
+          }
+        }
+        PSSubmit(pS82, pS83, pS84);
+        PreparedStatement pS140 = PS(conn, "S140");
+        for (int j = 0; j < (sched.length - 2); j += 3) {
+          int Lj = sched[(j + 2)];
           if (Lj != sid) {
             int rq, tp, td;
             if (!cache.containsKey(Lj)) {
@@ -1173,7 +1126,6 @@ public class Storage {
               tp = output[0];
               td = output[1];
               cache.put(Lj, new int[] { rq, tp, td });
-              Print("UPDATE CQ SET tp="+tp+", td="+td+" WHERE rid="+Lj);
               PSAdd(pS140, tp, td, Lj);
             }
           }
@@ -1192,20 +1144,16 @@ public class Storage {
         }
         PreparedStatement pS80 = PS(conn, "S80");
         PSAdd(pS80, sid, route[0]);
-        Print("Issue DELETE FROM CQ WHERE sid="+sid+" AND t2>"+route[0]);
         PSSubmit(pS80);
         PreparedStatement pS14 = PS(conn, "S14");
-        for (int j = 0; j < bound; j++) {
-          int t2 = sched[(3*j)];
-          int v2 = sched[(3*j + 1)];
-          int Lj = sched[(3*j + 2)];
+        for (int j = 0; j < (sched.length - 2); j += 3) {
+          int t2 = sched[(j + 0)];
+          int v2 = sched[(j + 1)];
+          int Lj = sched[(j + 2)];
           if (Lj != sid) {
             int[] qpd = cache.get(Lj);
             int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
             int o2 = o1 + 1;
-            Print("Issue INSERT INTO CQ VALUES "+sid+", "+sq+", "+se+", "+t1+", "+t2
-                +", "+v2+", "+q1+", "+q2+", "+Lj+", "+qpd[0]+", "+qpd[1]+", "+qpd[2]
-                +", "+o1+", "+o2);
             PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
                   qpd[0], qpd[1], qpd[2], o1, o2);
             t1 = t2;
@@ -1214,386 +1162,40 @@ public class Storage {
           }
         }
         PSSubmit(pS14);
-      }
-      conn.commit();
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
-    }
-  }
-  public void DBUpdateServerAddToSchedule(
-      int sid, int[] route, int[] sched, int[] rid)
-  throws RuntimeException {
-    Print("Call DBUpdateServerAddToSchedule(4)");
-    Print("  sid="+sid);
-    Print("  route.length="+route.length);
-    Print("  schedule.length="+sched.length);
-    for (int i = 0; i < route.length; i++)
-      Print("route["+i+"]="+route[i]);
-    for (int i = 0; i < sched.length; i++)
-      Print("sched["+i+"]="+sched[i]);
-    for (int i = 0; i < rid.length; i++)
-      Print("rid["+i+"]="+rid[i]);
-
-    int[] output = new int[] { };
-    int se, sq;
-    Map<Integer, int[]> cache = new HashMap<>();
-    Map<Integer, int[]> cache2 = new HashMap<>();
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-      Print("A1");
-      sq = lu_users.get(sid)[1];
-      se = lu_users.get(sid)[2];
-      Print("A2");
-      Print("B1");
-      PreparedStatement pS76 = PS(conn, "S76");
-      PSAdd(pS76, sid, route[0]);
-      Print("Issue DELETE FROM W WHERE sid="+sid+" AND t2>"+route[0]);
-      PSSubmit(pS76);
-      Print("B2");
-      int uid = sid;
-      PreparedStatement pS10 = PS(conn, "S10");
-      for (int i = 0; i < (route.length - 3); i += 2) {
-        int t1 = route[i];
-        int v1 = route[(i + 1)];
-        int t2 = route[(i + 2)];
-        int v2 = route[(i + 3)];
-        int dd = lu_edges.get(v1).get(v2)[0];
-        int nu = lu_edges.get(v1).get(v2)[1];
-        Print("Issue INSERT INTO W VALUES ("+uid+", "+se+", "+t1+", "+v1+", "+t2+", "
-          +v2+", "+dd+", "+nu+")");
-        PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
-      }
-      PSSubmit(pS10);
-      Print("B3");
-      PreparedStatement pS77 = PS(conn, "S77");
-      PreparedStatement pS139 = PS(conn, "S139");
-      int te = route[(route.length - 2)];
-      int ve = route[(route.length - 1)];
-      PSAdd(pS77, te, ve, sid);
-      PSAdd(pS139, te, sid);
-      Print("Issue UPDATE CW SET te="+te+", ve="+ve+" WHERE sid="+sid);
-      Print("Issue UPDATE CPD SET te="+te+" WHERE sid="+sid);
-      PSSubmit(pS77, pS139);
-      Print("B4");
-      Print("A3");
-      int bound = (sched.length/3);
-      Print("C1");
-      PreparedStatement pS82 = PS(conn, "S82");
-      PreparedStatement pS83 = PS(conn, "S83");
-      PreparedStatement pS84 = PS(conn, "S84");
-      for (int j = 0; j < bound; j++) {
-        int tj = sched[(3*j + 0)];
-        int vj = sched[(3*j + 1)];
-        int Lj = sched[(3*j + 2)];
-        if (Lj != sid) {
-          Print("UPDATE CPD SET tp="+tj+" WHERE vp="+vj+" AND rid="+Lj);
-          Print("UPDATE CPD SET td="+tj+" WHERE vd="+vj+" AND rid="+Lj);
-          Print("UPDATE PD SET t2="+tj+" WHERE v2="+vj+" AND rid="+Lj);
-          PSAdd(pS82, tj, vj, Lj);
-          PSAdd(pS83, tj, vj, Lj);
-          PSAdd(pS84, tj, vj, Lj);
-        }
-      }
-      PSSubmit(pS82, pS83, pS84);
-      Print("C2");
-      PreparedStatement pS140 = PS(conn, "S140");
-      for (int j = 0; j < bound; j++) {
-        int Lj = sched[(3*j + 2)];
-        if (Lj != sid) {
-          int rq, tp, vp;
-          int td = -1;
-          int vd = -1;
-          if (!cache.containsKey(Lj)) {
-            // rq = DBFetch(conn, "S85", 1, Lj)[0];
-            rq = lu_users.get(Lj)[1];
-            boolean flagged = false;
-            for (int r : rid) {
-              if (Lj == r) {
-                Print("set flagged=true");
-                flagged = true;
-                break;
-              }
-            }
-            if (flagged) {
-              Print("get tp, vp, td, vd of new job");
-              tp = sched[(3*j)];
-              vp = sched[(3*j + 1)];
-              Print("set tp="+tp);
-              Print("set vd="+vd);
-              for (int k = (j + 1); k < bound; k++) {
-                Print(": k="+k);
-                Print(":   Lj="+Lj);
-                Print(":   sched[(3*k+2)]="+sched[3*k+2]);
-                if (Lj == sched[(3*k + 2)]) {
-                  td = sched[(3*k)];
-                  vd = sched[(3*k + 1)];
-                  Print(":   set td="+sched[3*k]);
-                  Print(":   set vd="+sched[3*k+1]);
-                }
-              }
-              Print("set td="+td);
-              Print("set vd="+vd);
-              cache2.put(Lj, new int[] { vp, vd });
-            } else {
-              output = DBFetch(conn, "S86", 2, Lj);
-              tp = output[0];
-              td = output[1];
-              Print("UPDATE CQ SET tp="+tp+", td="+td+" WHERE rid="+Lj);
-              PSAdd(pS140, tp, td, Lj);
-            }
-            Print("cache.put("+Lj+", { "+rq+", "+tp+", "+td+" })");
-            cache.put(Lj, new int[] { rq, tp, td });
-          }
-        }
-      }
-      PSSubmit(pS140);
-      Print("C3");
-      int t1, q1, o1;
-      if (route[0] == 0) {
-        t1 = 0;
-        q1 = sq;
-        o1 = 1;
-      } else {
-        output = DBFetch(conn, "S87", 3, sid, route[0]);
-        t1 = output[0];
-        q1 = output[1];
-        o1 = output[2];
-      }
-      Print("C4");
-      PreparedStatement pS80 = PS(conn, "S80");
-      PSAdd(pS80, sid, route[0]);
-      Print("Issue DELETE FROM CQ WHERE sid="+sid+" AND t2>"+route[0]);
-      PSSubmit(pS80);
-      Print("C5");
-      PreparedStatement pS14 = PS(conn, "S14");
-      for (int j = 0; j < bound; j++) {
-        int t2 = sched[(3*j)];
-        int v2 = sched[(3*j + 1)];
-        int Lj = sched[(3*j + 2)];
-        if (Lj != sid) {
-          int[] qpd = cache.get(Lj);
-          int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
-          int o2 = o1 + 1;
-          Print("Issue INSERT INTO CQ VALUES "+sid+", "+sq+", "+se+", "+t1+", "+t2
-              +", "+v2+", "+q1+", "+q2+", "+Lj+", "+qpd[0]+", "+qpd[1]+", "+qpd[2]
-              +", "+o1+", "+o2);
-          PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
-                qpd[0], qpd[1], qpd[2], o1, o2);
-          t1 = t2;
-          q1 = q2;
-          o1 = o2;
-        }
-      }
-      PSSubmit(pS14);
-      Print("C6");
-      PreparedStatement pS12 = PS(conn, "S12");
-      PreparedStatement pS13 = PS(conn, "S13");
-      int rq, re, rl, ro, rd;
-      int[] qpd, pd;
-      for (int r : rid) {
-        output = DBFetch(conn, "S51", 5, r);
-        rq = output[0];
-        re = output[1];
-        rl = output[2];
-        ro = output[3];
-        rd = output[4];
-        qpd = cache.get(r);
-        pd = cache2.get(r);
-        Print("INSERT INTO PD VALUES ("+sid+", "+qpd[1]+", "+pd[0]+", "+r+")");
-        Print("INSERT INTO PD VALUES ("+sid+", "+qpd[2]+", "+pd[1]+", "+r+")");
-        PSAdd(pS12, sid, qpd[1], pd[0], r);
-        PSAdd(pS12, sid, qpd[2], pd[1], r);
-        Print("INSERT INTO CPD VALUES ("+sid+", "+se+", "+route[(route.length - 2)]
-          +", "+qpd[1]+", "+pd[0]+", "+qpd[2]+", "+pd[1]+", "+r+", "+re+", "+rl
-          +", "+ro+", "+rd+")");
-        PSAdd(pS13, sid, se, route[(route.length - 2)], qpd[1], pd[0], qpd[2], pd[1],
-              r, re, rl, ro, rd);
-      }
-      PSSubmit(pS12, pS13);
-      Print("C7");
-      Print("A4");
-      try {
-        conn.commit();
-        Print("Close connection "+conn.toString());
-        conn.close();
-        Print("A5");
+        PreparedStatement pS42 = PS(conn, "S42");
+        PreparedStatement pS43 = PS(conn, "S43");
         for (int r : rid) {
-          lu_rstatus.put(r, true);
+          PSAdd(pS42, r);
+          PSAdd(pS43, r);
         }
-      }
-      // If commit and close fails, we need to rollback the commit
-      // and manually close the connection
-      catch (SQLException e1) {
+        PSSubmit(pS42, pS43);
+        conn.commit();
+      } catch (SQLException e) {
         conn.rollback();
+        throw e;
+      } finally {
         conn.close();
-        printSQLException(e1);
-        DBSaveBackup(DERBY_DUMPNAME);
-        throw new RuntimeException("database failure");
       }
-    }
-    // If DriverManager.getConnection fails, we throw a 'database failure'
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
-    }
-  }
-  public void DBUpdateServerRemoveFromSchedule(
-      int sid, int[] route, int[] sched, int[] rid)
-  throws RuntimeException {
-    int[] output = new int[] { };
-    int se, sq;
-    Map<Integer, int[]> cache = new HashMap<>();
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-      sq = lu_users.get(sid)[1];
-      se = lu_users.get(sid)[2];
-      Print("B1");
-      PreparedStatement pS76 = PS(conn, "S76");
-      PSAdd(pS76, sid, route[0]);
-      Print("Issue DELETE FROM W WHERE sid="+sid+" AND t2>"+route[0]);
-      PSSubmit(pS76);
-      Print("B2");
-      int uid = sid;
-      PreparedStatement pS10 = PS(conn, "S10");
-      for (int i = 0; i < (route.length - 3); i += 2) {
-        int t1 = route[i];
-        int v1 = route[(i + 1)];
-        int t2 = route[(i + 2)];
-        int v2 = route[(i + 3)];
-        int dd = lu_edges.get(v1).get(v2)[0];
-        int nu = lu_edges.get(v1).get(v2)[1];
-        Print("Issue INSERT INTO W VALUES ("+uid+", "+se+", "+t1+", "+v1+", "+t2+", "
-          +v2+", "+dd+", "+nu+")");
-        PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
-      }
-      PSSubmit(pS10);
-      Print("B3");
-      PreparedStatement pS77 = PS(conn, "S77");
-      PreparedStatement pS139 = PS(conn, "S139");
-      int te = route[(route.length - 2)];
-      int ve = route[(route.length - 1)];
-      PSAdd(pS77, te, ve, sid);
-      PSAdd(pS139, te, sid);
-      Print("Issue UPDATE CW SET te="+te+", ve="+ve+" WHERE sid="+sid);
-      Print("Issue UPDATE CPD SET te="+te+" WHERE sid="+sid);
-      PSSubmit(pS77, pS139);
-      Print("B4");
-      int bound = (sched.length/3);
-      PreparedStatement pS82 = PS(conn, "S82");
-      PreparedStatement pS83 = PS(conn, "S83");
-      PreparedStatement pS84 = PS(conn, "S84");
-      for (int j = 0; j < bound; j++) {
-        int tj = sched[(3*j + 0)];
-        int vj = sched[(3*j + 1)];
-        int Lj = sched[(3*j + 2)];
-        if (Lj != sid) {
-          Print("UPDATE CPD SET tp="+tj+" WHERE vp="+vj+" AND rid="+Lj);
-          Print("UPDATE CPD SET td="+tj+" WHERE vd="+vj+" AND rid="+Lj);
-          Print("UPDATE PD SET t2="+tj+" WHERE v2="+vj+" AND rid="+Lj);
-          PSAdd(pS82, tj, vj, Lj);
-          PSAdd(pS83, tj, vj, Lj);
-          PSAdd(pS84, tj, vj, Lj);
-        }
-      }
-      PSSubmit(pS82, pS83, pS84);
-      PreparedStatement pS140 = PS(conn, "S140");
-      for (int j = 0; j < bound; j++) {
-        int Lj = sched[(3*j + 2)];
-        if (Lj != sid) {
-          int rq, tp, td;
-          if (!cache.containsKey(Lj)) {
-            rq = DBFetch(conn, "S85", 1, Lj)[0];
-            output = DBFetch(conn, "S86", 2, Lj);
-            tp = output[0];
-            td = output[1];
-            cache.put(Lj, new int[] { rq, tp, td });
-            Print("UPDATE CQ SET tp="+tp+", td="+td+" WHERE rid="+Lj);
-            PSAdd(pS140, tp, td, Lj);
-          }
-        }
-      }
-      PSSubmit(pS140);
-      int t1, q1, o1;
-      if (route[0] == 0) {
-        t1 = 0;
-        q1 = sq;
-        o1 = 1;
-      } else {
-        output = DBFetch(conn, "S87", 3, sid, route[0]);
-        t1 = output[0];
-        q1 = output[1];
-        o1 = output[2];
-      }
-      PreparedStatement pS80 = PS(conn, "S80");
-      PSAdd(pS80, sid, route[0]);
-      Print("Issue DELETE FROM CQ WHERE sid="+sid+" AND t2>"+route[0]);
-      PSSubmit(pS80);
-      PreparedStatement pS14 = PS(conn, "S14");
-      for (int j = 0; j < bound; j++) {
-        int t2 = sched[(3*j)];
-        int v2 = sched[(3*j + 1)];
-        int Lj = sched[(3*j + 2)];
-        if (Lj != sid) {
-          int[] qpd = cache.get(Lj);
-          int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
-          int o2 = o1 + 1;
-          Print("Issue INSERT INTO CQ VALUES "+sid+", "+sq+", "+se+", "+t1+", "+t2
-              +", "+v2+", "+q1+", "+q2+", "+Lj+", "+qpd[0]+", "+qpd[1]+", "+qpd[2]
-              +", "+o1+", "+o2);
-          PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
-                qpd[0], qpd[1], qpd[2], o1, o2);
-          t1 = t2;
-          q1 = q2;
-          o1 = o2;
-        }
-      }
-      PSSubmit(pS14);
-      PreparedStatement pS42 = PS(conn, "S42");
-      PreparedStatement pS43 = PS(conn, "S43");
-      for (int r : rid) {
-        PSAdd(pS42, r);
-        PSAdd(pS43, r);
-      }
-      PSSubmit(pS42, pS43);
-      conn.commit();
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    } catch (SQLException e) {
+      throw e;
     }
     for (int r : rid) {
       lu_rstatus.remove(r);
     }
   }
-  public void setDebug(boolean flag) {
-    DEBUG = flag;
-  }
   public final ConcurrentHashMap<Integer, int[]> getReferenceVerticesCache() {
-    return lu_vertices;
+    return this.lu_vertices;
   }
   public final ConcurrentHashMap<Integer,
       ConcurrentHashMap<Integer, int[]>> getReferenceEdgesCache() {
-    return lu_edges;
+    return this.lu_edges;
   }
   public final ConcurrentHashMap<Integer, int[]> getReferenceUsersCache() {
-    return lu_users;
+    return this.lu_users;
   }
-  public void DBLoadDataModel() throws RuntimeException {
-    Print("Load data model");
+  public void DBLoadDataModel() {
     try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
       Statement stmt = conn.createStatement();
       stmt.clearBatch();
       stmt.addBatch("CREATE TABLE V ("
@@ -1904,385 +1506,313 @@ public class Storage {
       stmt.addBatch("CREATE INDEX W_sid_t1_t2 ON W (sid, t1, t2)");
       stmt.executeBatch();
       conn.commit();
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    } catch (SQLException e) {
+      System.out.println("Storage.DBLoadDataModel(): "+"Encountered catastrophic exception.");
+      Tools.PrintSQLException(e);
+      System.exit(1);
     }
   }
-  public void DBLoadBackup(String p) throws RuntimeException {
-    Print("Load database backup ("+p+")");
+  public void DBLoadBackup(String p) throws SQLException {
+    this.CONNECTIONS_URL = "jdbc:derby:memory:jargobak;createFrom="+p;
     try {
-      CONNECTIONS_URL = "jdbc:derby:memory:jargobak;createFrom="+p;
-      setupDriver();
+      this.setupDriver();
+    } catch (ClassNotFoundException e) {
+      System.out.println("Storage.DBLoadBackup(1): "+"Encountered catastrophic exception.");
+      e.printStackTrace();
+      System.exit(1);
+    }
+  }
+  public void DBLoadRoadNetworkFromDB() throws SQLException {
+    ConcurrentHashMap<Integer, int[]>    lu1 = new ConcurrentHashMap<>();
+    ConcurrentHashMap<Integer,
+      ConcurrentHashMap<Integer, int[]>> lu2 = new ConcurrentHashMap<>();
+    int[] output = new int[] { };
+    try {
+      output = this.DBQueryAllVertices();
+    } catch (SQLException e) {
+      throw e;
+    }
+    for (int i = 0; i < (output.length - 2); i += 3) {
+      int   v = output[(i + 0)];
+      int lng = output[(i + 1)];
+      int lat = output[(i + 2)];
+      lu1.put(v, new int[] { lng, lat });
+    }
+    try {
+      output = this.DBQueryAllEdges();
+    } catch (SQLException e) {
+      throw e;
+    }
+    for (int i = 0; i < (output.length - 3); i += 4) {
+      int v1 = output[(i + 0)];
+      int v2 = output[(i + 1)];
+      int dd = output[(i + 2)];
+      int nu = output[(i + 3)];
+      if (!lu2.containsKey(v1)) {
+        lu2.put(v1, new ConcurrentHashMap());
+      }
+      lu2.get(v1).put(v2, new int[] { dd, nu });
+    }
+    this.lu_vertices = lu1;
+    this.lu_edges    = lu2;
+  }
+  public void DBLoadUsersFromDB() throws SQLException {
+    ConcurrentHashMap<Integer, int[]> lu1 = new ConcurrentHashMap<>();
+    Map<Integer, Boolean>             lu2 = new HashMap<>();
+    int[] output = new int[] { };
+    try {
+      output = this.DBQueryAllUsers();
+    } catch (SQLException e) {
+      throw e;
+    }
+    try {
+      for (int i = 0; i < (output.length - 6); i += 7) {
+        int uid = output[(i + 0)];
+        int  uq = output[(i + 1)];
+        int  ue = output[(i + 2)];
+        int  ul = output[(i + 3)];
+        int  uo = output[(i + 4)];
+        int  ud = output[(i + 5)];
+        int  ub = output[(i + 6)];
+        lu1.put(uid, new int[] { uid, uq, ue, ul, uo, ud, ub });
+        if (uq > 0) {
+          lu2.put(uid, (this.DBQueryRequestIsAssigned(uid).length > 0 ? true : false));
+        }
+      }
+    } catch (SQLException e) {
+      throw e;
+    }
+    this.lu_users   = lu1;
+    this.lu_rstatus = lu2;
+  }
+  public void DBSaveBackup(String p) throws SQLException {
+    try {
       Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-      CallableStatement cs = conn.prepareCall(
-        "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
-      Print("..set derby.storage.pageCacheSize="+DERBY_PAGECACHESIZE);
-      cs.setString(1, "derby.storage.pageCacheSize");
-      cs.setInt(2, DERBY_PAGECACHESIZE);
+      CallableStatement cs =
+        conn.prepareCall("CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE("+p+")");
       cs.execute();
-      Print("Close connection "+conn.toString());
-      conn.close();
-      if (lu_vertices.isEmpty()) {
-        int[] output = DBQueryAllVertices();
-        for (int i = 0; i < (output.length/3); i++) {
-          int v = output[(3*i)];
-          int lng = output[(3*i + 1)];
-          int lat = output[(3*i + 2)];
-          lu_vertices.put(v, new int[] { lng, lat });
-        }
-        output = DBQueryAllEdges();
-        for (int i = 0; i < (output.length/4); i++) {
-          int v1 = output[(4*i)];
-          int v2 = output[(4*i + 1)];
-          int dd = output[(4*i + 2)];
-          int nu = output[(4*i + 3)];
-          if (!lu_edges.containsKey(v1)) {
-            lu_edges.put(v1, new ConcurrentHashMap());
-          }
-          lu_edges.get(v1).put(v2, new int[] { dd, nu });
-        }
-      }
-     if (lu_users.isEmpty()) {
-        int[] output = new int[] { };
-        try {
-          conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-          Print("Open connection "+conn.toString());
-          output = DBFetch(conn, "S141", 7);
-          for (int i = 0; i < (output.length/7); i++) {
-            int uid = output[(7*i)];
-            int uq = output[(7*i + 1)];
-            int ue = output[(7*i + 2)];
-            int ul = output[(7*i + 3)];
-            int uo = output[(7*i + 4)];
-            int ud = output[(7*i + 5)];
-            int ub = output[(7*i + 6)];
-            lu_users.put(uid, new int[] { uid, uq, ue, ul, uo, ud, ub });
-            if (uq > 0) {
-              lu_rstatus.put(uid, (DBFetch(conn, "S148", 1, uid).length > 0 ? true : false));
-            }
-          }
-          Print("Close connection "+conn.toString());
-          conn.close();
-        }
-        catch (SQLException e1) {
-          printSQLException(e1);
-          DBSaveBackup(DERBY_DUMPNAME);
-          throw new RuntimeException("database failure");
-        }
-     }
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
+    } catch (SQLException e) {
+      throw e;
     }
   }
-  public void DBSaveBackup(String p) throws RuntimeException {
+  public void printSQLDriverStatistics() throws SQLException {
+    PoolingDriver d = (PoolingDriver) DriverManager.getDriver(CONNECTIONS_DRIVER_URL);
+    ObjectPool<? extends Connection> cp = d.getConnectionPool(CONNECTIONS_POOL_NAME);
+    System.out.println("Connections: "+cp.getNumActive()+" active; "+cp.getNumIdle()+" idle");
+  }
+  public Connection _getConnection() throws SQLException {
+    return DriverManager.getConnection(CONNECTIONS_POOL_URL);
+  }
+  private void setupDriver() throws SQLException, ClassNotFoundException {
+    connection_factory = new DriverManagerConnectionFactory(CONNECTIONS_URL);
+    poolableconnection_factory = new PoolableConnectionFactory(connection_factory, null);
+    poolableconnection_factory.setPoolStatements(true);
+    poolableconnection_factory.setDefaultAutoCommit(false);
+    poolableconnection_factory.setMaxOpenPreparedStatements(STATEMENTS_MAX_COUNT);
+    GenericObjectPoolConfig cfg = new GenericObjectPoolConfig();
+    cfg.setMinIdle(100000);
+    cfg.setMaxIdle(100000);
+    cfg.setMaxTotal(100000);
+    pool = new GenericObjectPool<>(poolableconnection_factory, cfg);
+    poolableconnection_factory.setPool(pool);
+    Class.forName("org.apache.commons.dbcp2.PoolingDriver");
+    driver = (PoolingDriver) DriverManager.getDriver(CONNECTIONS_DRIVER_URL);
+    driver.registerPool(CONNECTIONS_POOL_NAME, pool);
+  }
+  private void PSInit() {
+    String INS = "INSERT INTO ";
+    String UPD = "UPDATE ";
+    String DEL = "DELETE FROM ";
+    String SEL = "SELECT ";
+    String q2  = "(?,?)";
+    String q3  = "(?,?,?)";
+    String q4  = "(?,?,?,?)";
+    String q7  = "(?,?,?,?,?,?,?)";
+    String q8  = "(?,?,?,?,?,?,?,?)";
+    String q9  = "(?,?,?,?,?,?,?,?,?)";
+    String q12 = "(?,?,?,?,?,?,?,?,?,?,?,?)";
+    String q14 = "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    lu_pstr.put("S0", INS+"V VALUES "+q3);
+    lu_pstr.put("S1", INS+"E VALUES "+q4);
+    lu_pstr.put("S2", INS+"UQ VALUES "+q2);
+    lu_pstr.put("S3", INS+"UE VALUES "+q2);
+    lu_pstr.put("S4", INS+"UL VALUES "+q2);
+    lu_pstr.put("S5", INS+"UO VALUES "+q2);
+    lu_pstr.put("S6", INS+"UD VALUES "+q2);
+    lu_pstr.put("S7", INS+"UB VALUES "+q2);
+    lu_pstr.put("S8", INS+"S VALUES "+q7);
+    lu_pstr.put("S9", INS+"R VALUES "+q7);
+    lu_pstr.put("S10", INS+"W VALUES "+q8);
+    lu_pstr.put("S11", INS+"CW VALUES "+q9);
+    lu_pstr.put("S12", INS+"PD VALUES "+q4);
+    lu_pstr.put("S13", INS+"CPD VALUES "+q12);
+    lu_pstr.put("S14", INS+"CQ VALUES "+q14);
+    lu_pstr.put("S15", UPD+"E SET nu=? WHERE v1=? AND v2=?");
+    lu_pstr.put("S131", UPD+"W SET nu=? WHERE v1=? AND v2=?");
+    lu_pstr.put("S77", UPD+"CW SET te=?, ve=? WHERE sid=?");
+    lu_pstr.put("S84", UPD+"PD SET t2=? WHERE v2=? AND rid=?");
+    lu_pstr.put("S82", UPD+"CPD SET tp=? WHERE vp=? AND rid=?");
+    lu_pstr.put("S83", UPD+"CPD SET td=? WHERE vd=? AND rid=?");
+    lu_pstr.put("S76", DEL+"W WHERE sid=? AND t2>?");
+    lu_pstr.put("S42", DEL+"PD WHERE rid=?");
+    lu_pstr.put("S43", DEL+"CPD WHERE rid=?");
+    lu_pstr.put("S80", DEL+"CQ WHERE sid=? AND t2>?");
+    lu_pstr.put("S62", SEL+"COUNT (*) FROM V WHERE v<>0");
+    lu_pstr.put("S64", SEL+"MIN (lng), MAX (lng), MIN (lat), MAX (lat) "
+          + "FROM V WHERE v<>0");
+    lu_pstr.put("S63", SEL+"COUNT (*) FROM E WHERE v1<>0 AND v2<>0");
+    lu_pstr.put("S65", SEL+"MIN (dd), MAX (dd), SUM (dd) / COUNT (dd), "
+          + "MIN (nu), MAX (nu), SUM (nu) / COUNT (nu) "
+          + "FROM E WHERE v1<>0 AND v2<>0");
+    lu_pstr.put("S46", SEL+"dd, nu FROM E WHERE v1=? AND v2=?");
+    lu_pstr.put("S130", SEL+"lng, lat FROM V WHERE v=?");
+    lu_pstr.put("S70", SEL+"sid, sq, se, sl, so, sd, sb FROM S WHERE sid=?");
+    lu_pstr.put("S48", SEL+"sq, se FROM S WHERE sid=?");
+    lu_pstr.put("S66", SEL+"COUNT (*) FROM S");
+    lu_pstr.put("S75", SEL+"rid, rq, re, rl, ro, rd, rb FROM R WHERE rid=?");
+    lu_pstr.put("S51", SEL+"rq, re, rl, ro, rd FROM R WHERE rid=?");
+    lu_pstr.put("S67", SEL+"COUNT (*) FROM R");
+    lu_pstr.put("S59", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
+          + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
+          + "GROUP BY sid"
+          + ") as b ON a.sid=b.sid AND ABS(a.t2-?)=b.tdiff AND a.t2<=?");
+    lu_pstr.put("S128", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
+          + "SELECT sid FROM CW WHERE te>? OR (ve=0 AND sl>?)"
+          + ") as b ON a.sid=b.sid INNER JOIN ("
+          + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
+          + "GROUP BY sid"
+          + ") as c ON a.sid=c.sid AND ABS(a.t2-?)=c.tdiff AND a.t2<=?");
+    lu_pstr.put("S60", SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC");
+    lu_pstr.put("S129", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC");
+    lu_pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
+          + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC");
+    lu_pstr.put("S69", SEL+"t, v, Ls, Lr "
+          + "FROM r_server LEFT JOIN CQ ON t=t2 and v=v2 and Lr=rid "
+          + "WHERE r_server.sid=?"
+          + "   AND (t>? OR v=0)"
+          + "   AND (Ls IS NOT NULL OR Lr IS NOT NULL)"
+          + "ORDER BY t ASC, o2 ASC");
+    // A "timeout" of 30 seconds is hard-coded here
+    lu_pstr.put("S68", SEL+"* FROM R WHERE re<=? AND ?<=re+30 AND rid NOT IN  "
+          + "(SELECT rid FROM assignments_r)");
+    lu_pstr.put("S85", SEL+"uq FROM UQ WHERE uid=?");
+    lu_pstr.put("S86", SEL+"tp, td FROM CPD WHERE rid=?");
+    lu_pstr.put("S73", SEL+"q2 FROM CQ WHERE sid=? AND t2<=? "
+          + "ORDER BY t2 DESC, q2 DESC FETCH FIRST ROW ONLY");
+    lu_pstr.put("S87", SEL+"t2, q2, o2 FROM CQ WHERE sid=? AND t2<=? "
+          + "ORDER BY t2 DESC, o2 DESC FETCH FIRST ROW ONLY");
+    lu_pstr.put("S100", SEL+"rid FROM assignments WHERE t>? AND sid=?");
+    lu_pstr.put("S101", SEL+"rid FROM assignments WHERE t<=? AND sid=?");
+    lu_pstr.put("S102", SEL+"* FROM service_rate");
+    lu_pstr.put("S103", SEL+"* FROM dist_base");
+    lu_pstr.put("S104", SEL+"val FROM dist_s_travel WHERE sid=?");
+    lu_pstr.put("S105", SEL+"SUM (val) FROM dist_s_travel");
+    lu_pstr.put("S106", SEL+"val FROM dist_s_cruising WHERE sid=?");
+    lu_pstr.put("S107", SEL+"SUM (val) FROM dist_s_cruising");
+    lu_pstr.put("S108", SEL+"val FROM dist_s_service WHERE sid=?");
+    lu_pstr.put("S109", SEL+"SUM (val) FROM dist_s_service");
+    lu_pstr.put("S110", SEL+"val FROM dist_s_base");
+    lu_pstr.put("S111", SEL+"val FROM dist_r_base");
+    lu_pstr.put("S112", SEL+"val FROM dist_r_detour WHERE rid=?");
+    lu_pstr.put("S113", SEL+"SUM (val) FROM dist_r_detour");
+    lu_pstr.put("S114", SEL+"val FROM dist_r_transit WHERE rid=?");
+    lu_pstr.put("S115", SEL+"SUM (val) FROM dist_r_transit");
+    lu_pstr.put("S116", SEL+"val FROM dur_s_travel WHERE sid=?");
+    lu_pstr.put("S117", SEL+"SUM (val) FROM dur_s_travel");
+    lu_pstr.put("S118", SEL+"val FROM dur_r_pickup WHERE rid=?");
+    lu_pstr.put("S119", SEL+"SUM (val) FROM dur_r_pickup");
+    lu_pstr.put("S120", SEL+"val FROM dur_r_transit WHERE rid=?");
+    lu_pstr.put("S121", SEL+"SUM (val) FROM dur_r_transit");
+    lu_pstr.put("S122", SEL+"val FROM dur_r_travel WHERE rid=?");
+    lu_pstr.put("S123", SEL+"SUM (val) FROM dur_r_travel");
+    lu_pstr.put("S124", SEL+"val FROM t_r_depart WHERE rid=?");
+    lu_pstr.put("S125", SEL+"val FROM t_s_depart WHERE sid=?");
+    lu_pstr.put("S126", SEL+"val FROM t_r_arrive WHERE rid=?");
+    lu_pstr.put("S127", SEL+"val FROM t_s_arrive WHERE sid=?");
+    lu_pstr.put("S133", SEL+"val FROM f_status WHERE rid=? AND t<=? "
+        + "ORDER BY t DESC FETCH FIRST ROW ONLY");
+    lu_pstr.put("S134", SEL+"sid, te FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
+    lu_pstr.put("S135", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
+        + "SELECT t1 FROM W WHERE sid=? AND t1 <= ? AND ? < t2)");
+    lu_pstr.put("S136", SEL+"* FROM V");
+    lu_pstr.put("S137", SEL+"* FROM E");
+    lu_pstr.put("S138", SEL+"val FROM dist_r_unassigned");
+    lu_pstr.put("S139", UPD+"CPD SET te=? WHERE sid=?");
+    lu_pstr.put("S140", UPD+"CQ SET tp=?, td=? WHERE rid=?");
+    lu_pstr.put("S141", SEL+"* FROM r_user");
+    lu_pstr.put("S142", SEL+"SUM (dd) FROM W WHERE sid=? AND t2>?");
+    lu_pstr.put("S143", SEL+"* FROM R WHERE re<=? AND ?<=re+?");
+    lu_pstr.put("S144", SEL+"t2, v2, rid FROM CQ WHERE sid=? AND t2>? ORDER BY o2 ASC");
+    lu_pstr.put("S145", SEL+"te, ve FROM CW WHERE sid=?");
+    lu_pstr.put("S147", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
+        + "SELECT t1 FROM W WHERE sid=? AND v2=0)");
+    lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
+    lu_pstr.put("S149", SEL+"t2, v2 FROM W WHERE sid=? ORDER BY t2 ASC");
+  }
+  private PreparedStatement PS(Connection conn, String k) throws SQLException {
+    PreparedStatement p = null;
     try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-      CallableStatement cs = conn.prepareCall(
-        "CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE(?)");
-      cs.setString(1, p);
-      cs.execute();
-      Print("Close connection "+conn.toString());
-      conn.close();
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
-    }
-  }
-  public void printSQLDriverStatistics() {
-    try {
-      PoolingDriver d = (PoolingDriver) DriverManager.getDriver(CONNECTIONS_DRIVER_URL);
-      ObjectPool<? extends Connection> cp = d.getConnectionPool(CONNECTIONS_POOL_NAME);
-      System.out.println("Connections: "+cp.getNumActive()+" active; "+cp.getNumIdle()+" idle");
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
-    }
-  }
-  public void printSQLException(SQLException e) {
-    while (e != null) {
-      System.err.println("\n----- SQLException -----");
-      System.err.println("  SQL State:  " + e.getSQLState());
-      System.err.println("  Error Code: " + e.getErrorCode());
-      System.err.println("  Message:    " + e.getMessage());
-      e.printStackTrace(System.err);
-      e = e.getNextException();
-    }
-  }
-  public Connection _getConnection() throws RuntimeException {
-    try {
-      return DriverManager.getConnection(CONNECTIONS_POOL_URL);
-    }
-    catch (SQLException e1) {
-      printSQLException(e1);
-      DBSaveBackup(DERBY_DUMPNAME);
-      throw new RuntimeException("database failure");
-    }
-  }
-    private void Print(String msg) {
-      if (DEBUG) {
-        System.out.println("[Jargo][Storage]["+LocalDateTime.now()+"] "+msg);
-      }
-    }
-    private void setupDriver() throws RuntimeException {
-      Print("Initialize JDBC driver");
-      try {
-        Print("..initialize connection factory");
-        connection_factory = new DriverManagerConnectionFactory(CONNECTIONS_URL);
-        Print("..initialize poolable-connection factory");
-        poolableconnection_factory = new PoolableConnectionFactory(connection_factory, null);
-        poolableconnection_factory.setPoolStatements(true);
-        poolableconnection_factory.setDefaultAutoCommit(false);
-        poolableconnection_factory.setMaxOpenPreparedStatements(STATEMENTS_MAX_COUNT);
-        Print("..initialize connection pool");
-        GenericObjectPoolConfig cfg = new GenericObjectPoolConfig();
-        cfg.setMinIdle(100000);
-        cfg.setMaxIdle(100000);
-        cfg.setMaxTotal(100000);
-        pool = new GenericObjectPool<>(poolableconnection_factory, cfg);
-        Print("..register connection pool to driver");
-        poolableconnection_factory.setPool(pool);
-        Class.forName("org.apache.commons.dbcp2.PoolingDriver");
-        driver = (PoolingDriver) DriverManager.getDriver(CONNECTIONS_DRIVER_URL);
-        driver.registerPool(CONNECTIONS_POOL_NAME, pool);
-        Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-        Print("Open connection "+conn.toString());
-        CallableStatement cs = conn.prepareCall(
-          "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
-        Print("..set derby.storage.pageCacheSize="+DERBY_PAGECACHESIZE);
-        cs.setString(1, "derby.storage.pageCacheSize");
-        cs.setInt(2, DERBY_PAGECACHESIZE);
-        cs.execute();
-        Print("Close connection "+conn.toString());
-        conn.close();
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
-    private void PSInit() {
-      Print("Initialize prepared statement strings");
-      String INS = "INSERT INTO ";
-      String UPD = "UPDATE ";
-      String DEL = "DELETE FROM ";
-      String SEL = "SELECT ";
-      String q2  = "(?,?)";
-      String q3  = "(?,?,?)";
-      String q4  = "(?,?,?,?)";
-      String q7  = "(?,?,?,?,?,?,?)";
-      String q8  = "(?,?,?,?,?,?,?,?)";
-      String q9  = "(?,?,?,?,?,?,?,?,?)";
-      String q12 = "(?,?,?,?,?,?,?,?,?,?,?,?)";
-      String q14 = "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-      lu_pstr.put("S0", INS+"V VALUES "+q3);
-      lu_pstr.put("S1", INS+"E VALUES "+q4);
-      lu_pstr.put("S2", INS+"UQ VALUES "+q2);
-      lu_pstr.put("S3", INS+"UE VALUES "+q2);
-      lu_pstr.put("S4", INS+"UL VALUES "+q2);
-      lu_pstr.put("S5", INS+"UO VALUES "+q2);
-      lu_pstr.put("S6", INS+"UD VALUES "+q2);
-      lu_pstr.put("S7", INS+"UB VALUES "+q2);
-      lu_pstr.put("S8", INS+"S VALUES "+q7);
-      lu_pstr.put("S9", INS+"R VALUES "+q7);
-      lu_pstr.put("S10", INS+"W VALUES "+q8);
-      lu_pstr.put("S11", INS+"CW VALUES "+q9);
-      lu_pstr.put("S12", INS+"PD VALUES "+q4);
-      lu_pstr.put("S13", INS+"CPD VALUES "+q12);
-      lu_pstr.put("S14", INS+"CQ VALUES "+q14);
-      lu_pstr.put("S15", UPD+"E SET nu=? WHERE v1=? AND v2=?");
-      lu_pstr.put("S131", UPD+"W SET nu=? WHERE v1=? AND v2=?");
-      lu_pstr.put("S77", UPD+"CW SET te=?, ve=? WHERE sid=?");
-      lu_pstr.put("S84", UPD+"PD SET t2=? WHERE v2=? AND rid=?");
-      lu_pstr.put("S82", UPD+"CPD SET tp=? WHERE vp=? AND rid=?");
-      lu_pstr.put("S83", UPD+"CPD SET td=? WHERE vd=? AND rid=?");
-      lu_pstr.put("S76", DEL+"W WHERE sid=? AND t2>?");
-      lu_pstr.put("S42", DEL+"PD WHERE rid=?");
-      lu_pstr.put("S43", DEL+"CPD WHERE rid=?");
-      lu_pstr.put("S80", DEL+"CQ WHERE sid=? AND t2>?");
-      lu_pstr.put("S62", SEL+"COUNT (*) FROM V WHERE v<>0");
-      lu_pstr.put("S64", SEL+"MIN (lng), MAX (lng), MIN (lat), MAX (lat) "
-            + "FROM V WHERE v<>0");
-      lu_pstr.put("S63", SEL+"COUNT (*) FROM E WHERE v1<>0 AND v2<>0");
-      lu_pstr.put("S65", SEL+"MIN (dd), MAX (dd), SUM (dd) / COUNT (dd), "
-            + "MIN (nu), MAX (nu), SUM (nu) / COUNT (nu) "
-            + "FROM E WHERE v1<>0 AND v2<>0");
-      lu_pstr.put("S46", SEL+"dd, nu FROM E WHERE v1=? AND v2=?");
-      lu_pstr.put("S130", SEL+"lng, lat FROM V WHERE v=?");
-      lu_pstr.put("S70", SEL+"sid, sq, se, sl, so, sd, sb FROM S WHERE sid=?");
-      lu_pstr.put("S48", SEL+"sq, se FROM S WHERE sid=?");
-      lu_pstr.put("S66", SEL+"COUNT (*) FROM S");
-      lu_pstr.put("S75", SEL+"rid, rq, re, rl, ro, rd, rb FROM R WHERE rid=?");
-      lu_pstr.put("S51", SEL+"rq, re, rl, ro, rd FROM R WHERE rid=?");
-      lu_pstr.put("S67", SEL+"COUNT (*) FROM R");
-      lu_pstr.put("S59", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
-            + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
-            + "GROUP BY sid"
-            + ") as b ON a.sid=b.sid AND ABS(a.t2-?)=b.tdiff AND a.t2<=?");
-      lu_pstr.put("S128", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
-            + "SELECT sid FROM CW WHERE te>? OR (ve=0 AND sl>?)"
-            + ") as b ON a.sid=b.sid INNER JOIN ("
-            + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
-            + "GROUP BY sid"
-            + ") as c ON a.sid=c.sid AND ABS(a.t2-?)=c.tdiff AND a.t2<=?");
-      lu_pstr.put("S60", SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC");
-      lu_pstr.put("S129", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC");
-      lu_pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
-            + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC");
-      lu_pstr.put("S69", SEL+"t, v, Ls, Lr "
-            + "FROM r_server LEFT JOIN CQ ON t=t2 and v=v2 and Lr=rid "
-            + "WHERE r_server.sid=?"
-            + "   AND (t>? OR v=0)"
-            + "   AND (Ls IS NOT NULL OR Lr IS NOT NULL)"
-            + "ORDER BY t ASC, o2 ASC");
-      // A "timeout" of 30 seconds is hard-coded here
-      lu_pstr.put("S68", SEL+"* FROM R WHERE re<=? AND ?<=re+30 AND rid NOT IN  "
-            + "(SELECT rid FROM assignments_r)");
-      lu_pstr.put("S85", SEL+"uq FROM UQ WHERE uid=?");
-      lu_pstr.put("S86", SEL+"tp, td FROM CPD WHERE rid=?");
-      lu_pstr.put("S73", SEL+"q2 FROM CQ WHERE sid=? AND t2<=? "
-            + "ORDER BY t2 DESC, q2 DESC FETCH FIRST ROW ONLY");
-      lu_pstr.put("S87", SEL+"t2, q2, o2 FROM CQ WHERE sid=? AND t2<=? "
-            + "ORDER BY t2 DESC, o2 DESC FETCH FIRST ROW ONLY");
-      lu_pstr.put("S100", SEL+"rid FROM assignments WHERE t>? AND sid=?");
-      lu_pstr.put("S101", SEL+"rid FROM assignments WHERE t<=? AND sid=?");
-      lu_pstr.put("S102", SEL+"* FROM service_rate");
-      lu_pstr.put("S103", SEL+"* FROM dist_base");
-      lu_pstr.put("S104", SEL+"val FROM dist_s_travel WHERE sid=?");
-      lu_pstr.put("S105", SEL+"SUM (val) FROM dist_s_travel");
-      lu_pstr.put("S106", SEL+"val FROM dist_s_cruising WHERE sid=?");
-      lu_pstr.put("S107", SEL+"SUM (val) FROM dist_s_cruising");
-      lu_pstr.put("S108", SEL+"val FROM dist_s_service WHERE sid=?");
-      lu_pstr.put("S109", SEL+"SUM (val) FROM dist_s_service");
-      lu_pstr.put("S110", SEL+"val FROM dist_s_base");
-      lu_pstr.put("S111", SEL+"val FROM dist_r_base");
-      lu_pstr.put("S112", SEL+"val FROM dist_r_detour WHERE rid=?");
-      lu_pstr.put("S113", SEL+"SUM (val) FROM dist_r_detour");
-      lu_pstr.put("S114", SEL+"val FROM dist_r_transit WHERE rid=?");
-      lu_pstr.put("S115", SEL+"SUM (val) FROM dist_r_transit");
-      lu_pstr.put("S116", SEL+"val FROM dur_s_travel WHERE sid=?");
-      lu_pstr.put("S117", SEL+"SUM (val) FROM dur_s_travel");
-      lu_pstr.put("S118", SEL+"val FROM dur_r_pickup WHERE rid=?");
-      lu_pstr.put("S119", SEL+"SUM (val) FROM dur_r_pickup");
-      lu_pstr.put("S120", SEL+"val FROM dur_r_transit WHERE rid=?");
-      lu_pstr.put("S121", SEL+"SUM (val) FROM dur_r_transit");
-      lu_pstr.put("S122", SEL+"val FROM dur_r_travel WHERE rid=?");
-      lu_pstr.put("S123", SEL+"SUM (val) FROM dur_r_travel");
-      lu_pstr.put("S124", SEL+"val FROM t_r_depart WHERE rid=?");
-      lu_pstr.put("S125", SEL+"val FROM t_s_depart WHERE sid=?");
-      lu_pstr.put("S126", SEL+"val FROM t_r_arrive WHERE rid=?");
-      lu_pstr.put("S127", SEL+"val FROM t_s_arrive WHERE sid=?");
-      lu_pstr.put("S133", SEL+"val FROM f_status WHERE rid=? AND t<=? "
-          + "ORDER BY t DESC FETCH FIRST ROW ONLY");
-      lu_pstr.put("S134", SEL+"sid, te FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
-      lu_pstr.put("S135", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
-          + "SELECT t1 FROM W WHERE sid=? AND t1 <= ? AND ? < t2)");
-      lu_pstr.put("S136", SEL+"* FROM V");
-      lu_pstr.put("S137", SEL+"* FROM E");
-      lu_pstr.put("S138", SEL+"val FROM dist_r_unassigned");
-      lu_pstr.put("S139", UPD+"CPD SET te=? WHERE sid=?");
-      lu_pstr.put("S140", UPD+"CQ SET tp=?, td=? WHERE rid=?");
-      lu_pstr.put("S141", SEL+"* FROM r_user");
-      lu_pstr.put("S142", SEL+"SUM (dd) FROM W WHERE sid=? AND t2>?");
-      lu_pstr.put("S143", SEL+"* FROM R WHERE re<=? AND ?<=re+?");
-      lu_pstr.put("S144", SEL+"t2, v2, rid FROM CQ WHERE sid=? AND t2>? ORDER BY o2 ASC");
-      lu_pstr.put("S145", SEL+"te, ve FROM CW WHERE sid=?");
-      lu_pstr.put("S147", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
-          + "SELECT t1 FROM W WHERE sid=? AND v2=0)");
-      lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
-      lu_pstr.put("S149", SEL+"t2, v2 FROM W WHERE sid=? ORDER BY t2 ASC");
-    }
-    private PreparedStatement PS(Connection conn, String k) throws SQLException {
-      Print("Prepare statement "+k);
-      PreparedStatement p = null;
-      try {
-        p = conn.prepareStatement(lu_pstr.get(k),
-          ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        p.clearBatch();
-        p.clearParameters();
-      }
-      catch (SQLException e) {
-        throw e;
-      }
-      return p;
-    }
-    private int[] DBFetch(Connection conn,
-        String k, int ncols, Integer... values) throws SQLException {
-      PreparedStatement p = PS(conn, k);
-      Print("DBFetch("+lu_pstr.get(k)+")");
-      Print("DBFetch use conn "+conn.toString());
-      Print("DBFetch use thread "+Thread.currentThread().getName());
-      int[] output = new int[] { };
-      for (int i = 0; i < values.length; i++) {
-        if (values[i] == null) {
-          p.setNull((i + 1), java.sql.Types.INTEGER);
-          Print("Set param"+i+"=NULL");
-        } else {
-          p.setInt ((i + 1), values[i]);
-          Print("Set param"+(i + 1)+"="+values[i]);
-        }
-      }
-      try {
-        ResultSet res = p.executeQuery();  // <-- if stuck here, investigate locks
-        if (res.last() == true) {
-          output = new int[(ncols*res.getRow())];
-          res.first();
-          do {
-            for (int j = 1; j <= ncols; j++) {
-              output[((res.getRow() - 1)*ncols + (j - 1))] = res.getInt(j);
-            }
-          } while (res.next());
-        }
-        res.close();
-      }
-      catch (SQLException e) {
-        throw e;
-      }
-      p.close();
-      Print("DBFetch close conn "+conn.toString());
-      if (output.length == 0) {
-        Print("WARNING: DBFetch(3...) returned empty!");
-      }
-      return output;
-    }
-    private void PSAdd(PreparedStatement p, Integer... values) throws SQLException {
+      p = conn.prepareStatement(lu_pstr.get(k),
+        ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+      p.clearBatch();
       p.clearParameters();
+    } catch (SQLException e) {
+      throw e;
+    }
+    return p;
+  }
+  private int[] DBFetch(Connection conn, String k, int ncols, Integer... values)
+  throws SQLException {
+    int[] output = new int[] { };
+    try {
+      PreparedStatement p = PS(conn, k);
       for (int i = 0; i < values.length; i++) {
         if (values[i] == null) {
           p.setNull((i + 1), java.sql.Types.INTEGER);
-          Print("Set param"+i+"=NULL");
         } else {
           p.setInt ((i + 1), values[i]);
-          Print("Set param"+(i + 1)+"="+values[i]);
         }
       }
-      try {
-        p.addBatch();
+      ResultSet res = p.executeQuery();  // <-- if stuck here, investigate locks
+      if (res.last() == true) {
+        output = new int[(ncols*res.getRow())];
+        res.first();
+        do {
+          for (int j = 1; j <= ncols; j++) {
+            output[((res.getRow() - 1)*ncols + (j - 1))] = res.getInt(j);
+          }
+        } while (res.next());
       }
-      catch (SQLException e) {
-        throw e;
+      res.close();
+      p.close();
+    } catch (SQLException e) {
+      throw e;
+    }
+    return output;
+  }
+  private void PSAdd(PreparedStatement p, Integer... values) throws SQLException {
+    p.clearParameters();
+    for (int i = 0; i < values.length; i++) {
+      if (values[i] == null) {
+        p.setNull((i + 1), java.sql.Types.INTEGER);
+      } else {
+        p.setInt ((i + 1), values[i]);
       }
     }
-    private void PSSubmit(PreparedStatement... statements) throws SQLException {
-      try {
-        for (PreparedStatement p : statements) {
-          p.executeBatch();
-          p.close();
-        }
-      }
-      catch (SQLException e) {
-        throw e;
-      }
+    try {
+      p.addBatch();
+    } catch (SQLException e) {
+      throw e;
     }
+  }
+  private void PSSubmit(PreparedStatement... statements) throws SQLException {
+    try {
+      for (PreparedStatement p : statements) {
+        p.executeBatch();
+        p.close();
+      }
+    } catch (SQLException e) {
+      throw e;
+    }
+  }
 }

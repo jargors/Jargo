@@ -85,6 +85,7 @@ This file ([[src/Storage.nw]]) is the source for both the documentation
 <<Query count of requests>>
 <<Query ridesharing user>>
 <<Query request status>>
+<<Query request is assigned?>>
 <<Query queued requests>>
 <<Query active servers>>
 <<Query all server locations>>
@@ -115,15 +116,15 @@ This file ([[src/Storage.nw]]) is the source for both the documentation
 @
 \hi{Utilities}
 <<[[Storage]] public methods>>=
-<<Set debug flag>>
 <<Get reference to vertices cache>>
 <<Get reference to edges cache>>
 <<Get reference to users cache>>
 <<Load data model>>
 <<Load backup>>
+<<Load road network from database>>
+<<Load users from database>>
 <<Save backup>>
 <<Print SQL driver statistics>>
-<<Print SQL exception>>
 <<Get connection (for internal use)>>
 @
 \end{minipage}
@@ -1714,6 +1715,13 @@ definition} (\S\ref{sec:class-definition}).
 The preamble declares the package and imports dependencies.
 <<Storage.java preamble>>=
 package com.github.jargors;
+import com.github.jargors.exceptions.DuplicateVertexException;
+import com.github.jargors.exceptions.DuplicateEdgeException;
+import com.github.jargors.exceptions.DuplicateUserException;
+import com.github.jargors.exceptions.EdgeNotFoundException;
+import com.github.jargors.exceptions.UserNotFoundException;
+import com.github.jargors.exceptions.VertexNotFoundException;
+import com.github.jargors.Tools;
 @
 We import:
 \begin{itemize}
@@ -1801,26 +1809,35 @@ private PoolableConnectionFactory       poolableconnection_factory;
 private ObjectPool<PoolableConnection>  pool;
 private PoolingDriver                   driver;
 @ %def connection_factory poolableconnection_factory pool driver
-\item We declare a version string and a debug flag.
-<<[[Storage]] member variables>>=
-private final String  VERSION = "1.0.0";
-private       boolean DEBUG   = false;
-@ %def VERSION DEBUG
+\end{itemize}
+
+<<Open [[conn]]>>=
+Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
+@
+
+\subsection{Style Notes}
+\begin{itemize}
+\item Always use [[this]] when appropriate so that instance members can be
+easily distinguished.
 \end{itemize}
 
 \subsection{Constructor}
 \label{sec:constructor}
-The constructor simply establishes a connection to Derby and initializes the
-prepared statement strings.
+Failure here is catastrophic.
 <<[[Storage]] constructor>>=
 public Storage() {
-  Print("Initialize Storage Interface "+VERSION);
   try {
-    setupDriver();
-    PSInit();
-  } catch (RuntimeException e) {
+    this.setupDriver();
+  } catch (SQLException e) {
+    System.err.println("Storage.Storage(): "+<<Err0>>);
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  } catch (ClassNotFoundException e) {
+    System.err.println("Storage.Storage(): "+<<Err0>>);
     e.printStackTrace();
+    System.exit(1);
   }
+  this.PSInit();
 }
 @
 
@@ -1844,57 +1861,33 @@ value at position 1 is $b$; the value at position 2 is $c$.
 \subsection{Utilities}
 \label{sec:utilities}
 
-\subsubsection{[[setDebug]](1)}
-The [[setDebug]](1) method sets the [[DEBUG]] flag. If [[DEBUG]] is set to
-true, then debugging statements will be printed to terminal.
-<<Set debug flag>>=
-public void setDebug(boolean flag) {
-  DEBUG = flag;
-}
-@ %def setDebug
-
 \subsubsection{[[getReferenceVerticesCache]](0)}
-This method returns a read-only reference to the vertices cache,
-[[lu_vertices]]. It is used by Communicator so that vertex lookups performed by
-Client can use the cache directly instead of asking Storage. Real-world
-ridesharing algorithm clients likely would have a similar vertex cache
-available.
 <<Get reference to vertices cache>>=
 public final ConcurrentHashMap<Integer, int[]> getReferenceVerticesCache() {
-  return lu_vertices;
+  return this.lu_vertices;
 }
 @ %def getReferenceVerticesCache
 
 \subsubsection{[[getReferenceEdgesCache]](0)}
-This method returns a read-only reference to the edges cache, [[lu_edges]].
-Like [[getReferenceVerticesCache]](0), it is used by Communicator to support
-fast edge lookups by Client.
 <<Get reference to edges cache>>=
 public final ConcurrentHashMap<Integer,
     ConcurrentHashMap<Integer, int[]>> getReferenceEdgesCache() {
-  return lu_edges;
+  return this.lu_edges;
 }
 @ %def getReferenceEdgesCache
 
 \subsubsection{[[getReferenceUsersCache]](0)}
-This method returns a read-only reference to the users cache, [[lu_users]].
-Like [[getReferenceVerticesCache]](0), and [[getReferenceEdgesCache]](0), it is
-used by Communicator to support fast user lookups by Client.
 <<Get reference to users cache>>=
 public final ConcurrentHashMap<Integer, int[]> getReferenceUsersCache() {
-  return lu_users;
+  return this.lu_users;
 }
 @ %def getReferenceUsersCache
 
 \subsubsection{[[DBLoadDataModel]](0)}
-The [[DBLoadDataModel]](0) method loads the tables and views in
-\S\ref{sec:ridesharing-data-model} into the database.
 <<Load data model>>=
-public void DBLoadDataModel() throws RuntimeException {
-  Print("Load data model");
+public void DBLoadDataModel() {
   try {
     Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-    Print("Open connection "+conn.toString());
     Statement stmt = conn.createStatement();
     stmt.clearBatch();
     stmt.addBatch(<<Create Table V statement>>);
@@ -1942,95 +1935,128 @@ public void DBLoadDataModel() throws RuntimeException {
     stmt.addBatch("CREATE INDEX W_sid_t1_t2 ON W (sid, t1, t2)");
     stmt.executeBatch();
     conn.commit();
-    Print("Close connection "+conn.toString());
-    conn.close();
+  } catch (SQLException e) {
+    System.out.println("Storage.DBLoadDataModel(): "+<<Err0>>);
+    Tools.PrintSQLException(e);
+    System.exit(1);
   }
-  <<Catch and print [[SQLException]]>>
 }
 @ %def DBLoadDataModel
 
 \subsubsection{[[DBLoadBackup]](1)}
-The [[DBLoadBackup]](1) method loads a previously saved database snapshot into
-the storage layer. In this case, we need to reset the JDBC driver to use a
-connection URL that points to the on-disk snapshot. The snapshot is then loaded
-into a new in-memory Derby instance.
+A [[SQLException]] is possible if [[CONNECTIONS_URL]] is invalid. The client
+should catch and decide what to do next. A [[ClassNotFoundException]] is
+treated as catastrophic, but should never occur because [[Class.forName(1)]] in
+[[setupDriver(0)]] must have succeeded for Storage to be constructed in the
+first place!
 <<Load backup>>=
-public void DBLoadBackup(String p) throws RuntimeException {
-  Print("Load database backup ("+p+")");
+public void DBLoadBackup(String p) throws SQLException {
+  this.CONNECTIONS_URL = "jdbc:derby:memory:jargobak;createFrom="+p;
   try {
-    CONNECTIONS_URL = "jdbc:derby:memory:jargobak;createFrom="+p;
-    setupDriver();
-    <<..configure database properties>>
-    if (lu_vertices.isEmpty()) {
-      <<..load road network from database>>
-    }
-   if (lu_users.isEmpty()) {
-      <<..load users from database>>
-   }
+    this.setupDriver();
+  } catch (ClassNotFoundException e) {
+    System.out.println("Storage.DBLoadBackup(1): "+<<Err0>>);
+    e.printStackTrace();
+    System.exit(1);
   }
-  <<Catch and print [[SQLException]]>>
 }
 @ %def DBLoadBackup
-<<..load road network from database>>=
-int[] output = DBQueryAllVertices();
-for (int i = 0; i < (output.length/3); i++) {
-  int v = output[(3*i)];
-  int lng = output[(3*i + 1)];
-  int lat = output[(3*i + 2)];
-  lu_vertices.put(v, new int[] { lng, lat });
-}
-output = DBQueryAllEdges();
-for (int i = 0; i < (output.length/4); i++) {
-  int v1 = output[(4*i)];
-  int v2 = output[(4*i + 1)];
-  int dd = output[(4*i + 2)];
-  int nu = output[(4*i + 3)];
-  if (!lu_edges.containsKey(v1)) {
-    lu_edges.put(v1, new ConcurrentHashMap());
+
+\subsubsection{[[DBLoadRoadNetworkFromDB]](0)}
+Method [[DBQueryAllVertices]](0) might fail if Table V doesn't exist.  Method
+[[DBQueryAllEdges]](0) might fail if Table E doesn't exist. In other words,
+[[DBLoadDataModel]](0) was not called beforehand, or [[DBLoadBackup]](1) was
+not called beforehand, or [[DBLoadBackup]](1) was called with a corrupt Jargo
+instance. We should print an error and re-throw the exception.
+<<Load road network from database>>=
+public void DBLoadRoadNetworkFromDB() throws SQLException {
+  ConcurrentHashMap<Integer, int[]>    lu1 = new ConcurrentHashMap<>();
+  ConcurrentHashMap<Integer,
+    ConcurrentHashMap<Integer, int[]>> lu2 = new ConcurrentHashMap<>();
+  int[] output = new int[] { };
+  try {
+    output = this.DBQueryAllVertices();
+  } catch (SQLException e) {
+    throw e;
   }
-  lu_edges.get(v1).put(v2, new int[] { dd, nu });
-}
-@
-<<..load users from database>>=
-int[] output = new int[] { };
-try {
-  conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-  Print("Open connection "+conn.toString());
-  output = DBFetch(conn, "S141", 7);
-  for (int i = 0; i < (output.length/7); i++) {
-    int uid = output[(7*i)];
-    int uq = output[(7*i + 1)];
-    int ue = output[(7*i + 2)];
-    int ul = output[(7*i + 3)];
-    int uo = output[(7*i + 4)];
-    int ud = output[(7*i + 5)];
-    int ub = output[(7*i + 6)];
-    lu_users.put(uid, new int[] { uid, uq, ue, ul, uo, ud, ub });
-    if (uq > 0) {
-      lu_rstatus.put(uid, (DBFetch(conn, "S148", 1, uid).length > 0 ? true : false));
+  for (int i = 0; i < (output.length - 2); i += 3) {
+    int   v = output[(i + 0)];
+    int lng = output[(i + 1)];
+    int lat = output[(i + 2)];
+    lu1.put(v, new int[] { lng, lat });
+  }
+  try {
+    output = this.DBQueryAllEdges();
+  } catch (SQLException e) {
+    throw e;
+  }
+  for (int i = 0; i < (output.length - 3); i += 4) {
+    int v1 = output[(i + 0)];
+    int v2 = output[(i + 1)];
+    int dd = output[(i + 2)];
+    int nu = output[(i + 3)];
+    if (!lu2.containsKey(v1)) {
+      lu2.put(v1, new ConcurrentHashMap());
     }
+    lu2.get(v1).put(v2, new int[] { dd, nu });
   }
-  Print("Close connection "+conn.toString());
-  conn.close();
+  this.lu_vertices = lu1;
+  this.lu_edges    = lu2;
 }
-<<Catch and print [[SQLException]]>>
-@
+@ %def DBLoadRoadNetworkFromDB
+
+\subsubsection{[[DBLoadUsersFromDB]](0)}
+Method [[DBLoadUsersFroDB]](0) might fail if view r\_user doesn't exist.
+Method [[DBQueryRequestIsAssigned]](1) might fail if view assignments\_r
+doesn't exist. In other words, [[DBLoadDataModel]](0) was not called
+beforehand, or [[DBLoadBackup]](1) was not called beforehand, or
+[[DBLoadBackup]](1) was called with a corrupt Jargo instance. We should print
+an error and re-throw the exception.
+<<Load users from database>>=
+public void DBLoadUsersFromDB() throws SQLException {
+  ConcurrentHashMap<Integer, int[]> lu1 = new ConcurrentHashMap<>();
+  Map<Integer, Boolean>             lu2 = new HashMap<>();
+  int[] output = new int[] { };
+  try {
+    output = this.DBQueryAllUsers();
+  } catch (SQLException e) {
+    throw e;
+  }
+  try {
+    for (int i = 0; i < (output.length - 6); i += 7) {
+      int uid = output[(i + 0)];
+      int  uq = output[(i + 1)];
+      int  ue = output[(i + 2)];
+      int  ul = output[(i + 3)];
+      int  uo = output[(i + 4)];
+      int  ud = output[(i + 5)];
+      int  ub = output[(i + 6)];
+      lu1.put(uid, new int[] { uid, uq, ue, ul, uo, ud, ub });
+      if (uq > 0) {
+        lu2.put(uid, (this.DBQueryRequestIsAssigned(uid).length > 0 ? true : false));
+      }
+    }
+  } catch (SQLException e) {
+    throw e;
+  }
+  this.lu_users   = lu1;
+  this.lu_rstatus = lu2;
+}
+@ %def DBLoadUsersFromDB
 
 \subsubsection{[[DBSaveBackup]](1)}
-The [[DBSaveBackup]](1) method can save a database snapshot to disk.
+Method [[DBSaveBackup]](1) throws [[SQLException]] if the callable statement
+fails. We let the client decide how to handle any failure.
 <<Save backup>>=
-public void DBSaveBackup(String p) throws RuntimeException {
+public void DBSaveBackup(String p) throws SQLException {
   try {
     Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-    Print("Open connection "+conn.toString());
-    CallableStatement cs = conn.prepareCall(
-      "CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE(?)");
-    cs.setString(1, p);
+    CallableStatement cs =
+      conn.prepareCall("CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE("+p+")");
     cs.execute();
-    Print("Close connection "+conn.toString());
-    conn.close();
+  } catch (SQLException e) {
+    throw e;
   }
-  <<Catch and print [[SQLException]]>>
 }
 @ %def DBSaveBackup
 
@@ -2039,128 +2065,90 @@ The following code comes from the Apache DBCP2 examples and is licensed by the
 Apache Software Foundation. It prints the number of active and idle connections
 in the JDBC connection pool.
 <<Print SQL driver statistics>>=
-public void printSQLDriverStatistics() {
-  try {
-    PoolingDriver d = (PoolingDriver) DriverManager.getDriver(CONNECTIONS_DRIVER_URL);
-    ObjectPool<? extends Connection> cp = d.getConnectionPool(CONNECTIONS_POOL_NAME);
-    System.out.println("Connections: "+cp.getNumActive()+" active; "+cp.getNumIdle()+" idle");
-  }
-  <<Catch and print [[SQLException]]>>
+public void printSQLDriverStatistics() throws SQLException {
+  PoolingDriver d = (PoolingDriver) DriverManager.getDriver(CONNECTIONS_DRIVER_URL);
+  ObjectPool<? extends Connection> cp = d.getConnectionPool(CONNECTIONS_POOL_NAME);
+  System.out.println("Connections: "+cp.getNumActive()+" active; "+cp.getNumIdle()+" idle");
 }
 @ %def printSQLDriverStatistics
 
-\subsubsection{[[printSQLException]](1)}
-\label{sec:printSQLException(1)}
-The [[printSQLException]] method  unwraps the entire exception chain to unveil
-the real cause of a [[SQLException]].  This portion is licensed by the Apache
-Software Foundation.
-<<Print SQL exception>>=
-public void printSQLException(SQLException e) {
-  while (e != null) {
-    System.err.println("\n----- SQLException -----");
-    System.err.println("  SQL State:  " + e.getSQLState());
-    System.err.println("  Error Code: " + e.getErrorCode());
-    System.err.println("  Message:    " + e.getMessage());
-    e.printStackTrace(System.err);
-    e = e.getNextException();
-  }
-}
-@ %def printSQLException
-If [[SQLException]] occurs anywhere in the storage interface, we handle it using:
-\begin{itemize}
-\item Catch-and-print, for failed read operations. Automatically exports the
-last good state of the database to disk for offline analysis.
-<<Catch and print [[SQLException]]>>=
-catch (SQLException e1) {
-  printSQLException(e1);
-  DBSaveBackup(DERBY_DUMPNAME);
-  throw new RuntimeException("database failure");
-}
-@ \item Catch-and-rollback, for failed write operations. Automatically exports
-the last good state of the database to disk for offline analysis.
 <<Catch and rollback [[SQLException]]>>=
 catch (SQLException e1) {
   conn.rollback();
   conn.close();
-  printSQLException(e1);
+  PrintSQLException(e1);
   DBSaveBackup(DERBY_DUMPNAME);
   throw new RuntimeException("database failure");
 }
-@ \item Catch-and-throw, for fatal low-level SQL operations.
-<<Catch and throw [[SQLException]]>>=
-catch (SQLException e) {
-  throw e;
-}
 @
-\end{itemize}
 
 \subsubsection{[[_getConnection]](0)}
 For internal use.
 <<Get connection (for internal use)>>=
-public Connection _getConnection() throws RuntimeException {
-  try {
-    return DriverManager.getConnection(CONNECTIONS_POOL_URL);
-  }
-  <<Catch and print [[SQLException]]>>
+public Connection _getConnection() throws SQLException {
+  return DriverManager.getConnection(CONNECTIONS_POOL_URL);
 }
 @
 
 \subsection{Write Methods}
 \label{sec:write-methods}
-None of the write methods perform input validation, instead delegating that
-task to the database. If a method argument results in a database error, the
-method uses catch-and-print (\S\ref{sec:printSQLException(1)}) to throw a
-[[RuntimeException]].
-
-All write methods do a commit-and-close on a database connection. To save
-a little bit of space, we put this procedure into its own chunk here.
-<<..commit and close>>=
-conn.commit();
-Print("Close connection "+conn.toString());
-conn.close();
-@
 
 \subsubsection{[[DBAddNewVertex]](3)}
-The [[DBAddNewVertex]](3) method is used by the Controller to load an on-disk
-road network into the database. Duplicate-prevention is included here so the
-Controller doesn't have to.
+Give the client a chance to ignore duplicate vertex exceptions.
 <<Add new vertex>>=
-public void DBAddNewVertex(int v, int lng, int lat) throws RuntimeException {
-  if (!lu_vertices.containsKey(v)) {
+public void DBAddNewVertex(int v, int lng, int lat)
+throws DuplicateVertexException, SQLException {
+  if (lu_vertices.containsKey(v)) {
+    throw new DuplicateVertexException("Vertex "+v+" already exists.");
+  }
+  try {
+    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
     try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
       PreparedStatement pS0 = PS(conn, "S0");
       PSAdd(pS0, v, lng, lat);
       PSSubmit(pS0);
-      <<..commit and close>>
-      lu_vertices.put(v, new int[] { lng, lat });
+      conn.commit();
+    } catch (SQLException e) {
+      conn.rollback();
+      throw e;
+    } finally {
+      conn.close();
     }
-    <<Catch and print [[SQLException]]>>
+  } catch (SQLException e) {
+    throw e;
   }
+  lu_vertices.put(v, new int[] { lng, lat });
 }
 @ %def DBAddNewVertex
 
 \subsubsection{[[DBAddNewEdge]](4)}
-The [[DBAddNewEdge]](4) method is also used to load an on-disk road network
-into the database.
+Give the client a chance to ignore duplicate edge exceptions.
 <<Add new edge>>=
-public void DBAddNewEdge(int v1, int v2, int dd, int nu) throws RuntimeException {
+public void DBAddNewEdge(int v1, int v2, int dd, int nu)
+throws DuplicateEdgeException, SQLException {
+  if (lu_edges.containsKey(v1) && lu_edges.get(v1).containsKey(v2)) {
+    throw new DuplicateEdgeException("Edge ("+v1+", "+v2+") already exists.");
+  }
   if (!lu_edges.containsKey(v1)) {
     lu_edges.put(v1, new ConcurrentHashMap());
   }
-  if (!lu_edges.get(v1).containsKey(v2)) {
+  try {
+    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
     try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
       PreparedStatement pS1 = PS(conn, "S1");
       PSAdd(pS1, v1, v2, dd, nu);
       PSSubmit(pS1);
-      <<..commit and close>>
-      lu_edges.get(v1).put(v2, new int[] { dd, nu });
+      conn.commit();
+    } catch (SQLException e) {
+      conn.rollback();
+      throw e;
+    } finally {
+      conn.close();
     }
-    <<Catch and print [[SQLException]]>>
+  } catch (SQLException e) {
+    throw e;
   }
+  lu_edges.get(v1).put(v2, new int[] { dd, nu });
 }
 @ %def DBAddNewEdge
 
@@ -2168,54 +2156,59 @@ public void DBAddNewEdge(int v1, int v2, int dd, int nu) throws RuntimeException
 The [[DBUpdateEdgeSpeed]](3) method updates the maximum free-flow speed of an
 edge in the road network (in meters per second).
 <<Update edge speed>>=
-public void DBUpdateEdgeSpeed(int v1, int v2, int nu) throws RuntimeException {
+public void DBUpdateEdgeSpeed(int v1, int v2, int nu)
+throws EdgeNotFoundException, SQLException {
+  if (!(lu_edges.containsKey(v1) && lu_edges.get(v1).containsKey(v2))) {
+    throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
+  }
   try {
     Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-    Print("Open connection "+conn.toString());
-    PreparedStatement pS15 = PS(conn, "S15");
-    PreparedStatement pS131 = PS(conn, "S131");
-    PSAdd(pS15, nu, v1, v2);
-    PSAdd(pS131, nu, v1, v2);
-    PSSubmit(pS15, pS131);
-    <<..commit and close>>
-    int dd = lu_edges.get(v1).get(v2)[0];
-    lu_edges.get(v1).put(v2, new int[] { dd, nu });
+    try {
+      PreparedStatement pS15 = PS(conn, "S15");
+      PreparedStatement pS131 = PS(conn, "S131");
+      PSAdd(pS15, nu, v1, v2);
+      PSAdd(pS131, nu, v1, v2);
+      PSSubmit(pS15, pS131);
+      conn.commit();
+    } catch (SQLException e) {
+      conn.rollback();
+      throw e;
+    } finally {
+      conn.close();
+    }
+  } catch (SQLException e) {
+    throw e;
   }
-  <<Catch and print [[SQLException]]>>
+  int dd = lu_edges.get(v1).get(v2)[0];
+  lu_edges.get(v1).put(v2, new int[] { dd, nu });
 }
 @ %def DBUpdateEdgeSpeed
 
 \subsubsection{[[DBAddNewRequest]](1)}
-Array [[u]] =
-
-\noindent
-\begin{tikzpicture}
-\small
-\matrix[nodes={draw,minimum size=6mm}] {
-  \node {$0:\textrm{user identifier}$};
- &\node {$1:u_q$}; & \node {$2:u_e$}; & \node {$3:u_l$};
- &\node {$4:u_o$}; & \node {$5:u_d$}; & \node {$6:d_u$};\\
-};
-\end{tikzpicture}
-
-\noindent for user $u$, where $d_u$ is the base distance.
-The value of $u_q$ \emph{must} be greater than 0.
-
 <<Add new request>>=
-public void DBAddNewRequest(int[] u) throws RuntimeException {
-  if (!lu_users.containsKey(u[0])) {
+public void DBAddNewRequest(int[] u)
+throws DuplicateUserException, SQLException {
+  int uid = u[0];
+  if (lu_users.containsKey(uid)) {
+    throw new DuplicateUserException("User "+uid+" already exists.");
+  }
+  try {
+    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
     try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
-      int uid = u[0];
       <<..insert new user into user tables>>
       <<..insert new request into r>>
-      <<..commit and close>>
-      lu_users.put(u[0], u.clone());
-      lu_rstatus.put(u[0], false);
+      conn.commit();
+    } catch (SQLException e) {
+      conn.rollback();
+      throw e;
+    } finally {
+      conn.close();
     }
-    <<Catch and print [[SQLException]]>>
+  } catch (SQLException e) {
+    throw e;
   }
+  lu_users.put(u[0], u.clone());
+  lu_rstatus.put(u[0], false);
 }
 @ %def DBAddNewRequest
 <<..insert new user into user tables>>=
@@ -2240,52 +2233,33 @@ PSSubmit(pS9);
 @
 
 \subsubsection{[[DBAddNewServer]](2)}
-Array [[u]] =
-
-\noindent
-\begin{tikzpicture}
-\small
-\matrix[nodes={draw,minimum size=6mm}] {
-  \node {$0:\textrm{user identifier}$};
- &\node {$1:u_q$}; & \node {$2:u_e$}; & \node {$3:u_l$};
- &\node {$4:u_o$}; & \node {$5:u_d$}; & \node {$6:d_u$};\\
-};
-\end{tikzpicture}
-
-\noindent for user $u$, where $d_u$ is the base distance.
-The value of $u_q$ \emph{must} be less than 0. Array [[route]] =
-
-\noindent
-\begin{tikzpicture}
-\small
-\matrix[nodes={draw,minimum size=6mm}] {
-  \node {$0:t_i$}; & \node {$1:v_i$};
- &\node {$0:t_{i+1}$}; & \node {$1:v_{i+1}$};
- &\node[minimum width=12mm] {...};
- &\node {$(2|w|-2):t_{|w|}$}; & \node {$(2|w|-1):v_{|w|}$};\\
-};
-\end{tikzpicture}
-
-\noindent for route $w$.
-
 <<Add new server>>=
-public void DBAddNewServer(int[] u, int[] route) throws RuntimeException {
+public void DBAddNewServer(int[] u, int[] route)
+throws DuplicateUserException, EdgeNotFoundException, SQLException {
   int uid = u[0];
-  if (!lu_users.containsKey(uid)) {
+  if (lu_users.containsKey(uid)) {
+    throw new DuplicateUserException("User "+uid+" already exists.");
+  }
+  try {
+    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
     try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      Print("Open connection "+conn.toString());
       int se = u[2];
       <<..insert new user into user tables>>
       <<..insert new server into s>>
       <<..insert new server route into w>>
       <<..insert new server route into cw>>
       <<..insert new server into cq>>
-      <<..commit and close>>
-      lu_users.put(uid, u.clone());
+      conn.commit();
+    } catch (SQLException e) {
+      conn.rollback();
+      throw e;
+    } finally {
+      conn.close();
     }
-    <<Catch and print [[SQLException]]>>
+  } catch (SQLException e) {
+    throw e;
   }
+  lu_users.put(uid, u.clone());
 }
 @ %def DBAddNewServer
 <<..insert new server into s>>=
@@ -2298,7 +2272,6 @@ we can re-use it later. The procedure requires an integer array [[output]].
 After the procedure, we can re-initialize prepared statement [[pS10]] to add the first
 waypoint, with [[null]] as its predecessor, into the database.
 <<..insert new server route into w>>=
-int[] output = new int[] { };
 <<Procedure to insert [[route]] into Table W>>
 pS10 = PS(conn, "S10");
 PSAdd(pS10, uid, se, null, null, route[0], route[1], null, null);
@@ -2307,14 +2280,15 @@ PSSubmit(pS10);
 <<Procedure to insert [[route]] into Table W>>=
 PreparedStatement pS10 = PS(conn, "S10");
 for (int i = 0; i < (route.length - 3); i += 2) {
-  int t1 = route[i];
+  int t1 = route[(i + 0)];
   int v1 = route[(i + 1)];
   int t2 = route[(i + 2)];
   int v2 = route[(i + 3)];
+  if (!(lu_edges.containsKey(v1) && lu_edges.get(v1).containsKey(v2))) {
+    throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
+  }
   int dd = lu_edges.get(v1).get(v2)[0];
   int nu = lu_edges.get(v1).get(v2)[1];
-  Print("Issue INSERT INTO W VALUES ("+uid+", "+se+", "+t1+", "+v1+", "+t2+", "
-    +v2+", "+dd+", "+nu+")");
   PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
 }
 PSSubmit(pS10);
@@ -2332,75 +2306,33 @@ PSAdd(pS14, uid, u[1], u[2], null, u[2], u[4], null, u[1],
 PSSubmit(pS14);
 @
 \subsubsection{[[DBUpdateServerRoute]](3)}
-The [[DBUpdateServerRoute]](3) method can be used to
-\begin{enumerate}
-\item update the route of a server with no schedule;
-\item update the route of a server through the server's existing schedule;
-\item update the ordering of the remaining stops in the server's schedule.
-\end{enumerate}
-To perform Item 1, pass the new route as [[route]] and an empty array as
-[[sched]]. To perform Item 2, pass the new route as [[route]]. Then as the
-timing of the stops in the schedule may have changed, pass along the updated
-timings in [[sched]]. To perform Item 3, pass the new arrangement in [[sched]]
-and the new route through the arrangement as [[route]].
-
-Array [[route]] =
-
-\noindent
-\begin{tikzpicture}
-\small
-\matrix[nodes={draw,minimum size=6mm}] {
-  \node {$0:t_i$}; & \node {$1:v_i$};
- &\node {$2:t_{i+1}$}; & \node {$3:v_{i+1}$};
- &\node[minimum width=12mm] {...};
- &\node {$(2|w|-2):t_{|w|}$}; & \node {$(2|w|-1):v_{|w|}$};\\
-};
-\end{tikzpicture}
-
-\noindent for route $w$. Array [[sched]] =
-
-\noindent
-\begin{tikzpicture}
-\small
-\matrix[nodes={draw,minimum size=6mm}] {
-  \node {$0:t_{i_j}$}; & \node {$1:v_{i_j}$}; & \node {$2:L_{i_j}$};
- &\node {$3:t_{i_{j+1}}$}; & \node {$4:v_{i_{j+1}}$}; & \node {$5:L_{i_{j+1}}$};
- &\node[minimum width=12mm] {...};
- &\node {$(3|b|-3):t_{i_{|b|}}$};
- &\node {$(3|b|-2):v_{i_{|b|}}$};
- &\node {$(3|b|-1):L_{i_{|b|}}$}; \\
-};
-\end{tikzpicture}
-
-\noindent for schedule $b$, where $(t_{i_j},v_{i_j})$ make up a waypoint and
-$L_{i_j}$ is the label. Important notes:
-\begin{itemize}
-\item all waypoints beyond $t_i$ in the existing route will be replaced with
-those in [[route]];
-\item all stops beyond $(t_{i_j},v_{i_j})$ in the existing schedule will be
-replaced with those in [[sched]];
-\item waypoint $(t_i,v_i)$ \emph{must} exist in the current route;
-\item index $i_j$ must \emph{not} equal $i$; in other words the first waypoint
-in [[route]] cannot be labeled.
-\end{itemize}
-
 <<Update server route>>=
 public void DBUpdateServerRoute(int sid, int[] route, int[] sched)
-throws RuntimeException {
+throws UserNotFoundException, EdgeNotFoundException, SQLException {
+  if (!lu_users.containsKey(sid)) {
+    throw new UserNotFoundException("User "+sid+" not found.");
+  }
   int[] output = new int[] { };
   int se, sq;
   try {
     Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-    Print("Open connection "+conn.toString());
-    <<..fetch [[sq]] and [[se]]>>
-    <<..update route>>
-    if (sched.length > 0) {
-      Map<Integer, int[]> cache = new HashMap<>();
-      <<..update schedule>>
+    try {
+      <<..fetch [[sq]] and [[se]]>>
+      <<..update route>>
+      if (sched.length > 0) {
+        Map<Integer, int[]> cache = new HashMap<>();
+        <<..update schedule>>
+      }
+      conn.commit();
+    } catch (SQLException e) {
+      conn.rollback();
+      throw e;
+    } finally {
+      conn.close();
     }
-    <<..commit and close>>
+  } catch (SQLException e) {
+    throw e;
   }
-  <<Catch and print [[SQLException]]>>
 }
 @ %def DBUpdateServerRoute
 <<..fetch [[sq]] and [[se]]>>=
@@ -2408,19 +2340,13 @@ sq = lu_users.get(sid)[1];
 se = lu_users.get(sid)[2];
 @
 <<..update route>>=
-Print("B1");
 <<....delete remaining route from w>>
-Print("B2");
 <<....insert new remaining route into w>>
-Print("B3");
 <<....update route endpoint in cw, cpd>>
-Print("B4");
 @
-Using greater-than preserves the predecessor already recorded for ([[route[0]]]. [[route[1]]]).
 <<....delete remaining route from w>>=
 PreparedStatement pS76 = PS(conn, "S76");
 PSAdd(pS76, sid, route[0]);
-Print("Issue DELETE FROM W WHERE sid="+sid+" AND t2>"+route[0]);
 PSSubmit(pS76);
 @
 The chunk for inserting [[route]] into Table W uses [[uid]], so we set it here.
@@ -2435,12 +2361,9 @@ int te = route[(route.length - 2)];
 int ve = route[(route.length - 1)];
 PSAdd(pS77, te, ve, sid);
 PSAdd(pS139, te, sid);
-Print("Issue UPDATE CW SET te="+te+", ve="+ve+" WHERE sid="+sid);
-Print("Issue UPDATE CPD SET te="+te+" WHERE sid="+sid);
 PSSubmit(pS77, pS139);
 @
 <<..update schedule>>=
-int bound = (sched.length/3);
 <<....update times in pd and cpd>>
 <<....populate the tp, td cache and update cq>>
 <<....select latest order number>>
@@ -2451,14 +2374,11 @@ int bound = (sched.length/3);
 PreparedStatement pS82 = PS(conn, "S82");
 PreparedStatement pS83 = PS(conn, "S83");
 PreparedStatement pS84 = PS(conn, "S84");
-for (int j = 0; j < bound; j++) {
-  int tj = sched[(3*j + 0)];
-  int vj = sched[(3*j + 1)];
-  int Lj = sched[(3*j + 2)];
+for (int j = 0; j < (sched.length - 2); j += 3) {
+  int tj = sched[(j + 0)];
+  int vj = sched[(j + 1)];
+  int Lj = sched[(j + 2)];
   if (Lj != sid) {
-    Print("UPDATE CPD SET tp="+tj+" WHERE vp="+vj+" AND rid="+Lj);
-    Print("UPDATE CPD SET td="+tj+" WHERE vd="+vj+" AND rid="+Lj);
-    Print("UPDATE PD SET t2="+tj+" WHERE v2="+vj+" AND rid="+Lj);
     PSAdd(pS82, tj, vj, Lj);
     PSAdd(pS83, tj, vj, Lj);
     PSAdd(pS84, tj, vj, Lj);
@@ -2468,8 +2388,8 @@ PSSubmit(pS82, pS83, pS84);
 @
 <<....populate the tp, td cache and update cq>>=
 PreparedStatement pS140 = PS(conn, "S140");
-for (int j = 0; j < bound; j++) {
-  int Lj = sched[(3*j + 2)];
+for (int j = 0; j < (sched.length - 2); j += 3) {
+  int Lj = sched[(j + 2)];
   if (Lj != sid) {
     int rq, tp, td;
     if (!cache.containsKey(Lj)) {
@@ -2478,7 +2398,6 @@ for (int j = 0; j < bound; j++) {
       tp = output[0];
       td = output[1];
       cache.put(Lj, new int[] { rq, tp, td });
-      Print("UPDATE CQ SET tp="+tp+", td="+td+" WHERE rid="+Lj);
       PSAdd(pS140, tp, td, Lj);
     }
   }
@@ -2501,22 +2420,18 @@ if (route[0] == 0) {
 <<....delete remaining schedule from cq>>=
 PreparedStatement pS80 = PS(conn, "S80");
 PSAdd(pS80, sid, route[0]);
-Print("Issue DELETE FROM CQ WHERE sid="+sid+" AND t2>"+route[0]);
 PSSubmit(pS80);
 @
 <<....insert new remaining schedule into cq>>=
 PreparedStatement pS14 = PS(conn, "S14");
-for (int j = 0; j < bound; j++) {
-  int t2 = sched[(3*j)];
-  int v2 = sched[(3*j + 1)];
-  int Lj = sched[(3*j + 2)];
+for (int j = 0; j < (sched.length - 2); j += 3) {
+  int t2 = sched[(j + 0)];
+  int v2 = sched[(j + 1)];
+  int Lj = sched[(j + 2)];
   if (Lj != sid) {
     int[] qpd = cache.get(Lj);
     int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
     int o2 = o1 + 1;
-    Print("Issue INSERT INTO CQ VALUES "+sid+", "+sq+", "+se+", "+t1+", "+t2
-        +", "+v2+", "+q1+", "+q2+", "+Lj+", "+qpd[0]+", "+qpd[1]+", "+qpd[2]
-        +", "+o1+", "+o2);
     PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
           qpd[0], qpd[1], qpd[2], o1, o2);
     t1 = t2;
@@ -2528,141 +2443,59 @@ PSSubmit(pS14);
 @
 
 \subsubsection{[[DBUpdateServerAddToSchedule]](4)}
-The [[DBUpdateServerAddToSchedule]](4) method can be used to add new labeled
-waypoints to a server's existing remaining schedule. The ordering of the
-remaining waypoints in the existing schedule does not have to be the same
-upon adding the new waypoints. Pass the new remaining schedule as [[sched]] and
-the new route through this schedule as [[route]]. Pass the identifiers of all
-the requests used to label the new waypoints, in other words the new
-requests assigned to the server, as array [[rid]].
-
-Array [[route]] =
-
-\noindent
-\begin{tikzpicture}
-\small
-\matrix[nodes={draw,minimum size=6mm}] {
-  \node {$0:t_i$}; & \node {$1:v_i$};
- &\node {$2:t_{i+1}$}; & \node {$3:v_{i+1}$};
- &\node[minimum width=12mm] {...};
- &\node {$(2|w|-2):t_{|w|}$}; & \node {$(2|w|-1):v_{|w|}$};\\
-};
-\end{tikzpicture}
-
-\noindent for route $w$. Array [[sched]] =
-
-\noindent
-\begin{tikzpicture}
-\small
-\matrix[nodes={draw,minimum size=6mm}] {
-  \node {$0:t_{i_j}$}; & \node {$1:v_{i_j}$}; & \node {$2:L_{i_j}$};
- &\node {$3:t_{i_{j+1}}$}; & \node {$4:v_{i_{j+1}}$}; & \node {$5:L_{i_{j+1}}$};
- &\node[minimum width=12mm] {...};
- &\node {$(3|b|-3):t_{i_{|b|}}$};
- &\node {$(3|b|-2):v_{i_{|b|}}$};
- &\node {$(3|b|-1):L_{i_{|b|}}$}; \\
-};
-\end{tikzpicture}
-
-\noindent for schedule $b$, where $(t_{i_j},v_{i_j})$ make up a waypoint and
-$L_{i_j}$ is the label. Array [[rid]] = any permutation of
-
-\noindent
-\begin{tikzpicture}
-\small
-\matrix[nodes={draw,minimum size=6mm}] {
-  \node {$0:L_{i_{j'}}$};
- &\node {$1:L_{i_{(j'+1)}}$};
- &\node[minimum width=12mm] {...};
- &\node {$(n-1):L_{i_{(j'+n-1)}}$};\\
-};
-\end{tikzpicture}
-
-\noindent where $i_{j'},i_{j'+1},...i_{j'+n-1}$ identify the $n$ new labels
-(request identifiers) not appearing in the server's existing remaining
-schedule.
-
-Important notes:
-\begin{itemize}
-\item all waypoints beyond $t_i$ in the existing route will be replaced with
-those in [[route]];
-\item all stops beyond $(t_{i_j},v_{i_j})$ in the existing schedule will be
-replaced with those in [[sched]];
-\item waypoint $(t_i,v_i)$ \emph{must} exist in the current route;
-\item index $i_j$ must \emph{not} equal $i$; in other words the first waypoint
-in [[route]] cannot be labeled;
-\item array [[rid]] can be in any order.
-\end{itemize}
 <<Update server add to schedule>>=
-public void DBUpdateServerAddToSchedule(
-    int sid, int[] route, int[] sched, int[] rid)
-throws RuntimeException {
-  Print("Call DBUpdateServerAddToSchedule(4)");
-  Print("  sid="+sid);
-  Print("  route.length="+route.length);
-  Print("  schedule.length="+sched.length);
-  for (int i = 0; i < route.length; i++)
-    Print("route["+i+"]="+route[i]);
-  for (int i = 0; i < sched.length; i++)
-    Print("sched["+i+"]="+sched[i]);
-  for (int i = 0; i < rid.length; i++)
-    Print("rid["+i+"]="+rid[i]);
-
+public void DBUpdateServerAddToSchedule(int sid, int[] route, int[] sched, int[] rid)
+throws UserNotFoundException, EdgeNotFoundException, SQLException {
+  if (!lu_users.containsKey(sid)) {
+    throw new UserNotFoundException("User "+sid+" not found.");
+  }
+  for (int r : rid) {
+    if (!lu_users.containsKey(r)) {
+      throw new UserNotFoundException("User "+r+" not found.");
+    }
+  }
   int[] output = new int[] { };
   int se, sq;
-  Map<Integer, int[]> cache = new HashMap<>();
+  Map<Integer, int[]> cache  = new HashMap<>();
   Map<Integer, int[]> cache2 = new HashMap<>();
   try {
     Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-    Print("Open connection "+conn.toString());
-    Print("A1");
-    <<..fetch [[sq]] and [[se]]>>
-    Print("A2");
-    <<..update route>>
-    Print("A3");
-    <<..update and add to schedule>>
-    Print("A4");
     try {
-      <<..commit and close>>
-      Print("A5");
-      for (int r : rid) {
-        lu_rstatus.put(r, true);
-      }
+      <<..fetch [[sq]] and [[se]]>>
+      <<..update route>>
+      <<..update and add to schedule>>
+      conn.commit();
+    } catch (SQLException e) {
+      conn.rollback();
+      throw e;
+    } finally {
+      conn.close();
     }
-    // If commit and close fails, we need to rollback the commit
-    // and manually close the connection
-    <<Catch and rollback [[SQLException]]>>
+  } catch (SQLException e) {
+    throw e;
   }
-  // If DriverManager.getConnection fails, we throw a 'database failure'
-  <<Catch and print [[SQLException]]>>
+  for (int r : rid) {
+    lu_rstatus.put(r, true);
+  }
 }
 @ %def DBUpdateServerAddToSchedule
 <<..update and add to schedule>>=
-int bound = (sched.length/3);
-Print("C1");
 <<....update times in pd and cpd>>
-Print("C2");
 <<....populate the tp, td cache and vp, vd cache and update cq>>
-Print("C3");
 <<....select latest order number>>
-Print("C4");
 <<....delete remaining schedule from cq>>
-Print("C5");
 <<....insert new remaining schedule into cq>>
-Print("C6");
 <<....insert into pd, cpd>>
-Print("C7");
 @
 <<....populate the tp, td cache and vp, vd cache and update cq>>=
 PreparedStatement pS140 = PS(conn, "S140");
-for (int j = 0; j < bound; j++) {
-  int Lj = sched[(3*j + 2)];
+for (int j = 0; j < (sched.length - 2); j += 3) {
+  int Lj = sched[(j + 2)];
   if (Lj != sid) {
     int rq, tp, vp;
     int td = -1;
     int vd = -1;
     if (!cache.containsKey(Lj)) {
-      // rq = DBFetch(conn, "S85", 1, Lj)[0];
       rq = lu_users.get(Lj)[1];
       boolean flagged = false;
       <<......check if new job>>
@@ -2672,10 +2505,8 @@ for (int j = 0; j < bound; j++) {
         output = DBFetch(conn, "S86", 2, Lj);
         tp = output[0];
         td = output[1];
-        Print("UPDATE CQ SET tp="+tp+", td="+td+" WHERE rid="+Lj);
         PSAdd(pS140, tp, td, Lj);
       }
-      Print("cache.put("+Lj+", { "+rq+", "+tp+", "+td+" })");
       cache.put(Lj, new int[] { rq, tp, td });
     }
   }
@@ -2685,7 +2516,6 @@ PSSubmit(pS140);
 <<......check if new job>>=
 for (int r : rid) {
   if (Lj == r) {
-    Print("set flagged=true");
     flagged = true;
     break;
   }
@@ -2694,24 +2524,14 @@ for (int r : rid) {
 A second cache, [[cache2]], is introduced to store the pick-up an drop-off
 vertices so that we can use them when we insert into Table PD and CPD.
 <<......get tp, vp, td, vd of new job>>=
-Print("get tp, vp, td, vd of new job");
-tp = sched[(3*j)];
-vp = sched[(3*j + 1)];
-Print("set tp="+tp);
-Print("set vd="+vd);
-for (int k = (j + 1); k < bound; k++) {
-  Print(": k="+k);
-  Print(":   Lj="+Lj);
-  Print(":   sched[(3*k+2)]="+sched[3*k+2]);
-  if (Lj == sched[(3*k + 2)]) {
-    td = sched[(3*k)];
-    vd = sched[(3*k + 1)];
-    Print(":   set td="+sched[3*k]);
-    Print(":   set vd="+sched[3*k+1]);
+tp = sched[(j + 0)];
+vp = sched[(j + 1)];
+for (int k = (j + 3); k < (sched.length - 2); k += 3) {
+  if (Lj == sched[(k + 2)]) {
+    td = sched[(k + 0)];
+    vd = sched[(k + 1)];
   }
 }
-Print("set td="+td);
-Print("set vd="+vd);
 cache2.put(Lj, new int[] { vp, vd });
 @
 <<....insert into pd, cpd>>=
@@ -2728,13 +2548,8 @@ for (int r : rid) {
   rd = output[4];
   qpd = cache.get(r);
   pd = cache2.get(r);
-  Print("INSERT INTO PD VALUES ("+sid+", "+qpd[1]+", "+pd[0]+", "+r+")");
-  Print("INSERT INTO PD VALUES ("+sid+", "+qpd[2]+", "+pd[1]+", "+r+")");
   PSAdd(pS12, sid, qpd[1], pd[0], r);
   PSAdd(pS12, sid, qpd[2], pd[1], r);
-  Print("INSERT INTO CPD VALUES ("+sid+", "+se+", "+route[(route.length - 2)]
-    +", "+qpd[1]+", "+pd[0]+", "+qpd[2]+", "+pd[1]+", "+r+", "+re+", "+rl
-    +", "+ro+", "+rd+")");
   PSAdd(pS13, sid, se, route[(route.length - 2)], qpd[1], pd[0], qpd[2], pd[1],
         r, re, rl, ro, rd);
 }
@@ -2742,88 +2557,37 @@ PSSubmit(pS12, pS13);
 @
 
 \subsubsection{[[DBUpdateServerRemoveFromSchedule]](4)}
-The [[DBUpdateServerRemoveFromSchedule]](4) method can be used to remove
-existing labeled waypoints from a server's existing remaining schedule. The
-ordering of the remaining waypoints does not have to be the same as before.
-Pass the new remaining schedule as [[sched]] and the new route through this
-schedule as [[route]]. Pass the identifiers of all the requests used to label
-the waypoints to be removed, in other words the requests to unassign from the
-server, as array [[rid]].
-
-Array [[route]] =
-
-\noindent
-\begin{tikzpicture}
-\small
-\matrix[nodes={draw,minimum size=6mm}] {
-  \node {$0:t_i$}; & \node {$1:v_i$};
- &\node {$2:t_{i+1}$}; & \node {$3:v_{i+1}$};
- &\node[minimum width=12mm] {...};
- &\node {$(2|w|-2):t_{|w|}$}; & \node {$(2|w|-1):v_{|w|}$};\\
-};
-\end{tikzpicture}
-
-\noindent for route $w$. Array [[sched]] =
-
-\noindent
-\begin{tikzpicture}
-\small
-\matrix[nodes={draw,minimum size=6mm}] {
-  \node {$0:t_{i_j}$}; & \node {$1:v_{i_j}$}; & \node {$2:L_{i_j}$};
- &\node {$3:t_{i_{j+1}}$}; & \node {$4:v_{i_{j+1}}$}; & \node {$5:L_{i_{j+1}}$};
- &\node[minimum width=12mm] {...};
- &\node {$(3|b|-3):t_{i_{|b|}}$};
- &\node {$(3|b|-2):v_{i_{|b|}}$};
- &\node {$(3|b|-1):L_{i_{|b|}}$}; \\
-};
-\end{tikzpicture}
-
-\noindent for schedule $b$, where $(t_{i_j},v_{i_j})$ make up a waypoint and
-$L_{i_j}$ is the label. Array [[rid]] = any permutation of
-
-\noindent
-\begin{tikzpicture}
-\small
-\matrix[nodes={draw,minimum size=6mm}] {
-  \node {$0:L_{i_{j'}}$};
- &\node {$1:L_{i_{(j'+1)}}$};
- &\node[minimum width=12mm] {...};
- &\node {$(n-1):L_{i_{(j'+n-1)}}$};\\
-};
-\end{tikzpicture}
-
-\noindent where $i_{j'},i_{j'+1},...i_{j'+n-1}$ identify the $n$ labels
-(request identifiers) appearing in the server's existing remaining
-schedule but not in $[[sched]]$, in other words the labels that will be removed.
-
-Important notes:
-\begin{itemize}
-\item all waypoints beyond $t_i$ in the existing route will be replaced with
-those in [[route]];
-\item all stops beyond $(t_{i_j},v_{i_j})$ in the existing schedule will be
-replaced with those in [[sched]];
-\item waypoint $(t_i,v_i)$ \emph{must} exist in the current route;
-\item index $i_j$ must \emph{not} equal $i$; in other words the first waypoint
-in [[route]] cannot be labeled;
-\item array [[rid]] can be in any order.
-\end{itemize}
 <<Update server remove from schedule>>=
-public void DBUpdateServerRemoveFromSchedule(
-    int sid, int[] route, int[] sched, int[] rid)
-throws RuntimeException {
+public void DBUpdateServerRemoveFromSchedule(int sid, int[] route, int[] sched, int[] rid)
+throws UserNotFoundException, EdgeNotFoundException, SQLException {
+  if (!lu_users.containsKey(sid)) {
+    throw new UserNotFoundException("User "+sid+" not found.");
+  }
+  for (int r : rid) {
+    if (!lu_users.containsKey(r)) {
+      throw new UserNotFoundException("User "+r+" not found.");
+    }
+  }
   int[] output = new int[] { };
   int se, sq;
   Map<Integer, int[]> cache = new HashMap<>();
   try {
     Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-    Print("Open connection "+conn.toString());
-    <<..fetch [[sq]] and [[se]]>>
-    <<..update route>>
-    <<..update schedule>>
-    <<..remove jobs from pd, cpd>>
-    <<..commit and close>>
+    try {
+      <<..fetch [[sq]] and [[se]]>>
+      <<..update route>>
+      <<..update schedule>>
+      <<..remove jobs from pd, cpd>>
+      conn.commit();
+    } catch (SQLException e) {
+      conn.rollback();
+      throw e;
+    } finally {
+      conn.close();
+    }
+  } catch (SQLException e) {
+    throw e;
   }
-  <<Catch and print [[SQLException]]>>
   for (int r : rid) {
     lu_rstatus.remove(r);
   }
@@ -2841,56 +2605,49 @@ PSSubmit(pS42, pS43);
 
 \subsection{Read Methods}
 \label{sec:read-methods}
-Read methods (except for [[DBQuery]](2)) are implemented by wrapping
-[[DBFetch]](3...). As they all follow the same format, we chunk out the
-common portions here in order to emphasize [[DBFetch]].
-<<..read prepare>>=
-int[] output = new int[] { };
-try {
-  Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-  Print("Open connection "+conn.toString());
-@
-<<..read return>>=
-  Print("Close connection "+conn.toString());
-  conn.close();
-}
-<<Catch and print [[SQLException]]>>
-return output;
-@
 
 \subsubsection{[[DBQuery]](2)}
-Run custom [[SELECT]] queries against the database using [[DBQuery]]. The
-second parameter indicates the number of columns in the [[SELECT]] statement.
 <<Query custom statement>>=
-public int[] DBQuery(String sql, int ncols) throws RuntimeException {
-  <<..read prepare>>
-  Statement stmt = conn.createStatement(
-    ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-  ResultSet res = stmt.executeQuery(sql);
-  if (res.last()) {
-    <<..flatten results>>
+public int[] DBQuery(String sql, int ncols) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    Statement stmt = conn.createStatement(
+      ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+    ResultSet res = stmt.executeQuery(sql);
+    if (res.last()) {
+      <<..flatten results>>
+    }
+    conn.close();
+  } catch (SQLException e) {
+    throw e;
   }
-  Print("Close connection "+conn.toString());
-  conn.close();
-  <<..read return>>
+  return output;
 }
 @ % def DBQuery
 
 \subsubsection{[[DBQueryCountVertices]](0)}
 <<Query count of vertices>>=
-public int[] DBQueryCountVertices() throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S62", 1);
-  <<..read return>>
+public int[] DBQueryCountVertices() throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S62", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryCountVertices
 
 \subsubsection{[[DBQueryCountEdges]](0)}
 <<Query count of edges>>=
-public int[] DBQueryCountEdges() throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S63", 1);
-  <<..read return>>
+public int[] DBQueryCountEdges() throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S63", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryCountEdges
 
@@ -2908,17 +2665,25 @@ Returned array =
 
 \noindent where parameter [[v]] provides $v$.
 <<Query vertex>>=
-public final int[] DBQueryVertex(int v) throws RuntimeException {
+public final int[] DBQueryVertex(int v)
+throws VertexNotFoundException, SQLException {
+  if (!lu_vertices.containsKey(v)) {
+    throw new VertexNotFoundException("Vertex "+v+" not found.");
+  }
   return lu_vertices.get(v);
 }
 @ %def DBQueryVertex
 
 \subsubsection{[[DBQueryAllVertices]](0)}
 <<Query all vertices>>=
-public int[] DBQueryAllVertices() throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S136", 3);
-  <<..read return>>
+public int[] DBQueryAllVertices() throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S136", 3);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryAllVertices
 
@@ -2936,17 +2701,25 @@ Returned array =
 \noindent where parameter [[v1]] provides $v_1$ and parameter
 [[v2]] provides $v_2$.
 <<Query edge>>=
-public final int[] DBQueryEdge(int v1, int v2) throws RuntimeException {
+public final int[] DBQueryEdge(int v1, int v2)
+throws EdgeNotFoundException, SQLException {
+  if (!(lu_edges.containsKey(v1) && lu_edges.get(v1).containsKey(v2))) {
+    throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
+  }
   return lu_edges.get(v1).get(v2);
 }
 @ %def DBQueryEdge
 
 \subsubsection{[[DBQueryAllEdges]](0)}
 <<Query all edges>>=
-public int[] DBQueryAllEdges() throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S137", 4);
-  <<..read return>>
+public int[] DBQueryAllEdges() throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S137", 4);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryAllEdges
 
@@ -2955,10 +2728,14 @@ The following method returns six statistics: minimum edge weight,
 maximum edge weight, average edge weight, minimum edge speed, maximum edge speed,
 average edge speed.
 <<Query edge statistics>>=
-public int[] DBQueryStatisticsEdges() throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S65", 6);
-  <<..read return>>
+public int[] DBQueryStatisticsEdges() throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S65", 6);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryStatisticsEdges
 
@@ -2967,66 +2744,101 @@ The minimum bounding rectangle is
 returned as four numbers: minimum longitude, maximum longitude, minimum
 latitude, maximum latitude.
 <<Query MBR>>=
-public int[] DBQueryMBR() throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S64", 4);
-  <<..read return>>
+public int[] DBQueryMBR() throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S64", 4);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryMBR
 
 \subsubsection{[[DBQueryCountServers]](0)}
 <<Query count of servers>>=
-public int[] DBQueryCountServers() throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S66", 1);
-  <<..read return>>
+public int[] DBQueryCountServers() throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S66", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryCountServers
 
 \subsubsection{[[DBQueryCountRequests]](0)}
 <<Query count of requests>>=
-public int[] DBQueryCountRequests() throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S67", 1);
-  <<..read return>>
+public int[] DBQueryCountRequests() throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S67", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryCountRequests
 
 
 \subsubsection{[[DBQueryAllUsers]](0)}
 <<Query ridesharing user>>=
-public int[] DBQueryAllUsers() throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S141", 7);
-  <<..read return>>
+public int[] DBQueryAllUsers() throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S141", 7);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryAllUsers
 
 \subsubsection{[[DBQueryUser]](1)}
 <<Query ridesharing user>>=
-public final int[] DBQueryUser(int uid) throws RuntimeException {
+public final int[] DBQueryUser(int uid)
+throws UserNotFoundException, SQLException {
+  if (!lu_users.containsKey(uid)) {
+    throw new UserNotFoundException("User "+uid+" not found.");
+  }
   return lu_users.get(uid);
 }
 @ %def DBQueryUser
 
 \subsubsection{[[DBQueryRequestStatus]](2)}
 <<Query request status>>=
-public int[] DBQueryRequestStatus(int rid, int t) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S133", 1, rid, t);
-  <<..read return>>
+public int[] DBQueryRequestStatus(int rid, int t) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S133", 1, rid, t);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryRequestStatus
 
+\subsubsection{[[DBQueryRequestIsAssigned]](1)}
+<<Query request is assigned?>>=
+public int[] DBQueryRequestIsAssigned(int rid) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S148", 1, rid);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
+}
+@ %def DBQueryRequestIsAssigned
+
 \subsubsection{[[DBQueryQueuedRequests]](1)}
 <<Query queued requests>>=
-public int[] DBQueryQueuedRequests(int t) throws RuntimeException {
+public int[] DBQueryQueuedRequests(int t) throws SQLException {
   int[] output = new int[] { };
   int[] temp1 = new int[] { };
   int j = 0;
-  try {
     Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-    Print("Open connection "+conn.toString());
     output = DBFetch(conn, "S143", 7, t, t, REQUEST_TIMEOUT);
     temp1 = new int[output.length];
     for (int i = 0; i < (output.length - 6); i += 7) {
@@ -3041,10 +2853,7 @@ public int[] DBQueryQueuedRequests(int t) throws RuntimeException {
         j += 7;
       }
     }
-    Print("Close connection "+conn.toString());
     conn.close();
-  }
-  <<Catch and print [[SQLException]]>>
   int[] temp2 = new int[j];
   for (int i = 0; i < j; i += 7) {
     temp2[(i + 0)] = temp1[(i + 0)];
@@ -3061,34 +2870,40 @@ public int[] DBQueryQueuedRequests(int t) throws RuntimeException {
 
 \subsubsection{[[DBQueryActiveServers]](1)}
 <<Query active servers>>=
-public int[] DBQueryActiveServers(int t) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S134", 1, t, t, t);
-  <<..read return>>
+public int[] DBQueryActiveServers(int t) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S134", 1, t, t, t);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryActiveServers
 
 \subsubsection{[[DBQueryServerLocationsAll]](1)}
 <<Query all server locations>>=
-public int[] DBQueryServerLocationsAll(int t) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S59", 3, t, t, t, t);
-  <<..read return>>
+public int[] DBQueryServerLocationsAll(int t) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S59", 3, t, t, t, t);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryServerLocationsAll
 
 \subsubsection{[[DBQueryServerLocationsActive]](1)}
 <<Query active server locations>>=
-public int[] DBQueryServerLocationsActive(int t) throws RuntimeException {
+public int[] DBQueryServerLocationsActive(int t) throws SQLException {
   int[] output = new int[] { };
   int[] temp1 = new int[] { };
   int[] temp2 = new int[] { };
   int j = 0;
   int sid = 0;
   int te = 0;
-  try {
     Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-    Print("Open connection "+conn.toString());
     temp1 = DBFetch(conn, "S134", 2, t, t, t);      // <-- 10 ms/call
     output = new int[(3*(temp1.length/2))];
     for (int i = 0; i < temp1.length - 1; i += 2) {
@@ -3103,18 +2918,20 @@ public int[] DBQueryServerLocationsActive(int t) throws RuntimeException {
       j += 3;
     }
     conn.close();
-  }
-  <<Catch and print [[SQLException]]>>
   return output;
 }
 @ %def DBQueryServerLocationsActive
 
 \subsubsection{[[DBQueryServerRoute]](1)}
 <<Query routes>>=
-public int[] DBQueryServerRoute(int sid) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S60", 2, sid);
-  <<..read return>>
+public int[] DBQueryServerRoute(int sid) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S60", 2, sid);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryServerRoute
 
@@ -3122,19 +2939,27 @@ public int[] DBQueryServerRoute(int sid) throws RuntimeException {
 Schedules may contain [[null]] values in the labels. A null is recorded
 as a 0 in the output array due to [[getInt]] in [[DBFetch]].
 <<Query schedules>>=
-public int[] DBQueryServerSchedule(int sid) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S61", 4, sid);
-  <<..read return>>
+public int[] DBQueryServerSchedule(int sid) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S61", 4, sid);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryServerSchedule
 
 \subsubsection{[[DBQueryServerRemainingRoute]](2)}
 <<Query remaining routes>>=
-public int[] DBQueryServerRemainingRoute(int sid, int t) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S129", 2, sid, t);
-  <<..read return>>
+public int[] DBQueryServerRemainingRoute(int sid, int t) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S129", 2, sid, t);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryServerRemainingRoute
 
@@ -3142,12 +2967,10 @@ public int[] DBQueryServerRemainingRoute(int sid, int t) throws RuntimeException
 Aggressively invalidate the cache.
 <<Query remaining schedules>>=
 public int[] DBQueryServerRemainingSchedule(int sid, int t)
-throws RuntimeException {
+throws SQLException {
   int[] output = new int[] { };
   int[] temp = new int[] { };
-  try {
     Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-    Print("Open connection "+conn.toString());
     temp = DBFetch(conn, "S144", 3, sid, t);
     output = new int[4*temp.length/3 + 4];
     int j = 0;
@@ -3163,10 +2986,7 @@ throws RuntimeException {
     output[(j + 1)] = temp[1];
     output[(j + 2)] = sid;
     output[(j + 3)] = 0;
-    Print("Close connection "+conn.toString());
     conn.close();
-  }
-  <<Catch and print [[SQLException]]>>
   return output;
 }
 @ %def DBQueryServerRemainingSchedule
@@ -3174,48 +2994,68 @@ throws RuntimeException {
 \subsubsection{[[DBQueryServerRemainingDistance]](2)}
 <<Query remaining distance>>=
 public int[] DBQueryServerRemainingDistance(int sid, int t)
-throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S142", 1, sid, t);
-  <<..read return>>
+throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S142", 1, sid, t);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryServerRemainingDistance
 
 \subsubsection{[[DBQueryServerRemainingDuration]](2)}
 <<Query remaining duration>>=
 public int[] DBQueryServerRemainingDuration(int sid, int t)
-throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S127", 1, sid, t);
-  output[0] -= t;
-  <<..read return>>
+throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S127", 1, sid, t);
+    output[0] -= t;
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryServerRemainingDuration
 
 \subsubsection{[[DBQueryServerMaxLoad]](2)}
 <<Query max load>>=
-public int[] DBQueryServerMaxLoad(int sid, int t) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S73", 1, sid, t);
-  <<..read return>>
+public int[] DBQueryServerMaxLoad(int sid, int t) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S73", 1, sid, t);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryServerMaxLoad
 
 \subsubsection{[[DBQueryServerPendingAssignments]](2)}
 <<Query server pending assignments>>=
-public int[] DBQueryServerPendingAssignments(int sid, int t) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S100", 1, t, sid);
-  <<..read return>>
+public int[] DBQueryServerPendingAssignments(int sid, int t) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S100", 1, t, sid);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryServerPendingAssignments
 
 \subsubsection{[[DBQueryServerCompletedAssignments]](2)}
 <<Query server completed assignments>>=
-public int[] DBQueryServerCompletedAssignments(int sid, int t) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S101", 1, t, sid);
-  <<..read return>>
+public int[] DBQueryServerCompletedAssignments(int sid, int t) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S101", 1, t, sid);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryServerCompletedAssignments
 
@@ -3223,268 +3063,365 @@ public int[] DBQueryServerCompletedAssignments(int sid, int t) throws RuntimeExc
 The service rate $\mu$ is returned as integer $10000\mu$, for example
 if $\mu=.1234$, then [[DBQueryServiceRate]](0) returns $1234$.
 <<Query various metrics>>=
-public int[] DBQueryServiceRate() throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S102", 1);
-  <<..read return>>
+public int[] DBQueryServiceRate() throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S102", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryServiceRate
 
 \subsubsection{[[DBQueryBaseDistanceTotal]](0)}
 <<Query various metrics>>=
-public int[] DBQueryBaseDistanceTotal() throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S103", 1);
-  <<..read return>>
+public int[] DBQueryBaseDistanceTotal() throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S103", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryBaseDistanceTotal
 
 \subsubsection{[[DBQueryServerBaseDistanceTotal]](0)}
 <<Query various metrics>>=
-public int[] DBQueryServerBaseDistanceTotal() throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S110", 1);
-  <<..read return>>
+public int[] DBQueryServerBaseDistanceTotal() throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S110", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryServerBaseDistanceTotal
 
 \subsubsection{[[DBQueryRequestBaseDistanceTotal]](0)}
 <<Query various metrics>>=
-public int[] DBQueryRequestBaseDistanceTotal() throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S111", 1);
-  <<..read return>>
+public int[] DBQueryRequestBaseDistanceTotal() throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S111", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryRequestBaseDistanceTotal
 
 \subsubsection{[[DBQueryRequestBaseDistanceUnassigned]](0)}
 <<Query various metrics>>=
-public int[] DBQueryRequestBaseDistanceUnassigned() throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S138", 1);
-  <<..read return>>
+public int[] DBQueryRequestBaseDistanceUnassigned() throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S138", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryRequestBaseDistanceUnassigned
 
 \subsubsection{[[DBQueryServerTravelDistance]](1)}
 <<Query various metrics>>=
-public int[] DBQueryServerTravelDistance(int sid) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S104", 1, sid);
-  <<..read return>>
+public int[] DBQueryServerTravelDistance(int sid) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S104", 1, sid);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryServerTravelDistance
 
 \subsubsection{[[DBQueryServerTravelDistanceTotal]](0)}
 <<Query various metrics>>=
-public int[] DBQueryServerTravelDistanceTotal() throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S105", 1);
-  <<..read return>>
+public int[] DBQueryServerTravelDistanceTotal() throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S105", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryServerTravelDistanceTotal
 
 \subsubsection{[[DBQueryServerCruisingDistance]](1)}
 <<Query various metrics>>=
-public int[] DBQueryServerCruisingDistance(int sid) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S106", 1, sid);
-  <<..read return>>
+public int[] DBQueryServerCruisingDistance(int sid) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S106", 1, sid);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryServerCruisingDistance
 
 \subsubsection{[[DBQueryServerCruisingDistanceTotal]](0)}
 <<Query various metrics>>=
-public int[] DBQueryServerCruisingDistanceTotal() throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S107", 1);
-  <<..read return>>
+public int[] DBQueryServerCruisingDistanceTotal() throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S107", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryServerCruisingDistanceTotal
 
 \subsubsection{[[DBQueryServerServiceDistance]](1)}
 <<Query various metrics>>=
-public int[] DBQueryServerServiceDistance(int sid) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S108", 1, sid);
-  <<..read return>>
+public int[] DBQueryServerServiceDistance(int sid) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S108", 1, sid);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryServerServiceDistance
 
 \subsubsection{[[DBQueryServerServiceDistanceTotal]](0)}
 <<Query various metrics>>=
-public int[] DBQueryServerServiceDistanceTotal() throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S109", 1);
-  <<..read return>>
+public int[] DBQueryServerServiceDistanceTotal() throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S109", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryServerServiceDistanceTotal
 
 \subsubsection{[[DBQueryRequestDetourDistance]](1)}
 <<Query various metrics>>=
-public int[] DBQueryRequestDetourDistance(int rid) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S112", 1, rid);
-  <<..read return>>
+public int[] DBQueryRequestDetourDistance(int rid) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S112", 1, rid);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryRequestDetourDistance
 
 \subsubsection{[[DBQueryRequestDetourDistanceTotal]](0)}
 <<Query various metrics>>=
-public int[] DBQueryRequestDetourDistanceTotal() throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S113", 1);
-  <<..read return>>
+public int[] DBQueryRequestDetourDistanceTotal() throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S113", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryRequestDetourDistanceTotal
 
 \subsubsection{[[DBQueryRequestTransitDistance]](1)}
 <<Query various metrics>>=
-public int[] DBQueryRequestTransitDistance(int rid) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S114", 1, rid);
-  <<..read return>>
+public int[] DBQueryRequestTransitDistance(int rid) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S114", 1, rid);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryRequestTransitDistance
 
 \subsubsection{[[DBQueryRequestTransitDistanceTotal]](0)}
 <<Query various metrics>>=
-public int[] DBQueryRequestTransitDistanceTotal() throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S115", 1);
-  <<..read return>>
+public int[] DBQueryRequestTransitDistanceTotal() throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S115", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryRequestTransitDistanceTotal
 
 \subsubsection{[[DBQueryServerTravelDuration]](1)}
 <<Query various metrics>>=
-public int[] DBQueryServerTravelDuration(int sid) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S116", 1, sid);
-  <<..read return>>
+public int[] DBQueryServerTravelDuration(int sid) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S116", 1, sid);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryServerTravelDuration
 
 \subsubsection{[[DBQueryServerTravelDurationTotal]](0)}
 <<Query various metrics>>=
-public int[] DBQueryServerTravelDurationTotal() throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S117", 1);
-  <<..read return>>
+public int[] DBQueryServerTravelDurationTotal() throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S117", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryServerTravelDurationTotal
 
 \subsubsection{[[DBQueryRequestPickupDuration]](1)}
 <<Query various metrics>>=
-public int[] DBQueryRequestPickupDuration(int rid) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S118", 1, rid);
-  <<..read return>>
+public int[] DBQueryRequestPickupDuration(int rid) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S118", 1, rid);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryRequestPickupDuration
 
 \subsubsection{[[DBQueryRequestPickupDurationTotal]](0)}
 <<Query various metrics>>=
-public int[] DBQueryRequestPickupDurationTotal() throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S119", 1);
-  <<..read return>>
+public int[] DBQueryRequestPickupDurationTotal() throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S119", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryRequestPickupDurationTotal
 
 \subsubsection{[[DBQueryRequestTransitDuration]](1)}
 <<Query various metrics>>=
-public int[] DBQueryRequestTransitDuration(int rid) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S120", 1, rid);
-  <<..read return>>
+public int[] DBQueryRequestTransitDuration(int rid) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S120", 1, rid);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryRequestTransitDuration
 
 \subsubsection{[[DBQueryRequestTransitDurationTotal]](0)}
 <<Query various metrics>>=
-public int[] DBQueryRequestTransitDurationTotal() throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S121", 1);
-  <<..read return>>
+public int[] DBQueryRequestTransitDurationTotal() throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S121", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryRequestTransitDurationTotal
 
 \subsubsection{[[DBQueryRequestTravelDuration]](1)}
 <<Query various metrics>>=
-public int[] DBQueryRequestTravelDuration(int rid) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S122", 1, rid);
-  <<..read return>>
+public int[] DBQueryRequestTravelDuration(int rid) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S122", 1, rid);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryRequestTravelDuration
 
 \subsubsection{[[DBQueryRequestTravelDurationTotal]](0)}
 <<Query various metrics>>=
-public int[] DBQueryRequestTravelDurationTotal() throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S123", 1);
-  <<..read return>>
+public int[] DBQueryRequestTravelDurationTotal() throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S123", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryRequestTravelDurationTotal
 
 \subsubsection{[[DBQueryRequestDepartureTime]](1)}
 <<Query various metrics>>=
-public int[] DBQueryRequestDepartureTime(int rid) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S124", 1, rid);
-  <<..read return>>
+public int[] DBQueryRequestDepartureTime(int rid) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S124", 1, rid);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryRequestDepartureTime
 
 \subsubsection{[[DBQueryServerDepartureTime]](1)}
 <<Query various metrics>>=
-public int[] DBQueryServerDepartureTime(int sid) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S125", 1, sid);
-  <<..read return>>
+public int[] DBQueryServerDepartureTime(int sid) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S125", 1, sid);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryServerDepartureTime
 
 \subsubsection{[[DBQueryRequestArrivalTime]](1)}
 <<Query various metrics>>=
-public int[] DBQueryRequestArrivalTime(int rid) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S126", 1, rid);
-  <<..read return>>
+public int[] DBQueryRequestArrivalTime(int rid) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S126", 1, rid);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryRequestArrivalTime
 
 \subsubsection{[[DBQueryServerArrivalTime]](1)}
 <<Query various metrics>>=
-public int[] DBQueryServerArrivalTime(int sid) throws RuntimeException {
-  <<..read prepare>>
-  output = DBFetch(conn, "S127", 1, sid);
-  <<..read return>>
+public int[] DBQueryServerArrivalTime(int sid) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    output = DBFetch(conn, "S127", 1, sid);
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
 }
 @ %def DBQueryServerArrivalTime
 
 \section{Private Methods}
 \label{sec:private}
 <<[[Storage]] private methods>>=
-  <<Print a message>>
-  <<Setup JDBC driver>>
-  <<Initialize statements>>
-  <<Prepare a prepared statement>>
-  <<Fetch items from database>>
-  <<Fill prepared statement>>
-  <<Submit prepared statement batch>>
+<<Setup JDBC driver>>
+<<Initialize statements>>
+<<Prepare a prepared statement>>
+<<Fetch items from database>>
+<<Fill prepared statement>>
+<<Submit prepared statement batch>>
 @
-
-\subsection{[[Print]](1)}
-If [[DEBUG]] is on, the [[Print]](1) method prints a message to standard out.
-<<Print a message>>=
-private void Print(String msg) {
-  if (DEBUG) {
-    System.out.println("[Jargo][Storage]["+LocalDateTime.now()+"] "+msg);
-  }
-}
-@ %def Print
 
 \subsection{[[setupDriver]](0)}
 The following code registers a connection pool to the JDBC driver.  Portions of
@@ -3492,105 +3429,56 @@ this code are licensed by the Apache Software Foundation.  The connection pool
 allows us to concurrently submit multiple SQL commands against the database
 from different threads.
 <<Setup JDBC driver>>=
-private void setupDriver() throws RuntimeException {
-  Print("Initialize JDBC driver");
-  try {
-    <<..initialize connection factory>>
-    <<..initialize poolable-connection factory using connection factory>>
-    <<..initialize connection pool using poolable-connection factory>>
-    <<..register pool to poolable-connection factory and driver>>
-    <<..configure database properties>>
-  } catch (Exception e) {
-    throw new RuntimeException(e);
-  }
+private void setupDriver() throws SQLException, ClassNotFoundException {
+  connection_factory = new DriverManagerConnectionFactory(CONNECTIONS_URL);
+  poolableconnection_factory = new PoolableConnectionFactory(connection_factory, null);
+  poolableconnection_factory.setPoolStatements(true);
+  poolableconnection_factory.setDefaultAutoCommit(false);
+  poolableconnection_factory.setMaxOpenPreparedStatements(STATEMENTS_MAX_COUNT);
+  GenericObjectPoolConfig cfg = new GenericObjectPoolConfig();
+  cfg.setMinIdle(100000);
+  cfg.setMaxIdle(100000);
+  cfg.setMaxTotal(100000);
+  pool = new GenericObjectPool<>(poolableconnection_factory, cfg);
+  poolableconnection_factory.setPool(pool);
+  Class.forName("org.apache.commons.dbcp2.PoolingDriver");
+  driver = (PoolingDriver) DriverManager.getDriver(CONNECTIONS_DRIVER_URL);
+  driver.registerPool(CONNECTIONS_POOL_NAME, pool);
 }
 @ %def setupDriver
-<<..initialize connection factory>>=
-Print("..initialize connection factory");
-connection_factory = new DriverManagerConnectionFactory(CONNECTIONS_URL);
-@
-<<..initialize poolable-connection factory using connection factory>>=
-Print("..initialize poolable-connection factory");
-poolableconnection_factory = new PoolableConnectionFactory(connection_factory, null);
-poolableconnection_factory.setPoolStatements(true);
-poolableconnection_factory.setDefaultAutoCommit(false);
-poolableconnection_factory.setMaxOpenPreparedStatements(STATEMENTS_MAX_COUNT);
-@
-<<..initialize connection pool using poolable-connection factory>>=
-Print("..initialize connection pool");
-GenericObjectPoolConfig cfg = new GenericObjectPoolConfig();
-cfg.setMinIdle(100000);
-cfg.setMaxIdle(100000);
-cfg.setMaxTotal(100000);
-pool = new GenericObjectPool<>(poolableconnection_factory, cfg);
-@
-<<..register pool to poolable-connection factory and driver>>=
-Print("..register connection pool to driver");
-poolableconnection_factory.setPool(pool);
-Class.forName("org.apache.commons.dbcp2.PoolingDriver");
-driver = (PoolingDriver) DriverManager.getDriver(CONNECTIONS_DRIVER_URL);
-driver.registerPool(CONNECTIONS_POOL_NAME, pool);
-@
-We increase the page size\footnote{Even though the database is in-memory, the
-page size still needs to be set; see the Derby Tuning Guide for details.}.
-<<..configure database properties>>=
-Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-Print("Open connection "+conn.toString());
-CallableStatement cs = conn.prepareCall(
-  "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
-Print("..set derby.storage.pageCacheSize="+DERBY_PAGECACHESIZE);
-cs.setString(1, "derby.storage.pageCacheSize");
-cs.setInt(2, DERBY_PAGECACHESIZE);
-cs.execute();
-Print("Close connection "+conn.toString());
-conn.close();
-@
 
 \subsection{[[PS]](1)}
-The [[PS]](1) method is our factory method for generating prepared statements.
-We retrieve the statement string from [[lu_pstr]].  We set the result set to
-scroll-insensitive and read-only in order to allow cursor movements.
 <<Prepare a prepared statement>>=
 private PreparedStatement PS(Connection conn, String k) throws SQLException {
-  Print("Prepare statement "+k);
   PreparedStatement p = null;
   try {
     p = conn.prepareStatement(lu_pstr.get(k),
       ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
     p.clearBatch();
     p.clearParameters();
+  } catch (SQLException e) {
+    throw e;
   }
-  <<Catch and throw [[SQLException]]>>
   return p;
 }
 @ %def PS
 
 \subsection{[[DBFetch]](3...)}
-The [[DBFetch]](3...) method executes queries against the database. Query
-results are serialized into arrays so that callers do not need to deal with
-JDBC [[ResultSet]]s. For debugging purposes, some commented [[Print]] commands
-are inside the method.
 <<Fetch items from database>>=
-private int[] DBFetch(Connection conn,
-    String k, int ncols, Integer... values) throws SQLException {
-  PreparedStatement p = PS(conn, k);
-  Print("DBFetch("+lu_pstr.get(k)+")");
-  Print("DBFetch use conn "+conn.toString());
-  Print("DBFetch use thread "+Thread.currentThread().getName());
+private int[] DBFetch(Connection conn, String k, int ncols, Integer... values)
+throws SQLException {
   int[] output = new int[] { };
-  <<..set values for statement>>
   try {
+    PreparedStatement p = PS(conn, k);
+    <<..set values for statement>>
     ResultSet res = p.executeQuery();  // <-- if stuck here, investigate locks
     if (res.last() == true) {
       <<..flatten results>>
     }
     res.close();
-  }
-  <<Catch and throw [[SQLException]]>>
-  p.close();
-  Print("DBFetch close conn "+conn.toString());
-  if (output.length == 0) {
-    Print("WARNING: DBFetch(3...) returned empty!");
+    p.close();
+  } catch (SQLException e) {
+    throw e;
   }
   return output;
 }
@@ -3599,10 +3487,8 @@ private int[] DBFetch(Connection conn,
 for (int i = 0; i < values.length; i++) {
   if (values[i] == null) {
     p.setNull((i + 1), java.sql.Types.INTEGER);
-    Print("Set param"+i+"=NULL");
   } else {
     p.setInt ((i + 1), values[i]);
-    Print("Set param"+(i + 1)+"="+values[i]);
   }
 }
 @
@@ -3623,8 +3509,9 @@ private void PSAdd(PreparedStatement p, Integer... values) throws SQLException {
   <<..set values for statement>>
   try {
     p.addBatch();
+  } catch (SQLException e) {
+    throw e;
   }
-  <<Catch and throw [[SQLException]]>>
 }
 @ %def PSAdd
 
@@ -3636,8 +3523,9 @@ private void PSSubmit(PreparedStatement... statements) throws SQLException {
       p.executeBatch();
       p.close();
     }
+  } catch (SQLException e) {
+    throw e;
   }
-  <<Catch and throw [[SQLException]]>>
 }
 @ %def PSSubmit
 
@@ -3647,7 +3535,6 @@ statement is placed in its own chunk so it can be referenced wherever the
 statement is used.
 <<Initialize statements>>=
 private void PSInit() {
-  Print("Initialize prepared statement strings");
   String INS = "INSERT INTO ";
   String UPD = "UPDATE ";
   String DEL = "DELETE FROM ";
@@ -4037,7 +3924,6 @@ lu_pstr.put("S141", SEL+"* FROM r_user");
 <<S142>>=
 lu_pstr.put("S142", SEL+"SUM (dd) FROM W WHERE sid=? AND t2>?");
 @ %def S142
-\appendix
 <<S143>>=
 lu_pstr.put("S143", SEL+"* FROM R WHERE re<=? AND ?<=re+?");
 @ %def S143
@@ -4057,6 +3943,14 @@ lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
 <<S149>>=
 lu_pstr.put("S149", SEL+"t2, v2 FROM W WHERE sid=? ORDER BY t2 ASC");
 @ %def S149
+
+\appendix
+
+\section{Appendix: Error Strings}
+\label{ap:error-strings}
+<<Err0>>=
+"Encountered catastrophic exception."
+@ %def Err0
 
 \section{Appendix: List of Chunks}
 \label{ap:list-of-chunks}

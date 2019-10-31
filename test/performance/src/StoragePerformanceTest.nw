@@ -54,9 +54,16 @@ details.}.
 import com.github.jargors.Controller;
 import com.github.jargors.Storage;
 import com.github.jargors.Tools;
+import com.github.jargors.exceptions.DuplicateVertexException;
+import com.github.jargors.exceptions.DuplicateEdgeException;
+import com.github.jargors.exceptions.DuplicateUserException;
+import com.github.jargors.exceptions.EdgeNotFoundException;
+import com.github.jargors.exceptions.UserNotFoundException;
+import com.github.jargors.exceptions.VertexNotFoundException;
 import java.time.LocalDateTime;
 import java.sql.Connection;
 import java.sql.Statement;
+import java.sql.SQLException;
 @
 
 <<[[StoragePerformanceTest]] definition>>=
@@ -72,7 +79,11 @@ public class StoragePerformanceTest {
 <<[[StoragePerformanceTest]] main routine>>=
 public static void main(String[] args) {
   Print("Starting storage performance tests");
-  <<Load performance tests>>
+  try {
+    <<Load performance tests>>
+  } catch (SQLException e) {
+    Tools.PrintSQLException(e);
+  }
   Print("Complete!");
 }
 @ %def main
@@ -167,6 +178,8 @@ again.
 {
   Storage storage = new Storage();
   storage.DBLoadBackup("data/db");
+  storage.DBLoadRoadNetworkFromDB();
+  storage.DBLoadUsersFromDB();
   // BACKUP DOS NOT HAVE INDEXES
   try {
     Connection conn = storage._getConnection();
@@ -178,7 +191,9 @@ again.
     stmt.executeBatch();
     conn.commit();
     conn.close();
-  } catch (Exception e) { }
+  } catch (Exception e) {
+    Print(e.toString());
+  }
   int[] output = new int[] { };
   <<Begin timing block>>
   for (int t = 0; t < 1800; t+=100) {

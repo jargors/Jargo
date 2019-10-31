@@ -54,9 +54,16 @@ details.}.
 import com.github.jargors.Controller;
 import com.github.jargors.Storage;
 import com.github.jargors.Tools;
+import com.github.jargors.exceptions.DuplicateVertexException;
+import com.github.jargors.exceptions.DuplicateEdgeException;
+import com.github.jargors.exceptions.DuplicateUserException;
+import com.github.jargors.exceptions.EdgeNotFoundException;
+import com.github.jargors.exceptions.UserNotFoundException;
+import com.github.jargors.exceptions.VertexNotFoundException;
 import java.time.LocalDateTime;
 import java.sql.Connection;
 import java.sql.Statement;
+import java.sql.SQLException;
 \nwendcode{}\nwbegindocs{4}\nwdocspar
 
 \nwenddocs{}\nwbegincode{5}\sublabel{NW3iKWou-490CRJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-490CRJ-1}}}\moddef{\code{}StoragePerformanceTest\edoc{} definition~{\nwtagstyle{}\subpageref{NW3iKWou-490CRJ-1}}}\endmoddef\nwused{\\{NW3iKWou-40YM6y-1}}
@@ -72,7 +79,11 @@ public class StoragePerformanceTest \{
 \nwenddocs{}\nwbegincode{9}\sublabel{NW3iKWou-2hjWc8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-2hjWc8-1}}}\moddef{\code{}StoragePerformanceTest\edoc{} main routine~{\nwtagstyle{}\subpageref{NW3iKWou-2hjWc8-1}}}\endmoddef\nwused{\\{NW3iKWou-490CRJ-1}}
 public static void main(String[] args) \{
   Print("Starting storage performance tests");
-  \LA{}Load performance tests~{\nwtagstyle{}\subpageref{NW3iKWou-xbUR1-1}}\RA{}
+  try \{
+    \LA{}Load performance tests~{\nwtagstyle{}\subpageref{NW3iKWou-xbUR1-1}}\RA{}
+  \} catch (SQLException e) \{
+    Tools.PrintSQLException(e);
+  \}
   Print("Complete!");
 \}
 \nosublabel{NW3iKWou-2hjWc8-1-u1}\nwindexdefn{main}{main}{NW3iKWou-2hjWc8-1}\eatline
@@ -167,6 +178,8 @@ again.
 \{
   Storage storage = new Storage();
   storage.DBLoadBackup("data/db");
+  storage.DBLoadRoadNetworkFromDB();
+  storage.DBLoadUsersFromDB();
   // BACKUP DOS NOT HAVE INDEXES
   try \{
     Connection conn = storage._getConnection();
@@ -178,7 +191,9 @@ again.
     stmt.executeBatch();
     conn.commit();
     conn.close();
-  \} catch (Exception e) \{ \}
+  \} catch (Exception e) \{
+    Print(e.toString());
+  \}
   int[] output = new int[] \{ \};
   \LA{}Begin timing block~{\nwtagstyle{}\subpageref{NW3iKWou-4SyIkm-1}}\RA{}
   for (int t = 0; t < 1800; t+=100) \{
