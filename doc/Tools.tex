@@ -46,6 +46,8 @@ package com.github.jargors;
 import com.github.jargors.gtreeJNI.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Arrays;
+import java.time.LocalDateTime;
+import java.sql.SQLException;
 \nwendcode{}\nwbegindocs{4}\nwdocspar
 
 \subsection{Class Definition}
@@ -53,6 +55,7 @@ import java.util.Arrays;
 public class Tools \{
   \LA{}Member variables~{\nwtagstyle{}\subpageref{NW3zOIuJ-aPohW-1}}\RA{}
   \LA{}Public methods~{\nwtagstyle{}\subpageref{NW3zOIuJ-1eKCCy-1}}\RA{}
+  \LA{}Static methods~{\nwtagstyle{}\subpageref{NW3zOIuJ-4HFy3z-1}}\RA{}
 \}
 \nwendcode{}\nwbegindocs{6}\nwdocspar
 
@@ -356,7 +359,40 @@ public void printSchedule(int[] b) \{
   System.out.println();
 \}
 \nwindexdefn{printSchedule}{printSchedule}{NW3zOIuJ-45oGvT-1}\eatline
-\nwidentdefs{\\{{printSchedule}{printSchedule}}}\nwendcode{}
+\nwidentdefs{\\{{printSchedule}{printSchedule}}}\nwendcode{}\nwbegindocs{42}\nwdocspar
+\section{Static Methods}
+\nwenddocs{}\nwbegincode{43}\sublabel{NW3zOIuJ-4HFy3z-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-4HFy3z-1}}}\moddef{Static methods~{\nwtagstyle{}\subpageref{NW3zOIuJ-4HFy3z-1}}}\endmoddef\nwused{\\{NW3zOIuJ-1xm30x-1}}
+\LA{}Print statement~{\nwtagstyle{}\subpageref{NW3zOIuJ-15L4Qy-1}}\RA{}
+\LA{}Print SQL exception~{\nwtagstyle{}\subpageref{NW3zOIuJ-31QNBg-1}}\RA{}
+\nwendcode{}\nwbegindocs{44}\nwdocspar
+
+\subsection{{\tt{}\protect\nosublabel{NW3zOIuJ-4HFy3z-1-u2}\protect\nwindexuse{Print}{Print}{NW3zOIuJ-15L4Qy-1}Print}(2)}
+\nwenddocs{}\nwbegincode{45}\sublabel{NW3zOIuJ-15L4Qy-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-15L4Qy-1}}}\moddef{Print statement~{\nwtagstyle{}\subpageref{NW3zOIuJ-15L4Qy-1}}}\endmoddef\nwused{\\{NW3zOIuJ-4HFy3z-1}}
+public static void Print(String a, String b) \{
+  System.out.println(String.format("[%s][%s] %s", a, LocalDateTime.now(), b));
+\}
+public static void Print(String a) \{
+  Print("*", a);
+\}
+\nwindexdefn{Print}{Print}{NW3zOIuJ-15L4Qy-1}\eatline
+\nwidentdefs{\\{{Print}{Print}}}\nwendcode{}\nwbegindocs{46}\nwdocspar
+\subsection{{\tt{}\protect\nwindexuse{PrintSQLException}{PrintSQLException}{NW3zOIuJ-31QNBg-1}PrintSQLException}(1)}
+Method {\tt{}\protect\nwindexuse{PrintSQLException}{PrintSQLException}{NW3zOIuJ-31QNBg-1}PrintSQLException} unwraps the entire exception chain to unveil
+the real cause of a {\tt{}SQLException}.  This portion is licensed by the Apache
+Software Foundation.
+\nwenddocs{}\nwbegincode{47}\sublabel{NW3zOIuJ-31QNBg-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-31QNBg-1}}}\moddef{Print SQL exception~{\nwtagstyle{}\subpageref{NW3zOIuJ-31QNBg-1}}}\endmoddef\nwused{\\{NW3zOIuJ-4HFy3z-1}}
+public static void PrintSQLException(SQLException e) \{
+  while (e != null) \{
+    System.err.println("\\n----- SQLException -----");
+    System.err.println("  SQL State:  " + e.getSQLState());
+    System.err.println("  Error Code: " + e.getErrorCode());
+    System.err.println("  Message:    " + e.getMessage());
+    e.printStackTrace(System.err);
+    e = e.getNextException();
+  \}
+\}
+\nwindexdefn{PrintSQLException}{PrintSQLException}{NW3zOIuJ-31QNBg-1}\eatline
+\nwidentdefs{\\{{PrintSQLException}{PrintSQLException}}}\nwendcode{}
 
 \nwixlogsorted{c}{{..round to nearest meter}{NW3zOIuJ-1p0YRJ-1}{\nwixu{NW3zOIuJ-1XfngC-1}\nwixd{NW3zOIuJ-1p0YRJ-1}}}%
 \nwixlogsorted{c}{{\code{}Tools\edoc{} definition}{NW3zOIuJ-1xm30x-1}{\nwixu{NW3zOIuJ-2Vh5vZ-1}\nwixd{NW3zOIuJ-1xm30x-1}}}%
@@ -371,11 +407,14 @@ public void printSchedule(int[] b) \{
 \nwixlogsorted{c}{{Print path}{NW3zOIuJ-3QvbXQ-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-3QvbXQ-1}}}%
 \nwixlogsorted{c}{{Print route}{NW3zOIuJ-2sTsm3-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-2sTsm3-1}}}%
 \nwixlogsorted{c}{{Print schedule}{NW3zOIuJ-45oGvT-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-45oGvT-1}}}%
+\nwixlogsorted{c}{{Print SQL exception}{NW3zOIuJ-31QNBg-1}{\nwixu{NW3zOIuJ-4HFy3z-1}\nwixd{NW3zOIuJ-31QNBg-1}}}%
+\nwixlogsorted{c}{{Print statement}{NW3zOIuJ-15L4Qy-1}{\nwixu{NW3zOIuJ-4HFy3z-1}\nwixd{NW3zOIuJ-15L4Qy-1}}}%
 \nwixlogsorted{c}{{Print user}{NW3zOIuJ-3sWW32-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-3sWW32-1}}}%
 \nwixlogsorted{c}{{Public methods}{NW3zOIuJ-1eKCCy-1}{\nwixu{NW3zOIuJ-1xm30x-1}\nwixd{NW3zOIuJ-1eKCCy-1}}}%
 \nwixlogsorted{c}{{Register edges}{NW3zOIuJ-3Nu1Fg-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-3Nu1Fg-1}}}%
 \nwixlogsorted{c}{{Register users}{NW3zOIuJ-UKHEr-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-UKHEr-1}}}%
 \nwixlogsorted{c}{{Register vertices}{NW3zOIuJ-2ZKKW-1}{\nwixu{NW3zOIuJ-1eKCCy-1}\nwixd{NW3zOIuJ-2ZKKW-1}}}%
+\nwixlogsorted{c}{{Static methods}{NW3zOIuJ-4HFy3z-1}{\nwixu{NW3zOIuJ-1xm30x-1}\nwixd{NW3zOIuJ-4HFy3z-1}}}%
 \nwixlogsorted{c}{{Tools.java}{NW3zOIuJ-2Vh5vZ-1}{\nwixd{NW3zOIuJ-2Vh5vZ-1}}}%
 \nwixlogsorted{c}{{Tools.java preamble}{NW3zOIuJ-1ANZ96-1}{\nwixu{NW3zOIuJ-2Vh5vZ-1}\nwixd{NW3zOIuJ-1ANZ96-1}}}%
 \nwixlogsorted{i}{{computeHaversine}{computeHaversine}}%
@@ -390,15 +429,16 @@ public void printSchedule(int[] b) \{
 \nwixlogsorted{i}{{lu{\char95}edges}{lu:unedges}}%
 \nwixlogsorted{i}{{lu{\char95}users}{lu:unusers}}%
 \nwixlogsorted{i}{{lu{\char95}vertices}{lu:unvertices}}%
+\nwixlogsorted{i}{{Print}{Print}}%
 \nwixlogsorted{i}{{printPath}{printPath}}%
 \nwixlogsorted{i}{{printRoute}{printRoute}}%
 \nwixlogsorted{i}{{printSchedule}{printSchedule}}%
+\nwixlogsorted{i}{{PrintSQLException}{PrintSQLException}}%
 \nwixlogsorted{i}{{printUser}{printUser}}%
 \nwixlogsorted{i}{{registerEdges}{registerEdges}}%
 \nwixlogsorted{i}{{registerUsers}{registerUsers}}%
 \nwixlogsorted{i}{{registerVertices}{registerVertices}}%
-\nwbegindocs{42}\nwdocspar
-
+\nwbegindocs{48}\nwdocspar
 \appendix
 
 \section{Appendix: List of Chunks}

@@ -46,6 +46,8 @@ package com.github.jargors;
 import com.github.jargors.gtreeJNI.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Arrays;
+import java.time.LocalDateTime;
+import java.sql.SQLException;
 @
 
 \subsection{Class Definition}
@@ -53,6 +55,7 @@ import java.util.Arrays;
 public class Tools {
   <<Member variables>>
   <<Public methods>>
+  <<Static methods>>
 }
 @
 
@@ -357,6 +360,38 @@ public void printSchedule(int[] b) {
 }
 @ %def printSchedule
 
+\section{Static Methods}
+<<Static methods>>=
+<<Print statement>>
+<<Print SQL exception>>
+@
+
+\subsection{[[Print]](2)}
+<<Print statement>>=
+public static void Print(String a, String b) {
+  System.out.println(String.format("[%s][%s] %s", a, LocalDateTime.now(), b));
+}
+public static void Print(String a) {
+  Print("*", a);
+}
+@ %def Print
+
+\subsection{[[PrintSQLException]](1)}
+Method [[PrintSQLException]] unwraps the entire exception chain to unveil
+the real cause of a [[SQLException]].  This portion is licensed by the Apache
+Software Foundation.
+<<Print SQL exception>>=
+public static void PrintSQLException(SQLException e) {
+  while (e != null) {
+    System.err.println("\n----- SQLException -----");
+    System.err.println("  SQL State:  " + e.getSQLState());
+    System.err.println("  Error Code: " + e.getErrorCode());
+    System.err.println("  Message:    " + e.getMessage());
+    e.printStackTrace(System.err);
+    e = e.getNextException();
+  }
+}
+@ %def PrintSQLException
 
 \appendix
 

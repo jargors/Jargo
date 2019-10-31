@@ -2,6 +2,8 @@ package com.github.jargors;
 import com.github.jargors.gtreeJNI.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Arrays;
+import java.time.LocalDateTime;
+import java.sql.SQLException;
 public class Tools {
   private G_Tree gtree;
   private boolean flag_gtree_loaded = false;
@@ -158,4 +160,20 @@ public class Tools {
       }
       System.out.println();
     }
+  public static void Print(String a, String b) {
+    System.out.println(String.format("[%s][%s] %s", a, LocalDateTime.now(), b));
+  }
+  public static void Print(String a) {
+    Print("*", a);
+  }
+  public static void PrintSQLException(SQLException e) {
+    while (e != null) {
+      System.err.println("\n----- SQLException -----");
+      System.err.println("  SQL State:  " + e.getSQLState());
+      System.err.println("  Error Code: " + e.getErrorCode());
+      System.err.println("  Message:    " + e.getMessage());
+      e.printStackTrace(System.err);
+      e = e.getNextException();
+    }
+  }
 }
