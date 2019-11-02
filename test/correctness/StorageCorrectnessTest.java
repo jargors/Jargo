@@ -1318,10 +1318,7 @@ public class StorageCorrectnessTest {
         }
     } catch (SQLException e) {
       Tools.PrintSQLException(e);
-    } catch (EdgeNotFoundException
-          | UserNotFoundException
-          | DuplicateUserException
-          | VertexNotFoundException e) {
+    } catch (Exception e) {
       Tools.Print(e.toString());
     }
     Tools.Print("Complete! Passed: "+count_passed+"; Failed: "+count_failed);
