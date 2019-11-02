@@ -116,6 +116,8 @@ This file ([[src/Storage.nw]]) is the source for both the documentation
 @
 \hi{Utilities}
 <<[[Storage]] public methods>>=
+<<Initialize new empty database>>
+<<Close database>>
 <<Get reference to vertices cache>>
 <<Get reference to edges cache>>
 <<Get reference to users cache>>
@@ -1715,16 +1717,22 @@ definition} (\S\ref{sec:class-definition}).
 The preamble declares the package and imports dependencies.
 <<Storage.java preamble>>=
 package com.github.jargors;
+@
+We import:
+\begin{itemize}
+\item Various Jargo exceptions;
+<<Storage.java preamble>>=
 import com.github.jargors.exceptions.DuplicateVertexException;
 import com.github.jargors.exceptions.DuplicateEdgeException;
 import com.github.jargors.exceptions.DuplicateUserException;
 import com.github.jargors.exceptions.EdgeNotFoundException;
 import com.github.jargors.exceptions.UserNotFoundException;
 import com.github.jargors.exceptions.VertexNotFoundException;
+@
+\item Jargo [[Tools]] class so we can use [[Tools.PrintSQLException]](1);
+<<Storage.java preamble>>=
 import com.github.jargors.Tools;
 @
-We import:
-\begin{itemize}
 \item parts of the JDBC~API from [[java.sql]], for communication with Derby;
 <<Storage.java preamble>>=
 import java.sql.CallableStatement;   import java.sql.Connection;
@@ -1823,20 +1831,8 @@ easily distinguished.
 
 \subsection{Constructor}
 \label{sec:constructor}
-Failure here is catastrophic.
 <<[[Storage]] constructor>>=
 public Storage() {
-  try {
-    this.setupDriver();
-  } catch (SQLException e) {
-    System.err.println("Storage.Storage(): "+<<Err0>>);
-    Tools.PrintSQLException(e);
-    System.exit(1);
-  } catch (ClassNotFoundException e) {
-    System.err.println("Storage.Storage(): "+<<Err0>>);
-    e.printStackTrace();
-    System.exit(1);
-  }
   this.PSInit();
 }
 @
@@ -1860,6 +1856,36 @@ value at position 1 is $b$; the value at position 2 is $c$.
 
 \subsection{Utilities}
 \label{sec:utilities}
+
+\subsubsection{[[DBCreateNewInstance]](0)}
+<<Initialize new empty database>>=
+public void DBCreateNewInstance() {
+  try {
+    this.setupDriver();
+  } catch (SQLException e) {
+    System.err.println("Storage.init(): "+<<Err0>>);
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  } catch (ClassNotFoundException e) {
+    System.err.println("Storage.init(): "+<<Err0>>);
+    e.printStackTrace();
+    System.exit(1);
+  }
+}
+@ %def DBCreateNewInstance
+
+\subsubsection{[[DBCloseInstance]](0)}
+<<Close database>>=
+public void DBCloseInstance() throws SQLException {
+  try {
+    DriverManager.getConnection("jdbc:derby:memory:jargo;drop=true");
+  } catch (SQLException e) {
+    if (e.getErrorCode() != 45000) {  // 45000 = database successfully dropped
+      throw e;
+    }
+  }
+}
+@ %def DBCloseInstance
 
 \subsubsection{[[getReferenceVerticesCache]](0)}
 <<Get reference to vertices cache>>=
@@ -1951,7 +1977,7 @@ treated as catastrophic, but should never occur because [[Class.forName(1)]] in
 first place!
 <<Load backup>>=
 public void DBLoadBackup(String p) throws SQLException {
-  this.CONNECTIONS_URL = "jdbc:derby:memory:jargobak;createFrom="+p;
+  this.CONNECTIONS_URL = "jdbc:derby:memory:jargo;createFrom="+p;
   try {
     this.setupDriver();
   } catch (ClassNotFoundException e) {
@@ -2088,7 +2114,7 @@ For internal use.
 public Connection _getConnection() throws SQLException {
   return DriverManager.getConnection(CONNECTIONS_POOL_URL);
 }
-@
+@ %def _getConnection
 
 \subsection{Write Methods}
 \label{sec:write-methods}
@@ -3648,127 +3674,127 @@ private void PSInit() {
 }
 @ %def PSInit
 <<S0>>=
-lu_pstr.put("S0", INS+"V VALUES "+q3);
+this.lu_pstr.put("S0", INS+"V VALUES "+q3);
 @ %def S0
 <<S1>>=
-lu_pstr.put("S1", INS+"E VALUES "+q4);
+this.lu_pstr.put("S1", INS+"E VALUES "+q4);
 @ %def S1
 <<S2>>=
-lu_pstr.put("S2", INS+"UQ VALUES "+q2);
+this.lu_pstr.put("S2", INS+"UQ VALUES "+q2);
 @ %def S2
 <<S3>>=
-lu_pstr.put("S3", INS+"UE VALUES "+q2);
+this.lu_pstr.put("S3", INS+"UE VALUES "+q2);
 @ %def S3
 <<S4>>=
-lu_pstr.put("S4", INS+"UL VALUES "+q2);
+this.lu_pstr.put("S4", INS+"UL VALUES "+q2);
 @ %def S4
 <<S5>>=
-lu_pstr.put("S5", INS+"UO VALUES "+q2);
+this.lu_pstr.put("S5", INS+"UO VALUES "+q2);
 @ %def S5
 <<S6>>=
-lu_pstr.put("S6", INS+"UD VALUES "+q2);
+this.lu_pstr.put("S6", INS+"UD VALUES "+q2);
 @ %def S6
 <<S7>>=
-lu_pstr.put("S7", INS+"UB VALUES "+q2);
+this.lu_pstr.put("S7", INS+"UB VALUES "+q2);
 @ %def S7
 <<S8>>=
-lu_pstr.put("S8", INS+"S VALUES "+q7);
+this.lu_pstr.put("S8", INS+"S VALUES "+q7);
 @ %def S8
 <<S9>>=
-lu_pstr.put("S9", INS+"R VALUES "+q7);
+this.lu_pstr.put("S9", INS+"R VALUES "+q7);
 @ %def S9
 <<S10>>=
-lu_pstr.put("S10", INS+"W VALUES "+q8);
+this.lu_pstr.put("S10", INS+"W VALUES "+q8);
 @ %def S10
 <<S70>>=
-lu_pstr.put("S70", SEL+"sid, sq, se, sl, so, sd, sb FROM S WHERE sid=?");
+this.lu_pstr.put("S70", SEL+"sid, sq, se, sl, so, sd, sb FROM S WHERE sid=?");
 @ %def S70
 <<S11>>=
-lu_pstr.put("S11", INS+"CW VALUES "+q9);
+this.lu_pstr.put("S11", INS+"CW VALUES "+q9);
 @ %def S11
 <<S12>>=
-lu_pstr.put("S12", INS+"PD VALUES "+q4);
+this.lu_pstr.put("S12", INS+"PD VALUES "+q4);
 @ %def S12
 <<S13>>=
-lu_pstr.put("S13", INS+"CPD VALUES "+q12);
+this.lu_pstr.put("S13", INS+"CPD VALUES "+q12);
 @ %def S13
 <<S14>>=
-lu_pstr.put("S14", INS+"CQ VALUES "+q14);
+this.lu_pstr.put("S14", INS+"CQ VALUES "+q14);
 @ %def S14
 <<S15>>=
-lu_pstr.put("S15", UPD+"E SET nu=? WHERE v1=? AND v2=?");
+this.lu_pstr.put("S15", UPD+"E SET nu=? WHERE v1=? AND v2=?");
 @ %def S15
 <<S131>>=
-lu_pstr.put("S131", UPD+"W SET nu=? WHERE v1=? AND v2=?");
+this.lu_pstr.put("S131", UPD+"W SET nu=? WHERE v1=? AND v2=?");
 @ %def S131
 <<S77>>=
-lu_pstr.put("S77", UPD+"CW SET te=?, ve=? WHERE sid=?");
+this.lu_pstr.put("S77", UPD+"CW SET te=?, ve=? WHERE sid=?");
 @ %def S77
 <<S84>>=
-lu_pstr.put("S84", UPD+"PD SET t2=? WHERE v2=? AND rid=?");
+this.lu_pstr.put("S84", UPD+"PD SET t2=? WHERE v2=? AND rid=?");
 @ %def S84
 <<S82>>=
-lu_pstr.put("S82", UPD+"CPD SET tp=? WHERE vp=? AND rid=?");
+this.lu_pstr.put("S82", UPD+"CPD SET tp=? WHERE vp=? AND rid=?");
 @ %def S82
 <<S83>>=
-lu_pstr.put("S83", UPD+"CPD SET td=? WHERE vd=? AND rid=?");
+this.lu_pstr.put("S83", UPD+"CPD SET td=? WHERE vd=? AND rid=?");
 @ %def S83
 <<S76>>=
-lu_pstr.put("S76", DEL+"W WHERE sid=? AND t2>?");
+this.lu_pstr.put("S76", DEL+"W WHERE sid=? AND t2>?");
 @ %def S76
 <<S42>>=
-lu_pstr.put("S42", DEL+"PD WHERE rid=?");
+this.lu_pstr.put("S42", DEL+"PD WHERE rid=?");
 @ %def S42
 <<S43>>=
-lu_pstr.put("S43", DEL+"CPD WHERE rid=?");
+this.lu_pstr.put("S43", DEL+"CPD WHERE rid=?");
 @ %def S43
 <<S80>>=
-lu_pstr.put("S80", DEL+"CQ WHERE sid=? AND t2>?");
+this.lu_pstr.put("S80", DEL+"CQ WHERE sid=? AND t2>?");
 @ %def S80
 <<S62>>=
-lu_pstr.put("S62", SEL+"COUNT (*) FROM V WHERE v<>0");
+this.lu_pstr.put("S62", SEL+"COUNT (*) FROM V WHERE v<>0");
 @ %def S62
 <<S64>>=
-lu_pstr.put("S64", SEL+"MIN (lng), MAX (lng), MIN (lat), MAX (lat) "
+this.lu_pstr.put("S64", SEL+"MIN (lng), MAX (lng), MIN (lat), MAX (lat) "
       + "FROM V WHERE v<>0");
 @ %def S64
 <<S63>>=
-lu_pstr.put("S63", SEL+"COUNT (*) FROM E WHERE v1<>0 AND v2<>0");
+this.lu_pstr.put("S63", SEL+"COUNT (*) FROM E WHERE v1<>0 AND v2<>0");
 @ %def S63
 <<S65>>=
-lu_pstr.put("S65", SEL+"MIN (dd), MAX (dd), SUM (dd) / COUNT (dd), "
+this.lu_pstr.put("S65", SEL+"MIN (dd), MAX (dd), SUM (dd) / COUNT (dd), "
       + "MIN (nu), MAX (nu), SUM (nu) / COUNT (nu) "
       + "FROM E WHERE v1<>0 AND v2<>0");
 @ %def S65
 <<S46>>=
-lu_pstr.put("S46", SEL+"dd, nu FROM E WHERE v1=? AND v2=?");
+this.lu_pstr.put("S46", SEL+"dd, nu FROM E WHERE v1=? AND v2=?");
 @ %def S46
 <<S130>>=
-lu_pstr.put("S130", SEL+"lng, lat FROM V WHERE v=?");
+this.lu_pstr.put("S130", SEL+"lng, lat FROM V WHERE v=?");
 @ %def S130
 <<S48>>=
-lu_pstr.put("S48", SEL+"sq, se FROM S WHERE sid=?");
+this.lu_pstr.put("S48", SEL+"sq, se FROM S WHERE sid=?");
 @ %def S48
 <<S66>>=
-lu_pstr.put("S66", SEL+"COUNT (*) FROM S");
+this.lu_pstr.put("S66", SEL+"COUNT (*) FROM S");
 @ %def S66
 <<S75>>=
-lu_pstr.put("S75", SEL+"rid, rq, re, rl, ro, rd, rb FROM R WHERE rid=?");
+this.lu_pstr.put("S75", SEL+"rid, rq, re, rl, ro, rd, rb FROM R WHERE rid=?");
 @ %def S75
 <<S51>>=
-lu_pstr.put("S51", SEL+"rq, re, rl, ro, rd FROM R WHERE rid=?");
+this.lu_pstr.put("S51", SEL+"rq, re, rl, ro, rd FROM R WHERE rid=?");
 @ %def S51
 <<S67>>=
-lu_pstr.put("S67", SEL+"COUNT (*) FROM R");
+this.lu_pstr.put("S67", SEL+"COUNT (*) FROM R");
 @ %def S67
 <<S59>>=
-lu_pstr.put("S59", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
+this.lu_pstr.put("S59", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
       + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
       + "GROUP BY sid"
       + ") as b ON a.sid=b.sid AND ABS(a.t2-?)=b.tdiff AND a.t2<=?");
 @ %def S59
 <<S128>>=
-lu_pstr.put("S128", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
+this.lu_pstr.put("S128", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
       + "SELECT sid FROM CW WHERE te>? OR (ve=0 AND sl>?)"
       + ") as b ON a.sid=b.sid INNER JOIN ("
       + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
@@ -3776,19 +3802,19 @@ lu_pstr.put("S128", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
       + ") as c ON a.sid=c.sid AND ABS(a.t2-?)=c.tdiff AND a.t2<=?");
 @ %def S128
 <<S60>>=
-lu_pstr.put("S60", SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC");
+this.lu_pstr.put("S60", SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC");
 @ %def S60
 <<S129>>=
-lu_pstr.put("S129", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC");
+this.lu_pstr.put("S129", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC");
 @ %def S129
 <<S61>>=
-lu_pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
+this.lu_pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
       + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC");
 @ %def S61
 Need to join CQ in order to sort by order number [[o2]]. This query has
 worse performance after W (r\_server), CQ, PD grow.
 <<S69>>=
-lu_pstr.put("S69", SEL+"t, v, Ls, Lr "
+this.lu_pstr.put("S69", SEL+"t, v, Ls, Lr "
       + "FROM r_server LEFT JOIN CQ ON t=t2 and v=v2 and Lr=rid "
       + "WHERE r_server.sid=?"
       + "   AND (t>? OR v=0)"
@@ -3797,157 +3823,157 @@ lu_pstr.put("S69", SEL+"t, v, Ls, Lr "
 @ %def S69
 <<S68>>=
 // A "timeout" of 30 seconds is hard-coded here
-lu_pstr.put("S68", SEL+"* FROM R WHERE re<=? AND ?<=re+30 AND rid NOT IN  "
+this.lu_pstr.put("S68", SEL+"* FROM R WHERE re<=? AND ?<=re+30 AND rid NOT IN  "
       + "(SELECT rid FROM assignments_r)");
 @ %def S68
 <<S85>>=
-lu_pstr.put("S85", SEL+"uq FROM UQ WHERE uid=?");
+this.lu_pstr.put("S85", SEL+"uq FROM UQ WHERE uid=?");
 @ %def S85
 <<S86>>=
-lu_pstr.put("S86", SEL+"tp, td FROM CPD WHERE rid=?");
+this.lu_pstr.put("S86", SEL+"tp, td FROM CPD WHERE rid=?");
 @ %def S86
 <<S73>>=
-lu_pstr.put("S73", SEL+"q2 FROM CQ WHERE sid=? AND t2<=? "
+this.lu_pstr.put("S73", SEL+"q2 FROM CQ WHERE sid=? AND t2<=? "
       + "ORDER BY t2 DESC, q2 DESC FETCH FIRST ROW ONLY");
 @ %def S73
 <<S87>>=
-lu_pstr.put("S87", SEL+"t2, q2, o2 FROM CQ WHERE sid=? AND t2<=? "
+this.lu_pstr.put("S87", SEL+"t2, q2, o2 FROM CQ WHERE sid=? AND t2<=? "
       + "ORDER BY t2 DESC, o2 DESC FETCH FIRST ROW ONLY");
 @ %def S87
 <<S100>>=
-lu_pstr.put("S100", SEL+"rid FROM assignments WHERE t>? AND sid=?");
+this.lu_pstr.put("S100", SEL+"rid FROM assignments WHERE t>? AND sid=?");
 @ %def S100
 <<S101>>=
-lu_pstr.put("S101", SEL+"rid FROM assignments WHERE t<=? AND sid=?");
+this.lu_pstr.put("S101", SEL+"rid FROM assignments WHERE t<=? AND sid=?");
 @ %def S101
 <<S102>>=
-lu_pstr.put("S102", SEL+"* FROM service_rate");
+this.lu_pstr.put("S102", SEL+"* FROM service_rate");
 @ %def S102
 <<S103>>=
-lu_pstr.put("S103", SEL+"* FROM dist_base");
+this.lu_pstr.put("S103", SEL+"* FROM dist_base");
 @ %def S103
 <<S104>>=
-lu_pstr.put("S104", SEL+"val FROM dist_s_travel WHERE sid=?");
+this.lu_pstr.put("S104", SEL+"val FROM dist_s_travel WHERE sid=?");
 @ %def S104
 <<S105>>=
-lu_pstr.put("S105", SEL+"SUM (val) FROM dist_s_travel");
+this.lu_pstr.put("S105", SEL+"SUM (val) FROM dist_s_travel");
 @ %def S105
 <<S106>>=
-lu_pstr.put("S106", SEL+"val FROM dist_s_cruising WHERE sid=?");
+this.lu_pstr.put("S106", SEL+"val FROM dist_s_cruising WHERE sid=?");
 @ %def S106
 <<S107>>=
-lu_pstr.put("S107", SEL+"SUM (val) FROM dist_s_cruising");
+this.lu_pstr.put("S107", SEL+"SUM (val) FROM dist_s_cruising");
 @ %def S107
 <<S108>>=
-lu_pstr.put("S108", SEL+"val FROM dist_s_service WHERE sid=?");
+this.lu_pstr.put("S108", SEL+"val FROM dist_s_service WHERE sid=?");
 @ %def S108
 <<S109>>=
-lu_pstr.put("S109", SEL+"SUM (val) FROM dist_s_service");
+this.lu_pstr.put("S109", SEL+"SUM (val) FROM dist_s_service");
 @ %def S109
 <<S110>>=
-lu_pstr.put("S110", SEL+"val FROM dist_s_base");
+this.lu_pstr.put("S110", SEL+"val FROM dist_s_base");
 @ %def S110
 <<S111>>=
-lu_pstr.put("S111", SEL+"val FROM dist_r_base");
+this.lu_pstr.put("S111", SEL+"val FROM dist_r_base");
 @ %def S111
 <<S112>>=
-lu_pstr.put("S112", SEL+"val FROM dist_r_detour WHERE rid=?");
+this.lu_pstr.put("S112", SEL+"val FROM dist_r_detour WHERE rid=?");
 @ %def S112
 <<S113>>=
-lu_pstr.put("S113", SEL+"SUM (val) FROM dist_r_detour");
+this.lu_pstr.put("S113", SEL+"SUM (val) FROM dist_r_detour");
 @ %def S113
 <<S114>>=
-lu_pstr.put("S114", SEL+"val FROM dist_r_transit WHERE rid=?");
+this.lu_pstr.put("S114", SEL+"val FROM dist_r_transit WHERE rid=?");
 @ %def S114
 <<S115>>=
-lu_pstr.put("S115", SEL+"SUM (val) FROM dist_r_transit");
+this.lu_pstr.put("S115", SEL+"SUM (val) FROM dist_r_transit");
 @ %def S115
 <<S116>>=
-lu_pstr.put("S116", SEL+"val FROM dur_s_travel WHERE sid=?");
+this.lu_pstr.put("S116", SEL+"val FROM dur_s_travel WHERE sid=?");
 @ %def S116
 <<S117>>=
-lu_pstr.put("S117", SEL+"SUM (val) FROM dur_s_travel");
+this.lu_pstr.put("S117", SEL+"SUM (val) FROM dur_s_travel");
 @ %def S117
 <<S118>>=
-lu_pstr.put("S118", SEL+"val FROM dur_r_pickup WHERE rid=?");
+this.lu_pstr.put("S118", SEL+"val FROM dur_r_pickup WHERE rid=?");
 @ %def S118
 <<S119>>=
-lu_pstr.put("S119", SEL+"SUM (val) FROM dur_r_pickup");
+this.lu_pstr.put("S119", SEL+"SUM (val) FROM dur_r_pickup");
 @ %def S119
 <<S120>>=
-lu_pstr.put("S120", SEL+"val FROM dur_r_transit WHERE rid=?");
+this.lu_pstr.put("S120", SEL+"val FROM dur_r_transit WHERE rid=?");
 @ %def S120
 <<S121>>=
-lu_pstr.put("S121", SEL+"SUM (val) FROM dur_r_transit");
+this.lu_pstr.put("S121", SEL+"SUM (val) FROM dur_r_transit");
 @ %def S121
 <<S122>>=
-lu_pstr.put("S122", SEL+"val FROM dur_r_travel WHERE rid=?");
+this.lu_pstr.put("S122", SEL+"val FROM dur_r_travel WHERE rid=?");
 @ %def S122
 <<S123>>=
-lu_pstr.put("S123", SEL+"SUM (val) FROM dur_r_travel");
+this.lu_pstr.put("S123", SEL+"SUM (val) FROM dur_r_travel");
 @ %def S123
 <<S124>>=
-lu_pstr.put("S124", SEL+"val FROM t_r_depart WHERE rid=?");
+this.lu_pstr.put("S124", SEL+"val FROM t_r_depart WHERE rid=?");
 @ %def S124
 <<S125>>=
-lu_pstr.put("S125", SEL+"val FROM t_s_depart WHERE sid=?");
+this.lu_pstr.put("S125", SEL+"val FROM t_s_depart WHERE sid=?");
 @ %def S125
 <<S126>>=
-lu_pstr.put("S126", SEL+"val FROM t_r_arrive WHERE rid=?");
+this.lu_pstr.put("S126", SEL+"val FROM t_r_arrive WHERE rid=?");
 @ %def S126
 <<S127>>=
-lu_pstr.put("S127", SEL+"val FROM t_s_arrive WHERE sid=?");
+this.lu_pstr.put("S127", SEL+"val FROM t_s_arrive WHERE sid=?");
 @ %def S127
 <<S133>>=
-lu_pstr.put("S133", SEL+"val FROM f_status WHERE rid=? AND t<=? "
+this.lu_pstr.put("S133", SEL+"val FROM f_status WHERE rid=? AND t<=? "
     + "ORDER BY t DESC FETCH FIRST ROW ONLY");
 @ %def S133
 <<S134>>=
-lu_pstr.put("S134", SEL+"sid, te FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
+this.lu_pstr.put("S134", SEL+"sid, te FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
 @ %def S134
 <<S135>>=
-lu_pstr.put("S135", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
+this.lu_pstr.put("S135", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
     + "SELECT t1 FROM W WHERE sid=? AND t1 <= ? AND ? < t2)");
 @ %def S135
 <<S136>>=
-lu_pstr.put("S136", SEL+"* FROM V");
+this.lu_pstr.put("S136", SEL+"* FROM V");
 @ %def S136
 <<S137>>=
-lu_pstr.put("S137", SEL+"* FROM E");
+this.lu_pstr.put("S137", SEL+"* FROM E");
 @ %def S137
 <<S138>>=
-lu_pstr.put("S138", SEL+"val FROM dist_r_unassigned");
+this.lu_pstr.put("S138", SEL+"val FROM dist_r_unassigned");
 @ %def S138
 <<S139>>=
-lu_pstr.put("S139", UPD+"CPD SET te=? WHERE sid=?");
+this.lu_pstr.put("S139", UPD+"CPD SET te=? WHERE sid=?");
 @ %def S139
 <<S140>>=
-lu_pstr.put("S140", UPD+"CQ SET tp=?, td=? WHERE rid=?");
+this.lu_pstr.put("S140", UPD+"CQ SET tp=?, td=? WHERE rid=?");
 @ %def S140
 <<S141>>=
-lu_pstr.put("S141", SEL+"* FROM r_user");
+this.lu_pstr.put("S141", SEL+"* FROM r_user");
 @ %def S141
 <<S142>>=
-lu_pstr.put("S142", SEL+"SUM (dd) FROM W WHERE sid=? AND t2>?");
+this.lu_pstr.put("S142", SEL+"SUM (dd) FROM W WHERE sid=? AND t2>?");
 @ %def S142
 <<S143>>=
-lu_pstr.put("S143", SEL+"* FROM R WHERE re<=? AND ?<=re+?");
+this.lu_pstr.put("S143", SEL+"* FROM R WHERE re<=? AND ?<=re+?");
 @ %def S143
 <<S144>>=
-lu_pstr.put("S144", SEL+"t2, v2, rid FROM CQ WHERE sid=? AND t2>? ORDER BY o2 ASC");
+this.lu_pstr.put("S144", SEL+"t2, v2, rid FROM CQ WHERE sid=? AND t2>? ORDER BY o2 ASC");
 @ %def S144
 <<S145>>=
-lu_pstr.put("S145", SEL+"te, ve FROM CW WHERE sid=?");
+this.lu_pstr.put("S145", SEL+"te, ve FROM CW WHERE sid=?");
 @ %def S145
 <<S147>>=
-lu_pstr.put("S147", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
+this.lu_pstr.put("S147", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
     + "SELECT t1 FROM W WHERE sid=? AND v2=0)");
 @ %def S147
 <<S148>>=
-lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
+this.lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
 @ %def S148
 <<S149>>=
-lu_pstr.put("S149", SEL+"t2, v2 FROM W WHERE sid=? ORDER BY t2 ASC");
+this.lu_pstr.put("S149", SEL+"t2, v2 FROM W WHERE sid=? ORDER BY t2 ASC");
 @ %def S149
 
 \appendix

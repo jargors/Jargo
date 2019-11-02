@@ -42,17 +42,6 @@ public class Storage {
   private ObjectPool<PoolableConnection>  pool;
   private PoolingDriver                   driver;
   public Storage() {
-    try {
-      this.setupDriver();
-    } catch (SQLException e) {
-      System.err.println("Storage.Storage(): "+"Encountered catastrophic exception.");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    } catch (ClassNotFoundException e) {
-      System.err.println("Storage.Storage(): "+"Encountered catastrophic exception.");
-      e.printStackTrace();
-      System.exit(1);
-    }
     this.PSInit();
   }
   public int[] DBQuery(String sql, int ncols) throws SQLException {
@@ -1189,6 +1178,28 @@ public class Storage {
       lu_rstatus.remove(r);
     }
   }
+  public void DBCreateNewInstance() {
+    try {
+      this.setupDriver();
+    } catch (SQLException e) {
+      System.err.println("Storage.init(): "+"Encountered catastrophic exception.");
+      Tools.PrintSQLException(e);
+      System.exit(1);
+    } catch (ClassNotFoundException e) {
+      System.err.println("Storage.init(): "+"Encountered catastrophic exception.");
+      e.printStackTrace();
+      System.exit(1);
+    }
+  }
+  public void DBCloseInstance() throws SQLException {
+    try {
+      DriverManager.getConnection("jdbc:derby:memory:jargo;drop=true");
+    } catch (SQLException e) {
+      if (e.getErrorCode() != 45000) {  // 45000 = database successfully dropped
+        throw e;
+      }
+    }
+  }
   public final ConcurrentHashMap<Integer, int[]> getReferenceVerticesCache() {
     return this.lu_vertices;
   }
@@ -1519,7 +1530,7 @@ public class Storage {
     }
   }
   public void DBLoadBackup(String p) throws SQLException {
-    this.CONNECTIONS_URL = "jdbc:derby:memory:jargobak;createFrom="+p;
+    this.CONNECTIONS_URL = "jdbc:derby:memory:jargo;createFrom="+p;
     try {
       this.setupDriver();
     } catch (ClassNotFoundException e) {
@@ -1638,122 +1649,122 @@ public class Storage {
     String q9  = "(?,?,?,?,?,?,?,?,?)";
     String q12 = "(?,?,?,?,?,?,?,?,?,?,?,?)";
     String q14 = "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-    lu_pstr.put("S0", INS+"V VALUES "+q3);
-    lu_pstr.put("S1", INS+"E VALUES "+q4);
-    lu_pstr.put("S2", INS+"UQ VALUES "+q2);
-    lu_pstr.put("S3", INS+"UE VALUES "+q2);
-    lu_pstr.put("S4", INS+"UL VALUES "+q2);
-    lu_pstr.put("S5", INS+"UO VALUES "+q2);
-    lu_pstr.put("S6", INS+"UD VALUES "+q2);
-    lu_pstr.put("S7", INS+"UB VALUES "+q2);
-    lu_pstr.put("S8", INS+"S VALUES "+q7);
-    lu_pstr.put("S9", INS+"R VALUES "+q7);
-    lu_pstr.put("S10", INS+"W VALUES "+q8);
-    lu_pstr.put("S11", INS+"CW VALUES "+q9);
-    lu_pstr.put("S12", INS+"PD VALUES "+q4);
-    lu_pstr.put("S13", INS+"CPD VALUES "+q12);
-    lu_pstr.put("S14", INS+"CQ VALUES "+q14);
-    lu_pstr.put("S15", UPD+"E SET nu=? WHERE v1=? AND v2=?");
-    lu_pstr.put("S131", UPD+"W SET nu=? WHERE v1=? AND v2=?");
-    lu_pstr.put("S77", UPD+"CW SET te=?, ve=? WHERE sid=?");
-    lu_pstr.put("S84", UPD+"PD SET t2=? WHERE v2=? AND rid=?");
-    lu_pstr.put("S82", UPD+"CPD SET tp=? WHERE vp=? AND rid=?");
-    lu_pstr.put("S83", UPD+"CPD SET td=? WHERE vd=? AND rid=?");
-    lu_pstr.put("S76", DEL+"W WHERE sid=? AND t2>?");
-    lu_pstr.put("S42", DEL+"PD WHERE rid=?");
-    lu_pstr.put("S43", DEL+"CPD WHERE rid=?");
-    lu_pstr.put("S80", DEL+"CQ WHERE sid=? AND t2>?");
-    lu_pstr.put("S62", SEL+"COUNT (*) FROM V WHERE v<>0");
-    lu_pstr.put("S64", SEL+"MIN (lng), MAX (lng), MIN (lat), MAX (lat) "
+    this.lu_pstr.put("S0", INS+"V VALUES "+q3);
+    this.lu_pstr.put("S1", INS+"E VALUES "+q4);
+    this.lu_pstr.put("S2", INS+"UQ VALUES "+q2);
+    this.lu_pstr.put("S3", INS+"UE VALUES "+q2);
+    this.lu_pstr.put("S4", INS+"UL VALUES "+q2);
+    this.lu_pstr.put("S5", INS+"UO VALUES "+q2);
+    this.lu_pstr.put("S6", INS+"UD VALUES "+q2);
+    this.lu_pstr.put("S7", INS+"UB VALUES "+q2);
+    this.lu_pstr.put("S8", INS+"S VALUES "+q7);
+    this.lu_pstr.put("S9", INS+"R VALUES "+q7);
+    this.lu_pstr.put("S10", INS+"W VALUES "+q8);
+    this.lu_pstr.put("S11", INS+"CW VALUES "+q9);
+    this.lu_pstr.put("S12", INS+"PD VALUES "+q4);
+    this.lu_pstr.put("S13", INS+"CPD VALUES "+q12);
+    this.lu_pstr.put("S14", INS+"CQ VALUES "+q14);
+    this.lu_pstr.put("S15", UPD+"E SET nu=? WHERE v1=? AND v2=?");
+    this.lu_pstr.put("S131", UPD+"W SET nu=? WHERE v1=? AND v2=?");
+    this.lu_pstr.put("S77", UPD+"CW SET te=?, ve=? WHERE sid=?");
+    this.lu_pstr.put("S84", UPD+"PD SET t2=? WHERE v2=? AND rid=?");
+    this.lu_pstr.put("S82", UPD+"CPD SET tp=? WHERE vp=? AND rid=?");
+    this.lu_pstr.put("S83", UPD+"CPD SET td=? WHERE vd=? AND rid=?");
+    this.lu_pstr.put("S76", DEL+"W WHERE sid=? AND t2>?");
+    this.lu_pstr.put("S42", DEL+"PD WHERE rid=?");
+    this.lu_pstr.put("S43", DEL+"CPD WHERE rid=?");
+    this.lu_pstr.put("S80", DEL+"CQ WHERE sid=? AND t2>?");
+    this.lu_pstr.put("S62", SEL+"COUNT (*) FROM V WHERE v<>0");
+    this.lu_pstr.put("S64", SEL+"MIN (lng), MAX (lng), MIN (lat), MAX (lat) "
           + "FROM V WHERE v<>0");
-    lu_pstr.put("S63", SEL+"COUNT (*) FROM E WHERE v1<>0 AND v2<>0");
-    lu_pstr.put("S65", SEL+"MIN (dd), MAX (dd), SUM (dd) / COUNT (dd), "
+    this.lu_pstr.put("S63", SEL+"COUNT (*) FROM E WHERE v1<>0 AND v2<>0");
+    this.lu_pstr.put("S65", SEL+"MIN (dd), MAX (dd), SUM (dd) / COUNT (dd), "
           + "MIN (nu), MAX (nu), SUM (nu) / COUNT (nu) "
           + "FROM E WHERE v1<>0 AND v2<>0");
-    lu_pstr.put("S46", SEL+"dd, nu FROM E WHERE v1=? AND v2=?");
-    lu_pstr.put("S130", SEL+"lng, lat FROM V WHERE v=?");
-    lu_pstr.put("S70", SEL+"sid, sq, se, sl, so, sd, sb FROM S WHERE sid=?");
-    lu_pstr.put("S48", SEL+"sq, se FROM S WHERE sid=?");
-    lu_pstr.put("S66", SEL+"COUNT (*) FROM S");
-    lu_pstr.put("S75", SEL+"rid, rq, re, rl, ro, rd, rb FROM R WHERE rid=?");
-    lu_pstr.put("S51", SEL+"rq, re, rl, ro, rd FROM R WHERE rid=?");
-    lu_pstr.put("S67", SEL+"COUNT (*) FROM R");
-    lu_pstr.put("S59", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
+    this.lu_pstr.put("S46", SEL+"dd, nu FROM E WHERE v1=? AND v2=?");
+    this.lu_pstr.put("S130", SEL+"lng, lat FROM V WHERE v=?");
+    this.lu_pstr.put("S70", SEL+"sid, sq, se, sl, so, sd, sb FROM S WHERE sid=?");
+    this.lu_pstr.put("S48", SEL+"sq, se FROM S WHERE sid=?");
+    this.lu_pstr.put("S66", SEL+"COUNT (*) FROM S");
+    this.lu_pstr.put("S75", SEL+"rid, rq, re, rl, ro, rd, rb FROM R WHERE rid=?");
+    this.lu_pstr.put("S51", SEL+"rq, re, rl, ro, rd FROM R WHERE rid=?");
+    this.lu_pstr.put("S67", SEL+"COUNT (*) FROM R");
+    this.lu_pstr.put("S59", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
           + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
           + "GROUP BY sid"
           + ") as b ON a.sid=b.sid AND ABS(a.t2-?)=b.tdiff AND a.t2<=?");
-    lu_pstr.put("S128", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
+    this.lu_pstr.put("S128", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
           + "SELECT sid FROM CW WHERE te>? OR (ve=0 AND sl>?)"
           + ") as b ON a.sid=b.sid INNER JOIN ("
           + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
           + "GROUP BY sid"
           + ") as c ON a.sid=c.sid AND ABS(a.t2-?)=c.tdiff AND a.t2<=?");
-    lu_pstr.put("S60", SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC");
-    lu_pstr.put("S129", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC");
-    lu_pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
+    this.lu_pstr.put("S60", SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC");
+    this.lu_pstr.put("S129", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC");
+    this.lu_pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
           + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC");
-    lu_pstr.put("S69", SEL+"t, v, Ls, Lr "
+    this.lu_pstr.put("S69", SEL+"t, v, Ls, Lr "
           + "FROM r_server LEFT JOIN CQ ON t=t2 and v=v2 and Lr=rid "
           + "WHERE r_server.sid=?"
           + "   AND (t>? OR v=0)"
           + "   AND (Ls IS NOT NULL OR Lr IS NOT NULL)"
           + "ORDER BY t ASC, o2 ASC");
     // A "timeout" of 30 seconds is hard-coded here
-    lu_pstr.put("S68", SEL+"* FROM R WHERE re<=? AND ?<=re+30 AND rid NOT IN  "
+    this.lu_pstr.put("S68", SEL+"* FROM R WHERE re<=? AND ?<=re+30 AND rid NOT IN  "
           + "(SELECT rid FROM assignments_r)");
-    lu_pstr.put("S85", SEL+"uq FROM UQ WHERE uid=?");
-    lu_pstr.put("S86", SEL+"tp, td FROM CPD WHERE rid=?");
-    lu_pstr.put("S73", SEL+"q2 FROM CQ WHERE sid=? AND t2<=? "
+    this.lu_pstr.put("S85", SEL+"uq FROM UQ WHERE uid=?");
+    this.lu_pstr.put("S86", SEL+"tp, td FROM CPD WHERE rid=?");
+    this.lu_pstr.put("S73", SEL+"q2 FROM CQ WHERE sid=? AND t2<=? "
           + "ORDER BY t2 DESC, q2 DESC FETCH FIRST ROW ONLY");
-    lu_pstr.put("S87", SEL+"t2, q2, o2 FROM CQ WHERE sid=? AND t2<=? "
+    this.lu_pstr.put("S87", SEL+"t2, q2, o2 FROM CQ WHERE sid=? AND t2<=? "
           + "ORDER BY t2 DESC, o2 DESC FETCH FIRST ROW ONLY");
-    lu_pstr.put("S100", SEL+"rid FROM assignments WHERE t>? AND sid=?");
-    lu_pstr.put("S101", SEL+"rid FROM assignments WHERE t<=? AND sid=?");
-    lu_pstr.put("S102", SEL+"* FROM service_rate");
-    lu_pstr.put("S103", SEL+"* FROM dist_base");
-    lu_pstr.put("S104", SEL+"val FROM dist_s_travel WHERE sid=?");
-    lu_pstr.put("S105", SEL+"SUM (val) FROM dist_s_travel");
-    lu_pstr.put("S106", SEL+"val FROM dist_s_cruising WHERE sid=?");
-    lu_pstr.put("S107", SEL+"SUM (val) FROM dist_s_cruising");
-    lu_pstr.put("S108", SEL+"val FROM dist_s_service WHERE sid=?");
-    lu_pstr.put("S109", SEL+"SUM (val) FROM dist_s_service");
-    lu_pstr.put("S110", SEL+"val FROM dist_s_base");
-    lu_pstr.put("S111", SEL+"val FROM dist_r_base");
-    lu_pstr.put("S112", SEL+"val FROM dist_r_detour WHERE rid=?");
-    lu_pstr.put("S113", SEL+"SUM (val) FROM dist_r_detour");
-    lu_pstr.put("S114", SEL+"val FROM dist_r_transit WHERE rid=?");
-    lu_pstr.put("S115", SEL+"SUM (val) FROM dist_r_transit");
-    lu_pstr.put("S116", SEL+"val FROM dur_s_travel WHERE sid=?");
-    lu_pstr.put("S117", SEL+"SUM (val) FROM dur_s_travel");
-    lu_pstr.put("S118", SEL+"val FROM dur_r_pickup WHERE rid=?");
-    lu_pstr.put("S119", SEL+"SUM (val) FROM dur_r_pickup");
-    lu_pstr.put("S120", SEL+"val FROM dur_r_transit WHERE rid=?");
-    lu_pstr.put("S121", SEL+"SUM (val) FROM dur_r_transit");
-    lu_pstr.put("S122", SEL+"val FROM dur_r_travel WHERE rid=?");
-    lu_pstr.put("S123", SEL+"SUM (val) FROM dur_r_travel");
-    lu_pstr.put("S124", SEL+"val FROM t_r_depart WHERE rid=?");
-    lu_pstr.put("S125", SEL+"val FROM t_s_depart WHERE sid=?");
-    lu_pstr.put("S126", SEL+"val FROM t_r_arrive WHERE rid=?");
-    lu_pstr.put("S127", SEL+"val FROM t_s_arrive WHERE sid=?");
-    lu_pstr.put("S133", SEL+"val FROM f_status WHERE rid=? AND t<=? "
+    this.lu_pstr.put("S100", SEL+"rid FROM assignments WHERE t>? AND sid=?");
+    this.lu_pstr.put("S101", SEL+"rid FROM assignments WHERE t<=? AND sid=?");
+    this.lu_pstr.put("S102", SEL+"* FROM service_rate");
+    this.lu_pstr.put("S103", SEL+"* FROM dist_base");
+    this.lu_pstr.put("S104", SEL+"val FROM dist_s_travel WHERE sid=?");
+    this.lu_pstr.put("S105", SEL+"SUM (val) FROM dist_s_travel");
+    this.lu_pstr.put("S106", SEL+"val FROM dist_s_cruising WHERE sid=?");
+    this.lu_pstr.put("S107", SEL+"SUM (val) FROM dist_s_cruising");
+    this.lu_pstr.put("S108", SEL+"val FROM dist_s_service WHERE sid=?");
+    this.lu_pstr.put("S109", SEL+"SUM (val) FROM dist_s_service");
+    this.lu_pstr.put("S110", SEL+"val FROM dist_s_base");
+    this.lu_pstr.put("S111", SEL+"val FROM dist_r_base");
+    this.lu_pstr.put("S112", SEL+"val FROM dist_r_detour WHERE rid=?");
+    this.lu_pstr.put("S113", SEL+"SUM (val) FROM dist_r_detour");
+    this.lu_pstr.put("S114", SEL+"val FROM dist_r_transit WHERE rid=?");
+    this.lu_pstr.put("S115", SEL+"SUM (val) FROM dist_r_transit");
+    this.lu_pstr.put("S116", SEL+"val FROM dur_s_travel WHERE sid=?");
+    this.lu_pstr.put("S117", SEL+"SUM (val) FROM dur_s_travel");
+    this.lu_pstr.put("S118", SEL+"val FROM dur_r_pickup WHERE rid=?");
+    this.lu_pstr.put("S119", SEL+"SUM (val) FROM dur_r_pickup");
+    this.lu_pstr.put("S120", SEL+"val FROM dur_r_transit WHERE rid=?");
+    this.lu_pstr.put("S121", SEL+"SUM (val) FROM dur_r_transit");
+    this.lu_pstr.put("S122", SEL+"val FROM dur_r_travel WHERE rid=?");
+    this.lu_pstr.put("S123", SEL+"SUM (val) FROM dur_r_travel");
+    this.lu_pstr.put("S124", SEL+"val FROM t_r_depart WHERE rid=?");
+    this.lu_pstr.put("S125", SEL+"val FROM t_s_depart WHERE sid=?");
+    this.lu_pstr.put("S126", SEL+"val FROM t_r_arrive WHERE rid=?");
+    this.lu_pstr.put("S127", SEL+"val FROM t_s_arrive WHERE sid=?");
+    this.lu_pstr.put("S133", SEL+"val FROM f_status WHERE rid=? AND t<=? "
         + "ORDER BY t DESC FETCH FIRST ROW ONLY");
-    lu_pstr.put("S134", SEL+"sid, te FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
-    lu_pstr.put("S135", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
+    this.lu_pstr.put("S134", SEL+"sid, te FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
+    this.lu_pstr.put("S135", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
         + "SELECT t1 FROM W WHERE sid=? AND t1 <= ? AND ? < t2)");
-    lu_pstr.put("S136", SEL+"* FROM V");
-    lu_pstr.put("S137", SEL+"* FROM E");
-    lu_pstr.put("S138", SEL+"val FROM dist_r_unassigned");
-    lu_pstr.put("S139", UPD+"CPD SET te=? WHERE sid=?");
-    lu_pstr.put("S140", UPD+"CQ SET tp=?, td=? WHERE rid=?");
-    lu_pstr.put("S141", SEL+"* FROM r_user");
-    lu_pstr.put("S142", SEL+"SUM (dd) FROM W WHERE sid=? AND t2>?");
-    lu_pstr.put("S143", SEL+"* FROM R WHERE re<=? AND ?<=re+?");
-    lu_pstr.put("S144", SEL+"t2, v2, rid FROM CQ WHERE sid=? AND t2>? ORDER BY o2 ASC");
-    lu_pstr.put("S145", SEL+"te, ve FROM CW WHERE sid=?");
-    lu_pstr.put("S147", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
+    this.lu_pstr.put("S136", SEL+"* FROM V");
+    this.lu_pstr.put("S137", SEL+"* FROM E");
+    this.lu_pstr.put("S138", SEL+"val FROM dist_r_unassigned");
+    this.lu_pstr.put("S139", UPD+"CPD SET te=? WHERE sid=?");
+    this.lu_pstr.put("S140", UPD+"CQ SET tp=?, td=? WHERE rid=?");
+    this.lu_pstr.put("S141", SEL+"* FROM r_user");
+    this.lu_pstr.put("S142", SEL+"SUM (dd) FROM W WHERE sid=? AND t2>?");
+    this.lu_pstr.put("S143", SEL+"* FROM R WHERE re<=? AND ?<=re+?");
+    this.lu_pstr.put("S144", SEL+"t2, v2, rid FROM CQ WHERE sid=? AND t2>? ORDER BY o2 ASC");
+    this.lu_pstr.put("S145", SEL+"te, ve FROM CW WHERE sid=?");
+    this.lu_pstr.put("S147", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
         + "SELECT t1 FROM W WHERE sid=? AND v2=0)");
-    lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
-    lu_pstr.put("S149", SEL+"t2, v2 FROM W WHERE sid=? ORDER BY t2 ASC");
+    this.lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
+    this.lu_pstr.put("S149", SEL+"t2, v2 FROM W WHERE sid=? ORDER BY t2 ASC");
   }
   private PreparedStatement PS(Connection conn, String k) throws SQLException {
     PreparedStatement p = null;

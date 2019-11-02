@@ -16,28 +16,30 @@ public class StoragePerformanceTest {
   public static void main(String[] args) {
     Print("Starting storage performance tests");
     try {
-      /*{
-          Storage storage = new Storage();
-          final int n = 10000;  // 10,000
-          Connection[] arr = new Connection[n];
-          long _t0 = System.currentTimeMillis();
-          int _count = 0;
-          float _dur = 0;
-          for (int i = 0; i < n; i++) {
-            arr[i] = storage._getConnection();
-            System.out.print("\r          \r"+_count);
-            _count++;
-          }
-          long _t1 = System.currentTimeMillis();
-          _dur=((_t1 - _t0)/(float)(_count == 0 ? 1 : _count));
-          System.out.print("\r");
-          Print("_getConnection(0): "+_dur+" ms/call");
-          for (Connection c : arr) {
-            try {
-              c.close();
-            } catch (Exception e) { }
-          }
-        }*/
+      {
+        Storage storage = new Storage();
+        storage.DBCreateNewInstance();
+        final int n = 10000;  // 10,000
+        Connection[] arr = new Connection[n];
+        long _t0 = System.currentTimeMillis();
+        int _count = 0;
+        float _dur = 0;
+        for (int i = 0; i < n; i++) {
+          arr[i] = storage._getConnection();
+          System.out.print("\r          \r"+_count);
+          _count++;
+        }
+        long _t1 = System.currentTimeMillis();
+        _dur=((_t1 - _t0)/(float)(_count == 0 ? 1 : _count));
+        System.out.print("\r");
+        Print("_getConnection(0): "+_dur+" ms/call");
+        for (Connection c : arr) {
+          try {
+            c.close();
+          } catch (Exception e) { }
+        }
+        storage.DBCloseInstance();
+      }
       /*{
           Controller controller = new Controller();
           controller.loadDataModel();
@@ -111,6 +113,7 @@ public class StoragePerformanceTest {
         _dur=((_t1 - _t0)/(float)(_count == 0 ? 1 : _count));
         System.out.print("\r");
         Print("DBQueryServerLocationsActive(1): "+_dur+" ms/call");
+        storage.DBCloseInstance();
       }
     } catch (SQLException e) {
       Tools.PrintSQLException(e);

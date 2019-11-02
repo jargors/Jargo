@@ -105,10 +105,8 @@ _dur=((_t1 - _t0)/(float)(_count == 0 ? 1 : _count));
 System.out.print("\\r");
 \nwendcode{}\nwbegindocs{16}\nwdocspar
 
-Until I figure out how to close the Derby DB after each test, these
-can only be performed one at a time.
 \nwenddocs{}\nwbegincode{17}\sublabel{NW3iKWou-xbUR1-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-xbUR1-1}}}\moddef{Load performance tests~{\nwtagstyle{}\subpageref{NW3iKWou-xbUR1-1}}}\endmoddef\nwused{\\{NW3iKWou-2hjWc8-1}}
-/*\LA{}Test \code{}{\char95}getConnection\edoc{}(0)~{\nwtagstyle{}\subpageref{NW3iKWou-3EFvya-1}}\RA{}*/
+\LA{}Test \code{}{\char95}getConnection\edoc{}(0)~{\nwtagstyle{}\subpageref{NW3iKWou-3EFvya-1}}\RA{}
 /*\LA{}Test \code{}DBAddNewServer\edoc{}(1)~{\nwtagstyle{}\subpageref{NW3iKWou-39EpqO-1}}\RA{}*/
 /*\LA{}Test \code{}DBQueryQueuedRequests\edoc{}(1)~{\nwtagstyle{}\subpageref{NW3iKWou-3kKW1I-1}}\RA{}*/
 \LA{}Test \code{}DBQueryServerLocationsActive\edoc{}(1)~{\nwtagstyle{}\subpageref{NW3iKWou-29RW2s-1}}\RA{}
@@ -117,6 +115,7 @@ can only be performed one at a time.
 \nwenddocs{}\nwbegincode{19}\sublabel{NW3iKWou-3EFvya-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-3EFvya-1}}}\moddef{Test \code{}{\char95}getConnection\edoc{}(0)~{\nwtagstyle{}\subpageref{NW3iKWou-3EFvya-1}}}\endmoddef\nwused{\\{NW3iKWou-xbUR1-1}}
 \{
   Storage storage = new Storage();
+  storage.DBCreateNewInstance();
   final int n = 10000;  // 10,000
   Connection[] arr = new Connection[n];
   \LA{}Begin timing block~{\nwtagstyle{}\subpageref{NW3iKWou-4SyIkm-1}}\RA{}
@@ -131,6 +130,7 @@ can only be performed one at a time.
       c.close();
     \} catch (Exception e) \{ \}
   \}
+  storage.DBCloseInstance();
 \}
 \nwendcode{}\nwbegindocs{20}\nwdocspar
 
@@ -202,6 +202,7 @@ again.
   \}
   \LA{}End timing block~{\nwtagstyle{}\subpageref{NW3iKWou-3FOZIi-1}}\RA{}
   Print("DBQueryServerLocationsActive(1): "+_dur+" ms/call");
+  storage.DBCloseInstance();
 \}
 \nwendcode{}\nwbegindocs{26}\nwdocspar
 
