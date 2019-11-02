@@ -200,22 +200,24 @@ public class Storage {
     int[] output = new int[] { };
     int[] temp1 = new int[] { };
     int j = 0;
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
       output = DBFetch(conn, "S143", 7, t, t, REQUEST_TIMEOUT);
-      temp1 = new int[output.length];
-      for (int i = 0; i < (output.length - 6); i += 7) {
-        if (lu_rstatus.get(output[i]) == false) {
-          temp1[(j + 0)] = output[(i + 0)];
-          temp1[(j + 1)] = output[(i + 1)];
-          temp1[(j + 2)] = output[(i + 2)];
-          temp1[(j + 3)] = output[(i + 3)];
-          temp1[(j + 4)] = output[(i + 4)];
-          temp1[(j + 5)] = output[(i + 5)];
-          temp1[(j + 6)] = output[(i + 6)];
-          j += 7;
-        }
+    } catch (SQLException e) {
+      throw e;
+    }
+    temp1 = new int[output.length];
+    for (int i = 0; i < (output.length - 6); i += 7) {
+      if (lu_rstatus.get(output[i]) == false) {
+        temp1[(j + 0)] = output[(i + 0)];
+        temp1[(j + 1)] = output[(i + 1)];
+        temp1[(j + 2)] = output[(i + 2)];
+        temp1[(j + 3)] = output[(i + 3)];
+        temp1[(j + 4)] = output[(i + 4)];
+        temp1[(j + 5)] = output[(i + 5)];
+        temp1[(j + 6)] = output[(i + 6)];
+        j += 7;
       }
-      conn.close();
+    }
     int[] temp2 = new int[j];
     for (int i = 0; i < j; i += 7) {
       temp2[(i + 0)] = temp1[(i + 0)];
@@ -253,7 +255,7 @@ public class Storage {
     int j = 0;
     int sid = 0;
     int te = 0;
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
       temp1 = DBFetch(conn, "S134", 2, t, t, t);      // <-- 10 ms/call
       output = new int[(3*(temp1.length/2))];
       for (int i = 0; i < temp1.length - 1; i += 2) {
@@ -267,7 +269,9 @@ public class Storage {
         output[(j + 2)] = temp2[1];
         j += 3;
       }
-      conn.close();
+    } catch (SQLException e) {
+      throw e;
+    }
     return output;
   }
   public int[] DBQueryServerRoute(int sid) throws SQLException {
@@ -301,7 +305,7 @@ public class Storage {
   throws SQLException {
     int[] output = new int[] { };
     int[] temp = new int[] { };
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
       temp = DBFetch(conn, "S144", 3, sid, t);
       output = new int[4*temp.length/3 + 4];
       int j = 0;
@@ -317,7 +321,9 @@ public class Storage {
       output[(j + 1)] = temp[1];
       output[(j + 2)] = sid;
       output[(j + 3)] = 0;
-      conn.close();
+    } catch (SQLException e) {
+      throw e;
+    }
     return output;
   }
   public int[] DBQueryServerRemainingDistance(int sid, int t)
