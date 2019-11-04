@@ -71,6 +71,12 @@ import com.github.jargors.Storage;
 import com.github.jargors.Communicator;
 import com.github.jargors.Client;
 import com.github.jargors.Tools;
+import com.github.jargors.exceptions.DuplicateVertexException;
+import com.github.jargors.exceptions.DuplicateEdgeException;
+import com.github.jargors.exceptions.DuplicateUserException;
+import com.github.jargors.exceptions.EdgeNotFoundException;
+import com.github.jargors.exceptions.UserNotFoundException;
+import com.github.jargors.exceptions.VertexNotFoundException;
 @ \item standard utilities for concurrent execution;
 <<Controller.java preamble>>=
 import java.util.concurrent.CompletableFuture;
@@ -92,6 +98,9 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.HashMap;
 @
+<<Controller.java preamble>>=
+import java.sql.SQLException;
+@
 \end{itemize}
 
 \subsection{Class Definition}
@@ -101,7 +110,6 @@ public class Controller {
   <<[[Controller]] member variables>>
   <<[[Controller]] constructor>>
   <<[[Controller]] public methods>>
-  <<[[Controller]] private methods>>
 }
 @
 
@@ -140,8 +148,7 @@ private int engine_update_period = 10;
 private int loop_delay = 0;
 // private int deviation_rate = 0.02;
 // private int breakdown_rate = 0.005;
-private boolean DEBUG = false;
-@ %def CSHIFT world_time initial_world_time final_world_time engine_update_period loop_delay DEBUG
+@ %def CSHIFT world_time initial_world_time final_world_time engine_update_period loop_delay
 
 \hi{Loops.} Jargo's simulation environment comprises four ``loops'', defined
 here, running in parallel. They are executed using Java's
@@ -159,8 +166,7 @@ This loop advances the simulation world time.
 <<Definition of clock loop>>=
 private Runnable ClockLoop = () -> {
   communicator.setSimulationWorldTime(++world_time);
-  storage.printSQLDriverStatistics();
-  Print((world_time % 2 == 0 ? "*ping*" : "*pong*"));
+  Tools.Print((world_time % 2 == 0 ? "*ping*" : "*pong*"));
 };
 @ %def ClockLoop
 
@@ -174,23 +180,29 @@ private Runnable EngineLoop = () -> { };
 private Runnable RequestCollectionLoop = () -> {
   long A0 = System.currentTimeMillis();
   final int t0 = world_time;
-  int[] output = storage.DBQueryQueuedRequests(world_time);
-  for (int i = 0; i < (output.length - 6); i += 7) {
-    if (!lu_seen.containsKey(output[i]) || lu_seen.get(output[i]) == false) {
-      client.collectRequest(new int[] {
-        output[(i + 0)],
-        output[(i + 1)],
-        output[(i + 2)],
-        output[(i + 3)],
-        output[(i + 4)],
-        output[(i + 5)],
-        output[(i + 6)] });
-      lu_seen.put(output[i], true);
+  try {
+    int[] output = storage.DBQueryQueuedRequests(world_time);
+    for (int i = 0; i < (output.length - 6); i += 7) {
+      if (!lu_seen.containsKey(output[i]) || lu_seen.get(output[i]) == false) {
+        client.collectRequest(new int[] {
+          output[(i + 0)],
+          output[(i + 1)],
+          output[(i + 2)],
+          output[(i + 3)],
+          output[(i + 4)],
+          output[(i + 5)],
+          output[(i + 6)] });
+        lu_seen.put(output[i], true);
+      }
     }
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
   }
   final int t1 = world_time;
   long A1 = System.currentTimeMillis();
-  Print("Time RCL: "+(A1 - A0)+" ms");
+  Tools.Print("Time RCL: "+(A1 - A0)+" ms");
 };
 @ %def RequestCollectionLoop
 
@@ -204,7 +216,7 @@ private Runnable RequestHandlingLoop = () -> {
     System.out.println("client.notifyNew() exception: "+e.toString());
   }
   long A1 = System.currentTimeMillis();
-  Print("Time RHL: "+(A1 - A0)+" ms");
+  Tools.Print("Time RHL: "+(A1 - A0)+" ms");
 };
 @ %def RequestHandlingLoop
 
@@ -217,13 +229,16 @@ Option B. Change the query to use one query to get active vehicles, then
 <<Definition of server collection loop>>=
 private Runnable ServerLoop = () -> {
   long A0 = System.currentTimeMillis();
-  final int t0 = world_time;
-  int[] output = storage.DBQueryServerLocationsActive(world_time);
-  final int t1 = world_time;
+  try {
+    int[] output = storage.DBQueryServerLocationsActive(world_time);
+    client.collectServerLocations(output);
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
   long A1 = System.currentTimeMillis();
-  Print("Time SL: "+(A1 - A0)+" ms");
-  Print("ServerLoop t0="+t0+", t1="+t1+", # of servers="+output.length/3);
-  client.collectServerLocations(output);
+  Tools.Print("Time SL: "+(A1 - A0)+" ms");
 };
 @ %def ServerLoop
 
@@ -241,8 +256,8 @@ public Controller() {
 \label{sec:public-methods}
 \hi{General methods.}
 <<[[Controller]] public methods>>=
-<<Set debug>>
-<<Set storage debug>>
+<<Initialize new empty database>>
+<<Close database>>
 <<Set client debug>>
 <<Set communicator debug>>
 <<Set client>>
@@ -275,19 +290,32 @@ public Controller() {
 @
 
 \subsection{General methods}
-\subsubsection{[[setDebug]](1)}
-<<Set debug>>=
-public void setDebug(boolean flag) {
-  DEBUG = flag;
-}
-@ %def setDebug
 
-\subsubsection{[[setDebugStorage]](1)}
-<<Set storage debug>>=
-public void setDebugStorage(boolean flag) {
-  storage.setDebug(flag);
+\subsubsection{[[createNewInstance]](0)}
+<<Initialize new empty database>>=
+public void createNewInstance() {
+  try {
+    storage.DBCreateNewInstance();
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
 }
-@ %def setDebugStorage
+@ %def createNewInstance
+
+\subsubsection{[[closeInstance]](0)}
+<<Close database>>=
+public void closeInstance() {
+  try {
+    storage.DBCloseInstance();
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+}
+@ %def closeInstance
 
 \subsubsection{[[setDebugClient]](1)}
 <<Set client debug>>=
@@ -342,31 +370,41 @@ public void returnRequest(int rid) {
 \subsubsection{[[save]](1)}
 <<Save backup>>=
 public void saveBackup(String p) {
-  storage.DBSaveBackup(p);
+  try {
+    storage.DBSaveBackup(p);
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
 }
 @ %def saveBackup
 
 \subsubsection{[[loadBackup]](1)}
 <<Load backup>>=
 public void loadBackup(String p) {
-  storage.DBLoadBackup(p);
+  try {
+    storage.DBLoadBackup(p);
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
 }
 @ %def loadBackup
 
 \subsubsection{[[loadDataModel]](0)}
 <<Load data model>>=
-public void loadDataModel() throws RuntimeException {
+public void loadDataModel() {
   storage.DBLoadDataModel();
 }
 @
 
 \subsubsection{[[loadRoadNetwork]](1)}
 <<Load road network>>=
-public void loadRoadNetwork(String f_rnet) throws RuntimeException {
-  Print("Load road network ("+f_rnet+")");
+public void loadRoadNetwork(final String f_rnet) {
+  Tools.Print("Load road network ("+f_rnet+")");
   try {
-    int[] col = new int[7];
-    int dist;
     Scanner sc = new Scanner(new File(f_rnet));
     while (sc.hasNext()) {
       <<..parse a line of the road network>>
@@ -375,14 +413,27 @@ public void loadRoadNetwork(String f_rnet) throws RuntimeException {
       <<..compute edge weight [[dist]]>>
       <<..insert edge>>
     }
-  } catch (Exception e) {
-    throw new RuntimeException(e);
+  } catch (DuplicateVertexException e) {
+    System.err.println("Warning: duplicate vertex rejected");
+    System.err.println(e.toString());
+  } catch (DuplicateEdgeException e) {
+    System.err.println("Warning: duplicate edge rejected");
+    System.err.println(e.toString());
+  } catch (FileNotFoundException e) {
+    System.err.println("Encountered fatal error");
+    System.err.println(e.toString());
+    e.printStackTrace();
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
   }
   tools.registerVertices(storage.getReferenceVerticesCache());
   tools.registerEdges(storage.getReferenceEdgesCache());
 }
 @ %def loadRoadNetwork
 <<..parse a line of the road network>>=
+int[] col = new int[7];
 col[0] = sc.nextInt();
 col[1] = sc.nextInt();
 col[2] = sc.nextInt();
@@ -413,7 +464,7 @@ dummy vertex should only terminate and never begin an edge in the road network,
 otherwise a shortest path could take a shortcut through the dummy vertex to
 reach any other vertex with 0 weight!}.
 <<..compute edge weight [[dist]]>>=
-dist = ((col[1] != 0 && col[2] != 0)
+int dist = ((col[1] != 0 && col[2] != 0)
   ? tools.computeHaversine(
         col[3]/CSHIFT, col[4]/CSHIFT,
         col[5]/CSHIFT, col[6]/CSHIFT) : 0);
@@ -428,7 +479,7 @@ storage.DBAddNewEdge(col[1], col[2], dist, 10);
 \subsubsection{[[loadProblem(1)]]}
 <<Load problem>>=
 public void loadProblem(String p) {
-  Print("Load problem ("+p+")");
+  Tools.Print("Load problem ("+p+")");
   try {
     Scanner sc = new Scanner(new File(p));
     <<..skip header rows>>
@@ -446,10 +497,8 @@ public void loadProblem(String p) {
       int ub = tools.computeShortestPathDistance(uo, ud);
       if (uq < 0) {
         addNewServer(new int[] { uid, uq, ue, ul, uo, ud, ub });
-        Print("Put server "+uid);
       } else {
         addNewRequest(new int[] { uid, uq, ue, ul, uo, ud, ub });
-        Print("Put request "+uid);
       }
     }
   } catch (FileNotFoundException e) {
@@ -477,38 +526,38 @@ public void loadGTree(String p) {
 \subsubsection{[[start]](0)}
 <<Start dynamic simulation>>=
 public void start(Consumer app_cb) {
-  Print("SIMULATION STARTED");
+  Tools.Print("SIMULATION STARTED");
 
   world_time = initial_world_time;
-  Print("Set world time to "+world_time);
+  Tools.Print("Set world time to "+world_time);
 
   int simulation_duration = (final_world_time - initial_world_time);
-  Print("Set world duration to "+simulation_duration+" (sec)");
+  Tools.Print("Set world duration to "+simulation_duration+" (sec)");
 
   ScheduledExecutorService exe = Executors.newScheduledThreadPool(5);
 
   ScheduledFuture<?> cb1 = exe.scheduleAtFixedRate(
     ClockLoop, 0, 1, TimeUnit.SECONDS);
-  Print("Set clock-loop period to 1 (sec)");
+  Tools.Print("Set clock-loop period to 1 (sec)");
 
   ScheduledFuture<?> cb2 = exe.scheduleAtFixedRate(
     EngineLoop, loop_delay, engine_update_period, TimeUnit.SECONDS);
-  Print("Set engine-loop period to "+engine_update_period+" (sec)");
+  Tools.Print("Set engine-loop period to "+engine_update_period+" (sec)");
 
   int request_collection_period = client.getRequestCollectionPeriod();
   ScheduledFuture<?> cb3 = exe.scheduleAtFixedRate(
     RequestCollectionLoop, loop_delay, request_collection_period, TimeUnit.SECONDS);
-  Print("Set request-collection-loop period to "+request_collection_period+" (sec)");
+  Tools.Print("Set request-collection-loop period to "+request_collection_period+" (sec)");
 
   int request_handling_period = client.getRequestHandlingPeriod();
   ScheduledFuture<?> cb4 = exe.scheduleAtFixedRate(
     RequestHandlingLoop, loop_delay, request_handling_period, TimeUnit.MILLISECONDS);
-  Print("Set request-handling-loop period to "+request_handling_period+" (msec)");
+  Tools.Print("Set request-handling-loop period to "+request_handling_period+" (msec)");
 
   int server_collection_period = client.getServerLocationCollectionPeriod();
   ScheduledFuture<?> cb5 = exe.scheduleAtFixedRate(
     ServerLoop, loop_delay, server_collection_period, TimeUnit.SECONDS);
-  Print("Set server-loop period to "+server_collection_period+" (sec)");
+  Tools.Print("Set server-loop period to "+server_collection_period+" (sec)");
 
   exe.schedule(() -> {
     cb1.cancel(false);
@@ -518,7 +567,7 @@ public void start(Consumer app_cb) {
     cb5.cancel(false);
     exe.shutdown();
     client.end();
-    Print("SIMULATION ENDED");
+    Tools.Print("SIMULATION ENDED");
     app_cb.accept(true);
   }, simulation_duration, TimeUnit.SECONDS);
 }
@@ -527,11 +576,11 @@ public void start(Consumer app_cb) {
 \subsubsection{[[startStatic]](0)}
 <<Start static simulation>>=
 public void startStatic() {
-  Print("SIMULATION STARTED -- STATIC MODE");
+  Tools.Print("SIMULATION STARTED -- STATIC MODE");
 
   world_time = initial_world_time;
-  Print("Set world time to "+world_time);
-  Print("Set final world time to "+final_world_time+" (sec)");
+  Tools.Print("Set world time to "+world_time);
+  Tools.Print("Set final world time to "+final_world_time+" (sec)");
 
   while (world_time < final_world_time) {
     ClockLoop.run();
@@ -543,7 +592,7 @@ public void startStatic() {
 
   client.end();
 
-  Print("SIMULATION ENDED");
+  Tools.Print("SIMULATION ENDED");
 }
 @ %def startStatic
 
@@ -551,204 +600,439 @@ public void startStatic() {
 \subsection{Read Methods}
 \subsubsection{[[query]](2)}
 <<Query custom statement>>=
-public int[] query(String sql, int ncols) throws RuntimeException {
-  return storage.DBQuery(sql, ncols);
+public int[] query(String sql, int ncols) {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQuery(sql, ncols);
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def query
 
 \subsubsection{[[queryUser]](1)}
 <<Query ridesharing user>>=
-public int[] queryUser(int rid) throws RuntimeException {
-  return storage.DBQueryUser(rid);
+public int[] queryUser(int rid) {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryUser(rid);
+  } catch (UserNotFoundException e) {
+    System.err.println("Warning: user not found");
+    System.err.println(e.toString());
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryUser
 
 \subsubsection{[[queryQueuedRequests]](1)}
 <<Query queued requests>>=
-public int[] queryQueuedRequests(int t) throws RuntimeException {
-  return storage.DBQueryQueuedRequests(t);
+public int[] queryQueuedRequests(int t) {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryQueuedRequests(t);
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryQueuedRequests
 
 \subsubsection{[[queryRoute]](1)}
 <<Query routes>>=
-public int[] queryRoute(int sid) throws RuntimeException {
-  return storage.DBQueryServerRoute(sid);
+public int[] queryRoute(int sid) {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryServerRoute(sid);
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryRoute
 
 \subsubsection{[[querySchedule]](1)}
 <<Query schedules>>=
-public int[] querySchedule(int sid) throws RuntimeException {
-  return storage.DBQueryServerSchedule(sid);
+public int[] querySchedule(int sid) {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryServerSchedule(sid);
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def querySchedule
 
 \subsubsection{[[queryCountVertices]](0)}
 <<Query various metrics>>=
-public int[] queryCountVertices() throws RuntimeException {
-  return storage.DBQueryCountVertices();
+public int[] queryCountVertices() {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryCountVertices();
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryCountVertices
 
 \subsubsection{[[queryCountEdges]](0)}
 <<Query various metrics>>=
-public int[] queryCountEdges() throws RuntimeException {
-  return storage.DBQueryCountEdges();
+public int[] queryCountEdges() {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryCountEdges();
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryCountEdges
 
 \subsubsection{[[queryStatisticsEdges]](0)}
 <<Query various metrics>>=
-public int[] queryStatisticsEdges() throws RuntimeException {
-  return storage.DBQueryStatisticsEdges();
+public int[] queryStatisticsEdges() {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryStatisticsEdges();
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryStatisticsEdges
 
 \subsubsection{[[queryMBR]](0)}
 <<Query various metrics>>=
-public int[] queryMBR() throws RuntimeException {
-  return storage.DBQueryMBR();
+public int[] queryMBR() {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryMBR();
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryMBR
 
 \subsubsection{[[queryCountServers]](0)}
 <<Query various metrics>>=
-public int[] queryCountServers() throws RuntimeException {
-  return storage.DBQueryCountServers();
+public int[] queryCountServers() {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryCountServers();
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryCountServers
 
 \subsubsection{[[queryCountRequests]](0)}
 <<Query various metrics>>=
-public int[] queryCountRequests() throws RuntimeException {
-  return storage.DBQueryCountRequests();
+public int[] queryCountRequests() {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryCountRequests();
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryCountRequests
 
 \subsubsection{[[queryServiceRate]](0)}
 <<Query various metrics>>=
-public int[] queryServiceRate() throws RuntimeException {
-  return storage.DBQueryServiceRate();
+public int[] queryServiceRate() {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryServiceRate();
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryServiceRate
 
 \subsubsection{[[queryBaseDistanceTotal]](0)}
 <<Query various metrics>>=
-public int[] queryBaseDistanceTotal() throws RuntimeException {
-  return storage.DBQueryBaseDistanceTotal();
+public int[] queryBaseDistanceTotal() {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryBaseDistanceTotal();
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryBaseDistanceTotal
 
 \subsubsection{[[queryServerBaseDistanceTotal]](0)}
 <<Query various metrics>>=
-public int[] queryServerBaseDistanceTotal() throws RuntimeException {
-  return storage.DBQueryServerBaseDistanceTotal();
+public int[] queryServerBaseDistanceTotal() {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryServerBaseDistanceTotal();
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryServerBaseDistanceTotal
 
 \subsubsection{[[queryRequestBaseDistanceTotal]](0)}
 <<Query various metrics>>=
-public int[] queryRequestBaseDistanceTotal() throws RuntimeException {
-  return storage.DBQueryRequestBaseDistanceTotal();
+public int[] queryRequestBaseDistanceTotal() {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryRequestBaseDistanceTotal();
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryRequestBaseDistanceTotal
 
 \subsubsection{[[queryRequestBaseDistanceUnassigned]](0)}
 <<Query various metrics>>=
-public int[] queryRequestBaseDistanceUnassigned() throws RuntimeException {
-  return storage.DBQueryRequestBaseDistanceUnassigned();
+public int[] queryRequestBaseDistanceUnassigned() {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryRequestBaseDistanceUnassigned();
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryRequestBaseDistanceUnassigned
 
 \subsubsection{[[queryServerTravelDistanceTotal]](0)}
 <<Query various metrics>>=
-public int[] queryServerTravelDistanceTotal() throws RuntimeException {
-  return storage.DBQueryServerTravelDistanceTotal();
+public int[] queryServerTravelDistanceTotal() {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryServerTravelDistanceTotal();
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryServerTravelDistanceTotal
 
 \subsubsection{[[queryServerCruisingDistanceTotal]](0)}
 <<Query various metrics>>=
-public int[] queryServerCruisingDistanceTotal() throws RuntimeException {
-  return storage.DBQueryServerCruisingDistanceTotal();
+public int[] queryServerCruisingDistanceTotal() {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryServerCruisingDistanceTotal();
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryServerCruisingDistanceTotal
 
 \subsubsection{[[queryServerServiceDistanceTotal]](0)}
 <<Query various metrics>>=
-public int[] queryServerServiceDistanceTotal() throws RuntimeException {
-  return storage.DBQueryServerServiceDistanceTotal();
+public int[] queryServerServiceDistanceTotal() {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryServerServiceDistanceTotal();
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryServerServiceDistanceTotal
 
 \subsubsection{[[queryRequestDetourDistanceTotal]](0)}
 <<Query various metrics>>=
-public int[] queryRequestDetourDistanceTotal() throws RuntimeException {
-  return storage.DBQueryRequestDetourDistanceTotal();
+public int[] queryRequestDetourDistanceTotal() {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryRequestDetourDistanceTotal();
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryRequestDetourDistanceTotal
 
 \subsubsection{[[queryRequestTransitDistanceTotal]](0)}
 <<Query various metrics>>=
-public int[] queryRequestTransitDistanceTotal() throws RuntimeException {
-  return storage.DBQueryRequestTransitDistanceTotal();
+public int[] queryRequestTransitDistanceTotal() {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryRequestTransitDistanceTotal();
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryRequestTransitDistanceTotal
 
 \subsubsection{[[queryServerTravelDurationTotal]](0)}
 <<Query various metrics>>=
-public int[] queryServerTravelDurationTotal() throws RuntimeException {
-  return storage.DBQueryServerTravelDurationTotal();
+public int[] queryServerTravelDurationTotal() {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryServerTravelDurationTotal();
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryServerTravelDurationTotal
 
 \subsubsection{[[queryRequestPickupDurationTotal]](0)}
 <<Query various metrics>>=
-public int[] queryRequestPickupDurationTotal() throws RuntimeException {
-  return storage.DBQueryRequestPickupDurationTotal();
+public int[] queryRequestPickupDurationTotal() {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryRequestPickupDurationTotal();
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryRequestPickupDurationTotal
 
 \subsubsection{[[queryRequestTransitDurationTotal]](0)}
 <<Query various metrics>>=
-public int[] queryRequestTransitDurationTotal() throws RuntimeException {
-  return storage.DBQueryRequestTransitDurationTotal();
+public int[] queryRequestTransitDurationTotal() {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryRequestTransitDurationTotal();
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryRequestTransitDurationTotal
 
 \subsubsection{[[queryRequestTravelDurationTotal]](0)}
 <<Query various metrics>>=
-public int[] queryRequestTravelDurationTotal() throws RuntimeException {
-  return storage.DBQueryRequestTravelDurationTotal();
+public int[] queryRequestTravelDurationTotal() {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryRequestTravelDurationTotal();
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryRequestTravelDurationTotal
 
 \subsubsection{[[queryRequestDepartureTime]](1)}
 <<Query various metrics>>=
-public int[] queryRequestDepartureTime(int rid) throws RuntimeException {
-  return storage.DBQueryRequestDepartureTime(rid);
+public int[] queryRequestDepartureTime(int rid) {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryRequestDepartureTime(rid);
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryRequestDepartureTime
 
 \subsubsection{[[queryServerDepartureTime]](1)}
 <<Query various metrics>>=
-public int[] queryServerDepartureTime(int sid) throws RuntimeException {
-  return storage.DBQueryServerDepartureTime(sid);
+public int[] queryServerDepartureTime(int sid) {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryServerDepartureTime(sid);
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryServerDepartureTime
 
 \subsubsection{[[queryRequestArrivalTime]](1)}
 <<Query various metrics>>=
-public int[] queryRequestArrivalTime(int rid) throws RuntimeException {
-  return storage.DBQueryRequestArrivalTime(rid);
+public int[] queryRequestArrivalTime(int rid) {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryRequestArrivalTime(rid);
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryRequestArrivalTime
 
 \subsubsection{[[queryServerArrivalTime]](1)}
 <<Query various metrics>>=
-public int[] queryServerArrivalTime(int sid) throws RuntimeException {
-  return storage.DBQueryServerArrivalTime(sid);
+public int[] queryServerArrivalTime(int sid) {
+  int[] output = new int[] { };
+  try {
+    output = storage.DBQueryServerArrivalTime(sid);
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
+  return output;
 }
 @ %def queryServerArrivalTime
 
@@ -757,29 +1041,37 @@ public int[] queryServerArrivalTime(int sid) throws RuntimeException {
 \subsubsection{[[addNewServer]](1)}
 <<Add new server>>=
 public void addNewServer(int[] u) {
-  storage.DBAddNewServer(u, tools.computeRoute(u[4], u[5], u[2]));
+  try {
+    storage.DBAddNewServer(u, tools.computeRoute(u[4], u[5], u[2]));
+  } catch (DuplicateUserException e) {
+    System.err.println("Warning: duplicate user rejected");
+    System.err.println(e.toString());
+  } catch (EdgeNotFoundException e) {
+    System.err.println("Warning: malformed route rejected");
+    System.err.println(e.toString());
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  }
 }
 @ %def addNewServer
 
 \subsubsection{[[addNewRequest]](1)}
 <<Add new request>>=
 public void addNewRequest(int[] u) {
-  storage.DBAddNewRequest(u);
-}
-@ %def addNewRequest
-
-\section{Private Methods}
-\label{sec:private-methods}
-
-\subsection{[[Print(1)]]}
-<<[[Controller]] private methods>>=
-private void Print(String msg) {
-  if (DEBUG) {
-    System.out.println("[Jargo][Controller]["+LocalDateTime.now()+"]"
-      + "[t="+world_time+"] "+msg);
+  try {
+    storage.DBAddNewRequest(u);
+  } catch (DuplicateUserException e) {
+    System.err.println("Warning: duplicate user rejected");
+    System.err.println(e.toString());
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
   }
 }
-@ %def Print
+@ %def addNewRequest
 
 \appendix
 
