@@ -132,72 +132,67 @@ public class Storage {
     }
   }
   public int[] DBQueryAllUsers() throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S141", 7);
+      return this.DBFetch(conn, "S141", 7);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
-  public final int[] DBQueryUser(int uid)
+  public int[] DBQueryUser(final int uid)
   throws UserNotFoundException, SQLException {
-    if (!lu_users.containsKey(uid)) {
+    if (!this.lu_users.containsKey(uid)) {
       throw new UserNotFoundException("User "+uid+" not found.");
     }
-    return lu_users.get(uid);
+    return this.lu_users.get(uid).clone();
   }
-  public int[] DBQueryRequestStatus(int rid, int t) throws SQLException {
-    int[] output = new int[] { };
+  public int[] DBQueryRequestStatus(int rid, int t) throws UserNotFoundException, SQLException {
+    if (!this.lu_users.containsKey(rid)) {
+      throw new UserNotFoundException("User "+rid+" not found.");
+    }
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S133", 1, rid, t);
+      return this.DBFetch(conn, "S133", 1, rid, t);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
   public int[] DBQueryRequestIsAssigned(int rid) throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S148", 1, rid);
+      return this.DBFetch(conn, "S148", 1, rid);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
   public int[] DBQueryQueuedRequests(int t) throws SQLException {
-    int[] output = new int[] { };
-    int[] temp1 = new int[] { };
-    int j = 0;
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S143", 7, t, t, REQUEST_TIMEOUT);
+      final int[] output = this.DBFetch(conn, "S143", 7, t, t, REQUEST_TIMEOUT);
+      int[] temp1 = new int[output.length];
+      int j = 0;
+      for (int i = 0; i < (output.length - 6); i += 7) {
+        if (this.lu_rstatus.get(output[i]) == false) {
+          temp1[(j + 0)] = output[(i + 0)];
+          temp1[(j + 1)] = output[(i + 1)];
+          temp1[(j + 2)] = output[(i + 2)];
+          temp1[(j + 3)] = output[(i + 3)];
+          temp1[(j + 4)] = output[(i + 4)];
+          temp1[(j + 5)] = output[(i + 5)];
+          temp1[(j + 6)] = output[(i + 6)];
+          j += 7;
+        }
+      }
+      int[] temp2 = new int[j];
+      for (int i = 0; i < j; i += 7) {
+        temp2[(i + 0)] = temp1[(i + 0)];
+        temp2[(i + 1)] = temp1[(i + 1)];
+        temp2[(i + 2)] = temp1[(i + 2)];
+        temp2[(i + 3)] = temp1[(i + 3)];
+        temp2[(i + 4)] = temp1[(i + 4)];
+        temp2[(i + 5)] = temp1[(i + 5)];
+        temp2[(i + 6)] = temp1[(i + 6)];
+      }
+      return temp2;
     } catch (SQLException e) {
       throw e;
     }
-    temp1 = new int[output.length];
-    for (int i = 0; i < (output.length - 6); i += 7) {
-      if (lu_rstatus.get(output[i]) == false) {
-        temp1[(j + 0)] = output[(i + 0)];
-        temp1[(j + 1)] = output[(i + 1)];
-        temp1[(j + 2)] = output[(i + 2)];
-        temp1[(j + 3)] = output[(i + 3)];
-        temp1[(j + 4)] = output[(i + 4)];
-        temp1[(j + 5)] = output[(i + 5)];
-        temp1[(j + 6)] = output[(i + 6)];
-        j += 7;
-      }
-    }
-    int[] temp2 = new int[j];
-    for (int i = 0; i < j; i += 7) {
-      temp2[(i + 0)] = temp1[(i + 0)];
-      temp2[(i + 1)] = temp1[(i + 1)];
-      temp2[(i + 2)] = temp1[(i + 2)];
-      temp2[(i + 3)] = temp1[(i + 3)];
-      temp2[(i + 4)] = temp1[(i + 4)];
-      temp2[(i + 5)] = temp1[(i + 5)];
-      temp2[(i + 6)] = temp1[(i + 6)];
-    }
-    return temp2;
   }
   public int[] DBQueryActiveServers(int t) throws SQLException {
     int[] output = new int[] { };

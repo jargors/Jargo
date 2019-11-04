@@ -3686,92 +3686,246 @@ public int[] DBQueryCountRequests() throws SQLException {
 @ %def DBQueryCountRequests
 
 \subsubsection{[[DBQueryAllUsers]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryAllUsers]]}(0) returns all rows in view [[r_user]].
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{user identifier for user $u$}$};
+ &\node {$1:u_\texttt{q}$};
+ &\node {$2:u_\texttt{e}$};
+ &\node {$3:u_\texttt{l}$};
+ &\node {$4:u_\texttt{o}$};
+ &\node {$5:u_\texttt{d}$};
+ &\node {$6:d_u$};
+ &\node {...};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 <<Query ridesharing user>>=
 public int[] DBQueryAllUsers() throws SQLException {
-  int[] output = new int[] { };
   try (<<Open [[conn]]>>) {
-    output = DBFetch(conn, "S141", 7);
+    return this.DBFetch(conn, "S141", 7);
   } catch (SQLException e) {
     throw e;
   }
-  return output;
 }
 @ %def DBQueryAllUsers
 
 \subsubsection{[[DBQueryUser]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryUser]]}(0) returns the properties of the
+given user.
+A [[UserNotFoundException]] is thrown if the user does not exist.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[uid]] (param. 1):&user identifier for user $u$
+\end{tabular}
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{user identifier}$};
+ &\node {$1:u_\texttt{q}$};
+ &\node {$2:u_\texttt{e}$};
+ &\node {$3:u_\texttt{l}$};
+ &\node {$4:u_\texttt{o}$};
+ &\node {$5:u_\texttt{d}$};
+ &\node {$6:d_u$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[UserNotFoundException]] if user does not exist, or
+[[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 <<Query ridesharing user>>=
-public final int[] DBQueryUser(int uid)
+public int[] DBQueryUser(final int uid)
 throws UserNotFoundException, SQLException {
-  if (!lu_users.containsKey(uid)) {
+  if (!this.lu_users.containsKey(uid)) {
     throw new UserNotFoundException("User "+uid+" not found.");
   }
-  return lu_users.get(uid);
+  return this.lu_users.get(uid).clone();
 }
 @ %def DBQueryUser
 
 \subsubsection{[[DBQueryRequestStatus]](2)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryRequestStatus]]}(0) returns the status of
+the given request at the given time (Eq.~\ref{eq:status}).
+A [[UserNotFoundException]] is thrown if the user does not exist.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[rid]] (param. 1):&user identifier for request $r$\\
+Integer [[t]] (param. 2):&a time
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{status of $r$ at time $t$}$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[UserNotFoundException]] if user does not exist, or
+[[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 <<Query request status>>=
-public int[] DBQueryRequestStatus(int rid, int t) throws SQLException {
-  int[] output = new int[] { };
+public int[] DBQueryRequestStatus(int rid, int t) throws UserNotFoundException, SQLException {
+  if (!this.lu_users.containsKey(rid)) {
+    throw new UserNotFoundException("User "+rid+" not found.");
+  }
   try (<<Open [[conn]]>>) {
-    output = DBFetch(conn, "S133", 1, rid, t);
+    return this.DBFetch(conn, "S133", 1, rid, t);
   } catch (SQLException e) {
     throw e;
   }
-  return output;
 }
 @ %def DBQueryRequestStatus
 
 \subsubsection{[[DBQueryRequestIsAssigned]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryRequestIsAssigned]]}(1) returns a
+positive-length array if the given request is assigned (even if the request is
+not yet picked-up), or [[null]] if the request is not.  A
+[[UserNotFoundException]] is thrown if the user does not exist.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[rid]] (param. 1):&user identifier for request $r$
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:1$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[UserNotFoundException]] if user does not exist, or
+[[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 <<Query request is assigned?>>=
 public int[] DBQueryRequestIsAssigned(int rid) throws SQLException {
-  int[] output = new int[] { };
   try (<<Open [[conn]]>>) {
-    output = DBFetch(conn, "S148", 1, rid);
+    return this.DBFetch(conn, "S148", 1, rid);
   } catch (SQLException e) {
     throw e;
   }
-  return output;
 }
 @ %def DBQueryRequestIsAssigned
 
 \subsubsection{[[DBQueryQueuedRequests]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryQueuedRequests]]}(1) returns the requests
+eligible for assignment at the given time. A request $r$ is ``eligible'' if it
+is not assigned at the given time, and if the given time is between the
+request's early time $r_\texttt{e}$ and
+$r_\texttt{e}+\texttt{REQUEST\_TIMEOUT}$.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[t]] (param. 1):&a time
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{user identifier for user $u$}$};
+ &\node {$1:u_\texttt{q}$};
+ &\node {$2:u_\texttt{e}$};
+ &\node {$3:u_\texttt{l}$};
+ &\node {$4:u_\texttt{o}$};
+ &\node {$5:u_\texttt{d}$};
+ &\node {$6:d_u$};
+ &\node {...};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 <<Query queued requests>>=
 public int[] DBQueryQueuedRequests(int t) throws SQLException {
-  int[] output = new int[] { };
-  int[] temp1 = new int[] { };
-  int j = 0;
   try (<<Open [[conn]]>>) {
-    output = DBFetch(conn, "S143", 7, t, t, REQUEST_TIMEOUT);
+@ %def DBQueryQueuedRequests
+{\small Our approach is to first select all requests where $t$ is between the
+request's early time $r_\texttt{e}$ and
+$r_\texttt{e}+\texttt{REQUEST\_TIMEOUT}$.  Then, we return a filtered subset of
+these requests that are unassigned. As we don't know how many requests will
+returned in the end, we initialize a temporary array [[temp1]] to hold the
+pre-filter number of requests.}
+<<Query queued requests>>=
+    final int[] output = this.DBFetch(conn, "S143", 7, t, t, REQUEST_TIMEOUT);
+    int[] temp1 = new int[output.length];
+    int j = 0;
+    for (int i = 0; i < (output.length - 6); i += 7) {
+      if (this.lu_rstatus.get(output[i]) == false) {
+        temp1[(j + 0)] = output[(i + 0)];
+        temp1[(j + 1)] = output[(i + 1)];
+        temp1[(j + 2)] = output[(i + 2)];
+        temp1[(j + 3)] = output[(i + 3)];
+        temp1[(j + 4)] = output[(i + 4)];
+        temp1[(j + 5)] = output[(i + 5)];
+        temp1[(j + 6)] = output[(i + 6)];
+        j += 7;
+      }
+    }
+@
+{\small We copy the non-null elements of [[temp1]] into a second array
+[[temp2]] and return [[temp2]].}
+<<Query queued requests>>=
+    int[] temp2 = new int[j];
+    for (int i = 0; i < j; i += 7) {
+      temp2[(i + 0)] = temp1[(i + 0)];
+      temp2[(i + 1)] = temp1[(i + 1)];
+      temp2[(i + 2)] = temp1[(i + 2)];
+      temp2[(i + 3)] = temp1[(i + 3)];
+      temp2[(i + 4)] = temp1[(i + 4)];
+      temp2[(i + 5)] = temp1[(i + 5)];
+      temp2[(i + 6)] = temp1[(i + 6)];
+    }
+    return temp2;
   } catch (SQLException e) {
     throw e;
   }
-  temp1 = new int[output.length];
-  for (int i = 0; i < (output.length - 6); i += 7) {
-    if (lu_rstatus.get(output[i]) == false) {
-      temp1[(j + 0)] = output[(i + 0)];
-      temp1[(j + 1)] = output[(i + 1)];
-      temp1[(j + 2)] = output[(i + 2)];
-      temp1[(j + 3)] = output[(i + 3)];
-      temp1[(j + 4)] = output[(i + 4)];
-      temp1[(j + 5)] = output[(i + 5)];
-      temp1[(j + 6)] = output[(i + 6)];
-      j += 7;
-    }
-  }
-  int[] temp2 = new int[j];
-  for (int i = 0; i < j; i += 7) {
-    temp2[(i + 0)] = temp1[(i + 0)];
-    temp2[(i + 1)] = temp1[(i + 1)];
-    temp2[(i + 2)] = temp1[(i + 2)];
-    temp2[(i + 3)] = temp1[(i + 3)];
-    temp2[(i + 4)] = temp1[(i + 4)];
-    temp2[(i + 5)] = temp1[(i + 5)];
-    temp2[(i + 6)] = temp1[(i + 6)];
-  }
-  return temp2;
 }
-@ %def DBQueryQueuedRequests
+@
 
 \subsubsection{[[DBQueryActiveServers]](1)}
 <<Query active servers>>=
