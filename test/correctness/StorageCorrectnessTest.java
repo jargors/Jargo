@@ -1140,7 +1140,7 @@ public class StorageCorrectnessTest {
       {
         storage.DBUpdateServerRoute(13,
           new int[] { 0, 27, 7, 44, 14, 45, 15, 0 },
-          new int[] { });
+          new int[] { 15, 0, 13 });
         int[] output = storage.DBQueryServerRoute(13);
         if (!(output[0] == 0
           && output[1] == 27

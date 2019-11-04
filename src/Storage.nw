@@ -7,6 +7,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsthm}
+\usepackage{booktabs}
 \usepackage{caption}
 \usepackage{colortbl}
 \usepackage{enumitem}
@@ -1720,7 +1721,7 @@ package com.github.jargors;
 @
 We import:
 \begin{itemize}
-\item Various Jargo exceptions;
+\item various Jargo exceptions for exception handling;
 <<Storage.java preamble>>=
 import com.github.jargors.exceptions.DuplicateVertexException;
 import com.github.jargors.exceptions.DuplicateEdgeException;
@@ -1728,12 +1729,7 @@ import com.github.jargors.exceptions.DuplicateUserException;
 import com.github.jargors.exceptions.EdgeNotFoundException;
 import com.github.jargors.exceptions.UserNotFoundException;
 import com.github.jargors.exceptions.VertexNotFoundException;
-@
-\item Jargo [[Tools]] class so we can use [[Tools.PrintSQLException]](1);
-<<Storage.java preamble>>=
-import com.github.jargors.Tools;
-@
-\item parts of the JDBC~API from [[java.sql]], for communication with Derby;
+@ \item parts of the JDBC~API from [[java.sql]], for communication with Derby;
 <<Storage.java preamble>>=
 import java.sql.CallableStatement;   import java.sql.Connection;
 import java.sql.DriverManager;       import java.sql.PreparedStatement;
@@ -1749,19 +1745,18 @@ import org.apache.commons.dbcp2.PoolingDriver;
 import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
-@ \item standard map classes for caching various items;
+@ \item standard map classes for caching various items.
 <<Storage.java preamble>>=
 import java.util.Map;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
-@ \item date-time class for printing timestamps.
-<<Storage.java preamble>>=
-import java.time.LocalDateTime;
 @
 \end{itemize}
 
 \subsection{Class Definition}
 \label{sec:class-definition}
+The storage interface consists of member variables, a constructor, public
+methods, and private methods.
 <<[[Storage]] definition>>=
 public class Storage {
   <<[[Storage]] member variables>>
@@ -1773,12 +1768,20 @@ public class Storage {
 
 \subsection{Member Variables}
 \label{sec:member-variables}
+The storage interface caches static data to avoid unnecessary database queries.
 \begin{itemize}
-\item Maps accessed by one thread at a time:
+\item The [[lu_rstatus]] map stores a boolean flag for each request indicating
+whether the request is assigned or not. While the map elements are not static,
+the elements do not change often. Guaranteeing consistency of the map is easy
+because only [[Storage]] can update assignment changes to the database.
+Whenever it successfully does an update, we simply update the map at the same
+time.
 <<[[Storage]] member variables>>=
 private Map<Integer, Boolean> lu_rstatus = new HashMap<>();  //*
 @ %def lu_rstatus
-\item Maps that might be accessed concurrently:
+\item The other maps store static data values. References to these maps may be
+held by other threads. To avoid accidental corruption due to concurrent access,
+we use [[ConcurrentHashMap]].
 <<[[Storage]] member variables>>=
 private ConcurrentHashMap<String, String> lu_pstr     = new ConcurrentHashMap<>();
 private ConcurrentHashMap<Integer, int[]> lu_vertices = new ConcurrentHashMap<>();
@@ -1786,31 +1789,30 @@ private ConcurrentHashMap<Integer,
     ConcurrentHashMap<Integer, int[]>>    lu_edges    = new ConcurrentHashMap<>();
 private ConcurrentHashMap<Integer, int[]> lu_users    = new ConcurrentHashMap<>();
 @ %def lu_pstr lu_vertices lu_edges lu_users
-\item We declare configuration settings. IMPORTANT NOTES: (1) Parameter
+\end{itemize}
+
+The storage interface also contains configuration settings and JDBC objects.
+\begin{itemize}
+\item Parameter
 [[STATEMENTS_MAX_COUNT]] gives maximum number of simultaneous prepared
-statements; (2) Parameter [[DERBY_PAGECACHESIZE]] sets the size of each page?
-According to the Derby Tuning Guide, it should be set even if using in-memory;
-the default value is 1000; (3) Parameter [[REQUEST_TIMEOUT]] sets how long a
-client is allowed to try to match a request before the request is automatically
-rejected, in other words if request $r$ is not assigned within
+statements. Parameter [[REQUEST_TIMEOUT]] sets how long a client is allowed to
+try to match a request, in other words if request $r$ is not assigned within
 $\pi_\texttt{e}(r)+\texttt{REQUEST\_TIMEOUT}$, then it is not tried again.
+The remaining parameters configure the Derby database connection.
 <<[[Storage]] member variables>>=
+private final int    STATEMENTS_MAX_COUNT   = 20;
+private final int    REQUEST_TIMEOUT        = 30;
 private       String CONNECTIONS_URL        = "jdbc:derby:memory:jargo;create=true";
 private final String CONNECTIONS_DRIVER_URL = "jdbc:apache:commons:dbcp:";
 private final String CONNECTIONS_POOL_NAME  = "jargo";
 private final String CONNECTIONS_POOL_URL   = (CONNECTIONS_DRIVER_URL + CONNECTIONS_POOL_NAME);
-private final int    STATEMENTS_MAX_COUNT   = 20;
-private final int    DERBY_PAGECACHESIZE    = 8000;
-private final String DERBY_DUMPNAME         = "db-lastgood";
-private final int    REQUEST_TIMEOUT        = 30;
-@ %def CONNECTIONS_URL CONNECTIONS_DRIVER_URL CONNECTIONS_POOL_NAME STATEMENTS_MAX_COUNT DERBY_PAGECACHESIZE DERBY_DUMPNAME
-\item We declare connection pool and factories. The [[connection_factory]] is
-an object that returns new connections. The [[poolableconnection_factory]]
-registers [[connection_factory]] and then can return new poolable connections.
-The [[pool]] is an object containing the available poolable connections, and it
-is registered by the [[poolableconnection_factory]]. The [[driver]] is the JDBC
-[[DriverManager]].  We get a reference to [[DriverManager]] in order to
-register the pool.
+@ %def CONNECTIONS_URL CONNECTIONS_DRIVER_URL CONNECTIONS_POOL_NAME STATEMENTS_MAX_COUNT REQUEST_TIMEOUT
+\item The [[connection_factory]] is an object that returns new connections. The
+[[poolableconnection_factory]] registers [[connection_factory]] and then can
+return new poolable connections.  The [[pool]] is an object containing the
+available poolable connections, and it is registered by the
+[[poolableconnection_factory]]. The [[driver]] is the JDBC [[DriverManager]].
+We get a reference to [[DriverManager]] in order to register the pool.
 <<[[Storage]] member variables>>=
 private ConnectionFactory               connection_factory;
 private PoolableConnectionFactory       poolableconnection_factory;
@@ -1819,18 +1821,16 @@ private PoolingDriver                   driver;
 @ %def connection_factory poolableconnection_factory pool driver
 \end{itemize}
 
+To save some typing later on, we chunk out the code to get a database connection
+from the JDBC [[DriverManager]].
 <<Open [[conn]]>>=
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 @
 
-\subsection{Style Notes}
-\begin{itemize}
-\item Always use [[this]] when appropriate so that instance members can be
-easily distinguished.
-\end{itemize}
-
 \subsection{Constructor}
 \label{sec:constructor}
+The constructor simply initializes the prepared statement strings into
+[[lu_pstr]].
 <<[[Storage]] constructor>>=
 public Storage() {
   this.PSInit();
@@ -1858,14 +1858,32 @@ value at position 1 is $b$; the value at position 2 is $c$.
 \label{sec:utilities}
 
 \subsubsection{[[DBCreateNewInstance]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBCreateNewInstance]]}(0) creates a new database
+instance. It uses [[setupDriver]](0) to register the JDBC [[DriverManager]] to
+the new instance.  If the DBCP2 [[PoolingDriver]] cannot be found, a
+[[ClassNotFoundException]] is thrown. We consider this exception to be fatal
+and we exit immediately.  On the other hand if a [[SQLException]] occurs, we
+rethrow to let the caller handle it. This exception can occur if the driver
+cannot access the database for whatever reason.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} initializes a new in-memory Derby instance,
+or exits the JVM if the DBCP2 driver
+cannot be loaded.\\
+\textbf{Throws:} [[SQLException]] if database cannot be accessed for whatever
+reason.\\
+\bottomrule
+\end{tabular}
 <<Initialize new empty database>>=
-public void DBCreateNewInstance() {
+public void DBCreateNewInstance() throws SQLException {
   try {
     this.setupDriver();
   } catch (SQLException e) {
-    System.err.println("Storage.init(): "+<<Err0>>);
-    Tools.PrintSQLException(e);
-    System.exit(1);
+    throw e;
   } catch (ClassNotFoundException e) {
     System.err.println("Storage.init(): "+<<Err0>>);
     e.printStackTrace();
@@ -1875,12 +1893,27 @@ public void DBCreateNewInstance() {
 @ %def DBCreateNewInstance
 
 \subsubsection{[[DBCloseInstance]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBCloseInstance]]}(0) closes an existing Jargo
+database instance.  If the instance closes successfully, a [[SQLException]]
+with error code [[45000]] is thrown. Otherwise, some other error code is
+thrown. In this case we rethrow to let the caller handle it.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} closes an existing Jargo database instance.\\
+\textbf{Throws:} [[SQLException]] if database cannot be closed for whatever
+reason.\\
+\bottomrule
+\end{tabular}
 <<Close database>>=
 public void DBCloseInstance() throws SQLException {
   try {
     DriverManager.getConnection("jdbc:derby:memory:jargo;drop=true");
   } catch (SQLException e) {
-    if (e.getErrorCode() != 45000) {  // 45000 = database successfully dropped
+    if (e.getErrorCode() != 45000) {
       throw e;
     }
   }
@@ -1888,6 +1921,18 @@ public void DBCloseInstance() throws SQLException {
 @ %def DBCloseInstance
 
 \subsubsection{[[getReferenceVerticesCache]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[getReferenceVerticesCache]]}(0) returns a read-only
+reference to [[lu_vertices]].\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} a read-only reference to [[lu_vertices]].\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} nothing.\\
+\bottomrule
+\end{tabular}
 <<Get reference to vertices cache>>=
 public final ConcurrentHashMap<Integer, int[]> getReferenceVerticesCache() {
   return this.lu_vertices;
@@ -1895,6 +1940,18 @@ public final ConcurrentHashMap<Integer, int[]> getReferenceVerticesCache() {
 @ %def getReferenceVerticesCache
 
 \subsubsection{[[getReferenceEdgesCache]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[getReferenceEdgesCache]]}(0) returns a read-only
+reference to [[lu_edges]].\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} a read-only reference to [[lu_edges]].\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} nothing.\\
+\bottomrule
+\end{tabular}
 <<Get reference to edges cache>>=
 public final ConcurrentHashMap<Integer,
     ConcurrentHashMap<Integer, int[]>> getReferenceEdgesCache() {
@@ -1903,6 +1960,18 @@ public final ConcurrentHashMap<Integer,
 @ %def getReferenceEdgesCache
 
 \subsubsection{[[getReferenceUsersCache]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[getReferenceUsersCache]]}(0) returns a read-only
+reference to [[lu_users]].\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} a read-only reference to [[lu_users]].\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} nothing.\\
+\bottomrule
+\end{tabular}
 <<Get reference to users cache>>=
 public final ConcurrentHashMap<Integer, int[]> getReferenceUsersCache() {
   return this.lu_users;
@@ -1910,10 +1979,29 @@ public final ConcurrentHashMap<Integer, int[]> getReferenceUsersCache() {
 @ %def getReferenceUsersCache
 
 \subsubsection{[[DBLoadDataModel]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBLoadDataModel]]}(0) loads the data model in
+\S\ref{sec:ridesharing-data-model} into the Jargo database instance. If the
+data model cannot be loaded, a [[SQLException]] is thrown. We consider this
+exception to be fatal and we exit immediately. Possible reasons for such an
+exception might be because the caller forgot to first call
+[[DBCreateNewInstance]](0) resulting in ``No suitable driver found'' (error
+code 0), or because the caller previously called [[DBLoadBackup]](1) resulting
+in ``Table/View V already exists'' (error code 20000). In either case we print
+a hint to terminal to guide the debugging.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} loads the data model in \S\ref{sec:ridesharing-data-model}
+into the Jargo instance, or exits the JVM if failure occurs.\\
+\textbf{Throws:} nothing.\\
+\bottomrule
+\end{tabular}
 <<Load data model>>=
 public void DBLoadDataModel() {
-  try {
-    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+  try (<<Open [[conn]]>>) {
     Statement stmt = conn.createStatement();
     stmt.clearBatch();
     stmt.addBatch(<<Create Table V statement>>);
@@ -1962,21 +2050,41 @@ public void DBLoadDataModel() {
     stmt.executeBatch();
     conn.commit();
   } catch (SQLException e) {
-    System.out.println("Storage.DBLoadDataModel(): "+<<Err0>>);
-    Tools.PrintSQLException(e);
+    System.err.println("Storage.DBLoadDataModel(): "+<<Err0>>);
+    if (e.getErrorCode() == 0) {
+      System.err.println("(did you forget to call Storage.DBCreateNewInstance()?)");
+    } else if (e.getErrorCode() == 20000) {
+      System.err.println("(data model already exists from Storage.DBLoadBackup()?)");
+    }
+    e.printStackTrace(System.err);
     System.exit(1);
   }
 }
 @ %def DBLoadDataModel
 
 \subsubsection{[[DBLoadBackup]](1)}
-A [[SQLException]] is possible if [[CONNECTIONS_URL]] is invalid. The client
-should catch and decide what to do next. A [[ClassNotFoundException]] is
-treated as catastrophic, but should never occur because [[Class.forName(1)]] in
-[[setupDriver(0)]] must have succeeded for Storage to be constructed in the
-first place!
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBLoadBackup]]}(1) loads a previously saved Jargo
+database instance from disk into working memory. It uses [[setupDriver]](0) to
+register the JDBC [[DriverManager]] to the new instance.  If the DBCP2
+[[PolingDriver]] cannot be found, a [[ClassNotFoundException]] is thrown. We
+consider this exception to be fatal and we exit immediately.  On the other hand
+if a [[SQLException]] occurs, we rethrow to let the caller handle it. This
+exception can occur if the driver cannot access the database for whatever
+reason.\\
+\midrule
+\textbf{Parameters:} \\
+\hspace{2mm} String [[p]] (param. 1): path to directory where backup is located.\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} loads backup into Jargo database instance, or exits the
+JVM if failure occurs.\\
+\textbf{Throws:} [[SQLException]] if database cannot be accessed.\\
+\bottomrule
+\end{tabular}
 <<Load backup>>=
-public void DBLoadBackup(String p) throws SQLException {
+public void DBLoadBackup(final String p) throws SQLException {
   this.CONNECTIONS_URL = "jdbc:derby:memory:jargo;createFrom="+p;
   try {
     this.setupDriver();
@@ -1989,75 +2097,117 @@ public void DBLoadBackup(String p) throws SQLException {
 @ %def DBLoadBackup
 
 \subsubsection{[[DBLoadRoadNetworkFromDB]](0)}
-Method [[DBQueryAllVertices]](0) might fail if Table V doesn't exist.  Method
-[[DBQueryAllEdges]](0) might fail if Table E doesn't exist. In other words,
-[[DBLoadDataModel]](0) was not called beforehand, or [[DBLoadBackup]](1) was
-not called beforehand, or [[DBLoadBackup]](1) was called with a corrupt Jargo
-instance. We should print an error and re-throw the exception.
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBLoadRoadNetworkFromDB]]}(0) loads the
+two caches [[lu_vertices]] and [[lu_edges]] using the vertices and edges
+data in Tables V and E in the database. If queries on Tables V and E
+fail, this method throws a [[SQLException]].
+\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} populates [[lu_vertices]] and [[lu_edges]].\\
+\textbf{Throws:} [[SQLException]] if Tables V and E cannot be queried or
+other database failure is encountered.\\
+\bottomrule
+\end{tabular}
 <<Load road network from database>>=
 public void DBLoadRoadNetworkFromDB() throws SQLException {
+@ %def DBLoadRoadNetworkFromDB
+{\small Our approach is to create two temporary maps on the heap, populate the
+temporary maps, then assign [[lu_vertices]] and [[lu_edges]] to reference the
+temporary maps if all succeeds. This way we don't corrupt [[lu_vertices]] and
+[[lu_edges]] in case of failure. (The approach might be overly cautious as it's
+hard to imagine why this method would ever be called if the caches are already
+populated.)}
+<<Load road network from database>>=
   ConcurrentHashMap<Integer, int[]>    lu1 = new ConcurrentHashMap<>();
   ConcurrentHashMap<Integer,
     ConcurrentHashMap<Integer, int[]>> lu2 = new ConcurrentHashMap<>();
-  int[] output = new int[] { };
+@
+{\small We start by querying the vertices.}
+<<Load road network from database>>=
   try {
-    output = this.DBQueryAllVertices();
-  } catch (SQLException e) {
-    throw e;
-  }
-  for (int i = 0; i < (output.length - 2); i += 3) {
-    int   v = output[(i + 0)];
-    int lng = output[(i + 1)];
-    int lat = output[(i + 2)];
-    lu1.put(v, new int[] { lng, lat });
-  }
-  try {
-    output = this.DBQueryAllEdges();
-  } catch (SQLException e) {
-    throw e;
-  }
-  for (int i = 0; i < (output.length - 3); i += 4) {
-    int v1 = output[(i + 0)];
-    int v2 = output[(i + 1)];
-    int dd = output[(i + 2)];
-    int nu = output[(i + 3)];
-    if (!lu2.containsKey(v1)) {
-      lu2.put(v1, new ConcurrentHashMap());
+    final int[] output = this.DBQueryAllVertices();
+    for (int i = 0; i < (output.length - 2); i += 3) {
+      final int   v = output[(i + 0)];
+      final int lng = output[(i + 1)];
+      final int lat = output[(i + 2)];
+      lu1.put(v, new int[] { lng, lat });
     }
-    lu2.get(v1).put(v2, new int[] { dd, nu });
+  } catch (SQLException e) {
+    throw e;
   }
+@
+{\small Then we go on to query the edges.}
+<<Load road network from database>>=
+  try {
+    final int[] output = this.DBQueryAllEdges();
+    for (int i = 0; i < (output.length - 3); i += 4) {
+      final int v1 = output[(i + 0)];
+      final int v2 = output[(i + 1)];
+      final int dd = output[(i + 2)];
+      final int nu = output[(i + 3)];
+      if (!lu2.containsKey(v1)) {
+        lu2.put(v1, new ConcurrentHashMap());
+      }
+      lu2.get(v1).put(v2, new int[] { dd, nu });
+    }
+  } catch (SQLException e) {
+    throw e;
+  }
+@
+{\small Finally we do the assignment.}
+<<Load road network from database>>=
   this.lu_vertices = lu1;
   this.lu_edges    = lu2;
 }
-@ %def DBLoadRoadNetworkFromDB
+@
 
 \subsubsection{[[DBLoadUsersFromDB]](0)}
-Method [[DBLoadUsersFroDB]](0) might fail if view r\_user doesn't exist.
-Method [[DBQueryRequestIsAssigned]](1) might fail if view assignments\_r
-doesn't exist. In other words, [[DBLoadDataModel]](0) was not called
-beforehand, or [[DBLoadBackup]](1) was not called beforehand, or
-[[DBLoadBackup]](1) was called with a corrupt Jargo instance. We should print
-an error and re-throw the exception.
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBLoadUsersFromDB]]}(0) loads the two caches
+[[lu_users]] and [[lu_rstatus]] using data in the user and assignment tables in
+the database. If queries on these tables fail, this method throws a
+[[SQLException]].\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} populates [[lu_users]] and [[lu_rstatus]].\\
+\textbf{Throws:} [[SQLException]] if user and assignment tables cannot be
+queried or other database failure is encountered.\\
+\bottomrule
+\end{tabular}
 <<Load users from database>>=
 public void DBLoadUsersFromDB() throws SQLException {
+@ %def DBLoadUsersFromDB
+{\small Our approach follows the approach for [[DBLoadRoadNetworkFromDB]](0).
+We start by creating two temporary maps on the heap.}
+<<Load users from database>>=
   ConcurrentHashMap<Integer, int[]> lu1 = new ConcurrentHashMap<>();
   Map<Integer, Boolean>             lu2 = new HashMap<>();
-  int[] output = new int[] { };
+@
+{\small Then we query the users.}
+<<Load users from database>>=
   try {
-    output = this.DBQueryAllUsers();
-  } catch (SQLException e) {
-    throw e;
-  }
-  try {
+    final int[] output = this.DBQueryAllUsers();
     for (int i = 0; i < (output.length - 6); i += 7) {
-      int uid = output[(i + 0)];
-      int  uq = output[(i + 1)];
-      int  ue = output[(i + 2)];
-      int  ul = output[(i + 3)];
-      int  uo = output[(i + 4)];
-      int  ud = output[(i + 5)];
-      int  ub = output[(i + 6)];
+      final int uid = output[(i + 0)];
+      final int  uq = output[(i + 1)];
+      final int  ue = output[(i + 2)];
+      final int  ul = output[(i + 3)];
+      final int  uo = output[(i + 4)];
+      final int  ud = output[(i + 5)];
+      final int  ub = output[(i + 6)];
       lu1.put(uid, new int[] { uid, uq, ue, ul, uo, ud, ub });
+@
+{\small If the user is a request, in other words the user load is positive,
+we query the request's assignment status.}
+<<Load users from database>>=
       if (uq > 0) {
         lu2.put(uid, (this.DBQueryRequestIsAssigned(uid).length > 0 ? true : false));
       }
@@ -2065,20 +2215,34 @@ public void DBLoadUsersFromDB() throws SQLException {
   } catch (SQLException e) {
     throw e;
   }
+@
+{\small Finally we do the assignment.}
+<<Load users from database>>=
   this.lu_users   = lu1;
   this.lu_rstatus = lu2;
 }
-@ %def DBLoadUsersFromDB
+@
 
 \subsubsection{[[DBSaveBackup]](1)}
-Method [[DBSaveBackup]](1) throws [[SQLException]] if the callable statement
-fails. We let the client decide how to handle any failure.
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBSaveBackup]]}(1) exports the Jargo database
+instance to disk. If a [[SQLException]] occurs, we rethrow to let the caller
+handle it.\\
+\midrule
+\textbf{Parameters:} \\
+\hspace{2mm} String [[p]] (param. 1): path to directory where instance should
+be exported to.\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} writes the database to disk.\\
+\textbf{Throws:} [[SQLException]] if failure is encountered.\\
+\bottomrule
+\end{tabular}
 <<Save backup>>=
-public void DBSaveBackup(String p) throws SQLException {
-  try {
-    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-    CallableStatement cs =
-      conn.prepareCall("CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE("+p+")");
+public void DBSaveBackup(final String p) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    CallableStatement cs = conn.prepareCall("CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE("+p+")");
     cs.execute();
   } catch (SQLException e) {
     throw e;
@@ -2086,30 +2250,42 @@ public void DBSaveBackup(String p) throws SQLException {
 }
 @ %def DBSaveBackup
 
-\subsubsection{[[printSQLDriverStatistics]](0)}
+\subsubsection{[[_printSQLDriverStatistics]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+FOR INTERNAL USE. Method \textcolor{blue}{[[_printSQLDriverStatistics]]}(0)
+prints the number of active and idle connections in the JDBC connection pool.
 The following code comes from the Apache DBCP2 examples and is licensed by the
-Apache Software Foundation. It prints the number of active and idle connections
-in the JDBC connection pool.
+Apache Software Foundation.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} prints number of active and idle connections.\\
+\textbf{Throws:} [[SQLException]] if failure occurs.\\
+\bottomrule
+\end{tabular}
 <<Print SQL driver statistics>>=
-public void printSQLDriverStatistics() throws SQLException {
+public void _printSQLDriverStatistics() throws SQLException {
   PoolingDriver d = (PoolingDriver) DriverManager.getDriver(CONNECTIONS_DRIVER_URL);
   ObjectPool<? extends Connection> cp = d.getConnectionPool(CONNECTIONS_POOL_NAME);
   System.out.println("Connections: "+cp.getNumActive()+" active; "+cp.getNumIdle()+" idle");
 }
 @ %def printSQLDriverStatistics
 
-<<Catch and rollback [[SQLException]]>>=
-catch (SQLException e1) {
-  conn.rollback();
-  conn.close();
-  PrintSQLException(e1);
-  DBSaveBackup(DERBY_DUMPNAME);
-  throw new RuntimeException("database failure");
-}
-@
-
 \subsubsection{[[_getConnection]](0)}
-For internal use.
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+FOR INTERNAL USE. Method \textcolor{blue}{[[_getConnection]]}(0) returns a
+database connection.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} a database connection [[Connection]].\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if connection cannot be obtained.\\
+\bottomrule
+\end{tabular}
 <<Get connection (for internal use)>>=
 public Connection _getConnection() throws SQLException {
   return DriverManager.getConnection(CONNECTIONS_POOL_URL);
@@ -2120,106 +2296,202 @@ public Connection _getConnection() throws SQLException {
 \label{sec:write-methods}
 
 \subsubsection{[[DBAddNewVertex]](3)}
-Give the client a chance to ignore duplicate vertex exceptions.
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBAddNewVertex]]}(3) inserts a vertex into
+Table V and into [[lu_vertices]] if all succeeds. If the vertex attemping
+to be inserted already exists, a [[DuplicateVertexException]] is thrown.
+A [[SQLException]] is thrown for other database failures.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[v]] (param. 1):&vertex identifier.\\
+Integer [[lng]] (param. 2):&longitude, written to an \emph{integer
+precision}, \emph{e.g.} for longitude $123.456789$, pass $123456789$ for
+$10^6$ precision. \textbf{The caller is responsible for remembering the
+precision.}\\
+Integer [[lat]] (param. 3):&latitude, written to an \emph{integer
+precision} as above.
+\end{tabular}\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} inserts a row into Table V, puts an entry into
+[[lu_vertices]].\\
+\textbf{Throws:} [[DuplicateVertexException]] if vertex already exists,
+or [[SQLException]] for other database failures.\\
+\bottomrule
+\end{tabular}
 <<Add new vertex>>=
-public void DBAddNewVertex(int v, int lng, int lat)
+public void DBAddNewVertex(final int v, final int lng, final int lat)
 throws DuplicateVertexException, SQLException {
-  if (lu_vertices.containsKey(v)) {
+@ %def DBAddNewVertex
+{\small If only [[DBAddNewVertex]](3) is ever used to write vertices into Table
+V, we can be sure that any vertex appearing in Table V also appears in
+[[lu_vertices]].  To check if the vertex in param. 1 is a duplicate entry, it
+is sufficient to check [[lu_vertices]].}
+<<Add new vertex>>=
+  if (this.lu_vertices.containsKey(v)) {
     throw new DuplicateVertexException("Vertex "+v+" already exists.");
   }
-  try {
-    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+@
+{\small All we do is use statement [[S0]] to submit the insert statement
+against Table V. By putting [[conn]] in the resources of the outer try, we
+ensure [[conn]] gets closed in the end no matter what happens. This pattern
+will appear in other write methods. If all succeeds, we put the vertex into
+[[lu_vertices]].}
+<<Add new vertex>>=
+  try (<<Open [[conn]]>>) {
     try {
-      PreparedStatement pS0 = PS(conn, "S0");
-      PSAdd(pS0, v, lng, lat);
-      PSSubmit(pS0);
+      PreparedStatement pS0 = this.PS(conn, "S0");
+      this.PSAdd(pS0, v, lng, lat);
+      this.PSSubmit(pS0);
       conn.commit();
     } catch (SQLException e) {
       conn.rollback();
       throw e;
-    } finally {
-      conn.close();
     }
   } catch (SQLException e) {
     throw e;
   }
-  lu_vertices.put(v, new int[] { lng, lat });
+  this.lu_vertices.put(v, new int[] { lng, lat });
 }
-@ %def DBAddNewVertex
+@
 
 \subsubsection{[[DBAddNewEdge]](4)}
-Give the client a chance to ignore duplicate edge exceptions.
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBAddNewEdge]]}(4) inserts an edge into Table E
+and into [[lu_edges]] if all succeeds. If the edge attempting to be inserted
+already exists, a [[DuplicateEdgeException]] is thrown. A [[SQLException]]
+is thrown for other database failures.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[v1]] (param. 1):&source vertex identifier.\\
+Integer [[v2]] (param. 2):&target vertex identifier.\\
+Integer [[dd]] (param. 3):&distance along the edge, in meters.\\
+Integer [[nu]] (param. 4):&maximum free-flow speed along the edge, in meters per second.\\
+\end{tabular}\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} inserts a row into Table E, puts an entry into
+[[lu_edges]].\\
+\textbf{Throws:} [[DuplicateEdgeException]] if edge already exists, or
+[[SQLException]] for other database failures.\\
+\bottomrule
+\end{tabular}
 <<Add new edge>>=
-public void DBAddNewEdge(int v1, int v2, int dd, int nu)
+public void DBAddNewEdge(final int v1, final int v2, final int dd, final int nu)
 throws DuplicateEdgeException, SQLException {
-  if (lu_edges.containsKey(v1) && lu_edges.get(v1).containsKey(v2)) {
+  if (this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2)) {
     throw new DuplicateEdgeException("Edge ("+v1+", "+v2+") already exists.");
   }
-  if (!lu_edges.containsKey(v1)) {
-    lu_edges.put(v1, new ConcurrentHashMap());
+  if (!this.lu_edges.containsKey(v1)) {
+    this.lu_edges.put(v1, new ConcurrentHashMap());
   }
-  try {
-    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+  try (<<Open [[conn]]>>) {
     try {
-      PreparedStatement pS1 = PS(conn, "S1");
-      PSAdd(pS1, v1, v2, dd, nu);
-      PSSubmit(pS1);
+      PreparedStatement pS1 = this.PS(conn, "S1");
+      this.PSAdd(pS1, v1, v2, dd, nu);
+      this.PSSubmit(pS1);
       conn.commit();
     } catch (SQLException e) {
       conn.rollback();
       throw e;
-    } finally {
-      conn.close();
     }
   } catch (SQLException e) {
     throw e;
   }
-  lu_edges.get(v1).put(v2, new int[] { dd, nu });
+  this.lu_edges.get(v1).put(v2, new int[] { dd, nu });
 }
 @ %def DBAddNewEdge
 
 \subsubsection{[[DBUpdateEdgeSpeed]](3)}
-The [[DBUpdateEdgeSpeed]](3) method updates the maximum free-flow speed of an
-edge in the road network (in meters per second).
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBUpdateEdgeSpeed]]}(3) updates the maximum free-flow
+speed of an edge in the road network. If the edge attempting to be updated
+does not exist, an [[EdgeNotFoundException]] is throw.
+A [[SQLException]] is thrown for other database failures.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[v1]] (param. 1):&source vertex identifier.\\
+Integer [[v2]] (param. 2):&target vertex identifier.\\
+Integer [[nu]] (param. 3):&new maximum free-flow speed, in meters per second.
+\end{tabular}\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} updates a row in Table E, updates an entry in
+[[lu_edges]]. \textbf{May update rows in Table W if edge belongs to
+any server route. This update may cause C56 violations if waypoint times
+(columns \textsf{t1}, \textsf{t2}) are not updated accordingly!}\\
+\textbf{Throws:} [[EdgeNotFoundException]] if edge does not exist,
+or [[SQLException]] for other database failures.\\
+\bottomrule
+\end{tabular}
 <<Update edge speed>>=
-public void DBUpdateEdgeSpeed(int v1, int v2, int nu)
+public void DBUpdateEdgeSpeed(final int v1, final int v2, final int nu)
 throws EdgeNotFoundException, SQLException {
-  if (!(lu_edges.containsKey(v1) && lu_edges.get(v1).containsKey(v2))) {
+  if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
     throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
   }
-  try {
-    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+  try (<<Open [[conn]]>>) {
     try {
-      PreparedStatement pS15 = PS(conn, "S15");
-      PreparedStatement pS131 = PS(conn, "S131");
-      PSAdd(pS15, nu, v1, v2);
-      PSAdd(pS131, nu, v1, v2);
-      PSSubmit(pS15, pS131);
+      PreparedStatement pS15 = this.PS(conn, "S15");
+      PreparedStatement pS131 = this.PS(conn, "S131");
+      this.PSAdd(pS15, nu, v1, v2);
+      this.PSAdd(pS131, nu, v1, v2);
+      this.PSSubmit(pS15, pS131);
       conn.commit();
     } catch (SQLException e) {
       conn.rollback();
       throw e;
-    } finally {
-      conn.close();
     }
   } catch (SQLException e) {
     throw e;
   }
-  int dd = lu_edges.get(v1).get(v2)[0];
-  lu_edges.get(v1).put(v2, new int[] { dd, nu });
+  this.lu_edges.get(v1).get(v2)[1] = nu;
 }
 @ %def DBUpdateEdgeSpeed
 
 \subsubsection{[[DBAddNewRequest]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBAddNewRequest]]}(1) inserts a new request into the
+user tables and into [[lu_users]] and [[lu_rstatus]] if all succeeds.  If the
+request attempting to be inserted already exists, a [[DuplicateUserException]]
+is thrown. A [[SQLException]] is thrown for other database failures.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Array [[u]] (param. 1):&7-element integer array storing values of
+request $r$'s components.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{identifier}$}; & \node {$1:r_\texttt{q}$}; & \node {$2:r_\texttt{e}$};
+ &\node {$3:r_\texttt{l}$}; & \node {$4:r_\texttt{o}$}; & \node {$5:r_\texttt{d}$}; & \node {$6:d_r$};\\
+};
+\end{tikzpicture}
+\end{tabular}\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} inserts a row into each of the user tables, insert a
+row into Table R, puts an entry into [[lu_users]] and into [[lu_rstatus]].\\
+\textbf{Throws:} [[DuplicateUserException]] if request already exists, or
+[[SQLException]] for other database failures.\\
+\bottomrule
+\end{tabular}
 <<Add new request>>=
-public void DBAddNewRequest(int[] u)
+public void DBAddNewRequest(final int[] u)
 throws DuplicateUserException, SQLException {
-  int uid = u[0];
-  if (lu_users.containsKey(uid)) {
+  final int uid = u[0];
+  if (this.lu_users.containsKey(uid)) {
     throw new DuplicateUserException("User "+uid+" already exists.");
   }
-  try {
-    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+  try (<<Open [[conn]]>>) {
     try {
       <<..insert new user into user tables>>
       <<..insert new request into r>>
@@ -2227,419 +2499,826 @@ throws DuplicateUserException, SQLException {
     } catch (SQLException e) {
       conn.rollback();
       throw e;
-    } finally {
-      conn.close();
     }
   } catch (SQLException e) {
     throw e;
   }
-  lu_users.put(u[0], u.clone());
-  lu_rstatus.put(u[0], false);
-}
 @ %def DBAddNewRequest
-<<..insert new user into user tables>>=
-PreparedStatement pS2 = PS(conn, "S2");
-PreparedStatement pS3 = PS(conn, "S3");
-PreparedStatement pS4 = PS(conn, "S4");
-PreparedStatement pS5 = PS(conn, "S5");
-PreparedStatement pS6 = PS(conn, "S6");
-PreparedStatement pS7 = PS(conn, "S7");
-PSAdd(pS2, uid, u[1]);
-PSAdd(pS3, uid, u[2]);
-PSAdd(pS4, uid, u[3]);
-PSAdd(pS5, uid, u[4]);
-PSAdd(pS6, uid, u[5]);
-PSAdd(pS7, uid, u[6]);
-PSSubmit(pS2, pS3, pS4, pS5, pS6, pS7);
+{\small In the last step, we put $r$ into [[lu_users]] and put it into
+[[lu_rstatus]] with the value set to [[false]] to indicate that it is
+unassigned. When we put it into [[lu_users]], we store a cloned array [[u]] as
+the value because we don't want any changes to [[u]] on the caller side showing
+up in our cache (we are considering users to be immutable).}
+<<Add new request>>=
+  this.lu_users.put(u[0], u.clone());
+  this.lu_rstatus.put(u[0], false);
+}
 @
+{\small To insert $r$ into the user tables, we simply prepare and submit each
+of the insert statements against the tables using statements [[S2]] through
+[[S7]].}
+<<..insert new user into user tables>>=
+PreparedStatement pS2 = this.PS(conn, "S2");
+PreparedStatement pS3 = this.PS(conn, "S3");
+PreparedStatement pS4 = this.PS(conn, "S4");
+PreparedStatement pS5 = this.PS(conn, "S5");
+PreparedStatement pS6 = this.PS(conn, "S6");
+PreparedStatement pS7 = this.PS(conn, "S7");
+this.PSAdd(pS2, uid, u[1]);
+this.PSAdd(pS3, uid, u[2]);
+this.PSAdd(pS4, uid, u[3]);
+this.PSAdd(pS5, uid, u[4]);
+this.PSAdd(pS6, uid, u[5]);
+this.PSAdd(pS7, uid, u[6]);
+this.PSSubmit(pS2, pS3, pS4, pS5, pS6, pS7);
+@
+{\small Similarly, we prepare and submit statement [[S9]] to insert $r$ into
+Table R.}
 <<..insert new request into r>>=
-PreparedStatement pS9 = PS(conn, "S9");
-PSAdd(pS9, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
-PSSubmit(pS9);
+PreparedStatement pS9 = this.PS(conn, "S9");
+this.PSAdd(pS9, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
+this.PSSubmit(pS9);
 @
 
 \subsubsection{[[DBAddNewServer]](2)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBAddNewServer]]}(2) inserts a new server into the
+user tables and into [[lu_users]] if all succeeds.  If the server attempting to
+be inserted already exists, a [[DuplicateUserException]] is thrown. The method
+requires the server's initial route be given in the second parameter. If the
+supplied route contains an edge that does not exist in Table E, an
+[[EdgeNotFoundException]] is thrown. A [[SQLException]] is thrown for other
+database failures.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Array [[u]] (param. 1):&7-element integer array storing values of
+server $s$'s components.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{identifier}$}; & \node {$1:s_\texttt{q}$}; & \node {$2:s_\texttt{e}$};
+ &\node {$3:s_\texttt{l}$}; & \node {$4:s_\texttt{o}$}; & \node {$5:s_\texttt{d}$}; & \node {$6:d_s$};\\
+};
+\end{tikzpicture}\\
+Array [[route]] (param. 2):&$(2|w|)$-element integer array storing values of
+waypoint components in the server's route $w$.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:t_1$}; & \node {$1:v_1$}; & \node[minimum width=6mm] {...};
+ &\node {$(2|w|-2):t_{|w|}$}; & \node {$(2|w|-1):v_{|w|}$}; \\
+};
+\end{tikzpicture}\\
+\end{tabular}\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} inserts a row into each of the user tables, insert a
+row into Table S, inserts at least two rows into Table W, inserts a row into Table CW,
+inserts a row into Table CQ, puts an entry into [[lu_users]].\\
+\textbf{Throws:} [[DuplicateUserException]] if server already exists,
+[[EdgeNotFoundException]] if [[route]] contains an edge that does not exist
+in Table E, or [[SQLException]] for other database failures.\\
+\bottomrule
+\end{tabular}
 <<Add new server>>=
-public void DBAddNewServer(int[] u, int[] route)
+public void DBAddNewServer(final int[] u, final int[] route)
 throws DuplicateUserException, EdgeNotFoundException, SQLException {
-  int uid = u[0];
-  if (lu_users.containsKey(uid)) {
+  final int uid = u[0];
+  if (this.lu_users.containsKey(uid)) {
     throw new DuplicateUserException("User "+uid+" already exists.");
   }
-  try {
-    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+  try (<<Open [[conn]]>>) {
     try {
-      int se = u[2];
+      final int se = u[2];
+@ %def DBAddNewServer
+{\small We can re-use the chunk from [[DBAddNewRequest]](1) to insert the
+server into the user tables.}
+<<Add new server>>=
       <<..insert new user into user tables>>
-      <<..insert new server into s>>
-      <<..insert new server route into w>>
-      <<..insert new server route into cw>>
-      <<..insert new server into cq>>
+@
+{\small Then we prepare and submit the insert statements that will insert $s$
+into Table S and insert [[route]] into Tables W and CW. Next we record the
+server's initial load into Table CQ. A ``label'' marks where each chunk begins
+in the source code ([[Storage.java]]).}
+<<Add new server>>=
+/*L1*/<<..insert new server into s>>
+/*L2*/<<..insert new server route into w>>
+/*L3*/<<..insert new server route into cw>>
+/*L4*/<<..insert new server into cq>>
       conn.commit();
     } catch (SQLException e) {
       conn.rollback();
       throw e;
-    } finally {
-      conn.close();
     }
   } catch (SQLException e) {
     throw e;
   }
-  lu_users.put(uid, u.clone());
-}
-@ %def DBAddNewServer
-<<..insert new server into s>>=
-PreparedStatement pS8 = PS(conn, "S8");
-PSAdd(pS8, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
-PSSubmit(pS8);
 @
-The procedure to insert [[route]] into Table W is written into its own chunk so
-we can re-use it later. The procedure requires an integer array [[output]].
-After the procedure, we can re-initialize prepared statement [[pS10]] to add the first
-waypoint, with [[null]] as its predecessor, into the database.
+{\small In the last step, we put $s$ into [[lu_users]].}
+<<Add new server>>=
+  this.lu_users.put(uid, u.clone());
+}
+@
+{\small We prepare and submit statement [[S8]] to insert $s$ into Table S.}
+<<..insert new server into s>>=
+PreparedStatement pS8 = this.PS(conn, "S8");
+this.PSAdd(pS8, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
+this.PSSubmit(pS8);
+@
+{\small The procedure to insert [[route]] into Table W is written into its own
+chunk so we can re-use it later.  After the procedure, we re-initialize
+statement [[S10]] to add the first waypoint $(t_1,v_1)$ into columns
+\textsf{t2} and \textsf{v2} while setting columns \textsf{t1} and \textsf{v1}
+to [[null]].}
 <<..insert new server route into w>>=
 <<Procedure to insert [[route]] into Table W>>
-pS10 = PS(conn, "S10");
-PSAdd(pS10, uid, se, null, null, route[0], route[1], null, null);
-PSSubmit(pS10);
+pS10 = this.PS(conn, "S10");
+this.PSAdd(pS10, uid, se, null, null, route[0], route[1], null, null);
+this.PSSubmit(pS10);
 @
+{\small In the procedure to insert [[route]] into Table W, we loop through each
+of the waypoints, adding the waypoint $(t_i,v_i)$ into columns \textsf{t1} and
+\textsf{v1} and adding its successor $(t_{i+1},v_{i+1})$ into columns
+\textsf{t2} and \textsf{v2}. We start by treating $(t_1,v_1)$ as the
+predecessor for $(t_2,v_2)$, then add the predecessor to $(t_1,v_1)$ seperately
+as mentioned above.}
 <<Procedure to insert [[route]] into Table W>>=
-PreparedStatement pS10 = PS(conn, "S10");
+PreparedStatement pS10 = this.PS(conn, "S10");
 for (int i = 0; i < (route.length - 3); i += 2) {
-  int t1 = route[(i + 0)];
-  int v1 = route[(i + 1)];
-  int t2 = route[(i + 2)];
-  int v2 = route[(i + 3)];
-  if (!(lu_edges.containsKey(v1) && lu_edges.get(v1).containsKey(v2))) {
+  final int t1 = route[(i + 0)];
+  final int v1 = route[(i + 1)];
+  final int t2 = route[(i + 2)];
+  final int v2 = route[(i + 3)];
+  if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
     throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
   }
-  int dd = lu_edges.get(v1).get(v2)[0];
-  int nu = lu_edges.get(v1).get(v2)[1];
-  PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
+  final int dd = this.lu_edges.get(v1).get(v2)[0];
+  final int nu = this.lu_edges.get(v1).get(v2)[1];
+  this.PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
 }
-PSSubmit(pS10);
+this.PSSubmit(pS10);
 @
+{\small We prepare and submit statement [[S11]] to insert the server's
+start and end times into Table CW.}
 <<..insert new server route into cw>>=
-PreparedStatement pS11 = PS(conn, "S11");
-int te = route[(route.length - 2)];
-PSAdd(pS11, uid, u[2], u[3], u[4], u[5], u[2], u[4], te, u[5]);
-PSSubmit(pS11);
+PreparedStatement pS11 = this.PS(conn, "S11");
+final int te = route[(route.length - 2)];
+this.PSAdd(pS11, uid, u[2], u[3], u[4], u[5], u[2], u[4], te, u[5]);
+this.PSSubmit(pS11);
 @
+{\small We prepare and submit statement [[S14]] to insert the server's
+initial load into Table CQ.}
 <<..insert new server into cq>>=
-PreparedStatement pS14 = PS(conn, "S14");
-PSAdd(pS14, uid, u[1], u[2], null, u[2], u[4], null, u[1],
+PreparedStatement pS14 = this.PS(conn, "S14");
+this.PSAdd(pS14, uid, u[1], u[2], null, u[2], u[4], null, u[1],
     null, null, null, null, null, 1);
-PSSubmit(pS14);
+this.PSSubmit(pS14);
 @
+
 \subsubsection{[[DBUpdateServerRoute]](3)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBUpdateServerRoute]]}(3) inserts a new
+\emph{remaining route} for server $s$ into Table W. As the timing of waypoints
+may change, the method also updates timings in the \emph{remaining schedule}.
+If the server to be updated does not exist, a [[UserNotFoundException]] is
+thrown.  If the supplied route contains an edge that does not exist in Table E,
+an [[EdgeNotFoundException]] is thrown. A [[SQLException]] is thrown for other
+database failures.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[sid]] (param. 1):&server identifier.\\
+Array [[route]] (param. 2):&$2n$-element integer array storing values of
+waypoint components in the server's $n$-length remaining route $w_{>t}$.
+In the diagram, $|w|-i=n$.
+Here $t$ is taken to be [[route[0]]]. Consequently, $(t_i,v_i)$ is \emph{not} part
+of the remaining route, in other words \textbf{it must pre-exist in Table W}.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:t_i$}; & \node {$1:v_i$}; & \node[minimum width=6mm] {...};
+ &\node {$(2|w|-2):t_{|w|}$}; & \node {$(2|w|-1):v_{|w|}$}; \\
+};
+\end{tikzpicture}\\
+Array [[sched]] (param. 2):&$3m$-element integer array storing values of
+waypoint components and their labels in the server's $m$-length remaining
+schedule $b_{>t}$, where $m\leq n$. In the diagram, $|b|-j=m$.  Note
+$(t_{i_j},v_{i_j})$ \emph{cannot equal} $(t_i,v_i)$, as $(t_i,v_i)$ is part of
+the traveled route and not the remaining route (we cannot change the past).
+Therefore $t_{i_j}$ \textbf{must be greater than} $t_i$. Due to rule R3,
+$(t_{i_{|b|}},v_{i_{|b|}})$ \textbf{must equal} $(t_{|w|},v_{|w|})$.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:t_{i_j}$}; & \node {$1:v_{i_j}$}; & \node {$2:L(b_j)$}; & \node[minimum width=6mm] {...};
+ &\node {$(2|b|-3):t_{i_{|b|}}$}; & \node {$(2|b|-2):v_{i_{|b|}}$}; & \node {$(2|b|-1):L(b_{|b|})$};\\
+};
+\end{tikzpicture}
+
+If a waypoint has multiple labels, write them side-by-side, \textit{e.g.}
+to record two labels $L_1(b_j)$ and $L_2(b_j)$ on waypoint $b_j$, write
+(indices omitted for clarity):
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node[minimum width=6mm] {...};
+ &\node {$t_{i_j}$}; & \node {$v_{i_j}$};
+ &\node {$L_1(b_j)$};
+ &\node {$t_{i_j}$}; & \node {$v_{i_j}$};
+ &\node {$L_2(b_j)$};
+ &\node[minimum width=6mm] {...};\\
+};
+\end{tikzpicture}
+
+If a waypoint has multiple labels with some indicating drop-offs, \textbf{write
+the drop-offs first} before any of the pick-ups, otherwise C98 violation may
+occur.
+\end{tabular}\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} may delete and insert rows into Table W, may
+update columns in Table CW, may update columns in Tables PD and CPD,
+may delete and insert rows into Table CQ.\\
+\textbf{Throws:} [[UserNotFoundException]] if server does not exist,
+[[EdgeNotFoundException]] if [[route]] contains an edge that does not exist
+in Table E, or [[SQLException]] for other database failures.\\
+\bottomrule
+\end{tabular}
 <<Update server route>>=
-public void DBUpdateServerRoute(int sid, int[] route, int[] sched)
+public void DBUpdateServerRoute(final int sid, final int[] route, final int[] sched)
 throws UserNotFoundException, EdgeNotFoundException, SQLException {
-  if (!lu_users.containsKey(sid)) {
+  if (!this.lu_users.containsKey(sid)) {
     throw new UserNotFoundException("User "+sid+" not found.");
   }
-  int[] output = new int[] { };
-  int se, sq;
-  try {
-    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+  try (<<Open [[conn]]>>) {
     try {
-      <<..fetch [[sq]] and [[se]]>>
-      <<..update route>>
+/*L1*/<<..fetch [[sq]] and [[se]]>>
+/*L2*/<<..update route>>
       if (sched.length > 0) {
         Map<Integer, int[]> cache = new HashMap<>();
-        <<..update schedule>>
+/*L3*/  <<..update schedule>>
       }
       conn.commit();
     } catch (SQLException e) {
       conn.rollback();
       throw e;
-    } finally {
-      conn.close();
     }
   } catch (SQLException e) {
     throw e;
   }
 }
 @ %def DBUpdateServerRoute
+{\small We get the server's load into [[sq]], needed by Table CQ. We also
+get the server's early time into [[se]], needed by the procedure to insert
+[[route]] into Table W.}
 <<..fetch [[sq]] and [[se]]>>=
-sq = lu_users.get(sid)[1];
-se = lu_users.get(sid)[2];
+final int sq = lu_users.get(sid)[1];
+final int se = lu_users.get(sid)[2];
 @
+{\small To update the route, first we delete the pre-existing remaining route
+from Table W, then insert the waypoints in [[route]], and lastly update the
+route endpoint in Table CW. As Table CPD stores the route endpoint time in
+column \textsf{te}, we update this table as well.}
 <<..update route>>=
-<<....delete remaining route from w>>
-<<....insert new remaining route into w>>
-<<....update route endpoint in cw, cpd>>
+/*a*/<<....delete remaining route from w>>
+/*b*/<<....insert new remaining route into w>>
+/*c*/<<....update route endpoint in cw, cpd>>
 @
+{\small We prepare and submit statement [[S76]] to delete the pre-existing
+remaining route from Table W.}
 <<....delete remaining route from w>>=
-PreparedStatement pS76 = PS(conn, "S76");
-PSAdd(pS76, sid, route[0]);
-PSSubmit(pS76);
+PreparedStatement pS76 = this.PS(conn, "S76");
+this.PSAdd(pS76, sid, route[0]);
+this.PSSubmit(pS76);
 @
-The chunk for inserting [[route]] into Table W uses [[uid]], so we set it here.
+{\small We re-use the chunk that inserts [[route]] into Table W.}
 <<....insert new remaining route into w>>=
-int uid = sid;
+final int uid = sid;
 <<Procedure to insert [[route]] into Table W>>
 @
+{\small We prepare and submit statements [[S77]] and [[S139]] to update the
+route endpoint in Tables CW and CPD.}
 <<....update route endpoint in cw, cpd>>=
-PreparedStatement pS77 = PS(conn, "S77");
-PreparedStatement pS139 = PS(conn, "S139");
-int te = route[(route.length - 2)];
-int ve = route[(route.length - 1)];
-PSAdd(pS77, te, ve, sid);
-PSAdd(pS139, te, sid);
-PSSubmit(pS77, pS139);
+PreparedStatement pS77 = this.PS(conn, "S77");
+PreparedStatement pS139 = this.PS(conn, "S139");
+final int te = sched[(sched.length - 3)];
+final int ve = sched[(sched.length - 2)];
+this.PSAdd(pS77, te, ve, sid);
+this.PSAdd(pS139, te, sid);
+this.PSSubmit(pS77, pS139);
 @
+{\small To update the schedule, first we update the time values in column
+\textsf{t2} of Table PD and in columns \textsf{tp} and \textsf{td} of Table
+CPD. Then we prepare to update Table CQ. The method does not require
+pick-ups and drop-offs in [[sched]] be in the same order as in the pre-existing
+remaining schedule. Consequently simply updating column \textsf{t2} in Table CQ
+is not enough. Our approach here follows our approach for
+updating the route. That is, first we delete the pre-existing remaining
+schedule, and then we insert the waypoints in [[sched]]. In order to do so, we
+need to know the pick-up and drop-off times of every request in the remaining
+schedule, as required by constraints F46 and F47. We also need to know the
+latest order number so we can fill in columns \textsf{o1} and \textsf{o2}. Thus
+we perform some queries to get the required values before finally submitting
+the individual insert statements.}
 <<..update schedule>>=
-<<....update times in pd and cpd>>
-<<....populate the tp, td cache and update cq>>
-<<....select latest order number>>
-<<....delete remaining schedule from cq>>
-<<....insert new remaining schedule into cq>>
+/*a*/<<....update times in pd and cpd>>
+@ {\small Here begins the procedure to update Table CQ.}
+<<..update schedule>>=
+/*b*/<<....populate the tp, td cache and update cq>>
+/*c*/<<....select latest order number>>
+/*d*/<<....delete remaining schedule from cq>>
+/*e*/<<....insert new remaining schedule into cq>>
 @
+{\small We prepare and submit statements [[S82]], [[S83]], and [[S84]] to
+update the times in Tables PD and CPD. As we don't know at this point if a
+waypoint in [[sched]] represents a pick-up or a drop-off, we issue both
+[[S82]], updating pick-up time \textsf{tp}, and [[S83]], updating drop-off time
+\textsf{td}, for all waypoints. As desired, only one of these statements will
+succeed due to the [[WHERE]] conditions in the statements.}
 <<....update times in pd and cpd>>=
-PreparedStatement pS82 = PS(conn, "S82");
-PreparedStatement pS83 = PS(conn, "S83");
-PreparedStatement pS84 = PS(conn, "S84");
+PreparedStatement pS82 = this.PS(conn, "S82");
+PreparedStatement pS83 = this.PS(conn, "S83");
+PreparedStatement pS84 = this.PS(conn, "S84");
 for (int j = 0; j < (sched.length - 2); j += 3) {
-  int tj = sched[(j + 0)];
-  int vj = sched[(j + 1)];
-  int Lj = sched[(j + 2)];
+  final int tj = sched[(j + 0)];
+  final int vj = sched[(j + 1)];
+  final int Lj = sched[(j + 2)];
   if (Lj != sid) {
-    PSAdd(pS82, tj, vj, Lj);
-    PSAdd(pS83, tj, vj, Lj);
-    PSAdd(pS84, tj, vj, Lj);
+    this.PSAdd(pS82, tj, vj, Lj);
+    this.PSAdd(pS83, tj, vj, Lj);
+    this.PSAdd(pS84, tj, vj, Lj);
   }
 }
-PSSubmit(pS82, pS83, pS84);
+this.PSSubmit(pS82, pS83, pS84);
 @
+{\small To insert a load change due to pick-up or drop-off of a request into
+Table CQ, we are required to know the time of both the pick-up and the drop-off
+of the request. In this chunk, we loop through all the requests in [[sched]]
+and use statement [[S86]] to get the request's pick-up and drop-off times from
+the newly-updated Table CPD. We store the obtained times, along with the
+request's load, into a temporary map called [[cache]]. At the same time, we go
+ahead and use statement [[S140]] to update Table CQ with the discovered pick-up
+and drop-off times.}
 <<....populate the tp, td cache and update cq>>=
-PreparedStatement pS140 = PS(conn, "S140");
+PreparedStatement pS140 = this.PS(conn, "S140");
 for (int j = 0; j < (sched.length - 2); j += 3) {
-  int Lj = sched[(j + 2)];
+  final int Lj = sched[(j + 2)];
   if (Lj != sid) {
-    int rq, tp, td;
     if (!cache.containsKey(Lj)) {
-      rq = DBFetch(conn, "S85", 1, Lj)[0];
-      output = DBFetch(conn, "S86", 2, Lj);
-      tp = output[0];
-      td = output[1];
+      final int[] output = DBFetch(conn, "S86", 2, Lj);
+      final int tp = output[0];
+      final int td = output[1];
+      final int rq = this.lu_users.get(Lj)[1];
       cache.put(Lj, new int[] { rq, tp, td });
-      PSAdd(pS140, tp, td, Lj);
+      this.PSAdd(pS140, tp, td, Lj);
     }
   }
 }
-PSSubmit(pS140);
+this.PSSubmit(pS140);
 @
+{\small We are also required to know the latest order number so we can
+correctly set columns \textsf{o1} and \textsf{o2}. We use statement [[S87]] to
+obtain this value and other values from the preceding order. For the special
+case where $t=0$, we can skip the query.}
 <<....select latest order number>>=
-int t1, q1, o1;
-if (route[0] == 0) {
-  t1 = 0;
-  q1 = sq;
-  o1 = 1;
-} else {
-  output = DBFetch(conn, "S87", 3, sid, route[0]);
-  t1 = output[0];
-  q1 = output[1];
-  o1 = output[2];
-}
+final int[] output = (route[0] == 0 ? null : this.DBFetch(conn, "S87", 3, sid, route[0]));
+int t1 = (route[0] == 0 ?  0 : output[0]);
+int q1 = (route[0] == 0 ? sq : output[1]);
+int o1 = (route[0] == 0 ?  1 : output[2]);
 @
+{\small We prepare and submit statement [[S80]] to delete the pre-existing
+remaining schedule from Table CQ.}
 <<....delete remaining schedule from cq>>=
-PreparedStatement pS80 = PS(conn, "S80");
-PSAdd(pS80, sid, route[0]);
-PSSubmit(pS80);
+PreparedStatement pS80 = this.PS(conn, "S80");
+this.PSAdd(pS80, sid, route[0]);
+this.PSSubmit(pS80);
 @
+{\small We prepare and submit statement [[S14]] to insert the new remaining
+schedule into Table CQ, using the pick-up and drop-off times collected in
+[[cache]].}
 <<....insert new remaining schedule into cq>>=
 PreparedStatement pS14 = PS(conn, "S14");
 for (int j = 0; j < (sched.length - 2); j += 3) {
-  int t2 = sched[(j + 0)];
-  int v2 = sched[(j + 1)];
-  int Lj = sched[(j + 2)];
+  final int t2 = sched[(j + 0)];
+  final int v2 = sched[(j + 1)];
+  final int Lj = sched[(j + 2)];
   if (Lj != sid) {
-    int[] qpd = cache.get(Lj);
-    int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
-    int o2 = o1 + 1;
-    PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
+    final int[] qpd = cache.get(Lj);
+    final int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
+    final int o2 = o1 + 1;
+    this.PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
           qpd[0], qpd[1], qpd[2], o1, o2);
     t1 = t2;
     q1 = q2;
     o1 = o2;
   }
 }
-PSSubmit(pS14);
+this.PSSubmit(pS14);
 @
 
 \subsubsection{[[DBUpdateServerAddToSchedule]](4)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBUpdateServerAddToSchedule]]}(4) inserts a new
+\emph{remaining route} for server $s$ into Table W, and a new \emph{remaining
+schedule} with \emph{new labeled waypoints} not found in the pre-existing
+remaining schedule into Tables PD, CPD, and CQ.  If the server to be updated
+does not exist, a [[UserNotFoundException]] is thrown.  This exception is also
+thrown if any labels in the new labeled waypoints is not an existing user.  If
+the supplied route contains an edge that does not exist in Table E, an
+[[EdgeNotFoundException]] is thrown.  A [[SQLException]] is thrown for other
+database failures.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[sid]] (param. 1):&server identifier.\\
+Array [[route]] (param. 2):&$2n$-element integer array storing values of
+waypoint components in the server's $n$-length remaining route $w_{>t}$.
+In the diagram, $|w|-i=n$.
+Here $t$ is taken to be [[route[0]]]. Consequently, $(t_i,v_i)$ is \emph{not} part
+of the remaining route, in other words \textbf{it must pre-exist in Table W}.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:t_i$}; & \node {$1:v_i$}; & \node[minimum width=6mm] {...};
+ &\node {$(2|w|-2):t_{|w|}$}; & \node {$(2|w|-1):v_{|w|}$}; \\
+};
+\end{tikzpicture}\\
+Array [[sched]] (param. 2):&$3m$-element integer array storing values of
+waypoint components and their labels in the server's $m$-length remaining
+schedule $b_{>t}$, where $m\leq n$. In the diagram, $|b|-j=m$.  Note
+$(t_{i_j},v_{i_j})$ \emph{cannot equal} $(t_i,v_i)$, as $(t_i,v_i)$ is part of
+the traveled route and not the remaining route (we cannot change the past).
+Therefore $t_{i_j}$ \textbf{must be greater than} $t_i$. Due to rule R3,
+$(t_{i_{|b|}},v_{i_{|b|}})$ \textbf{must equal} $(t_{|w|},v_{|w|})$.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:t_{i_j}$}; & \node {$1:v_{i_j}$}; & \node {$2:L(b_j)$}; & \node[minimum width=6mm] {...};
+ &\node {$(2|b|-3):t_{i_{|b|}}$}; & \node {$(2|b|-2):v_{i_{|b|}}$}; & \node {$(2|b|-1):L(b_{|b|})$};\\
+};
+\end{tikzpicture}
+
+If a waypoint has multiple labels, write them side-by-side, \textit{e.g.}
+to record two labels $L_1(b_j)$ and $L_2(b_j)$ on waypoint $b_j$, write
+(indices omitted for clarity):
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node[minimum width=6mm] {...};
+ &\node {$t_{i_j}$}; & \node {$v_{i_j}$};
+ &\node {$L_1(b_j)$};
+ &\node {$t_{i_j}$}; & \node {$v_{i_j}$};
+ &\node {$L_2(b_j)$};
+ &\node[minimum width=6mm] {...};\\
+};
+\end{tikzpicture}
+
+If a waypoint has multiple labels with some indicating drop-offs, \textbf{write
+the drop-offs first} before any of the pick-ups, otherwise C98 violation may
+occur.\\
+Array [[rid]] (param. 4):&$k$-element integer array storing request identifiers
+used to label \emph{new waypoints} not found in the pre-existing schedule but
+found in the new remaining schedule [[sched]]. The order of this array doesn't
+matter.
+\end{tabular}\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} may delete and insert rows into Table W, may
+update columns in Table CW, may update columns in Tables PD and CPD,
+may delete and insert rows into Table CQ.\\
+\textbf{Throws:} [[UserNotFoundException]] if server does not exist or if
+any request identifier in [[rid]] (param. 4) cannot be found,
+[[EdgeNotFoundException]] if [[route]] contains an edge that does not exist
+in Table E, or [[SQLException]] for other database failures.\\
+\bottomrule
+\end{tabular}
 <<Update server add to schedule>>=
-public void DBUpdateServerAddToSchedule(int sid, int[] route, int[] sched, int[] rid)
+public void DBUpdateServerAddToSchedule(
+    final int sid, final int[] route, final int[] sched, final int[] rid)
 throws UserNotFoundException, EdgeNotFoundException, SQLException {
-  if (!lu_users.containsKey(sid)) {
+  if (!this.lu_users.containsKey(sid)) {
     throw new UserNotFoundException("User "+sid+" not found.");
   }
-  for (int r : rid) {
-    if (!lu_users.containsKey(r)) {
+  for (final int r : rid) {
+    if (!this.lu_users.containsKey(r)) {
       throw new UserNotFoundException("User "+r+" not found.");
     }
   }
-  int[] output = new int[] { };
-  int se, sq;
   Map<Integer, int[]> cache  = new HashMap<>();
   Map<Integer, int[]> cache2 = new HashMap<>();
-  try {
-    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+  try (<<Open [[conn]]>>) {
     try {
-      <<..fetch [[sq]] and [[se]]>>
-      <<..update route>>
-      <<..update and add to schedule>>
+/*L1*/<<..fetch [[sq]] and [[se]]>>
+/*L2*/<<..update route>>
+/*L3*/<<..update and add to schedule>>
       conn.commit();
     } catch (SQLException e) {
       conn.rollback();
       throw e;
-    } finally {
-      conn.close();
     }
   } catch (SQLException e) {
     throw e;
   }
-  for (int r : rid) {
-    lu_rstatus.put(r, true);
+@ %def DBUpdateServerAddToSchedule
+{\small If all goes well, we add each request identifier in [[rid]] into
+[[lu_rstatus]] and change the value to [[true]], indicating that the request
+is now \emph{assigned}.}
+<<Update server add to schedule>>=
+  for (final int r : rid) {
+    this.lu_rstatus.put(r, true);
   }
 }
-@ %def DBUpdateServerAddToSchedule
-<<..update and add to schedule>>=
-<<....update times in pd and cpd>>
-<<....populate the tp, td cache and vp, vd cache and update cq>>
-<<....select latest order number>>
-<<....delete remaining schedule from cq>>
-<<....insert new remaining schedule into cq>>
-<<....insert into pd, cpd>>
 @
+{\small After re-using some chunks from [[DBUpdateServerRoute]](3) to update
+[[route]] (labels [[L1]] and [[L2]] above), we proceed to update [[sched]].}
+<<..update and add to schedule>>=
+/*a*/<<....update times in pd and cpd>>
+/*b*/<<....populate the tp, td cache and vp, vd cache and update cq>>
+/*c*/<<....select latest order number>>
+/*d*/<<....delete remaining schedule from cq>>
+/*e*/<<....insert new remaining schedule into cq>>
+/*f*/<<....insert into pd, cpd>>
+@
+{\small Just as we needed pick-up and drop-off times when updating the schedule
+in [[DBupdateServerRoute]](3), we also need them here. But in addition, we
+require to get the pick-up and drop-off \emph{vertices} of the new labeled
+waypoints in [[sched]] so that we can insert them into column \textsf{v2} in
+Table PD and columns \textsf{vp} and \textsf{vd} in Table CPD. For this purpose
+we introduce a second temporary map called [[cache2]].}
 <<....populate the tp, td cache and vp, vd cache and update cq>>=
-PreparedStatement pS140 = PS(conn, "S140");
+PreparedStatement pS140 = this.PS(conn, "S140");
 for (int j = 0; j < (sched.length - 2); j += 3) {
-  int Lj = sched[(j + 2)];
-  if (Lj != sid) {
-    int rq, tp, vp;
-    int td = -1;
-    int vd = -1;
-    if (!cache.containsKey(Lj)) {
-      rq = lu_users.get(Lj)[1];
-      boolean flagged = false;
-      <<......check if new job>>
-      if (flagged) {
-        <<......get tp, vp, td, vd of new job>>
-      } else {
-        output = DBFetch(conn, "S86", 2, Lj);
-        tp = output[0];
-        td = output[1];
-        PSAdd(pS140, tp, td, Lj);
-      }
+  final int Lj = sched[(j + 2)];
+  if (Lj != sid && !cache.containsKey(Lj)) {
+    final int rq = lu_users.get(Lj)[1];
+@
+{\small If the waypoint we are working on in the [[for]] loop is a new
+labeled waypoint, meaning it is not found in the pre-existing remaining
+schedule, then it represents a new pick-up or drop-off for some request.
+We need to get both pick-up and drop-off vertices of this request so that
+we can insert these values into Tables PD and CPD. We introduce a boolean
+[[flagged]] to detect if the waypoint is new or not.}
+<<....populate the tp, td cache and vp, vd cache and update cq>>=
+    boolean flagged = false;
+    <<......check if new job>>
+    if (flagged) {
+      <<......get tp, vp, td, vd of new job>>
+@
+{\small If the waypoint we are working on is not a new labeled waypoint, then
+we simply cache the pick-up and drop-off time as we did in
+[[DBUpdateServerRoute]](3). At the same time we prepare and submit statement
+[[S140]] to update the times in Table CQ.}
+<<....populate the tp, td cache and vp, vd cache and update cq>>=
+    } else {
+      final int[] output = this.DBFetch(conn, "S86", 2, Lj);
+      final int tp = output[0];
+      final int td = output[1];
+      this.PSAdd(pS140, tp, td, Lj);
       cache.put(Lj, new int[] { rq, tp, td });
     }
   }
 }
-PSSubmit(pS140);
+this.PSSubmit(pS140);
 @
+{\small We do a linear search through [[rid]] (param. 4) to determine if a
+waypoint is newly labeled or not.}
 <<......check if new job>>=
-for (int r : rid) {
+for (final int r : rid) {
   if (Lj == r) {
     flagged = true;
     break;
   }
 }
 @
-A second cache, [[cache2]], is introduced to store the pick-up an drop-off
-vertices so that we can use them when we insert into Table PD and CPD.
+{\small If a waypoint is newly labeled, it can either be a new pick-up or a new
+drop-off. It is a violation to have a pick-up without a drop-off or vice versa,
+so we know that newly labeled waypoints come in pairs. If the label for the
+waypoint we are working on doesn't appear in [[cache]], then we know the
+waypoint must be a pick-up because it is the first time we've seen it.  We scan
+the remainder of [[sched]] to find the corresponding drop-off. Once we've found
+it, we put the pick-up and drop-off times into [[cache]] and the pick-up and
+drop-off vertices into [[cache2]].}
 <<......get tp, vp, td, vd of new job>>=
-tp = sched[(j + 0)];
-vp = sched[(j + 1)];
+final int tp = sched[(j + 0)];
+final int vp = sched[(j + 1)];
 for (int k = (j + 3); k < (sched.length - 2); k += 3) {
   if (Lj == sched[(k + 2)]) {
-    td = sched[(k + 0)];
-    vd = sched[(k + 1)];
+    final int td = sched[(k + 0)];
+    final int vd = sched[(k + 1)];
+    cache. put(Lj, new int[] { rq, tp, td });
+    cache2.put(Lj, new int[] { vp, vd });
+    break;
   }
 }
-cache2.put(Lj, new int[] { vp, vd });
 @
+{\small After re-using the chunk from [[DBUpdateServerRoute]](3) to insert the
+remaining schedule into Table CQ, we prepare and submit statements [[S12]] and
+[[S13]] to insert the new labeled waypoints into Tables PD and CPD.}
 <<....insert into pd, cpd>>=
-PreparedStatement pS12 = PS(conn, "S12");
-PreparedStatement pS13 = PS(conn, "S13");
-int rq, re, rl, ro, rd;
-int[] qpd, pd;
-for (int r : rid) {
-  output = DBFetch(conn, "S51", 5, r);
-  rq = output[0];
-  re = output[1];
-  rl = output[2];
-  ro = output[3];
-  rd = output[4];
-  qpd = cache.get(r);
-  pd = cache2.get(r);
-  PSAdd(pS12, sid, qpd[1], pd[0], r);
-  PSAdd(pS12, sid, qpd[2], pd[1], r);
-  PSAdd(pS13, sid, se, route[(route.length - 2)], qpd[1], pd[0], qpd[2], pd[1],
+PreparedStatement pS12 = this.PS(conn, "S12");
+PreparedStatement pS13 = this.PS(conn, "S13");
+for (final int r : rid) {
+  final int[] output2 = this.DBFetch(conn, "S51", 5, r);
+  final int rq = output2[0];
+  final int re = output2[1];
+  final int rl = output2[2];
+  final int ro = output2[3];
+  final int rd = output2[4];
+  final int[] qpd = cache.get(r);
+  final int[]  pd = cache2.get(r);
+  this.PSAdd(pS12, sid, qpd[1], pd[0], r);
+  this.PSAdd(pS12, sid, qpd[2], pd[1], r);
+  this.PSAdd(pS13, sid, se, route[(route.length - 2)], qpd[1], pd[0], qpd[2], pd[1],
         r, re, rl, ro, rd);
 }
-PSSubmit(pS12, pS13);
+this.PSSubmit(pS12, pS13);
 @
 
 \subsubsection{[[DBUpdateServerRemoveFromSchedule]](4)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBUpdateServerRemoveFromSchedule]](4)} inserts a new
+\emph{remaining route} for server $s$ into Table W, and a new \emph{remaining
+schedule} with \emph{some pre-existing labeled waypoints removed} into Tables
+PD, CPD, and CQ. If the server to be update does not exist, a
+[[UserNotFoundException]] is thrown.  This exception is also thrown if any
+labels in the new labeled waypoints is not an existing user.  If the supplied
+route contains an edge that does not exist in Table E, an
+[[EdgeNotFoundException]] is thrown.  A [[SQLException]] is thrown for other
+database failures.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[sid]] (param. 1):&server identifier.\\
+Array [[route]] (param. 2):&$2n$-element integer array storing values of
+waypoint components in the server's $n$-length remaining route $w_{>t}$.
+In the diagram, $|w|-i=n$.
+Here $t$ is taken to be [[route[0]]]. Consequently, $(t_i,v_i)$ is \emph{not} part
+of the remaining route, in other words \textbf{it must pre-exist in Table W}.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:t_i$}; & \node {$1:v_i$}; & \node[minimum width=6mm] {...};
+ &\node {$(2|w|-2):t_{|w|}$}; & \node {$(2|w|-1):v_{|w|}$}; \\
+};
+\end{tikzpicture}\\
+Array [[sched]] (param. 2):&$3m$-element integer array storing values of
+waypoint components and their labels in the server's $m$-length remaining
+schedule $b_{>t}$, where $m\leq n$. In the diagram, $|b|-j=m$.  Note
+$(t_{i_j},v_{i_j})$ \emph{cannot equal} $(t_i,v_i)$, as $(t_i,v_i)$ is part of
+the traveled route and not the remaining route (we cannot change the past).
+Therefore $t_{i_j}$ \textbf{must be greater than} $t_i$. Due to rule R3,
+$(t_{i_{|b|}},v_{i_{|b|}})$ \textbf{must equal} $(t_{|w|},v_{|w|})$.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:t_{i_j}$}; & \node {$1:v_{i_j}$}; & \node {$2:L(b_j)$}; & \node[minimum width=6mm] {...};
+ &\node {$(2|b|-3):t_{i_{|b|}}$}; & \node {$(2|b|-2):v_{i_{|b|}}$}; & \node {$(2|b|-1):L(b_{|b|})$};\\
+};
+\end{tikzpicture}
+
+If a waypoint has multiple labels, write them side-by-side, \textit{e.g.}
+to record two labels $L_1(b_j)$ and $L_2(b_j)$ on waypoint $b_j$, write
+(indices omitted for clarity):
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node[minimum width=6mm] {...};
+ &\node {$t_{i_j}$}; & \node {$v_{i_j}$};
+ &\node {$L_1(b_j)$};
+ &\node {$t_{i_j}$}; & \node {$v_{i_j}$};
+ &\node {$L_2(b_j)$};
+ &\node[minimum width=6mm] {...};\\
+};
+\end{tikzpicture}
+
+If a waypoint has multiple labels with some indicating drop-offs, \textbf{write
+the drop-offs first} before any of the pick-ups, otherwise C98 violation may
+occur.\\ Array [[rid]] (param. 4):&$k$-element integer array storing request
+identifiers found in the pre-existing schedule \emph{but not found in the new
+remaining schedule} [[sched]]. The order of this array doesn't matter.
+\end{tabular}\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} may delete and insert rows into Table W, may
+update columns in Table CW, may update columns in Tables PD and CPD,
+may delete and insert rows into Table CQ.\\
+\textbf{Throws:} [[UserNotFoundException]] if server does not exist or if
+any request identifier in [[rid]] (param. 4) cannot be found,
+[[EdgeNotFoundException]] if [[route]] contains an edge that does not exist
+in Table E, or [[SQLException]] for other database failures.\\
+\bottomrule
+\end{tabular}
 <<Update server remove from schedule>>=
-public void DBUpdateServerRemoveFromSchedule(int sid, int[] route, int[] sched, int[] rid)
+public void DBUpdateServerRemoveFromSchedule(
+    final int sid, final int[] route, final int[] sched, final int[] rid)
 throws UserNotFoundException, EdgeNotFoundException, SQLException {
-  if (!lu_users.containsKey(sid)) {
+  if (!this.lu_users.containsKey(sid)) {
     throw new UserNotFoundException("User "+sid+" not found.");
   }
-  for (int r : rid) {
-    if (!lu_users.containsKey(r)) {
+  for (final int r : rid) {
+    if (!this.lu_users.containsKey(r)) {
       throw new UserNotFoundException("User "+r+" not found.");
     }
   }
-  int[] output = new int[] { };
-  int se, sq;
   Map<Integer, int[]> cache = new HashMap<>();
-  try {
-    Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+  try (<<Open [[conn]]>>) {
     try {
-      <<..fetch [[sq]] and [[se]]>>
-      <<..update route>>
-      <<..update schedule>>
-      <<..remove jobs from pd, cpd>>
+/*L1*/<<..fetch [[sq]] and [[se]]>>
+/*L2*/<<..update route>>
+/*L3*/<<..update schedule>>
+/*L4*/<<..remove jobs from pd, cpd>>
       conn.commit();
     } catch (SQLException e) {
       conn.rollback();
       throw e;
-    } finally {
-      conn.close();
     }
   } catch (SQLException e) {
     throw e;
   }
-  for (int r : rid) {
-    lu_rstatus.remove(r);
+@ %def DBUpdateServerRemoveFromSchedule
+{\small If all goes well, we put each request indentifier in [[rid]] into
+[[lu_rstatus]] and change the value to [[false]], indicating that the request
+is now \emph{unassigned}.}
+<<Update server remove from schedule>>=
+  for (final int r : rid) {
+    this.lu_rstatus.put(r, false);
   }
 }
-@ %def DBUpdateServerRemoveFromSchedule
+@
+{\small We re-use chunks from [[DBUpdateServerRoute]](3) to update the route
+and the schedule. Then we prepare and submit statements [[S42]] and [[S43]] to
+delete labeled waypoints from Tables PD and CPD.}
 <<..remove jobs from pd, cpd>>=
-PreparedStatement pS42 = PS(conn, "S42");
-PreparedStatement pS43 = PS(conn, "S43");
-for (int r : rid) {
-  PSAdd(pS42, r);
-  PSAdd(pS43, r);
+PreparedStatement pS42 = this.PS(conn, "S42");
+PreparedStatement pS43 = this.PS(conn, "S43");
+for (final int r : rid) {
+  this.PSAdd(pS42, r);
+  this.PSAdd(pS43, r);
 }
-PSSubmit(pS42, pS43);
+this.PSSubmit(pS42, pS43);
 @
 
 \subsection{Read Methods}
 \label{sec:read-methods}
 
 \subsubsection{[[DBQuery]](2)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQuery]]}(2) executes an arbitrary [[SELECT]]
+query against the Jargo database instance.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+String [[sql]] (param. 1):&[[SELECT]] statement to execute.\\
+Integer [[ncols]] (param. 2):&number of columns $n$ in the selection.\\
+\end{tabular}
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {...};
+ &\node {$in+j:\textrm{value at column $j$, row $i$ of the result set}$};
+ &\node {...};\\
+};
+\end{tikzpicture}
+
+where $i$, $j$ start from 0.\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 <<Query custom statement>>=
-public int[] DBQuery(String sql, int ncols) throws SQLException {
+public int[] DBQuery(final String sql, final int ncols) throws SQLException {
   int[] output = new int[] { };
   try (<<Open [[conn]]>>) {
     Statement stmt = conn.createStatement(
       ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
     ResultSet res = stmt.executeQuery(sql);
+@
+{\small The JDBC method [[ResultSet.last]](0) returns [[false]] if there are no
+results.  We use the return value to determine whether or not to continue
+flattening results.}
+<<Query custom statement>>=
     if (res.last()) {
       <<..flatten results>>
     }
@@ -2649,164 +3328,362 @@ public int[] DBQuery(String sql, int ncols) throws SQLException {
   }
   return output;
 }
-@ % def DBQuery
+@ %def DBQuery
+{\small In the flattening procedure, we simply loop through the result rows and
+columns, adding values into their respective positions in the returned
+[[output]] array.}
+<<..flatten results>>=
+output = new int[(ncols*res.getRow())];
+res.first();
+do {
+  for (int j = 1; j <= ncols; j++) {
+    output[((res.getRow() - 1)*ncols + (j - 1))] = res.getInt(j);
+  }
+} while (res.next());
+@
 
 \subsubsection{[[DBQueryCountVertices]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryCountVertices]]}(0) returns the total number
+of vertices in Table V.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{number of vertices in Table V}$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 <<Query count of vertices>>=
 public int[] DBQueryCountVertices() throws SQLException {
-  int[] output = new int[] { };
   try (<<Open [[conn]]>>) {
-    output = DBFetch(conn, "S62", 1);
+    return this.DBFetch(conn, "S62", 1);
   } catch (SQLException e) {
     throw e;
   }
-  return output;
 }
 @ %def DBQueryCountVertices
 
 \subsubsection{[[DBQueryCountEdges]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryCountEdges]]}(0) returns the total number
+of vertices in Table V.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{number of edges in Table E}$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 <<Query count of edges>>=
 public int[] DBQueryCountEdges() throws SQLException {
-  int[] output = new int[] { };
   try (<<Open [[conn]]>>) {
-    output = DBFetch(conn, "S63", 1);
+    return this.DBFetch(conn, "S63", 1);
   } catch (SQLException e) {
     throw e;
   }
-  return output;
 }
 @ %def DBQueryCountEdges
 
 \subsubsection{[[DBQueryVertex]](1)}
-Returned array =
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryVertex]]}(1) returns the longitude and
+latitude coordinates of the given vertex. If the vertex does not exist,
+a [[VertexNotFoundException]] is thrown.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[v]] (param. 1):&vertex identifier.
+\end{tabular}
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
 
-\noindent
 \begin{tikzpicture}
 \small
 \matrix[nodes={draw,minimum size=6mm}] {
-  \node {$0:\textrm{longitude of }v$};
-& \node {$1:\textrm{latitude of }v$}; \\
+  \node {$0:\textrm{longitude of }\texttt{v}$};
+ &\node {$1:\textrm{latitude of }\texttt{v}$};\\
 };
-\end{tikzpicture}
-
-\noindent where parameter [[v]] provides $v$.
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[VertexNotFoundException]] if vertex does not exist, or
+[[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 <<Query vertex>>=
-public final int[] DBQueryVertex(int v)
+public int[] DBQueryVertex(final int v)
 throws VertexNotFoundException, SQLException {
-  if (!lu_vertices.containsKey(v)) {
+  if (!this.lu_vertices.containsKey(v)) {
     throw new VertexNotFoundException("Vertex "+v+" not found.");
   }
-  return lu_vertices.get(v);
+  return this.lu_vertices.get(v).clone();
 }
 @ %def DBQueryVertex
 
 \subsubsection{[[DBQueryAllVertices]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryAllVertices]]}(0) returns all rows in Table V.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{vertex identifier}$};
+ &\node {$1:\textrm{longitude of the vertex}$};
+ &\node {$2:\textrm{latitude of the vertex}$};
+ &\node {...};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 <<Query all vertices>>=
 public int[] DBQueryAllVertices() throws SQLException {
-  int[] output = new int[] { };
   try (<<Open [[conn]]>>) {
-    output = DBFetch(conn, "S136", 3);
+    return this.DBFetch(conn, "S136", 3);
   } catch (SQLException e) {
     throw e;
   }
-  return output;
 }
 @ %def DBQueryAllVertices
 
 \subsubsection{[[DBQueryEdge]](2)}
-Returned array =
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryEdge]]}(2) returns the distance and
+maximum free-flow speed along the given edge.
+An [[EdgeNotFoundException]] is thrown if the edge does not exist.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[v1]] (param. 1):&source vertex identifier $v_1$\\
+Integer [[v2]] (param. 2):&target vertex identifier $v_2$
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
 
-\noindent
 \begin{tikzpicture}
 \small
 \matrix[nodes={draw,minimum size=6mm}] {
   \node {$0:d(v_1,v_2)$}; & \node {$1:v^\textrm{max}(v_1,v_2)$}; \\
 };
-\end{tikzpicture}
-
-\noindent where parameter [[v1]] provides $v_1$ and parameter
-[[v2]] provides $v_2$.
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 <<Query edge>>=
-public final int[] DBQueryEdge(int v1, int v2)
+public int[] DBQueryEdge(final int v1, final int v2)
 throws EdgeNotFoundException, SQLException {
-  if (!(lu_edges.containsKey(v1) && lu_edges.get(v1).containsKey(v2))) {
+  if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
     throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
   }
-  return lu_edges.get(v1).get(v2);
+  return this.lu_edges.get(v1).get(v2).clone();
 }
 @ %def DBQueryEdge
 
 \subsubsection{[[DBQueryAllEdges]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryAllEdges]]}(0) returns all rows in Table E.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{source vertex identifier $v_1$}$};
+ &\node {$1:\textrm{target vertex identifier $v_2$}$};
+ &\node {$2:d(v_1,v_2)$};
+ &\node {$3:v^\textrm{max}(v_1,v_2)$};
+ &\node {...};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 <<Query all edges>>=
 public int[] DBQueryAllEdges() throws SQLException {
-  int[] output = new int[] { };
   try (<<Open [[conn]]>>) {
-    output = DBFetch(conn, "S137", 4);
+    return this.DBFetch(conn, "S137", 4);
   } catch (SQLException e) {
     throw e;
   }
-  return output;
 }
 @ %def DBQueryAllEdges
 
 \subsubsection{[[DBQueryStatisticsEdges]](0)}
-The following method returns six statistics: minimum edge weight,
-maximum edge weight, average edge weight, minimum edge speed, maximum edge speed,
-average edge speed.
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryStatisticsEdges]]}(0) returns some edge statistics.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{min. weight}$};
+ &\node {$1:\textrm{max. weight}$};
+ &\node {$2:\textrm{avg. weight}$};
+ &\node {$3:\textrm{min. speed}$};
+ &\node {$4:\textrm{max. speed}$};
+ &\node {$5:\textrm{avg. speed}$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 <<Query edge statistics>>=
 public int[] DBQueryStatisticsEdges() throws SQLException {
-  int[] output = new int[] { };
   try (<<Open [[conn]]>>) {
-    output = DBFetch(conn, "S65", 6);
+    return this.DBFetch(conn, "S65", 6);
   } catch (SQLException e) {
     throw e;
   }
-  return output;
 }
 @ %def DBQueryStatisticsEdges
 
 \subsubsection{[[DBQueryMBR]](0)}
-The minimum bounding rectangle is
-returned as four numbers: minimum longitude, maximum longitude, minimum
-latitude, maximum latitude.
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryMBR]]}(0) returns the minimum-bounding
+rectangle of the road network.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{min. longitude}$};
+ &\node {$1:\textrm{max. longitude}$};
+ &\node {$2:\textrm{min. latitude}$};
+ &\node {$3:\textrm{max. latitude}$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 <<Query MBR>>=
 public int[] DBQueryMBR() throws SQLException {
-  int[] output = new int[] { };
   try (<<Open [[conn]]>>) {
-    output = DBFetch(conn, "S64", 4);
+    return this.DBFetch(conn, "S64", 4);
   } catch (SQLException e) {
     throw e;
   }
-  return output;
 }
 @ %def DBQueryMBR
 
 \subsubsection{[[DBQueryCountServers]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryCountSevers]]}(0) returns the total number
+of servers in Table S.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{number of servers in Table S}$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 <<Query count of servers>>=
 public int[] DBQueryCountServers() throws SQLException {
-  int[] output = new int[] { };
   try (<<Open [[conn]]>>) {
-    output = DBFetch(conn, "S66", 1);
+    return this.DBFetch(conn, "S66", 1);
   } catch (SQLException e) {
     throw e;
   }
-  return output;
 }
 @ %def DBQueryCountServers
 
 \subsubsection{[[DBQueryCountRequests]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryCountRequests]]}(0) returns the total number
+of requests in Table R.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{number of requests in Table R}$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 <<Query count of requests>>=
 public int[] DBQueryCountRequests() throws SQLException {
-  int[] output = new int[] { };
   try (<<Open [[conn]]>>) {
-    output = DBFetch(conn, "S67", 1);
+    return this.DBFetch(conn, "S67", 1);
   } catch (SQLException e) {
     throw e;
   }
-  return output;
 }
 @ %def DBQueryCountRequests
-
 
 \subsubsection{[[DBQueryAllUsers]](0)}
 <<Query ridesharing user>>=
@@ -3523,15 +4400,6 @@ for (int i = 0; i < values.length; i++) {
     p.setInt ((i + 1), values[i]);
   }
 }
-@
-<<..flatten results>>=
-output = new int[(ncols*res.getRow())];
-res.first();
-do {
-  for (int j = 1; j <= ncols; j++) {
-    output[((res.getRow() - 1)*ncols + (j - 1))] = res.getInt(j);
-  }
-} while (res.next());
 @
 
 \subsection{[[PSAdd]](2...)}

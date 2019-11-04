@@ -5,7 +5,6 @@ import com.github.jargors.exceptions.DuplicateUserException;
 import com.github.jargors.exceptions.EdgeNotFoundException;
 import com.github.jargors.exceptions.UserNotFoundException;
 import com.github.jargors.exceptions.VertexNotFoundException;
-import com.github.jargors.Tools;
 import java.sql.CallableStatement;   import java.sql.Connection;
 import java.sql.DriverManager;       import java.sql.PreparedStatement;
 import java.sql.ResultSet;           import java.sql.SQLException;
@@ -21,7 +20,6 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
-import java.time.LocalDateTime;
 public class Storage {
   private Map<Integer, Boolean> lu_rstatus = new HashMap<>();  //*
   private ConcurrentHashMap<String, String> lu_pstr     = new ConcurrentHashMap<>();
@@ -29,14 +27,12 @@ public class Storage {
   private ConcurrentHashMap<Integer,
       ConcurrentHashMap<Integer, int[]>>    lu_edges    = new ConcurrentHashMap<>();
   private ConcurrentHashMap<Integer, int[]> lu_users    = new ConcurrentHashMap<>();
+  private final int    STATEMENTS_MAX_COUNT   = 20;
+  private final int    REQUEST_TIMEOUT        = 30;
   private       String CONNECTIONS_URL        = "jdbc:derby:memory:jargo;create=true";
   private final String CONNECTIONS_DRIVER_URL = "jdbc:apache:commons:dbcp:";
   private final String CONNECTIONS_POOL_NAME  = "jargo";
   private final String CONNECTIONS_POOL_URL   = (CONNECTIONS_DRIVER_URL + CONNECTIONS_POOL_NAME);
-  private final int    STATEMENTS_MAX_COUNT   = 20;
-  private final int    DERBY_PAGECACHESIZE    = 8000;
-  private final String DERBY_DUMPNAME         = "db-lastgood";
-  private final int    REQUEST_TIMEOUT        = 30;
   private ConnectionFactory               connection_factory;
   private PoolableConnectionFactory       poolableconnection_factory;
   private ObjectPool<PoolableConnection>  pool;
@@ -44,7 +40,7 @@ public class Storage {
   public Storage() {
     this.PSInit();
   }
-  public int[] DBQuery(String sql, int ncols) throws SQLException {
+  public int[] DBQuery(final String sql, final int ncols) throws SQLException {
     int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
       Statement stmt = conn.createStatement(
@@ -66,90 +62,74 @@ public class Storage {
     return output;
   }
   public int[] DBQueryCountVertices() throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S62", 1);
+      return this.DBFetch(conn, "S62", 1);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
   public int[] DBQueryCountEdges() throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S63", 1);
+      return this.DBFetch(conn, "S63", 1);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
-  public final int[] DBQueryVertex(int v)
+  public int[] DBQueryVertex(final int v)
   throws VertexNotFoundException, SQLException {
-    if (!lu_vertices.containsKey(v)) {
+    if (!this.lu_vertices.containsKey(v)) {
       throw new VertexNotFoundException("Vertex "+v+" not found.");
     }
-    return lu_vertices.get(v);
+    return this.lu_vertices.get(v).clone();
   }
   public int[] DBQueryAllVertices() throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S136", 3);
+      return this.DBFetch(conn, "S136", 3);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
-  public final int[] DBQueryEdge(int v1, int v2)
+  public int[] DBQueryEdge(final int v1, final int v2)
   throws EdgeNotFoundException, SQLException {
-    if (!(lu_edges.containsKey(v1) && lu_edges.get(v1).containsKey(v2))) {
+    if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
       throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
     }
-    return lu_edges.get(v1).get(v2);
+    return this.lu_edges.get(v1).get(v2).clone();
   }
   public int[] DBQueryAllEdges() throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S137", 4);
+      return this.DBFetch(conn, "S137", 4);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
   public int[] DBQueryStatisticsEdges() throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S65", 6);
+      return this.DBFetch(conn, "S65", 6);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
   public int[] DBQueryMBR() throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S64", 4);
+      return this.DBFetch(conn, "S64", 4);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
   public int[] DBQueryCountServers() throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S66", 1);
+      return this.DBFetch(conn, "S66", 1);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
   public int[] DBQueryCountRequests() throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S67", 1);
+      return this.DBFetch(conn, "S67", 1);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
   public int[] DBQueryAllUsers() throws SQLException {
     int[] output = new int[] { };
@@ -606,585 +586,526 @@ public class Storage {
     }
     return output;
   }
-  public void DBAddNewVertex(int v, int lng, int lat)
+  public void DBAddNewVertex(final int v, final int lng, final int lat)
   throws DuplicateVertexException, SQLException {
-    if (lu_vertices.containsKey(v)) {
+    if (this.lu_vertices.containsKey(v)) {
       throw new DuplicateVertexException("Vertex "+v+" already exists.");
     }
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
       try {
-        PreparedStatement pS0 = PS(conn, "S0");
-        PSAdd(pS0, v, lng, lat);
-        PSSubmit(pS0);
+        PreparedStatement pS0 = this.PS(conn, "S0");
+        this.PSAdd(pS0, v, lng, lat);
+        this.PSSubmit(pS0);
         conn.commit();
       } catch (SQLException e) {
         conn.rollback();
         throw e;
-      } finally {
-        conn.close();
       }
     } catch (SQLException e) {
       throw e;
     }
-    lu_vertices.put(v, new int[] { lng, lat });
+    this.lu_vertices.put(v, new int[] { lng, lat });
   }
-  public void DBAddNewEdge(int v1, int v2, int dd, int nu)
+  public void DBAddNewEdge(final int v1, final int v2, final int dd, final int nu)
   throws DuplicateEdgeException, SQLException {
-    if (lu_edges.containsKey(v1) && lu_edges.get(v1).containsKey(v2)) {
+    if (this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2)) {
       throw new DuplicateEdgeException("Edge ("+v1+", "+v2+") already exists.");
     }
-    if (!lu_edges.containsKey(v1)) {
-      lu_edges.put(v1, new ConcurrentHashMap());
+    if (!this.lu_edges.containsKey(v1)) {
+      this.lu_edges.put(v1, new ConcurrentHashMap());
     }
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
       try {
-        PreparedStatement pS1 = PS(conn, "S1");
-        PSAdd(pS1, v1, v2, dd, nu);
-        PSSubmit(pS1);
+        PreparedStatement pS1 = this.PS(conn, "S1");
+        this.PSAdd(pS1, v1, v2, dd, nu);
+        this.PSSubmit(pS1);
         conn.commit();
       } catch (SQLException e) {
         conn.rollback();
         throw e;
-      } finally {
-        conn.close();
       }
     } catch (SQLException e) {
       throw e;
     }
-    lu_edges.get(v1).put(v2, new int[] { dd, nu });
+    this.lu_edges.get(v1).put(v2, new int[] { dd, nu });
   }
-  public void DBAddNewRequest(int[] u)
+  public void DBAddNewRequest(final int[] u)
   throws DuplicateUserException, SQLException {
-    int uid = u[0];
-    if (lu_users.containsKey(uid)) {
+    final int uid = u[0];
+    if (this.lu_users.containsKey(uid)) {
       throw new DuplicateUserException("User "+uid+" already exists.");
     }
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
       try {
-        PreparedStatement pS2 = PS(conn, "S2");
-        PreparedStatement pS3 = PS(conn, "S3");
-        PreparedStatement pS4 = PS(conn, "S4");
-        PreparedStatement pS5 = PS(conn, "S5");
-        PreparedStatement pS6 = PS(conn, "S6");
-        PreparedStatement pS7 = PS(conn, "S7");
-        PSAdd(pS2, uid, u[1]);
-        PSAdd(pS3, uid, u[2]);
-        PSAdd(pS4, uid, u[3]);
-        PSAdd(pS5, uid, u[4]);
-        PSAdd(pS6, uid, u[5]);
-        PSAdd(pS7, uid, u[6]);
-        PSSubmit(pS2, pS3, pS4, pS5, pS6, pS7);
-        PreparedStatement pS9 = PS(conn, "S9");
-        PSAdd(pS9, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
-        PSSubmit(pS9);
+        PreparedStatement pS2 = this.PS(conn, "S2");
+        PreparedStatement pS3 = this.PS(conn, "S3");
+        PreparedStatement pS4 = this.PS(conn, "S4");
+        PreparedStatement pS5 = this.PS(conn, "S5");
+        PreparedStatement pS6 = this.PS(conn, "S6");
+        PreparedStatement pS7 = this.PS(conn, "S7");
+        this.PSAdd(pS2, uid, u[1]);
+        this.PSAdd(pS3, uid, u[2]);
+        this.PSAdd(pS4, uid, u[3]);
+        this.PSAdd(pS5, uid, u[4]);
+        this.PSAdd(pS6, uid, u[5]);
+        this.PSAdd(pS7, uid, u[6]);
+        this.PSSubmit(pS2, pS3, pS4, pS5, pS6, pS7);
+        PreparedStatement pS9 = this.PS(conn, "S9");
+        this.PSAdd(pS9, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
+        this.PSSubmit(pS9);
         conn.commit();
       } catch (SQLException e) {
         conn.rollback();
         throw e;
-      } finally {
-        conn.close();
       }
     } catch (SQLException e) {
       throw e;
     }
-    lu_users.put(u[0], u.clone());
-    lu_rstatus.put(u[0], false);
+    this.lu_users.put(u[0], u.clone());
+    this.lu_rstatus.put(u[0], false);
   }
-  public void DBAddNewServer(int[] u, int[] route)
+  public void DBAddNewServer(final int[] u, final int[] route)
   throws DuplicateUserException, EdgeNotFoundException, SQLException {
-    int uid = u[0];
-    if (lu_users.containsKey(uid)) {
+    final int uid = u[0];
+    if (this.lu_users.containsKey(uid)) {
       throw new DuplicateUserException("User "+uid+" already exists.");
     }
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
       try {
-        int se = u[2];
-        PreparedStatement pS2 = PS(conn, "S2");
-        PreparedStatement pS3 = PS(conn, "S3");
-        PreparedStatement pS4 = PS(conn, "S4");
-        PreparedStatement pS5 = PS(conn, "S5");
-        PreparedStatement pS6 = PS(conn, "S6");
-        PreparedStatement pS7 = PS(conn, "S7");
-        PSAdd(pS2, uid, u[1]);
-        PSAdd(pS3, uid, u[2]);
-        PSAdd(pS4, uid, u[3]);
-        PSAdd(pS5, uid, u[4]);
-        PSAdd(pS6, uid, u[5]);
-        PSAdd(pS7, uid, u[6]);
-        PSSubmit(pS2, pS3, pS4, pS5, pS6, pS7);
-        PreparedStatement pS8 = PS(conn, "S8");
-        PSAdd(pS8, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
-        PSSubmit(pS8);
-        PreparedStatement pS10 = PS(conn, "S10");
+        final int se = u[2];
+        PreparedStatement pS2 = this.PS(conn, "S2");
+        PreparedStatement pS3 = this.PS(conn, "S3");
+        PreparedStatement pS4 = this.PS(conn, "S4");
+        PreparedStatement pS5 = this.PS(conn, "S5");
+        PreparedStatement pS6 = this.PS(conn, "S6");
+        PreparedStatement pS7 = this.PS(conn, "S7");
+        this.PSAdd(pS2, uid, u[1]);
+        this.PSAdd(pS3, uid, u[2]);
+        this.PSAdd(pS4, uid, u[3]);
+        this.PSAdd(pS5, uid, u[4]);
+        this.PSAdd(pS6, uid, u[5]);
+        this.PSAdd(pS7, uid, u[6]);
+        this.PSSubmit(pS2, pS3, pS4, pS5, pS6, pS7);
+  /*L1*/PreparedStatement pS8 = this.PS(conn, "S8");
+        this.PSAdd(pS8, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
+        this.PSSubmit(pS8);
+  /*L2*/PreparedStatement pS10 = this.PS(conn, "S10");
         for (int i = 0; i < (route.length - 3); i += 2) {
-          int t1 = route[(i + 0)];
-          int v1 = route[(i + 1)];
-          int t2 = route[(i + 2)];
-          int v2 = route[(i + 3)];
-          if (!(lu_edges.containsKey(v1) && lu_edges.get(v1).containsKey(v2))) {
+          final int t1 = route[(i + 0)];
+          final int v1 = route[(i + 1)];
+          final int t2 = route[(i + 2)];
+          final int v2 = route[(i + 3)];
+          if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
             throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
           }
-          int dd = lu_edges.get(v1).get(v2)[0];
-          int nu = lu_edges.get(v1).get(v2)[1];
-          PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
+          final int dd = this.lu_edges.get(v1).get(v2)[0];
+          final int nu = this.lu_edges.get(v1).get(v2)[1];
+          this.PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
         }
-        PSSubmit(pS10);
-        pS10 = PS(conn, "S10");
-        PSAdd(pS10, uid, se, null, null, route[0], route[1], null, null);
-        PSSubmit(pS10);
-        PreparedStatement pS11 = PS(conn, "S11");
-        int te = route[(route.length - 2)];
-        PSAdd(pS11, uid, u[2], u[3], u[4], u[5], u[2], u[4], te, u[5]);
-        PSSubmit(pS11);
-        PreparedStatement pS14 = PS(conn, "S14");
-        PSAdd(pS14, uid, u[1], u[2], null, u[2], u[4], null, u[1],
+        this.PSSubmit(pS10);
+        pS10 = this.PS(conn, "S10");
+        this.PSAdd(pS10, uid, se, null, null, route[0], route[1], null, null);
+        this.PSSubmit(pS10);
+  /*L3*/PreparedStatement pS11 = this.PS(conn, "S11");
+        final int te = route[(route.length - 2)];
+        this.PSAdd(pS11, uid, u[2], u[3], u[4], u[5], u[2], u[4], te, u[5]);
+        this.PSSubmit(pS11);
+  /*L4*/PreparedStatement pS14 = this.PS(conn, "S14");
+        this.PSAdd(pS14, uid, u[1], u[2], null, u[2], u[4], null, u[1],
             null, null, null, null, null, 1);
-        PSSubmit(pS14);
+        this.PSSubmit(pS14);
         conn.commit();
       } catch (SQLException e) {
         conn.rollback();
         throw e;
-      } finally {
-        conn.close();
       }
     } catch (SQLException e) {
       throw e;
     }
-    lu_users.put(uid, u.clone());
+    this.lu_users.put(uid, u.clone());
   }
-  public void DBUpdateEdgeSpeed(int v1, int v2, int nu)
+  public void DBUpdateEdgeSpeed(final int v1, final int v2, final int nu)
   throws EdgeNotFoundException, SQLException {
-    if (!(lu_edges.containsKey(v1) && lu_edges.get(v1).containsKey(v2))) {
+    if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
       throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
     }
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
       try {
-        PreparedStatement pS15 = PS(conn, "S15");
-        PreparedStatement pS131 = PS(conn, "S131");
-        PSAdd(pS15, nu, v1, v2);
-        PSAdd(pS131, nu, v1, v2);
-        PSSubmit(pS15, pS131);
+        PreparedStatement pS15 = this.PS(conn, "S15");
+        PreparedStatement pS131 = this.PS(conn, "S131");
+        this.PSAdd(pS15, nu, v1, v2);
+        this.PSAdd(pS131, nu, v1, v2);
+        this.PSSubmit(pS15, pS131);
         conn.commit();
       } catch (SQLException e) {
         conn.rollback();
         throw e;
-      } finally {
-        conn.close();
       }
     } catch (SQLException e) {
       throw e;
     }
-    int dd = lu_edges.get(v1).get(v2)[0];
-    lu_edges.get(v1).put(v2, new int[] { dd, nu });
+    this.lu_edges.get(v1).get(v2)[1] = nu;
   }
-  public void DBUpdateServerRoute(int sid, int[] route, int[] sched)
+  public void DBUpdateServerRoute(final int sid, final int[] route, final int[] sched)
   throws UserNotFoundException, EdgeNotFoundException, SQLException {
-    if (!lu_users.containsKey(sid)) {
+    if (!this.lu_users.containsKey(sid)) {
       throw new UserNotFoundException("User "+sid+" not found.");
     }
-    int[] output = new int[] { };
-    int se, sq;
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
       try {
-        sq = lu_users.get(sid)[1];
-        se = lu_users.get(sid)[2];
-        PreparedStatement pS76 = PS(conn, "S76");
-        PSAdd(pS76, sid, route[0]);
-        PSSubmit(pS76);
-        int uid = sid;
-        PreparedStatement pS10 = PS(conn, "S10");
-        for (int i = 0; i < (route.length - 3); i += 2) {
-          int t1 = route[(i + 0)];
-          int v1 = route[(i + 1)];
-          int t2 = route[(i + 2)];
-          int v2 = route[(i + 3)];
-          if (!(lu_edges.containsKey(v1) && lu_edges.get(v1).containsKey(v2))) {
-            throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
-          }
-          int dd = lu_edges.get(v1).get(v2)[0];
-          int nu = lu_edges.get(v1).get(v2)[1];
-          PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
-        }
-        PSSubmit(pS10);
-        PreparedStatement pS77 = PS(conn, "S77");
-        PreparedStatement pS139 = PS(conn, "S139");
-        int te = route[(route.length - 2)];
-        int ve = route[(route.length - 1)];
-        PSAdd(pS77, te, ve, sid);
-        PSAdd(pS139, te, sid);
-        PSSubmit(pS77, pS139);
+  /*L1*/final int sq = lu_users.get(sid)[1];
+        final int se = lu_users.get(sid)[2];
+  /*L2*//*a*/PreparedStatement pS76 = this.PS(conn, "S76");
+             this.PSAdd(pS76, sid, route[0]);
+             this.PSSubmit(pS76);
+        /*b*/final int uid = sid;
+             PreparedStatement pS10 = this.PS(conn, "S10");
+             for (int i = 0; i < (route.length - 3); i += 2) {
+               final int t1 = route[(i + 0)];
+               final int v1 = route[(i + 1)];
+               final int t2 = route[(i + 2)];
+               final int v2 = route[(i + 3)];
+               if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
+                 throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
+               }
+               final int dd = this.lu_edges.get(v1).get(v2)[0];
+               final int nu = this.lu_edges.get(v1).get(v2)[1];
+               this.PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
+             }
+             this.PSSubmit(pS10);
+        /*c*/PreparedStatement pS77 = this.PS(conn, "S77");
+             PreparedStatement pS139 = this.PS(conn, "S139");
+             final int te = sched[(sched.length - 3)];
+             final int ve = sched[(sched.length - 2)];
+             this.PSAdd(pS77, te, ve, sid);
+             this.PSAdd(pS139, te, sid);
+             this.PSSubmit(pS77, pS139);
         if (sched.length > 0) {
           Map<Integer, int[]> cache = new HashMap<>();
-          PreparedStatement pS82 = PS(conn, "S82");
-          PreparedStatement pS83 = PS(conn, "S83");
-          PreparedStatement pS84 = PS(conn, "S84");
-          for (int j = 0; j < (sched.length - 2); j += 3) {
-            int tj = sched[(j + 0)];
-            int vj = sched[(j + 1)];
-            int Lj = sched[(j + 2)];
-            if (Lj != sid) {
-              PSAdd(pS82, tj, vj, Lj);
-              PSAdd(pS83, tj, vj, Lj);
-              PSAdd(pS84, tj, vj, Lj);
-            }
-          }
-          PSSubmit(pS82, pS83, pS84);
-          PreparedStatement pS140 = PS(conn, "S140");
-          for (int j = 0; j < (sched.length - 2); j += 3) {
-            int Lj = sched[(j + 2)];
-            if (Lj != sid) {
-              int rq, tp, td;
-              if (!cache.containsKey(Lj)) {
-                rq = DBFetch(conn, "S85", 1, Lj)[0];
-                output = DBFetch(conn, "S86", 2, Lj);
-                tp = output[0];
-                td = output[1];
-                cache.put(Lj, new int[] { rq, tp, td });
-                PSAdd(pS140, tp, td, Lj);
-              }
-            }
-          }
-          PSSubmit(pS140);
-          int t1, q1, o1;
-          if (route[0] == 0) {
-            t1 = 0;
-            q1 = sq;
-            o1 = 1;
-          } else {
-            output = DBFetch(conn, "S87", 3, sid, route[0]);
-            t1 = output[0];
-            q1 = output[1];
-            o1 = output[2];
-          }
-          PreparedStatement pS80 = PS(conn, "S80");
-          PSAdd(pS80, sid, route[0]);
-          PSSubmit(pS80);
-          PreparedStatement pS14 = PS(conn, "S14");
-          for (int j = 0; j < (sched.length - 2); j += 3) {
-            int t2 = sched[(j + 0)];
-            int v2 = sched[(j + 1)];
-            int Lj = sched[(j + 2)];
-            if (Lj != sid) {
-              int[] qpd = cache.get(Lj);
-              int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
-              int o2 = o1 + 1;
-              PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
-                    qpd[0], qpd[1], qpd[2], o1, o2);
-              t1 = t2;
-              q1 = q2;
-              o1 = o2;
-            }
-          }
-          PSSubmit(pS14);
+  /*L3*/  /*a*/PreparedStatement pS82 = this.PS(conn, "S82");
+               PreparedStatement pS83 = this.PS(conn, "S83");
+               PreparedStatement pS84 = this.PS(conn, "S84");
+               for (int j = 0; j < (sched.length - 2); j += 3) {
+                 final int tj = sched[(j + 0)];
+                 final int vj = sched[(j + 1)];
+                 final int Lj = sched[(j + 2)];
+                 if (Lj != sid) {
+                   this.PSAdd(pS82, tj, vj, Lj);
+                   this.PSAdd(pS83, tj, vj, Lj);
+                   this.PSAdd(pS84, tj, vj, Lj);
+                 }
+               }
+               this.PSSubmit(pS82, pS83, pS84);
+          /*b*/PreparedStatement pS140 = this.PS(conn, "S140");
+               for (int j = 0; j < (sched.length - 2); j += 3) {
+                 final int Lj = sched[(j + 2)];
+                 if (Lj != sid) {
+                   if (!cache.containsKey(Lj)) {
+                     final int[] output = DBFetch(conn, "S86", 2, Lj);
+                     final int tp = output[0];
+                     final int td = output[1];
+                     final int rq = this.lu_users.get(Lj)[1];
+                     cache.put(Lj, new int[] { rq, tp, td });
+                     this.PSAdd(pS140, tp, td, Lj);
+                   }
+                 }
+               }
+               this.PSSubmit(pS140);
+          /*c*/final int[] output = (route[0] == 0 ? null : this.DBFetch(conn, "S87", 3, sid, route[0]));
+               int t1 = (route[0] == 0 ?  0 : output[0]);
+               int q1 = (route[0] == 0 ? sq : output[1]);
+               int o1 = (route[0] == 0 ?  1 : output[2]);
+          /*d*/PreparedStatement pS80 = this.PS(conn, "S80");
+               this.PSAdd(pS80, sid, route[0]);
+               this.PSSubmit(pS80);
+          /*e*/PreparedStatement pS14 = PS(conn, "S14");
+               for (int j = 0; j < (sched.length - 2); j += 3) {
+                 final int t2 = sched[(j + 0)];
+                 final int v2 = sched[(j + 1)];
+                 final int Lj = sched[(j + 2)];
+                 if (Lj != sid) {
+                   final int[] qpd = cache.get(Lj);
+                   final int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
+                   final int o2 = o1 + 1;
+                   this.PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
+                         qpd[0], qpd[1], qpd[2], o1, o2);
+                   t1 = t2;
+                   q1 = q2;
+                   o1 = o2;
+                 }
+               }
+               this.PSSubmit(pS14);
         }
         conn.commit();
       } catch (SQLException e) {
         conn.rollback();
         throw e;
-      } finally {
-        conn.close();
       }
     } catch (SQLException e) {
       throw e;
     }
   }
-  public void DBUpdateServerAddToSchedule(int sid, int[] route, int[] sched, int[] rid)
+  public void DBUpdateServerAddToSchedule(
+      final int sid, final int[] route, final int[] sched, final int[] rid)
   throws UserNotFoundException, EdgeNotFoundException, SQLException {
-    if (!lu_users.containsKey(sid)) {
+    if (!this.lu_users.containsKey(sid)) {
       throw new UserNotFoundException("User "+sid+" not found.");
     }
-    for (int r : rid) {
-      if (!lu_users.containsKey(r)) {
+    for (final int r : rid) {
+      if (!this.lu_users.containsKey(r)) {
         throw new UserNotFoundException("User "+r+" not found.");
       }
     }
-    int[] output = new int[] { };
-    int se, sq;
     Map<Integer, int[]> cache  = new HashMap<>();
     Map<Integer, int[]> cache2 = new HashMap<>();
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
       try {
-        sq = lu_users.get(sid)[1];
-        se = lu_users.get(sid)[2];
-        PreparedStatement pS76 = PS(conn, "S76");
-        PSAdd(pS76, sid, route[0]);
-        PSSubmit(pS76);
-        int uid = sid;
-        PreparedStatement pS10 = PS(conn, "S10");
-        for (int i = 0; i < (route.length - 3); i += 2) {
-          int t1 = route[(i + 0)];
-          int v1 = route[(i + 1)];
-          int t2 = route[(i + 2)];
-          int v2 = route[(i + 3)];
-          if (!(lu_edges.containsKey(v1) && lu_edges.get(v1).containsKey(v2))) {
-            throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
-          }
-          int dd = lu_edges.get(v1).get(v2)[0];
-          int nu = lu_edges.get(v1).get(v2)[1];
-          PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
-        }
-        PSSubmit(pS10);
-        PreparedStatement pS77 = PS(conn, "S77");
-        PreparedStatement pS139 = PS(conn, "S139");
-        int te = route[(route.length - 2)];
-        int ve = route[(route.length - 1)];
-        PSAdd(pS77, te, ve, sid);
-        PSAdd(pS139, te, sid);
-        PSSubmit(pS77, pS139);
-        PreparedStatement pS82 = PS(conn, "S82");
-        PreparedStatement pS83 = PS(conn, "S83");
-        PreparedStatement pS84 = PS(conn, "S84");
-        for (int j = 0; j < (sched.length - 2); j += 3) {
-          int tj = sched[(j + 0)];
-          int vj = sched[(j + 1)];
-          int Lj = sched[(j + 2)];
-          if (Lj != sid) {
-            PSAdd(pS82, tj, vj, Lj);
-            PSAdd(pS83, tj, vj, Lj);
-            PSAdd(pS84, tj, vj, Lj);
-          }
-        }
-        PSSubmit(pS82, pS83, pS84);
-        PreparedStatement pS140 = PS(conn, "S140");
-        for (int j = 0; j < (sched.length - 2); j += 3) {
-          int Lj = sched[(j + 2)];
-          if (Lj != sid) {
-            int rq, tp, vp;
-            int td = -1;
-            int vd = -1;
-            if (!cache.containsKey(Lj)) {
-              rq = lu_users.get(Lj)[1];
-              boolean flagged = false;
-              for (int r : rid) {
-                if (Lj == r) {
-                  flagged = true;
-                  break;
-                }
-              }
-              if (flagged) {
-                tp = sched[(j + 0)];
-                vp = sched[(j + 1)];
-                for (int k = (j + 3); k < (sched.length - 2); k += 3) {
-                  if (Lj == sched[(k + 2)]) {
-                    td = sched[(k + 0)];
-                    vd = sched[(k + 1)];
-                  }
-                }
-                cache2.put(Lj, new int[] { vp, vd });
-              } else {
-                output = DBFetch(conn, "S86", 2, Lj);
-                tp = output[0];
-                td = output[1];
-                PSAdd(pS140, tp, td, Lj);
-              }
-              cache.put(Lj, new int[] { rq, tp, td });
-            }
-          }
-        }
-        PSSubmit(pS140);
-        int t1, q1, o1;
-        if (route[0] == 0) {
-          t1 = 0;
-          q1 = sq;
-          o1 = 1;
-        } else {
-          output = DBFetch(conn, "S87", 3, sid, route[0]);
-          t1 = output[0];
-          q1 = output[1];
-          o1 = output[2];
-        }
-        PreparedStatement pS80 = PS(conn, "S80");
-        PSAdd(pS80, sid, route[0]);
-        PSSubmit(pS80);
-        PreparedStatement pS14 = PS(conn, "S14");
-        for (int j = 0; j < (sched.length - 2); j += 3) {
-          int t2 = sched[(j + 0)];
-          int v2 = sched[(j + 1)];
-          int Lj = sched[(j + 2)];
-          if (Lj != sid) {
-            int[] qpd = cache.get(Lj);
-            int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
-            int o2 = o1 + 1;
-            PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
-                  qpd[0], qpd[1], qpd[2], o1, o2);
-            t1 = t2;
-            q1 = q2;
-            o1 = o2;
-          }
-        }
-        PSSubmit(pS14);
-        PreparedStatement pS12 = PS(conn, "S12");
-        PreparedStatement pS13 = PS(conn, "S13");
-        int rq, re, rl, ro, rd;
-        int[] qpd, pd;
-        for (int r : rid) {
-          output = DBFetch(conn, "S51", 5, r);
-          rq = output[0];
-          re = output[1];
-          rl = output[2];
-          ro = output[3];
-          rd = output[4];
-          qpd = cache.get(r);
-          pd = cache2.get(r);
-          PSAdd(pS12, sid, qpd[1], pd[0], r);
-          PSAdd(pS12, sid, qpd[2], pd[1], r);
-          PSAdd(pS13, sid, se, route[(route.length - 2)], qpd[1], pd[0], qpd[2], pd[1],
-                r, re, rl, ro, rd);
-        }
-        PSSubmit(pS12, pS13);
+  /*L1*/final int sq = lu_users.get(sid)[1];
+        final int se = lu_users.get(sid)[2];
+  /*L2*//*a*/PreparedStatement pS76 = this.PS(conn, "S76");
+             this.PSAdd(pS76, sid, route[0]);
+             this.PSSubmit(pS76);
+        /*b*/final int uid = sid;
+             PreparedStatement pS10 = this.PS(conn, "S10");
+             for (int i = 0; i < (route.length - 3); i += 2) {
+               final int t1 = route[(i + 0)];
+               final int v1 = route[(i + 1)];
+               final int t2 = route[(i + 2)];
+               final int v2 = route[(i + 3)];
+               if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
+                 throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
+               }
+               final int dd = this.lu_edges.get(v1).get(v2)[0];
+               final int nu = this.lu_edges.get(v1).get(v2)[1];
+               this.PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
+             }
+             this.PSSubmit(pS10);
+        /*c*/PreparedStatement pS77 = this.PS(conn, "S77");
+             PreparedStatement pS139 = this.PS(conn, "S139");
+             final int te = sched[(sched.length - 3)];
+             final int ve = sched[(sched.length - 2)];
+             this.PSAdd(pS77, te, ve, sid);
+             this.PSAdd(pS139, te, sid);
+             this.PSSubmit(pS77, pS139);
+  /*L3*//*a*/PreparedStatement pS82 = this.PS(conn, "S82");
+             PreparedStatement pS83 = this.PS(conn, "S83");
+             PreparedStatement pS84 = this.PS(conn, "S84");
+             for (int j = 0; j < (sched.length - 2); j += 3) {
+               final int tj = sched[(j + 0)];
+               final int vj = sched[(j + 1)];
+               final int Lj = sched[(j + 2)];
+               if (Lj != sid) {
+                 this.PSAdd(pS82, tj, vj, Lj);
+                 this.PSAdd(pS83, tj, vj, Lj);
+                 this.PSAdd(pS84, tj, vj, Lj);
+               }
+             }
+             this.PSSubmit(pS82, pS83, pS84);
+        /*b*/PreparedStatement pS140 = this.PS(conn, "S140");
+             for (int j = 0; j < (sched.length - 2); j += 3) {
+               final int Lj = sched[(j + 2)];
+               if (Lj != sid && !cache.containsKey(Lj)) {
+                 final int rq = lu_users.get(Lj)[1];
+                 boolean flagged = false;
+                 for (final int r : rid) {
+                   if (Lj == r) {
+                     flagged = true;
+                     break;
+                   }
+                 }
+                 if (flagged) {
+                   final int tp = sched[(j + 0)];
+                   final int vp = sched[(j + 1)];
+                   for (int k = (j + 3); k < (sched.length - 2); k += 3) {
+                     if (Lj == sched[(k + 2)]) {
+                       final int td = sched[(k + 0)];
+                       final int vd = sched[(k + 1)];
+                       cache. put(Lj, new int[] { rq, tp, td });
+                       cache2.put(Lj, new int[] { vp, vd });
+                       break;
+                     }
+                   }
+                 } else {
+                   final int[] output = this.DBFetch(conn, "S86", 2, Lj);
+                   final int tp = output[0];
+                   final int td = output[1];
+                   this.PSAdd(pS140, tp, td, Lj);
+                   cache.put(Lj, new int[] { rq, tp, td });
+                 }
+               }
+             }
+             this.PSSubmit(pS140);
+        /*c*/final int[] output = (route[0] == 0 ? null : this.DBFetch(conn, "S87", 3, sid, route[0]));
+             int t1 = (route[0] == 0 ?  0 : output[0]);
+             int q1 = (route[0] == 0 ? sq : output[1]);
+             int o1 = (route[0] == 0 ?  1 : output[2]);
+        /*d*/PreparedStatement pS80 = this.PS(conn, "S80");
+             this.PSAdd(pS80, sid, route[0]);
+             this.PSSubmit(pS80);
+        /*e*/PreparedStatement pS14 = PS(conn, "S14");
+             for (int j = 0; j < (sched.length - 2); j += 3) {
+               final int t2 = sched[(j + 0)];
+               final int v2 = sched[(j + 1)];
+               final int Lj = sched[(j + 2)];
+               if (Lj != sid) {
+                 final int[] qpd = cache.get(Lj);
+                 final int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
+                 final int o2 = o1 + 1;
+                 this.PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
+                       qpd[0], qpd[1], qpd[2], o1, o2);
+                 t1 = t2;
+                 q1 = q2;
+                 o1 = o2;
+               }
+             }
+             this.PSSubmit(pS14);
+        /*f*/PreparedStatement pS12 = this.PS(conn, "S12");
+             PreparedStatement pS13 = this.PS(conn, "S13");
+             for (final int r : rid) {
+               final int[] output2 = this.DBFetch(conn, "S51", 5, r);
+               final int rq = output2[0];
+               final int re = output2[1];
+               final int rl = output2[2];
+               final int ro = output2[3];
+               final int rd = output2[4];
+               final int[] qpd = cache.get(r);
+               final int[]  pd = cache2.get(r);
+               this.PSAdd(pS12, sid, qpd[1], pd[0], r);
+               this.PSAdd(pS12, sid, qpd[2], pd[1], r);
+               this.PSAdd(pS13, sid, se, route[(route.length - 2)], qpd[1], pd[0], qpd[2], pd[1],
+                     r, re, rl, ro, rd);
+             }
+             this.PSSubmit(pS12, pS13);
         conn.commit();
       } catch (SQLException e) {
         conn.rollback();
         throw e;
-      } finally {
-        conn.close();
       }
     } catch (SQLException e) {
       throw e;
     }
-    for (int r : rid) {
-      lu_rstatus.put(r, true);
+    for (final int r : rid) {
+      this.lu_rstatus.put(r, true);
     }
   }
-  public void DBUpdateServerRemoveFromSchedule(int sid, int[] route, int[] sched, int[] rid)
+  public void DBUpdateServerRemoveFromSchedule(
+      final int sid, final int[] route, final int[] sched, final int[] rid)
   throws UserNotFoundException, EdgeNotFoundException, SQLException {
-    if (!lu_users.containsKey(sid)) {
+    if (!this.lu_users.containsKey(sid)) {
       throw new UserNotFoundException("User "+sid+" not found.");
     }
-    for (int r : rid) {
-      if (!lu_users.containsKey(r)) {
+    for (final int r : rid) {
+      if (!this.lu_users.containsKey(r)) {
         throw new UserNotFoundException("User "+r+" not found.");
       }
     }
-    int[] output = new int[] { };
-    int se, sq;
     Map<Integer, int[]> cache = new HashMap<>();
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
       try {
-        sq = lu_users.get(sid)[1];
-        se = lu_users.get(sid)[2];
-        PreparedStatement pS76 = PS(conn, "S76");
-        PSAdd(pS76, sid, route[0]);
-        PSSubmit(pS76);
-        int uid = sid;
-        PreparedStatement pS10 = PS(conn, "S10");
-        for (int i = 0; i < (route.length - 3); i += 2) {
-          int t1 = route[(i + 0)];
-          int v1 = route[(i + 1)];
-          int t2 = route[(i + 2)];
-          int v2 = route[(i + 3)];
-          if (!(lu_edges.containsKey(v1) && lu_edges.get(v1).containsKey(v2))) {
-            throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
-          }
-          int dd = lu_edges.get(v1).get(v2)[0];
-          int nu = lu_edges.get(v1).get(v2)[1];
-          PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
+  /*L1*/final int sq = lu_users.get(sid)[1];
+        final int se = lu_users.get(sid)[2];
+  /*L2*//*a*/PreparedStatement pS76 = this.PS(conn, "S76");
+             this.PSAdd(pS76, sid, route[0]);
+             this.PSSubmit(pS76);
+        /*b*/final int uid = sid;
+             PreparedStatement pS10 = this.PS(conn, "S10");
+             for (int i = 0; i < (route.length - 3); i += 2) {
+               final int t1 = route[(i + 0)];
+               final int v1 = route[(i + 1)];
+               final int t2 = route[(i + 2)];
+               final int v2 = route[(i + 3)];
+               if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
+                 throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
+               }
+               final int dd = this.lu_edges.get(v1).get(v2)[0];
+               final int nu = this.lu_edges.get(v1).get(v2)[1];
+               this.PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
+             }
+             this.PSSubmit(pS10);
+        /*c*/PreparedStatement pS77 = this.PS(conn, "S77");
+             PreparedStatement pS139 = this.PS(conn, "S139");
+             final int te = sched[(sched.length - 3)];
+             final int ve = sched[(sched.length - 2)];
+             this.PSAdd(pS77, te, ve, sid);
+             this.PSAdd(pS139, te, sid);
+             this.PSSubmit(pS77, pS139);
+  /*L3*//*a*/PreparedStatement pS82 = this.PS(conn, "S82");
+             PreparedStatement pS83 = this.PS(conn, "S83");
+             PreparedStatement pS84 = this.PS(conn, "S84");
+             for (int j = 0; j < (sched.length - 2); j += 3) {
+               final int tj = sched[(j + 0)];
+               final int vj = sched[(j + 1)];
+               final int Lj = sched[(j + 2)];
+               if (Lj != sid) {
+                 this.PSAdd(pS82, tj, vj, Lj);
+                 this.PSAdd(pS83, tj, vj, Lj);
+                 this.PSAdd(pS84, tj, vj, Lj);
+               }
+             }
+             this.PSSubmit(pS82, pS83, pS84);
+        /*b*/PreparedStatement pS140 = this.PS(conn, "S140");
+             for (int j = 0; j < (sched.length - 2); j += 3) {
+               final int Lj = sched[(j + 2)];
+               if (Lj != sid) {
+                 if (!cache.containsKey(Lj)) {
+                   final int[] output = DBFetch(conn, "S86", 2, Lj);
+                   final int tp = output[0];
+                   final int td = output[1];
+                   final int rq = this.lu_users.get(Lj)[1];
+                   cache.put(Lj, new int[] { rq, tp, td });
+                   this.PSAdd(pS140, tp, td, Lj);
+                 }
+               }
+             }
+             this.PSSubmit(pS140);
+        /*c*/final int[] output = (route[0] == 0 ? null : this.DBFetch(conn, "S87", 3, sid, route[0]));
+             int t1 = (route[0] == 0 ?  0 : output[0]);
+             int q1 = (route[0] == 0 ? sq : output[1]);
+             int o1 = (route[0] == 0 ?  1 : output[2]);
+        /*d*/PreparedStatement pS80 = this.PS(conn, "S80");
+             this.PSAdd(pS80, sid, route[0]);
+             this.PSSubmit(pS80);
+        /*e*/PreparedStatement pS14 = PS(conn, "S14");
+             for (int j = 0; j < (sched.length - 2); j += 3) {
+               final int t2 = sched[(j + 0)];
+               final int v2 = sched[(j + 1)];
+               final int Lj = sched[(j + 2)];
+               if (Lj != sid) {
+                 final int[] qpd = cache.get(Lj);
+                 final int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
+                 final int o2 = o1 + 1;
+                 this.PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
+                       qpd[0], qpd[1], qpd[2], o1, o2);
+                 t1 = t2;
+                 q1 = q2;
+                 o1 = o2;
+               }
+             }
+             this.PSSubmit(pS14);
+  /*L4*/PreparedStatement pS42 = this.PS(conn, "S42");
+        PreparedStatement pS43 = this.PS(conn, "S43");
+        for (final int r : rid) {
+          this.PSAdd(pS42, r);
+          this.PSAdd(pS43, r);
         }
-        PSSubmit(pS10);
-        PreparedStatement pS77 = PS(conn, "S77");
-        PreparedStatement pS139 = PS(conn, "S139");
-        int te = route[(route.length - 2)];
-        int ve = route[(route.length - 1)];
-        PSAdd(pS77, te, ve, sid);
-        PSAdd(pS139, te, sid);
-        PSSubmit(pS77, pS139);
-        PreparedStatement pS82 = PS(conn, "S82");
-        PreparedStatement pS83 = PS(conn, "S83");
-        PreparedStatement pS84 = PS(conn, "S84");
-        for (int j = 0; j < (sched.length - 2); j += 3) {
-          int tj = sched[(j + 0)];
-          int vj = sched[(j + 1)];
-          int Lj = sched[(j + 2)];
-          if (Lj != sid) {
-            PSAdd(pS82, tj, vj, Lj);
-            PSAdd(pS83, tj, vj, Lj);
-            PSAdd(pS84, tj, vj, Lj);
-          }
-        }
-        PSSubmit(pS82, pS83, pS84);
-        PreparedStatement pS140 = PS(conn, "S140");
-        for (int j = 0; j < (sched.length - 2); j += 3) {
-          int Lj = sched[(j + 2)];
-          if (Lj != sid) {
-            int rq, tp, td;
-            if (!cache.containsKey(Lj)) {
-              rq = DBFetch(conn, "S85", 1, Lj)[0];
-              output = DBFetch(conn, "S86", 2, Lj);
-              tp = output[0];
-              td = output[1];
-              cache.put(Lj, new int[] { rq, tp, td });
-              PSAdd(pS140, tp, td, Lj);
-            }
-          }
-        }
-        PSSubmit(pS140);
-        int t1, q1, o1;
-        if (route[0] == 0) {
-          t1 = 0;
-          q1 = sq;
-          o1 = 1;
-        } else {
-          output = DBFetch(conn, "S87", 3, sid, route[0]);
-          t1 = output[0];
-          q1 = output[1];
-          o1 = output[2];
-        }
-        PreparedStatement pS80 = PS(conn, "S80");
-        PSAdd(pS80, sid, route[0]);
-        PSSubmit(pS80);
-        PreparedStatement pS14 = PS(conn, "S14");
-        for (int j = 0; j < (sched.length - 2); j += 3) {
-          int t2 = sched[(j + 0)];
-          int v2 = sched[(j + 1)];
-          int Lj = sched[(j + 2)];
-          if (Lj != sid) {
-            int[] qpd = cache.get(Lj);
-            int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
-            int o2 = o1 + 1;
-            PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
-                  qpd[0], qpd[1], qpd[2], o1, o2);
-            t1 = t2;
-            q1 = q2;
-            o1 = o2;
-          }
-        }
-        PSSubmit(pS14);
-        PreparedStatement pS42 = PS(conn, "S42");
-        PreparedStatement pS43 = PS(conn, "S43");
-        for (int r : rid) {
-          PSAdd(pS42, r);
-          PSAdd(pS43, r);
-        }
-        PSSubmit(pS42, pS43);
+        this.PSSubmit(pS42, pS43);
         conn.commit();
       } catch (SQLException e) {
         conn.rollback();
         throw e;
-      } finally {
-        conn.close();
       }
     } catch (SQLException e) {
       throw e;
     }
-    for (int r : rid) {
-      lu_rstatus.remove(r);
+    for (final int r : rid) {
+      this.lu_rstatus.put(r, false);
     }
   }
-  public void DBCreateNewInstance() {
+  public void DBCreateNewInstance() throws SQLException {
     try {
       this.setupDriver();
     } catch (SQLException e) {
-      System.err.println("Storage.init(): "+"Encountered catastrophic exception.");
-      Tools.PrintSQLException(e);
-      System.exit(1);
+      throw e;
     } catch (ClassNotFoundException e) {
       System.err.println("Storage.init(): "+"Encountered catastrophic exception.");
       e.printStackTrace();
@@ -1195,7 +1116,7 @@ public class Storage {
     try {
       DriverManager.getConnection("jdbc:derby:memory:jargo;drop=true");
     } catch (SQLException e) {
-      if (e.getErrorCode() != 45000) {  // 45000 = database successfully dropped
+      if (e.getErrorCode() != 45000) {
         throw e;
       }
     }
@@ -1211,8 +1132,7 @@ public class Storage {
     return this.lu_users;
   }
   public void DBLoadDataModel() {
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
       Statement stmt = conn.createStatement();
       stmt.clearBatch();
       stmt.addBatch("CREATE TABLE V ("
@@ -1524,12 +1444,17 @@ public class Storage {
       stmt.executeBatch();
       conn.commit();
     } catch (SQLException e) {
-      System.out.println("Storage.DBLoadDataModel(): "+"Encountered catastrophic exception.");
-      Tools.PrintSQLException(e);
+      System.err.println("Storage.DBLoadDataModel(): "+"Encountered catastrophic exception.");
+      if (e.getErrorCode() == 0) {
+        System.err.println("(did you forget to call Storage.DBCreateNewInstance()?)");
+      } else if (e.getErrorCode() == 20000) {
+        System.err.println("(data model already exists from Storage.DBLoadBackup()?)");
+      }
+      e.printStackTrace(System.err);
       System.exit(1);
     }
   }
-  public void DBLoadBackup(String p) throws SQLException {
+  public void DBLoadBackup(final String p) throws SQLException {
     this.CONNECTIONS_URL = "jdbc:derby:memory:jargo;createFrom="+p;
     try {
       this.setupDriver();
@@ -1543,32 +1468,31 @@ public class Storage {
     ConcurrentHashMap<Integer, int[]>    lu1 = new ConcurrentHashMap<>();
     ConcurrentHashMap<Integer,
       ConcurrentHashMap<Integer, int[]>> lu2 = new ConcurrentHashMap<>();
-    int[] output = new int[] { };
     try {
-      output = this.DBQueryAllVertices();
-    } catch (SQLException e) {
-      throw e;
-    }
-    for (int i = 0; i < (output.length - 2); i += 3) {
-      int   v = output[(i + 0)];
-      int lng = output[(i + 1)];
-      int lat = output[(i + 2)];
-      lu1.put(v, new int[] { lng, lat });
-    }
-    try {
-      output = this.DBQueryAllEdges();
-    } catch (SQLException e) {
-      throw e;
-    }
-    for (int i = 0; i < (output.length - 3); i += 4) {
-      int v1 = output[(i + 0)];
-      int v2 = output[(i + 1)];
-      int dd = output[(i + 2)];
-      int nu = output[(i + 3)];
-      if (!lu2.containsKey(v1)) {
-        lu2.put(v1, new ConcurrentHashMap());
+      final int[] output = this.DBQueryAllVertices();
+      for (int i = 0; i < (output.length - 2); i += 3) {
+        final int   v = output[(i + 0)];
+        final int lng = output[(i + 1)];
+        final int lat = output[(i + 2)];
+        lu1.put(v, new int[] { lng, lat });
       }
-      lu2.get(v1).put(v2, new int[] { dd, nu });
+    } catch (SQLException e) {
+      throw e;
+    }
+    try {
+      final int[] output = this.DBQueryAllEdges();
+      for (int i = 0; i < (output.length - 3); i += 4) {
+        final int v1 = output[(i + 0)];
+        final int v2 = output[(i + 1)];
+        final int dd = output[(i + 2)];
+        final int nu = output[(i + 3)];
+        if (!lu2.containsKey(v1)) {
+          lu2.put(v1, new ConcurrentHashMap());
+        }
+        lu2.get(v1).put(v2, new int[] { dd, nu });
+      }
+    } catch (SQLException e) {
+      throw e;
     }
     this.lu_vertices = lu1;
     this.lu_edges    = lu2;
@@ -1576,21 +1500,16 @@ public class Storage {
   public void DBLoadUsersFromDB() throws SQLException {
     ConcurrentHashMap<Integer, int[]> lu1 = new ConcurrentHashMap<>();
     Map<Integer, Boolean>             lu2 = new HashMap<>();
-    int[] output = new int[] { };
     try {
-      output = this.DBQueryAllUsers();
-    } catch (SQLException e) {
-      throw e;
-    }
-    try {
+      final int[] output = this.DBQueryAllUsers();
       for (int i = 0; i < (output.length - 6); i += 7) {
-        int uid = output[(i + 0)];
-        int  uq = output[(i + 1)];
-        int  ue = output[(i + 2)];
-        int  ul = output[(i + 3)];
-        int  uo = output[(i + 4)];
-        int  ud = output[(i + 5)];
-        int  ub = output[(i + 6)];
+        final int uid = output[(i + 0)];
+        final int  uq = output[(i + 1)];
+        final int  ue = output[(i + 2)];
+        final int  ul = output[(i + 3)];
+        final int  uo = output[(i + 4)];
+        final int  ud = output[(i + 5)];
+        final int  ub = output[(i + 6)];
         lu1.put(uid, new int[] { uid, uq, ue, ul, uo, ud, ub });
         if (uq > 0) {
           lu2.put(uid, (this.DBQueryRequestIsAssigned(uid).length > 0 ? true : false));
@@ -1602,17 +1521,15 @@ public class Storage {
     this.lu_users   = lu1;
     this.lu_rstatus = lu2;
   }
-  public void DBSaveBackup(String p) throws SQLException {
-    try {
-      Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL);
-      CallableStatement cs =
-        conn.prepareCall("CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE("+p+")");
+  public void DBSaveBackup(final String p) throws SQLException {
+    try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+      CallableStatement cs = conn.prepareCall("CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE("+p+")");
       cs.execute();
     } catch (SQLException e) {
       throw e;
     }
   }
-  public void printSQLDriverStatistics() throws SQLException {
+  public void _printSQLDriverStatistics() throws SQLException {
     PoolingDriver d = (PoolingDriver) DriverManager.getDriver(CONNECTIONS_DRIVER_URL);
     ObjectPool<? extends Connection> cp = d.getConnectionPool(CONNECTIONS_POOL_NAME);
     System.out.println("Connections: "+cp.getNumActive()+" active; "+cp.getNumIdle()+" idle");
