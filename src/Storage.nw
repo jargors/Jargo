@@ -3795,7 +3795,8 @@ Integer [[t]] (param. 2):&a time
 \bottomrule
 \end{tabular}
 <<Query request status>>=
-public int[] DBQueryRequestStatus(int rid, int t) throws UserNotFoundException, SQLException {
+public int[] DBQueryRequestStatus(final int rid, final int t)
+throws UserNotFoundException, SQLException {
   if (!this.lu_users.containsKey(rid)) {
     throw new UserNotFoundException("User "+rid+" not found.");
   }
@@ -3836,7 +3837,7 @@ Integer [[rid]] (param. 1):&user identifier for request $r$
 \bottomrule
 \end{tabular}
 <<Query request is assigned?>>=
-public int[] DBQueryRequestIsAssigned(int rid) throws SQLException {
+public int[] DBQueryRequestIsAssigned(final int rid) throws SQLException {
   try (<<Open [[conn]]>>) {
     return this.DBFetch(conn, "S148", 1, rid);
   } catch (SQLException e) {
@@ -3881,7 +3882,7 @@ Integer [[t]] (param. 1):&a time
 \bottomrule
 \end{tabular}
 <<Query queued requests>>=
-public int[] DBQueryQueuedRequests(int t) throws SQLException {
+public int[] DBQueryQueuedRequests(final int t) throws SQLException {
   try (<<Open [[conn]]>>) {
 @ %def DBQueryQueuedRequests
 {\small Our approach is to first select all requests where $t$ is between the
@@ -3928,49 +3929,129 @@ pre-filter number of requests.}
 @
 
 \subsubsection{[[DBQueryActiveServers]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryActiveServers]]}(1) returns the identifiers
+of the active servers at the given time. A server is ``active'' if its
+service has not ended.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[t]] (param. 1):&a time
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{a server identifier}$};
+ &\node {...};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 <<Query active servers>>=
-public int[] DBQueryActiveServers(int t) throws SQLException {
-  int[] output = new int[] { };
+public int[] DBQueryActiveServers(final int t) throws SQLException {
   try (<<Open [[conn]]>>) {
-    output = DBFetch(conn, "S134", 1, t, t, t);
+    return this.DBFetch(conn, "S134", 1, t, t, t);
   } catch (SQLException e) {
     throw e;
   }
-  return output;
 }
 @ %def DBQueryActiveServers
 
 \subsubsection{[[DBQueryServerLocationsAll]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServerLocationsAll]]}(1) returns the
+last-known locations of all servers (including inactive servers) at the given
+time.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[t]] (param. 1):&a time
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{a server identifier}$};
+ &\node {$1:\textrm{time of last-known location}$};
+ &\node {$2:\textrm{vertex of last-known location}$};
+ &\node {...};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 <<Query all server locations>>=
-public int[] DBQueryServerLocationsAll(int t) throws SQLException {
+public int[] DBQueryServerLocationsAll(final int t) throws SQLException {
   int[] output = new int[] { };
   try (<<Open [[conn]]>>) {
-    output = DBFetch(conn, "S59", 3, t, t, t, t);
+    return this.DBFetch(conn, "S59", 3, t, t, t, t);
   } catch (SQLException e) {
     throw e;
   }
-  return output;
 }
 @ %def DBQueryServerLocationsAll
 
 \subsubsection{[[DBQueryServerLocationsActive]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServerLocationsActive]]}(1) returns the
+last-known locations of all active servers at the given time. A server is
+``active'' if its service has not ended.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[t]] (param. 1):&a time
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{a server identifier}$};
+ &\node {$1:\textrm{time of last-known location}$};
+ &\node {$2:\textrm{vertex of last-known location}$};
+ &\node {...};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 <<Query active server locations>>=
-public int[] DBQueryServerLocationsActive(int t) throws SQLException {
+public int[] DBQueryServerLocationsActive(final int t) throws SQLException {
   int[] output = new int[] { };
-  int[] temp1 = new int[] { };
-  int[] temp2 = new int[] { };
-  int j = 0;
-  int sid = 0;
-  int te = 0;
   try (<<Open [[conn]]>>) {
-    temp1 = DBFetch(conn, "S134", 2, t, t, t);      // <-- 10 ms/call
+    int j = 0;
+@ %def DBQueryServerLocationsActive
+{\small Our approach is to first use statement [[S134]] to get the active
+servers. Then for each active server, we use either statement [[S135]] or
+[[S147]] to get its last-known location.}
+<<Query active server locations>>=
+    final int[] temp1 = this.DBFetch(conn, "S134", 2, t, t, t);  // <-- 10 ms/call
     output = new int[(3*(temp1.length/2))];
     for (int i = 0; i < temp1.length - 1; i += 2) {
-      sid = temp1[(i + 0)];
-       te = temp1[(i + 1)];
-      temp2 = (t < te
-        ? DBFetch(conn, "S135", 2, sid, sid, t, t)  // <-- 0.07-0.15 ms/call
-        : DBFetch(conn, "S147", 2, sid, sid));      // <-- 0.04-0.15 ms/call
+      final int sid = temp1[(i + 0)];
+      final int  te = temp1[(i + 1)];
+      final int[] temp2 = (t < te
+        ? this.DBFetch(conn, "S135", 2, sid, sid, t, t)  // <-- 0.07-0.15 ms/call
+        : this.DBFetch(conn, "S147", 2, sid, sid));      // <-- 0.04-0.15 ms/call
       output[(j + 0)] = sid;
       output[(j + 1)] = temp2[0];
       output[(j + 2)] = temp2[1];
@@ -3981,7 +4062,7 @@ public int[] DBQueryServerLocationsActive(int t) throws SQLException {
   }
   return output;
 }
-@ %def DBQueryServerLocationsActive
+@
 
 \subsubsection{[[DBQueryServerRoute]](1)}
 <<Query routes>>=

@@ -3795,7 +3795,8 @@ Integer {\tt{}t} (param. 2):&a time
 \bottomrule
 \end{tabular}
 \nwenddocs{}\nwbegincode{267}\sublabel{NW27XAxz-1hFvVm-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1hFvVm-1}}}\moddef{Query request status~{\nwtagstyle{}\subpageref{NW27XAxz-1hFvVm-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
-public int[] DBQueryRequestStatus(int rid, int t) throws UserNotFoundException, SQLException \{
+public int[] DBQueryRequestStatus(final int rid, final int t)
+throws UserNotFoundException, SQLException \{
   if (!this.lu_users.containsKey(rid)) \{
     throw new UserNotFoundException("User "+rid+" not found.");
   \}
@@ -3836,7 +3837,7 @@ Integer {\tt{}rid} (param. 1):&user identifier for request $r$
 \bottomrule
 \end{tabular}
 \nwenddocs{}\nwbegincode{269}\sublabel{NW27XAxz-3k0aNo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3k0aNo-1}}}\moddef{Query request is assigned?~{\nwtagstyle{}\subpageref{NW27XAxz-3k0aNo-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
-public int[] DBQueryRequestIsAssigned(int rid) throws SQLException \{
+public int[] DBQueryRequestIsAssigned(final int rid) throws SQLException \{
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
     return this.DBFetch(conn, "S148", 1, rid);
   \} catch (SQLException e) \{
@@ -3881,7 +3882,7 @@ Integer {\tt{}t} (param. 1):&a time
 \bottomrule
 \end{tabular}
 \nwenddocs{}\nwbegincode{271}\sublabel{NW27XAxz-3AGrxZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3AGrxZ-1}}}\moddef{Query queued requests~{\nwtagstyle{}\subpageref{NW27XAxz-3AGrxZ-1}}}\endmoddef\nwalsodefined{\\{NW27XAxz-3AGrxZ-2}\\{NW27XAxz-3AGrxZ-3}}\nwused{\\{NW27XAxz-4PbjF-1}}
-public int[] DBQueryQueuedRequests(int t) throws SQLException \{
+public int[] DBQueryQueuedRequests(final int t) throws SQLException \{
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
 \nosublabel{NW27XAxz-3AGrxZ-1-u1}\nwindexdefn{DBQueryQueuedRequests}{DBQueryQueuedRequests}{NW27XAxz-3AGrxZ-1}\eatline
 \nwidentdefs{\\{{DBQueryQueuedRequests}{DBQueryQueuedRequests}}}\nwendcode{}\nwbegindocs{272}{\small Our approach is to first select all requests where $t$ is between the
@@ -3928,49 +3929,129 @@ pre-filter number of requests.}
 \nwendcode{}\nwbegindocs{276}\nwdocspar
 
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryActiveServers}{DBQueryActiveServers}{NW27XAxz-pt8I9-1}DBQueryActiveServers}(1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{{\tt{}\protect\nwindexuse{DBQueryActiveServers}{DBQueryActiveServers}{NW27XAxz-pt8I9-1}DBQueryActiveServers}}(1) returns the identifiers
+of the active servers at the given time. A server is ``active'' if its
+service has not ended.
+A {\tt{}SQLException} is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer {\tt{}t} (param. 1):&a time
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+{\tt{}null} if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{a server identifier}$};
+ &\node {...};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} {\tt{}SQLException} if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 \nwenddocs{}\nwbegincode{277}\sublabel{NW27XAxz-pt8I9-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-pt8I9-1}}}\moddef{Query active servers~{\nwtagstyle{}\subpageref{NW27XAxz-pt8I9-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
-public int[] DBQueryActiveServers(int t) throws SQLException \{
-  int[] output = new int[] \{ \};
+public int[] DBQueryActiveServers(final int t) throws SQLException \{
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
-    output = DBFetch(conn, "S134", 1, t, t, t);
+    return this.DBFetch(conn, "S134", 1, t, t, t);
   \} catch (SQLException e) \{
     throw e;
   \}
-  return output;
 \}
 \nwindexdefn{DBQueryActiveServers}{DBQueryActiveServers}{NW27XAxz-pt8I9-1}\eatline
 \nwidentdefs{\\{{DBQueryActiveServers}{DBQueryActiveServers}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S134}{S134}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-pt8I9-1}\nwindexuse{S134}{S134}{NW27XAxz-pt8I9-1}\nwendcode{}\nwbegindocs{278}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServerLocationsAll}{DBQueryServerLocationsAll}{NW27XAxz-rvb17-1}DBQueryServerLocationsAll}(1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{{\tt{}\protect\nwindexuse{DBQueryServerLocationsAll}{DBQueryServerLocationsAll}{NW27XAxz-rvb17-1}DBQueryServerLocationsAll}}(1) returns the
+last-known locations of all servers (including inactive servers) at the given
+time.
+A {\tt{}SQLException} is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer {\tt{}t} (param. 1):&a time
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+{\tt{}null} if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{a server identifier}$};
+ &\node {$1:\textrm{time of last-known location}$};
+ &\node {$2:\textrm{vertex of last-known location}$};
+ &\node {...};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} {\tt{}SQLException} if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 \nwenddocs{}\nwbegincode{279}\sublabel{NW27XAxz-rvb17-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-rvb17-1}}}\moddef{Query all server locations~{\nwtagstyle{}\subpageref{NW27XAxz-rvb17-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
-public int[] DBQueryServerLocationsAll(int t) throws SQLException \{
+public int[] DBQueryServerLocationsAll(final int t) throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
-    output = DBFetch(conn, "S59", 3, t, t, t, t);
+    return this.DBFetch(conn, "S59", 3, t, t, t, t);
   \} catch (SQLException e) \{
     throw e;
   \}
-  return output;
 \}
 \nwindexdefn{DBQueryServerLocationsAll}{DBQueryServerLocationsAll}{NW27XAxz-rvb17-1}\eatline
 \nwidentdefs{\\{{DBQueryServerLocationsAll}{DBQueryServerLocationsAll}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S59}{S59}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-rvb17-1}\nwindexuse{S59}{S59}{NW27XAxz-rvb17-1}\nwendcode{}\nwbegindocs{280}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServerLocationsActive}{DBQueryServerLocationsActive}{NW27XAxz-3UaQCb-1}DBQueryServerLocationsActive}(1)}
-\nwenddocs{}\nwbegincode{281}\sublabel{NW27XAxz-3UaQCb-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3UaQCb-1}}}\moddef{Query active server locations~{\nwtagstyle{}\subpageref{NW27XAxz-3UaQCb-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
-public int[] DBQueryServerLocationsActive(int t) throws SQLException \{
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{{\tt{}\protect\nwindexuse{DBQueryServerLocationsActive}{DBQueryServerLocationsActive}{NW27XAxz-3UaQCb-1}DBQueryServerLocationsActive}}(1) returns the
+last-known locations of all active servers at the given time. A server is
+``active'' if its service has not ended.
+A {\tt{}SQLException} is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer {\tt{}t} (param. 1):&a time
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+{\tt{}null} if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{a server identifier}$};
+ &\node {$1:\textrm{time of last-known location}$};
+ &\node {$2:\textrm{vertex of last-known location}$};
+ &\node {...};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} {\tt{}SQLException} if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+\nwenddocs{}\nwbegincode{281}\sublabel{NW27XAxz-3UaQCb-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3UaQCb-1}}}\moddef{Query active server locations~{\nwtagstyle{}\subpageref{NW27XAxz-3UaQCb-1}}}\endmoddef\nwalsodefined{\\{NW27XAxz-3UaQCb-2}}\nwused{\\{NW27XAxz-4PbjF-1}}
+public int[] DBQueryServerLocationsActive(final int t) throws SQLException \{
   int[] output = new int[] \{ \};
-  int[] temp1 = new int[] \{ \};
-  int[] temp2 = new int[] \{ \};
-  int j = 0;
-  int sid = 0;
-  int te = 0;
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
-    temp1 = DBFetch(conn, "S134", 2, t, t, t);      // <-- 10 ms/call
+    int j = 0;
+\nosublabel{NW27XAxz-3UaQCb-1-u1}\nwindexdefn{DBQueryServerLocationsActive}{DBQueryServerLocationsActive}{NW27XAxz-3UaQCb-1}\eatline
+\nwidentdefs{\\{{DBQueryServerLocationsActive}{DBQueryServerLocationsActive}}}\nwendcode{}\nwbegindocs{282}{\small Our approach is to first use statement {\tt{}\protect\nwindexuse{S134}{S134}{NW27XAxz-9eEGJ-1}S134} to get the active
+servers. Then for each active server, we use either statement {\tt{}\protect\nwindexuse{S135}{S135}{NW27XAxz-4dp7jX-1}S135} or
+{\tt{}\protect\nwindexuse{S147}{S147}{NW27XAxz-2TcddD-1}S147} to get its last-known location.}
+\nwenddocs{}\nwbegincode{283}\sublabel{NW27XAxz-3UaQCb-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3UaQCb-2}}}\moddef{Query active server locations~{\nwtagstyle{}\subpageref{NW27XAxz-3UaQCb-1}}}\plusendmoddef
+    final int[] temp1 = this.DBFetch(conn, "S134", 2, t, t, t);  // <-- 10 ms/call
     output = new int[(3*(temp1.length/2))];
     for (int i = 0; i < temp1.length - 1; i += 2) \{
-      sid = temp1[(i + 0)];
-       te = temp1[(i + 1)];
-      temp2 = (t < te
-        ? DBFetch(conn, "S135", 2, sid, sid, t, t)  // <-- 0.07-0.15 ms/call
-        : DBFetch(conn, "S147", 2, sid, sid));      // <-- 0.04-0.15 ms/call
+      final int sid = temp1[(i + 0)];
+      final int  te = temp1[(i + 1)];
+      final int[] temp2 = (t < te
+        ? this.DBFetch(conn, "S135", 2, sid, sid, t, t)  // <-- 0.07-0.15 ms/call
+        : this.DBFetch(conn, "S147", 2, sid, sid));      // <-- 0.04-0.15 ms/call
       output[(j + 0)] = sid;
       output[(j + 1)] = temp2[0];
       output[(j + 2)] = temp2[1];
@@ -3981,10 +4062,10 @@ public int[] DBQueryServerLocationsActive(int t) throws SQLException \{
   \}
   return output;
 \}
-\nwindexdefn{DBQueryServerLocationsActive}{DBQueryServerLocationsActive}{NW27XAxz-3UaQCb-1}\eatline
-\nwidentdefs{\\{{DBQueryServerLocationsActive}{DBQueryServerLocationsActive}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S134}{S134}}\\{{S135}{S135}}\\{{S147}{S147}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-3UaQCb-1}\nwindexuse{S134}{S134}{NW27XAxz-3UaQCb-1}\nwindexuse{S135}{S135}{NW27XAxz-3UaQCb-1}\nwindexuse{S147}{S147}{NW27XAxz-3UaQCb-1}\nwendcode{}\nwbegindocs{282}\nwdocspar
+\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S134}{S134}}\\{{S135}{S135}}\\{{S147}{S147}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-3UaQCb-2}\nwindexuse{S134}{S134}{NW27XAxz-3UaQCb-2}\nwindexuse{S135}{S135}{NW27XAxz-3UaQCb-2}\nwindexuse{S147}{S147}{NW27XAxz-3UaQCb-2}\nwendcode{}\nwbegindocs{284}\nwdocspar
+
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServerRoute}{DBQueryServerRoute}{NW27XAxz-1AprqI-1}DBQueryServerRoute}(1)}
-\nwenddocs{}\nwbegincode{283}\sublabel{NW27XAxz-1AprqI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1AprqI-1}}}\moddef{Query routes~{\nwtagstyle{}\subpageref{NW27XAxz-1AprqI-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
+\nwenddocs{}\nwbegincode{285}\sublabel{NW27XAxz-1AprqI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1AprqI-1}}}\moddef{Query routes~{\nwtagstyle{}\subpageref{NW27XAxz-1AprqI-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
 public int[] DBQueryServerRoute(int sid) throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -3995,11 +4076,11 @@ public int[] DBQueryServerRoute(int sid) throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryServerRoute}{DBQueryServerRoute}{NW27XAxz-1AprqI-1}\eatline
-\nwidentdefs{\\{{DBQueryServerRoute}{DBQueryServerRoute}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S60}{S60}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1AprqI-1}\nwindexuse{S60}{S60}{NW27XAxz-1AprqI-1}\nwendcode{}\nwbegindocs{284}\nwdocspar
+\nwidentdefs{\\{{DBQueryServerRoute}{DBQueryServerRoute}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S60}{S60}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1AprqI-1}\nwindexuse{S60}{S60}{NW27XAxz-1AprqI-1}\nwendcode{}\nwbegindocs{286}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServerSchedule}{DBQueryServerSchedule}{NW27XAxz-3yA8FQ-1}DBQueryServerSchedule}(1)}
 Schedules may contain {\tt{}null} values in the labels. A null is recorded
 as a 0 in the output array due to {\tt{}getInt} in {\tt{}\protect\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-17Zt8W-1}DBFetch}.
-\nwenddocs{}\nwbegincode{285}\sublabel{NW27XAxz-3yA8FQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3yA8FQ-1}}}\moddef{Query schedules~{\nwtagstyle{}\subpageref{NW27XAxz-3yA8FQ-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
+\nwenddocs{}\nwbegincode{287}\sublabel{NW27XAxz-3yA8FQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3yA8FQ-1}}}\moddef{Query schedules~{\nwtagstyle{}\subpageref{NW27XAxz-3yA8FQ-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
 public int[] DBQueryServerSchedule(int sid) throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4010,9 +4091,9 @@ public int[] DBQueryServerSchedule(int sid) throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryServerSchedule}{DBQueryServerSchedule}{NW27XAxz-3yA8FQ-1}\eatline
-\nwidentdefs{\\{{DBQueryServerSchedule}{DBQueryServerSchedule}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S61}{S61}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-3yA8FQ-1}\nwindexuse{S61}{S61}{NW27XAxz-3yA8FQ-1}\nwendcode{}\nwbegindocs{286}\nwdocspar
+\nwidentdefs{\\{{DBQueryServerSchedule}{DBQueryServerSchedule}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S61}{S61}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-3yA8FQ-1}\nwindexuse{S61}{S61}{NW27XAxz-3yA8FQ-1}\nwendcode{}\nwbegindocs{288}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServerRemainingRoute}{DBQueryServerRemainingRoute}{NW27XAxz-23oLro-1}DBQueryServerRemainingRoute}(2)}
-\nwenddocs{}\nwbegincode{287}\sublabel{NW27XAxz-23oLro-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-23oLro-1}}}\moddef{Query remaining routes~{\nwtagstyle{}\subpageref{NW27XAxz-23oLro-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
+\nwenddocs{}\nwbegincode{289}\sublabel{NW27XAxz-23oLro-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-23oLro-1}}}\moddef{Query remaining routes~{\nwtagstyle{}\subpageref{NW27XAxz-23oLro-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
 public int[] DBQueryServerRemainingRoute(int sid, int t) throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4023,10 +4104,10 @@ public int[] DBQueryServerRemainingRoute(int sid, int t) throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryServerRemainingRoute}{DBQueryServerRemainingRoute}{NW27XAxz-23oLro-1}\eatline
-\nwidentdefs{\\{{DBQueryServerRemainingRoute}{DBQueryServerRemainingRoute}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S129}{S129}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-23oLro-1}\nwindexuse{S129}{S129}{NW27XAxz-23oLro-1}\nwendcode{}\nwbegindocs{288}\nwdocspar
+\nwidentdefs{\\{{DBQueryServerRemainingRoute}{DBQueryServerRemainingRoute}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S129}{S129}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-23oLro-1}\nwindexuse{S129}{S129}{NW27XAxz-23oLro-1}\nwendcode{}\nwbegindocs{290}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServerRemainingSchedule}{DBQueryServerRemainingSchedule}{NW27XAxz-1oPNKc-1}DBQueryServerRemainingSchedule}(2)}
 Aggressively invalidate the cache.
-\nwenddocs{}\nwbegincode{289}\sublabel{NW27XAxz-1oPNKc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1oPNKc-1}}}\moddef{Query remaining schedules~{\nwtagstyle{}\subpageref{NW27XAxz-1oPNKc-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
+\nwenddocs{}\nwbegincode{291}\sublabel{NW27XAxz-1oPNKc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1oPNKc-1}}}\moddef{Query remaining schedules~{\nwtagstyle{}\subpageref{NW27XAxz-1oPNKc-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
 public int[] DBQueryServerRemainingSchedule(int sid, int t)
 throws SQLException \{
   int[] output = new int[] \{ \};
@@ -4053,9 +4134,9 @@ throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryServerRemainingSchedule}{DBQueryServerRemainingSchedule}{NW27XAxz-1oPNKc-1}\eatline
-\nwidentdefs{\\{{DBQueryServerRemainingSchedule}{DBQueryServerRemainingSchedule}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S144}{S144}}\\{{S145}{S145}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1oPNKc-1}\nwindexuse{S144}{S144}{NW27XAxz-1oPNKc-1}\nwindexuse{S145}{S145}{NW27XAxz-1oPNKc-1}\nwendcode{}\nwbegindocs{290}\nwdocspar
+\nwidentdefs{\\{{DBQueryServerRemainingSchedule}{DBQueryServerRemainingSchedule}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S144}{S144}}\\{{S145}{S145}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1oPNKc-1}\nwindexuse{S144}{S144}{NW27XAxz-1oPNKc-1}\nwindexuse{S145}{S145}{NW27XAxz-1oPNKc-1}\nwendcode{}\nwbegindocs{292}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServerRemainingDistance}{DBQueryServerRemainingDistance}{NW27XAxz-3tQic5-1}DBQueryServerRemainingDistance}(2)}
-\nwenddocs{}\nwbegincode{291}\sublabel{NW27XAxz-3tQic5-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3tQic5-1}}}\moddef{Query remaining distance~{\nwtagstyle{}\subpageref{NW27XAxz-3tQic5-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
+\nwenddocs{}\nwbegincode{293}\sublabel{NW27XAxz-3tQic5-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3tQic5-1}}}\moddef{Query remaining distance~{\nwtagstyle{}\subpageref{NW27XAxz-3tQic5-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
 public int[] DBQueryServerRemainingDistance(int sid, int t)
 throws SQLException \{
   int[] output = new int[] \{ \};
@@ -4067,9 +4148,9 @@ throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryServerRemainingDistance}{DBQueryServerRemainingDistance}{NW27XAxz-3tQic5-1}\eatline
-\nwidentdefs{\\{{DBQueryServerRemainingDistance}{DBQueryServerRemainingDistance}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S142}{S142}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-3tQic5-1}\nwindexuse{S142}{S142}{NW27XAxz-3tQic5-1}\nwendcode{}\nwbegindocs{292}\nwdocspar
+\nwidentdefs{\\{{DBQueryServerRemainingDistance}{DBQueryServerRemainingDistance}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S142}{S142}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-3tQic5-1}\nwindexuse{S142}{S142}{NW27XAxz-3tQic5-1}\nwendcode{}\nwbegindocs{294}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServerRemainingDuration}{DBQueryServerRemainingDuration}{NW27XAxz-2cRw59-1}DBQueryServerRemainingDuration}(2)}
-\nwenddocs{}\nwbegincode{293}\sublabel{NW27XAxz-2cRw59-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2cRw59-1}}}\moddef{Query remaining duration~{\nwtagstyle{}\subpageref{NW27XAxz-2cRw59-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
+\nwenddocs{}\nwbegincode{295}\sublabel{NW27XAxz-2cRw59-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2cRw59-1}}}\moddef{Query remaining duration~{\nwtagstyle{}\subpageref{NW27XAxz-2cRw59-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
 public int[] DBQueryServerRemainingDuration(int sid, int t)
 throws SQLException \{
   int[] output = new int[] \{ \};
@@ -4082,9 +4163,9 @@ throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryServerRemainingDuration}{DBQueryServerRemainingDuration}{NW27XAxz-2cRw59-1}\eatline
-\nwidentdefs{\\{{DBQueryServerRemainingDuration}{DBQueryServerRemainingDuration}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S127}{S127}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-2cRw59-1}\nwindexuse{S127}{S127}{NW27XAxz-2cRw59-1}\nwendcode{}\nwbegindocs{294}\nwdocspar
+\nwidentdefs{\\{{DBQueryServerRemainingDuration}{DBQueryServerRemainingDuration}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S127}{S127}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-2cRw59-1}\nwindexuse{S127}{S127}{NW27XAxz-2cRw59-1}\nwendcode{}\nwbegindocs{296}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServerMaxLoad}{DBQueryServerMaxLoad}{NW27XAxz-3KLGqo-1}DBQueryServerMaxLoad}(2)}
-\nwenddocs{}\nwbegincode{295}\sublabel{NW27XAxz-3KLGqo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3KLGqo-1}}}\moddef{Query max load~{\nwtagstyle{}\subpageref{NW27XAxz-3KLGqo-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
+\nwenddocs{}\nwbegincode{297}\sublabel{NW27XAxz-3KLGqo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3KLGqo-1}}}\moddef{Query max load~{\nwtagstyle{}\subpageref{NW27XAxz-3KLGqo-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
 public int[] DBQueryServerMaxLoad(int sid, int t) throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4095,9 +4176,9 @@ public int[] DBQueryServerMaxLoad(int sid, int t) throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryServerMaxLoad}{DBQueryServerMaxLoad}{NW27XAxz-3KLGqo-1}\eatline
-\nwidentdefs{\\{{DBQueryServerMaxLoad}{DBQueryServerMaxLoad}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S73}{S73}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-3KLGqo-1}\nwindexuse{S73}{S73}{NW27XAxz-3KLGqo-1}\nwendcode{}\nwbegindocs{296}\nwdocspar
+\nwidentdefs{\\{{DBQueryServerMaxLoad}{DBQueryServerMaxLoad}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S73}{S73}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-3KLGqo-1}\nwindexuse{S73}{S73}{NW27XAxz-3KLGqo-1}\nwendcode{}\nwbegindocs{298}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServerPendingAssignments}{DBQueryServerPendingAssignments}{NW27XAxz-1UG2Ih-1}DBQueryServerPendingAssignments}(2)}
-\nwenddocs{}\nwbegincode{297}\sublabel{NW27XAxz-1UG2Ih-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1UG2Ih-1}}}\moddef{Query server pending assignments~{\nwtagstyle{}\subpageref{NW27XAxz-1UG2Ih-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
+\nwenddocs{}\nwbegincode{299}\sublabel{NW27XAxz-1UG2Ih-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1UG2Ih-1}}}\moddef{Query server pending assignments~{\nwtagstyle{}\subpageref{NW27XAxz-1UG2Ih-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
 public int[] DBQueryServerPendingAssignments(int sid, int t) throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4108,9 +4189,9 @@ public int[] DBQueryServerPendingAssignments(int sid, int t) throws SQLException
   return output;
 \}
 \nwindexdefn{DBQueryServerPendingAssignments}{DBQueryServerPendingAssignments}{NW27XAxz-1UG2Ih-1}\eatline
-\nwidentdefs{\\{{DBQueryServerPendingAssignments}{DBQueryServerPendingAssignments}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S100}{S100}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1UG2Ih-1}\nwindexuse{S100}{S100}{NW27XAxz-1UG2Ih-1}\nwendcode{}\nwbegindocs{298}\nwdocspar
+\nwidentdefs{\\{{DBQueryServerPendingAssignments}{DBQueryServerPendingAssignments}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S100}{S100}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1UG2Ih-1}\nwindexuse{S100}{S100}{NW27XAxz-1UG2Ih-1}\nwendcode{}\nwbegindocs{300}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServerCompletedAssignments}{DBQueryServerCompletedAssignments}{NW27XAxz-4CeViM-1}DBQueryServerCompletedAssignments}(2)}
-\nwenddocs{}\nwbegincode{299}\sublabel{NW27XAxz-4CeViM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4CeViM-1}}}\moddef{Query server completed assignments~{\nwtagstyle{}\subpageref{NW27XAxz-4CeViM-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
+\nwenddocs{}\nwbegincode{301}\sublabel{NW27XAxz-4CeViM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4CeViM-1}}}\moddef{Query server completed assignments~{\nwtagstyle{}\subpageref{NW27XAxz-4CeViM-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-1}}
 public int[] DBQueryServerCompletedAssignments(int sid, int t) throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4121,11 +4202,11 @@ public int[] DBQueryServerCompletedAssignments(int sid, int t) throws SQLExcepti
   return output;
 \}
 \nwindexdefn{DBQueryServerCompletedAssignments}{DBQueryServerCompletedAssignments}{NW27XAxz-4CeViM-1}\eatline
-\nwidentdefs{\\{{DBQueryServerCompletedAssignments}{DBQueryServerCompletedAssignments}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S101}{S101}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-4CeViM-1}\nwindexuse{S101}{S101}{NW27XAxz-4CeViM-1}\nwendcode{}\nwbegindocs{300}\nwdocspar
+\nwidentdefs{\\{{DBQueryServerCompletedAssignments}{DBQueryServerCompletedAssignments}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S101}{S101}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-4CeViM-1}\nwindexuse{S101}{S101}{NW27XAxz-4CeViM-1}\nwendcode{}\nwbegindocs{302}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServiceRate}{DBQueryServiceRate}{NW27XAxz-1Ang64-1}DBQueryServiceRate}(0)}
 The service rate $\mu$ is returned as integer $10000\mu$, for example
 if $\mu=.1234$, then {\tt{}\protect\nwindexuse{DBQueryServiceRate}{DBQueryServiceRate}{NW27XAxz-1Ang64-1}DBQueryServiceRate}(0) returns $1234$.
-\nwenddocs{}\nwbegincode{301}\sublabel{NW27XAxz-1Ang64-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\endmoddef\nwalsodefined{\\{NW27XAxz-1Ang64-2}\\{NW27XAxz-1Ang64-3}\\{NW27XAxz-1Ang64-4}\\{NW27XAxz-1Ang64-5}\\{NW27XAxz-1Ang64-6}\\{NW27XAxz-1Ang64-7}\\{NW27XAxz-1Ang64-8}\\{NW27XAxz-1Ang64-9}\\{NW27XAxz-1Ang64-A}\\{NW27XAxz-1Ang64-B}\\{NW27XAxz-1Ang64-C}\\{NW27XAxz-1Ang64-D}\\{NW27XAxz-1Ang64-E}\\{NW27XAxz-1Ang64-F}\\{NW27XAxz-1Ang64-G}\\{NW27XAxz-1Ang64-H}\\{NW27XAxz-1Ang64-I}\\{NW27XAxz-1Ang64-J}\\{NW27XAxz-1Ang64-K}\\{NW27XAxz-1Ang64-L}\\{NW27XAxz-1Ang64-M}\\{NW27XAxz-1Ang64-N}\\{NW27XAxz-1Ang64-O}\\{NW27XAxz-1Ang64-P}\\{NW27XAxz-1Ang64-Q}\\{NW27XAxz-1Ang64-R}}\nwused{\\{NW27XAxz-4PbjF-1}}
+\nwenddocs{}\nwbegincode{303}\sublabel{NW27XAxz-1Ang64-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\endmoddef\nwalsodefined{\\{NW27XAxz-1Ang64-2}\\{NW27XAxz-1Ang64-3}\\{NW27XAxz-1Ang64-4}\\{NW27XAxz-1Ang64-5}\\{NW27XAxz-1Ang64-6}\\{NW27XAxz-1Ang64-7}\\{NW27XAxz-1Ang64-8}\\{NW27XAxz-1Ang64-9}\\{NW27XAxz-1Ang64-A}\\{NW27XAxz-1Ang64-B}\\{NW27XAxz-1Ang64-C}\\{NW27XAxz-1Ang64-D}\\{NW27XAxz-1Ang64-E}\\{NW27XAxz-1Ang64-F}\\{NW27XAxz-1Ang64-G}\\{NW27XAxz-1Ang64-H}\\{NW27XAxz-1Ang64-I}\\{NW27XAxz-1Ang64-J}\\{NW27XAxz-1Ang64-K}\\{NW27XAxz-1Ang64-L}\\{NW27XAxz-1Ang64-M}\\{NW27XAxz-1Ang64-N}\\{NW27XAxz-1Ang64-O}\\{NW27XAxz-1Ang64-P}\\{NW27XAxz-1Ang64-Q}\\{NW27XAxz-1Ang64-R}}\nwused{\\{NW27XAxz-4PbjF-1}}
 public int[] DBQueryServiceRate() throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4136,9 +4217,9 @@ public int[] DBQueryServiceRate() throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryServiceRate}{DBQueryServiceRate}{NW27XAxz-1Ang64-1}\eatline
-\nwidentdefs{\\{{DBQueryServiceRate}{DBQueryServiceRate}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S102}{S102}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-1}\nwindexuse{S102}{S102}{NW27XAxz-1Ang64-1}\nwendcode{}\nwbegindocs{302}\nwdocspar
+\nwidentdefs{\\{{DBQueryServiceRate}{DBQueryServiceRate}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S102}{S102}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-1}\nwindexuse{S102}{S102}{NW27XAxz-1Ang64-1}\nwendcode{}\nwbegindocs{304}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryBaseDistanceTotal}{DBQueryBaseDistanceTotal}{NW27XAxz-1Ang64-2}DBQueryBaseDistanceTotal}(0)}
-\nwenddocs{}\nwbegincode{303}\sublabel{NW27XAxz-1Ang64-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-2}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{305}\sublabel{NW27XAxz-1Ang64-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-2}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryBaseDistanceTotal() throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4149,9 +4230,9 @@ public int[] DBQueryBaseDistanceTotal() throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryBaseDistanceTotal}{DBQueryBaseDistanceTotal}{NW27XAxz-1Ang64-2}\eatline
-\nwidentdefs{\\{{DBQueryBaseDistanceTotal}{DBQueryBaseDistanceTotal}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S103}{S103}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-2}\nwindexuse{S103}{S103}{NW27XAxz-1Ang64-2}\nwendcode{}\nwbegindocs{304}\nwdocspar
+\nwidentdefs{\\{{DBQueryBaseDistanceTotal}{DBQueryBaseDistanceTotal}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S103}{S103}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-2}\nwindexuse{S103}{S103}{NW27XAxz-1Ang64-2}\nwendcode{}\nwbegindocs{306}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServerBaseDistanceTotal}{DBQueryServerBaseDistanceTotal}{NW27XAxz-1Ang64-3}DBQueryServerBaseDistanceTotal}(0)}
-\nwenddocs{}\nwbegincode{305}\sublabel{NW27XAxz-1Ang64-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-3}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{307}\sublabel{NW27XAxz-1Ang64-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-3}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryServerBaseDistanceTotal() throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4162,9 +4243,9 @@ public int[] DBQueryServerBaseDistanceTotal() throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryServerBaseDistanceTotal}{DBQueryServerBaseDistanceTotal}{NW27XAxz-1Ang64-3}\eatline
-\nwidentdefs{\\{{DBQueryServerBaseDistanceTotal}{DBQueryServerBaseDistanceTotal}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S110}{S110}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-3}\nwindexuse{S110}{S110}{NW27XAxz-1Ang64-3}\nwendcode{}\nwbegindocs{306}\nwdocspar
+\nwidentdefs{\\{{DBQueryServerBaseDistanceTotal}{DBQueryServerBaseDistanceTotal}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S110}{S110}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-3}\nwindexuse{S110}{S110}{NW27XAxz-1Ang64-3}\nwendcode{}\nwbegindocs{308}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryRequestBaseDistanceTotal}{DBQueryRequestBaseDistanceTotal}{NW27XAxz-1Ang64-4}DBQueryRequestBaseDistanceTotal}(0)}
-\nwenddocs{}\nwbegincode{307}\sublabel{NW27XAxz-1Ang64-4}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-4}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{309}\sublabel{NW27XAxz-1Ang64-4}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-4}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryRequestBaseDistanceTotal() throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4175,9 +4256,9 @@ public int[] DBQueryRequestBaseDistanceTotal() throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryRequestBaseDistanceTotal}{DBQueryRequestBaseDistanceTotal}{NW27XAxz-1Ang64-4}\eatline
-\nwidentdefs{\\{{DBQueryRequestBaseDistanceTotal}{DBQueryRequestBaseDistanceTotal}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S111}{S111}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-4}\nwindexuse{S111}{S111}{NW27XAxz-1Ang64-4}\nwendcode{}\nwbegindocs{308}\nwdocspar
+\nwidentdefs{\\{{DBQueryRequestBaseDistanceTotal}{DBQueryRequestBaseDistanceTotal}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S111}{S111}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-4}\nwindexuse{S111}{S111}{NW27XAxz-1Ang64-4}\nwendcode{}\nwbegindocs{310}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryRequestBaseDistanceUnassigned}{DBQueryRequestBaseDistanceUnassigned}{NW27XAxz-1Ang64-5}DBQueryRequestBaseDistanceUnassigned}(0)}
-\nwenddocs{}\nwbegincode{309}\sublabel{NW27XAxz-1Ang64-5}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-5}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{311}\sublabel{NW27XAxz-1Ang64-5}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-5}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryRequestBaseDistanceUnassigned() throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4188,9 +4269,9 @@ public int[] DBQueryRequestBaseDistanceUnassigned() throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryRequestBaseDistanceUnassigned}{DBQueryRequestBaseDistanceUnassigned}{NW27XAxz-1Ang64-5}\eatline
-\nwidentdefs{\\{{DBQueryRequestBaseDistanceUnassigned}{DBQueryRequestBaseDistanceUnassigned}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S138}{S138}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-5}\nwindexuse{S138}{S138}{NW27XAxz-1Ang64-5}\nwendcode{}\nwbegindocs{310}\nwdocspar
+\nwidentdefs{\\{{DBQueryRequestBaseDistanceUnassigned}{DBQueryRequestBaseDistanceUnassigned}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S138}{S138}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-5}\nwindexuse{S138}{S138}{NW27XAxz-1Ang64-5}\nwendcode{}\nwbegindocs{312}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServerTravelDistance}{DBQueryServerTravelDistance}{NW27XAxz-1Ang64-6}DBQueryServerTravelDistance}(1)}
-\nwenddocs{}\nwbegincode{311}\sublabel{NW27XAxz-1Ang64-6}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-6}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{313}\sublabel{NW27XAxz-1Ang64-6}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-6}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryServerTravelDistance(int sid) throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4201,9 +4282,9 @@ public int[] DBQueryServerTravelDistance(int sid) throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryServerTravelDistance}{DBQueryServerTravelDistance}{NW27XAxz-1Ang64-6}\eatline
-\nwidentdefs{\\{{DBQueryServerTravelDistance}{DBQueryServerTravelDistance}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S104}{S104}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-6}\nwindexuse{S104}{S104}{NW27XAxz-1Ang64-6}\nwendcode{}\nwbegindocs{312}\nwdocspar
+\nwidentdefs{\\{{DBQueryServerTravelDistance}{DBQueryServerTravelDistance}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S104}{S104}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-6}\nwindexuse{S104}{S104}{NW27XAxz-1Ang64-6}\nwendcode{}\nwbegindocs{314}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServerTravelDistanceTotal}{DBQueryServerTravelDistanceTotal}{NW27XAxz-1Ang64-7}DBQueryServerTravelDistanceTotal}(0)}
-\nwenddocs{}\nwbegincode{313}\sublabel{NW27XAxz-1Ang64-7}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-7}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{315}\sublabel{NW27XAxz-1Ang64-7}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-7}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryServerTravelDistanceTotal() throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4214,9 +4295,9 @@ public int[] DBQueryServerTravelDistanceTotal() throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryServerTravelDistanceTotal}{DBQueryServerTravelDistanceTotal}{NW27XAxz-1Ang64-7}\eatline
-\nwidentdefs{\\{{DBQueryServerTravelDistanceTotal}{DBQueryServerTravelDistanceTotal}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S105}{S105}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-7}\nwindexuse{S105}{S105}{NW27XAxz-1Ang64-7}\nwendcode{}\nwbegindocs{314}\nwdocspar
+\nwidentdefs{\\{{DBQueryServerTravelDistanceTotal}{DBQueryServerTravelDistanceTotal}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S105}{S105}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-7}\nwindexuse{S105}{S105}{NW27XAxz-1Ang64-7}\nwendcode{}\nwbegindocs{316}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServerCruisingDistance}{DBQueryServerCruisingDistance}{NW27XAxz-1Ang64-8}DBQueryServerCruisingDistance}(1)}
-\nwenddocs{}\nwbegincode{315}\sublabel{NW27XAxz-1Ang64-8}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-8}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{317}\sublabel{NW27XAxz-1Ang64-8}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-8}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryServerCruisingDistance(int sid) throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4227,9 +4308,9 @@ public int[] DBQueryServerCruisingDistance(int sid) throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryServerCruisingDistance}{DBQueryServerCruisingDistance}{NW27XAxz-1Ang64-8}\eatline
-\nwidentdefs{\\{{DBQueryServerCruisingDistance}{DBQueryServerCruisingDistance}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S106}{S106}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-8}\nwindexuse{S106}{S106}{NW27XAxz-1Ang64-8}\nwendcode{}\nwbegindocs{316}\nwdocspar
+\nwidentdefs{\\{{DBQueryServerCruisingDistance}{DBQueryServerCruisingDistance}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S106}{S106}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-8}\nwindexuse{S106}{S106}{NW27XAxz-1Ang64-8}\nwendcode{}\nwbegindocs{318}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServerCruisingDistanceTotal}{DBQueryServerCruisingDistanceTotal}{NW27XAxz-1Ang64-9}DBQueryServerCruisingDistanceTotal}(0)}
-\nwenddocs{}\nwbegincode{317}\sublabel{NW27XAxz-1Ang64-9}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-9}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{319}\sublabel{NW27XAxz-1Ang64-9}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-9}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryServerCruisingDistanceTotal() throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4240,9 +4321,9 @@ public int[] DBQueryServerCruisingDistanceTotal() throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryServerCruisingDistanceTotal}{DBQueryServerCruisingDistanceTotal}{NW27XAxz-1Ang64-9}\eatline
-\nwidentdefs{\\{{DBQueryServerCruisingDistanceTotal}{DBQueryServerCruisingDistanceTotal}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S107}{S107}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-9}\nwindexuse{S107}{S107}{NW27XAxz-1Ang64-9}\nwendcode{}\nwbegindocs{318}\nwdocspar
+\nwidentdefs{\\{{DBQueryServerCruisingDistanceTotal}{DBQueryServerCruisingDistanceTotal}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S107}{S107}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-9}\nwindexuse{S107}{S107}{NW27XAxz-1Ang64-9}\nwendcode{}\nwbegindocs{320}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServerServiceDistance}{DBQueryServerServiceDistance}{NW27XAxz-1Ang64-A}DBQueryServerServiceDistance}(1)}
-\nwenddocs{}\nwbegincode{319}\sublabel{NW27XAxz-1Ang64-A}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-A}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{321}\sublabel{NW27XAxz-1Ang64-A}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-A}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryServerServiceDistance(int sid) throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4253,9 +4334,9 @@ public int[] DBQueryServerServiceDistance(int sid) throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryServerServiceDistance}{DBQueryServerServiceDistance}{NW27XAxz-1Ang64-A}\eatline
-\nwidentdefs{\\{{DBQueryServerServiceDistance}{DBQueryServerServiceDistance}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S108}{S108}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-A}\nwindexuse{S108}{S108}{NW27XAxz-1Ang64-A}\nwendcode{}\nwbegindocs{320}\nwdocspar
+\nwidentdefs{\\{{DBQueryServerServiceDistance}{DBQueryServerServiceDistance}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S108}{S108}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-A}\nwindexuse{S108}{S108}{NW27XAxz-1Ang64-A}\nwendcode{}\nwbegindocs{322}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServerServiceDistanceTotal}{DBQueryServerServiceDistanceTotal}{NW27XAxz-1Ang64-B}DBQueryServerServiceDistanceTotal}(0)}
-\nwenddocs{}\nwbegincode{321}\sublabel{NW27XAxz-1Ang64-B}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-B}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{323}\sublabel{NW27XAxz-1Ang64-B}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-B}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryServerServiceDistanceTotal() throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4266,9 +4347,9 @@ public int[] DBQueryServerServiceDistanceTotal() throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryServerServiceDistanceTotal}{DBQueryServerServiceDistanceTotal}{NW27XAxz-1Ang64-B}\eatline
-\nwidentdefs{\\{{DBQueryServerServiceDistanceTotal}{DBQueryServerServiceDistanceTotal}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S109}{S109}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-B}\nwindexuse{S109}{S109}{NW27XAxz-1Ang64-B}\nwendcode{}\nwbegindocs{322}\nwdocspar
+\nwidentdefs{\\{{DBQueryServerServiceDistanceTotal}{DBQueryServerServiceDistanceTotal}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S109}{S109}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-B}\nwindexuse{S109}{S109}{NW27XAxz-1Ang64-B}\nwendcode{}\nwbegindocs{324}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryRequestDetourDistance}{DBQueryRequestDetourDistance}{NW27XAxz-1Ang64-C}DBQueryRequestDetourDistance}(1)}
-\nwenddocs{}\nwbegincode{323}\sublabel{NW27XAxz-1Ang64-C}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-C}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{325}\sublabel{NW27XAxz-1Ang64-C}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-C}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryRequestDetourDistance(int rid) throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4279,9 +4360,9 @@ public int[] DBQueryRequestDetourDistance(int rid) throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryRequestDetourDistance}{DBQueryRequestDetourDistance}{NW27XAxz-1Ang64-C}\eatline
-\nwidentdefs{\\{{DBQueryRequestDetourDistance}{DBQueryRequestDetourDistance}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S112}{S112}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-C}\nwindexuse{S112}{S112}{NW27XAxz-1Ang64-C}\nwendcode{}\nwbegindocs{324}\nwdocspar
+\nwidentdefs{\\{{DBQueryRequestDetourDistance}{DBQueryRequestDetourDistance}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S112}{S112}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-C}\nwindexuse{S112}{S112}{NW27XAxz-1Ang64-C}\nwendcode{}\nwbegindocs{326}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryRequestDetourDistanceTotal}{DBQueryRequestDetourDistanceTotal}{NW27XAxz-1Ang64-D}DBQueryRequestDetourDistanceTotal}(0)}
-\nwenddocs{}\nwbegincode{325}\sublabel{NW27XAxz-1Ang64-D}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-D}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{327}\sublabel{NW27XAxz-1Ang64-D}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-D}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryRequestDetourDistanceTotal() throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4292,9 +4373,9 @@ public int[] DBQueryRequestDetourDistanceTotal() throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryRequestDetourDistanceTotal}{DBQueryRequestDetourDistanceTotal}{NW27XAxz-1Ang64-D}\eatline
-\nwidentdefs{\\{{DBQueryRequestDetourDistanceTotal}{DBQueryRequestDetourDistanceTotal}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S113}{S113}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-D}\nwindexuse{S113}{S113}{NW27XAxz-1Ang64-D}\nwendcode{}\nwbegindocs{326}\nwdocspar
+\nwidentdefs{\\{{DBQueryRequestDetourDistanceTotal}{DBQueryRequestDetourDistanceTotal}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S113}{S113}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-D}\nwindexuse{S113}{S113}{NW27XAxz-1Ang64-D}\nwendcode{}\nwbegindocs{328}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryRequestTransitDistance}{DBQueryRequestTransitDistance}{NW27XAxz-1Ang64-E}DBQueryRequestTransitDistance}(1)}
-\nwenddocs{}\nwbegincode{327}\sublabel{NW27XAxz-1Ang64-E}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-E}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{329}\sublabel{NW27XAxz-1Ang64-E}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-E}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryRequestTransitDistance(int rid) throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4305,9 +4386,9 @@ public int[] DBQueryRequestTransitDistance(int rid) throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryRequestTransitDistance}{DBQueryRequestTransitDistance}{NW27XAxz-1Ang64-E}\eatline
-\nwidentdefs{\\{{DBQueryRequestTransitDistance}{DBQueryRequestTransitDistance}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S114}{S114}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-E}\nwindexuse{S114}{S114}{NW27XAxz-1Ang64-E}\nwendcode{}\nwbegindocs{328}\nwdocspar
+\nwidentdefs{\\{{DBQueryRequestTransitDistance}{DBQueryRequestTransitDistance}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S114}{S114}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-E}\nwindexuse{S114}{S114}{NW27XAxz-1Ang64-E}\nwendcode{}\nwbegindocs{330}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryRequestTransitDistanceTotal}{DBQueryRequestTransitDistanceTotal}{NW27XAxz-1Ang64-F}DBQueryRequestTransitDistanceTotal}(0)}
-\nwenddocs{}\nwbegincode{329}\sublabel{NW27XAxz-1Ang64-F}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-F}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{331}\sublabel{NW27XAxz-1Ang64-F}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-F}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryRequestTransitDistanceTotal() throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4318,9 +4399,9 @@ public int[] DBQueryRequestTransitDistanceTotal() throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryRequestTransitDistanceTotal}{DBQueryRequestTransitDistanceTotal}{NW27XAxz-1Ang64-F}\eatline
-\nwidentdefs{\\{{DBQueryRequestTransitDistanceTotal}{DBQueryRequestTransitDistanceTotal}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S115}{S115}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-F}\nwindexuse{S115}{S115}{NW27XAxz-1Ang64-F}\nwendcode{}\nwbegindocs{330}\nwdocspar
+\nwidentdefs{\\{{DBQueryRequestTransitDistanceTotal}{DBQueryRequestTransitDistanceTotal}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S115}{S115}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-F}\nwindexuse{S115}{S115}{NW27XAxz-1Ang64-F}\nwendcode{}\nwbegindocs{332}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServerTravelDuration}{DBQueryServerTravelDuration}{NW27XAxz-1Ang64-G}DBQueryServerTravelDuration}(1)}
-\nwenddocs{}\nwbegincode{331}\sublabel{NW27XAxz-1Ang64-G}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-G}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{333}\sublabel{NW27XAxz-1Ang64-G}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-G}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryServerTravelDuration(int sid) throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4331,9 +4412,9 @@ public int[] DBQueryServerTravelDuration(int sid) throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryServerTravelDuration}{DBQueryServerTravelDuration}{NW27XAxz-1Ang64-G}\eatline
-\nwidentdefs{\\{{DBQueryServerTravelDuration}{DBQueryServerTravelDuration}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S116}{S116}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-G}\nwindexuse{S116}{S116}{NW27XAxz-1Ang64-G}\nwendcode{}\nwbegindocs{332}\nwdocspar
+\nwidentdefs{\\{{DBQueryServerTravelDuration}{DBQueryServerTravelDuration}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S116}{S116}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-G}\nwindexuse{S116}{S116}{NW27XAxz-1Ang64-G}\nwendcode{}\nwbegindocs{334}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServerTravelDurationTotal}{DBQueryServerTravelDurationTotal}{NW27XAxz-1Ang64-H}DBQueryServerTravelDurationTotal}(0)}
-\nwenddocs{}\nwbegincode{333}\sublabel{NW27XAxz-1Ang64-H}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-H}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{335}\sublabel{NW27XAxz-1Ang64-H}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-H}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryServerTravelDurationTotal() throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4344,9 +4425,9 @@ public int[] DBQueryServerTravelDurationTotal() throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryServerTravelDurationTotal}{DBQueryServerTravelDurationTotal}{NW27XAxz-1Ang64-H}\eatline
-\nwidentdefs{\\{{DBQueryServerTravelDurationTotal}{DBQueryServerTravelDurationTotal}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S117}{S117}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-H}\nwindexuse{S117}{S117}{NW27XAxz-1Ang64-H}\nwendcode{}\nwbegindocs{334}\nwdocspar
+\nwidentdefs{\\{{DBQueryServerTravelDurationTotal}{DBQueryServerTravelDurationTotal}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S117}{S117}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-H}\nwindexuse{S117}{S117}{NW27XAxz-1Ang64-H}\nwendcode{}\nwbegindocs{336}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryRequestPickupDuration}{DBQueryRequestPickupDuration}{NW27XAxz-1Ang64-I}DBQueryRequestPickupDuration}(1)}
-\nwenddocs{}\nwbegincode{335}\sublabel{NW27XAxz-1Ang64-I}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-I}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{337}\sublabel{NW27XAxz-1Ang64-I}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-I}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryRequestPickupDuration(int rid) throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4357,9 +4438,9 @@ public int[] DBQueryRequestPickupDuration(int rid) throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryRequestPickupDuration}{DBQueryRequestPickupDuration}{NW27XAxz-1Ang64-I}\eatline
-\nwidentdefs{\\{{DBQueryRequestPickupDuration}{DBQueryRequestPickupDuration}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S118}{S118}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-I}\nwindexuse{S118}{S118}{NW27XAxz-1Ang64-I}\nwendcode{}\nwbegindocs{336}\nwdocspar
+\nwidentdefs{\\{{DBQueryRequestPickupDuration}{DBQueryRequestPickupDuration}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S118}{S118}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-I}\nwindexuse{S118}{S118}{NW27XAxz-1Ang64-I}\nwendcode{}\nwbegindocs{338}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryRequestPickupDurationTotal}{DBQueryRequestPickupDurationTotal}{NW27XAxz-1Ang64-J}DBQueryRequestPickupDurationTotal}(0)}
-\nwenddocs{}\nwbegincode{337}\sublabel{NW27XAxz-1Ang64-J}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-J}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{339}\sublabel{NW27XAxz-1Ang64-J}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-J}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryRequestPickupDurationTotal() throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4370,9 +4451,9 @@ public int[] DBQueryRequestPickupDurationTotal() throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryRequestPickupDurationTotal}{DBQueryRequestPickupDurationTotal}{NW27XAxz-1Ang64-J}\eatline
-\nwidentdefs{\\{{DBQueryRequestPickupDurationTotal}{DBQueryRequestPickupDurationTotal}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S119}{S119}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-J}\nwindexuse{S119}{S119}{NW27XAxz-1Ang64-J}\nwendcode{}\nwbegindocs{338}\nwdocspar
+\nwidentdefs{\\{{DBQueryRequestPickupDurationTotal}{DBQueryRequestPickupDurationTotal}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S119}{S119}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-J}\nwindexuse{S119}{S119}{NW27XAxz-1Ang64-J}\nwendcode{}\nwbegindocs{340}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryRequestTransitDuration}{DBQueryRequestTransitDuration}{NW27XAxz-1Ang64-K}DBQueryRequestTransitDuration}(1)}
-\nwenddocs{}\nwbegincode{339}\sublabel{NW27XAxz-1Ang64-K}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-K}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{341}\sublabel{NW27XAxz-1Ang64-K}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-K}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryRequestTransitDuration(int rid) throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4383,9 +4464,9 @@ public int[] DBQueryRequestTransitDuration(int rid) throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryRequestTransitDuration}{DBQueryRequestTransitDuration}{NW27XAxz-1Ang64-K}\eatline
-\nwidentdefs{\\{{DBQueryRequestTransitDuration}{DBQueryRequestTransitDuration}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S120}{S120}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-K}\nwindexuse{S120}{S120}{NW27XAxz-1Ang64-K}\nwendcode{}\nwbegindocs{340}\nwdocspar
+\nwidentdefs{\\{{DBQueryRequestTransitDuration}{DBQueryRequestTransitDuration}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S120}{S120}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-K}\nwindexuse{S120}{S120}{NW27XAxz-1Ang64-K}\nwendcode{}\nwbegindocs{342}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryRequestTransitDurationTotal}{DBQueryRequestTransitDurationTotal}{NW27XAxz-1Ang64-L}DBQueryRequestTransitDurationTotal}(0)}
-\nwenddocs{}\nwbegincode{341}\sublabel{NW27XAxz-1Ang64-L}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-L}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{343}\sublabel{NW27XAxz-1Ang64-L}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-L}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryRequestTransitDurationTotal() throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4396,9 +4477,9 @@ public int[] DBQueryRequestTransitDurationTotal() throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryRequestTransitDurationTotal}{DBQueryRequestTransitDurationTotal}{NW27XAxz-1Ang64-L}\eatline
-\nwidentdefs{\\{{DBQueryRequestTransitDurationTotal}{DBQueryRequestTransitDurationTotal}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S121}{S121}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-L}\nwindexuse{S121}{S121}{NW27XAxz-1Ang64-L}\nwendcode{}\nwbegindocs{342}\nwdocspar
+\nwidentdefs{\\{{DBQueryRequestTransitDurationTotal}{DBQueryRequestTransitDurationTotal}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S121}{S121}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-L}\nwindexuse{S121}{S121}{NW27XAxz-1Ang64-L}\nwendcode{}\nwbegindocs{344}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryRequestTravelDuration}{DBQueryRequestTravelDuration}{NW27XAxz-1Ang64-M}DBQueryRequestTravelDuration}(1)}
-\nwenddocs{}\nwbegincode{343}\sublabel{NW27XAxz-1Ang64-M}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-M}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{345}\sublabel{NW27XAxz-1Ang64-M}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-M}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryRequestTravelDuration(int rid) throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4409,9 +4490,9 @@ public int[] DBQueryRequestTravelDuration(int rid) throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryRequestTravelDuration}{DBQueryRequestTravelDuration}{NW27XAxz-1Ang64-M}\eatline
-\nwidentdefs{\\{{DBQueryRequestTravelDuration}{DBQueryRequestTravelDuration}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S122}{S122}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-M}\nwindexuse{S122}{S122}{NW27XAxz-1Ang64-M}\nwendcode{}\nwbegindocs{344}\nwdocspar
+\nwidentdefs{\\{{DBQueryRequestTravelDuration}{DBQueryRequestTravelDuration}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S122}{S122}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-M}\nwindexuse{S122}{S122}{NW27XAxz-1Ang64-M}\nwendcode{}\nwbegindocs{346}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryRequestTravelDurationTotal}{DBQueryRequestTravelDurationTotal}{NW27XAxz-1Ang64-N}DBQueryRequestTravelDurationTotal}(0)}
-\nwenddocs{}\nwbegincode{345}\sublabel{NW27XAxz-1Ang64-N}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-N}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{347}\sublabel{NW27XAxz-1Ang64-N}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-N}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryRequestTravelDurationTotal() throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4422,9 +4503,9 @@ public int[] DBQueryRequestTravelDurationTotal() throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryRequestTravelDurationTotal}{DBQueryRequestTravelDurationTotal}{NW27XAxz-1Ang64-N}\eatline
-\nwidentdefs{\\{{DBQueryRequestTravelDurationTotal}{DBQueryRequestTravelDurationTotal}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S123}{S123}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-N}\nwindexuse{S123}{S123}{NW27XAxz-1Ang64-N}\nwendcode{}\nwbegindocs{346}\nwdocspar
+\nwidentdefs{\\{{DBQueryRequestTravelDurationTotal}{DBQueryRequestTravelDurationTotal}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S123}{S123}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-N}\nwindexuse{S123}{S123}{NW27XAxz-1Ang64-N}\nwendcode{}\nwbegindocs{348}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryRequestDepartureTime}{DBQueryRequestDepartureTime}{NW27XAxz-1Ang64-O}DBQueryRequestDepartureTime}(1)}
-\nwenddocs{}\nwbegincode{347}\sublabel{NW27XAxz-1Ang64-O}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-O}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{349}\sublabel{NW27XAxz-1Ang64-O}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-O}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryRequestDepartureTime(int rid) throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4435,9 +4516,9 @@ public int[] DBQueryRequestDepartureTime(int rid) throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryRequestDepartureTime}{DBQueryRequestDepartureTime}{NW27XAxz-1Ang64-O}\eatline
-\nwidentdefs{\\{{DBQueryRequestDepartureTime}{DBQueryRequestDepartureTime}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S124}{S124}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-O}\nwindexuse{S124}{S124}{NW27XAxz-1Ang64-O}\nwendcode{}\nwbegindocs{348}\nwdocspar
+\nwidentdefs{\\{{DBQueryRequestDepartureTime}{DBQueryRequestDepartureTime}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S124}{S124}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-O}\nwindexuse{S124}{S124}{NW27XAxz-1Ang64-O}\nwendcode{}\nwbegindocs{350}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServerDepartureTime}{DBQueryServerDepartureTime}{NW27XAxz-1Ang64-P}DBQueryServerDepartureTime}(1)}
-\nwenddocs{}\nwbegincode{349}\sublabel{NW27XAxz-1Ang64-P}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-P}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{351}\sublabel{NW27XAxz-1Ang64-P}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-P}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryServerDepartureTime(int sid) throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4448,9 +4529,9 @@ public int[] DBQueryServerDepartureTime(int sid) throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryServerDepartureTime}{DBQueryServerDepartureTime}{NW27XAxz-1Ang64-P}\eatline
-\nwidentdefs{\\{{DBQueryServerDepartureTime}{DBQueryServerDepartureTime}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S125}{S125}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-P}\nwindexuse{S125}{S125}{NW27XAxz-1Ang64-P}\nwendcode{}\nwbegindocs{350}\nwdocspar
+\nwidentdefs{\\{{DBQueryServerDepartureTime}{DBQueryServerDepartureTime}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S125}{S125}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-P}\nwindexuse{S125}{S125}{NW27XAxz-1Ang64-P}\nwendcode{}\nwbegindocs{352}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryRequestArrivalTime}{DBQueryRequestArrivalTime}{NW27XAxz-1Ang64-Q}DBQueryRequestArrivalTime}(1)}
-\nwenddocs{}\nwbegincode{351}\sublabel{NW27XAxz-1Ang64-Q}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-Q}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{353}\sublabel{NW27XAxz-1Ang64-Q}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-Q}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryRequestArrivalTime(int rid) throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4461,9 +4542,9 @@ public int[] DBQueryRequestArrivalTime(int rid) throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryRequestArrivalTime}{DBQueryRequestArrivalTime}{NW27XAxz-1Ang64-Q}\eatline
-\nwidentdefs{\\{{DBQueryRequestArrivalTime}{DBQueryRequestArrivalTime}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S126}{S126}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-Q}\nwindexuse{S126}{S126}{NW27XAxz-1Ang64-Q}\nwendcode{}\nwbegindocs{352}\nwdocspar
+\nwidentdefs{\\{{DBQueryRequestArrivalTime}{DBQueryRequestArrivalTime}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S126}{S126}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-Q}\nwindexuse{S126}{S126}{NW27XAxz-1Ang64-Q}\nwendcode{}\nwbegindocs{354}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{DBQueryServerArrivalTime}{DBQueryServerArrivalTime}{NW27XAxz-1Ang64-R}DBQueryServerArrivalTime}(1)}
-\nwenddocs{}\nwbegincode{353}\sublabel{NW27XAxz-1Ang64-R}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-R}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{355}\sublabel{NW27XAxz-1Ang64-R}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-R}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryServerArrivalTime(int sid) throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
@@ -4474,24 +4555,24 @@ public int[] DBQueryServerArrivalTime(int sid) throws SQLException \{
   return output;
 \}
 \nwindexdefn{DBQueryServerArrivalTime}{DBQueryServerArrivalTime}{NW27XAxz-1Ang64-R}\eatline
-\nwidentdefs{\\{{DBQueryServerArrivalTime}{DBQueryServerArrivalTime}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S127}{S127}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-R}\nwindexuse{S127}{S127}{NW27XAxz-1Ang64-R}\nwendcode{}\nwbegindocs{354}\nwdocspar
+\nwidentdefs{\\{{DBQueryServerArrivalTime}{DBQueryServerArrivalTime}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S127}{S127}}}\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-1Ang64-R}\nwindexuse{S127}{S127}{NW27XAxz-1Ang64-R}\nwendcode{}\nwbegindocs{356}\nwdocspar
 \section{Private Methods}
 \label{sec:private}
-\nwenddocs{}\nwbegincode{355}\sublabel{NW27XAxz-XGFF1-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-XGFF1-1}}}\moddef{\code{}Storage\edoc{} private methods~{\nwtagstyle{}\subpageref{NW27XAxz-XGFF1-1}}}\endmoddef\nwused{\\{NW27XAxz-3TAldU-1}}
+\nwenddocs{}\nwbegincode{357}\sublabel{NW27XAxz-XGFF1-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-XGFF1-1}}}\moddef{\code{}Storage\edoc{} private methods~{\nwtagstyle{}\subpageref{NW27XAxz-XGFF1-1}}}\endmoddef\nwused{\\{NW27XAxz-3TAldU-1}}
 \LA{}Setup JDBC driver~{\nwtagstyle{}\subpageref{NW27XAxz-33Wt2A-1}}\RA{}
 \LA{}Initialize statements~{\nwtagstyle{}\subpageref{NW27XAxz-1g2xnv-1}}\RA{}
 \LA{}Prepare a prepared statement~{\nwtagstyle{}\subpageref{NW27XAxz-4UQpM2-1}}\RA{}
 \LA{}Fetch items from database~{\nwtagstyle{}\subpageref{NW27XAxz-17Zt8W-1}}\RA{}
 \LA{}Fill prepared statement~{\nwtagstyle{}\subpageref{NW27XAxz-1ZE0ye-1}}\RA{}
 \LA{}Submit prepared statement batch~{\nwtagstyle{}\subpageref{NW27XAxz-322zJf-1}}\RA{}
-\nwendcode{}\nwbegindocs{356}\nwdocspar
+\nwendcode{}\nwbegindocs{358}\nwdocspar
 
 \subsection{{\tt{}\protect\nosublabel{NW27XAxz-XGFF1-1-u6}\protect\nwindexuse{setupDriver}{setupDriver}{NW27XAxz-33Wt2A-1}setupDriver}(0)}
 The following code registers a connection pool to the JDBC driver.  Portions of
 this code are licensed by the Apache Software Foundation.  The connection pool
 allows us to concurrently submit multiple SQL commands against the database
 from different threads.
-\nwenddocs{}\nwbegincode{357}\sublabel{NW27XAxz-33Wt2A-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-33Wt2A-1}}}\moddef{Setup JDBC driver~{\nwtagstyle{}\subpageref{NW27XAxz-33Wt2A-1}}}\endmoddef\nwused{\\{NW27XAxz-XGFF1-1}}
+\nwenddocs{}\nwbegincode{359}\sublabel{NW27XAxz-33Wt2A-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-33Wt2A-1}}}\moddef{Setup JDBC driver~{\nwtagstyle{}\subpageref{NW27XAxz-33Wt2A-1}}}\endmoddef\nwused{\\{NW27XAxz-XGFF1-1}}
 private void setupDriver() throws SQLException, ClassNotFoundException \{
   connection_factory = new DriverManagerConnectionFactory(CONNECTIONS_URL);
   poolableconnection_factory = new PoolableConnectionFactory(connection_factory, null);
@@ -4509,9 +4590,9 @@ private void setupDriver() throws SQLException, ClassNotFoundException \{
   driver.registerPool(CONNECTIONS_POOL_NAME, pool);
 \}
 \nwindexdefn{setupDriver}{setupDriver}{NW27XAxz-33Wt2A-1}\eatline
-\nwidentdefs{\\{{setupDriver}{setupDriver}}}\nwidentuses{\\{{connection{\char95}factory}{connection:unfactory}}\\{{CONNECTIONS{\char95}DRIVER{\char95}URL}{CONNECTIONS:unDRIVER:unURL}}\\{{CONNECTIONS{\char95}POOL{\char95}NAME}{CONNECTIONS:unPOOL:unNAME}}\\{{CONNECTIONS{\char95}URL}{CONNECTIONS:unURL}}\\{{driver}{driver}}\\{{pool}{pool}}\\{{poolableconnection{\char95}factory}{poolableconnection:unfactory}}\\{{STATEMENTS{\char95}MAX{\char95}COUNT}{STATEMENTS:unMAX:unCOUNT}}}\nwindexuse{connection{\char95}factory}{connection:unfactory}{NW27XAxz-33Wt2A-1}\nwindexuse{CONNECTIONS{\char95}DRIVER{\char95}URL}{CONNECTIONS:unDRIVER:unURL}{NW27XAxz-33Wt2A-1}\nwindexuse{CONNECTIONS{\char95}POOL{\char95}NAME}{CONNECTIONS:unPOOL:unNAME}{NW27XAxz-33Wt2A-1}\nwindexuse{CONNECTIONS{\char95}URL}{CONNECTIONS:unURL}{NW27XAxz-33Wt2A-1}\nwindexuse{driver}{driver}{NW27XAxz-33Wt2A-1}\nwindexuse{pool}{pool}{NW27XAxz-33Wt2A-1}\nwindexuse{poolableconnection{\char95}factory}{poolableconnection:unfactory}{NW27XAxz-33Wt2A-1}\nwindexuse{STATEMENTS{\char95}MAX{\char95}COUNT}{STATEMENTS:unMAX:unCOUNT}{NW27XAxz-33Wt2A-1}\nwendcode{}\nwbegindocs{358}\nwdocspar
+\nwidentdefs{\\{{setupDriver}{setupDriver}}}\nwidentuses{\\{{connection{\char95}factory}{connection:unfactory}}\\{{CONNECTIONS{\char95}DRIVER{\char95}URL}{CONNECTIONS:unDRIVER:unURL}}\\{{CONNECTIONS{\char95}POOL{\char95}NAME}{CONNECTIONS:unPOOL:unNAME}}\\{{CONNECTIONS{\char95}URL}{CONNECTIONS:unURL}}\\{{driver}{driver}}\\{{pool}{pool}}\\{{poolableconnection{\char95}factory}{poolableconnection:unfactory}}\\{{STATEMENTS{\char95}MAX{\char95}COUNT}{STATEMENTS:unMAX:unCOUNT}}}\nwindexuse{connection{\char95}factory}{connection:unfactory}{NW27XAxz-33Wt2A-1}\nwindexuse{CONNECTIONS{\char95}DRIVER{\char95}URL}{CONNECTIONS:unDRIVER:unURL}{NW27XAxz-33Wt2A-1}\nwindexuse{CONNECTIONS{\char95}POOL{\char95}NAME}{CONNECTIONS:unPOOL:unNAME}{NW27XAxz-33Wt2A-1}\nwindexuse{CONNECTIONS{\char95}URL}{CONNECTIONS:unURL}{NW27XAxz-33Wt2A-1}\nwindexuse{driver}{driver}{NW27XAxz-33Wt2A-1}\nwindexuse{pool}{pool}{NW27XAxz-33Wt2A-1}\nwindexuse{poolableconnection{\char95}factory}{poolableconnection:unfactory}{NW27XAxz-33Wt2A-1}\nwindexuse{STATEMENTS{\char95}MAX{\char95}COUNT}{STATEMENTS:unMAX:unCOUNT}{NW27XAxz-33Wt2A-1}\nwendcode{}\nwbegindocs{360}\nwdocspar
 \subsection{{\tt{}\protect\nwindexuse{PS}{PS}{NW27XAxz-4UQpM2-1}PS}(1)}
-\nwenddocs{}\nwbegincode{359}\sublabel{NW27XAxz-4UQpM2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4UQpM2-1}}}\moddef{Prepare a prepared statement~{\nwtagstyle{}\subpageref{NW27XAxz-4UQpM2-1}}}\endmoddef\nwused{\\{NW27XAxz-XGFF1-1}}
+\nwenddocs{}\nwbegincode{361}\sublabel{NW27XAxz-4UQpM2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4UQpM2-1}}}\moddef{Prepare a prepared statement~{\nwtagstyle{}\subpageref{NW27XAxz-4UQpM2-1}}}\endmoddef\nwused{\\{NW27XAxz-XGFF1-1}}
 private PreparedStatement PS(Connection conn, String k) throws SQLException \{
   PreparedStatement p = null;
   try \{
@@ -4525,9 +4606,9 @@ private PreparedStatement PS(Connection conn, String k) throws SQLException \{
   return p;
 \}
 \nwindexdefn{PS}{PS}{NW27XAxz-4UQpM2-1}\eatline
-\nwidentdefs{\\{{PS}{PS}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4UQpM2-1}\nwendcode{}\nwbegindocs{360}\nwdocspar
+\nwidentdefs{\\{{PS}{PS}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4UQpM2-1}\nwendcode{}\nwbegindocs{362}\nwdocspar
 \subsection{{\tt{}\protect\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-17Zt8W-1}DBFetch}(3...)}
-\nwenddocs{}\nwbegincode{361}\sublabel{NW27XAxz-17Zt8W-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-17Zt8W-1}}}\moddef{Fetch items from database~{\nwtagstyle{}\subpageref{NW27XAxz-17Zt8W-1}}}\endmoddef\nwused{\\{NW27XAxz-XGFF1-1}}
+\nwenddocs{}\nwbegincode{363}\sublabel{NW27XAxz-17Zt8W-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-17Zt8W-1}}}\moddef{Fetch items from database~{\nwtagstyle{}\subpageref{NW27XAxz-17Zt8W-1}}}\endmoddef\nwused{\\{NW27XAxz-XGFF1-1}}
 private int[] DBFetch(Connection conn, String k, int ncols, Integer... values)
 throws SQLException \{
   int[] output = new int[] \{ \};
@@ -4546,7 +4627,7 @@ throws SQLException \{
   return output;
 \}
 \nosublabel{NW27XAxz-17Zt8W-1-u2}\nwindexdefn{DBFetch}{DBFetch}{NW27XAxz-17Zt8W-1}\eatline
-\nwidentdefs{\\{{DBFetch}{DBFetch}}}\nwidentuses{\\{{PS}{PS}}}\nwindexuse{PS}{PS}{NW27XAxz-17Zt8W-1}\nwendcode{}\nwbegincode{362}\sublabel{NW27XAxz-2m6DFc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2m6DFc-1}}}\moddef{..set values for statement~{\nwtagstyle{}\subpageref{NW27XAxz-2m6DFc-1}}}\endmoddef\nwused{\\{NW27XAxz-17Zt8W-1}\\{NW27XAxz-1ZE0ye-1}}
+\nwidentdefs{\\{{DBFetch}{DBFetch}}}\nwidentuses{\\{{PS}{PS}}}\nwindexuse{PS}{PS}{NW27XAxz-17Zt8W-1}\nwendcode{}\nwbegincode{364}\sublabel{NW27XAxz-2m6DFc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2m6DFc-1}}}\moddef{..set values for statement~{\nwtagstyle{}\subpageref{NW27XAxz-2m6DFc-1}}}\endmoddef\nwused{\\{NW27XAxz-17Zt8W-1}\\{NW27XAxz-1ZE0ye-1}}
 for (int i = 0; i < values.length; i++) \{
   if (values[i] == null) \{
     p.setNull((i + 1), java.sql.Types.INTEGER);
@@ -4554,10 +4635,10 @@ for (int i = 0; i < values.length; i++) \{
     p.setInt ((i + 1), values[i]);
   \}
 \}
-\nwendcode{}\nwbegindocs{363}\nwdocspar
+\nwendcode{}\nwbegindocs{365}\nwdocspar
 
 \subsection{{\tt{}\protect\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-1ZE0ye-1}PSAdd}(2...)}
-\nwenddocs{}\nwbegincode{364}\sublabel{NW27XAxz-1ZE0ye-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1ZE0ye-1}}}\moddef{Fill prepared statement~{\nwtagstyle{}\subpageref{NW27XAxz-1ZE0ye-1}}}\endmoddef\nwused{\\{NW27XAxz-XGFF1-1}}
+\nwenddocs{}\nwbegincode{366}\sublabel{NW27XAxz-1ZE0ye-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1ZE0ye-1}}}\moddef{Fill prepared statement~{\nwtagstyle{}\subpageref{NW27XAxz-1ZE0ye-1}}}\endmoddef\nwused{\\{NW27XAxz-XGFF1-1}}
 private void PSAdd(PreparedStatement p, Integer... values) throws SQLException \{
   p.clearParameters();
   \LA{}..set values for statement~{\nwtagstyle{}\subpageref{NW27XAxz-2m6DFc-1}}\RA{}
@@ -4568,9 +4649,9 @@ private void PSAdd(PreparedStatement p, Integer... values) throws SQLException \
   \}
 \}
 \nosublabel{NW27XAxz-1ZE0ye-1-u1}\nwindexdefn{PSAdd}{PSAdd}{NW27XAxz-1ZE0ye-1}\eatline
-\nwidentdefs{\\{{PSAdd}{PSAdd}}}\nwendcode{}\nwbegindocs{365}\nwdocspar
+\nwidentdefs{\\{{PSAdd}{PSAdd}}}\nwendcode{}\nwbegindocs{367}\nwdocspar
 \subsection{{\tt{}\protect\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-322zJf-1}PSSubmit}(1...)}
-\nwenddocs{}\nwbegincode{366}\sublabel{NW27XAxz-322zJf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-322zJf-1}}}\moddef{Submit prepared statement batch~{\nwtagstyle{}\subpageref{NW27XAxz-322zJf-1}}}\endmoddef\nwused{\\{NW27XAxz-XGFF1-1}}
+\nwenddocs{}\nwbegincode{368}\sublabel{NW27XAxz-322zJf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-322zJf-1}}}\moddef{Submit prepared statement batch~{\nwtagstyle{}\subpageref{NW27XAxz-322zJf-1}}}\endmoddef\nwused{\\{NW27XAxz-XGFF1-1}}
 private void PSSubmit(PreparedStatement... statements) throws SQLException \{
   try \{
     for (PreparedStatement p : statements) \{
@@ -4582,12 +4663,12 @@ private void PSSubmit(PreparedStatement... statements) throws SQLException \{
   \}
 \}
 \nwindexdefn{PSSubmit}{PSSubmit}{NW27XAxz-322zJf-1}\eatline
-\nwidentdefs{\\{{PSSubmit}{PSSubmit}}}\nwendcode{}\nwbegindocs{367}\nwdocspar
+\nwidentdefs{\\{{PSSubmit}{PSSubmit}}}\nwendcode{}\nwbegindocs{369}\nwdocspar
 \subsection{{\tt{}\protect\nwindexuse{PSInit}{PSInit}{NW27XAxz-1g2xnv-1}PSInit}(0)}
 The {\tt{}\protect\nwindexuse{PSInit}{PSInit}{NW27XAxz-1g2xnv-1}PSInit}(0) method initializes the statement cache {\tt{}\protect\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-17yXws-2}lu{\char95}pstr}. Each
 statement is placed in its own chunk so it can be referenced wherever the
 statement is used.
-\nwenddocs{}\nwbegincode{368}\sublabel{NW27XAxz-1g2xnv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1g2xnv-1}}}\moddef{Initialize statements~{\nwtagstyle{}\subpageref{NW27XAxz-1g2xnv-1}}}\endmoddef\nwused{\\{NW27XAxz-XGFF1-1}}
+\nwenddocs{}\nwbegincode{370}\sublabel{NW27XAxz-1g2xnv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1g2xnv-1}}}\moddef{Initialize statements~{\nwtagstyle{}\subpageref{NW27XAxz-1g2xnv-1}}}\endmoddef\nwused{\\{NW27XAxz-XGFF1-1}}
 private void PSInit() \{
   String INS = "INSERT INTO ";
   String UPD = "UPDATE ";
@@ -4695,127 +4776,127 @@ private void PSInit() \{
   \LA{}S149~{\nwtagstyle{}\subpageref{NW27XAxz-44GFKd-1}}\RA{}
 \}
 \nosublabel{NW27XAxz-1g2xnv-1-u92}\nwindexdefn{PSInit}{PSInit}{NW27XAxz-1g2xnv-1}\eatline
-\nwidentdefs{\\{{PSInit}{PSInit}}}\nwendcode{}\nwbegincode{369}\sublabel{NW27XAxz-9czRY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-9czRY-1}}}\moddef{S0~{\nwtagstyle{}\subpageref{NW27XAxz-9czRY-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{PSInit}{PSInit}}}\nwendcode{}\nwbegincode{371}\sublabel{NW27XAxz-9czRY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-9czRY-1}}}\moddef{S0~{\nwtagstyle{}\subpageref{NW27XAxz-9czRY-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S0", INS+"V VALUES "+q3);
 \nwindexdefn{S0}{S0}{NW27XAxz-9czRY-1}\eatline
-\nwidentdefs{\\{{S0}{S0}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-9czRY-1}\nwendcode{}\nwbegincode{370}\sublabel{NW27XAxz-4dnsum-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4dnsum-1}}}\moddef{S1~{\nwtagstyle{}\subpageref{NW27XAxz-4dnsum-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S0}{S0}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-9czRY-1}\nwendcode{}\nwbegincode{372}\sublabel{NW27XAxz-4dnsum-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4dnsum-1}}}\moddef{S1~{\nwtagstyle{}\subpageref{NW27XAxz-4dnsum-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S1", INS+"E VALUES "+q4);
 \nwindexdefn{S1}{S1}{NW27XAxz-4dnsum-1}\eatline
-\nwidentdefs{\\{{S1}{S1}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4dnsum-1}\nwendcode{}\nwbegincode{371}\sublabel{NW27XAxz-26Y6r2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-26Y6r2-1}}}\moddef{S2~{\nwtagstyle{}\subpageref{NW27XAxz-26Y6r2-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S1}{S1}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4dnsum-1}\nwendcode{}\nwbegincode{373}\sublabel{NW27XAxz-26Y6r2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-26Y6r2-1}}}\moddef{S2~{\nwtagstyle{}\subpageref{NW27XAxz-26Y6r2-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S2", INS+"UQ VALUES "+q2);
 \nwindexdefn{S2}{S2}{NW27XAxz-26Y6r2-1}\eatline
-\nwidentdefs{\\{{S2}{S2}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-26Y6r2-1}\nwendcode{}\nwbegincode{372}\sublabel{NW27XAxz-2UOPmS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2UOPmS-1}}}\moddef{S3~{\nwtagstyle{}\subpageref{NW27XAxz-2UOPmS-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S2}{S2}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-26Y6r2-1}\nwendcode{}\nwbegincode{374}\sublabel{NW27XAxz-2UOPmS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2UOPmS-1}}}\moddef{S3~{\nwtagstyle{}\subpageref{NW27XAxz-2UOPmS-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S3", INS+"UE VALUES "+q2);
 \nwindexdefn{S3}{S3}{NW27XAxz-2UOPmS-1}\eatline
-\nwidentdefs{\\{{S3}{S3}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-2UOPmS-1}\nwendcode{}\nwbegincode{373}\sublabel{NW27XAxz-yRBj6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-yRBj6-1}}}\moddef{S4~{\nwtagstyle{}\subpageref{NW27XAxz-yRBj6-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S3}{S3}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-2UOPmS-1}\nwendcode{}\nwbegincode{375}\sublabel{NW27XAxz-yRBj6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-yRBj6-1}}}\moddef{S4~{\nwtagstyle{}\subpageref{NW27XAxz-yRBj6-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S4", INS+"UL VALUES "+q2);
 \nwindexdefn{S4}{S4}{NW27XAxz-yRBj6-1}\eatline
-\nwidentdefs{\\{{S4}{S4}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-yRBj6-1}\nwendcode{}\nwbegincode{374}\sublabel{NW27XAxz-3WGA2y-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3WGA2y-1}}}\moddef{S5~{\nwtagstyle{}\subpageref{NW27XAxz-3WGA2y-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S4}{S4}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-yRBj6-1}\nwendcode{}\nwbegincode{376}\sublabel{NW27XAxz-3WGA2y-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3WGA2y-1}}}\moddef{S5~{\nwtagstyle{}\subpageref{NW27XAxz-3WGA2y-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S5", INS+"UO VALUES "+q2);
 \nwindexdefn{S5}{S5}{NW27XAxz-3WGA2y-1}\eatline
-\nwidentdefs{\\{{S5}{S5}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3WGA2y-1}\nwendcode{}\nwbegincode{375}\sublabel{NW27XAxz-1SWfVw-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1SWfVw-1}}}\moddef{S6~{\nwtagstyle{}\subpageref{NW27XAxz-1SWfVw-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S5}{S5}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3WGA2y-1}\nwendcode{}\nwbegincode{377}\sublabel{NW27XAxz-1SWfVw-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1SWfVw-1}}}\moddef{S6~{\nwtagstyle{}\subpageref{NW27XAxz-1SWfVw-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S6", INS+"UD VALUES "+q2);
 \nwindexdefn{S6}{S6}{NW27XAxz-1SWfVw-1}\eatline
-\nwidentdefs{\\{{S6}{S6}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-1SWfVw-1}\nwendcode{}\nwbegincode{376}\sublabel{NW27XAxz-3Q0zBY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3Q0zBY-1}}}\moddef{S7~{\nwtagstyle{}\subpageref{NW27XAxz-3Q0zBY-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S6}{S6}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-1SWfVw-1}\nwendcode{}\nwbegincode{378}\sublabel{NW27XAxz-3Q0zBY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3Q0zBY-1}}}\moddef{S7~{\nwtagstyle{}\subpageref{NW27XAxz-3Q0zBY-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S7", INS+"UB VALUES "+q2);
 \nwindexdefn{S7}{S7}{NW27XAxz-3Q0zBY-1}\eatline
-\nwidentdefs{\\{{S7}{S7}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3Q0zBY-1}\nwendcode{}\nwbegincode{377}\sublabel{NW27XAxz-PwvQG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-PwvQG-1}}}\moddef{S8~{\nwtagstyle{}\subpageref{NW27XAxz-PwvQG-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S7}{S7}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3Q0zBY-1}\nwendcode{}\nwbegincode{379}\sublabel{NW27XAxz-PwvQG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-PwvQG-1}}}\moddef{S8~{\nwtagstyle{}\subpageref{NW27XAxz-PwvQG-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S8", INS+"S VALUES "+q7);
 \nwindexdefn{S8}{S8}{NW27XAxz-PwvQG-1}\eatline
-\nwidentdefs{\\{{S8}{S8}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-PwvQG-1}\nwendcode{}\nwbegincode{378}\sublabel{NW27XAxz-4Ai05A-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4Ai05A-1}}}\moddef{S9~{\nwtagstyle{}\subpageref{NW27XAxz-4Ai05A-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S8}{S8}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-PwvQG-1}\nwendcode{}\nwbegincode{380}\sublabel{NW27XAxz-4Ai05A-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4Ai05A-1}}}\moddef{S9~{\nwtagstyle{}\subpageref{NW27XAxz-4Ai05A-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S9", INS+"R VALUES "+q7);
 \nwindexdefn{S9}{S9}{NW27XAxz-4Ai05A-1}\eatline
-\nwidentdefs{\\{{S9}{S9}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4Ai05A-1}\nwendcode{}\nwbegincode{379}\sublabel{NW27XAxz-96fbA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-96fbA-1}}}\moddef{S10~{\nwtagstyle{}\subpageref{NW27XAxz-96fbA-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S9}{S9}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4Ai05A-1}\nwendcode{}\nwbegincode{381}\sublabel{NW27XAxz-96fbA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-96fbA-1}}}\moddef{S10~{\nwtagstyle{}\subpageref{NW27XAxz-96fbA-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S10", INS+"W VALUES "+q8);
 \nwindexdefn{S10}{S10}{NW27XAxz-96fbA-1}\eatline
-\nwidentdefs{\\{{S10}{S10}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-96fbA-1}\nwendcode{}\nwbegincode{380}\sublabel{NW27XAxz-9NVqO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-9NVqO-1}}}\moddef{S70~{\nwtagstyle{}\subpageref{NW27XAxz-9NVqO-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S10}{S10}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-96fbA-1}\nwendcode{}\nwbegincode{382}\sublabel{NW27XAxz-9NVqO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-9NVqO-1}}}\moddef{S70~{\nwtagstyle{}\subpageref{NW27XAxz-9NVqO-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S70", SEL+"sid, sq, se, sl, so, sd, sb FROM S WHERE sid=?");
 \nwindexdefn{S70}{S70}{NW27XAxz-9NVqO-1}\eatline
-\nwidentdefs{\\{{S70}{S70}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-9NVqO-1}\nwendcode{}\nwbegincode{381}\sublabel{NW27XAxz-4dHZ4O-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4dHZ4O-1}}}\moddef{S11~{\nwtagstyle{}\subpageref{NW27XAxz-4dHZ4O-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S70}{S70}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-9NVqO-1}\nwendcode{}\nwbegincode{383}\sublabel{NW27XAxz-4dHZ4O-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4dHZ4O-1}}}\moddef{S11~{\nwtagstyle{}\subpageref{NW27XAxz-4dHZ4O-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S11", INS+"CW VALUES "+q9);
 \nwindexdefn{S11}{S11}{NW27XAxz-4dHZ4O-1}\eatline
-\nwidentdefs{\\{{S11}{S11}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4dHZ4O-1}\nwendcode{}\nwbegincode{382}\sublabel{NW27XAxz-261n0e-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-261n0e-1}}}\moddef{S12~{\nwtagstyle{}\subpageref{NW27XAxz-261n0e-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S11}{S11}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4dHZ4O-1}\nwendcode{}\nwbegincode{384}\sublabel{NW27XAxz-261n0e-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-261n0e-1}}}\moddef{S12~{\nwtagstyle{}\subpageref{NW27XAxz-261n0e-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S12", INS+"PD VALUES "+q4);
 \nwindexdefn{S12}{S12}{NW27XAxz-261n0e-1}\eatline
-\nwidentdefs{\\{{S12}{S12}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-261n0e-1}\nwendcode{}\nwbegincode{383}\sublabel{NW27XAxz-2Ts5w4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2Ts5w4-1}}}\moddef{S13~{\nwtagstyle{}\subpageref{NW27XAxz-2Ts5w4-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S12}{S12}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-261n0e-1}\nwendcode{}\nwbegincode{385}\sublabel{NW27XAxz-2Ts5w4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2Ts5w4-1}}}\moddef{S13~{\nwtagstyle{}\subpageref{NW27XAxz-2Ts5w4-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S13", INS+"CPD VALUES "+q12);
 \nwindexdefn{S13}{S13}{NW27XAxz-2Ts5w4-1}\eatline
-\nwidentdefs{\\{{S13}{S13}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-2Ts5w4-1}\nwendcode{}\nwbegincode{384}\sublabel{NW27XAxz-yU48q-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-yU48q-1}}}\moddef{S14~{\nwtagstyle{}\subpageref{NW27XAxz-yU48q-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S13}{S13}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-2Ts5w4-1}\nwendcode{}\nwbegincode{386}\sublabel{NW27XAxz-yU48q-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-yU48q-1}}}\moddef{S14~{\nwtagstyle{}\subpageref{NW27XAxz-yU48q-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S14", INS+"CQ VALUES "+q14);
 \nwindexdefn{S14}{S14}{NW27XAxz-yU48q-1}\eatline
-\nwidentdefs{\\{{S14}{S14}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-yU48q-1}\nwendcode{}\nwbegincode{385}\sublabel{NW27XAxz-3WJ2Si-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3WJ2Si-1}}}\moddef{S15~{\nwtagstyle{}\subpageref{NW27XAxz-3WJ2Si-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S14}{S14}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-yU48q-1}\nwendcode{}\nwbegincode{387}\sublabel{NW27XAxz-3WJ2Si-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3WJ2Si-1}}}\moddef{S15~{\nwtagstyle{}\subpageref{NW27XAxz-3WJ2Si-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S15", UPD+"E SET nu=? WHERE v1=? AND v2=?");
 \nwindexdefn{S15}{S15}{NW27XAxz-3WJ2Si-1}\eatline
-\nwidentdefs{\\{{S15}{S15}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3WJ2Si-1}\nwendcode{}\nwbegincode{386}\sublabel{NW27XAxz-3WHOrj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3WHOrj-1}}}\moddef{S131~{\nwtagstyle{}\subpageref{NW27XAxz-3WHOrj-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S15}{S15}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3WJ2Si-1}\nwendcode{}\nwbegincode{388}\sublabel{NW27XAxz-3WHOrj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3WHOrj-1}}}\moddef{S131~{\nwtagstyle{}\subpageref{NW27XAxz-3WHOrj-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S131", UPD+"W SET nu=? WHERE v1=? AND v2=?");
 \nwindexdefn{S131}{S131}{NW27XAxz-3WHOrj-1}\eatline
-\nwidentdefs{\\{{S131}{S131}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3WHOrj-1}\nwendcode{}\nwbegincode{387}\sublabel{NW27XAxz-3PlVaO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3PlVaO-1}}}\moddef{S77~{\nwtagstyle{}\subpageref{NW27XAxz-3PlVaO-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S131}{S131}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3WHOrj-1}\nwendcode{}\nwbegincode{389}\sublabel{NW27XAxz-3PlVaO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3PlVaO-1}}}\moddef{S77~{\nwtagstyle{}\subpageref{NW27XAxz-3PlVaO-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S77", UPD+"CW SET te=?, ve=? WHERE sid=?");
 \nwindexdefn{S77}{S77}{NW27XAxz-3PlVaO-1}\eatline
-\nwidentdefs{\\{{S77}{S77}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3PlVaO-1}\nwendcode{}\nwbegincode{388}\sublabel{NW27XAxz-yx2fc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-yx2fc-1}}}\moddef{S84~{\nwtagstyle{}\subpageref{NW27XAxz-yx2fc-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S77}{S77}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3PlVaO-1}\nwendcode{}\nwbegincode{390}\sublabel{NW27XAxz-yx2fc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-yx2fc-1}}}\moddef{S84~{\nwtagstyle{}\subpageref{NW27XAxz-yx2fc-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S84", UPD+"PD SET t2=? WHERE v2=? AND rid=?");
 \nwindexdefn{S84}{S84}{NW27XAxz-yx2fc-1}\eatline
-\nwidentdefs{\\{{S84}{S84}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-yx2fc-1}\nwendcode{}\nwbegincode{389}\sublabel{NW27XAxz-25vZHI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-25vZHI-1}}}\moddef{S82~{\nwtagstyle{}\subpageref{NW27XAxz-25vZHI-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S84}{S84}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-yx2fc-1}\nwendcode{}\nwbegincode{391}\sublabel{NW27XAxz-25vZHI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-25vZHI-1}}}\moddef{S82~{\nwtagstyle{}\subpageref{NW27XAxz-25vZHI-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S82", UPD+"CPD SET tp=? WHERE vp=? AND rid=?");
 \nwindexdefn{S82}{S82}{NW27XAxz-25vZHI-1}\eatline
-\nwidentdefs{\\{{S82}{S82}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-25vZHI-1}\nwendcode{}\nwbegincode{390}\sublabel{NW27XAxz-2TlsCi-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2TlsCi-1}}}\moddef{S83~{\nwtagstyle{}\subpageref{NW27XAxz-2TlsCi-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S82}{S82}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-25vZHI-1}\nwendcode{}\nwbegincode{392}\sublabel{NW27XAxz-2TlsCi-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2TlsCi-1}}}\moddef{S83~{\nwtagstyle{}\subpageref{NW27XAxz-2TlsCi-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S83", UPD+"CPD SET td=? WHERE vd=? AND rid=?");
 \nwindexdefn{S83}{S83}{NW27XAxz-2TlsCi-1}\eatline
-\nwidentdefs{\\{{S83}{S83}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-2TlsCi-1}\nwendcode{}\nwbegincode{391}\sublabel{NW27XAxz-1SHBum-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1SHBum-1}}}\moddef{S76~{\nwtagstyle{}\subpageref{NW27XAxz-1SHBum-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S83}{S83}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-2TlsCi-1}\nwendcode{}\nwbegincode{393}\sublabel{NW27XAxz-1SHBum-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1SHBum-1}}}\moddef{S76~{\nwtagstyle{}\subpageref{NW27XAxz-1SHBum-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S76", DEL+"W WHERE sid=? AND t2>?");
 \nwindexdefn{S76}{S76}{NW27XAxz-1SHBum-1}\eatline
-\nwidentdefs{\\{{S76}{S76}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-1SHBum-1}\nwendcode{}\nwbegincode{392}\sublabel{NW27XAxz-25mK0a-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-25mK0a-1}}}\moddef{S42~{\nwtagstyle{}\subpageref{NW27XAxz-25mK0a-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S76}{S76}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-1SHBum-1}\nwendcode{}\nwbegincode{394}\sublabel{NW27XAxz-25mK0a-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-25mK0a-1}}}\moddef{S42~{\nwtagstyle{}\subpageref{NW27XAxz-25mK0a-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S42", DEL+"PD WHERE rid=?");
 \nwindexdefn{S42}{S42}{NW27XAxz-25mK0a-1}\eatline
-\nwidentdefs{\\{{S42}{S42}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-25mK0a-1}\nwendcode{}\nwbegincode{393}\sublabel{NW27XAxz-2Tccw0-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2Tccw0-1}}}\moddef{S43~{\nwtagstyle{}\subpageref{NW27XAxz-2Tccw0-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S42}{S42}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-25mK0a-1}\nwendcode{}\nwbegincode{395}\sublabel{NW27XAxz-2Tccw0-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2Tccw0-1}}}\moddef{S43~{\nwtagstyle{}\subpageref{NW27XAxz-2Tccw0-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S43", DEL+"CPD WHERE rid=?");
 \nwindexdefn{S43}{S43}{NW27XAxz-2Tccw0-1}\eatline
-\nwidentdefs{\\{{S43}{S43}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-2Tccw0-1}\nwendcode{}\nwbegincode{394}\sublabel{NW27XAxz-A8qO4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-A8qO4-1}}}\moddef{S80~{\nwtagstyle{}\subpageref{NW27XAxz-A8qO4-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S43}{S43}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-2Tccw0-1}\nwendcode{}\nwbegincode{396}\sublabel{NW27XAxz-A8qO4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-A8qO4-1}}}\moddef{S80~{\nwtagstyle{}\subpageref{NW27XAxz-A8qO4-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S80", DEL+"CQ WHERE sid=? AND t2>?");
 \nwindexdefn{S80}{S80}{NW27XAxz-A8qO4-1}\eatline
-\nwidentdefs{\\{{S80}{S80}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-A8qO4-1}\nwendcode{}\nwbegincode{395}\sublabel{NW27XAxz-25gPSO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-25gPSO-1}}}\moddef{S62~{\nwtagstyle{}\subpageref{NW27XAxz-25gPSO-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S80}{S80}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-A8qO4-1}\nwendcode{}\nwbegincode{397}\sublabel{NW27XAxz-25gPSO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-25gPSO-1}}}\moddef{S62~{\nwtagstyle{}\subpageref{NW27XAxz-25gPSO-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S62", SEL+"COUNT (*) FROM V WHERE v<>0");
 \nwindexdefn{S62}{S62}{NW27XAxz-25gPSO-1}\eatline
-\nwidentdefs{\\{{S62}{S62}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-25gPSO-1}\nwendcode{}\nwbegincode{396}\sublabel{NW27XAxz-zH56q-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-zH56q-1}}}\moddef{S64~{\nwtagstyle{}\subpageref{NW27XAxz-zH56q-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S62}{S62}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-25gPSO-1}\nwendcode{}\nwbegincode{398}\sublabel{NW27XAxz-zH56q-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-zH56q-1}}}\moddef{S64~{\nwtagstyle{}\subpageref{NW27XAxz-zH56q-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S64", SEL+"MIN (lng), MAX (lng), MIN (lat), MAX (lat) "
       + "FROM V WHERE v<>0");
 \nwindexdefn{S64}{S64}{NW27XAxz-zH56q-1}\eatline
-\nwidentdefs{\\{{S64}{S64}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-zH56q-1}\nwendcode{}\nwbegincode{397}\sublabel{NW27XAxz-2TWiNo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2TWiNo-1}}}\moddef{S63~{\nwtagstyle{}\subpageref{NW27XAxz-2TWiNo-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S64}{S64}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-zH56q-1}\nwendcode{}\nwbegincode{399}\sublabel{NW27XAxz-2TWiNo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2TWiNo-1}}}\moddef{S63~{\nwtagstyle{}\subpageref{NW27XAxz-2TWiNo-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S63", SEL+"COUNT (*) FROM E WHERE v1<>0 AND v2<>0");
 \nwindexdefn{S63}{S63}{NW27XAxz-2TWiNo-1}\eatline
-\nwidentdefs{\\{{S63}{S63}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-2TWiNo-1}\nwendcode{}\nwbegincode{398}\sublabel{NW27XAxz-3X63Qi-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3X63Qi-1}}}\moddef{S65~{\nwtagstyle{}\subpageref{NW27XAxz-3X63Qi-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S63}{S63}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-2TWiNo-1}\nwendcode{}\nwbegincode{400}\sublabel{NW27XAxz-3X63Qi-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3X63Qi-1}}}\moddef{S65~{\nwtagstyle{}\subpageref{NW27XAxz-3X63Qi-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S65", SEL+"MIN (dd), MAX (dd), SUM (dd) / COUNT (dd), "
       + "MIN (nu), MAX (nu), SUM (nu) / COUNT (nu) "
       + "FROM E WHERE v1<>0 AND v2<>0");
 \nwindexdefn{S65}{S65}{NW27XAxz-3X63Qi-1}\eatline
-\nwidentdefs{\\{{S65}{S65}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3X63Qi-1}\nwendcode{}\nwbegincode{399}\sublabel{NW27XAxz-1RksfU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1RksfU-1}}}\moddef{S46~{\nwtagstyle{}\subpageref{NW27XAxz-1RksfU-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S65}{S65}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3X63Qi-1}\nwendcode{}\nwbegincode{401}\sublabel{NW27XAxz-1RksfU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1RksfU-1}}}\moddef{S46~{\nwtagstyle{}\subpageref{NW27XAxz-1RksfU-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S46", SEL+"dd, nu FROM E WHERE v1=? AND v2=?");
 \nwindexdefn{S46}{S46}{NW27XAxz-1RksfU-1}\eatline
-\nwidentdefs{\\{{S46}{S46}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-1RksfU-1}\nwendcode{}\nwbegincode{400}\sublabel{NW27XAxz-ySQXr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-ySQXr-1}}}\moddef{S130~{\nwtagstyle{}\subpageref{NW27XAxz-ySQXr-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S46}{S46}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-1RksfU-1}\nwendcode{}\nwbegincode{402}\sublabel{NW27XAxz-ySQXr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-ySQXr-1}}}\moddef{S130~{\nwtagstyle{}\subpageref{NW27XAxz-ySQXr-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S130", SEL+"lng, lat FROM V WHERE v=?");
 \nwindexdefn{S130}{S130}{NW27XAxz-ySQXr-1}\eatline
-\nwidentdefs{\\{{S130}{S130}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-ySQXr-1}\nwendcode{}\nwbegincode{401}\sublabel{NW27XAxz-PSjhs-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-PSjhs-1}}}\moddef{S48~{\nwtagstyle{}\subpageref{NW27XAxz-PSjhs-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S130}{S130}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-ySQXr-1}\nwendcode{}\nwbegincode{403}\sublabel{NW27XAxz-PSjhs-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-PSjhs-1}}}\moddef{S48~{\nwtagstyle{}\subpageref{NW27XAxz-PSjhs-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S48", SEL+"sq, se FROM S WHERE sid=?");
 \nwindexdefn{S48}{S48}{NW27XAxz-PSjhs-1}\eatline
-\nwidentdefs{\\{{S48}{S48}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-PSjhs-1}\nwendcode{}\nwbegincode{402}\sublabel{NW27XAxz-1SEANQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1SEANQ-1}}}\moddef{S66~{\nwtagstyle{}\subpageref{NW27XAxz-1SEANQ-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S48}{S48}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-PSjhs-1}\nwendcode{}\nwbegincode{404}\sublabel{NW27XAxz-1SEANQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1SEANQ-1}}}\moddef{S66~{\nwtagstyle{}\subpageref{NW27XAxz-1SEANQ-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S66", SEL+"COUNT (*) FROM S");
 \nwindexdefn{S66}{S66}{NW27XAxz-1SEANQ-1}\eatline
-\nwidentdefs{\\{{S66}{S66}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-1SEANQ-1}\nwendcode{}\nwbegincode{403}\sublabel{NW27XAxz-3W0gRo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3W0gRo-1}}}\moddef{S75~{\nwtagstyle{}\subpageref{NW27XAxz-3W0gRo-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S66}{S66}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-1SEANQ-1}\nwendcode{}\nwbegincode{405}\sublabel{NW27XAxz-3W0gRo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3W0gRo-1}}}\moddef{S75~{\nwtagstyle{}\subpageref{NW27XAxz-3W0gRo-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S75", SEL+"rid, rq, re, rl, ro, rd, rb FROM R WHERE rid=?");
 \nwindexdefn{S75}{S75}{NW27XAxz-3W0gRo-1}\eatline
-\nwidentdefs{\\{{S75}{S75}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3W0gRo-1}\nwendcode{}\nwbegincode{404}\sublabel{NW27XAxz-4dVWIm-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4dVWIm-1}}}\moddef{S51~{\nwtagstyle{}\subpageref{NW27XAxz-4dVWIm-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S75}{S75}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3W0gRo-1}\nwendcode{}\nwbegincode{406}\sublabel{NW27XAxz-4dVWIm-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4dVWIm-1}}}\moddef{S51~{\nwtagstyle{}\subpageref{NW27XAxz-4dVWIm-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S51", SEL+"rq, re, rl, ro, rd FROM R WHERE rid=?");
 \nwindexdefn{S51}{S51}{NW27XAxz-4dVWIm-1}\eatline
-\nwidentdefs{\\{{S51}{S51}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4dVWIm-1}\nwendcode{}\nwbegincode{405}\sublabel{NW27XAxz-3PiU32-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3PiU32-1}}}\moddef{S67~{\nwtagstyle{}\subpageref{NW27XAxz-3PiU32-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S51}{S51}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4dVWIm-1}\nwendcode{}\nwbegincode{407}\sublabel{NW27XAxz-3PiU32-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3PiU32-1}}}\moddef{S67~{\nwtagstyle{}\subpageref{NW27XAxz-3PiU32-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S67", SEL+"COUNT (*) FROM R");
 \nwindexdefn{S67}{S67}{NW27XAxz-3PiU32-1}\eatline
-\nwidentdefs{\\{{S67}{S67}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3PiU32-1}\nwendcode{}\nwbegincode{406}\sublabel{NW27XAxz-4APdTA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4APdTA-1}}}\moddef{S59~{\nwtagstyle{}\subpageref{NW27XAxz-4APdTA-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S67}{S67}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3PiU32-1}\nwendcode{}\nwbegincode{408}\sublabel{NW27XAxz-4APdTA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4APdTA-1}}}\moddef{S59~{\nwtagstyle{}\subpageref{NW27XAxz-4APdTA-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S59", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
       + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
       + "GROUP BY sid"
       + ") as b ON a.sid=b.sid AND ABS(a.t2-?)=b.tdiff AND a.t2<=?");
 \nwindexdefn{S59}{S59}{NW27XAxz-4APdTA-1}\eatline
-\nwidentdefs{\\{{S59}{S59}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4APdTA-1}\nwendcode{}\nwbegincode{407}\sublabel{NW27XAxz-nIIRf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-nIIRf-1}}}\moddef{S128~{\nwtagstyle{}\subpageref{NW27XAxz-nIIRf-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S59}{S59}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4APdTA-1}\nwendcode{}\nwbegincode{409}\sublabel{NW27XAxz-nIIRf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-nIIRf-1}}}\moddef{S128~{\nwtagstyle{}\subpageref{NW27XAxz-nIIRf-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S128", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
       + "SELECT sid FROM CW WHERE te>? OR (ve=0 AND sl>?)"
       + ") as b ON a.sid=b.sid INNER JOIN ("
@@ -4823,19 +4904,19 @@ this.lu_pstr.put("S128", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
       + "GROUP BY sid"
       + ") as c ON a.sid=c.sid AND ABS(a.t2-?)=c.tdiff AND a.t2<=?");
 \nwindexdefn{S128}{S128}{NW27XAxz-nIIRf-1}\eatline
-\nwidentdefs{\\{{S128}{S128}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-nIIRf-1}\nwendcode{}\nwbegincode{408}\sublabel{NW27XAxz-9tgZA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-9tgZA-1}}}\moddef{S60~{\nwtagstyle{}\subpageref{NW27XAxz-9tgZA-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S128}{S128}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-nIIRf-1}\nwendcode{}\nwbegincode{410}\sublabel{NW27XAxz-9tgZA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-9tgZA-1}}}\moddef{S60~{\nwtagstyle{}\subpageref{NW27XAxz-9tgZA-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S60", SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC");
 \nwindexdefn{S60}{S60}{NW27XAxz-9tgZA-1}\eatline
-\nwidentdefs{\\{{S60}{S60}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-9tgZA-1}\nwendcode{}\nwbegincode{409}\sublabel{NW27XAxz-44X5Zr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-44X5Zr-1}}}\moddef{S129~{\nwtagstyle{}\subpageref{NW27XAxz-44X5Zr-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S60}{S60}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-9tgZA-1}\nwendcode{}\nwbegincode{411}\sublabel{NW27XAxz-44X5Zr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-44X5Zr-1}}}\moddef{S129~{\nwtagstyle{}\subpageref{NW27XAxz-44X5Zr-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S129", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC");
 \nwindexdefn{S129}{S129}{NW27XAxz-44X5Zr-1}\eatline
-\nwidentdefs{\\{{S129}{S129}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-44X5Zr-1}\nwendcode{}\nwbegincode{410}\sublabel{NW27XAxz-4e4a2O-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4e4a2O-1}}}\moddef{S61~{\nwtagstyle{}\subpageref{NW27XAxz-4e4a2O-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S129}{S129}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-44X5Zr-1}\nwendcode{}\nwbegincode{412}\sublabel{NW27XAxz-4e4a2O-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4e4a2O-1}}}\moddef{S61~{\nwtagstyle{}\subpageref{NW27XAxz-4e4a2O-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
       + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC");
 \nwindexdefn{S61}{S61}{NW27XAxz-4e4a2O-1}\eatline
-\nwidentdefs{\\{{S61}{S61}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4e4a2O-1}\nwendcode{}\nwbegindocs{411}Need to join CQ in order to sort by order number {\tt{}o2}. This query has
+\nwidentdefs{\\{{S61}{S61}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4e4a2O-1}\nwendcode{}\nwbegindocs{413}Need to join CQ in order to sort by order number {\tt{}o2}. This query has
 worse performance after W (r\_server), CQ, PD grow.
-\nwenddocs{}\nwbegincode{412}\sublabel{NW27XAxz-49qIgW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-49qIgW-1}}}\moddef{S69~{\nwtagstyle{}\subpageref{NW27XAxz-49qIgW-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwenddocs{}\nwbegincode{414}\sublabel{NW27XAxz-49qIgW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-49qIgW-1}}}\moddef{S69~{\nwtagstyle{}\subpageref{NW27XAxz-49qIgW-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S69", SEL+"t, v, Ls, Lr "
       + "FROM r_server LEFT JOIN CQ ON t=t2 and v=v2 and Lr=rid "
       + "WHERE r_server.sid=?"
@@ -4843,166 +4924,166 @@ this.lu_pstr.put("S69", SEL+"t, v, Ls, Lr "
       + "   AND (Ls IS NOT NULL OR Lr IS NOT NULL)"
       + "ORDER BY t ASC, o2 ASC");
 \nwindexdefn{S69}{S69}{NW27XAxz-49qIgW-1}\eatline
-\nwidentdefs{\\{{S69}{S69}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-49qIgW-1}\nwendcode{}\nwbegincode{413}\sublabel{NW27XAxz-P5E1c-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-P5E1c-1}}}\moddef{S68~{\nwtagstyle{}\subpageref{NW27XAxz-P5E1c-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S69}{S69}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-49qIgW-1}\nwendcode{}\nwbegincode{415}\sublabel{NW27XAxz-P5E1c-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-P5E1c-1}}}\moddef{S68~{\nwtagstyle{}\subpageref{NW27XAxz-P5E1c-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 // A "timeout" of 30 seconds is hard-coded here
 this.lu_pstr.put("S68", SEL+"* FROM R WHERE re<=? AND ?<=re+30 AND rid NOT IN  "
       + "(SELECT rid FROM assignments_r)");
 \nwindexdefn{S68}{S68}{NW27XAxz-P5E1c-1}\eatline
-\nwidentdefs{\\{{S68}{S68}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-P5E1c-1}\nwendcode{}\nwbegincode{414}\sublabel{NW27XAxz-3Wm0zU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3Wm0zU-1}}}\moddef{S85~{\nwtagstyle{}\subpageref{NW27XAxz-3Wm0zU-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S68}{S68}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-P5E1c-1}\nwendcode{}\nwbegincode{416}\sublabel{NW27XAxz-3Wm0zU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3Wm0zU-1}}}\moddef{S85~{\nwtagstyle{}\subpageref{NW27XAxz-3Wm0zU-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S85", SEL+"uq FROM UQ WHERE uid=?");
 \nwindexdefn{S85}{S85}{NW27XAxz-3Wm0zU-1}\eatline
-\nwidentdefs{\\{{S85}{S85}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3Wm0zU-1}\nwendcode{}\nwbegincode{415}\sublabel{NW27XAxz-1Ru7wC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ru7wC-1}}}\moddef{S86~{\nwtagstyle{}\subpageref{NW27XAxz-1Ru7wC-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S85}{S85}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3Wm0zU-1}\nwendcode{}\nwbegincode{417}\sublabel{NW27XAxz-1Ru7wC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ru7wC-1}}}\moddef{S86~{\nwtagstyle{}\subpageref{NW27XAxz-1Ru7wC-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S86", SEL+"tp, td FROM CPD WHERE rid=?");
 \nwindexdefn{S86}{S86}{NW27XAxz-1Ru7wC-1}\eatline
-\nwidentdefs{\\{{S86}{S86}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-1Ru7wC-1}\nwendcode{}\nwbegincode{416}\sublabel{NW27XAxz-2U8wBI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2U8wBI-1}}}\moddef{S73~{\nwtagstyle{}\subpageref{NW27XAxz-2U8wBI-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S86}{S86}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-1Ru7wC-1}\nwendcode{}\nwbegincode{418}\sublabel{NW27XAxz-2U8wBI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2U8wBI-1}}}\moddef{S73~{\nwtagstyle{}\subpageref{NW27XAxz-2U8wBI-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S73", SEL+"q2 FROM CQ WHERE sid=? AND t2<=? "
       + "ORDER BY t2 DESC, q2 DESC FETCH FIRST ROW ONLY");
 \nwindexdefn{S73}{S73}{NW27XAxz-2U8wBI-1}\eatline
-\nwidentdefs{\\{{S73}{S73}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-2U8wBI-1}\nwendcode{}\nwbegincode{417}\sublabel{NW27XAxz-3PORbo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3PORbo-1}}}\moddef{S87~{\nwtagstyle{}\subpageref{NW27XAxz-3PORbo-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S73}{S73}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-2U8wBI-1}\nwendcode{}\nwbegincode{419}\sublabel{NW27XAxz-3PORbo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3PORbo-1}}}\moddef{S87~{\nwtagstyle{}\subpageref{NW27XAxz-3PORbo-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S87", SEL+"t2, q2, o2 FROM CQ WHERE sid=? AND t2<=? "
       + "ORDER BY t2 DESC, o2 DESC FETCH FIRST ROW ONLY");
 \nwindexdefn{S87}{S87}{NW27XAxz-3PORbo-1}\eatline
-\nwidentdefs{\\{{S87}{S87}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3PORbo-1}\nwendcode{}\nwbegincode{418}\sublabel{NW27XAxz-yxMXz-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-yxMXz-1}}}\moddef{S100~{\nwtagstyle{}\subpageref{NW27XAxz-yxMXz-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S87}{S87}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3PORbo-1}\nwendcode{}\nwbegincode{420}\sublabel{NW27XAxz-yxMXz-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-yxMXz-1}}}\moddef{S100~{\nwtagstyle{}\subpageref{NW27XAxz-yxMXz-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S100", SEL+"rid FROM assignments WHERE t>? AND sid=?");
 \nwindexdefn{S100}{S100}{NW27XAxz-yxMXz-1}\eatline
-\nwidentdefs{\\{{S100}{S100}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-yxMXz-1}\nwendcode{}\nwbegincode{419}\sublabel{NW27XAxz-3WmKrr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3WmKrr-1}}}\moddef{S101~{\nwtagstyle{}\subpageref{NW27XAxz-3WmKrr-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S100}{S100}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-yxMXz-1}\nwendcode{}\nwbegincode{421}\sublabel{NW27XAxz-3WmKrr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3WmKrr-1}}}\moddef{S101~{\nwtagstyle{}\subpageref{NW27XAxz-3WmKrr-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S101", SEL+"rid FROM assignments WHERE t<=? AND sid=?");
 \nwindexdefn{S101}{S101}{NW27XAxz-3WmKrr-1}\eatline
-\nwidentdefs{\\{{S101}{S101}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3WmKrr-1}\nwendcode{}\nwbegincode{420}\sublabel{NW27XAxz-1RuRoZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1RuRoZ-1}}}\moddef{S102~{\nwtagstyle{}\subpageref{NW27XAxz-1RuRoZ-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S101}{S101}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3WmKrr-1}\nwendcode{}\nwbegincode{422}\sublabel{NW27XAxz-1RuRoZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1RuRoZ-1}}}\moddef{S102~{\nwtagstyle{}\subpageref{NW27XAxz-1RuRoZ-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S102", SEL+"* FROM service_rate");
 \nwindexdefn{S102}{S102}{NW27XAxz-1RuRoZ-1}\eatline
-\nwidentdefs{\\{{S102}{S102}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-1RuRoZ-1}\nwendcode{}\nwbegincode{421}\sublabel{NW27XAxz-3POlUB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3POlUB-1}}}\moddef{S103~{\nwtagstyle{}\subpageref{NW27XAxz-3POlUB-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S102}{S102}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-1RuRoZ-1}\nwendcode{}\nwbegincode{423}\sublabel{NW27XAxz-3POlUB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3POlUB-1}}}\moddef{S103~{\nwtagstyle{}\subpageref{NW27XAxz-3POlUB-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S103", SEL+"* FROM dist_base");
 \nwindexdefn{S103}{S103}{NW27XAxz-3POlUB-1}\eatline
-\nwidentdefs{\\{{S103}{S103}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3POlUB-1}\nwendcode{}\nwbegincode{422}\sublabel{NW27XAxz-A9AGR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-A9AGR-1}}}\moddef{S104~{\nwtagstyle{}\subpageref{NW27XAxz-A9AGR-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S103}{S103}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3POlUB-1}\nwendcode{}\nwbegincode{424}\sublabel{NW27XAxz-A9AGR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-A9AGR-1}}}\moddef{S104~{\nwtagstyle{}\subpageref{NW27XAxz-A9AGR-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S104", SEL+"val FROM dist_s_travel WHERE sid=?");
 \nwindexdefn{S104}{S104}{NW27XAxz-A9AGR-1}\eatline
-\nwidentdefs{\\{{S104}{S104}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-A9AGR-1}\nwendcode{}\nwbegincode{423}\sublabel{NW27XAxz-4eK3jf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4eK3jf-1}}}\moddef{S105~{\nwtagstyle{}\subpageref{NW27XAxz-4eK3jf-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S104}{S104}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-A9AGR-1}\nwendcode{}\nwbegincode{425}\sublabel{NW27XAxz-4eK3jf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4eK3jf-1}}}\moddef{S105~{\nwtagstyle{}\subpageref{NW27XAxz-4eK3jf-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S105", SEL+"SUM (val) FROM dist_s_travel");
 \nwindexdefn{S105}{S105}{NW27XAxz-4eK3jf-1}\eatline
-\nwidentdefs{\\{{S105}{S105}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4eK3jf-1}\nwendcode{}\nwbegincode{424}\sublabel{NW27XAxz-25vt9f-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-25vt9f-1}}}\moddef{S106~{\nwtagstyle{}\subpageref{NW27XAxz-25vt9f-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S105}{S105}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4eK3jf-1}\nwendcode{}\nwbegincode{426}\sublabel{NW27XAxz-25vt9f-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-25vt9f-1}}}\moddef{S106~{\nwtagstyle{}\subpageref{NW27XAxz-25vt9f-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S106", SEL+"val FROM dist_s_cruising WHERE sid=?");
 \nwindexdefn{S106}{S106}{NW27XAxz-25vt9f-1}\eatline
-\nwidentdefs{\\{{S106}{S106}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-25vt9f-1}\nwendcode{}\nwbegincode{425}\sublabel{NW27XAxz-2TmC55-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2TmC55-1}}}\moddef{S107~{\nwtagstyle{}\subpageref{NW27XAxz-2TmC55-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S106}{S106}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-25vt9f-1}\nwendcode{}\nwbegincode{427}\sublabel{NW27XAxz-2TmC55-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2TmC55-1}}}\moddef{S107~{\nwtagstyle{}\subpageref{NW27XAxz-2TmC55-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S107", SEL+"SUM (val) FROM dist_s_cruising");
 \nwindexdefn{S107}{S107}{NW27XAxz-2TmC55-1}\eatline
-\nwidentdefs{\\{{S107}{S107}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-2TmC55-1}\nwendcode{}\nwbegincode{426}\sublabel{NW27XAxz-mtPWF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-mtPWF-1}}}\moddef{S108~{\nwtagstyle{}\subpageref{NW27XAxz-mtPWF-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S107}{S107}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-2TmC55-1}\nwendcode{}\nwbegincode{428}\sublabel{NW27XAxz-mtPWF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-mtPWF-1}}}\moddef{S108~{\nwtagstyle{}\subpageref{NW27XAxz-mtPWF-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S108", SEL+"val FROM dist_s_service WHERE sid=?");
 \nwindexdefn{S108}{S108}{NW27XAxz-mtPWF-1}\eatline
-\nwidentdefs{\\{{S108}{S108}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-mtPWF-1}\nwendcode{}\nwbegincode{427}\sublabel{NW27XAxz-448CeR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-448CeR-1}}}\moddef{S109~{\nwtagstyle{}\subpageref{NW27XAxz-448CeR-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S108}{S108}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-mtPWF-1}\nwendcode{}\nwbegincode{429}\sublabel{NW27XAxz-448CeR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-448CeR-1}}}\moddef{S109~{\nwtagstyle{}\subpageref{NW27XAxz-448CeR-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S109", SEL+"SUM (val) FROM dist_s_service");
 \nwindexdefn{S109}{S109}{NW27XAxz-448CeR-1}\eatline
-\nwidentdefs{\\{{S109}{S109}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-448CeR-1}\nwendcode{}\nwbegincode{428}\sublabel{NW27XAxz-yTwJX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-yTwJX-1}}}\moddef{S110~{\nwtagstyle{}\subpageref{NW27XAxz-yTwJX-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S109}{S109}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-448CeR-1}\nwendcode{}\nwbegincode{430}\sublabel{NW27XAxz-yTwJX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-yTwJX-1}}}\moddef{S110~{\nwtagstyle{}\subpageref{NW27XAxz-yTwJX-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S110", SEL+"val FROM dist_s_base");
 \nwindexdefn{S110}{S110}{NW27XAxz-yTwJX-1}\eatline
-\nwidentdefs{\\{{S110}{S110}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-yTwJX-1}\nwendcode{}\nwbegincode{429}\sublabel{NW27XAxz-3WIudP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3WIudP-1}}}\moddef{S111~{\nwtagstyle{}\subpageref{NW27XAxz-3WIudP-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S110}{S110}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-yTwJX-1}\nwendcode{}\nwbegincode{431}\sublabel{NW27XAxz-3WIudP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3WIudP-1}}}\moddef{S111~{\nwtagstyle{}\subpageref{NW27XAxz-3WIudP-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S111", SEL+"val FROM dist_r_base");
 \nwindexdefn{S111}{S111}{NW27XAxz-3WIudP-1}\eatline
-\nwidentdefs{\\{{S111}{S111}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3WIudP-1}\nwendcode{}\nwbegincode{430}\sublabel{NW27XAxz-1SZQ6N-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1SZQ6N-1}}}\moddef{S112~{\nwtagstyle{}\subpageref{NW27XAxz-1SZQ6N-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S111}{S111}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3WIudP-1}\nwendcode{}\nwbegincode{432}\sublabel{NW27XAxz-1SZQ6N-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1SZQ6N-1}}}\moddef{S112~{\nwtagstyle{}\subpageref{NW27XAxz-1SZQ6N-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S112", SEL+"val FROM dist_r_detour WHERE rid=?");
 \nwindexdefn{S112}{S112}{NW27XAxz-1SZQ6N-1}\eatline
-\nwidentdefs{\\{{S112}{S112}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-1SZQ6N-1}\nwendcode{}\nwbegincode{431}\sublabel{NW27XAxz-3Q3jlz-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3Q3jlz-1}}}\moddef{S113~{\nwtagstyle{}\subpageref{NW27XAxz-3Q3jlz-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S112}{S112}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-1SZQ6N-1}\nwendcode{}\nwbegincode{433}\sublabel{NW27XAxz-3Q3jlz-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3Q3jlz-1}}}\moddef{S113~{\nwtagstyle{}\subpageref{NW27XAxz-3Q3jlz-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S113", SEL+"SUM (val) FROM dist_r_detour");
 \nwindexdefn{S113}{S113}{NW27XAxz-3Q3jlz-1}\eatline
-\nwidentdefs{\\{{S113}{S113}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3Q3jlz-1}\nwendcode{}\nwbegincode{432}\sublabel{NW27XAxz-96Xlr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-96Xlr-1}}}\moddef{S114~{\nwtagstyle{}\subpageref{NW27XAxz-96Xlr-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S113}{S113}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3Q3jlz-1}\nwendcode{}\nwbegincode{434}\sublabel{NW27XAxz-96Xlr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-96Xlr-1}}}\moddef{S114~{\nwtagstyle{}\subpageref{NW27XAxz-96Xlr-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S114", SEL+"val FROM dist_r_transit WHERE rid=?");
 \nwindexdefn{S114}{S114}{NW27XAxz-96Xlr-1}\eatline
-\nwidentdefs{\\{{S114}{S114}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-96Xlr-1}\nwendcode{}\nwbegincode{433}\sublabel{NW27XAxz-4dHRF5-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4dHRF5-1}}}\moddef{S115~{\nwtagstyle{}\subpageref{NW27XAxz-4dHRF5-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S114}{S114}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-96Xlr-1}\nwendcode{}\nwbegincode{435}\sublabel{NW27XAxz-4dHRF5-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4dHRF5-1}}}\moddef{S115~{\nwtagstyle{}\subpageref{NW27XAxz-4dHRF5-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S115", SEL+"SUM (val) FROM dist_r_transit");
 \nwindexdefn{S115}{S115}{NW27XAxz-4dHRF5-1}\eatline
-\nwidentdefs{\\{{S115}{S115}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4dHRF5-1}\nwendcode{}\nwbegincode{434}\sublabel{NW27XAxz-261fBL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-261fBL-1}}}\moddef{S116~{\nwtagstyle{}\subpageref{NW27XAxz-261fBL-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S115}{S115}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4dHRF5-1}\nwendcode{}\nwbegincode{436}\sublabel{NW27XAxz-261fBL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-261fBL-1}}}\moddef{S116~{\nwtagstyle{}\subpageref{NW27XAxz-261fBL-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S116", SEL+"val FROM dur_s_travel WHERE sid=?");
 \nwindexdefn{S116}{S116}{NW27XAxz-261fBL-1}\eatline
-\nwidentdefs{\\{{S116}{S116}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-261fBL-1}\nwendcode{}\nwbegincode{435}\sublabel{NW27XAxz-2Try6l-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2Try6l-1}}}\moddef{S117~{\nwtagstyle{}\subpageref{NW27XAxz-2Try6l-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S116}{S116}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-261fBL-1}\nwendcode{}\nwbegincode{437}\sublabel{NW27XAxz-2Try6l-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2Try6l-1}}}\moddef{S117~{\nwtagstyle{}\subpageref{NW27XAxz-2Try6l-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S117", SEL+"SUM (val) FROM dur_s_travel");
 \nwindexdefn{S117}{S117}{NW27XAxz-2Try6l-1}\eatline
-\nwidentdefs{\\{{S117}{S117}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-2Try6l-1}\nwendcode{}\nwbegincode{436}\sublabel{NW27XAxz-npyw7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-npyw7-1}}}\moddef{S118~{\nwtagstyle{}\subpageref{NW27XAxz-npyw7-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S117}{S117}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-2Try6l-1}\nwendcode{}\nwbegincode{438}\sublabel{NW27XAxz-npyw7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-npyw7-1}}}\moddef{S118~{\nwtagstyle{}\subpageref{NW27XAxz-npyw7-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S118", SEL+"val FROM dur_r_pickup WHERE rid=?");
 \nwindexdefn{S118}{S118}{NW27XAxz-npyw7-1}\eatline
-\nwidentdefs{\\{{S118}{S118}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-npyw7-1}\nwendcode{}\nwbegincode{437}\sublabel{NW27XAxz-454m4J-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-454m4J-1}}}\moddef{S119~{\nwtagstyle{}\subpageref{NW27XAxz-454m4J-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S118}{S118}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-npyw7-1}\nwendcode{}\nwbegincode{439}\sublabel{NW27XAxz-454m4J-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-454m4J-1}}}\moddef{S119~{\nwtagstyle{}\subpageref{NW27XAxz-454m4J-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S119", SEL+"SUM (val) FROM dur_r_pickup");
 \nwindexdefn{S119}{S119}{NW27XAxz-454m4J-1}\eatline
-\nwidentdefs{\\{{S119}{S119}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-454m4J-1}\nwendcode{}\nwbegincode{438}\sublabel{NW27XAxz-z4eLL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-z4eLL-1}}}\moddef{S120~{\nwtagstyle{}\subpageref{NW27XAxz-z4eLL-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S119}{S119}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-454m4J-1}\nwendcode{}\nwbegincode{440}\sublabel{NW27XAxz-z4eLL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-z4eLL-1}}}\moddef{S120~{\nwtagstyle{}\subpageref{NW27XAxz-z4eLL-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S120", SEL+"val FROM dur_r_transit WHERE rid=?");
 \nwindexdefn{S120}{S120}{NW27XAxz-z4eLL-1}\eatline
-\nwidentdefs{\\{{S120}{S120}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-z4eLL-1}\nwendcode{}\nwbegincode{439}\sublabel{NW27XAxz-3WtcfD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3WtcfD-1}}}\moddef{S121~{\nwtagstyle{}\subpageref{NW27XAxz-3WtcfD-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S120}{S120}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-z4eLL-1}\nwendcode{}\nwbegincode{441}\sublabel{NW27XAxz-3WtcfD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3WtcfD-1}}}\moddef{S121~{\nwtagstyle{}\subpageref{NW27XAxz-3WtcfD-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S121", SEL+"SUM (val) FROM dur_r_transit");
 \nwindexdefn{S121}{S121}{NW27XAxz-3WtcfD-1}\eatline
-\nwidentdefs{\\{{S121}{S121}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3WtcfD-1}\nwendcode{}\nwbegincode{440}\sublabel{NW27XAxz-1S1jbv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1S1jbv-1}}}\moddef{S122~{\nwtagstyle{}\subpageref{NW27XAxz-1S1jbv-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S121}{S121}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3WtcfD-1}\nwendcode{}\nwbegincode{442}\sublabel{NW27XAxz-1S1jbv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1S1jbv-1}}}\moddef{S122~{\nwtagstyle{}\subpageref{NW27XAxz-1S1jbv-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S122", SEL+"val FROM dur_r_travel WHERE rid=?");
 \nwindexdefn{S122}{S122}{NW27XAxz-1S1jbv-1}\eatline
-\nwidentdefs{\\{{S122}{S122}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-1S1jbv-1}\nwendcode{}\nwbegincode{441}\sublabel{NW27XAxz-3PW3HX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3PW3HX-1}}}\moddef{S123~{\nwtagstyle{}\subpageref{NW27XAxz-3PW3HX-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S122}{S122}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-1S1jbv-1}\nwendcode{}\nwbegincode{443}\sublabel{NW27XAxz-3PW3HX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3PW3HX-1}}}\moddef{S123~{\nwtagstyle{}\subpageref{NW27XAxz-3PW3HX-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S123", SEL+"SUM (val) FROM dur_r_travel");
 \nwindexdefn{S123}{S123}{NW27XAxz-3PW3HX-1}\eatline
-\nwidentdefs{\\{{S123}{S123}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3PW3HX-1}\nwendcode{}\nwbegincode{442}\sublabel{NW27XAxz-9hFnf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-9hFnf-1}}}\moddef{S124~{\nwtagstyle{}\subpageref{NW27XAxz-9hFnf-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S123}{S123}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3PW3HX-1}\nwendcode{}\nwbegincode{444}\sublabel{NW27XAxz-9hFnf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-9hFnf-1}}}\moddef{S124~{\nwtagstyle{}\subpageref{NW27XAxz-9hFnf-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S124", SEL+"val FROM t_r_depart WHERE rid=?");
 \nwindexdefn{S124}{S124}{NW27XAxz-9hFnf-1}\eatline
-\nwidentdefs{\\{{S124}{S124}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-9hFnf-1}\nwendcode{}\nwbegincode{443}\sublabel{NW27XAxz-4ds9Gt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4ds9Gt-1}}}\moddef{S125~{\nwtagstyle{}\subpageref{NW27XAxz-4ds9Gt-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S124}{S124}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-9hFnf-1}\nwendcode{}\nwbegincode{445}\sublabel{NW27XAxz-4ds9Gt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4ds9Gt-1}}}\moddef{S125~{\nwtagstyle{}\subpageref{NW27XAxz-4ds9Gt-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S125", SEL+"val FROM t_s_depart WHERE sid=?");
 \nwindexdefn{S125}{S125}{NW27XAxz-4ds9Gt-1}\eatline
-\nwidentdefs{\\{{S125}{S125}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4ds9Gt-1}\nwendcode{}\nwbegincode{444}\sublabel{NW27XAxz-25Tygt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-25Tygt-1}}}\moddef{S126~{\nwtagstyle{}\subpageref{NW27XAxz-25Tygt-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S125}{S125}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4ds9Gt-1}\nwendcode{}\nwbegincode{446}\sublabel{NW27XAxz-25Tygt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-25Tygt-1}}}\moddef{S126~{\nwtagstyle{}\subpageref{NW27XAxz-25Tygt-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S126", SEL+"val FROM t_r_arrive WHERE rid=?");
 \nwindexdefn{S126}{S126}{NW27XAxz-25Tygt-1}\eatline
-\nwidentdefs{\\{{S126}{S126}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-25Tygt-1}\nwendcode{}\nwbegincode{445}\sublabel{NW27XAxz-2TKHcJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2TKHcJ-1}}}\moddef{S127~{\nwtagstyle{}\subpageref{NW27XAxz-2TKHcJ-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S126}{S126}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-25Tygt-1}\nwendcode{}\nwbegincode{447}\sublabel{NW27XAxz-2TKHcJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2TKHcJ-1}}}\moddef{S127~{\nwtagstyle{}\subpageref{NW27XAxz-2TKHcJ-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S127", SEL+"val FROM t_s_arrive WHERE sid=?");
 \nwindexdefn{S127}{S127}{NW27XAxz-2TKHcJ-1}\eatline
-\nwidentdefs{\\{{S127}{S127}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-2TKHcJ-1}\nwendcode{}\nwbegincode{446}\sublabel{NW27XAxz-3Q2E0J-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3Q2E0J-1}}}\moddef{S133~{\nwtagstyle{}\subpageref{NW27XAxz-3Q2E0J-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S127}{S127}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-2TKHcJ-1}\nwendcode{}\nwbegincode{448}\sublabel{NW27XAxz-3Q2E0J-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3Q2E0J-1}}}\moddef{S133~{\nwtagstyle{}\subpageref{NW27XAxz-3Q2E0J-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S133", SEL+"val FROM f_status WHERE rid=? AND t<=? "
     + "ORDER BY t DESC FETCH FIRST ROW ONLY");
 \nwindexdefn{S133}{S133}{NW27XAxz-3Q2E0J-1}\eatline
-\nwidentdefs{\\{{S133}{S133}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3Q2E0J-1}\nwendcode{}\nwbegincode{447}\sublabel{NW27XAxz-9eEGJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-9eEGJ-1}}}\moddef{S134~{\nwtagstyle{}\subpageref{NW27XAxz-9eEGJ-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S133}{S133}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3Q2E0J-1}\nwendcode{}\nwbegincode{449}\sublabel{NW27XAxz-9eEGJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-9eEGJ-1}}}\moddef{S134~{\nwtagstyle{}\subpageref{NW27XAxz-9eEGJ-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S134", SEL+"sid, te FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
 \nwindexdefn{S134}{S134}{NW27XAxz-9eEGJ-1}\eatline
-\nwidentdefs{\\{{S134}{S134}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-9eEGJ-1}\nwendcode{}\nwbegincode{448}\sublabel{NW27XAxz-4dp7jX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4dp7jX-1}}}\moddef{S135~{\nwtagstyle{}\subpageref{NW27XAxz-4dp7jX-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S134}{S134}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-9eEGJ-1}\nwendcode{}\nwbegincode{450}\sublabel{NW27XAxz-4dp7jX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4dp7jX-1}}}\moddef{S135~{\nwtagstyle{}\subpageref{NW27XAxz-4dp7jX-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S135", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
     + "SELECT t1 FROM W WHERE sid=? AND t1 <= ? AND ? < t2)");
 \nwindexdefn{S135}{S135}{NW27XAxz-4dp7jX-1}\eatline
-\nwidentdefs{\\{{S135}{S135}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4dp7jX-1}\nwendcode{}\nwbegincode{449}\sublabel{NW27XAxz-26ZLfn-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-26ZLfn-1}}}\moddef{S136~{\nwtagstyle{}\subpageref{NW27XAxz-26ZLfn-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S135}{S135}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4dp7jX-1}\nwendcode{}\nwbegincode{451}\sublabel{NW27XAxz-26ZLfn-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-26ZLfn-1}}}\moddef{S136~{\nwtagstyle{}\subpageref{NW27XAxz-26ZLfn-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S136", SEL+"* FROM V");
 \nwindexdefn{S136}{S136}{NW27XAxz-26ZLfn-1}\eatline
-\nwidentdefs{\\{{S136}{S136}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-26ZLfn-1}\nwendcode{}\nwbegincode{450}\sublabel{NW27XAxz-2UPebD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2UPebD-1}}}\moddef{S137~{\nwtagstyle{}\subpageref{NW27XAxz-2UPebD-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S136}{S136}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-26ZLfn-1}\nwendcode{}\nwbegincode{452}\sublabel{NW27XAxz-2UPebD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2UPebD-1}}}\moddef{S137~{\nwtagstyle{}\subpageref{NW27XAxz-2UPebD-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S137", SEL+"* FROM E");
 \nwindexdefn{S137}{S137}{NW27XAxz-2UPebD-1}\eatline
-\nwidentdefs{\\{{S137}{S137}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-2UPebD-1}\nwendcode{}\nwbegincode{451}\sublabel{NW27XAxz-nWs2N-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-nWs2N-1}}}\moddef{S138~{\nwtagstyle{}\subpageref{NW27XAxz-nWs2N-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S137}{S137}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-2UPebD-1}\nwendcode{}\nwbegincode{453}\sublabel{NW27XAxz-nWs2N-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-nWs2N-1}}}\moddef{S138~{\nwtagstyle{}\subpageref{NW27XAxz-nWs2N-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S138", SEL+"val FROM dist_r_unassigned");
 \nwindexdefn{S138}{S138}{NW27XAxz-nWs2N-1}\eatline
-\nwidentdefs{\\{{S138}{S138}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-nWs2N-1}\nwendcode{}\nwbegincode{452}\sublabel{NW27XAxz-44lfAZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-44lfAZ-1}}}\moddef{S139~{\nwtagstyle{}\subpageref{NW27XAxz-44lfAZ-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S138}{S138}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-nWs2N-1}\nwendcode{}\nwbegincode{454}\sublabel{NW27XAxz-44lfAZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-44lfAZ-1}}}\moddef{S139~{\nwtagstyle{}\subpageref{NW27XAxz-44lfAZ-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S139", UPD+"CPD SET te=? WHERE sid=?");
 \nwindexdefn{S139}{S139}{NW27XAxz-44lfAZ-1}\eatline
-\nwidentdefs{\\{{S139}{S139}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-44lfAZ-1}\nwendcode{}\nwbegincode{453}\sublabel{NW27XAxz-yno67-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-yno67-1}}}\moddef{S140~{\nwtagstyle{}\subpageref{NW27XAxz-yno67-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S139}{S139}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-44lfAZ-1}\nwendcode{}\nwbegincode{455}\sublabel{NW27XAxz-yno67-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-yno67-1}}}\moddef{S140~{\nwtagstyle{}\subpageref{NW27XAxz-yno67-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S140", UPD+"CQ SET tp=?, td=? WHERE rid=?");
 \nwindexdefn{S140}{S140}{NW27XAxz-yno67-1}\eatline
-\nwidentdefs{\\{{S140}{S140}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-yno67-1}\nwendcode{}\nwbegincode{454}\sublabel{NW27XAxz-3WcmPz-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3WcmPz-1}}}\moddef{S141~{\nwtagstyle{}\subpageref{NW27XAxz-3WcmPz-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S140}{S140}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-yno67-1}\nwendcode{}\nwbegincode{456}\sublabel{NW27XAxz-3WcmPz-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3WcmPz-1}}}\moddef{S141~{\nwtagstyle{}\subpageref{NW27XAxz-3WcmPz-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S141", SEL+"* FROM r_user");
 \nwindexdefn{S141}{S141}{NW27XAxz-3WcmPz-1}\eatline
-\nwidentdefs{\\{{S141}{S141}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3WcmPz-1}\nwendcode{}\nwbegincode{455}\sublabel{NW27XAxz-1RktMh-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1RktMh-1}}}\moddef{S142~{\nwtagstyle{}\subpageref{NW27XAxz-1RktMh-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S141}{S141}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3WcmPz-1}\nwendcode{}\nwbegincode{457}\sublabel{NW27XAxz-1RktMh-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1RktMh-1}}}\moddef{S142~{\nwtagstyle{}\subpageref{NW27XAxz-1RktMh-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S142", SEL+"SUM (dd) FROM W WHERE sid=? AND t2>?");
 \nwindexdefn{S142}{S142}{NW27XAxz-1RktMh-1}\eatline
-\nwidentdefs{\\{{S142}{S142}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-1RktMh-1}\nwendcode{}\nwbegincode{456}\sublabel{NW27XAxz-3PFD2J-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3PFD2J-1}}}\moddef{S143~{\nwtagstyle{}\subpageref{NW27XAxz-3PFD2J-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S142}{S142}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-1RktMh-1}\nwendcode{}\nwbegincode{458}\sublabel{NW27XAxz-3PFD2J-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-3PFD2J-1}}}\moddef{S143~{\nwtagstyle{}\subpageref{NW27XAxz-3PFD2J-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S143", SEL+"* FROM R WHERE re<=? AND ?<=re+?");
 \nwindexdefn{S143}{S143}{NW27XAxz-3PFD2J-1}\eatline
-\nwidentdefs{\\{{S143}{S143}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3PFD2J-1}\nwendcode{}\nwbegincode{457}\sublabel{NW27XAxz-9zboZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-9zboZ-1}}}\moddef{S144~{\nwtagstyle{}\subpageref{NW27XAxz-9zboZ-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S143}{S143}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-3PFD2J-1}\nwendcode{}\nwbegincode{459}\sublabel{NW27XAxz-9zboZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-9zboZ-1}}}\moddef{S144~{\nwtagstyle{}\subpageref{NW27XAxz-9zboZ-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S144", SEL+"t2, v2, rid FROM CQ WHERE sid=? AND t2>? ORDER BY o2 ASC");
 \nwindexdefn{S144}{S144}{NW27XAxz-9zboZ-1}\eatline
-\nwidentdefs{\\{{S144}{S144}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-9zboZ-1}\nwendcode{}\nwbegincode{458}\sublabel{NW27XAxz-4eAVHn-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4eAVHn-1}}}\moddef{S145~{\nwtagstyle{}\subpageref{NW27XAxz-4eAVHn-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S144}{S144}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-9zboZ-1}\nwendcode{}\nwbegincode{460}\sublabel{NW27XAxz-4eAVHn-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4eAVHn-1}}}\moddef{S145~{\nwtagstyle{}\subpageref{NW27XAxz-4eAVHn-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S145", SEL+"te, ve FROM CW WHERE sid=?");
 \nwindexdefn{S145}{S145}{NW27XAxz-4eAVHn-1}\eatline
-\nwidentdefs{\\{{S145}{S145}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4eAVHn-1}\nwendcode{}\nwbegincode{459}\sublabel{NW27XAxz-2TcddD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2TcddD-1}}}\moddef{S147~{\nwtagstyle{}\subpageref{NW27XAxz-2TcddD-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S145}{S145}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4eAVHn-1}\nwendcode{}\nwbegincode{461}\sublabel{NW27XAxz-2TcddD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-2TcddD-1}}}\moddef{S147~{\nwtagstyle{}\subpageref{NW27XAxz-2TcddD-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S147", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
     + "SELECT t1 FROM W WHERE sid=? AND v2=0)");
 \nwindexdefn{S147}{S147}{NW27XAxz-2TcddD-1}\eatline
-\nwidentdefs{\\{{S147}{S147}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-2TcddD-1}\nwendcode{}\nwbegincode{460}\sublabel{NW27XAxz-n1SCR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-n1SCR-1}}}\moddef{S148~{\nwtagstyle{}\subpageref{NW27XAxz-n1SCR-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S147}{S147}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-2TcddD-1}\nwendcode{}\nwbegincode{462}\sublabel{NW27XAxz-n1SCR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-n1SCR-1}}}\moddef{S148~{\nwtagstyle{}\subpageref{NW27XAxz-n1SCR-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
 \nwindexdefn{S148}{S148}{NW27XAxz-n1SCR-1}\eatline
-\nwidentdefs{\\{{S148}{S148}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-n1SCR-1}\nwendcode{}\nwbegincode{461}\sublabel{NW27XAxz-44GFKd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-44GFKd-1}}}\moddef{S149~{\nwtagstyle{}\subpageref{NW27XAxz-44GFKd-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
+\nwidentdefs{\\{{S148}{S148}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-n1SCR-1}\nwendcode{}\nwbegincode{463}\sublabel{NW27XAxz-44GFKd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-44GFKd-1}}}\moddef{S149~{\nwtagstyle{}\subpageref{NW27XAxz-44GFKd-1}}}\endmoddef\nwused{\\{NW27XAxz-1g2xnv-1}}
 this.lu_pstr.put("S149", SEL+"t2, v2 FROM W WHERE sid=? ORDER BY t2 ASC");
 \nwindexdefn{S149}{S149}{NW27XAxz-44GFKd-1}\eatline
-\nwidentdefs{\\{{S149}{S149}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-44GFKd-1}\nwendcode{}\nwbegindocs{462}\nwdocspar
+\nwidentdefs{\\{{S149}{S149}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-44GFKd-1}\nwendcode{}\nwbegindocs{464}\nwdocspar
 \appendix
 
 \section{Appendix: Error Strings}
 \label{ap:error-strings}
-\nwenddocs{}\nwbegincode{463}\sublabel{NW27XAxz-15VC47-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-15VC47-1}}}\moddef{Err0~{\nwtagstyle{}\subpageref{NW27XAxz-15VC47-1}}}\endmoddef\nwused{\\{NW27XAxz-2CVxut-1}\\{NW27XAxz-4P4YpK-1}\\{NW27XAxz-b3Hn1-1}}
+\nwenddocs{}\nwbegincode{465}\sublabel{NW27XAxz-15VC47-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-15VC47-1}}}\moddef{Err0~{\nwtagstyle{}\subpageref{NW27XAxz-15VC47-1}}}\endmoddef\nwused{\\{NW27XAxz-2CVxut-1}\\{NW27XAxz-4P4YpK-1}\\{NW27XAxz-b3Hn1-1}}
 "Encountered catastrophic exception."
 \nwindexdefn{Err0}{Err0}{NW27XAxz-15VC47-1}\eatline
 \nwidentdefs{\\{{Err0}{Err0}}}\nwendcode{}
@@ -5098,7 +5179,7 @@ this.lu_pstr.put("S149", SEL+"t2, v2 FROM W WHERE sid=? ORDER BY t2 ASC");
 \nwixlogsorted{c}{{Prepare a prepared statement}{NW27XAxz-4UQpM2-1}{\nwixu{NW27XAxz-XGFF1-1}\nwixd{NW27XAxz-4UQpM2-1}}}%
 \nwixlogsorted{c}{{Print SQL driver statistics}{NW27XAxz-1lVtry-1}{\nwixu{NW27XAxz-4PbjF-3}\nwixd{NW27XAxz-1lVtry-1}}}%
 \nwixlogsorted{c}{{Procedure to insert \code{}route\edoc{} into Table W}{NW27XAxz-1EP7t-1}{\nwixu{NW27XAxz-3xg8Fp-1}\nwixd{NW27XAxz-1EP7t-1}\nwixu{NW27XAxz-2BaQBV-1}}}%
-\nwixlogsorted{c}{{Query active server locations}{NW27XAxz-3UaQCb-1}{\nwixu{NW27XAxz-4PbjF-1}\nwixd{NW27XAxz-3UaQCb-1}}}%
+\nwixlogsorted{c}{{Query active server locations}{NW27XAxz-3UaQCb-1}{\nwixu{NW27XAxz-4PbjF-1}\nwixd{NW27XAxz-3UaQCb-1}\nwixd{NW27XAxz-3UaQCb-2}}}%
 \nwixlogsorted{c}{{Query active servers}{NW27XAxz-pt8I9-1}{\nwixu{NW27XAxz-4PbjF-1}\nwixd{NW27XAxz-pt8I9-1}}}%
 \nwixlogsorted{c}{{Query all edges}{NW27XAxz-4ILREc-1}{\nwixu{NW27XAxz-4PbjF-1}\nwixd{NW27XAxz-4ILREc-1}}}%
 \nwixlogsorted{c}{{Query all server locations}{NW27XAxz-rvb17-1}{\nwixu{NW27XAxz-4PbjF-1}\nwixd{NW27XAxz-rvb17-1}}}%
@@ -5415,7 +5496,7 @@ this.lu_pstr.put("S149", SEL+"t2, v2 FROM W WHERE sid=? ORDER BY t2 ASC");
 \nwixlogsorted{i}{{S9}{S9}}%
 \nwixlogsorted{i}{{setupDriver}{setupDriver}}%
 \nwixlogsorted{i}{{STATEMENTS{\char95}MAX{\char95}COUNT}{STATEMENTS:unMAX:unCOUNT}}%
-\nwbegindocs{464}\nwdocspar
+\nwbegindocs{466}\nwdocspar
 \section{Appendix: List of Chunks}
 \label{ap:list-of-chunks}
 \nowebchunks

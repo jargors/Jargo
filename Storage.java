@@ -145,7 +145,8 @@ public class Storage {
     }
     return this.lu_users.get(uid).clone();
   }
-  public int[] DBQueryRequestStatus(int rid, int t) throws UserNotFoundException, SQLException {
+  public int[] DBQueryRequestStatus(final int rid, final int t)
+  throws UserNotFoundException, SQLException {
     if (!this.lu_users.containsKey(rid)) {
       throw new UserNotFoundException("User "+rid+" not found.");
     }
@@ -155,14 +156,14 @@ public class Storage {
       throw e;
     }
   }
-  public int[] DBQueryRequestIsAssigned(int rid) throws SQLException {
+  public int[] DBQueryRequestIsAssigned(final int rid) throws SQLException {
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
       return this.DBFetch(conn, "S148", 1, rid);
     } catch (SQLException e) {
       throw e;
     }
   }
-  public int[] DBQueryQueuedRequests(int t) throws SQLException {
+  public int[] DBQueryQueuedRequests(final int t) throws SQLException {
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
       final int[] output = this.DBFetch(conn, "S143", 7, t, t, REQUEST_TIMEOUT);
       int[] temp1 = new int[output.length];
@@ -194,40 +195,33 @@ public class Storage {
       throw e;
     }
   }
-  public int[] DBQueryActiveServers(int t) throws SQLException {
-    int[] output = new int[] { };
+  public int[] DBQueryActiveServers(final int t) throws SQLException {
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S134", 1, t, t, t);
+      return this.DBFetch(conn, "S134", 1, t, t, t);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
-  public int[] DBQueryServerLocationsAll(int t) throws SQLException {
+  public int[] DBQueryServerLocationsAll(final int t) throws SQLException {
     int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S59", 3, t, t, t, t);
+      return this.DBFetch(conn, "S59", 3, t, t, t, t);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
-  public int[] DBQueryServerLocationsActive(int t) throws SQLException {
+  public int[] DBQueryServerLocationsActive(final int t) throws SQLException {
     int[] output = new int[] { };
-    int[] temp1 = new int[] { };
-    int[] temp2 = new int[] { };
-    int j = 0;
-    int sid = 0;
-    int te = 0;
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      temp1 = DBFetch(conn, "S134", 2, t, t, t);      // <-- 10 ms/call
+      int j = 0;
+      final int[] temp1 = this.DBFetch(conn, "S134", 2, t, t, t);  // <-- 10 ms/call
       output = new int[(3*(temp1.length/2))];
       for (int i = 0; i < temp1.length - 1; i += 2) {
-        sid = temp1[(i + 0)];
-         te = temp1[(i + 1)];
-        temp2 = (t < te
-          ? DBFetch(conn, "S135", 2, sid, sid, t, t)  // <-- 0.07-0.15 ms/call
-          : DBFetch(conn, "S147", 2, sid, sid));      // <-- 0.04-0.15 ms/call
+        final int sid = temp1[(i + 0)];
+        final int  te = temp1[(i + 1)];
+        final int[] temp2 = (t < te
+          ? this.DBFetch(conn, "S135", 2, sid, sid, t, t)  // <-- 0.07-0.15 ms/call
+          : this.DBFetch(conn, "S147", 2, sid, sid));      // <-- 0.04-0.15 ms/call
         output[(j + 0)] = sid;
         output[(j + 1)] = temp2[0];
         output[(j + 2)] = temp2[1];
