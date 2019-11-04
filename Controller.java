@@ -179,20 +179,29 @@ public class Controller {
           col[5] = 0;
           col[6] = 0;
         }
-        storage.DBAddNewVertex(col[1], col[3], col[4]);
-        storage.DBAddNewVertex(col[2], col[5], col[6]);
+        try {
+          storage.DBAddNewVertex(col[1], col[3], col[4]);
+        } catch (DuplicateVertexException e) {
+          // System.err.println("Warning: duplicate vertex rejected");
+          // System.err.println(e.toString());
+        }
+        try {
+          storage.DBAddNewVertex(col[2], col[5], col[6]);
+        } catch (DuplicateVertexException e) {
+          // System.err.println("Warning: duplicate vertex rejected");
+          // System.err.println(e.toString());
+        }
         int dist = ((col[1] != 0 && col[2] != 0)
           ? tools.computeHaversine(
                 col[3]/CSHIFT, col[4]/CSHIFT,
                 col[5]/CSHIFT, col[6]/CSHIFT) : 0);
-        storage.DBAddNewEdge(col[1], col[2], dist, 10);
+        try {
+          storage.DBAddNewEdge(col[1], col[2], dist, 10);
+        } catch (DuplicateEdgeException e) {
+          // System.err.println("Warning: duplicate edge rejected");
+          // System.err.println(e.toString());
+        }
       }
-    } catch (DuplicateVertexException e) {
-      System.err.println("Warning: duplicate vertex rejected");
-      System.err.println(e.toString());
-    } catch (DuplicateEdgeException e) {
-      System.err.println("Warning: duplicate edge rejected");
-      System.err.println(e.toString());
     } catch (FileNotFoundException e) {
       System.err.println("Encountered fatal error");
       System.err.println(e.toString());

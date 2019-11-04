@@ -413,12 +413,6 @@ public void loadRoadNetwork(final String f_rnet) {
       <<..compute edge weight [[dist]]>>
       <<..insert edge>>
     }
-  } catch (DuplicateVertexException e) {
-    System.err.println("Warning: duplicate vertex rejected");
-    System.err.println(e.toString());
-  } catch (DuplicateEdgeException e) {
-    System.err.println("Warning: duplicate edge rejected");
-    System.err.println(e.toString());
   } catch (FileNotFoundException e) {
     System.err.println("Encountered fatal error");
     System.err.println(e.toString());
@@ -454,8 +448,18 @@ if (col[2] == 0) {
 }
 @
 <<..insert vertex coordinates>>=
-storage.DBAddNewVertex(col[1], col[3], col[4]);
-storage.DBAddNewVertex(col[2], col[5], col[6]);
+try {
+  storage.DBAddNewVertex(col[1], col[3], col[4]);
+} catch (DuplicateVertexException e) {
+  // System.err.println("Warning: duplicate vertex rejected");
+  // System.err.println(e.toString());
+}
+try {
+  storage.DBAddNewVertex(col[2], col[5], col[6]);
+} catch (DuplicateVertexException e) {
+  // System.err.println("Warning: duplicate vertex rejected");
+  // System.err.println(e.toString());
+}
 @
 We use haversine to compute edge weights\footnote{If the distance between two
 vertices is 0 due to rounding, then we round it up to 1.}.  If one of the
@@ -473,7 +477,12 @@ The fifth parameter is the \textit{initial speed} on all the edges \footnote{In
 the future, the speed on each edge may be recorded directly in the road network
 file instead of hardcoded here.}.
 <<..insert edge>>=
-storage.DBAddNewEdge(col[1], col[2], dist, 10);
+try {
+  storage.DBAddNewEdge(col[1], col[2], dist, 10);
+} catch (DuplicateEdgeException e) {
+  // System.err.println("Warning: duplicate edge rejected");
+  // System.err.println(e.toString());
+}
 @
 
 \subsubsection{[[loadProblem(1)]]}

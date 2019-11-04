@@ -413,12 +413,6 @@ public void loadRoadNetwork(final String f_rnet) \{
       \LA{}..compute edge weight \code{}dist\edoc{}~{\nwtagstyle{}\subpageref{NW2ZDXo8-3oMXI2-1}}\RA{}
       \LA{}..insert edge~{\nwtagstyle{}\subpageref{NW2ZDXo8-2i97Vx-1}}\RA{}
     \}
-  \} catch (DuplicateVertexException e) \{
-    System.err.println("Warning: duplicate vertex rejected");
-    System.err.println(e.toString());
-  \} catch (DuplicateEdgeException e) \{
-    System.err.println("Warning: duplicate edge rejected");
-    System.err.println(e.toString());
   \} catch (FileNotFoundException e) \{
     System.err.println("Encountered fatal error");
     System.err.println(e.toString());
@@ -454,8 +448,18 @@ if (col[2] == 0) \{
 \}
 \nwendcode{}\nwbegindocs{73}\nwdocspar
 \nwenddocs{}\nwbegincode{74}\sublabel{NW2ZDXo8-1EuI65-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1EuI65-1}}}\moddef{..insert vertex coordinates~{\nwtagstyle{}\subpageref{NW2ZDXo8-1EuI65-1}}}\endmoddef\nwused{\\{NW2ZDXo8-1JUvcB-1}}
-storage.DBAddNewVertex(col[1], col[3], col[4]);
-storage.DBAddNewVertex(col[2], col[5], col[6]);
+try \{
+  storage.DBAddNewVertex(col[1], col[3], col[4]);
+\} catch (DuplicateVertexException e) \{
+  // System.err.println("Warning: duplicate vertex rejected");
+  // System.err.println(e.toString());
+\}
+try \{
+  storage.DBAddNewVertex(col[2], col[5], col[6]);
+\} catch (DuplicateVertexException e) \{
+  // System.err.println("Warning: duplicate vertex rejected");
+  // System.err.println(e.toString());
+\}
 \nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1EuI65-1}\nwendcode{}\nwbegindocs{75}\nwdocspar
 We use haversine to compute edge weights\footnote{If the distance between two
 vertices is 0 due to rounding, then we round it up to 1.}.  If one of the
@@ -473,7 +477,12 @@ The fifth parameter is the \textit{initial speed} on all the edges \footnote{In
 the future, the speed on each edge may be recorded directly in the road network
 file instead of hardcoded here.}.
 \nwenddocs{}\nwbegincode{78}\sublabel{NW2ZDXo8-2i97Vx-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-2i97Vx-1}}}\moddef{..insert edge~{\nwtagstyle{}\subpageref{NW2ZDXo8-2i97Vx-1}}}\endmoddef\nwused{\\{NW2ZDXo8-1JUvcB-1}}
-storage.DBAddNewEdge(col[1], col[2], dist, 10);
+try \{
+  storage.DBAddNewEdge(col[1], col[2], dist, 10);
+\} catch (DuplicateEdgeException e) \{
+  // System.err.println("Warning: duplicate edge rejected");
+  // System.err.println(e.toString());
+\}
 \nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-2i97Vx-1}\nwendcode{}\nwbegindocs{79}\nwdocspar
 
 \subsubsection{{\tt{}\protect\nwindexuse{loadProblem}{loadProblem}{NW2ZDXo8-2rtVpi-1}loadProblem(1)}}
