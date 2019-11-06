@@ -203,7 +203,6 @@ public class Storage {
     }
   }
   public int[] DBQueryServerLocationsAll(final int t) throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
       return this.DBFetch(conn, "S59", 3, t, t, t, t);
     } catch (SQLException e) {
@@ -232,42 +231,35 @@ public class Storage {
     }
     return output;
   }
-  public int[] DBQueryServerRoute(int sid) throws SQLException {
-    int[] output = new int[] { };
+  public int[] DBQueryServerRoute(final int sid) throws SQLException {
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S60", 2, sid);
+      return DBFetch(conn, "S60", 2, sid);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
-  public int[] DBQueryServerSchedule(int sid) throws SQLException {
-    int[] output = new int[] { };
+  public int[] DBQueryServerSchedule(final int sid) throws SQLException {
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S61", 4, sid);
+      return DBFetch(conn, "S61", 4, sid);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
-  public int[] DBQueryServerRemainingRoute(int sid, int t) throws SQLException {
-    int[] output = new int[] { };
+  public int[] DBQueryServerRemainingRoute(final int sid, final int t) throws SQLException {
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S129", 2, sid, t);
+      return DBFetch(conn, "S129", 2, sid, t);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
-  public int[] DBQueryServerRemainingSchedule(int sid, int t)
+  public int[] DBQueryServerRemainingSchedule(final int sid, final int t)
   throws SQLException {
     int[] output = new int[] { };
-    int[] temp = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      temp = DBFetch(conn, "S144", 3, sid, t);
-      output = new int[4*temp.length/3 + 4];
+      int[] temp = DBFetch(conn, "S144", 3, sid, t);
+      output = new int[(4*temp.length/3 + 4)];
       int j = 0;
-      for (int i = 0; i < temp.length - 2; i += 3) {
+      for (int i = 0; i < (temp.length - 2); i += 3) {
         output[(j + 0)] = temp[(i + 0)];
         output[(j + 1)] = temp[(i + 1)];
         output[(j + 2)] = 0;
@@ -284,296 +276,237 @@ public class Storage {
     }
     return output;
   }
-  public int[] DBQueryServerRemainingDistance(int sid, int t)
+  public int[] DBQueryServerRemainingDistance(final int sid, final int t)
   throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S142", 1, sid, t);
+      return DBFetch(conn, "S142", 1, sid, t);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
-  public int[] DBQueryServerRemainingDuration(int sid, int t)
+  public int[] DBQueryServerRemainingDuration(final int sid, final int t)
   throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S127", 1, sid, t);
-      output[0] -= t;
+      int[] output = DBFetch(conn, "S127", 1, sid, t);
+      if (output != null) {
+        output[0] -= t;
+      }
+      return output;
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
-  public int[] DBQueryServerMaxLoad(int sid, int t) throws SQLException {
-    int[] output = new int[] { };
+  public int[] DBQueryServerMaxLoad(final int sid, final int t) throws SQLException {
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S73", 1, sid, t);
+      return DBFetch(conn, "S73", 1, sid, t);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
-  public int[] DBQueryServerPendingAssignments(int sid, int t) throws SQLException {
-    int[] output = new int[] { };
+  public int[] DBQueryServerPendingAssignments(final int sid, final int t)
+  throws SQLException {
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S100", 1, t, sid);
+      return DBFetch(conn, "S100", 1, t, sid);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
-  public int[] DBQueryServerCompletedAssignments(int sid, int t) throws SQLException {
-    int[] output = new int[] { };
+  public int[] DBQueryServerCompletedAssignments(final int sid, final int t)
+  throws SQLException {
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S101", 1, t, sid);
+      return DBFetch(conn, "S101", 1, t, sid);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
   public int[] DBQueryServiceRate() throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S102", 1);
+      return DBFetch(conn, "S102", 1);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
   public int[] DBQueryBaseDistanceTotal() throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S103", 1);
+      return DBFetch(conn, "S103", 1);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
   public int[] DBQueryServerBaseDistanceTotal() throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S110", 1);
+      return DBFetch(conn, "S110", 1);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
   public int[] DBQueryRequestBaseDistanceTotal() throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S111", 1);
+      return DBFetch(conn, "S111", 1);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
   public int[] DBQueryRequestBaseDistanceUnassigned() throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S138", 1);
+      return DBFetch(conn, "S138", 1);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
-  public int[] DBQueryServerTravelDistance(int sid) throws SQLException {
-    int[] output = new int[] { };
+  public int[] DBQueryServerTravelDistance(final int sid) throws SQLException {
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S104", 1, sid);
+      return DBFetch(conn, "S104", 1, sid);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
   public int[] DBQueryServerTravelDistanceTotal() throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S105", 1);
+      return DBFetch(conn, "S105", 1);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
-  public int[] DBQueryServerCruisingDistance(int sid) throws SQLException {
-    int[] output = new int[] { };
+  public int[] DBQueryServerCruisingDistance(final int sid) throws SQLException {
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S106", 1, sid);
+      return DBFetch(conn, "S106", 1, sid);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
   public int[] DBQueryServerCruisingDistanceTotal() throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S107", 1);
+      return DBFetch(conn, "S107", 1);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
-  public int[] DBQueryServerServiceDistance(int sid) throws SQLException {
-    int[] output = new int[] { };
+  public int[] DBQueryServerServiceDistance(final int sid) throws SQLException {
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S108", 1, sid);
+      return DBFetch(conn, "S108", 1, sid);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
   public int[] DBQueryServerServiceDistanceTotal() throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S109", 1);
+      return DBFetch(conn, "S109", 1);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
-  public int[] DBQueryRequestDetourDistance(int rid) throws SQLException {
-    int[] output = new int[] { };
+  public int[] DBQueryRequestDetourDistance(final int rid) throws SQLException {
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S112", 1, rid);
+      return DBFetch(conn, "S112", 1, rid);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
   public int[] DBQueryRequestDetourDistanceTotal() throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S113", 1);
+      return DBFetch(conn, "S113", 1);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
-  public int[] DBQueryRequestTransitDistance(int rid) throws SQLException {
-    int[] output = new int[] { };
+  public int[] DBQueryRequestTransitDistance(final int rid) throws SQLException {
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S114", 1, rid);
+      return DBFetch(conn, "S114", 1, rid);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
   public int[] DBQueryRequestTransitDistanceTotal() throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S115", 1);
+      return DBFetch(conn, "S115", 1);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
-  public int[] DBQueryServerTravelDuration(int sid) throws SQLException {
-    int[] output = new int[] { };
+  public int[] DBQueryServerTravelDuration(final int sid) throws SQLException {
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S116", 1, sid);
+      return DBFetch(conn, "S116", 1, sid);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
   public int[] DBQueryServerTravelDurationTotal() throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S117", 1);
+      return DBFetch(conn, "S117", 1);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
-  public int[] DBQueryRequestPickupDuration(int rid) throws SQLException {
-    int[] output = new int[] { };
+  public int[] DBQueryRequestPickupDuration(final int rid) throws SQLException {
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S118", 1, rid);
+      return output = DBFetch(conn, "S118", 1, rid);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
   public int[] DBQueryRequestPickupDurationTotal() throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S119", 1);
+      return DBFetch(conn, "S119", 1);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
-  public int[] DBQueryRequestTransitDuration(int rid) throws SQLException {
-    int[] output = new int[] { };
+  public int[] DBQueryRequestTransitDuration(final int rid) throws SQLException {
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S120", 1, rid);
+      return DBFetch(conn, "S120", 1, rid);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
   public int[] DBQueryRequestTransitDurationTotal() throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S121", 1);
+      return output = DBFetch(conn, "S121", 1);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
-  public int[] DBQueryRequestTravelDuration(int rid) throws SQLException {
-    int[] output = new int[] { };
+  public int[] DBQueryRequestTravelDuration(final int rid) throws SQLException {
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S122", 1, rid);
+      return DBFetch(conn, "S122", 1, rid);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
   public int[] DBQueryRequestTravelDurationTotal() throws SQLException {
-    int[] output = new int[] { };
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S123", 1);
+      return DBFetch(conn, "S123", 1);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
-  public int[] DBQueryRequestDepartureTime(int rid) throws SQLException {
-    int[] output = new int[] { };
+  public int[] DBQueryRequestDepartureTime(final int rid) throws SQLException {
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S124", 1, rid);
+      return DBFetch(conn, "S124", 1, rid);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
-  public int[] DBQueryServerDepartureTime(int sid) throws SQLException {
-    int[] output = new int[] { };
+  public int[] DBQueryServerDepartureTime(final int sid) throws SQLException {
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S125", 1, sid);
+      return DBFetch(conn, "S125", 1, sid);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
-  public int[] DBQueryRequestArrivalTime(int rid) throws SQLException {
-    int[] output = new int[] { };
+  public int[] DBQueryRequestArrivalTime(final int rid) throws SQLException {
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S126", 1, rid);
+      return DBFetch(conn, "S126", 1, rid);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
-  public int[] DBQueryServerArrivalTime(int sid) throws SQLException {
-    int[] output = new int[] { };
+  public int[] DBQueryServerArrivalTime(final int sid) throws SQLException {
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      output = DBFetch(conn, "S127", 1, sid);
+      return DBFetch(conn, "S127", 1, sid);
     } catch (SQLException e) {
       throw e;
     }
-    return output;
   }
   public void DBAddNewVertex(final int v, final int lng, final int lat)
   throws DuplicateVertexException, SQLException {
