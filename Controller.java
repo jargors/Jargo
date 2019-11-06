@@ -149,6 +149,8 @@ public class Controller {
   public void loadBackup(String p) {
     try {
       storage.DBLoadBackup(p);
+      storage.DBLoadRoadNetworkFromDB();
+      storage.DBLoadUsersFromDB();
     } catch (SQLException e) {
       System.err.println("Encountered fatal error");
       Tools.PrintSQLException(e);
@@ -159,7 +161,6 @@ public class Controller {
     storage.DBLoadDataModel();
   }
   public void loadRoadNetwork(final String f_rnet) {
-    Tools.Print("Load road network ("+f_rnet+")");
     try {
       Scanner sc = new Scanner(new File(f_rnet));
       while (sc.hasNext()) {
@@ -215,7 +216,6 @@ public class Controller {
     tools.registerEdges(storage.getReferenceEdgesCache());
   }
   public void loadProblem(String p) {
-    Tools.Print("Load problem ("+p+")");
     try {
       Scanner sc = new Scanner(new File(p));
       for (int i = 0; i < 6; i++) {
@@ -251,38 +251,29 @@ public class Controller {
     tools.loadGTree(p);
   }
   public void start(Consumer app_cb) {
-    Tools.Print("SIMULATION STARTED");
-
     world_time = initial_world_time;
-    Tools.Print("Set world time to "+world_time);
 
     int simulation_duration = (final_world_time - initial_world_time);
-    Tools.Print("Set world duration to "+simulation_duration+" (sec)");
 
     ScheduledExecutorService exe = Executors.newScheduledThreadPool(5);
 
     ScheduledFuture<?> cb1 = exe.scheduleAtFixedRate(
       ClockLoop, 0, 1, TimeUnit.SECONDS);
-    Tools.Print("Set clock-loop period to 1 (sec)");
 
     ScheduledFuture<?> cb2 = exe.scheduleAtFixedRate(
       EngineLoop, loop_delay, engine_update_period, TimeUnit.SECONDS);
-    Tools.Print("Set engine-loop period to "+engine_update_period+" (sec)");
 
     int request_collection_period = client.getRequestCollectionPeriod();
     ScheduledFuture<?> cb3 = exe.scheduleAtFixedRate(
       RequestCollectionLoop, loop_delay, request_collection_period, TimeUnit.SECONDS);
-    Tools.Print("Set request-collection-loop period to "+request_collection_period+" (sec)");
 
     int request_handling_period = client.getRequestHandlingPeriod();
     ScheduledFuture<?> cb4 = exe.scheduleAtFixedRate(
       RequestHandlingLoop, loop_delay, request_handling_period, TimeUnit.MILLISECONDS);
-    Tools.Print("Set request-handling-loop period to "+request_handling_period+" (msec)");
 
     int server_collection_period = client.getServerLocationCollectionPeriod();
     ScheduledFuture<?> cb5 = exe.scheduleAtFixedRate(
       ServerLoop, loop_delay, server_collection_period, TimeUnit.SECONDS);
-    Tools.Print("Set server-loop period to "+server_collection_period+" (sec)");
 
     exe.schedule(() -> {
       cb1.cancel(false);
@@ -292,16 +283,12 @@ public class Controller {
       cb5.cancel(false);
       exe.shutdown();
       client.end();
-      Tools.Print("SIMULATION ENDED");
       app_cb.accept(true);
     }, simulation_duration, TimeUnit.SECONDS);
   }
   public void startStatic() {
-    Tools.Print("SIMULATION STARTED -- STATIC MODE");
 
     world_time = initial_world_time;
-    Tools.Print("Set world time to "+world_time);
-    Tools.Print("Set final world time to "+final_world_time+" (sec)");
 
     while (world_time < final_world_time) {
       ClockLoop.run();
@@ -312,13 +299,59 @@ public class Controller {
     }
 
     client.end();
-
-    Tools.Print("SIMULATION ENDED");
   }
   public int[] query(String sql, int ncols) {
     int[] output = new int[] { };
     try {
       output = storage.DBQuery(sql, ncols);
+    } catch (SQLException e) {
+      System.err.println("Encountered fatal error");
+      Tools.PrintSQLException(e);
+      System.exit(1);
+    }
+    return output;
+  }
+  public int[] queryAllVertices() {
+    int[] output = new int[] { };
+    try {
+      output = storage.DBQueryAllVertices();
+    } catch (SQLException e) {
+      System.err.println("Encountered fatal error");
+      Tools.PrintSQLException(e);
+      System.exit(1);
+    }
+    return output;
+  }
+  public int[] queryAllEdges() {
+    int[] output = new int[] { };
+    try {
+      output = storage.DBQueryAllEdges();
+    } catch (SQLException e) {
+      System.err.println("Encountered fatal error");
+      Tools.PrintSQLException(e);
+      System.exit(1);
+    }
+    return output;
+  }
+  public int[] queryVertex(final int v) {
+    int[] output = new int[] { };
+    try {
+      output = storage.DBQueryVertex(v);
+    } catch (VertexNotFoundException e) {
+      System.err.println("Warning: vertex "+v+" not found");
+    } catch (SQLException e) {
+      System.err.println("Encountered fatal error");
+      Tools.PrintSQLException(e);
+      System.exit(1);
+    }
+    return output;
+  }
+  public int[] queryEdge(final int v1, final int v2) {
+    int[] output = new int[] { };
+    try {
+      output = storage.DBQueryEdge(v1, v2);
+    } catch (EdgeNotFoundException e) {
+      // ...
     } catch (SQLException e) {
       System.err.println("Encountered fatal error");
       Tools.PrintSQLException(e);

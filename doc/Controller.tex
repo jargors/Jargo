@@ -277,6 +277,10 @@ public Controller() \{
 \hi{Read methods.}
 \nwenddocs{}\nwbegincode{41}\sublabel{NW2ZDXo8-bF3Hn-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-bF3Hn-2}}}\moddef{\code{}Controller\edoc{} public methods~{\nwtagstyle{}\subpageref{NW2ZDXo8-bF3Hn-1}}}\plusendmoddef
 \LA{}Query custom statement~{\nwtagstyle{}\subpageref{NW2ZDXo8-2FtqIZ-1}}\RA{}
+\LA{}Query all vertices~{\nwtagstyle{}\subpageref{NW2ZDXo8-1r5OnM-1}}\RA{}
+\LA{}Query all edges~{\nwtagstyle{}\subpageref{NW2ZDXo8-4ILREc-1}}\RA{}
+\LA{}Query vertex~{\nwtagstyle{}\subpageref{NW2ZDXo8-4IfXsG-1}}\RA{}
+\LA{}Query edge~{\nwtagstyle{}\subpageref{NW2ZDXo8-1E2aru-1}}\RA{}
 \LA{}Query ridesharing user~{\nwtagstyle{}\subpageref{NW2ZDXo8-3isdeu-1}}\RA{}
 \LA{}Query queued requests~{\nwtagstyle{}\subpageref{NW2ZDXo8-3AGrxZ-1}}\RA{}
 \LA{}Query routes~{\nwtagstyle{}\subpageref{NW2ZDXo8-1AprqI-1}}\RA{}
@@ -385,6 +389,8 @@ public void saveBackup(String p) \{
 public void loadBackup(String p) \{
   try \{
     storage.DBLoadBackup(p);
+    storage.DBLoadRoadNetworkFromDB();
+    storage.DBLoadUsersFromDB();
   \} catch (SQLException e) \{
     System.err.println("Encountered fatal error");
     Tools.PrintSQLException(e);
@@ -403,7 +409,6 @@ public void loadDataModel() \{
 \subsubsection{{\tt{}\protect\nwindexuse{loadRoadNetwork}{loadRoadNetwork}{NW2ZDXo8-1JUvcB-1}loadRoadNetwork}(1)}
 \nwenddocs{}\nwbegincode{69}\sublabel{NW2ZDXo8-1JUvcB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1JUvcB-1}}}\moddef{Load road network~{\nwtagstyle{}\subpageref{NW2ZDXo8-1JUvcB-1}}}\endmoddef\nwused{\\{NW2ZDXo8-bF3Hn-1}}
 public void loadRoadNetwork(final String f_rnet) \{
-  Tools.Print("Load road network ("+f_rnet+")");
   try \{
     Scanner sc = new Scanner(new File(f_rnet));
     while (sc.hasNext()) \{
@@ -488,7 +493,6 @@ try \{
 \subsubsection{{\tt{}\protect\nwindexuse{loadProblem}{loadProblem}{NW2ZDXo8-2rtVpi-1}loadProblem(1)}}
 \nwenddocs{}\nwbegincode{80}\sublabel{NW2ZDXo8-2rtVpi-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-2rtVpi-1}}}\moddef{Load problem~{\nwtagstyle{}\subpageref{NW2ZDXo8-2rtVpi-1}}}\endmoddef\nwused{\\{NW2ZDXo8-bF3Hn-1}}
 public void loadProblem(String p) \{
-  Tools.Print("Load problem ("+p+")");
   try \{
     Scanner sc = new Scanner(new File(p));
     \LA{}..skip header rows~{\nwtagstyle{}\subpageref{NW2ZDXo8-4FZ4vu-1}}\RA{}
@@ -535,38 +539,29 @@ public void loadGTree(String p) \{
 \subsubsection{{\tt{}\protect\nwindexuse{start}{start}{NW2ZDXo8-43uvLJ-1}start}(0)}
 \nwenddocs{}\nwbegincode{85}\sublabel{NW2ZDXo8-43uvLJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-43uvLJ-1}}}\moddef{Start dynamic simulation~{\nwtagstyle{}\subpageref{NW2ZDXo8-43uvLJ-1}}}\endmoddef\nwused{\\{NW2ZDXo8-bF3Hn-1}}
 public void start(Consumer app_cb) \{
-  Tools.Print("SIMULATION STARTED");
-
   world_time = initial_world_time;
-  Tools.Print("Set world time to "+world_time);
 
   int simulation_duration = (final_world_time - initial_world_time);
-  Tools.Print("Set world duration to "+simulation_duration+" (sec)");
 
   ScheduledExecutorService exe = Executors.newScheduledThreadPool(5);
 
   ScheduledFuture<?> cb1 = exe.scheduleAtFixedRate(
     ClockLoop, 0, 1, TimeUnit.SECONDS);
-  Tools.Print("Set clock-loop period to 1 (sec)");
 
   ScheduledFuture<?> cb2 = exe.scheduleAtFixedRate(
     EngineLoop, loop_delay, engine_update_period, TimeUnit.SECONDS);
-  Tools.Print("Set engine-loop period to "+engine_update_period+" (sec)");
 
   int request_collection_period = client.getRequestCollectionPeriod();
   ScheduledFuture<?> cb3 = exe.scheduleAtFixedRate(
     RequestCollectionLoop, loop_delay, request_collection_period, TimeUnit.SECONDS);
-  Tools.Print("Set request-collection-loop period to "+request_collection_period+" (sec)");
 
   int request_handling_period = client.getRequestHandlingPeriod();
   ScheduledFuture<?> cb4 = exe.scheduleAtFixedRate(
     RequestHandlingLoop, loop_delay, request_handling_period, TimeUnit.MILLISECONDS);
-  Tools.Print("Set request-handling-loop period to "+request_handling_period+" (msec)");
 
   int server_collection_period = client.getServerLocationCollectionPeriod();
   ScheduledFuture<?> cb5 = exe.scheduleAtFixedRate(
     ServerLoop, loop_delay, server_collection_period, TimeUnit.SECONDS);
-  Tools.Print("Set server-loop period to "+server_collection_period+" (sec)");
 
   exe.schedule(() -> \{
     cb1.cancel(false);
@@ -576,7 +571,6 @@ public void start(Consumer app_cb) \{
     cb5.cancel(false);
     exe.shutdown();
     client.end();
-    Tools.Print("SIMULATION ENDED");
     app_cb.accept(true);
   \}, simulation_duration, TimeUnit.SECONDS);
 \}
@@ -585,11 +579,8 @@ public void start(Consumer app_cb) \{
 \subsubsection{{\tt{}\protect\nwindexuse{startStatic}{startStatic}{NW2ZDXo8-1n2dd-1}startStatic}(0)}
 \nwenddocs{}\nwbegincode{87}\sublabel{NW2ZDXo8-1n2dd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1n2dd-1}}}\moddef{Start static simulation~{\nwtagstyle{}\subpageref{NW2ZDXo8-1n2dd-1}}}\endmoddef\nwused{\\{NW2ZDXo8-bF3Hn-1}}
 public void startStatic() \{
-  Tools.Print("SIMULATION STARTED -- STATIC MODE");
 
   world_time = initial_world_time;
-  Tools.Print("Set world time to "+world_time);
-  Tools.Print("Set final world time to "+final_world_time+" (sec)");
 
   while (world_time < final_world_time) \{
     ClockLoop.run();
@@ -600,8 +591,6 @@ public void startStatic() \{
   \}
 
   client.end();
-
-  Tools.Print("SIMULATION ENDED");
 \}
 \nwindexdefn{startStatic}{startStatic}{NW2ZDXo8-1n2dd-1}\eatline
 \nwidentdefs{\\{{startStatic}{startStatic}}}\nwidentuses{\\{{client}{client}}\\{{ClockLoop}{ClockLoop}}\\{{EngineLoop}{EngineLoop}}\\{{final{\char95}world{\char95}time}{final:unworld:untime}}\\{{initial{\char95}world{\char95}time}{initial:unworld:untime}}\\{{RequestCollectionLoop}{RequestCollectionLoop}}\\{{RequestHandlingLoop}{RequestHandlingLoop}}\\{{ServerLoop}{ServerLoop}}\\{{world{\char95}time}{world:untime}}}\nwindexuse{client}{client}{NW2ZDXo8-1n2dd-1}\nwindexuse{ClockLoop}{ClockLoop}{NW2ZDXo8-1n2dd-1}\nwindexuse{EngineLoop}{EngineLoop}{NW2ZDXo8-1n2dd-1}\nwindexuse{final{\char95}world{\char95}time}{final:unworld:untime}{NW2ZDXo8-1n2dd-1}\nwindexuse{initial{\char95}world{\char95}time}{initial:unworld:untime}{NW2ZDXo8-1n2dd-1}\nwindexuse{RequestCollectionLoop}{RequestCollectionLoop}{NW2ZDXo8-1n2dd-1}\nwindexuse{RequestHandlingLoop}{RequestHandlingLoop}{NW2ZDXo8-1n2dd-1}\nwindexuse{ServerLoop}{ServerLoop}{NW2ZDXo8-1n2dd-1}\nwindexuse{world{\char95}time}{world:untime}{NW2ZDXo8-1n2dd-1}\nwendcode{}\nwbegindocs{88}\nwdocspar
@@ -622,8 +611,72 @@ public int[] query(String sql, int ncols) \{
 \}
 \nwindexdefn{query}{query}{NW2ZDXo8-2FtqIZ-1}\eatline
 \nwidentdefs{\\{{query}{query}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-2FtqIZ-1}\nwendcode{}\nwbegindocs{90}\nwdocspar
+\subsubsection{{\tt{}\protect\nwindexuse{queryAllVertices}{queryAllVertices}{NW2ZDXo8-1r5OnM-1}queryAllVertices}(0)}
+\nwenddocs{}\nwbegincode{91}\sublabel{NW2ZDXo8-1r5OnM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1r5OnM-1}}}\moddef{Query all vertices~{\nwtagstyle{}\subpageref{NW2ZDXo8-1r5OnM-1}}}\endmoddef\nwused{\\{NW2ZDXo8-bF3Hn-2}}
+public int[] queryAllVertices() \{
+  int[] output = new int[] \{ \};
+  try \{
+    output = storage.DBQueryAllVertices();
+  \} catch (SQLException e) \{
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  \}
+  return output;
+\}
+\nwindexdefn{queryAllVertices}{queryAllVertices}{NW2ZDXo8-1r5OnM-1}\eatline
+\nwidentdefs{\\{{queryAllVertices}{queryAllVertices}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1r5OnM-1}\nwendcode{}\nwbegindocs{92}\nwdocspar
+\subsubsection{{\tt{}\protect\nwindexuse{queryAllEdges}{queryAllEdges}{NW2ZDXo8-4ILREc-1}queryAllEdges}(0)}
+\nwenddocs{}\nwbegincode{93}\sublabel{NW2ZDXo8-4ILREc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-4ILREc-1}}}\moddef{Query all edges~{\nwtagstyle{}\subpageref{NW2ZDXo8-4ILREc-1}}}\endmoddef\nwused{\\{NW2ZDXo8-bF3Hn-2}}
+public int[] queryAllEdges() \{
+  int[] output = new int[] \{ \};
+  try \{
+    output = storage.DBQueryAllEdges();
+  \} catch (SQLException e) \{
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  \}
+  return output;
+\}
+\nwindexdefn{queryAllEdges}{queryAllEdges}{NW2ZDXo8-4ILREc-1}\eatline
+\nwidentdefs{\\{{queryAllEdges}{queryAllEdges}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-4ILREc-1}\nwendcode{}\nwbegindocs{94}\nwdocspar
+\subsubsection{{\tt{}queryVertex}(1)}
+\nwenddocs{}\nwbegincode{95}\sublabel{NW2ZDXo8-4IfXsG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-4IfXsG-1}}}\moddef{Query vertex~{\nwtagstyle{}\subpageref{NW2ZDXo8-4IfXsG-1}}}\endmoddef\nwused{\\{NW2ZDXo8-bF3Hn-2}}
+public int[] queryVertex(final int v) \{
+  int[] output = new int[] \{ \};
+  try \{
+    output = storage.DBQueryVertex(v);
+  \} catch (VertexNotFoundException e) \{
+    System.err.println("Warning: vertex "+v+" not found");
+  \} catch (SQLException e) \{
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  \}
+  return output;
+\}
+\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-4IfXsG-1}\nwendcode{}\nwbegindocs{96}\nwdocspar
+
+\subsubsection{{\tt{}queryEdge}(2)}
+\nwenddocs{}\nwbegincode{97}\sublabel{NW2ZDXo8-1E2aru-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1E2aru-1}}}\moddef{Query edge~{\nwtagstyle{}\subpageref{NW2ZDXo8-1E2aru-1}}}\endmoddef\nwused{\\{NW2ZDXo8-bF3Hn-2}}
+public int[] queryEdge(final int v1, final int v2) \{
+  int[] output = new int[] \{ \};
+  try \{
+    output = storage.DBQueryEdge(v1, v2);
+  \} catch (EdgeNotFoundException e) \{
+    // ...
+  \} catch (SQLException e) \{
+    System.err.println("Encountered fatal error");
+    Tools.PrintSQLException(e);
+    System.exit(1);
+  \}
+  return output;
+\}
+\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1E2aru-1}\nwendcode{}\nwbegindocs{98}\nwdocspar
+
 \subsubsection{{\tt{}\protect\nwindexuse{queryUser}{queryUser}{NW2ZDXo8-3isdeu-1}queryUser}(1)}
-\nwenddocs{}\nwbegincode{91}\sublabel{NW2ZDXo8-3isdeu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-3isdeu-1}}}\moddef{Query ridesharing user~{\nwtagstyle{}\subpageref{NW2ZDXo8-3isdeu-1}}}\endmoddef\nwused{\\{NW2ZDXo8-bF3Hn-2}}
+\nwenddocs{}\nwbegincode{99}\sublabel{NW2ZDXo8-3isdeu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-3isdeu-1}}}\moddef{Query ridesharing user~{\nwtagstyle{}\subpageref{NW2ZDXo8-3isdeu-1}}}\endmoddef\nwused{\\{NW2ZDXo8-bF3Hn-2}}
 public int[] queryUser(int rid) \{
   int[] output = new int[] \{ \};
   try \{
@@ -639,9 +692,9 @@ public int[] queryUser(int rid) \{
   return output;
 \}
 \nwindexdefn{queryUser}{queryUser}{NW2ZDXo8-3isdeu-1}\eatline
-\nwidentdefs{\\{{queryUser}{queryUser}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-3isdeu-1}\nwendcode{}\nwbegindocs{92}\nwdocspar
+\nwidentdefs{\\{{queryUser}{queryUser}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-3isdeu-1}\nwendcode{}\nwbegindocs{100}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryQueuedRequests}{queryQueuedRequests}{NW2ZDXo8-3AGrxZ-1}queryQueuedRequests}(1)}
-\nwenddocs{}\nwbegincode{93}\sublabel{NW2ZDXo8-3AGrxZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-3AGrxZ-1}}}\moddef{Query queued requests~{\nwtagstyle{}\subpageref{NW2ZDXo8-3AGrxZ-1}}}\endmoddef\nwused{\\{NW2ZDXo8-bF3Hn-2}}
+\nwenddocs{}\nwbegincode{101}\sublabel{NW2ZDXo8-3AGrxZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-3AGrxZ-1}}}\moddef{Query queued requests~{\nwtagstyle{}\subpageref{NW2ZDXo8-3AGrxZ-1}}}\endmoddef\nwused{\\{NW2ZDXo8-bF3Hn-2}}
 public int[] queryQueuedRequests(int t) \{
   int[] output = new int[] \{ \};
   try \{
@@ -654,9 +707,9 @@ public int[] queryQueuedRequests(int t) \{
   return output;
 \}
 \nwindexdefn{queryQueuedRequests}{queryQueuedRequests}{NW2ZDXo8-3AGrxZ-1}\eatline
-\nwidentdefs{\\{{queryQueuedRequests}{queryQueuedRequests}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-3AGrxZ-1}\nwendcode{}\nwbegindocs{94}\nwdocspar
+\nwidentdefs{\\{{queryQueuedRequests}{queryQueuedRequests}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-3AGrxZ-1}\nwendcode{}\nwbegindocs{102}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryRoute}{queryRoute}{NW2ZDXo8-1AprqI-1}queryRoute}(1)}
-\nwenddocs{}\nwbegincode{95}\sublabel{NW2ZDXo8-1AprqI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1AprqI-1}}}\moddef{Query routes~{\nwtagstyle{}\subpageref{NW2ZDXo8-1AprqI-1}}}\endmoddef\nwused{\\{NW2ZDXo8-bF3Hn-2}}
+\nwenddocs{}\nwbegincode{103}\sublabel{NW2ZDXo8-1AprqI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1AprqI-1}}}\moddef{Query routes~{\nwtagstyle{}\subpageref{NW2ZDXo8-1AprqI-1}}}\endmoddef\nwused{\\{NW2ZDXo8-bF3Hn-2}}
 public int[] queryRoute(int sid) \{
   int[] output = new int[] \{ \};
   try \{
@@ -669,9 +722,9 @@ public int[] queryRoute(int sid) \{
   return output;
 \}
 \nwindexdefn{queryRoute}{queryRoute}{NW2ZDXo8-1AprqI-1}\eatline
-\nwidentdefs{\\{{queryRoute}{queryRoute}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1AprqI-1}\nwendcode{}\nwbegindocs{96}\nwdocspar
+\nwidentdefs{\\{{queryRoute}{queryRoute}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1AprqI-1}\nwendcode{}\nwbegindocs{104}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{querySchedule}{querySchedule}{NW2ZDXo8-3yA8FQ-1}querySchedule}(1)}
-\nwenddocs{}\nwbegincode{97}\sublabel{NW2ZDXo8-3yA8FQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-3yA8FQ-1}}}\moddef{Query schedules~{\nwtagstyle{}\subpageref{NW2ZDXo8-3yA8FQ-1}}}\endmoddef\nwused{\\{NW2ZDXo8-bF3Hn-2}}
+\nwenddocs{}\nwbegincode{105}\sublabel{NW2ZDXo8-3yA8FQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-3yA8FQ-1}}}\moddef{Query schedules~{\nwtagstyle{}\subpageref{NW2ZDXo8-3yA8FQ-1}}}\endmoddef\nwused{\\{NW2ZDXo8-bF3Hn-2}}
 public int[] querySchedule(int sid) \{
   int[] output = new int[] \{ \};
   try \{
@@ -684,9 +737,9 @@ public int[] querySchedule(int sid) \{
   return output;
 \}
 \nwindexdefn{querySchedule}{querySchedule}{NW2ZDXo8-3yA8FQ-1}\eatline
-\nwidentdefs{\\{{querySchedule}{querySchedule}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-3yA8FQ-1}\nwendcode{}\nwbegindocs{98}\nwdocspar
+\nwidentdefs{\\{{querySchedule}{querySchedule}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-3yA8FQ-1}\nwendcode{}\nwbegindocs{106}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryCountVertices}{queryCountVertices}{NW2ZDXo8-1Ang64-1}queryCountVertices}(0)}
-\nwenddocs{}\nwbegincode{99}\sublabel{NW2ZDXo8-1Ang64-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\endmoddef\nwalsodefined{\\{NW2ZDXo8-1Ang64-2}\\{NW2ZDXo8-1Ang64-3}\\{NW2ZDXo8-1Ang64-4}\\{NW2ZDXo8-1Ang64-5}\\{NW2ZDXo8-1Ang64-6}\\{NW2ZDXo8-1Ang64-7}\\{NW2ZDXo8-1Ang64-8}\\{NW2ZDXo8-1Ang64-9}\\{NW2ZDXo8-1Ang64-A}\\{NW2ZDXo8-1Ang64-B}\\{NW2ZDXo8-1Ang64-C}\\{NW2ZDXo8-1Ang64-D}\\{NW2ZDXo8-1Ang64-E}\\{NW2ZDXo8-1Ang64-F}\\{NW2ZDXo8-1Ang64-G}\\{NW2ZDXo8-1Ang64-H}\\{NW2ZDXo8-1Ang64-I}\\{NW2ZDXo8-1Ang64-J}\\{NW2ZDXo8-1Ang64-K}\\{NW2ZDXo8-1Ang64-L}\\{NW2ZDXo8-1Ang64-M}\\{NW2ZDXo8-1Ang64-N}\\{NW2ZDXo8-1Ang64-O}}\nwused{\\{NW2ZDXo8-bF3Hn-2}}
+\nwenddocs{}\nwbegincode{107}\sublabel{NW2ZDXo8-1Ang64-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\endmoddef\nwalsodefined{\\{NW2ZDXo8-1Ang64-2}\\{NW2ZDXo8-1Ang64-3}\\{NW2ZDXo8-1Ang64-4}\\{NW2ZDXo8-1Ang64-5}\\{NW2ZDXo8-1Ang64-6}\\{NW2ZDXo8-1Ang64-7}\\{NW2ZDXo8-1Ang64-8}\\{NW2ZDXo8-1Ang64-9}\\{NW2ZDXo8-1Ang64-A}\\{NW2ZDXo8-1Ang64-B}\\{NW2ZDXo8-1Ang64-C}\\{NW2ZDXo8-1Ang64-D}\\{NW2ZDXo8-1Ang64-E}\\{NW2ZDXo8-1Ang64-F}\\{NW2ZDXo8-1Ang64-G}\\{NW2ZDXo8-1Ang64-H}\\{NW2ZDXo8-1Ang64-I}\\{NW2ZDXo8-1Ang64-J}\\{NW2ZDXo8-1Ang64-K}\\{NW2ZDXo8-1Ang64-L}\\{NW2ZDXo8-1Ang64-M}\\{NW2ZDXo8-1Ang64-N}\\{NW2ZDXo8-1Ang64-O}}\nwused{\\{NW2ZDXo8-bF3Hn-2}}
 public int[] queryCountVertices() \{
   int[] output = new int[] \{ \};
   try \{
@@ -699,9 +752,9 @@ public int[] queryCountVertices() \{
   return output;
 \}
 \nwindexdefn{queryCountVertices}{queryCountVertices}{NW2ZDXo8-1Ang64-1}\eatline
-\nwidentdefs{\\{{queryCountVertices}{queryCountVertices}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-1}\nwendcode{}\nwbegindocs{100}\nwdocspar
+\nwidentdefs{\\{{queryCountVertices}{queryCountVertices}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-1}\nwendcode{}\nwbegindocs{108}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryCountEdges}{queryCountEdges}{NW2ZDXo8-1Ang64-2}queryCountEdges}(0)}
-\nwenddocs{}\nwbegincode{101}\sublabel{NW2ZDXo8-1Ang64-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-2}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{109}\sublabel{NW2ZDXo8-1Ang64-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-2}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
 public int[] queryCountEdges() \{
   int[] output = new int[] \{ \};
   try \{
@@ -714,9 +767,9 @@ public int[] queryCountEdges() \{
   return output;
 \}
 \nwindexdefn{queryCountEdges}{queryCountEdges}{NW2ZDXo8-1Ang64-2}\eatline
-\nwidentdefs{\\{{queryCountEdges}{queryCountEdges}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-2}\nwendcode{}\nwbegindocs{102}\nwdocspar
+\nwidentdefs{\\{{queryCountEdges}{queryCountEdges}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-2}\nwendcode{}\nwbegindocs{110}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryStatisticsEdges}{queryStatisticsEdges}{NW2ZDXo8-1Ang64-3}queryStatisticsEdges}(0)}
-\nwenddocs{}\nwbegincode{103}\sublabel{NW2ZDXo8-1Ang64-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-3}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{111}\sublabel{NW2ZDXo8-1Ang64-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-3}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
 public int[] queryStatisticsEdges() \{
   int[] output = new int[] \{ \};
   try \{
@@ -729,9 +782,9 @@ public int[] queryStatisticsEdges() \{
   return output;
 \}
 \nwindexdefn{queryStatisticsEdges}{queryStatisticsEdges}{NW2ZDXo8-1Ang64-3}\eatline
-\nwidentdefs{\\{{queryStatisticsEdges}{queryStatisticsEdges}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-3}\nwendcode{}\nwbegindocs{104}\nwdocspar
+\nwidentdefs{\\{{queryStatisticsEdges}{queryStatisticsEdges}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-3}\nwendcode{}\nwbegindocs{112}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryMBR}{queryMBR}{NW2ZDXo8-1Ang64-4}queryMBR}(0)}
-\nwenddocs{}\nwbegincode{105}\sublabel{NW2ZDXo8-1Ang64-4}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-4}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{113}\sublabel{NW2ZDXo8-1Ang64-4}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-4}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
 public int[] queryMBR() \{
   int[] output = new int[] \{ \};
   try \{
@@ -744,9 +797,9 @@ public int[] queryMBR() \{
   return output;
 \}
 \nwindexdefn{queryMBR}{queryMBR}{NW2ZDXo8-1Ang64-4}\eatline
-\nwidentdefs{\\{{queryMBR}{queryMBR}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-4}\nwendcode{}\nwbegindocs{106}\nwdocspar
+\nwidentdefs{\\{{queryMBR}{queryMBR}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-4}\nwendcode{}\nwbegindocs{114}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryCountServers}{queryCountServers}{NW2ZDXo8-1Ang64-5}queryCountServers}(0)}
-\nwenddocs{}\nwbegincode{107}\sublabel{NW2ZDXo8-1Ang64-5}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-5}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{115}\sublabel{NW2ZDXo8-1Ang64-5}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-5}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
 public int[] queryCountServers() \{
   int[] output = new int[] \{ \};
   try \{
@@ -759,9 +812,9 @@ public int[] queryCountServers() \{
   return output;
 \}
 \nwindexdefn{queryCountServers}{queryCountServers}{NW2ZDXo8-1Ang64-5}\eatline
-\nwidentdefs{\\{{queryCountServers}{queryCountServers}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-5}\nwendcode{}\nwbegindocs{108}\nwdocspar
+\nwidentdefs{\\{{queryCountServers}{queryCountServers}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-5}\nwendcode{}\nwbegindocs{116}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryCountRequests}{queryCountRequests}{NW2ZDXo8-1Ang64-6}queryCountRequests}(0)}
-\nwenddocs{}\nwbegincode{109}\sublabel{NW2ZDXo8-1Ang64-6}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-6}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{117}\sublabel{NW2ZDXo8-1Ang64-6}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-6}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
 public int[] queryCountRequests() \{
   int[] output = new int[] \{ \};
   try \{
@@ -774,9 +827,9 @@ public int[] queryCountRequests() \{
   return output;
 \}
 \nwindexdefn{queryCountRequests}{queryCountRequests}{NW2ZDXo8-1Ang64-6}\eatline
-\nwidentdefs{\\{{queryCountRequests}{queryCountRequests}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-6}\nwendcode{}\nwbegindocs{110}\nwdocspar
+\nwidentdefs{\\{{queryCountRequests}{queryCountRequests}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-6}\nwendcode{}\nwbegindocs{118}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryServiceRate}{queryServiceRate}{NW2ZDXo8-1Ang64-7}queryServiceRate}(0)}
-\nwenddocs{}\nwbegincode{111}\sublabel{NW2ZDXo8-1Ang64-7}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-7}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{119}\sublabel{NW2ZDXo8-1Ang64-7}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-7}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
 public int[] queryServiceRate() \{
   int[] output = new int[] \{ \};
   try \{
@@ -789,9 +842,9 @@ public int[] queryServiceRate() \{
   return output;
 \}
 \nwindexdefn{queryServiceRate}{queryServiceRate}{NW2ZDXo8-1Ang64-7}\eatline
-\nwidentdefs{\\{{queryServiceRate}{queryServiceRate}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-7}\nwendcode{}\nwbegindocs{112}\nwdocspar
+\nwidentdefs{\\{{queryServiceRate}{queryServiceRate}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-7}\nwendcode{}\nwbegindocs{120}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryBaseDistanceTotal}{queryBaseDistanceTotal}{NW2ZDXo8-1Ang64-8}queryBaseDistanceTotal}(0)}
-\nwenddocs{}\nwbegincode{113}\sublabel{NW2ZDXo8-1Ang64-8}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-8}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{121}\sublabel{NW2ZDXo8-1Ang64-8}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-8}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
 public int[] queryBaseDistanceTotal() \{
   int[] output = new int[] \{ \};
   try \{
@@ -804,9 +857,9 @@ public int[] queryBaseDistanceTotal() \{
   return output;
 \}
 \nwindexdefn{queryBaseDistanceTotal}{queryBaseDistanceTotal}{NW2ZDXo8-1Ang64-8}\eatline
-\nwidentdefs{\\{{queryBaseDistanceTotal}{queryBaseDistanceTotal}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-8}\nwendcode{}\nwbegindocs{114}\nwdocspar
+\nwidentdefs{\\{{queryBaseDistanceTotal}{queryBaseDistanceTotal}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-8}\nwendcode{}\nwbegindocs{122}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryServerBaseDistanceTotal}{queryServerBaseDistanceTotal}{NW2ZDXo8-1Ang64-9}queryServerBaseDistanceTotal}(0)}
-\nwenddocs{}\nwbegincode{115}\sublabel{NW2ZDXo8-1Ang64-9}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-9}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{123}\sublabel{NW2ZDXo8-1Ang64-9}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-9}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
 public int[] queryServerBaseDistanceTotal() \{
   int[] output = new int[] \{ \};
   try \{
@@ -819,9 +872,9 @@ public int[] queryServerBaseDistanceTotal() \{
   return output;
 \}
 \nwindexdefn{queryServerBaseDistanceTotal}{queryServerBaseDistanceTotal}{NW2ZDXo8-1Ang64-9}\eatline
-\nwidentdefs{\\{{queryServerBaseDistanceTotal}{queryServerBaseDistanceTotal}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-9}\nwendcode{}\nwbegindocs{116}\nwdocspar
+\nwidentdefs{\\{{queryServerBaseDistanceTotal}{queryServerBaseDistanceTotal}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-9}\nwendcode{}\nwbegindocs{124}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryRequestBaseDistanceTotal}{queryRequestBaseDistanceTotal}{NW2ZDXo8-1Ang64-A}queryRequestBaseDistanceTotal}(0)}
-\nwenddocs{}\nwbegincode{117}\sublabel{NW2ZDXo8-1Ang64-A}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-A}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{125}\sublabel{NW2ZDXo8-1Ang64-A}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-A}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
 public int[] queryRequestBaseDistanceTotal() \{
   int[] output = new int[] \{ \};
   try \{
@@ -834,9 +887,9 @@ public int[] queryRequestBaseDistanceTotal() \{
   return output;
 \}
 \nwindexdefn{queryRequestBaseDistanceTotal}{queryRequestBaseDistanceTotal}{NW2ZDXo8-1Ang64-A}\eatline
-\nwidentdefs{\\{{queryRequestBaseDistanceTotal}{queryRequestBaseDistanceTotal}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-A}\nwendcode{}\nwbegindocs{118}\nwdocspar
+\nwidentdefs{\\{{queryRequestBaseDistanceTotal}{queryRequestBaseDistanceTotal}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-A}\nwendcode{}\nwbegindocs{126}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryRequestBaseDistanceUnassigned}{queryRequestBaseDistanceUnassigned}{NW2ZDXo8-1Ang64-B}queryRequestBaseDistanceUnassigned}(0)}
-\nwenddocs{}\nwbegincode{119}\sublabel{NW2ZDXo8-1Ang64-B}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-B}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{127}\sublabel{NW2ZDXo8-1Ang64-B}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-B}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
 public int[] queryRequestBaseDistanceUnassigned() \{
   int[] output = new int[] \{ \};
   try \{
@@ -849,9 +902,9 @@ public int[] queryRequestBaseDistanceUnassigned() \{
   return output;
 \}
 \nwindexdefn{queryRequestBaseDistanceUnassigned}{queryRequestBaseDistanceUnassigned}{NW2ZDXo8-1Ang64-B}\eatline
-\nwidentdefs{\\{{queryRequestBaseDistanceUnassigned}{queryRequestBaseDistanceUnassigned}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-B}\nwendcode{}\nwbegindocs{120}\nwdocspar
+\nwidentdefs{\\{{queryRequestBaseDistanceUnassigned}{queryRequestBaseDistanceUnassigned}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-B}\nwendcode{}\nwbegindocs{128}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryServerTravelDistanceTotal}{queryServerTravelDistanceTotal}{NW2ZDXo8-1Ang64-C}queryServerTravelDistanceTotal}(0)}
-\nwenddocs{}\nwbegincode{121}\sublabel{NW2ZDXo8-1Ang64-C}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-C}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{129}\sublabel{NW2ZDXo8-1Ang64-C}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-C}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
 public int[] queryServerTravelDistanceTotal() \{
   int[] output = new int[] \{ \};
   try \{
@@ -864,9 +917,9 @@ public int[] queryServerTravelDistanceTotal() \{
   return output;
 \}
 \nwindexdefn{queryServerTravelDistanceTotal}{queryServerTravelDistanceTotal}{NW2ZDXo8-1Ang64-C}\eatline
-\nwidentdefs{\\{{queryServerTravelDistanceTotal}{queryServerTravelDistanceTotal}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-C}\nwendcode{}\nwbegindocs{122}\nwdocspar
+\nwidentdefs{\\{{queryServerTravelDistanceTotal}{queryServerTravelDistanceTotal}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-C}\nwendcode{}\nwbegindocs{130}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryServerCruisingDistanceTotal}{queryServerCruisingDistanceTotal}{NW2ZDXo8-1Ang64-D}queryServerCruisingDistanceTotal}(0)}
-\nwenddocs{}\nwbegincode{123}\sublabel{NW2ZDXo8-1Ang64-D}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-D}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{131}\sublabel{NW2ZDXo8-1Ang64-D}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-D}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
 public int[] queryServerCruisingDistanceTotal() \{
   int[] output = new int[] \{ \};
   try \{
@@ -879,9 +932,9 @@ public int[] queryServerCruisingDistanceTotal() \{
   return output;
 \}
 \nwindexdefn{queryServerCruisingDistanceTotal}{queryServerCruisingDistanceTotal}{NW2ZDXo8-1Ang64-D}\eatline
-\nwidentdefs{\\{{queryServerCruisingDistanceTotal}{queryServerCruisingDistanceTotal}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-D}\nwendcode{}\nwbegindocs{124}\nwdocspar
+\nwidentdefs{\\{{queryServerCruisingDistanceTotal}{queryServerCruisingDistanceTotal}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-D}\nwendcode{}\nwbegindocs{132}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryServerServiceDistanceTotal}{queryServerServiceDistanceTotal}{NW2ZDXo8-1Ang64-E}queryServerServiceDistanceTotal}(0)}
-\nwenddocs{}\nwbegincode{125}\sublabel{NW2ZDXo8-1Ang64-E}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-E}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{133}\sublabel{NW2ZDXo8-1Ang64-E}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-E}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
 public int[] queryServerServiceDistanceTotal() \{
   int[] output = new int[] \{ \};
   try \{
@@ -894,9 +947,9 @@ public int[] queryServerServiceDistanceTotal() \{
   return output;
 \}
 \nwindexdefn{queryServerServiceDistanceTotal}{queryServerServiceDistanceTotal}{NW2ZDXo8-1Ang64-E}\eatline
-\nwidentdefs{\\{{queryServerServiceDistanceTotal}{queryServerServiceDistanceTotal}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-E}\nwendcode{}\nwbegindocs{126}\nwdocspar
+\nwidentdefs{\\{{queryServerServiceDistanceTotal}{queryServerServiceDistanceTotal}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-E}\nwendcode{}\nwbegindocs{134}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryRequestDetourDistanceTotal}{queryRequestDetourDistanceTotal}{NW2ZDXo8-1Ang64-F}queryRequestDetourDistanceTotal}(0)}
-\nwenddocs{}\nwbegincode{127}\sublabel{NW2ZDXo8-1Ang64-F}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-F}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{135}\sublabel{NW2ZDXo8-1Ang64-F}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-F}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
 public int[] queryRequestDetourDistanceTotal() \{
   int[] output = new int[] \{ \};
   try \{
@@ -909,9 +962,9 @@ public int[] queryRequestDetourDistanceTotal() \{
   return output;
 \}
 \nwindexdefn{queryRequestDetourDistanceTotal}{queryRequestDetourDistanceTotal}{NW2ZDXo8-1Ang64-F}\eatline
-\nwidentdefs{\\{{queryRequestDetourDistanceTotal}{queryRequestDetourDistanceTotal}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-F}\nwendcode{}\nwbegindocs{128}\nwdocspar
+\nwidentdefs{\\{{queryRequestDetourDistanceTotal}{queryRequestDetourDistanceTotal}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-F}\nwendcode{}\nwbegindocs{136}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryRequestTransitDistanceTotal}{queryRequestTransitDistanceTotal}{NW2ZDXo8-1Ang64-G}queryRequestTransitDistanceTotal}(0)}
-\nwenddocs{}\nwbegincode{129}\sublabel{NW2ZDXo8-1Ang64-G}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-G}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{137}\sublabel{NW2ZDXo8-1Ang64-G}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-G}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
 public int[] queryRequestTransitDistanceTotal() \{
   int[] output = new int[] \{ \};
   try \{
@@ -924,9 +977,9 @@ public int[] queryRequestTransitDistanceTotal() \{
   return output;
 \}
 \nwindexdefn{queryRequestTransitDistanceTotal}{queryRequestTransitDistanceTotal}{NW2ZDXo8-1Ang64-G}\eatline
-\nwidentdefs{\\{{queryRequestTransitDistanceTotal}{queryRequestTransitDistanceTotal}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-G}\nwendcode{}\nwbegindocs{130}\nwdocspar
+\nwidentdefs{\\{{queryRequestTransitDistanceTotal}{queryRequestTransitDistanceTotal}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-G}\nwendcode{}\nwbegindocs{138}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryServerTravelDurationTotal}{queryServerTravelDurationTotal}{NW2ZDXo8-1Ang64-H}queryServerTravelDurationTotal}(0)}
-\nwenddocs{}\nwbegincode{131}\sublabel{NW2ZDXo8-1Ang64-H}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-H}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{139}\sublabel{NW2ZDXo8-1Ang64-H}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-H}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
 public int[] queryServerTravelDurationTotal() \{
   int[] output = new int[] \{ \};
   try \{
@@ -939,9 +992,9 @@ public int[] queryServerTravelDurationTotal() \{
   return output;
 \}
 \nwindexdefn{queryServerTravelDurationTotal}{queryServerTravelDurationTotal}{NW2ZDXo8-1Ang64-H}\eatline
-\nwidentdefs{\\{{queryServerTravelDurationTotal}{queryServerTravelDurationTotal}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-H}\nwendcode{}\nwbegindocs{132}\nwdocspar
+\nwidentdefs{\\{{queryServerTravelDurationTotal}{queryServerTravelDurationTotal}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-H}\nwendcode{}\nwbegindocs{140}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryRequestPickupDurationTotal}{queryRequestPickupDurationTotal}{NW2ZDXo8-1Ang64-I}queryRequestPickupDurationTotal}(0)}
-\nwenddocs{}\nwbegincode{133}\sublabel{NW2ZDXo8-1Ang64-I}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-I}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{141}\sublabel{NW2ZDXo8-1Ang64-I}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-I}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
 public int[] queryRequestPickupDurationTotal() \{
   int[] output = new int[] \{ \};
   try \{
@@ -954,9 +1007,9 @@ public int[] queryRequestPickupDurationTotal() \{
   return output;
 \}
 \nwindexdefn{queryRequestPickupDurationTotal}{queryRequestPickupDurationTotal}{NW2ZDXo8-1Ang64-I}\eatline
-\nwidentdefs{\\{{queryRequestPickupDurationTotal}{queryRequestPickupDurationTotal}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-I}\nwendcode{}\nwbegindocs{134}\nwdocspar
+\nwidentdefs{\\{{queryRequestPickupDurationTotal}{queryRequestPickupDurationTotal}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-I}\nwendcode{}\nwbegindocs{142}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryRequestTransitDurationTotal}{queryRequestTransitDurationTotal}{NW2ZDXo8-1Ang64-J}queryRequestTransitDurationTotal}(0)}
-\nwenddocs{}\nwbegincode{135}\sublabel{NW2ZDXo8-1Ang64-J}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-J}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{143}\sublabel{NW2ZDXo8-1Ang64-J}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-J}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
 public int[] queryRequestTransitDurationTotal() \{
   int[] output = new int[] \{ \};
   try \{
@@ -969,9 +1022,9 @@ public int[] queryRequestTransitDurationTotal() \{
   return output;
 \}
 \nwindexdefn{queryRequestTransitDurationTotal}{queryRequestTransitDurationTotal}{NW2ZDXo8-1Ang64-J}\eatline
-\nwidentdefs{\\{{queryRequestTransitDurationTotal}{queryRequestTransitDurationTotal}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-J}\nwendcode{}\nwbegindocs{136}\nwdocspar
+\nwidentdefs{\\{{queryRequestTransitDurationTotal}{queryRequestTransitDurationTotal}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-J}\nwendcode{}\nwbegindocs{144}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryRequestTravelDurationTotal}{queryRequestTravelDurationTotal}{NW2ZDXo8-1Ang64-K}queryRequestTravelDurationTotal}(0)}
-\nwenddocs{}\nwbegincode{137}\sublabel{NW2ZDXo8-1Ang64-K}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-K}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{145}\sublabel{NW2ZDXo8-1Ang64-K}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-K}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
 public int[] queryRequestTravelDurationTotal() \{
   int[] output = new int[] \{ \};
   try \{
@@ -984,9 +1037,9 @@ public int[] queryRequestTravelDurationTotal() \{
   return output;
 \}
 \nwindexdefn{queryRequestTravelDurationTotal}{queryRequestTravelDurationTotal}{NW2ZDXo8-1Ang64-K}\eatline
-\nwidentdefs{\\{{queryRequestTravelDurationTotal}{queryRequestTravelDurationTotal}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-K}\nwendcode{}\nwbegindocs{138}\nwdocspar
+\nwidentdefs{\\{{queryRequestTravelDurationTotal}{queryRequestTravelDurationTotal}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-K}\nwendcode{}\nwbegindocs{146}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryRequestDepartureTime}{queryRequestDepartureTime}{NW2ZDXo8-1Ang64-L}queryRequestDepartureTime}(1)}
-\nwenddocs{}\nwbegincode{139}\sublabel{NW2ZDXo8-1Ang64-L}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-L}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{147}\sublabel{NW2ZDXo8-1Ang64-L}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-L}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
 public int[] queryRequestDepartureTime(int rid) \{
   int[] output = new int[] \{ \};
   try \{
@@ -999,9 +1052,9 @@ public int[] queryRequestDepartureTime(int rid) \{
   return output;
 \}
 \nwindexdefn{queryRequestDepartureTime}{queryRequestDepartureTime}{NW2ZDXo8-1Ang64-L}\eatline
-\nwidentdefs{\\{{queryRequestDepartureTime}{queryRequestDepartureTime}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-L}\nwendcode{}\nwbegindocs{140}\nwdocspar
+\nwidentdefs{\\{{queryRequestDepartureTime}{queryRequestDepartureTime}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-L}\nwendcode{}\nwbegindocs{148}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryServerDepartureTime}{queryServerDepartureTime}{NW2ZDXo8-1Ang64-M}queryServerDepartureTime}(1)}
-\nwenddocs{}\nwbegincode{141}\sublabel{NW2ZDXo8-1Ang64-M}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-M}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{149}\sublabel{NW2ZDXo8-1Ang64-M}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-M}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
 public int[] queryServerDepartureTime(int sid) \{
   int[] output = new int[] \{ \};
   try \{
@@ -1014,9 +1067,9 @@ public int[] queryServerDepartureTime(int sid) \{
   return output;
 \}
 \nwindexdefn{queryServerDepartureTime}{queryServerDepartureTime}{NW2ZDXo8-1Ang64-M}\eatline
-\nwidentdefs{\\{{queryServerDepartureTime}{queryServerDepartureTime}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-M}\nwendcode{}\nwbegindocs{142}\nwdocspar
+\nwidentdefs{\\{{queryServerDepartureTime}{queryServerDepartureTime}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-M}\nwendcode{}\nwbegindocs{150}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryRequestArrivalTime}{queryRequestArrivalTime}{NW2ZDXo8-1Ang64-N}queryRequestArrivalTime}(1)}
-\nwenddocs{}\nwbegincode{143}\sublabel{NW2ZDXo8-1Ang64-N}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-N}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{151}\sublabel{NW2ZDXo8-1Ang64-N}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-N}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
 public int[] queryRequestArrivalTime(int rid) \{
   int[] output = new int[] \{ \};
   try \{
@@ -1029,9 +1082,9 @@ public int[] queryRequestArrivalTime(int rid) \{
   return output;
 \}
 \nwindexdefn{queryRequestArrivalTime}{queryRequestArrivalTime}{NW2ZDXo8-1Ang64-N}\eatline
-\nwidentdefs{\\{{queryRequestArrivalTime}{queryRequestArrivalTime}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-N}\nwendcode{}\nwbegindocs{144}\nwdocspar
+\nwidentdefs{\\{{queryRequestArrivalTime}{queryRequestArrivalTime}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-N}\nwendcode{}\nwbegindocs{152}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryServerArrivalTime}{queryServerArrivalTime}{NW2ZDXo8-1Ang64-O}queryServerArrivalTime}(1)}
-\nwenddocs{}\nwbegincode{145}\sublabel{NW2ZDXo8-1Ang64-O}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-O}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{153}\sublabel{NW2ZDXo8-1Ang64-O}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-O}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW2ZDXo8-1Ang64-1}}}\plusendmoddef
 public int[] queryServerArrivalTime(int sid) \{
   int[] output = new int[] \{ \};
   try \{
@@ -1044,11 +1097,11 @@ public int[] queryServerArrivalTime(int sid) \{
   return output;
 \}
 \nwindexdefn{queryServerArrivalTime}{queryServerArrivalTime}{NW2ZDXo8-1Ang64-O}\eatline
-\nwidentdefs{\\{{queryServerArrivalTime}{queryServerArrivalTime}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-O}\nwendcode{}\nwbegindocs{146}\nwdocspar
+\nwidentdefs{\\{{queryServerArrivalTime}{queryServerArrivalTime}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1Ang64-O}\nwendcode{}\nwbegindocs{154}\nwdocspar
 
 \subsection{Write Methods}
 \subsubsection{{\tt{}\protect\nwindexuse{addNewServer}{addNewServer}{NW2ZDXo8-IYVQQ-1}addNewServer}(1)}
-\nwenddocs{}\nwbegincode{147}\sublabel{NW2ZDXo8-IYVQQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-IYVQQ-1}}}\moddef{Add new server~{\nwtagstyle{}\subpageref{NW2ZDXo8-IYVQQ-1}}}\endmoddef\nwused{\\{NW2ZDXo8-bF3Hn-3}}
+\nwenddocs{}\nwbegincode{155}\sublabel{NW2ZDXo8-IYVQQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-IYVQQ-1}}}\moddef{Add new server~{\nwtagstyle{}\subpageref{NW2ZDXo8-IYVQQ-1}}}\endmoddef\nwused{\\{NW2ZDXo8-bF3Hn-3}}
 public void addNewServer(int[] u) \{
   try \{
     storage.DBAddNewServer(u, tools.computeRoute(u[4], u[5], u[2]));
@@ -1065,9 +1118,9 @@ public void addNewServer(int[] u) \{
   \}
 \}
 \nwindexdefn{addNewServer}{addNewServer}{NW2ZDXo8-IYVQQ-1}\eatline
-\nwidentdefs{\\{{addNewServer}{addNewServer}}}\nwidentuses{\\{{storage}{storage}}\\{{tools}{tools}}}\nwindexuse{storage}{storage}{NW2ZDXo8-IYVQQ-1}\nwindexuse{tools}{tools}{NW2ZDXo8-IYVQQ-1}\nwendcode{}\nwbegindocs{148}\nwdocspar
+\nwidentdefs{\\{{addNewServer}{addNewServer}}}\nwidentuses{\\{{storage}{storage}}\\{{tools}{tools}}}\nwindexuse{storage}{storage}{NW2ZDXo8-IYVQQ-1}\nwindexuse{tools}{tools}{NW2ZDXo8-IYVQQ-1}\nwendcode{}\nwbegindocs{156}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{addNewRequest}{addNewRequest}{NW2ZDXo8-4ISWm4-1}addNewRequest}(1)}
-\nwenddocs{}\nwbegincode{149}\sublabel{NW2ZDXo8-4ISWm4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-4ISWm4-1}}}\moddef{Add new request~{\nwtagstyle{}\subpageref{NW2ZDXo8-4ISWm4-1}}}\endmoddef\nwused{\\{NW2ZDXo8-bF3Hn-3}}
+\nwenddocs{}\nwbegincode{157}\sublabel{NW2ZDXo8-4ISWm4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-4ISWm4-1}}}\moddef{Add new request~{\nwtagstyle{}\subpageref{NW2ZDXo8-4ISWm4-1}}}\endmoddef\nwused{\\{NW2ZDXo8-bF3Hn-3}}
 public void addNewRequest(int[] u) \{
   try \{
     storage.DBAddNewRequest(u);
@@ -1112,12 +1165,16 @@ public void addNewRequest(int[] u) \{
 \nwixlogsorted{c}{{Load problem}{NW2ZDXo8-2rtVpi-1}{\nwixu{NW2ZDXo8-bF3Hn-1}\nwixd{NW2ZDXo8-2rtVpi-1}}}%
 \nwixlogsorted{c}{{Load road network}{NW2ZDXo8-1JUvcB-1}{\nwixu{NW2ZDXo8-bF3Hn-1}\nwixd{NW2ZDXo8-1JUvcB-1}}}%
 \nwixlogsorted{c}{{Loop objects}{NW2ZDXo8-2e0Sfa-1}{\nwixu{NW2ZDXo8-3yXfwG-1}\nwixd{NW2ZDXo8-2e0Sfa-1}}}%
+\nwixlogsorted{c}{{Query all edges}{NW2ZDXo8-4ILREc-1}{\nwixu{NW2ZDXo8-bF3Hn-2}\nwixd{NW2ZDXo8-4ILREc-1}}}%
+\nwixlogsorted{c}{{Query all vertices}{NW2ZDXo8-1r5OnM-1}{\nwixu{NW2ZDXo8-bF3Hn-2}\nwixd{NW2ZDXo8-1r5OnM-1}}}%
 \nwixlogsorted{c}{{Query custom statement}{NW2ZDXo8-2FtqIZ-1}{\nwixu{NW2ZDXo8-bF3Hn-2}\nwixd{NW2ZDXo8-2FtqIZ-1}}}%
+\nwixlogsorted{c}{{Query edge}{NW2ZDXo8-1E2aru-1}{\nwixu{NW2ZDXo8-bF3Hn-2}\nwixd{NW2ZDXo8-1E2aru-1}}}%
 \nwixlogsorted{c}{{Query queued requests}{NW2ZDXo8-3AGrxZ-1}{\nwixu{NW2ZDXo8-bF3Hn-2}\nwixd{NW2ZDXo8-3AGrxZ-1}}}%
 \nwixlogsorted{c}{{Query ridesharing user}{NW2ZDXo8-3isdeu-1}{\nwixu{NW2ZDXo8-bF3Hn-2}\nwixd{NW2ZDXo8-3isdeu-1}}}%
 \nwixlogsorted{c}{{Query routes}{NW2ZDXo8-1AprqI-1}{\nwixu{NW2ZDXo8-bF3Hn-2}\nwixd{NW2ZDXo8-1AprqI-1}}}%
 \nwixlogsorted{c}{{Query schedules}{NW2ZDXo8-3yA8FQ-1}{\nwixu{NW2ZDXo8-bF3Hn-2}\nwixd{NW2ZDXo8-3yA8FQ-1}}}%
 \nwixlogsorted{c}{{Query various metrics}{NW2ZDXo8-1Ang64-1}{\nwixu{NW2ZDXo8-bF3Hn-2}\nwixd{NW2ZDXo8-1Ang64-1}\nwixd{NW2ZDXo8-1Ang64-2}\nwixd{NW2ZDXo8-1Ang64-3}\nwixd{NW2ZDXo8-1Ang64-4}\nwixd{NW2ZDXo8-1Ang64-5}\nwixd{NW2ZDXo8-1Ang64-6}\nwixd{NW2ZDXo8-1Ang64-7}\nwixd{NW2ZDXo8-1Ang64-8}\nwixd{NW2ZDXo8-1Ang64-9}\nwixd{NW2ZDXo8-1Ang64-A}\nwixd{NW2ZDXo8-1Ang64-B}\nwixd{NW2ZDXo8-1Ang64-C}\nwixd{NW2ZDXo8-1Ang64-D}\nwixd{NW2ZDXo8-1Ang64-E}\nwixd{NW2ZDXo8-1Ang64-F}\nwixd{NW2ZDXo8-1Ang64-G}\nwixd{NW2ZDXo8-1Ang64-H}\nwixd{NW2ZDXo8-1Ang64-I}\nwixd{NW2ZDXo8-1Ang64-J}\nwixd{NW2ZDXo8-1Ang64-K}\nwixd{NW2ZDXo8-1Ang64-L}\nwixd{NW2ZDXo8-1Ang64-M}\nwixd{NW2ZDXo8-1Ang64-N}\nwixd{NW2ZDXo8-1Ang64-O}}}%
+\nwixlogsorted{c}{{Query vertex}{NW2ZDXo8-4IfXsG-1}{\nwixu{NW2ZDXo8-bF3Hn-2}\nwixd{NW2ZDXo8-4IfXsG-1}}}%
 \nwixlogsorted{c}{{Return request to queue}{NW2ZDXo8-3SURrj-1}{\nwixu{NW2ZDXo8-bF3Hn-1}\nwixd{NW2ZDXo8-3SURrj-1}}}%
 \nwixlogsorted{c}{{Save backup}{NW2ZDXo8-2OKmqF-1}{\nwixu{NW2ZDXo8-bF3Hn-1}\nwixd{NW2ZDXo8-2OKmqF-1}}}%
 \nwixlogsorted{c}{{Set client}{NW2ZDXo8-3HnCZ3-1}{\nwixu{NW2ZDXo8-bF3Hn-1}\nwixd{NW2ZDXo8-3HnCZ3-1}}}%
@@ -1148,6 +1205,8 @@ public void addNewRequest(int[] u) \{
 \nwixlogsorted{i}{{loop{\char95}delay}{loop:undelay}}%
 \nwixlogsorted{i}{{lu{\char95}seen}{lu:unseen}}%
 \nwixlogsorted{i}{{query}{query}}%
+\nwixlogsorted{i}{{queryAllEdges}{queryAllEdges}}%
+\nwixlogsorted{i}{{queryAllVertices}{queryAllVertices}}%
 \nwixlogsorted{i}{{queryBaseDistanceTotal}{queryBaseDistanceTotal}}%
 \nwixlogsorted{i}{{queryCountEdges}{queryCountEdges}}%
 \nwixlogsorted{i}{{queryCountRequests}{queryCountRequests}}%
@@ -1191,7 +1250,7 @@ public void addNewRequest(int[] u) \{
 \nwixlogsorted{i}{{storage}{storage}}%
 \nwixlogsorted{i}{{tools}{tools}}%
 \nwixlogsorted{i}{{world{\char95}time}{world:untime}}%
-\nwbegindocs{150}\nwdocspar
+\nwbegindocs{158}\nwdocspar
 \appendix
 
 \section{Appendix: List of Chunks}
