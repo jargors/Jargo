@@ -1,11 +1,4 @@
 import com.github.jargors.Storage;
-import com.github.jargors.exceptions.DuplicateVertexException;
-import com.github.jargors.exceptions.DuplicateEdgeException;
-import com.github.jargors.exceptions.DuplicateUserException;
-import com.github.jargors.exceptions.EdgeNotFoundException;
-import com.github.jargors.exceptions.UserNotFoundException;
-import com.github.jargors.exceptions.VertexNotFoundException;
-import java.sql.SQLException;
 public class StorageCorrectnessTest {
   private static int count_passed = 0;
   private static int count_failed = 0;
