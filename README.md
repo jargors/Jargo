@@ -1,3 +1,9 @@
+# Jargo - Storage Interface
+
+![Road network used by the test program](test/correctness/data/test.png)
+
+*Road network used by the test program*
+
 Created July 2, 2019 | Latest Version 1.0.0 (Nov. 6, 2019)
 -------------------- | -----------------------------------
 
@@ -83,6 +89,4 @@ To build and run the test program:
 - Type `make class` (if you have successfully built the storage interface jar,
   you should encounter no problems here)
 - Type `./run.sh`
-
-![Road network used by the test program](test/correctness/data/test.png)
 
