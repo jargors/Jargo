@@ -2070,7 +2070,7 @@ public void DBLoadDataModel() {
 Method \textcolor{blue}{[[DBLoadBackup]]}(1) loads a previously saved Jargo
 database instance from disk into working memory. It uses [[setupDriver]](0) to
 register the JDBC [[DriverManager]] to the new instance.  If the DBCP2
-[[PolingDriver]] cannot be found, a [[ClassNotFoundException]] is thrown. We
+[[PoolingDriver]] cannot be found, a [[ClassNotFoundException]] is thrown. We
 consider this exception to be fatal and we exit immediately.  On the other hand
 if a [[SQLException]] occurs, we rethrow to let the caller handle it. This
 exception can occur if the driver cannot access the database for whatever
@@ -2081,7 +2081,8 @@ reason.\\
 \textbf{Returns:} nothing.\\
 \textbf{Side Effects:} loads backup into Jargo database instance, or exits the
 JVM if failure occurs.\\
-\textbf{Throws:} [[SQLException]] if database cannot be accessed.\\
+\textbf{Throws:} [[SQLException]] if database cannot be accessed, or
+[[ClassNotFoundException]] if the DBCP2 driver cannot be found.\\
 \bottomrule
 \end{tabular}
 <<Load backup>>=
@@ -3296,9 +3297,9 @@ or [[null]] if no results.
 
 \begin{tikzpicture}
 \small
-\matrix[nodes={draw,minimum size=6mm}] {
+\matrix[nodes={minimum size=6mm}] {
   \node {...};
- &\node {$in+j:\textrm{value at column $j$, row $i$ of the result set}$};
+ &\node[draw] {$in+j:\textrm{value at column $j$, row $i$ of the result set}$};
  &\node {...};\\
 };
 \end{tikzpicture}
@@ -5100,7 +5101,7 @@ where $r$ is the request identified by [[rid]] (param. 1).\\
 <<Query various metrics>>=
 public int[] DBQueryRequestPickupDuration(final int rid) throws SQLException {
   try (<<Open [[conn]]>>) {
-    return output = DBFetch(conn, "S118", 1, rid);
+    return DBFetch(conn, "S118", 1, rid);
   } catch (SQLException e) {
     throw e;
   }
@@ -5202,7 +5203,7 @@ or [[null]] if no results.
 <<Query various metrics>>=
 public int[] DBQueryRequestTransitDurationTotal() throws SQLException {
   try (<<Open [[conn]]>>) {
-    return output = DBFetch(conn, "S121", 1);
+    return DBFetch(conn, "S121", 1);
   } catch (SQLException e) {
     throw e;
   }
@@ -5443,10 +5444,25 @@ public int[] DBQueryServerArrivalTime(final int sid) throws SQLException {
 @
 
 \subsection{[[setupDriver]](0)}
-The following code registers a connection pool to the JDBC driver.  Portions of
-this code are licensed by the Apache Software Foundation.  The connection pool
-allows us to concurrently submit multiple SQL commands against the database
-from different threads.
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[setupDriver]]}(0) registers a connection pool to the
+JDBC driver.
+The connection pool allows us to concurrently submit SQL
+commands against the database from different threads.
+A [[SQLException]] is thrown in case of database failure.
+A [[ClassNotFoundException]] is thrown if the DBCP2 [[PoolingDriver]]
+cannot be found.
+Portions of this code are licensed by the Apache Software Foundation.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} registers a new connection pool to the JDBC driver manager.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered, or
+[[ClassNotFoundException]] if the DBCP2 driver cannot be found.\\
+\bottomrule
+\end{tabular}
 <<Setup JDBC driver>>=
 private void setupDriver() throws SQLException, ClassNotFoundException {
   connection_factory = new DriverManagerConnectionFactory(CONNECTIONS_URL);
@@ -5466,9 +5482,27 @@ private void setupDriver() throws SQLException, ClassNotFoundException {
 }
 @ %def setupDriver
 
-\subsection{[[PS]](1)}
+\subsection{[[PS]](2)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[PS]]}(2) returns a JDBC [[PreparedStatement]] for the
+statement string identified by [[k]] (param. 2) on the connection given in
+param. 1.  A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Connection [[conn]] (param. 1):&a JDBC connection.\\
+String [[k]] (param. 2):&statement identifier.\\
+\end{tabular}\\
+\textbf{Returns:} a prepared statement on the connection in param. 1 of the
+statement string identified by param. 2.\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 <<Prepare a prepared statement>>=
-private PreparedStatement PS(Connection conn, String k) throws SQLException {
+private PreparedStatement PS(final Connection conn, final String k) throws SQLException {
   PreparedStatement p = null;
   try {
     p = conn.prepareStatement(lu_pstr.get(k),
@@ -5483,8 +5517,41 @@ private PreparedStatement PS(Connection conn, String k) throws SQLException {
 @ %def PS
 
 \subsection{[[DBFetch]](3...)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBFetch]]}(3...) executes a predefined [[SELECT]]
+query against the Jargo database instance.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Connection [[conn]] (param. 1):&a JDBC connection.\\
+String [[k]] (param. 2):&statement identifier.\\
+Integer [[ncols]] (param. 3):&number of columns in the selection.\\
+Integer... [[values]] (param. 4...):&values to use in the statement, in order
+of appearance.
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node {...};
+ &\node[draw] {$in+j:\textrm{value at column $j$, row $i$ of the result set}$};
+ &\node {...};\\
+};
+\end{tikzpicture}
+
+where $i$, $j$ start from 0.\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 <<Fetch items from database>>=
-private int[] DBFetch(Connection conn, String k, int ncols, Integer... values)
+private int[] DBFetch(
+    final Connection conn, final String k, final int ncols, final Integer... values)
 throws SQLException {
   int[] output = new int[] { };
   try {
@@ -5513,8 +5580,25 @@ for (int i = 0; i < values.length; i++) {
 @
 
 \subsection{[[PSAdd]](2...)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[PSAdd]]}(2...) adds a prepared statement to
+the execution batch.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Prepared statement [[p]] (param. 1):&a prepared statement.\\
+Integer... [[values]] (param. 2...):&values to use in the statement, in order of appearance.\\
+\end{tabular}\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} adds to the execution batch for the statement in param. 1.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 <<Fill prepared statement>>=
-private void PSAdd(PreparedStatement p, Integer... values) throws SQLException {
+private void PSAdd(PreparedStatement p, final Integer... values) throws SQLException {
   p.clearParameters();
   <<..set values for statement>>
   try {
@@ -5526,6 +5610,21 @@ private void PSAdd(PreparedStatement p, Integer... values) throws SQLException {
 @ %def PSAdd
 
 \subsection{[[PSSubmit]](1...)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[PSSubmit]]}(1...) executes a prepared statement's batch.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Prepared statement [[p]] (param. 1):&a prepared statement.
+\end{tabular}\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} may modify tables in the Jargo database.
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 <<Submit prepared statement batch>>=
 private void PSSubmit(PreparedStatement... statements) throws SQLException {
   try {
@@ -5540,9 +5639,19 @@ private void PSSubmit(PreparedStatement... statements) throws SQLException {
 @ %def PSSubmit
 
 \subsection{[[PSInit]](0)}
-The [[PSInit]](0) method initializes the statement cache [[lu_pstr]]. Each
-statement is placed in its own chunk so it can be referenced wherever the
-statement is used.
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[PSInit]]}(0) initializes the statement cache
+[[lu_pstr]]. Each statement is placed in its own chunk so it can be referenced
+wherever the statement is used.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} populates [[lu_pstr]].
+\textbf{Throws:} nothing.\\
+\bottomrule
+\end{tabular}
 <<Initialize statements>>=
 private void PSInit() {
   String INS = "INSERT INTO ";

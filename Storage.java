@@ -440,7 +440,7 @@ public class Storage {
   }
   public int[] DBQueryRequestPickupDuration(final int rid) throws SQLException {
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      return output = DBFetch(conn, "S118", 1, rid);
+      return DBFetch(conn, "S118", 1, rid);
     } catch (SQLException e) {
       throw e;
     }
@@ -461,7 +461,7 @@ public class Storage {
   }
   public int[] DBQueryRequestTransitDurationTotal() throws SQLException {
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      return output = DBFetch(conn, "S121", 1);
+      return DBFetch(conn, "S121", 1);
     } catch (SQLException e) {
       throw e;
     }
@@ -1605,7 +1605,7 @@ public class Storage {
     this.lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
     this.lu_pstr.put("S149", SEL+"t2, v2 FROM W WHERE sid=? ORDER BY t2 ASC");
   }
-  private PreparedStatement PS(Connection conn, String k) throws SQLException {
+  private PreparedStatement PS(final Connection conn, final String k) throws SQLException {
     PreparedStatement p = null;
     try {
       p = conn.prepareStatement(lu_pstr.get(k),
@@ -1617,7 +1617,8 @@ public class Storage {
     }
     return p;
   }
-  private int[] DBFetch(Connection conn, String k, int ncols, Integer... values)
+  private int[] DBFetch(
+      final Connection conn, final String k, final int ncols, final Integer... values)
   throws SQLException {
     int[] output = new int[] { };
     try {
@@ -1646,7 +1647,7 @@ public class Storage {
     }
     return output;
   }
-  private void PSAdd(PreparedStatement p, Integer... values) throws SQLException {
+  private void PSAdd(PreparedStatement p, final Integer... values) throws SQLException {
     p.clearParameters();
     for (int i = 0; i < values.length; i++) {
       if (values[i] == null) {

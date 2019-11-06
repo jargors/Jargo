@@ -2070,7 +2070,7 @@ public void DBLoadDataModel() \{
 Method \textcolor{blue}{{\tt{}\protect\nwindexuse{DBLoadBackup}{DBLoadBackup}{NW27XAxz-b3Hn1-1}DBLoadBackup}}(1) loads a previously saved Jargo
 database instance from disk into working memory. It uses {\tt{}\protect\nwindexuse{setupDriver}{setupDriver}{NW27XAxz-33Wt2A-1}setupDriver}(0) to
 register the JDBC {\tt{}DriverManager} to the new instance.  If the DBCP2
-{\tt{}PolingDriver} cannot be found, a {\tt{}ClassNotFoundException} is thrown. We
+{\tt{}PoolingDriver} cannot be found, a {\tt{}ClassNotFoundException} is thrown. We
 consider this exception to be fatal and we exit immediately.  On the other hand
 if a {\tt{}SQLException} occurs, we rethrow to let the caller handle it. This
 exception can occur if the driver cannot access the database for whatever
@@ -2081,7 +2081,8 @@ reason.\\
 \textbf{Returns:} nothing.\\
 \textbf{Side Effects:} loads backup into Jargo database instance, or exits the
 JVM if failure occurs.\\
-\textbf{Throws:} {\tt{}SQLException} if database cannot be accessed.\\
+\textbf{Throws:} {\tt{}SQLException} if database cannot be accessed, or
+{\tt{}ClassNotFoundException} if the DBCP2 driver cannot be found.\\
 \bottomrule
 \end{tabular}
 \nwenddocs{}\nwbegincode{123}\sublabel{NW27XAxz-b3Hn1-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-b3Hn1-1}}}\moddef{Load backup~{\nwtagstyle{}\subpageref{NW27XAxz-b3Hn1-1}}}\endmoddef\nwused{\\{NW27XAxz-4PbjF-3}}
@@ -3296,9 +3297,9 @@ or {\tt{}null} if no results.
 
 \begin{tikzpicture}
 \small
-\matrix[nodes={draw,minimum size=6mm}] {
+\matrix[nodes={minimum size=6mm}] {
   \node {...};
- &\node {$in+j:\textrm{value at column $j$, row $i$ of the result set}$};
+ &\node[draw] {$in+j:\textrm{value at column $j$, row $i$ of the result set}$};
  &\node {...};\\
 };
 \end{tikzpicture}
@@ -5100,7 +5101,7 @@ where $r$ is the request identified by {\tt{}rid} (param. 1).\\
 \nwenddocs{}\nwbegincode{337}\sublabel{NW27XAxz-1Ang64-I}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-I}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryRequestPickupDuration(final int rid) throws SQLException \{
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
-    return output = DBFetch(conn, "S118", 1, rid);
+    return DBFetch(conn, "S118", 1, rid);
   \} catch (SQLException e) \{
     throw e;
   \}
@@ -5202,7 +5203,7 @@ or {\tt{}null} if no results.
 \nwenddocs{}\nwbegincode{343}\sublabel{NW27XAxz-1Ang64-L}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-L}}}\moddef{Query various metrics~{\nwtagstyle{}\subpageref{NW27XAxz-1Ang64-1}}}\plusendmoddef
 public int[] DBQueryRequestTransitDurationTotal() throws SQLException \{
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW27XAxz-JT1v9-1}}\RA{}) \{
-    return output = DBFetch(conn, "S121", 1);
+    return DBFetch(conn, "S121", 1);
   \} catch (SQLException e) \{
     throw e;
   \}
@@ -5443,10 +5444,25 @@ public int[] DBQueryServerArrivalTime(final int sid) throws SQLException \{
 \nwendcode{}\nwbegindocs{358}\nwdocspar
 
 \subsection{{\tt{}\protect\nosublabel{NW27XAxz-XGFF1-1-u6}\protect\nwindexuse{setupDriver}{setupDriver}{NW27XAxz-33Wt2A-1}setupDriver}(0)}
-The following code registers a connection pool to the JDBC driver.  Portions of
-this code are licensed by the Apache Software Foundation.  The connection pool
-allows us to concurrently submit multiple SQL commands against the database
-from different threads.
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{{\tt{}\protect\nwindexuse{setupDriver}{setupDriver}{NW27XAxz-33Wt2A-1}setupDriver}}(0) registers a connection pool to the
+JDBC driver.
+The connection pool allows us to concurrently submit SQL
+commands against the database from different threads.
+A {\tt{}SQLException} is thrown in case of database failure.
+A {\tt{}ClassNotFoundException} is thrown if the DBCP2 {\tt{}PoolingDriver}
+cannot be found.
+Portions of this code are licensed by the Apache Software Foundation.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} registers a new connection pool to the JDBC driver manager.\\
+\textbf{Throws:} {\tt{}SQLException} if database failure is encountered, or
+{\tt{}ClassNotFoundException} if the DBCP2 driver cannot be found.\\
+\bottomrule
+\end{tabular}
 \nwenddocs{}\nwbegincode{359}\sublabel{NW27XAxz-33Wt2A-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-33Wt2A-1}}}\moddef{Setup JDBC driver~{\nwtagstyle{}\subpageref{NW27XAxz-33Wt2A-1}}}\endmoddef\nwused{\\{NW27XAxz-XGFF1-1}}
 private void setupDriver() throws SQLException, ClassNotFoundException \{
   connection_factory = new DriverManagerConnectionFactory(CONNECTIONS_URL);
@@ -5466,9 +5482,27 @@ private void setupDriver() throws SQLException, ClassNotFoundException \{
 \}
 \nwindexdefn{setupDriver}{setupDriver}{NW27XAxz-33Wt2A-1}\eatline
 \nwidentdefs{\\{{setupDriver}{setupDriver}}}\nwidentuses{\\{{connection{\char95}factory}{connection:unfactory}}\\{{CONNECTIONS{\char95}DRIVER{\char95}URL}{CONNECTIONS:unDRIVER:unURL}}\\{{CONNECTIONS{\char95}POOL{\char95}NAME}{CONNECTIONS:unPOOL:unNAME}}\\{{CONNECTIONS{\char95}URL}{CONNECTIONS:unURL}}\\{{driver}{driver}}\\{{pool}{pool}}\\{{poolableconnection{\char95}factory}{poolableconnection:unfactory}}\\{{STATEMENTS{\char95}MAX{\char95}COUNT}{STATEMENTS:unMAX:unCOUNT}}}\nwindexuse{connection{\char95}factory}{connection:unfactory}{NW27XAxz-33Wt2A-1}\nwindexuse{CONNECTIONS{\char95}DRIVER{\char95}URL}{CONNECTIONS:unDRIVER:unURL}{NW27XAxz-33Wt2A-1}\nwindexuse{CONNECTIONS{\char95}POOL{\char95}NAME}{CONNECTIONS:unPOOL:unNAME}{NW27XAxz-33Wt2A-1}\nwindexuse{CONNECTIONS{\char95}URL}{CONNECTIONS:unURL}{NW27XAxz-33Wt2A-1}\nwindexuse{driver}{driver}{NW27XAxz-33Wt2A-1}\nwindexuse{pool}{pool}{NW27XAxz-33Wt2A-1}\nwindexuse{poolableconnection{\char95}factory}{poolableconnection:unfactory}{NW27XAxz-33Wt2A-1}\nwindexuse{STATEMENTS{\char95}MAX{\char95}COUNT}{STATEMENTS:unMAX:unCOUNT}{NW27XAxz-33Wt2A-1}\nwendcode{}\nwbegindocs{360}\nwdocspar
-\subsection{{\tt{}\protect\nwindexuse{PS}{PS}{NW27XAxz-4UQpM2-1}PS}(1)}
+\subsection{{\tt{}\protect\nwindexuse{PS}{PS}{NW27XAxz-4UQpM2-1}PS}(2)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{{\tt{}\protect\nwindexuse{PS}{PS}{NW27XAxz-4UQpM2-1}PS}}(2) returns a JDBC {\tt{}PreparedStatement} for the
+statement string identified by {\tt{}k} (param. 2) on the connection given in
+param. 1.  A {\tt{}SQLException} is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Connection {\tt{}conn} (param. 1):&a JDBC connection.\\
+String {\tt{}k} (param. 2):&statement identifier.\\
+\end{tabular}\\
+\textbf{Returns:} a prepared statement on the connection in param. 1 of the
+statement string identified by param. 2.\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} {\tt{}SQLException} if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 \nwenddocs{}\nwbegincode{361}\sublabel{NW27XAxz-4UQpM2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-4UQpM2-1}}}\moddef{Prepare a prepared statement~{\nwtagstyle{}\subpageref{NW27XAxz-4UQpM2-1}}}\endmoddef\nwused{\\{NW27XAxz-XGFF1-1}}
-private PreparedStatement PS(Connection conn, String k) throws SQLException \{
+private PreparedStatement PS(final Connection conn, final String k) throws SQLException \{
   PreparedStatement p = null;
   try \{
     p = conn.prepareStatement(lu_pstr.get(k),
@@ -5483,8 +5517,41 @@ private PreparedStatement PS(Connection conn, String k) throws SQLException \{
 \nwindexdefn{PS}{PS}{NW27XAxz-4UQpM2-1}\eatline
 \nwidentdefs{\\{{PS}{PS}}}\nwidentuses{\\{{lu{\char95}pstr}{lu:unpstr}}}\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-4UQpM2-1}\nwendcode{}\nwbegindocs{362}\nwdocspar
 \subsection{{\tt{}\protect\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-17Zt8W-1}DBFetch}(3...)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{{\tt{}\protect\nwindexuse{DBFetch}{DBFetch}{NW27XAxz-17Zt8W-1}DBFetch}}(3...) executes a predefined {\tt{}SELECT}
+query against the Jargo database instance.
+A {\tt{}SQLException} is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Connection {\tt{}conn} (param. 1):&a JDBC connection.\\
+String {\tt{}k} (param. 2):&statement identifier.\\
+Integer {\tt{}ncols} (param. 3):&number of columns in the selection.\\
+Integer... {\tt{}values} (param. 4...):&values to use in the statement, in order
+of appearance.
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or {\tt{}null} if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node {...};
+ &\node[draw] {$in+j:\textrm{value at column $j$, row $i$ of the result set}$};
+ &\node {...};\\
+};
+\end{tikzpicture}
+
+where $i$, $j$ start from 0.\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} {\tt{}SQLException} if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 \nwenddocs{}\nwbegincode{363}\sublabel{NW27XAxz-17Zt8W-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-17Zt8W-1}}}\moddef{Fetch items from database~{\nwtagstyle{}\subpageref{NW27XAxz-17Zt8W-1}}}\endmoddef\nwused{\\{NW27XAxz-XGFF1-1}}
-private int[] DBFetch(Connection conn, String k, int ncols, Integer... values)
+private int[] DBFetch(
+    final Connection conn, final String k, final int ncols, final Integer... values)
 throws SQLException \{
   int[] output = new int[] \{ \};
   try \{
@@ -5513,8 +5580,25 @@ for (int i = 0; i < values.length; i++) \{
 \nwendcode{}\nwbegindocs{365}\nwdocspar
 
 \subsection{{\tt{}\protect\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-1ZE0ye-1}PSAdd}(2...)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{{\tt{}\protect\nwindexuse{PSAdd}{PSAdd}{NW27XAxz-1ZE0ye-1}PSAdd}}(2...) adds a prepared statement to
+the execution batch.
+A {\tt{}SQLException} is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Prepared statement {\tt{}p} (param. 1):&a prepared statement.\\
+Integer... {\tt{}values} (param. 2...):&values to use in the statement, in order of appearance.\\
+\end{tabular}\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} adds to the execution batch for the statement in param. 1.\\
+\textbf{Throws:} {\tt{}SQLException} if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 \nwenddocs{}\nwbegincode{366}\sublabel{NW27XAxz-1ZE0ye-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1ZE0ye-1}}}\moddef{Fill prepared statement~{\nwtagstyle{}\subpageref{NW27XAxz-1ZE0ye-1}}}\endmoddef\nwused{\\{NW27XAxz-XGFF1-1}}
-private void PSAdd(PreparedStatement p, Integer... values) throws SQLException \{
+private void PSAdd(PreparedStatement p, final Integer... values) throws SQLException \{
   p.clearParameters();
   \LA{}..set values for statement~{\nwtagstyle{}\subpageref{NW27XAxz-2m6DFc-1}}\RA{}
   try \{
@@ -5526,6 +5610,21 @@ private void PSAdd(PreparedStatement p, Integer... values) throws SQLException \
 \nosublabel{NW27XAxz-1ZE0ye-1-u1}\nwindexdefn{PSAdd}{PSAdd}{NW27XAxz-1ZE0ye-1}\eatline
 \nwidentdefs{\\{{PSAdd}{PSAdd}}}\nwendcode{}\nwbegindocs{367}\nwdocspar
 \subsection{{\tt{}\protect\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-322zJf-1}PSSubmit}(1...)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{{\tt{}\protect\nwindexuse{PSSubmit}{PSSubmit}{NW27XAxz-322zJf-1}PSSubmit}}(1...) executes a prepared statement's batch.
+A {\tt{}SQLException} is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Prepared statement {\tt{}p} (param. 1):&a prepared statement.
+\end{tabular}\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} may modify tables in the Jargo database.
+\textbf{Throws:} {\tt{}SQLException} if database failure is encountered.\\
+\bottomrule
+\end{tabular}
 \nwenddocs{}\nwbegincode{368}\sublabel{NW27XAxz-322zJf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-322zJf-1}}}\moddef{Submit prepared statement batch~{\nwtagstyle{}\subpageref{NW27XAxz-322zJf-1}}}\endmoddef\nwused{\\{NW27XAxz-XGFF1-1}}
 private void PSSubmit(PreparedStatement... statements) throws SQLException \{
   try \{
@@ -5540,9 +5639,19 @@ private void PSSubmit(PreparedStatement... statements) throws SQLException \{
 \nwindexdefn{PSSubmit}{PSSubmit}{NW27XAxz-322zJf-1}\eatline
 \nwidentdefs{\\{{PSSubmit}{PSSubmit}}}\nwendcode{}\nwbegindocs{369}\nwdocspar
 \subsection{{\tt{}\protect\nwindexuse{PSInit}{PSInit}{NW27XAxz-1g2xnv-1}PSInit}(0)}
-The {\tt{}\protect\nwindexuse{PSInit}{PSInit}{NW27XAxz-1g2xnv-1}PSInit}(0) method initializes the statement cache {\tt{}\protect\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-17yXws-2}lu{\char95}pstr}. Each
-statement is placed in its own chunk so it can be referenced wherever the
-statement is used.
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{{\tt{}\protect\nwindexuse{PSInit}{PSInit}{NW27XAxz-1g2xnv-1}PSInit}}(0) initializes the statement cache
+{\tt{}\protect\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-17yXws-2}lu{\char95}pstr}. Each statement is placed in its own chunk so it can be referenced
+wherever the statement is used.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} populates {\tt{}\protect\nwindexuse{lu{\char95}pstr}{lu:unpstr}{NW27XAxz-17yXws-2}lu{\char95}pstr}.
+\textbf{Throws:} nothing.\\
+\bottomrule
+\end{tabular}
 \nwenddocs{}\nwbegincode{370}\sublabel{NW27XAxz-1g2xnv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-1g2xnv-1}}}\moddef{Initialize statements~{\nwtagstyle{}\subpageref{NW27XAxz-1g2xnv-1}}}\endmoddef\nwused{\\{NW27XAxz-XGFF1-1}}
 private void PSInit() \{
   String INS = "INSERT INTO ";
