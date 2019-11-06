@@ -7,16 +7,16 @@ VERSION=1.0.0
 
 .PHONY : all clean
 
-all : pdf jar
+all : java tex pdf jar
 
-jar : java
+jar : $(WIDGET).java
 	javac -Xlint:deprecation -d . -cp .:$(CLASSPATH)/* $(WIDGET).java
 	jar cvf $(CLASSPATH)/jargors-$(WIDGET)-$(VERSION).jar com
 
 java : src/$(WIDGET).nw
 	notangle -R$(WIDGET).java src/$(WIDGET).nw > $(WIDGET).java
 
-pdf : tex
+pdf : doc/$(WIDGET).tex
 	pdflatex doc/$(WIDGET).tex
 
 tex : src/$(WIDGET).nw

@@ -6,7 +6,7 @@ WIDGET=StorageCorrectnessTest
 
 all : pdf class
 
-class : java
+class : $(WIDGET).java
 	javac -Xlint:deprecation -d . -cp .:$(CLASSPATH)/* $(WIDGET).java
 
 java : src/$(WIDGET).nw
