@@ -38,13 +38,6 @@
 
 \section{Introduction}
 \label{sec:introduction}
-The test program is developed using the
-Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
-programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
-([[src/StoragePerformanceTest.nw]]) is the source for both the documentation
-([[doc/StoragePerformanceTest.tex]]) and the Java code
-([[StoragePerformanceTest.java]])\footnote{See the [[Makefile]] for build
-details.}.
 <<StoragePerformanceTest.java>>=
 <<StoragePerformanceTest.java preamble>>
 <<[[StoragePerformanceTest]] definition>>
@@ -60,7 +53,6 @@ import com.github.jargors.exceptions.DuplicateUserException;
 import com.github.jargors.exceptions.EdgeNotFoundException;
 import com.github.jargors.exceptions.UserNotFoundException;
 import com.github.jargors.exceptions.VertexNotFoundException;
-import java.time.LocalDateTime;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.SQLException;
@@ -68,23 +60,18 @@ import java.sql.SQLException;
 
 <<[[StoragePerformanceTest]] definition>>=
 public class StoragePerformanceTest {
-  <<[[StoragePerformanceTest]] member variables>>
   <<[[StoragePerformanceTest]] main routine>>
-  <<[[StoragePerformanceTest]] private methods>>
 }
 @
-<<[[StoragePerformanceTest]] member variables>>=
-@ %def
-
 <<[[StoragePerformanceTest]] main routine>>=
 public static void main(String[] args) {
-  Print("Starting storage performance tests");
+  Tools.Print("Starting storage performance tests");
   try {
     <<Load performance tests>>
   } catch (SQLException e) {
     Tools.PrintSQLException(e);
   }
-  Print("Complete!");
+  Tools.Print("Complete!");
 }
 @ %def main
 
@@ -107,10 +94,14 @@ System.out.print("\r");
 
 <<Load performance tests>>=
 <<Test [[_getConnection]](0)>>
-/*<<Test [[DBAddNewServer]](1)>>*/
-/*<<Test [[DBQueryQueuedRequests]](1)>>*/
+<<Test [[DBAddNewServer]](1)>>
+<<Test [[DBQueryQueuedRequests]](1)>>
 <<Test [[DBQueryServerLocationsActive]](1)>>
+<<Test [[DBQueryServerRemainingSchedule]](2)>>
 @
+
+\section{Tests}
+\label{sec:tests}
 
 <<Test [[_getConnection]](0)>>=
 {
@@ -124,7 +115,7 @@ System.out.print("\r");
     <<Increment call count>>
   }
   <<End timing block>>
-  Print("_getConnection(0): "+_dur+" ms/call");
+  Tools.Print("_getConnection(0): "+_dur+" ms/call");
   for (Connection c : arr) {
     try {
       c.close();
@@ -149,7 +140,8 @@ System.out.print("\r");
     <<Increment call count>>
   }
   <<End timing block>>
-  Print("DBAddNewServer(1): "+_dur+" ms/call");
+  Tools.Print("DBAddNewServer(1): "+_dur+" ms/call");
+  controller.closeInstance();
 }
 @
 
@@ -170,7 +162,8 @@ again.
     <<Increment call count>>
   }
   <<End timing block>>
-  Print("DBQueryQueuedRequests(1): "+_dur+" ms/call");
+  Tools.Print("DBQueryQueuedRequests(1): "+_dur+" ms/call");
+  controller.closeInstance();
 }
 @
 
@@ -180,7 +173,7 @@ again.
   storage.DBLoadBackup("data/db");
   storage.DBLoadRoadNetworkFromDB();
   storage.DBLoadUsersFromDB();
-  // BACKUP DOS NOT HAVE INDEXES
+  // BACKUP DOES NOT HAVE INDEXES
   try {
     Connection conn = storage._getConnection();
     Statement stmt = conn.createStatement();
@@ -192,7 +185,7 @@ again.
     conn.commit();
     conn.close();
   } catch (Exception e) {
-    Print(e.toString());
+    Tools.Print(e.toString());
   }
   int[] output = new int[] { };
   <<Begin timing block>>
@@ -201,20 +194,45 @@ again.
     <<Increment call count>>
   }
   <<End timing block>>
-  Print("DBQueryServerLocationsActive(1): "+_dur+" ms/call");
+  Tools.Print("DBQueryServerLocationsActive(1): "+_dur+" ms/call");
   storage.DBCloseInstance();
 }
 @
 
-<<[[StoragePerformanceTest]] private methods>>=
-private static void Print(String msg) {
-  System.out.println("[StoragePerformanceTest]["+LocalDateTime.now()+"] "+msg);
+<<Test [[DBQueryServerRemainingSchedule]](2)>>=
+{
+  Storage storage = new Storage();
+  storage.DBLoadBackup("data/db");
+  storage.DBLoadRoadNetworkFromDB();
+  storage.DBLoadUsersFromDB();
+  // BACKUP DOES NOT HAVE INDEXES
+  try {
+    Connection conn = storage._getConnection();
+    Statement stmt = conn.createStatement();
+    stmt.addBatch("CREATE INDEX W_sid_t1 ON W (sid, t1)");
+    stmt.addBatch("CREATE INDEX W_sid_t2 ON W (sid, t2)");
+    stmt.addBatch("CREATE INDEX W_sid_v2 ON W (sid, v2)");
+    stmt.addBatch("CREATE INDEX W_sid_t1_t2 ON W (sid, t1, t2)");
+    stmt.executeBatch();
+    conn.commit();
+    conn.close();
+  } catch (Exception e) {
+    Tools.Print(e.toString());
+  }
+  int[] output = new int[] { };
+  <<Begin timing block>>
+  for (int t = 0; t < 1800; t++) {
+    for (int i = 0; i < 100; i++) {
+      int sid = (int) (Math.random()*4999.0) + 1;
+      output = storage.DBQueryServerRemainingSchedule(sid, t);
+    }
+    <<Increment call count>>
+  }
+  <<End timing block>>
+  Tools.Print("DBQueryServerRemainingSchedule(2): "+_dur+" ms/call");
+  storage.DBCloseInstance();
 }
 @
-
-\section{Tests}
-\label{sec:tests}
-
 
 \appendix
 

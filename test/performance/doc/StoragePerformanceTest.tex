@@ -38,13 +38,6 @@
 
 \section{Introduction}
 \label{sec:introduction}
-The test program is developed using the
-Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
-programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
-({\tt{}src/StoragePerformanceTest.nw}) is the source for both the documentation
-({\tt{}doc/StoragePerformanceTest.tex}) and the Java code
-({\tt{}StoragePerformanceTest.java})\footnote{See the {\tt{}Makefile} for build
-details.}.
 \nwfilename{src/StoragePerformanceTest.nw}\nwbegincode{1}\sublabel{NW3iKWou-40YM6y-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-40YM6y-1}}}\moddef{StoragePerformanceTest.java~{\nwtagstyle{}\subpageref{NW3iKWou-40YM6y-1}}}\endmoddef\nwnotused{StoragePerformanceTest.java}
 \LA{}StoragePerformanceTest.java preamble~{\nwtagstyle{}\subpageref{NW3iKWou-2PlaJO-1}}\RA{}
 \LA{}\code{}StoragePerformanceTest\edoc{} definition~{\nwtagstyle{}\subpageref{NW3iKWou-490CRJ-1}}\RA{}
@@ -60,7 +53,6 @@ import com.github.jargors.exceptions.DuplicateUserException;
 import com.github.jargors.exceptions.EdgeNotFoundException;
 import com.github.jargors.exceptions.UserNotFoundException;
 import com.github.jargors.exceptions.VertexNotFoundException;
-import java.time.LocalDateTime;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.SQLException;
@@ -68,51 +60,50 @@ import java.sql.SQLException;
 
 \nwenddocs{}\nwbegincode{5}\sublabel{NW3iKWou-490CRJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-490CRJ-1}}}\moddef{\code{}StoragePerformanceTest\edoc{} definition~{\nwtagstyle{}\subpageref{NW3iKWou-490CRJ-1}}}\endmoddef\nwused{\\{NW3iKWou-40YM6y-1}}
 public class StoragePerformanceTest \{
-  \LA{}\code{}StoragePerformanceTest\edoc{} member variables~{\nwtagstyle{}\subpageref{NW3iKWou-5sgeP-1}}\RA{}
   \LA{}\code{}StoragePerformanceTest\edoc{} main routine~{\nwtagstyle{}\subpageref{NW3iKWou-2hjWc8-1}}\RA{}
-  \LA{}\code{}StoragePerformanceTest\edoc{} private methods~{\nwtagstyle{}\subpageref{NW3iKWou-1GKv5n-1}}\RA{}
 \}
 \nwendcode{}\nwbegindocs{6}\nwdocspar
-\nwenddocs{}\nwbegincode{7}\sublabel{NW3iKWou-5sgeP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-5sgeP-1}}}\moddef{\code{}StoragePerformanceTest\edoc{} member variables~{\nwtagstyle{}\subpageref{NW3iKWou-5sgeP-1}}}\endmoddef\nwused{\\{NW3iKWou-490CRJ-1}}
-\nwendcode{}\nwbegindocs{8}%def
-
-\nwenddocs{}\nwbegincode{9}\sublabel{NW3iKWou-2hjWc8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-2hjWc8-1}}}\moddef{\code{}StoragePerformanceTest\edoc{} main routine~{\nwtagstyle{}\subpageref{NW3iKWou-2hjWc8-1}}}\endmoddef\nwused{\\{NW3iKWou-490CRJ-1}}
+\nwenddocs{}\nwbegincode{7}\sublabel{NW3iKWou-2hjWc8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-2hjWc8-1}}}\moddef{\code{}StoragePerformanceTest\edoc{} main routine~{\nwtagstyle{}\subpageref{NW3iKWou-2hjWc8-1}}}\endmoddef\nwused{\\{NW3iKWou-490CRJ-1}}
 public static void main(String[] args) \{
-  Print("Starting storage performance tests");
+  Tools.Print("Starting storage performance tests");
   try \{
     \LA{}Load performance tests~{\nwtagstyle{}\subpageref{NW3iKWou-xbUR1-1}}\RA{}
   \} catch (SQLException e) \{
     Tools.PrintSQLException(e);
   \}
-  Print("Complete!");
+  Tools.Print("Complete!");
 \}
 \nosublabel{NW3iKWou-2hjWc8-1-u1}\nwindexdefn{main}{main}{NW3iKWou-2hjWc8-1}\eatline
-\nwidentdefs{\\{{main}{main}}}\nwendcode{}\nwbegindocs{10}\nwdocspar
-\nwenddocs{}\nwbegincode{11}\sublabel{NW3iKWou-4SyIkm-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-4SyIkm-1}}}\moddef{Begin timing block~{\nwtagstyle{}\subpageref{NW3iKWou-4SyIkm-1}}}\endmoddef\nwused{\\{NW3iKWou-3EFvya-1}\\{NW3iKWou-39EpqO-1}\\{NW3iKWou-3kKW1I-1}\\{NW3iKWou-29RW2s-1}}
+\nwidentdefs{\\{{main}{main}}}\nwendcode{}\nwbegindocs{8}\nwdocspar
+\nwenddocs{}\nwbegincode{9}\sublabel{NW3iKWou-4SyIkm-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-4SyIkm-1}}}\moddef{Begin timing block~{\nwtagstyle{}\subpageref{NW3iKWou-4SyIkm-1}}}\endmoddef\nwused{\\{NW3iKWou-3EFvya-1}\\{NW3iKWou-39EpqO-1}\\{NW3iKWou-3kKW1I-1}\\{NW3iKWou-29RW2s-1}\\{NW3iKWou-3OfygW-1}}
 long _t0 = System.currentTimeMillis();
 int _count = 0;
 float _dur = 0;
-\nwendcode{}\nwbegindocs{12}\nwdocspar
+\nwendcode{}\nwbegindocs{10}\nwdocspar
 
-\nwenddocs{}\nwbegincode{13}\sublabel{NW3iKWou-3FrbVy-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-3FrbVy-1}}}\moddef{Increment call count~{\nwtagstyle{}\subpageref{NW3iKWou-3FrbVy-1}}}\endmoddef\nwused{\\{NW3iKWou-3EFvya-1}\\{NW3iKWou-39EpqO-1}\\{NW3iKWou-3kKW1I-1}\\{NW3iKWou-29RW2s-1}}
+\nwenddocs{}\nwbegincode{11}\sublabel{NW3iKWou-3FrbVy-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-3FrbVy-1}}}\moddef{Increment call count~{\nwtagstyle{}\subpageref{NW3iKWou-3FrbVy-1}}}\endmoddef\nwused{\\{NW3iKWou-3EFvya-1}\\{NW3iKWou-39EpqO-1}\\{NW3iKWou-3kKW1I-1}\\{NW3iKWou-29RW2s-1}\\{NW3iKWou-3OfygW-1}}
 System.out.print("\\r          \\r"+_count);
 _count++;
-\nwendcode{}\nwbegindocs{14}\nwdocspar
+\nwendcode{}\nwbegindocs{12}\nwdocspar
 
-\nwenddocs{}\nwbegincode{15}\sublabel{NW3iKWou-3FOZIi-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-3FOZIi-1}}}\moddef{End timing block~{\nwtagstyle{}\subpageref{NW3iKWou-3FOZIi-1}}}\endmoddef\nwused{\\{NW3iKWou-3EFvya-1}\\{NW3iKWou-39EpqO-1}\\{NW3iKWou-3kKW1I-1}\\{NW3iKWou-29RW2s-1}}
+\nwenddocs{}\nwbegincode{13}\sublabel{NW3iKWou-3FOZIi-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-3FOZIi-1}}}\moddef{End timing block~{\nwtagstyle{}\subpageref{NW3iKWou-3FOZIi-1}}}\endmoddef\nwused{\\{NW3iKWou-3EFvya-1}\\{NW3iKWou-39EpqO-1}\\{NW3iKWou-3kKW1I-1}\\{NW3iKWou-29RW2s-1}\\{NW3iKWou-3OfygW-1}}
 long _t1 = System.currentTimeMillis();
 _dur=((_t1 - _t0)/(float)(_count == 0 ? 1 : _count));
 System.out.print("\\r");
+\nwendcode{}\nwbegindocs{14}\nwdocspar
+
+\nwenddocs{}\nwbegincode{15}\sublabel{NW3iKWou-xbUR1-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-xbUR1-1}}}\moddef{Load performance tests~{\nwtagstyle{}\subpageref{NW3iKWou-xbUR1-1}}}\endmoddef\nwused{\\{NW3iKWou-2hjWc8-1}}
+\LA{}Test \code{}{\char95}getConnection\edoc{}(0)~{\nwtagstyle{}\subpageref{NW3iKWou-3EFvya-1}}\RA{}
+\LA{}Test \code{}DBAddNewServer\edoc{}(1)~{\nwtagstyle{}\subpageref{NW3iKWou-39EpqO-1}}\RA{}
+\LA{}Test \code{}DBQueryQueuedRequests\edoc{}(1)~{\nwtagstyle{}\subpageref{NW3iKWou-3kKW1I-1}}\RA{}
+\LA{}Test \code{}DBQueryServerLocationsActive\edoc{}(1)~{\nwtagstyle{}\subpageref{NW3iKWou-29RW2s-1}}\RA{}
+\LA{}Test \code{}DBQueryServerRemainingSchedule\edoc{}(2)~{\nwtagstyle{}\subpageref{NW3iKWou-3OfygW-1}}\RA{}
 \nwendcode{}\nwbegindocs{16}\nwdocspar
 
-\nwenddocs{}\nwbegincode{17}\sublabel{NW3iKWou-xbUR1-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-xbUR1-1}}}\moddef{Load performance tests~{\nwtagstyle{}\subpageref{NW3iKWou-xbUR1-1}}}\endmoddef\nwused{\\{NW3iKWou-2hjWc8-1}}
-\LA{}Test \code{}{\char95}getConnection\edoc{}(0)~{\nwtagstyle{}\subpageref{NW3iKWou-3EFvya-1}}\RA{}
-/*\LA{}Test \code{}DBAddNewServer\edoc{}(1)~{\nwtagstyle{}\subpageref{NW3iKWou-39EpqO-1}}\RA{}*/
-/*\LA{}Test \code{}DBQueryQueuedRequests\edoc{}(1)~{\nwtagstyle{}\subpageref{NW3iKWou-3kKW1I-1}}\RA{}*/
-\LA{}Test \code{}DBQueryServerLocationsActive\edoc{}(1)~{\nwtagstyle{}\subpageref{NW3iKWou-29RW2s-1}}\RA{}
-\nwendcode{}\nwbegindocs{18}\nwdocspar
+\section{Tests}
+\label{sec:tests}
 
-\nwenddocs{}\nwbegincode{19}\sublabel{NW3iKWou-3EFvya-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-3EFvya-1}}}\moddef{Test \code{}{\char95}getConnection\edoc{}(0)~{\nwtagstyle{}\subpageref{NW3iKWou-3EFvya-1}}}\endmoddef\nwused{\\{NW3iKWou-xbUR1-1}}
+\nwenddocs{}\nwbegincode{17}\sublabel{NW3iKWou-3EFvya-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-3EFvya-1}}}\moddef{Test \code{}{\char95}getConnection\edoc{}(0)~{\nwtagstyle{}\subpageref{NW3iKWou-3EFvya-1}}}\endmoddef\nwused{\\{NW3iKWou-xbUR1-1}}
 \{
   Storage storage = new Storage();
   storage.DBCreateNewInstance();
@@ -124,7 +115,7 @@ System.out.print("\\r");
     \LA{}Increment call count~{\nwtagstyle{}\subpageref{NW3iKWou-3FrbVy-1}}\RA{}
   \}
   \LA{}End timing block~{\nwtagstyle{}\subpageref{NW3iKWou-3FOZIi-1}}\RA{}
-  Print("_getConnection(0): "+_dur+" ms/call");
+  Tools.Print("_getConnection(0): "+_dur+" ms/call");
   for (Connection c : arr) \{
     try \{
       c.close();
@@ -132,9 +123,9 @@ System.out.print("\\r");
   \}
   storage.DBCloseInstance();
 \}
-\nwendcode{}\nwbegindocs{20}\nwdocspar
+\nwendcode{}\nwbegindocs{18}\nwdocspar
 
-\nwenddocs{}\nwbegincode{21}\sublabel{NW3iKWou-39EpqO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-39EpqO-1}}}\moddef{Test \code{}DBAddNewServer\edoc{}(1)~{\nwtagstyle{}\subpageref{NW3iKWou-39EpqO-1}}}\endmoddef\nwused{\\{NW3iKWou-xbUR1-1}}
+\nwenddocs{}\nwbegincode{19}\sublabel{NW3iKWou-39EpqO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-39EpqO-1}}}\moddef{Test \code{}DBAddNewServer\edoc{}(1)~{\nwtagstyle{}\subpageref{NW3iKWou-39EpqO-1}}}\endmoddef\nwused{\\{NW3iKWou-xbUR1-1}}
 \{
   Controller controller = new Controller();
   controller.loadDataModel();
@@ -149,14 +140,15 @@ System.out.print("\\r");
     \LA{}Increment call count~{\nwtagstyle{}\subpageref{NW3iKWou-3FrbVy-1}}\RA{}
   \}
   \LA{}End timing block~{\nwtagstyle{}\subpageref{NW3iKWou-3FOZIi-1}}\RA{}
-  Print("DBAddNewServer(1): "+_dur+" ms/call");
+  Tools.Print("DBAddNewServer(1): "+_dur+" ms/call");
+  controller.closeInstance();
 \}
-\nwendcode{}\nwbegindocs{22}\nwdocspar
+\nwendcode{}\nwbegindocs{20}\nwdocspar
 
 Even though {\tt{}Controller} falls out of scope from the previous test,
 the Derby database is still live! No need to load data model, road network
 again.
-\nwenddocs{}\nwbegincode{23}\sublabel{NW3iKWou-3kKW1I-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-3kKW1I-1}}}\moddef{Test \code{}DBQueryQueuedRequests\edoc{}(1)~{\nwtagstyle{}\subpageref{NW3iKWou-3kKW1I-1}}}\endmoddef\nwused{\\{NW3iKWou-xbUR1-1}}
+\nwenddocs{}\nwbegincode{21}\sublabel{NW3iKWou-3kKW1I-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-3kKW1I-1}}}\moddef{Test \code{}DBQueryQueuedRequests\edoc{}(1)~{\nwtagstyle{}\subpageref{NW3iKWou-3kKW1I-1}}}\endmoddef\nwused{\\{NW3iKWou-xbUR1-1}}
 \{
   Controller controller = new Controller();
   controller.loadDataModel();
@@ -170,17 +162,18 @@ again.
     \LA{}Increment call count~{\nwtagstyle{}\subpageref{NW3iKWou-3FrbVy-1}}\RA{}
   \}
   \LA{}End timing block~{\nwtagstyle{}\subpageref{NW3iKWou-3FOZIi-1}}\RA{}
-  Print("DBQueryQueuedRequests(1): "+_dur+" ms/call");
+  Tools.Print("DBQueryQueuedRequests(1): "+_dur+" ms/call");
+  controller.closeInstance();
 \}
-\nwendcode{}\nwbegindocs{24}\nwdocspar
+\nwendcode{}\nwbegindocs{22}\nwdocspar
 
-\nwenddocs{}\nwbegincode{25}\sublabel{NW3iKWou-29RW2s-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-29RW2s-1}}}\moddef{Test \code{}DBQueryServerLocationsActive\edoc{}(1)~{\nwtagstyle{}\subpageref{NW3iKWou-29RW2s-1}}}\endmoddef\nwused{\\{NW3iKWou-xbUR1-1}}
+\nwenddocs{}\nwbegincode{23}\sublabel{NW3iKWou-29RW2s-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-29RW2s-1}}}\moddef{Test \code{}DBQueryServerLocationsActive\edoc{}(1)~{\nwtagstyle{}\subpageref{NW3iKWou-29RW2s-1}}}\endmoddef\nwused{\\{NW3iKWou-xbUR1-1}}
 \{
   Storage storage = new Storage();
   storage.DBLoadBackup("data/db");
   storage.DBLoadRoadNetworkFromDB();
   storage.DBLoadUsersFromDB();
-  // BACKUP DOS NOT HAVE INDEXES
+  // BACKUP DOES NOT HAVE INDEXES
   try \{
     Connection conn = storage._getConnection();
     Statement stmt = conn.createStatement();
@@ -192,7 +185,7 @@ again.
     conn.commit();
     conn.close();
   \} catch (Exception e) \{
-    Print(e.toString());
+    Tools.Print(e.toString());
   \}
   int[] output = new int[] \{ \};
   \LA{}Begin timing block~{\nwtagstyle{}\subpageref{NW3iKWou-4SyIkm-1}}\RA{}
@@ -201,24 +194,51 @@ again.
     \LA{}Increment call count~{\nwtagstyle{}\subpageref{NW3iKWou-3FrbVy-1}}\RA{}
   \}
   \LA{}End timing block~{\nwtagstyle{}\subpageref{NW3iKWou-3FOZIi-1}}\RA{}
-  Print("DBQueryServerLocationsActive(1): "+_dur+" ms/call");
+  Tools.Print("DBQueryServerLocationsActive(1): "+_dur+" ms/call");
   storage.DBCloseInstance();
 \}
-\nwendcode{}\nwbegindocs{26}\nwdocspar
+\nwendcode{}\nwbegindocs{24}\nwdocspar
 
-\nwenddocs{}\nwbegincode{27}\sublabel{NW3iKWou-1GKv5n-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-1GKv5n-1}}}\moddef{\code{}StoragePerformanceTest\edoc{} private methods~{\nwtagstyle{}\subpageref{NW3iKWou-1GKv5n-1}}}\endmoddef\nwused{\\{NW3iKWou-490CRJ-1}}
-private static void Print(String msg) \{
-  System.out.println("[StoragePerformanceTest]["+LocalDateTime.now()+"] "+msg);
+\nwenddocs{}\nwbegincode{25}\sublabel{NW3iKWou-3OfygW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-3OfygW-1}}}\moddef{Test \code{}DBQueryServerRemainingSchedule\edoc{}(2)~{\nwtagstyle{}\subpageref{NW3iKWou-3OfygW-1}}}\endmoddef\nwused{\\{NW3iKWou-xbUR1-1}}
+\{
+  Storage storage = new Storage();
+  storage.DBLoadBackup("data/db");
+  storage.DBLoadRoadNetworkFromDB();
+  storage.DBLoadUsersFromDB();
+  // BACKUP DOES NOT HAVE INDEXES
+  try \{
+    Connection conn = storage._getConnection();
+    Statement stmt = conn.createStatement();
+    stmt.addBatch("CREATE INDEX W_sid_t1 ON W (sid, t1)");
+    stmt.addBatch("CREATE INDEX W_sid_t2 ON W (sid, t2)");
+    stmt.addBatch("CREATE INDEX W_sid_v2 ON W (sid, v2)");
+    stmt.addBatch("CREATE INDEX W_sid_t1_t2 ON W (sid, t1, t2)");
+    stmt.executeBatch();
+    conn.commit();
+    conn.close();
+  \} catch (Exception e) \{
+    Tools.Print(e.toString());
+  \}
+  int[] output = new int[] \{ \};
+  \LA{}Begin timing block~{\nwtagstyle{}\subpageref{NW3iKWou-4SyIkm-1}}\RA{}
+  for (int t = 0; t < 1800; t++) \{
+    for (int i = 0; i < 100; i++) \{
+      int sid = (int) (Math.random()*4999.0) + 1;
+      output = storage.DBQueryServerRemainingSchedule(sid, t);
+    \}
+    \LA{}Increment call count~{\nwtagstyle{}\subpageref{NW3iKWou-3FrbVy-1}}\RA{}
+  \}
+  \LA{}End timing block~{\nwtagstyle{}\subpageref{NW3iKWou-3FOZIi-1}}\RA{}
+  Tools.Print("DBQueryServerRemainingSchedule(2): "+_dur+" ms/call");
+  storage.DBCloseInstance();
 \}
 \nwendcode{}
 
 \nwixlogsorted{c}{{\code{}StoragePerformanceTest\edoc{} definition}{NW3iKWou-490CRJ-1}{\nwixu{NW3iKWou-40YM6y-1}\nwixd{NW3iKWou-490CRJ-1}}}%
 \nwixlogsorted{c}{{\code{}StoragePerformanceTest\edoc{} main routine}{NW3iKWou-2hjWc8-1}{\nwixu{NW3iKWou-490CRJ-1}\nwixd{NW3iKWou-2hjWc8-1}}}%
-\nwixlogsorted{c}{{\code{}StoragePerformanceTest\edoc{} member variables}{NW3iKWou-5sgeP-1}{\nwixu{NW3iKWou-490CRJ-1}\nwixd{NW3iKWou-5sgeP-1}}}%
-\nwixlogsorted{c}{{\code{}StoragePerformanceTest\edoc{} private methods}{NW3iKWou-1GKv5n-1}{\nwixu{NW3iKWou-490CRJ-1}\nwixd{NW3iKWou-1GKv5n-1}}}%
-\nwixlogsorted{c}{{Begin timing block}{NW3iKWou-4SyIkm-1}{\nwixd{NW3iKWou-4SyIkm-1}\nwixu{NW3iKWou-3EFvya-1}\nwixu{NW3iKWou-39EpqO-1}\nwixu{NW3iKWou-3kKW1I-1}\nwixu{NW3iKWou-29RW2s-1}}}%
-\nwixlogsorted{c}{{End timing block}{NW3iKWou-3FOZIi-1}{\nwixd{NW3iKWou-3FOZIi-1}\nwixu{NW3iKWou-3EFvya-1}\nwixu{NW3iKWou-39EpqO-1}\nwixu{NW3iKWou-3kKW1I-1}\nwixu{NW3iKWou-29RW2s-1}}}%
-\nwixlogsorted{c}{{Increment call count}{NW3iKWou-3FrbVy-1}{\nwixd{NW3iKWou-3FrbVy-1}\nwixu{NW3iKWou-3EFvya-1}\nwixu{NW3iKWou-39EpqO-1}\nwixu{NW3iKWou-3kKW1I-1}\nwixu{NW3iKWou-29RW2s-1}}}%
+\nwixlogsorted{c}{{Begin timing block}{NW3iKWou-4SyIkm-1}{\nwixd{NW3iKWou-4SyIkm-1}\nwixu{NW3iKWou-3EFvya-1}\nwixu{NW3iKWou-39EpqO-1}\nwixu{NW3iKWou-3kKW1I-1}\nwixu{NW3iKWou-29RW2s-1}\nwixu{NW3iKWou-3OfygW-1}}}%
+\nwixlogsorted{c}{{End timing block}{NW3iKWou-3FOZIi-1}{\nwixd{NW3iKWou-3FOZIi-1}\nwixu{NW3iKWou-3EFvya-1}\nwixu{NW3iKWou-39EpqO-1}\nwixu{NW3iKWou-3kKW1I-1}\nwixu{NW3iKWou-29RW2s-1}\nwixu{NW3iKWou-3OfygW-1}}}%
+\nwixlogsorted{c}{{Increment call count}{NW3iKWou-3FrbVy-1}{\nwixd{NW3iKWou-3FrbVy-1}\nwixu{NW3iKWou-3EFvya-1}\nwixu{NW3iKWou-39EpqO-1}\nwixu{NW3iKWou-3kKW1I-1}\nwixu{NW3iKWou-29RW2s-1}\nwixu{NW3iKWou-3OfygW-1}}}%
 \nwixlogsorted{c}{{Load performance tests}{NW3iKWou-xbUR1-1}{\nwixu{NW3iKWou-2hjWc8-1}\nwixd{NW3iKWou-xbUR1-1}}}%
 \nwixlogsorted{c}{{StoragePerformanceTest.java}{NW3iKWou-40YM6y-1}{\nwixd{NW3iKWou-40YM6y-1}}}%
 \nwixlogsorted{c}{{StoragePerformanceTest.java preamble}{NW3iKWou-2PlaJO-1}{\nwixu{NW3iKWou-40YM6y-1}\nwixd{NW3iKWou-2PlaJO-1}}}%
@@ -226,12 +246,9 @@ private static void Print(String msg) \{
 \nwixlogsorted{c}{{Test \code{}DBAddNewServer\edoc{}(1)}{NW3iKWou-39EpqO-1}{\nwixu{NW3iKWou-xbUR1-1}\nwixd{NW3iKWou-39EpqO-1}}}%
 \nwixlogsorted{c}{{Test \code{}DBQueryQueuedRequests\edoc{}(1)}{NW3iKWou-3kKW1I-1}{\nwixu{NW3iKWou-xbUR1-1}\nwixd{NW3iKWou-3kKW1I-1}}}%
 \nwixlogsorted{c}{{Test \code{}DBQueryServerLocationsActive\edoc{}(1)}{NW3iKWou-29RW2s-1}{\nwixu{NW3iKWou-xbUR1-1}\nwixd{NW3iKWou-29RW2s-1}}}%
+\nwixlogsorted{c}{{Test \code{}DBQueryServerRemainingSchedule\edoc{}(2)}{NW3iKWou-3OfygW-1}{\nwixu{NW3iKWou-xbUR1-1}\nwixd{NW3iKWou-3OfygW-1}}}%
 \nwixlogsorted{i}{{main}{main}}%
-\nwbegindocs{28}\nwdocspar
-
-\section{Tests}
-\label{sec:tests}
-
+\nwbegindocs{26}\nwdocspar
 
 \appendix
 

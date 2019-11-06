@@ -6,7 +6,6 @@ import com.github.jargors.exceptions.DuplicateUserException;
 import com.github.jargors.exceptions.EdgeNotFoundException;
 import com.github.jargors.exceptions.UserNotFoundException;
 import com.github.jargors.exceptions.VertexNotFoundException;
-import java.time.LocalDateTime;
 import java.sql.SQLException;
 public class StorageCorrectnessTest {
   private static int count_passed = 0;
