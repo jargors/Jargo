@@ -1,0 +1,361 @@
+\documentclass{article}
+
+\usepackage{noweb}
+\noweboptions{smallcode,longchunks}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{colortbl}
+\usepackage[colorlinks=true]{hyperref}
+\usepackage{tikz}
+
+\newcommand{\hi}[1]{\noindent {\bf #1}}     % Define a handy paragraph opener
+
+\def\nwendcode{\endtrivlist \endgroup}      % Remove noweb page break penalty
+\let\nwdocspar=\par
+
+\title{Jargo Desktop\footnote{
+    \url{https://github.com/jargors/Desktop}}}
+\author{James J. Pan\\
+  \small{\href{mailto:pan-j16@mails.tsinghua.edu.cn}{pan-j16@mails.tsinghua.edu.cn}}}
+
+\begin{document}
+\maketitle
+\pagestyle{noweb}
+
+\tableofcontents
+
+\section{Introduction}
+\label{sec:introduction}
+
+\section{Implementation Overview}
+\nwfilename{src/DesktopController.nw}\nwbegincode{1}\sublabel{NW4WjzfE-4ScqTl-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-4ScqTl-1}}}\moddef{DesktopController.java~{\nwtagstyle{}\subpageref{NW4WjzfE-4ScqTl-1}}}\endmoddef\nwnotused{DesktopController.java}
+\LA{}DesktopController.java preamble~{\nwtagstyle{}\subpageref{NW4WjzfE-4Xk0Zi-1}}\RA{}
+\LA{}\code{}DesktopController\edoc{} definition~{\nwtagstyle{}\subpageref{NW4WjzfE-2VtYMw-1}}\RA{}
+\nwendcode{}\nwbegindocs{2}\nwdocspar
+
+\subsection{Preamble}
+\nwenddocs{}\nwbegincode{3}\sublabel{NW4WjzfE-4Xk0Zi-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-4Xk0Zi-1}}}\moddef{DesktopController.java preamble~{\nwtagstyle{}\subpageref{NW4WjzfE-4Xk0Zi-1}}}\endmoddef\nwalsodefined{\\{NW4WjzfE-4Xk0Zi-2}\\{NW4WjzfE-4Xk0Zi-3}}\nwused{\\{NW4WjzfE-4ScqTl-1}}
+package com.github.jargors;
+import com.github.jargors.Controller;
+import com.github.jargors.Client;
+\nwendcode{}\nwbegindocs{4}\nwdocspar
+\nwenddocs{}\nwbegincode{5}\sublabel{NW4WjzfE-4Xk0Zi-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-4Xk0Zi-2}}}\moddef{DesktopController.java preamble~{\nwtagstyle{}\subpageref{NW4WjzfE-4Xk0Zi-1}}}\plusendmoddef
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+\nwendcode{}\nwbegindocs{6}\nwdocspar
+\nwenddocs{}\nwbegincode{7}\sublabel{NW4WjzfE-4Xk0Zi-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-4Xk0Zi-3}}}\moddef{DesktopController.java preamble~{\nwtagstyle{}\subpageref{NW4WjzfE-4Xk0Zi-1}}}\plusendmoddef
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.stage.Stage;
+import javafx.stage.DirectoryChooser;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+\nwidentuses{\\{{stage}{stage}}}\nwindexuse{stage}{stage}{NW4WjzfE-4Xk0Zi-3}\nwendcode{}\nwbegindocs{8}\nwdocspar
+
+\subsection{Class Definition}
+\nwenddocs{}\nwbegincode{9}\sublabel{NW4WjzfE-2VtYMw-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-2VtYMw-1}}}\moddef{\code{}DesktopController\edoc{} definition~{\nwtagstyle{}\subpageref{NW4WjzfE-2VtYMw-1}}}\endmoddef\nwused{\\{NW4WjzfE-4ScqTl-1}}
+public class DesktopController \{
+  \LA{}Member variables~{\nwtagstyle{}\subpageref{NW4WjzfE-aPohW-1}}\RA{}
+  \LA{}Event handlers~{\nwtagstyle{}\subpageref{NW4WjzfE-66IDg-1}}\RA{}
+  \LA{}Private methods~{\nwtagstyle{}\subpageref{NW4WjzfE-3zWt7f-1}}\RA{}
+  \LA{}Initialization routine~{\nwtagstyle{}\subpageref{NW4WjzfE-2M5SBC-1}}\RA{}
+\}
+\nwendcode{}\nwbegindocs{10}\nwdocspar
+
+\subsection{Member Variables}
+\nwenddocs{}\nwbegincode{11}\sublabel{NW4WjzfE-aPohW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-aPohW-1}}}\moddef{Member variables~{\nwtagstyle{}\subpageref{NW4WjzfE-aPohW-1}}}\endmoddef\nwalsodefined{\\{NW4WjzfE-aPohW-2}\\{NW4WjzfE-aPohW-3}\\{NW4WjzfE-aPohW-4}\\{NW4WjzfE-aPohW-5}}\nwused{\\{NW4WjzfE-2VtYMw-1}}
+private Stage stage;
+\nwindexdefn{stage}{stage}{NW4WjzfE-aPohW-1}\eatline
+\nwidentdefs{\\{{stage}{stage}}}\nwendcode{}\nwbegindocs{12}\nwdocspar
+\nwenddocs{}\nwbegincode{13}\sublabel{NW4WjzfE-aPohW-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-aPohW-2}}}\moddef{Member variables~{\nwtagstyle{}\subpageref{NW4WjzfE-aPohW-1}}}\plusendmoddef
+@FXML private ScrollPane container_canvas;
+@FXML private Button btn_new;
+@FXML private Button btn_load;
+@FXML private Button btn_prob;
+@FXML private Button btn_road;
+@FXML private Button btn_gtree;
+@FXML private Button btn_client;
+@FXML private Button btn_startseq;
+@FXML private Button btn_startreal;
+@FXML private Button btn_pause;
+@FXML private Button btn_stop;
+@FXML private TextField tf_class;
+@FXML private TextField tf_t0;
+@FXML private TextField tf_t1;
+@FXML private Label lbl_status;
+@FXML private Circle circ_status;
+\nwendcode{}\nwbegindocs{14}\nwdocspar
+
+\nwenddocs{}\nwbegincode{15}\sublabel{NW4WjzfE-aPohW-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-aPohW-3}}}\moddef{Member variables~{\nwtagstyle{}\subpageref{NW4WjzfE-aPohW-1}}}\plusendmoddef
+private final Color C_SUCCESS = Color.GREEN;
+private final Color C_WARN = Color.YELLOW;
+private final Color C_ERROR = Color.RED;
+private final String TITLE_STRING = "Jargo Desktop";
+\nwindexdefn{TITLE{\char95}STRING}{TITLE:unSTRING}{NW4WjzfE-aPohW-3}\eatline
+\nwidentdefs{\\{{TITLE{\char95}STRING}{TITLE:unSTRING}}}\nwendcode{}\nwbegindocs{16}\nwdocspar
+\nwenddocs{}\nwbegincode{17}\sublabel{NW4WjzfE-aPohW-4}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-aPohW-4}}}\moddef{Member variables~{\nwtagstyle{}\subpageref{NW4WjzfE-aPohW-1}}}\plusendmoddef
+private Controller controller = null;
+private Client client = null;
+private String db = null;
+private Canvas can_road;
+\nwindexdefn{controller}{controller}{NW4WjzfE-aPohW-4}\nwindexdefn{client}{client}{NW4WjzfE-aPohW-4}\eatline
+\nwidentdefs{\\{{client}{client}}\\{{controller}{controller}}}\nwendcode{}\nwbegindocs{18}\nwdocspar
+\nwenddocs{}\nwbegincode{19}\sublabel{NW4WjzfE-aPohW-5}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-aPohW-5}}}\moddef{Member variables~{\nwtagstyle{}\subpageref{NW4WjzfE-aPohW-1}}}\plusendmoddef
+private GraphicsContext gc = null;
+private double window_height = 0;
+private double window_width = 0;
+private double mouse_x = 0;
+private double mouse_y = 0;
+private int[] edges = null;
+private int[] mbr = null;
+private double xunit = 0;
+private double yunit = 0;
+\nwendcode{}\nwbegindocs{20}\nwdocspar
+
+\subsection{Event Handlers}
+\nwenddocs{}\nwbegincode{21}\sublabel{NW4WjzfE-66IDg-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-66IDg-1}}}\moddef{Event handlers~{\nwtagstyle{}\subpageref{NW4WjzfE-66IDg-1}}}\endmoddef\nwused{\\{NW4WjzfE-2VtYMw-1}}
+\LA{}Action: quit~{\nwtagstyle{}\subpageref{NW4WjzfE-33A4oq-1}}\RA{}
+\LA{}Action: github~{\nwtagstyle{}\subpageref{NW4WjzfE-3QJyuX-1}}\RA{}
+\LA{}Action: about~{\nwtagstyle{}\subpageref{NW4WjzfE-2fCMaq-1}}\RA{}
+\LA{}Action: new~{\nwtagstyle{}\subpageref{NW4WjzfE-1wsOEd-1}}\RA{}
+\LA{}Action: load~{\nwtagstyle{}\subpageref{NW4WjzfE-2wXrbd-1}}\RA{}
+\LA{}Action: stop~{\nwtagstyle{}\subpageref{NW4WjzfE-2pNlF4-1}}\RA{}
+\LA{}Action: record mouse press~{\nwtagstyle{}\subpageref{NW4WjzfE-1MJhlW-1}}\RA{}
+\LA{}Action: translate canvas~{\nwtagstyle{}\subpageref{NW4WjzfE-2H3ZAK-1}}\RA{}
+\LA{}Action: set window width~{\nwtagstyle{}\subpageref{NW4WjzfE-8xFzK-1}}\RA{}
+\LA{}Action: set window height~{\nwtagstyle{}\subpageref{NW4WjzfE-4J0pcH-1}}\RA{}
+\LA{}Action: set stage~{\nwtagstyle{}\subpageref{NW4WjzfE-3sgJyN-1}}\RA{}
+\nwendcode{}\nwbegindocs{22}\nwdocspar
+
+\nwenddocs{}\nwbegincode{23}\sublabel{NW4WjzfE-33A4oq-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-33A4oq-1}}}\moddef{Action: quit~{\nwtagstyle{}\subpageref{NW4WjzfE-33A4oq-1}}}\endmoddef\nwused{\\{NW4WjzfE-66IDg-1}}
+public void actionQuit(ActionEvent e) \{
+  System.exit(0);
+\}
+\nwendcode{}\nwbegindocs{24}\nwdocspar
+
+\nwenddocs{}\nwbegincode{25}\sublabel{NW4WjzfE-3QJyuX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-3QJyuX-1}}}\moddef{Action: github~{\nwtagstyle{}\subpageref{NW4WjzfE-3QJyuX-1}}}\endmoddef\nwused{\\{NW4WjzfE-66IDg-1}}
+public void actionGitHub(ActionEvent e) \{
+  // ...
+\}
+\nwendcode{}\nwbegindocs{26}\nwdocspar
+
+\nwenddocs{}\nwbegincode{27}\sublabel{NW4WjzfE-2fCMaq-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-2fCMaq-1}}}\moddef{Action: about~{\nwtagstyle{}\subpageref{NW4WjzfE-2fCMaq-1}}}\endmoddef\nwused{\\{NW4WjzfE-66IDg-1}}
+public void actionAbout(ActionEvent e) \{
+  // ...
+\}
+\nwendcode{}\nwbegindocs{28}\nwdocspar
+
+\nwenddocs{}\nwbegincode{29}\sublabel{NW4WjzfE-1wsOEd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-1wsOEd-1}}}\moddef{Action: new~{\nwtagstyle{}\subpageref{NW4WjzfE-1wsOEd-1}}}\endmoddef\nwused{\\{NW4WjzfE-66IDg-1}}
+public void actionNew(ActionEvent e) \{
+  this.btn_new      .setDisable(true);
+  this.btn_load     .setDisable(true);
+  this.btn_stop     .setDisable(true);
+  this.circ_status.setFill(C_WARN);
+  this.lbl_status.setText("Create new Jargo instance...");
+  CompletableFuture.runAsync(() -> \{
+    this.controller = new Controller();
+    this.controller.createNewInstance();
+    this.controller.loadDataModel();
+    this.db = "no-name";
+    Platform.runLater(() -> \{
+      this.btn_prob     .setDisable(false);
+      this.btn_road     .setDisable(false);
+      this.btn_gtree    .setDisable(false);
+      this.btn_client   .setDisable(false);
+      this.btn_stop     .setDisable(false);
+      this.tf_class     .setDisable(false);
+      this.tf_t0        .setDisable(false);
+      this.tf_t1        .setDisable(false);
+      this.circ_status.setFill(C_SUCCESS);
+      this.lbl_status.setText("Created new Jargo instance.");
+    \});
+  \});
+\}
+\nwidentuses{\\{{controller}{controller}}}\nwindexuse{controller}{controller}{NW4WjzfE-1wsOEd-1}\nwendcode{}\nwbegindocs{30}\nwdocspar
+
+\nwenddocs{}\nwbegincode{31}\sublabel{NW4WjzfE-2wXrbd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-2wXrbd-1}}}\moddef{Action: load~{\nwtagstyle{}\subpageref{NW4WjzfE-2wXrbd-1}}}\endmoddef\nwused{\\{NW4WjzfE-66IDg-1}}
+public void actionLoad(ActionEvent e) \{
+  this.btn_new      .setDisable(true);
+  this.btn_load     .setDisable(true);
+  this.btn_stop     .setDisable(true);
+  DirectoryChooser dc = new DirectoryChooser();
+  File db = dc.showDialog(this.stage);
+  if (db != null) \{
+    this.db = db.toString();
+    this.circ_status.setFill(C_WARN);
+    this.lbl_status.setText("Load '"+this.db+"'...");
+    CompletableFuture.runAsync(() -> \{
+      this.controller = new Controller();
+      this.controller.loadBackup(this.db);
+      int nv = this.controller.queryCountVertices()[0];
+      int ne = this.controller.queryCountEdges()[0];
+      Platform.runLater(() -> \{
+        this.btn_prob     .setDisable(true);
+        this.btn_road     .setDisable(true);
+        this.btn_gtree    .setDisable(false);
+        this.btn_client   .setDisable(false);
+        this.btn_stop     .setDisable(false);
+        this.tf_class     .setDisable(false);
+        this.tf_t0        .setDisable(false);
+        this.tf_t1        .setDisable(false);
+        this.circ_status.setFill(C_SUCCESS);
+        this.lbl_status.setText("Loaded Jargo instance (#vertices="+nv+"; #edges="+ne+")");
+        this.drawRoadNetwork();
+      \});
+    \});
+  \} else \{
+    this.btn_new      .setDisable(false);
+    this.btn_load     .setDisable(false);
+    this.btn_stop     .setDisable(false);
+  \}
+\}
+\nwidentuses{\\{{controller}{controller}}\\{{stage}{stage}}}\nwindexuse{controller}{controller}{NW4WjzfE-2wXrbd-1}\nwindexuse{stage}{stage}{NW4WjzfE-2wXrbd-1}\nwendcode{}\nwbegindocs{32}\nwdocspar
+
+\nwenddocs{}\nwbegincode{33}\sublabel{NW4WjzfE-2pNlF4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-2pNlF4-1}}}\moddef{Action: stop~{\nwtagstyle{}\subpageref{NW4WjzfE-2pNlF4-1}}}\endmoddef\nwused{\\{NW4WjzfE-66IDg-1}}
+public void actionStop(ActionEvent e) \{
+  if (this.controller != null) \{
+    this.btn_stop     .setDisable(true);
+    this.circ_status.setFill(C_WARN);
+    this.lbl_status.setText("Close '"+this.db+"'...");
+    CompletableFuture.runAsync(() -> \{
+      this.controller.closeInstance();
+      Platform.runLater(() -> \{
+        this.btn_new      .setDisable(false);
+        this.btn_load     .setDisable(false);
+        this.btn_stop     .setDisable(false);
+        this.btn_prob     .setDisable(true);
+        this.btn_road     .setDisable(true);
+        this.btn_gtree    .setDisable(true);
+        this.btn_client   .setDisable(true);
+        this.tf_class     .setDisable(true);
+        this.tf_t0        .setDisable(true);
+        this.tf_t1        .setDisable(true);
+        this.container_canvas.setContent(null);
+        this.circ_status.setFill(C_SUCCESS);
+        this.lbl_status.setText("Closed instance.");
+      \});
+    \});
+  \} else \{
+    this.lbl_status.setText("Ready.");
+  \}
+\}
+\nwidentuses{\\{{controller}{controller}}}\nwindexuse{controller}{controller}{NW4WjzfE-2pNlF4-1}\nwendcode{}\nwbegindocs{34}\nwdocspar
+
+\nwenddocs{}\nwbegincode{35}\sublabel{NW4WjzfE-1MJhlW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-1MJhlW-1}}}\moddef{Action: record mouse press~{\nwtagstyle{}\subpageref{NW4WjzfE-1MJhlW-1}}}\endmoddef\nwused{\\{NW4WjzfE-66IDg-1}}
+public void actionRecordMousePress(MouseEvent e) \{
+  this.mouse_x = e.getX();
+  this.mouse_y = e.getY();
+  e.consume();
+\}
+\nwendcode{}\nwbegindocs{36}\nwdocspar
+
+\nwenddocs{}\nwbegincode{37}\sublabel{NW4WjzfE-2H3ZAK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-2H3ZAK-1}}}\moddef{Action: translate canvas~{\nwtagstyle{}\subpageref{NW4WjzfE-2H3ZAK-1}}}\endmoddef\nwused{\\{NW4WjzfE-66IDg-1}}
+public void actionTranslateCanvas(MouseEvent e) \{
+  this.can_road.setTranslateX(this.can_road.getTranslateX() + e.getX() - this.mouse_x);
+  this.can_road.setTranslateY(this.can_road.getTranslateY() + e.getY() - this.mouse_y);
+  e.consume();
+\}
+\nwendcode{}\nwbegindocs{38}\nwdocspar
+
+\nwenddocs{}\nwbegincode{39}\sublabel{NW4WjzfE-3zWt7f-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-3zWt7f-1}}}\moddef{Private methods~{\nwtagstyle{}\subpageref{NW4WjzfE-3zWt7f-1}}}\endmoddef\nwused{\\{NW4WjzfE-2VtYMw-1}}
+\LA{}Draw road network~{\nwtagstyle{}\subpageref{NW4WjzfE-2oyNQH-1}}\RA{}
+\nwendcode{}\nwbegindocs{40}\nwdocspar
+
+\nwenddocs{}\nwbegincode{41}\sublabel{NW4WjzfE-2oyNQH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-2oyNQH-1}}}\moddef{Draw road network~{\nwtagstyle{}\subpageref{NW4WjzfE-2oyNQH-1}}}\endmoddef\nwused{\\{NW4WjzfE-3zWt7f-1}}
+private void drawRoadNetwork() \{
+  this.edges    = this.controller.queryAllEdges();
+  this.mbr      = this.controller.queryMBR();
+
+  this.can_road = new Canvas(this.window_width, this.window_height);
+  this.xunit    = this.can_road.getWidth() /(double) (this.mbr[1] - this.mbr[0]);
+  this.yunit    = this.can_road.getHeight()/(double) (this.mbr[3] - this.mbr[2]);
+  double unit   = Math.min(xunit, yunit);
+
+  this.gc = this.can_road.getGraphicsContext2D();
+  this.gc.setLineWidth(0.1);
+  this.gc.setStroke(Color.BLUE);
+  for (int i = 0; i < (this.edges.length - 3); i += 4) \{
+    if (this.edges[(i + 0)] != 0 && this.edges[(i + 1)] != 0) \{
+      int[] v1 = this.controller.queryVertex(this.edges[(i + 0)]);
+      int[] v2 = this.controller.queryVertex(this.edges[(i + 1)]);
+      this.gc.strokeLine(unit*(v1[0] - this.mbr[0]), unit*(v1[1] - this.mbr[2]),
+                         unit*(v2[0] - this.mbr[0]), unit*(v2[1] - this.mbr[2]));
+    \}
+  \}
+  this.container_canvas.setContent(this.can_road);
+  this.can_road.setOnMousePressed((e) -> \{ actionRecordMousePress(e); \});
+  this.can_road.setOnMouseDragged((e) -> \{ actionTranslateCanvas(e); \});
+\}
+\nwidentuses{\\{{controller}{controller}}}\nwindexuse{controller}{controller}{NW4WjzfE-2oyNQH-1}\nwendcode{}\nwbegindocs{42}\nwdocspar
+
+\nwenddocs{}\nwbegincode{43}\sublabel{NW4WjzfE-8xFzK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-8xFzK-1}}}\moddef{Action: set window width~{\nwtagstyle{}\subpageref{NW4WjzfE-8xFzK-1}}}\endmoddef\nwused{\\{NW4WjzfE-66IDg-1}}
+public void setWindowWidth(double w) \{
+  this.window_width = w;
+\}
+\nwendcode{}\nwbegindocs{44}\nwdocspar
+
+\nwenddocs{}\nwbegincode{45}\sublabel{NW4WjzfE-4J0pcH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-4J0pcH-1}}}\moddef{Action: set window height~{\nwtagstyle{}\subpageref{NW4WjzfE-4J0pcH-1}}}\endmoddef\nwused{\\{NW4WjzfE-66IDg-1}}
+public void setWindowHeight(double h) \{
+  this.window_height = h;
+\}
+\nwendcode{}\nwbegindocs{46}\nwdocspar
+
+\nwenddocs{}\nwbegincode{47}\sublabel{NW4WjzfE-3sgJyN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-3sgJyN-1}}}\moddef{Action: set stage~{\nwtagstyle{}\subpageref{NW4WjzfE-3sgJyN-1}}}\endmoddef\nwused{\\{NW4WjzfE-66IDg-1}}
+public void setStage(Stage s) \{
+  this.stage = s;
+\}
+
+\nwidentuses{\\{{stage}{stage}}}\nwindexuse{stage}{stage}{NW4WjzfE-3sgJyN-1}\nwendcode{}\nwbegincode{48}\sublabel{NW4WjzfE-2M5SBC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-2M5SBC-1}}}\moddef{Initialization routine~{\nwtagstyle{}\subpageref{NW4WjzfE-2M5SBC-1}}}\endmoddef\nwused{\\{NW4WjzfE-2VtYMw-1}}
+public void initialize() \{ \}
+\nwendcode{}
+
+\nwixlogsorted{c}{{\code{}DesktopController\edoc{} definition}{NW4WjzfE-2VtYMw-1}{\nwixu{NW4WjzfE-4ScqTl-1}\nwixd{NW4WjzfE-2VtYMw-1}}}%
+\nwixlogsorted{c}{{Action: about}{NW4WjzfE-2fCMaq-1}{\nwixu{NW4WjzfE-66IDg-1}\nwixd{NW4WjzfE-2fCMaq-1}}}%
+\nwixlogsorted{c}{{Action: github}{NW4WjzfE-3QJyuX-1}{\nwixu{NW4WjzfE-66IDg-1}\nwixd{NW4WjzfE-3QJyuX-1}}}%
+\nwixlogsorted{c}{{Action: load}{NW4WjzfE-2wXrbd-1}{\nwixu{NW4WjzfE-66IDg-1}\nwixd{NW4WjzfE-2wXrbd-1}}}%
+\nwixlogsorted{c}{{Action: new}{NW4WjzfE-1wsOEd-1}{\nwixu{NW4WjzfE-66IDg-1}\nwixd{NW4WjzfE-1wsOEd-1}}}%
+\nwixlogsorted{c}{{Action: quit}{NW4WjzfE-33A4oq-1}{\nwixu{NW4WjzfE-66IDg-1}\nwixd{NW4WjzfE-33A4oq-1}}}%
+\nwixlogsorted{c}{{Action: record mouse press}{NW4WjzfE-1MJhlW-1}{\nwixu{NW4WjzfE-66IDg-1}\nwixd{NW4WjzfE-1MJhlW-1}}}%
+\nwixlogsorted{c}{{Action: set stage}{NW4WjzfE-3sgJyN-1}{\nwixu{NW4WjzfE-66IDg-1}\nwixd{NW4WjzfE-3sgJyN-1}}}%
+\nwixlogsorted{c}{{Action: set window height}{NW4WjzfE-4J0pcH-1}{\nwixu{NW4WjzfE-66IDg-1}\nwixd{NW4WjzfE-4J0pcH-1}}}%
+\nwixlogsorted{c}{{Action: set window width}{NW4WjzfE-8xFzK-1}{\nwixu{NW4WjzfE-66IDg-1}\nwixd{NW4WjzfE-8xFzK-1}}}%
+\nwixlogsorted{c}{{Action: stop}{NW4WjzfE-2pNlF4-1}{\nwixu{NW4WjzfE-66IDg-1}\nwixd{NW4WjzfE-2pNlF4-1}}}%
+\nwixlogsorted{c}{{Action: translate canvas}{NW4WjzfE-2H3ZAK-1}{\nwixu{NW4WjzfE-66IDg-1}\nwixd{NW4WjzfE-2H3ZAK-1}}}%
+\nwixlogsorted{c}{{DesktopController.java}{NW4WjzfE-4ScqTl-1}{\nwixd{NW4WjzfE-4ScqTl-1}}}%
+\nwixlogsorted{c}{{DesktopController.java preamble}{NW4WjzfE-4Xk0Zi-1}{\nwixu{NW4WjzfE-4ScqTl-1}\nwixd{NW4WjzfE-4Xk0Zi-1}\nwixd{NW4WjzfE-4Xk0Zi-2}\nwixd{NW4WjzfE-4Xk0Zi-3}}}%
+\nwixlogsorted{c}{{Draw road network}{NW4WjzfE-2oyNQH-1}{\nwixu{NW4WjzfE-3zWt7f-1}\nwixd{NW4WjzfE-2oyNQH-1}}}%
+\nwixlogsorted{c}{{Event handlers}{NW4WjzfE-66IDg-1}{\nwixu{NW4WjzfE-2VtYMw-1}\nwixd{NW4WjzfE-66IDg-1}}}%
+\nwixlogsorted{c}{{Initialization routine}{NW4WjzfE-2M5SBC-1}{\nwixu{NW4WjzfE-2VtYMw-1}\nwixd{NW4WjzfE-2M5SBC-1}}}%
+\nwixlogsorted{c}{{Member variables}{NW4WjzfE-aPohW-1}{\nwixu{NW4WjzfE-2VtYMw-1}\nwixd{NW4WjzfE-aPohW-1}\nwixd{NW4WjzfE-aPohW-2}\nwixd{NW4WjzfE-aPohW-3}\nwixd{NW4WjzfE-aPohW-4}\nwixd{NW4WjzfE-aPohW-5}}}%
+\nwixlogsorted{c}{{Private methods}{NW4WjzfE-3zWt7f-1}{\nwixu{NW4WjzfE-2VtYMw-1}\nwixd{NW4WjzfE-3zWt7f-1}}}%
+\nwixlogsorted{i}{{client}{client}}%
+\nwixlogsorted{i}{{controller}{controller}}%
+\nwixlogsorted{i}{{stage}{stage}}%
+\nwixlogsorted{i}{{TITLE{\char95}STRING}{TITLE:unSTRING}}%
+\nwbegindocs{49}\nwdocspar
+
+\appendix
+
+\section{Appendix: List of Chunks}
+\label{ap:list-of-chunks}
+\nowebchunks
+
+\section{Appendix: List of Identifiers}
+\label{ap:list-of-identifiers}
+\nowebindex
+
+\end{document}
+
+\nwenddocs{}

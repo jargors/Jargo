@@ -2,12 +2,15 @@
 # - Set CLASSPATH environmental variable before running `make`.
 # - Command `make clean` does NOT remove the compressed jar from $CLASSPATH/.
 #   Do that manually.
-WIDGET=Desktop
+WIDGET=DesktopController
 VERSION=1.0.0
 
 .PHONY : all clean
 
-all : pdf class
+all : pdf class app
+
+app : Desktop.java
+	javac -Xlint:deprecation -d . -cp .:$(CLASSPATH)/* --module-path $(CLASSPATH) --add-modules javafx.controls Desktop.java
 
 class : java
 	javac -Xlint:deprecation -d . -cp .:$(CLASSPATH)/* --module-path $(CLASSPATH) --add-modules javafx.controls $(WIDGET).java
@@ -24,6 +27,6 @@ tex : src/$(WIDGET).nw
 clean :
 	rm -f $(WIDGET).pdf
 	rm -f $(WIDGET).java
-	rm -f $(WIDGET).class
+	rm -rf com/
 	latexmk -f -c doc/$(WIDGET).tex
 	rm -f doc/$(WIDGET).tex
