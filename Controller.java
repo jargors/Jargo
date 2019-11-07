@@ -18,7 +18,6 @@ import java.util.function.Consumer;
 import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.HashMap;
 import java.sql.SQLException;
@@ -130,6 +129,9 @@ public class Controller {
   }
   public void setFinalWorldTime(int t) {
     final_world_time = t;
+  }
+  public void setEngineUpdatePeriod(int t) {
+    this.engine_update_period = t;
   }
   public static int getSimulationWorldTime() {
     return world_time;

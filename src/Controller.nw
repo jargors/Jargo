@@ -90,9 +90,6 @@ import java.util.function.Consumer;
 import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
-@ \item date-time class for printing timestamps;
-<<Controller.java preamble>>=
-import java.time.LocalDateTime;
 @ \item standard map classes for caching various items.
 <<Controller.java preamble>>=
 import java.util.Map;
@@ -263,6 +260,7 @@ public Controller() {
 <<Set client>>
 <<Set initial world time>>
 <<Set final world time>>
+<<Set engine update period>>
 <<Get world time>>
 <<Return request to queue>>
 <<Save backup>>
@@ -357,12 +355,20 @@ public void setFinalWorldTime(int t) {
 }
 @ %def setFinalWorldTime
 
+\subsubsection{[[setEngineUpdatePeriod(1)]]}
+<<Set engine update period>>=
+public void setEngineUpdatePeriod(int t) {
+  this.engine_update_period = t;
+}
+@ %def setEngineUpdatePeriod
+
 \subsubsection{[[getSimulationWorldTime(0)]]}
 <<Get world time>>=
 public static int getSimulationWorldTime() {
   return world_time;
 }
 @ %def getSimulationWorldTime
+
 
 \subsubsection{[[returnRequest]](1)}
 <<Return request to queue>>=
