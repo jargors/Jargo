@@ -3,6 +3,7 @@
 \usepackage{noweb}
 \noweboptions{smallcode,longchunks}
 \usepackage[a4paper,margin=1in]{geometry}
+\usepackage{booktabs}
 \usepackage{caption}
 \usepackage{colortbl}
 \usepackage[colorlinks=true]{hyperref}
@@ -12,6 +13,9 @@
 
 \def\nwendcode{\endtrivlist \endgroup}      % Remove noweb page break penalty
 \let\nwdocspar=\par
+
+\definecolor{TableTitle}{rgb}{0.900, 0.900, 0.900}  % Define colors for tables
+\definecolor{TableHeader}{rgb}{0.900, 0.900, 0.900}
 
 \captionsetup{labelfont={bf},textfont={bf,it}}
 \setlength{\abovecaptionskip}{1mm}
@@ -71,6 +75,8 @@ import com.github.jargors.Storage;
 import com.github.jargors.Communicator;
 import com.github.jargors.Client;
 import com.github.jargors.Tools;
+import com.github.jargors.exceptions.ClientException;
+import com.github.jargors.exceptions.ClientFatalException;
 import com.github.jargors.exceptions.DuplicateVertexException;
 import com.github.jargors.exceptions.DuplicateEdgeException;
 import com.github.jargors.exceptions.DuplicateUserException;
@@ -128,24 +134,39 @@ private Map<Integer, Boolean> lu_seen = new HashMap<>();
 @ %def storage communicator tools client lu_seen
 
 \hi{Settings.} Settings objects configure various aspects of the simulation.
-These settings should mostly be set by the evaluation program by using the public
-setters.
-
-Ultimately we want everything in the database to be an integer so we don't have
-to fiddle around with data types when we do reads and writes. We use [[CSHIFT]]
-to shift the decimal places of latitude and longitude coordinates left and
-right by multiplication or division\footnote{Beware, if [[CSHIFT]] is changed
-here, it should also be changed in Tools.}.
+Some settings can be configured using the public setters, others can
+be configured through system properties, and others are non-configurable.
 <<Settings objects>>=
-private final double CSHIFT = 10000000.0;
-private static int world_time = 0;
 private int initial_world_time = 0;
 private int final_world_time = 86400;
-private int engine_update_period = 10;
+@ %def initial_world_time final_world_time
+The simulation world time is stored in [[world_time]] and is upated by the
+clock loop. The time advances in increments of 1 from [[initial_world_time]]
+to [[final_world_time]].
+<<Settings objects>>=
+private int world_time = 0;
+@ %def world_time
+The [[loop_delay]] configures how many seconds to wait until the controller
+loops start. The update periods configure how often particular loops should
+execute, in seconds.
+<<Settings objects>>=
 private int loop_delay = 0;
+private int engine_update_period = 10;
 // private int deviation_rate = 0.02;
 // private int breakdown_rate = 0.005;
-@ %def CSHIFT world_time initial_world_time final_world_time engine_update_period loop_delay
+@ %def loop_delay engine_update_period
+The [[CSHIFT]] setting configures the precision for longitude and latitude
+coordiates (see [[Storage.DBAddNewVertex]](3))\footnote{Beware, if [[CSHIFT]]
+is changed here, it should also be changed in Tools.}.
+<<Settings objects>>=
+private final double CSHIFT = 10000000.0;
+@ %def CSHIFT
+The [[DEBUG]] setting controls whether certain messages are print to screen.
+Pass [[-Djargors.controller.debug=true]] to the [[java]] command to set
+[[DEBUG]] to [[true]].
+<<Settings objects>>=
+private final boolean DEBUG = "true".equals(System.getProperty("jargors.controller.debug"));
+@ %def DEBUG
 
 \hi{Loops.} Jargo's simulation environment comprises four ``loops'', defined
 here, running in parallel. They are executed using Java's
@@ -159,29 +180,82 @@ here, running in parallel. They are executed using Java's
 @
 
 \subsubsection{Clock Loop}
-This loop advances the simulation world time.
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Member \textcolor{blue}{[[ClockLoop]]} is a [[Runnable]] that does two things.
+First it advances the simulation world time, and then it tells [[communicator]]
+about the new time.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} increments [[world_time]] by 1, may modify
+[[communicator]] by changing [[Communicator.world_time]], may print to
+standard error if [[DEBUG]] is [[true]].\\
+\textbf{Throws:} nothing.\\
+\bottomrule
+\end{tabular}
 <<Definition of clock loop>>=
 private Runnable ClockLoop = () -> {
-  communicator.setSimulationWorldTime(++world_time);
-  Tools.Print((world_time % 2 == 0 ? "*ping*" : "*pong*"));
+  this.communicator.setSimulationWorldTime(++(this.world_time));
+  if (DEBUG) {
+    System.err.printf("[t=%d] Controller.ClockLoop says: %s!",
+        this.world_time, (this.world_time % 2 == 0 ? "ping" : "pong"));
+  }
 };
 @ %def ClockLoop
 
 \subsubsection{Engine Loop}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Member \textcolor{blue}{[[EngineLoop]]} is a [[Runnable]] that simulates
+stochastic effects on the ridesharing vehicles.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} may insert, delete, or update rows in Tables W, CW,
+PD, CPD, and CQ in the database instance underlying [[storage]].\\
+\textbf{Throws:} nothing.\\
+\bottomrule
+\end{tabular}
 <<Definition of engine loop>>=
 private Runnable EngineLoop = () -> { };
 @ %def EngineLoop
 
 \subsubsection{Request Collection Loop}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Member \textcolor{blue}{[[RequestCollectionLoop]]} is a [[Runnable]] that
+collects requests eligible for assignment at the current world time.  A request
+$r$ is ``eligible'' if it is not assigned at the current world time, and if the
+world time is between the request's early time $r_\texttt{e}$ and
+$(r_\texttt{e}+\texttt{REQUEST\_TIMEOUT})$ (see
+[[Storage.DBQueryQueuedRequests]](1)). If the eligible requests cannot be
+collected, we consider this failure to be fatal and exit immediately. A possible
+reason may be database failure in [[storage]]. \\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} may modify [[client]] by adding objects into
+[[Client.queue]], may put new entries or modify existing entries in
+[[lu_seen]], may print to standard error if [[DEBUG]] is [[true]], or exits the JVM if
+failure occurs.\\
+\textbf{Throws:} nothing.\\
+\bottomrule
+\end{tabular}
 <<Definition of request collection loop>>=
 private Runnable RequestCollectionLoop = () -> {
-  long A0 = System.currentTimeMillis();
-  final int t0 = world_time;
+  long A0 = 0;
+  if (DEBUG) {
+    A0 = System.currentTimeMillis();
+  }
   try {
-    int[] output = storage.DBQueryQueuedRequests(world_time);
+    int[] output = this.storage.DBQueryQueuedRequests(this.world_time);
     for (int i = 0; i < (output.length - 6); i += 7) {
-      if (!lu_seen.containsKey(output[i]) || lu_seen.get(output[i]) == false) {
-        client.collectRequest(new int[] {
+      if (!this.lu_seen.containsKey(output[i]) || this.lu_seen.get(output[i]) == false) {
+        this.client.collectRequest(new int[] {
           output[(i + 0)],
           output[(i + 1)],
           output[(i + 2)],
@@ -189,53 +263,105 @@ private Runnable RequestCollectionLoop = () -> {
           output[(i + 4)],
           output[(i + 5)],
           output[(i + 6)] });
-        lu_seen.put(output[i], true);
+        this.lu_seen.put(output[i], true);
       }
     }
   } catch (SQLException e) {
     System.err.println("Encountered fatal error");
-    Tools.PrintSQLException(e);
+    System.err.println(e.toString());
+    e.printStackTrace();
     System.exit(1);
   }
-  final int t1 = world_time;
-  long A1 = System.currentTimeMillis();
-  Tools.Print("Time RCL: "+(A1 - A0)+" ms");
+  if (DEBUG) {
+    System.err.printf("Controller.RequestCollectionLoop completed in %d ms\n",
+        (System.currentTimeMillis() - A0));
+  }
 };
 @ %def RequestCollectionLoop
 
 \subsubsection{Request Handling Loop}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Member \textcolor{blue}{[[RequestHandlingLoop]]} is a [[Runnable]] that
+notifies the client algorithm to check for and process new requests.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} may indirectly modify the database underlying
+[[storage]] depending on the body of [[Client.notifyNew]](0). May print to
+standard error if a [[ClientException]] occurs or [[ClientFatalException]]
+occurs or [[DEBUG]] is [[true]], or exits the JVM if [[ClientFatalException]]
+occurs.\\
+\textbf{Throws:} nothing.\\
+\bottomrule
+\end{tabular}
 <<Definition of request handling loop>>=
 private Runnable RequestHandlingLoop = () -> {
-  long A0 = System.currentTimeMillis();
-  try {
-    client.notifyNew();
-  } catch (RuntimeException e) {
-    System.out.println("client.notifyNew() exception: "+e.toString());
+  long A0 = 0;
+  if (DEBUG) {
+    A0 = System.currentTimeMillis();
   }
-  long A1 = System.currentTimeMillis();
-  Tools.Print("Time RHL: "+(A1 - A0)+" ms");
+  try {
+    this.client.notifyNew();
+  } catch (ClientException e) {
+    System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a non-fatal Client exception: %s",
+        this.world_time, e.toString());
+  } catch (ClientFatalException e) {
+    System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a FATAL Client exception: %s",
+        this.world_time, e.toString());
+    e.printStackTrace();
+    System.exit(1);
+  }
+  if (DEBUG) {
+    System.err.printf("Controller.RequestHandlingLoop completed in %d ms\n",
+        (System.currentTimeMillis() - A0));
+  }
 };
 @ %def RequestHandlingLoop
 
 \subsubsection{Server Loop}
-This loop ``pushes'' server locations to the client.
-Option A. Cache the routes here, then update the cache when the routes change.
-Option B. Change the query to use one query to get active vehicles, then
-  a second query to get position from table W for each active vehicle, instead
-  of using join.
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Member \textcolor{blue}{[[ServerLoop]]} is a [[Runnable]] that collects
+last-known locations of all active servers at the current word time.  A server
+is ``active'' if its service has not ended, in other words it has not arrived
+at its own destination.  The ``last-known location'' is the waypoint in the
+server's route $w$ with a time component closest to but not exceeding the given
+time, in other words ${w_{\leq t}}_{|w_{\leq t}|}$ (see
+[[Storage.DBQueryServerLocationsActive]](1)).  If the last-known locations
+cannot be collected, we consider this failure to be fatal and exit immediately.
+A possible reason may be database failure in [[storage]]. \\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} may indirectly modify the database underlying
+[[storage]] depending on the body of [[Client.collectServerLocations]](1).
+May print to standard error if [[DEBUG]] is [[true]], or
+exits the JVM if failure occurs.\\
+\textbf{Throws:} nothing.\\
+\bottomrule
+\end{tabular}
 <<Definition of server collection loop>>=
 private Runnable ServerLoop = () -> {
-  long A0 = System.currentTimeMillis();
+  long A0 = 0;
+  if (DEBUG) {
+    A0 = System.currentTimeMillis();
+  }
   try {
-    int[] output = storage.DBQueryServerLocationsActive(world_time);
-    client.collectServerLocations(output);
+    int[] output = this.storage.DBQueryServerLocationsActive(this.world_time);
+    this.client.collectServerLocations(output);
   } catch (SQLException e) {
     System.err.println("Encountered fatal error");
-    Tools.PrintSQLException(e);
+    System.err.println(e.toString());
+    e.printStackTrace();
     System.exit(1);
   }
-  long A1 = System.currentTimeMillis();
-  Tools.Print("Time SL: "+(A1 - A0)+" ms");
+  if (DEBUG) {
+    System.err.printf("Controller.ServerLoop completed in %d ms\n",
+        (System.currentTimeMillis() - A0));
+  }
 };
 @ %def ServerLoop
 
@@ -364,7 +490,7 @@ public void setEngineUpdatePeriod(int t) {
 
 \subsubsection{[[getSimulationWorldTime(0)]]}
 <<Get world time>>=
-public static int getSimulationWorldTime() {
+public int getSimulationWorldTime() {
   return world_time;
 }
 @ %def getSimulationWorldTime

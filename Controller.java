@@ -3,6 +3,8 @@ import com.github.jargors.Storage;
 import com.github.jargors.Communicator;
 import com.github.jargors.Client;
 import com.github.jargors.Tools;
+import com.github.jargors.exceptions.ClientException;
+import com.github.jargors.exceptions.ClientFatalException;
 import com.github.jargors.exceptions.DuplicateVertexException;
 import com.github.jargors.exceptions.DuplicateEdgeException;
 import com.github.jargors.exceptions.DuplicateUserException;
@@ -27,27 +29,33 @@ public class Controller {
   private Tools tools = new Tools();
   private Client client;
   private Map<Integer, Boolean> lu_seen = new HashMap<>();
-  private final double CSHIFT = 10000000.0;
-  private static int world_time = 0;
   private int initial_world_time = 0;
   private int final_world_time = 86400;
-  private int engine_update_period = 10;
+  private int world_time = 0;
   private int loop_delay = 0;
+  private int engine_update_period = 10;
   // private int deviation_rate = 0.02;
   // private int breakdown_rate = 0.005;
+  private final double CSHIFT = 10000000.0;
+  private final boolean DEBUG = "true".equals(System.getProperty("jargors.controller.debug"));
   private Runnable ClockLoop = () -> {
-    communicator.setSimulationWorldTime(++world_time);
-    Tools.Print((world_time % 2 == 0 ? "*ping*" : "*pong*"));
+    this.communicator.setSimulationWorldTime(++(this.world_time));
+    if (DEBUG) {
+      System.err.printf("[t=%d] Controller.ClockLoop says: %s!",
+          this.world_time, (this.world_time % 2 == 0 ? "ping" : "pong"));
+    }
   };
   private Runnable EngineLoop = () -> { };
   private Runnable RequestCollectionLoop = () -> {
-    long A0 = System.currentTimeMillis();
-    final int t0 = world_time;
+    long A0 = 0;
+    if (DEBUG) {
+      A0 = System.currentTimeMillis();
+    }
     try {
-      int[] output = storage.DBQueryQueuedRequests(world_time);
+      int[] output = this.storage.DBQueryQueuedRequests(this.world_time);
       for (int i = 0; i < (output.length - 6); i += 7) {
-        if (!lu_seen.containsKey(output[i]) || lu_seen.get(output[i]) == false) {
-          client.collectRequest(new int[] {
+        if (!this.lu_seen.containsKey(output[i]) || this.lu_seen.get(output[i]) == false) {
+          this.client.collectRequest(new int[] {
             output[(i + 0)],
             output[(i + 1)],
             output[(i + 2)],
@@ -55,40 +63,59 @@ public class Controller {
             output[(i + 4)],
             output[(i + 5)],
             output[(i + 6)] });
-          lu_seen.put(output[i], true);
+          this.lu_seen.put(output[i], true);
         }
       }
     } catch (SQLException e) {
       System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
+      System.err.println(e.toString());
+      e.printStackTrace();
       System.exit(1);
     }
-    final int t1 = world_time;
-    long A1 = System.currentTimeMillis();
-    Tools.Print("Time RCL: "+(A1 - A0)+" ms");
+    if (DEBUG) {
+      System.err.printf("Controller.RequestCollectionLoop completed in %d ms\n",
+          (System.currentTimeMillis() - A0));
+    }
   };
   private Runnable RequestHandlingLoop = () -> {
-    long A0 = System.currentTimeMillis();
-    try {
-      client.notifyNew();
-    } catch (RuntimeException e) {
-      System.out.println("client.notifyNew() exception: "+e.toString());
+    long A0 = 0;
+    if (DEBUG) {
+      A0 = System.currentTimeMillis();
     }
-    long A1 = System.currentTimeMillis();
-    Tools.Print("Time RHL: "+(A1 - A0)+" ms");
-  };
-  private Runnable ServerLoop = () -> {
-    long A0 = System.currentTimeMillis();
     try {
-      int[] output = storage.DBQueryServerLocationsActive(world_time);
-      client.collectServerLocations(output);
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
+      this.client.notifyNew();
+    } catch (ClientException e) {
+      System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a non-fatal Client exception: %s",
+          this.world_time, e.toString());
+    } catch (ClientFatalException e) {
+      System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a FATAL Client exception: %s",
+          this.world_time, e.toString());
+      e.printStackTrace();
       System.exit(1);
     }
-    long A1 = System.currentTimeMillis();
-    Tools.Print("Time SL: "+(A1 - A0)+" ms");
+    if (DEBUG) {
+      System.err.printf("Controller.RequestHandlingLoop completed in %d ms\n",
+          (System.currentTimeMillis() - A0));
+    }
+  };
+  private Runnable ServerLoop = () -> {
+    long A0 = 0;
+    if (DEBUG) {
+      A0 = System.currentTimeMillis();
+    }
+    try {
+      int[] output = this.storage.DBQueryServerLocationsActive(this.world_time);
+      this.client.collectServerLocations(output);
+    } catch (SQLException e) {
+      System.err.println("Encountered fatal error");
+      System.err.println(e.toString());
+      e.printStackTrace();
+      System.exit(1);
+    }
+    if (DEBUG) {
+      System.err.printf("Controller.ServerLoop completed in %d ms\n",
+          (System.currentTimeMillis() - A0));
+    }
   };
   public Controller() {
     storage = new Storage();
@@ -133,7 +160,7 @@ public class Controller {
   public void setEngineUpdatePeriod(int t) {
     this.engine_update_period = t;
   }
-  public static int getSimulationWorldTime() {
+  public int getSimulationWorldTime() {
     return world_time;
   }
   public void returnRequest(int rid) {
