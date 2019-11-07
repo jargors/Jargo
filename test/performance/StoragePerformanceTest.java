@@ -40,6 +40,7 @@ public class StoragePerformanceTest {
       }
       {
         Controller controller = new Controller();
+        controller.createNewInstance();
         controller.loadDataModel();
         controller.loadRoadNetwork("data/chengdu.rnet");
         controller.loadGTree("data/chengdu.gtree");
@@ -62,6 +63,7 @@ public class StoragePerformanceTest {
       }
       {
         Controller controller = new Controller();
+        controller.createNewInstance();
         controller.loadDataModel();
         controller.loadRoadNetwork("data/chengdu.rnet");
         controller.loadGTree("data/chengdu.gtree");

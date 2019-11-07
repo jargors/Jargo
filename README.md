@@ -73,6 +73,11 @@ To delete build objects from the directory:
 ### TESTING THE BUILD
 
 A program is included in `test/correctness` that can be used to test the build.
+The program included in `test/correctness/generator` can be used to recreate
+the test instance `test/correctness/data/db`. The test instance road network
+and generating SQL can be found in `test/correctness/generator/data`. To
+recreate the test instance, navigate to `test/correctness/generator` and type
+`make` followed by `./run.sh`, then follow the instructions.
 
 Prerequisites for running the test program:
 

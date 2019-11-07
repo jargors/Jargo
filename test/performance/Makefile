@@ -4,15 +4,15 @@ WIDGET=StoragePerformanceTest
 
 .PHONY : all clean
 
-all : pdf class
+all : java tex pdf class
 
-class : java
+class : $(WIDGET).java
 	javac -Xlint:deprecation -d . -cp .:$(CLASSPATH)/* $(WIDGET).java
 
 java : src/$(WIDGET).nw
 	notangle -R$(WIDGET).java src/$(WIDGET).nw > $(WIDGET).java
 
-pdf : tex
+pdf : doc/$(WIDGET).tex
 	pdflatex doc/$(WIDGET).tex
 
 tex : src/$(WIDGET).nw

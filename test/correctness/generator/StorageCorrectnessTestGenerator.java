@@ -3,6 +3,7 @@ import com.github.jargors.Controller;
 public class StorageCorrectnessTestGenerator {
   public static void main(String[] args) {
     Controller controller = new Controller();
+    controller.createNewInstance();
     controller.loadDataModel();
     controller.loadRoadNetwork("data/test.rnet");
     controller.saveBackup("temp");

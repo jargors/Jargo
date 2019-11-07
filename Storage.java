@@ -1445,7 +1445,7 @@ public class Storage {
   }
   public void DBSaveBackup(final String p) throws SQLException {
     try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-      CallableStatement cs = conn.prepareCall("CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE("+p+")");
+      CallableStatement cs = conn.prepareCall("CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE('"+p+"')");
       cs.execute();
     } catch (SQLException e) {
       throw e;
