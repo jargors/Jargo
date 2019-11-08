@@ -118,191 +118,117 @@ public class Controller {
     }
   };
   public Controller() {
-    storage = new Storage();
-    communicator = new Communicator();
-    communicator.setStorage(storage);
-    communicator.setController(this);
+    this.storage = new Storage();
+    this.communicator = new Communicator();
+    this.communicator.setStorage(storage);
+    this.communicator.setController(this);
   }
-  public void createNewInstance() {
-    try {
-      storage.DBCreateNewInstance();
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
+  public void createNewInstance() throws SQLException {
+    this.storage.DBCreateNewInstance();
   }
-  public void closeInstance() {
-    try {
-      storage.DBCloseInstance();
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
+  public void closeInstance() throws SQLException {
+    this.storage.DBCloseInstance();
   }
-  public void setDebugClient(boolean flag) {
-    client.setDebug(flag);
+  public void setClient(final Client target) {
+    this.client = target;
+    this.client.setCommunicator(this.communicator);
   }
-  public void setDebugCommunicator(boolean flag) {
-    communicator.setDebug(flag);
+  public void setInitialWorldTime(final int t) {
+    this.initial_world_time = t;
   }
-  public void setClient(Client target) {
-    client = target;
-    client.setCommunicator(communicator);
+  public void setFinalWorldTime(final int t) {
+    this.final_world_time = t;
   }
-  public void setInitialWorldTime(int t) {
-    initial_world_time = t;
-  }
-  public void setFinalWorldTime(int t) {
-    final_world_time = t;
-  }
-  public void setEngineUpdatePeriod(int t) {
+  public void setEngineUpdatePeriod(final int t) {
     this.engine_update_period = t;
   }
   public int getSimulationWorldTime() {
-    return world_time;
+    return this.world_time;
   }
-  public void returnRequest(int rid) {
-    lu_seen.put(rid, false);
+  public void returnRequest(final int rid) {
+    this.lu_seen.put(rid, false);
   }
-  public void saveBackup(String p) {
-    try {
-      storage.DBSaveBackup(p);
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
+  public void saveBackup(final String p) throws SQLException {
+    this.storage.DBSaveBackup(p);
   }
-  public void loadBackup(String p) {
-    try {
-      storage.DBLoadBackup(p);
-      storage.DBLoadRoadNetworkFromDB();
-      storage.DBLoadUsersFromDB();
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
+  public void loadBackup(final String p) throws SQLException {
+    this.storage.DBLoadBackup(p);
+    this.storage.DBLoadRoadNetworkFromDB();
+    this.storage.DBLoadUsersFromDB();
   }
   public void loadDataModel() {
-    storage.DBLoadDataModel();
+    this.storage.DBLoadDataModel();
   }
-  public void loadRoadNetwork(final String f_rnet) {
-    try {
-      Scanner sc = new Scanner(new File(f_rnet));
-      while (sc.hasNext()) {
-        int[] col = new int[7];
-        col[0] = sc.nextInt();
-        col[1] = sc.nextInt();
-        col[2] = sc.nextInt();
-        col[3] = (int) Math.round(sc.nextDouble()*CSHIFT);
-        col[4] = (int) Math.round(sc.nextDouble()*CSHIFT);
-        col[5] = (int) Math.round(sc.nextDouble()*CSHIFT);
-        col[6] = (int) Math.round(sc.nextDouble()*CSHIFT);
-        if (col[1] == 0) {
-          col[3] = 0;
-          col[4] = 0;
-        }
-        if (col[2] == 0) {
-          col[5] = 0;
-          col[6] = 0;
-        }
-        try {
-          storage.DBAddNewVertex(col[1], col[3], col[4]);
-        } catch (DuplicateVertexException e) {
-          // System.err.println("Warning: duplicate vertex rejected");
-          // System.err.println(e.toString());
-        }
-        try {
-          storage.DBAddNewVertex(col[2], col[5], col[6]);
-        } catch (DuplicateVertexException e) {
-          // System.err.println("Warning: duplicate vertex rejected");
-          // System.err.println(e.toString());
-        }
-        int dist = ((col[1] != 0 && col[2] != 0)
-          ? tools.computeHaversine(
-                col[3]/CSHIFT, col[4]/CSHIFT,
-                col[5]/CSHIFT, col[6]/CSHIFT) : 0);
-        try {
-          storage.DBAddNewEdge(col[1], col[2], dist, 10);
-        } catch (DuplicateEdgeException e) {
-          // System.err.println("Warning: duplicate edge rejected");
-          // System.err.println(e.toString());
-        }
-      }
-    } catch (FileNotFoundException e) {
-      System.err.println("Encountered fatal error");
-      System.err.println(e.toString());
-      e.printStackTrace();
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
+  public void loadRoadNetwork(final String f_rnet)
+  throws FileNotFoundException, DuplicateVertexException, DuplicateEdgeException, SQLException {
+    Scanner sc = new Scanner(new File(f_rnet));
+    while (sc.hasNext()) {
+      final int col0 = sc.nextInt();
+      final int col1 = sc.nextInt();
+      final int col2 = sc.nextInt();
+      final int col3 = (col1 == 0 ? 0 : (int) Math.round(sc.nextDouble()*CSHIFT));
+      final int col4 = (col1 == 0 ? 0 : (int) Math.round(sc.nextDouble()*CSHIFT));
+      final int col5 = (col2 == 0 ? 0 : (int) Math.round(sc.nextDouble()*CSHIFT));
+      final int col6 = (col2 == 0 ? 0 : (int) Math.round(sc.nextDouble()*CSHIFT));
+      this.storage.DBAddNewVertex(col1, col3, col4);
+      this.storage.DBAddNewVertex(col2, col5, col6);
+      final int dist = ((col1 != 0 && col2 != 0)
+        ? tools.computeHaversine(
+              col3/CSHIFT, col4/CSHIFT,
+              col5/CSHIFT, col6/CSHIFT) : 0);
+      this.storage.DBAddNewEdge(col1, col2, dist, 10);
     }
-    tools.registerVertices(storage.getReferenceVerticesCache());
-    tools.registerEdges(storage.getReferenceEdgesCache());
+    this.tools.registerVertices(this.storage.getReferenceVerticesCache());
+    this.tools.registerEdges(this.storage.getReferenceEdgesCache());
   }
-  public void loadProblem(String p) {
-    try {
-      Scanner sc = new Scanner(new File(p));
-      for (int i = 0; i < 6; i++) {
-        sc.nextLine();
+  public void loadProblem(String p)
+  throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException, SQLException {
+    Scanner sc = new Scanner(new File(p));
+    for (int i = 0; i < 6; i++) {
+      sc.nextLine();
+    }
+    while (sc.hasNext()) {
+      final int uid = sc.nextInt();
+      final int  uo = sc.nextInt();
+      final int  ud = sc.nextInt();
+      final int  uq = sc.nextInt();
+      final int  ue = sc.nextInt();
+      final int  ul = sc.nextInt();
+      final int  ub = this.tools.computeShortestPathDistance(uo, ud);
+      if (uq < 0) {
+        this.addNewServer(new int[] { uid, uq, ue, ul, uo, ud, ub });
+      } else {
+        this.addNewRequest(new int[] { uid, uq, ue, ul, uo, ud, ub });
       }
-      int[] col = new int[6];
-      while (sc.hasNext()) {
-        for (int i = 0; i < 6; i++) {
-          col[i] = sc.nextInt();
-        }
-        int uid = col[0];
-        int uo = col[1];
-        int ud = col[2];
-        int uq = col[3];
-        int ue = col[4];
-        int ul = col[5];
-        int ub = tools.computeShortestPathDistance(uo, ud);
-        if (uq < 0) {
-          addNewServer(new int[] { uid, uq, ue, ul, uo, ud, ub });
-        } else {
-          addNewRequest(new int[] { uid, uq, ue, ul, uo, ud, ub });
-        }
-      }
-    } catch (FileNotFoundException e) {
-      System.out.println("Bad path to problem instance");
-    } catch (RuntimeException e) {
-      System.out.println(e.getMessage());
-      e.printStackTrace();
-      System.out.println("Jargo runtime exception");
     }
   }
   public void loadGTree(String p) {
-    tools.loadGTree(p);
+    this.tools.loadGTree(p);
   }
-  public void start(Consumer app_cb) {
-    world_time = initial_world_time;
+  public void start(final Consumer app_cb) {
+    this.world_time = this.initial_world_time;
 
-    int simulation_duration = (final_world_time - initial_world_time);
+    int simulation_duration = (this.final_world_time - this.initial_world_time);
 
     ScheduledExecutorService exe = Executors.newScheduledThreadPool(5);
 
     ScheduledFuture<?> cb1 = exe.scheduleAtFixedRate(
-      ClockLoop, 0, 1, TimeUnit.SECONDS);
+      this.ClockLoop, 0, 1, TimeUnit.SECONDS);
 
     ScheduledFuture<?> cb2 = exe.scheduleAtFixedRate(
-      EngineLoop, loop_delay, engine_update_period, TimeUnit.SECONDS);
+      this.EngineLoop, this.loop_delay, this.engine_update_period, TimeUnit.SECONDS);
 
-    int request_collection_period = client.getRequestCollectionPeriod();
+    int request_collection_period = this.client.getRequestCollectionPeriod();
     ScheduledFuture<?> cb3 = exe.scheduleAtFixedRate(
-      RequestCollectionLoop, loop_delay, request_collection_period, TimeUnit.SECONDS);
+      this.RequestCollectionLoop, this.loop_delay, request_collection_period, TimeUnit.SECONDS);
 
-    int request_handling_period = client.getRequestHandlingPeriod();
+    int request_handling_period = this.client.getRequestHandlingPeriod();
     ScheduledFuture<?> cb4 = exe.scheduleAtFixedRate(
-      RequestHandlingLoop, loop_delay, request_handling_period, TimeUnit.MILLISECONDS);
+      this.RequestHandlingLoop, this.loop_delay, request_handling_period, TimeUnit.MILLISECONDS);
 
-    int server_collection_period = client.getServerLocationCollectionPeriod();
+    int server_collection_period = this.client.getServerLocationCollectionPeriod();
     ScheduledFuture<?> cb5 = exe.scheduleAtFixedRate(
-      ServerLoop, loop_delay, server_collection_period, TimeUnit.SECONDS);
+      this.ServerLoop, this.loop_delay, server_collection_period, TimeUnit.SECONDS);
 
     exe.schedule(() -> {
       cb1.cancel(false);
@@ -311,419 +237,126 @@ public class Controller {
       cb4.cancel(false);
       cb5.cancel(false);
       exe.shutdown();
-      client.end();
+      this.client.end();
       app_cb.accept(true);
     }, simulation_duration, TimeUnit.SECONDS);
   }
-  public void startStatic() {
-
-    world_time = initial_world_time;
-
-    while (world_time < final_world_time) {
-      ClockLoop.run();
-      EngineLoop.run();
-      ServerLoop.run();
-      RequestCollectionLoop.run();
-      RequestHandlingLoop.run();
+  public void startStatic(final Consumer app_cb) {
+    this.world_time = this.initial_world_time;
+    while (this.world_time < this.final_world_time) {
+      this.ClockLoop.run();  // this.world_time gets incremented here!
+      this.EngineLoop.run();
+      this.ServerLoop.run();
+      this.RequestCollectionLoop.run();
+      this.RequestHandlingLoop.run();
     }
-
-    client.end();
+    this.client.end();
+    app_cb.accept(true);
   }
-  public int[] query(String sql, int ncols) {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQuery(sql, ncols);
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] query(String sql, int ncols) throws SQLException {
+    return storage.DBQuery(sql, ncols);
   }
-  public int[] queryAllVertices() {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryAllVertices();
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryAllVertices() throws SQLException {
+    return storage.DBQueryAllVertices();
   }
-  public int[] queryAllEdges() {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryAllEdges();
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryAllEdges() throws SQLException {
+    return storage.DBQueryAllEdges();
   }
-  public int[] queryVertex(final int v) {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryVertex(v);
-    } catch (VertexNotFoundException e) {
-      System.err.println("Warning: vertex "+v+" not found");
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryVertex(final int v) throws VertexNotFoundException, SQLException {
+    return storage.DBQueryVertex(v);
   }
-  public int[] queryEdge(final int v1, final int v2) {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryEdge(v1, v2);
-    } catch (EdgeNotFoundException e) {
-      // ...
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryEdge(final int v1, final int v2) throws EdgeNotFoundException, SQLException {
+    return storage.DBQueryEdge(v1, v2);
   }
-  public int[] queryUser(int rid) {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryUser(rid);
-    } catch (UserNotFoundException e) {
-      System.err.println("Warning: user not found");
-      System.err.println(e.toString());
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryUser(final int rid) throws UserNotFoundException, SQLException {
+    return storage.DBQueryUser(rid);
   }
-  public int[] queryQueuedRequests(int t) {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryQueuedRequests(t);
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryQueuedRequests(final int t) throws SQLException {
+    return storage.DBQueryQueuedRequests(t);
   }
-  public int[] queryRoute(int sid) {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryServerRoute(sid);
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryRoute(final int sid) throws SQLException {
+    return storage.DBQueryServerRoute(sid);
   }
-  public int[] querySchedule(int sid) {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryServerSchedule(sid);
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] querySchedule(final int sid) throws SQLException {
+    return storage.DBQueryServerSchedule(sid);
   }
-  public int[] queryCountVertices() {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryCountVertices();
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryCountVertices() throws SQLException {
+    return storage.DBQueryCountVertices();
   }
-  public int[] queryCountEdges() {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryCountEdges();
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryCountEdges() throws SQLException {
+    return storage.DBQueryCountEdges();
   }
-  public int[] queryStatisticsEdges() {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryStatisticsEdges();
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryStatisticsEdges() throws SQLException {
+    return storage.DBQueryStatisticsEdges();
   }
-  public int[] queryMBR() {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryMBR();
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryMBR() throws SQLException {
+    return storage.DBQueryMBR();
   }
-  public int[] queryCountServers() {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryCountServers();
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryCountServers() throws SQLException {
+    return storage.DBQueryCountServers();
   }
-  public int[] queryCountRequests() {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryCountRequests();
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryCountRequests() throws SQLException {
+    return storage.DBQueryCountRequests();
   }
-  public int[] queryServiceRate() {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryServiceRate();
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryServiceRate() throws SQLException {
+    return storage.DBQueryServiceRate();
   }
-  public int[] queryBaseDistanceTotal() {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryBaseDistanceTotal();
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryBaseDistanceTotal() throws SQLException {
+    return storage.DBQueryBaseDistanceTotal();
   }
-  public int[] queryServerBaseDistanceTotal() {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryServerBaseDistanceTotal();
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryServerBaseDistanceTotal() throws SQLException {
+    return storage.DBQueryServerBaseDistanceTotal();
   }
-  public int[] queryRequestBaseDistanceTotal() {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryRequestBaseDistanceTotal();
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryRequestBaseDistanceTotal() throws SQLException {
+    return storage.DBQueryRequestBaseDistanceTotal();
   }
-  public int[] queryRequestBaseDistanceUnassigned() {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryRequestBaseDistanceUnassigned();
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryRequestBaseDistanceUnassigned() throws SQLException {
+    return storage.DBQueryRequestBaseDistanceUnassigned();
   }
-  public int[] queryServerTravelDistanceTotal() {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryServerTravelDistanceTotal();
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryServerTravelDistanceTotal() throws SQLException {
+    return storage.DBQueryServerTravelDistanceTotal();
   }
-  public int[] queryServerCruisingDistanceTotal() {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryServerCruisingDistanceTotal();
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryServerCruisingDistanceTotal() throws SQLException {
+    return storage.DBQueryServerCruisingDistanceTotal();
   }
-  public int[] queryServerServiceDistanceTotal() {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryServerServiceDistanceTotal();
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryServerServiceDistanceTotal() throws SQLException {
+    return storage.DBQueryServerServiceDistanceTotal();
   }
-  public int[] queryRequestDetourDistanceTotal() {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryRequestDetourDistanceTotal();
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryRequestDetourDistanceTotal() throws SQLException {
+    return storage.DBQueryRequestDetourDistanceTotal();
   }
-  public int[] queryRequestTransitDistanceTotal() {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryRequestTransitDistanceTotal();
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryRequestTransitDistanceTotal() throws SQLException {
+    return storage.DBQueryRequestTransitDistanceTotal();
   }
-  public int[] queryServerTravelDurationTotal() {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryServerTravelDurationTotal();
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryServerTravelDurationTotal() throws SQLException {
+    return storage.DBQueryServerTravelDurationTotal();
   }
-  public int[] queryRequestPickupDurationTotal() {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryRequestPickupDurationTotal();
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryRequestPickupDurationTotal() throws SQLException {
+    return storage.DBQueryRequestPickupDurationTotal();
   }
-  public int[] queryRequestTransitDurationTotal() {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryRequestTransitDurationTotal();
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryRequestTransitDurationTotal() throws SQLException {
+    return storage.DBQueryRequestTransitDurationTotal();
   }
-  public int[] queryRequestTravelDurationTotal() {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryRequestTravelDurationTotal();
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryRequestTravelDurationTotal() throws SQLException {
+    return storage.DBQueryRequestTravelDurationTotal();
   }
-  public int[] queryRequestDepartureTime(int rid) {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryRequestDepartureTime(rid);
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryRequestDepartureTime(final int rid) throws SQLException {
+    return storage.DBQueryRequestDepartureTime(rid);
   }
-  public int[] queryServerDepartureTime(int sid) {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryServerDepartureTime(sid);
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryServerDepartureTime(final int sid) throws SQLException {
+    return storage.DBQueryServerDepartureTime(sid);
   }
-  public int[] queryRequestArrivalTime(int rid) {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryRequestArrivalTime(rid);
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryRequestArrivalTime(final int rid) throws SQLException {
+    return storage.DBQueryRequestArrivalTime(rid);
   }
-  public int[] queryServerArrivalTime(int sid) {
-    int[] output = new int[] { };
-    try {
-      output = storage.DBQueryServerArrivalTime(sid);
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
-    return output;
+  public int[] queryServerArrivalTime(final int sid) throws SQLException {
+    return storage.DBQueryServerArrivalTime(sid);
   }
-  public void addNewServer(int[] u) {
-    try {
-      storage.DBAddNewServer(u, tools.computeRoute(u[4], u[5], u[2]));
-    } catch (DuplicateUserException e) {
-      System.err.println("Warning: duplicate user rejected");
-      System.err.println(e.toString());
-    } catch (EdgeNotFoundException e) {
-      System.err.println("Warning: malformed route rejected");
-      System.err.println(e.toString());
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
+  public void addNewServer(final int[] u)
+  throws DuplicateUserException, EdgeNotFoundException, SQLException {
+    this.storage.DBAddNewServer(u, this.tools.computeRoute(u[4], u[5], u[2]));
   }
-  public void addNewRequest(int[] u) {
-    try {
-      storage.DBAddNewRequest(u);
-    } catch (DuplicateUserException e) {
-      System.err.println("Warning: duplicate user rejected");
-      System.err.println(e.toString());
-    } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      Tools.PrintSQLException(e);
-      System.exit(1);
-    }
+  public void addNewRequest(final int[] u) throws DuplicateUserException, SQLException {
+    this.storage.DBAddNewRequest(u);
   }
 }
