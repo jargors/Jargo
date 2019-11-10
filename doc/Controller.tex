@@ -516,7 +516,7 @@ public void loadDataModel() \{
 \subsubsection{{\tt{}\protect\nwindexuse{loadRoadNetwork}{loadRoadNetwork}{NW2ZDXo8-1JUvcB-1}loadRoadNetwork}(1)}
 \nwenddocs{}\nwbegincode{73}\sublabel{NW2ZDXo8-1JUvcB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1JUvcB-1}}}\moddef{Load road network~{\nwtagstyle{}\subpageref{NW2ZDXo8-1JUvcB-1}}}\endmoddef\nwused{\\{NW2ZDXo8-bF3Hn-1}}
 public void loadRoadNetwork(final String f_rnet)
-throws FileNotFoundException, DuplicateVertexException, DuplicateEdgeException, SQLException \{
+throws FileNotFoundException, SQLException \{
   Scanner sc = new Scanner(new File(f_rnet));
   while (sc.hasNext()) \{
     \LA{}..parse a line of the road network~{\nwtagstyle{}\subpageref{NW2ZDXo8-14B9L6-1}}\RA{}
@@ -528,20 +528,34 @@ throws FileNotFoundException, DuplicateVertexException, DuplicateEdgeException, 
   this.tools.registerEdges(this.storage.getReferenceEdgesCache());
 \}
 \nwindexdefn{loadRoadNetwork}{loadRoadNetwork}{NW2ZDXo8-1JUvcB-1}\eatline
-\nwidentdefs{\\{{loadRoadNetwork}{loadRoadNetwork}}}\nwidentuses{\\{{storage}{storage}}\\{{tools}{tools}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1JUvcB-1}\nwindexuse{tools}{tools}{NW2ZDXo8-1JUvcB-1}\nwendcode{}\nwbegindocs{74}If a vertex identifier is $0$, then we store its coordinates as $(0,0)$.
+\nwidentdefs{\\{{loadRoadNetwork}{loadRoadNetwork}}}\nwidentuses{\\{{storage}{storage}}\\{{tools}{tools}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1JUvcB-1}\nwindexuse{tools}{tools}{NW2ZDXo8-1JUvcB-1}\nwendcode{}\nwbegindocs{74}If a vertex identifier is $0$, then we store its coordinates as $(0,0)$. We
+still call {\tt{}Scanner.nextDouble}(0) because we need to advance to the next
+token.
 \nwenddocs{}\nwbegincode{75}\sublabel{NW2ZDXo8-14B9L6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-14B9L6-1}}}\moddef{..parse a line of the road network~{\nwtagstyle{}\subpageref{NW2ZDXo8-14B9L6-1}}}\endmoddef\nwused{\\{NW2ZDXo8-1JUvcB-1}}
 final int col0 = sc.nextInt();
 final int col1 = sc.nextInt();
 final int col2 = sc.nextInt();
-final int col3 = (col1 == 0 ? 0 : (int) Math.round(sc.nextDouble()*CSHIFT));
-final int col4 = (col1 == 0 ? 0 : (int) Math.round(sc.nextDouble()*CSHIFT));
-final int col5 = (col2 == 0 ? 0 : (int) Math.round(sc.nextDouble()*CSHIFT));
-final int col6 = (col2 == 0 ? 0 : (int) Math.round(sc.nextDouble()*CSHIFT));
+final int col3 = (col1 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
+final int col4 = (col1 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
+final int col5 = (col2 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
+final int col6 = (col2 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
 \nwidentuses{\\{{CSHIFT}{CSHIFT}}}\nwindexuse{CSHIFT}{CSHIFT}{NW2ZDXo8-14B9L6-1}\nwendcode{}\nwbegindocs{76}\nwdocspar
 \nwenddocs{}\nwbegincode{77}\sublabel{NW2ZDXo8-1EuI65-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1EuI65-1}}}\moddef{..insert vertex coordinates~{\nwtagstyle{}\subpageref{NW2ZDXo8-1EuI65-1}}}\endmoddef\nwused{\\{NW2ZDXo8-1JUvcB-1}}
-this.storage.DBAddNewVertex(col1, col3, col4);
-this.storage.DBAddNewVertex(col2, col5, col6);
-\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1EuI65-1}\nwendcode{}\nwbegindocs{78}\nwdocspar
+try \{
+  this.storage.DBAddNewVertex(col1, col3, col4);
+\} catch (DuplicateVertexException e) \{
+  if (DEBUG) \{
+    System.out.println("Warning! Duplicate vertex ignored.");
+  \}
+\}
+try \{
+  this.storage.DBAddNewVertex(col2, col5, col6);
+\} catch (DuplicateVertexException e) \{
+  if (DEBUG) \{
+    System.out.println("Warning! Duplicate vertex ignored.");
+  \}
+\}
+\nwidentuses{\\{{DEBUG}{DEBUG}}\\{{storage}{storage}}}\nwindexuse{DEBUG}{DEBUG}{NW2ZDXo8-1EuI65-1}\nwindexuse{storage}{storage}{NW2ZDXo8-1EuI65-1}\nwendcode{}\nwbegindocs{78}\nwdocspar
 We use haversine to compute edge weights\footnote{If the distance between two
 vertices is 0 due to rounding, then we round it up to 1.}.  If one of the
 vertices in the edge is a dummy vertex, we set the weight to 0\footnote{The
@@ -558,7 +572,11 @@ The fifth parameter is the \textit{initial speed} on all the edges \footnote{In
 the future, the speed on each edge may be recorded directly in the road network
 file instead of hardcoded here.}.
 \nwenddocs{}\nwbegincode{81}\sublabel{NW2ZDXo8-2i97Vx-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-2i97Vx-1}}}\moddef{..insert edge~{\nwtagstyle{}\subpageref{NW2ZDXo8-2i97Vx-1}}}\endmoddef\nwused{\\{NW2ZDXo8-1JUvcB-1}}
-this.storage.DBAddNewEdge(col1, col2, dist, 10);
+try \{
+  this.storage.DBAddNewEdge(col1, col2, dist, 10);
+\} catch (DuplicateEdgeException e) \{
+  System.out.println("Warning! Duplicate edge ignored.");
+\}
 \nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-2i97Vx-1}\nwendcode{}\nwbegindocs{82}\nwdocspar
 
 \subsubsection{{\tt{}\protect\nwindexuse{loadProblem}{loadProblem}{NW2ZDXo8-2rtVpi-1}loadProblem(1)}}
@@ -675,20 +693,20 @@ public int[] queryAllEdges() throws SQLException \{
 \}
 \nwindexdefn{queryAllEdges}{queryAllEdges}{NW2ZDXo8-4ILREc-1}\eatline
 \nwidentdefs{\\{{queryAllEdges}{queryAllEdges}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-4ILREc-1}\nwendcode{}\nwbegindocs{97}\nwdocspar
-\subsubsection{{\tt{}queryVertex}(1)}
+\subsubsection{{\tt{}\protect\nwindexuse{queryVertex}{queryVertex}{NW2ZDXo8-4IfXsG-1}queryVertex}(1)}
 \nwenddocs{}\nwbegincode{98}\sublabel{NW2ZDXo8-4IfXsG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-4IfXsG-1}}}\moddef{Query vertex~{\nwtagstyle{}\subpageref{NW2ZDXo8-4IfXsG-1}}}\endmoddef\nwused{\\{NW2ZDXo8-bF3Hn-2}}
 public int[] queryVertex(final int v) throws VertexNotFoundException, SQLException \{
   return storage.DBQueryVertex(v);
 \}
-\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-4IfXsG-1}\nwendcode{}\nwbegindocs{99}\nwdocspar
-
-\subsubsection{{\tt{}queryEdge}(2)}
+\nwindexdefn{queryVertex}{queryVertex}{NW2ZDXo8-4IfXsG-1}\eatline
+\nwidentdefs{\\{{queryVertex}{queryVertex}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-4IfXsG-1}\nwendcode{}\nwbegindocs{99}\nwdocspar
+\subsubsection{{\tt{}\protect\nwindexuse{queryEdge}{queryEdge}{NW2ZDXo8-1E2aru-1}queryEdge}(2)}
 \nwenddocs{}\nwbegincode{100}\sublabel{NW2ZDXo8-1E2aru-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1E2aru-1}}}\moddef{Query edge~{\nwtagstyle{}\subpageref{NW2ZDXo8-1E2aru-1}}}\endmoddef\nwused{\\{NW2ZDXo8-bF3Hn-2}}
 public int[] queryEdge(final int v1, final int v2) throws EdgeNotFoundException, SQLException \{
   return storage.DBQueryEdge(v1, v2);
 \}
-\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1E2aru-1}\nwendcode{}\nwbegindocs{101}\nwdocspar
-
+\nwindexdefn{queryEdge}{queryEdge}{NW2ZDXo8-1E2aru-1}\eatline
+\nwidentdefs{\\{{queryEdge}{queryEdge}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NW2ZDXo8-1E2aru-1}\nwendcode{}\nwbegindocs{101}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryUser}{queryUser}{NW2ZDXo8-3isdeu-1}queryUser}(1)}
 \nwenddocs{}\nwbegincode{102}\sublabel{NW2ZDXo8-3isdeu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-3isdeu-1}}}\moddef{Query ridesharing user~{\nwtagstyle{}\subpageref{NW2ZDXo8-3isdeu-1}}}\endmoddef\nwused{\\{NW2ZDXo8-bF3Hn-2}}
 public int[] queryUser(final int rid) throws UserNotFoundException, SQLException \{
@@ -977,6 +995,7 @@ public void addNewRequest(final int[] u) throws DuplicateUserException, SQLExcep
 \nwixlogsorted{i}{{queryCountRequests}{queryCountRequests}}%
 \nwixlogsorted{i}{{queryCountServers}{queryCountServers}}%
 \nwixlogsorted{i}{{queryCountVertices}{queryCountVertices}}%
+\nwixlogsorted{i}{{queryEdge}{queryEdge}}%
 \nwixlogsorted{i}{{queryMBR}{queryMBR}}%
 \nwixlogsorted{i}{{queryQueuedRequests}{queryQueuedRequests}}%
 \nwixlogsorted{i}{{queryRequestArrivalTime}{queryRequestArrivalTime}}%
@@ -1000,6 +1019,7 @@ public void addNewRequest(final int[] u) throws DuplicateUserException, SQLExcep
 \nwixlogsorted{i}{{queryServiceRate}{queryServiceRate}}%
 \nwixlogsorted{i}{{queryStatisticsEdges}{queryStatisticsEdges}}%
 \nwixlogsorted{i}{{queryUser}{queryUser}}%
+\nwixlogsorted{i}{{queryVertex}{queryVertex}}%
 \nwixlogsorted{i}{{RequestCollectionLoop}{RequestCollectionLoop}}%
 \nwixlogsorted{i}{{RequestHandlingLoop}{RequestHandlingLoop}}%
 \nwixlogsorted{i}{{returnRequest}{returnRequest}}%

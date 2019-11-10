@@ -160,23 +160,39 @@ public class Controller {
     this.storage.DBLoadDataModel();
   }
   public void loadRoadNetwork(final String f_rnet)
-  throws FileNotFoundException, DuplicateVertexException, DuplicateEdgeException, SQLException {
+  throws FileNotFoundException, SQLException {
     Scanner sc = new Scanner(new File(f_rnet));
     while (sc.hasNext()) {
       final int col0 = sc.nextInt();
       final int col1 = sc.nextInt();
       final int col2 = sc.nextInt();
-      final int col3 = (col1 == 0 ? 0 : (int) Math.round(sc.nextDouble()*CSHIFT));
-      final int col4 = (col1 == 0 ? 0 : (int) Math.round(sc.nextDouble()*CSHIFT));
-      final int col5 = (col2 == 0 ? 0 : (int) Math.round(sc.nextDouble()*CSHIFT));
-      final int col6 = (col2 == 0 ? 0 : (int) Math.round(sc.nextDouble()*CSHIFT));
-      this.storage.DBAddNewVertex(col1, col3, col4);
-      this.storage.DBAddNewVertex(col2, col5, col6);
+      final int col3 = (col1 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
+      final int col4 = (col1 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
+      final int col5 = (col2 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
+      final int col6 = (col2 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
+      try {
+        this.storage.DBAddNewVertex(col1, col3, col4);
+      } catch (DuplicateVertexException e) {
+        if (DEBUG) {
+          System.out.println("Warning! Duplicate vertex ignored.");
+        }
+      }
+      try {
+        this.storage.DBAddNewVertex(col2, col5, col6);
+      } catch (DuplicateVertexException e) {
+        if (DEBUG) {
+          System.out.println("Warning! Duplicate vertex ignored.");
+        }
+      }
       final int dist = ((col1 != 0 && col2 != 0)
         ? tools.computeHaversine(
               col3/CSHIFT, col4/CSHIFT,
               col5/CSHIFT, col6/CSHIFT) : 0);
-      this.storage.DBAddNewEdge(col1, col2, dist, 10);
+      try {
+        this.storage.DBAddNewEdge(col1, col2, dist, 10);
+      } catch (DuplicateEdgeException e) {
+        System.out.println("Warning! Duplicate edge ignored.");
+      }
     }
     this.tools.registerVertices(this.storage.getReferenceVerticesCache());
     this.tools.registerEdges(this.storage.getReferenceEdgesCache());

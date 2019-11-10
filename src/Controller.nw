@@ -516,7 +516,7 @@ public void loadDataModel() {
 \subsubsection{[[loadRoadNetwork]](1)}
 <<Load road network>>=
 public void loadRoadNetwork(final String f_rnet)
-throws FileNotFoundException, DuplicateVertexException, DuplicateEdgeException, SQLException {
+throws FileNotFoundException, SQLException {
   Scanner sc = new Scanner(new File(f_rnet));
   while (sc.hasNext()) {
     <<..parse a line of the road network>>
@@ -528,19 +528,33 @@ throws FileNotFoundException, DuplicateVertexException, DuplicateEdgeException, 
   this.tools.registerEdges(this.storage.getReferenceEdgesCache());
 }
 @ %def loadRoadNetwork
-If a vertex identifier is $0$, then we store its coordinates as $(0,0)$.
+If a vertex identifier is $0$, then we store its coordinates as $(0,0)$. We
+still call [[Scanner.nextDouble]](0) because we need to advance to the next
+token.
 <<..parse a line of the road network>>=
 final int col0 = sc.nextInt();
 final int col1 = sc.nextInt();
 final int col2 = sc.nextInt();
-final int col3 = (col1 == 0 ? 0 : (int) Math.round(sc.nextDouble()*CSHIFT));
-final int col4 = (col1 == 0 ? 0 : (int) Math.round(sc.nextDouble()*CSHIFT));
-final int col5 = (col2 == 0 ? 0 : (int) Math.round(sc.nextDouble()*CSHIFT));
-final int col6 = (col2 == 0 ? 0 : (int) Math.round(sc.nextDouble()*CSHIFT));
+final int col3 = (col1 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
+final int col4 = (col1 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
+final int col5 = (col2 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
+final int col6 = (col2 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
 @
 <<..insert vertex coordinates>>=
-this.storage.DBAddNewVertex(col1, col3, col4);
-this.storage.DBAddNewVertex(col2, col5, col6);
+try {
+  this.storage.DBAddNewVertex(col1, col3, col4);
+} catch (DuplicateVertexException e) {
+  if (DEBUG) {
+    System.out.println("Warning! Duplicate vertex ignored.");
+  }
+}
+try {
+  this.storage.DBAddNewVertex(col2, col5, col6);
+} catch (DuplicateVertexException e) {
+  if (DEBUG) {
+    System.out.println("Warning! Duplicate vertex ignored.");
+  }
+}
 @
 We use haversine to compute edge weights\footnote{If the distance between two
 vertices is 0 due to rounding, then we round it up to 1.}.  If one of the
@@ -558,7 +572,11 @@ The fifth parameter is the \textit{initial speed} on all the edges \footnote{In
 the future, the speed on each edge may be recorded directly in the road network
 file instead of hardcoded here.}.
 <<..insert edge>>=
-this.storage.DBAddNewEdge(col1, col2, dist, 10);
+try {
+  this.storage.DBAddNewEdge(col1, col2, dist, 10);
+} catch (DuplicateEdgeException e) {
+  System.out.println("Warning! Duplicate edge ignored.");
+}
 @
 
 \subsubsection{[[loadProblem(1)]]}
@@ -680,14 +698,14 @@ public int[] queryAllEdges() throws SQLException {
 public int[] queryVertex(final int v) throws VertexNotFoundException, SQLException {
   return storage.DBQueryVertex(v);
 }
-@
+@ %def queryVertex
 
 \subsubsection{[[queryEdge]](2)}
 <<Query edge>>=
 public int[] queryEdge(final int v1, final int v2) throws EdgeNotFoundException, SQLException {
   return storage.DBQueryEdge(v1, v2);
 }
-@
+@ %def queryEdge
 
 \subsubsection{[[queryUser]](1)}
 <<Query ridesharing user>>=
