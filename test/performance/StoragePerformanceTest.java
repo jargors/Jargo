@@ -10,8 +10,10 @@ import com.github.jargors.exceptions.VertexNotFoundException;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.SQLException;
+import java.io.FileNotFoundException;
 public class StoragePerformanceTest {
-  public static void main(String[] args) {
+  public static void main(String[] args)
+  throws FileNotFoundException, SQLException {
     Tools.Print("Starting storage performance tests");
     try {
       {
@@ -154,8 +156,13 @@ public class StoragePerformanceTest {
         Tools.Print("DBQueryServerRemainingSchedule(2): "+_dur+" ms/call");
         storage.DBCloseInstance();
       }
+    } catch (DuplicateUserException e) {
+    } catch (EdgeNotFoundException e) {
     } catch (SQLException e) {
       Tools.PrintSQLException(e);
+      throw e;
+    } catch (FileNotFoundException e) {
+      throw e;
     }
     Tools.Print("Complete!");
   }

@@ -56,6 +56,7 @@ import com.github.jargors.exceptions.VertexNotFoundException;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.SQLException;
+import java.io.FileNotFoundException;
 \nwendcode{}\nwbegindocs{4}\nwdocspar
 
 \nwenddocs{}\nwbegincode{5}\sublabel{NW3iKWou-490CRJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-490CRJ-1}}}\moddef{\code{}StoragePerformanceTest\edoc{} definition~{\nwtagstyle{}\subpageref{NW3iKWou-490CRJ-1}}}\endmoddef\nwused{\\{NW3iKWou-40YM6y-1}}
@@ -64,12 +65,18 @@ public class StoragePerformanceTest \{
 \}
 \nwendcode{}\nwbegindocs{6}\nwdocspar
 \nwenddocs{}\nwbegincode{7}\sublabel{NW3iKWou-2hjWc8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3iKWou-2hjWc8-1}}}\moddef{\code{}StoragePerformanceTest\edoc{} main routine~{\nwtagstyle{}\subpageref{NW3iKWou-2hjWc8-1}}}\endmoddef\nwused{\\{NW3iKWou-490CRJ-1}}
-public static void main(String[] args) \{
+public static void main(String[] args)
+throws FileNotFoundException, SQLException \{
   Tools.Print("Starting storage performance tests");
   try \{
     \LA{}Load performance tests~{\nwtagstyle{}\subpageref{NW3iKWou-xbUR1-1}}\RA{}
+  \} catch (DuplicateUserException e) \{
+  \} catch (EdgeNotFoundException e) \{
   \} catch (SQLException e) \{
     Tools.PrintSQLException(e);
+    throw e;
+  \} catch (FileNotFoundException e) \{
+    throw e;
   \}
   Tools.Print("Complete!");
 \}
