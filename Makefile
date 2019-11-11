@@ -33,7 +33,7 @@ all : java compile jar tex pdf
 
 java : $(JAVASRCS)
 
-compile : $(CLASSES)
+compile : $(CLASSES) com/github/jargors/Desktop.class
 
 tex : $(TEXSRCS)
 
@@ -44,6 +44,9 @@ $(TEXSRCS) : doc/%.tex : src/%.nw
 	@noweave -delay -index $< > $@
 
 $(CLASSES) : com/github/jargors/%.class: java/%.java
+	@javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:$(CLASSPATH)/* $<
+
+com/github/jargors/Desktop.class : java/Desktop.java
 	@javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:$(CLASSPATH)/* $<
 
 jar : $(CLASSES)
@@ -57,4 +60,4 @@ clean :
 	@latexmk -f -c jargo.tex
 
 purge : clean
-	@rm -rf doc/*.tex java/*.java
+	@rm -rf $(TEXSRCS) $(JAVASRCS)

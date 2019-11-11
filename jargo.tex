@@ -1,4 +1,4 @@
-\documentclass{book}
+\documentclass{report}
 \usepackage{noweb}
 \noweboptions{smallcode,longchunks}
 \usepackage[a4paper,margin=1in]{geometry}
@@ -30,7 +30,17 @@
 \setlength{\abovecaptionskip}{1mm}
 \setlength{\belowcaptionskip}{1mm}
 
-\title{Jargo\footnote{\url{https://github.com/jargors}}}
+\title{
+$
+\begin{array}{l}
+\includegraphics[width=12mm]{res/icon}
+\end{array}
+$
+Jargo\footnote{\url{https://github.com/jargors}}:\\
+\large{\textbf{\textit{Real-time stochastic ridesharing simulator}}\\
+\vspace{2em}
+\small{\textsc{ANNOTATED SOURCE CODE}}}
+}
 \author{James J. Pan\\
   \small{\href{mailto:pan-j16@mails.tsinghua.edu.cn}{pan-j16@mails.tsinghua.edu.cn}}}
 
@@ -38,21 +48,30 @@
 \maketitle
 \pagestyle{noweb}
 
+\renewcommand{\thepage}{\roman{page}}
+\setcounter{page}{1}
+
 \tableofcontents
 
-\chapter{Storage}
+\renewcommand{\thepage}{\arabic{page}}
+\setcounter{page}{1}
+
+\chapter{Introduction}
+\input{doc/0-Introduction.tex}
+\chapter{Class: Storage}
 \input{doc/Storage.tex}
-\chapter{Controller}
+\chapter{Class: Controller}
 \input{doc/Controller.tex}
-\chapter{Communicator}
+\chapter{Class: Communicator}
 \input{doc/Communicator.tex}
-\chapter{Client}
+\chapter{Class: Client}
 \input{doc/Client.tex}
-\chapter{Traffic}
+\chapter{Class: Traffic}
 \input{doc/Traffic.tex}
-\chapter{Tools}
+\chapter{Class: Tools}
 \input{doc/Tools.tex}
-\chapter{DesktopController}
+\chapter{Class: DesktopController}
 \input{doc/DesktopController.tex}
+\chapter{Example: Greedy Insertion}
 
 \end{document}
