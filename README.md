@@ -11,6 +11,7 @@ the `Makefile` for details.
 For those without notangle and noweave, the "woven" `doc/*.tex` and "tangled"
 `java/*.java` codes are provided.
 
+![Screenshot of Jargo Desktop](res/scrot.png)
 
 ### BUILD PREREQUISITES
 *(versions not shown here are unsupported)*
@@ -86,9 +87,9 @@ To delete the java and tex codes in addition to the build objects:
 
 ### LAUNCHING THE GUI
 
-The Jargo GUI can be started using `gui-launcher.sh`.
+The graphical Jargo Desktop can be started using `gui-launcher.sh`.
 
-Prerequisites for running the GUI:
+Prerequisites for running Desktop:
 
 - JavaFX 13+14
 - Apache Derby 10.15.1.3
@@ -100,7 +101,7 @@ Prerequisites for running the GUI:
 - `jargors-GTreeJNI-1.0.0.jar`
 - `libgtree.so`
 
-To start the GUI:
+To start Desktop:
 
 - Verify directory `jar` contains `jargors-1.0.0.jar`.
 - Verify `echo $LD_LIBRARY_PATH` returns a directory that contains `libgtree.so`.
