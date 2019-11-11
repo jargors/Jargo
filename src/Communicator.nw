@@ -1,0 +1,305 @@
+\section{Introduction}
+\label{sec:introduction}
+Jargo's communicator intends to be the sole way for Jargo clients to interact
+with the Jargo simulated world (Figure~\ref{fig:interface-fig}). The
+communicator exposes only the subset of Jargo's storage interface API that a
+client would possibly have access to in the real world, including querying and
+submitting server routes and schedules. The communicator also performs some
+\emph{input validation} on submitted routes to prevent clients from overwriting
+historical traveled routes depending on time of submission.  The communicator
+is developed using the
+Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
+programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
+([[src/Communicator.nw]]) is the source for the documentation
+([[doc/Communicator.tex]]) and the Java code
+([[Communicator.java]])\footnote{See the [[Makefile]] for build details.}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=150mm]{src/fig/interface-fig}
+\caption{Communicator within the Jargo stack.}
+\label{fig:interface-fig}
+\end{figure}
+
+\section{Implementation Overview}
+\label{sec:implementation-overview}
+<<Communicator.java>>=
+<<Communicator.java preamble>>
+<<[[Communicator]] definition>>
+@
+
+\subsection{Preamble}
+\label{sec:preamble}
+The preamble declares the package and imports dependencies.
+<<Communicator.java preamble>>=
+package com.github.jargors;
+@
+<<Communicator.java preamble>>=
+import com.github.jargors.Storage;
+import com.github.jargors.Controller;
+import com.github.jargors.exceptions.ClientException;
+import com.github.jargors.exceptions.ClientFatalException;
+import com.github.jargors.exceptions.DuplicateVertexException;
+import com.github.jargors.exceptions.DuplicateEdgeException;
+import com.github.jargors.exceptions.DuplicateUserException;
+import com.github.jargors.exceptions.EdgeNotFoundException;
+import com.github.jargors.exceptions.UserNotFoundException;
+import com.github.jargors.exceptions.VertexNotFoundException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.sql.SQLException;
+@
+
+\subsection{Class Definition}
+\label{sec:class-definition}
+<<[[Communicator]] definition>>=
+public class Communicator {
+  <<[[Communicator]] member variables>>
+  <<[[Communicator]] constructor>>
+  <<[[Communicator]] public methods>>
+}
+@
+
+\subsection{Member Variables}
+\label{sec:member-variables}
+<<[[Communicator]] member variables>>=
+private Storage storage;
+private Controller controller;
+private int world_time = 0;
+private final boolean DEBUG = "true".equals(System.getProperty("jargors.communicator.debug"));
+@ %def this.storage controller world_time DEBUG
+
+\subsection{Constructor}
+\label{sec:constructor}
+<<[[Communicator]] constructor>>=
+public Communicator() { }
+@
+
+\section{Public Methods}
+\label{sec:public-methods}
+\hi{General Methods.}
+<<[[Communicator]] public methods>>=
+<<Register storage>>
+<<Register controller>>
+<<Set/get simulation world time>>
+<<Get reference to vertices cache>>
+<<Get reference to edges cache>>
+<<Get reference to users cache>>
+<<Return request to queue>>
+@
+\hi{Write Methods.}
+<<[[Communicator]] public methods>>=
+<<Update server route>>
+<<Update server add to schedule>>
+<<Update server remove from schedule>>
+@
+\hi{Read Methods.}
+<<[[Communicator]] public methods>>=
+<<Query vertex>>
+<<Query edge>>
+<<Query ridesharing user>>
+<<Query active server locations>>
+<<Query routes>>
+<<Query schedules>>
+<<Query remaining distance>>
+<<Query remaining duration>>
+<<Query max load>>
+@
+
+\subsection{General Methods}
+\label{sec:general-methods}
+
+\subsubsection{[[registerStorage]](1)}
+<<Register storage>>=
+public void registerStorage(final Storage src) {
+  this.storage = src;
+}
+@ %def setStorage
+
+\subsubsection{[[registerController]](1)}
+<<Register controller>>=
+public void registerController(final Controller src) {
+  this.controller = src;
+}
+@ %def setController
+
+\subsubsection{[[setSimulationWorldTime]](1)}
+We depend on the controller to tell the simulation interface about the current
+world time.
+<<Set/get simulation world time>>=
+public void setSimulationWorldTime(final int t) {
+  this.world_time = t;
+}
+@ %def setSimulationWorldTime
+
+\subsubsection{[[getSimulationWorldTime]](0)}
+<<Set/get simulation world time>>=
+public int getSimulationWorldTime() {
+  return this.world_time;
+}
+@ %def getSimulationWorldTime
+
+\subsubsection{[[getReferenceVerticesCache]](0)}
+<<Get reference to vertices cache>>=
+public final ConcurrentHashMap<Integer, int[]> getReferenceVerticesCache() {
+  return this.storage.getReferenceVerticesCache();
+}
+@ %def getReferenceVerticesCache
+
+\subsubsection{[[getReferenceEdgesCache]](0)}
+<<Get reference to edges cache>>=
+public final ConcurrentHashMap<Integer,
+    ConcurrentHashMap<Integer, int[]>> getReferenceEdgesCache() {
+  return this.storage.getReferenceEdgesCache();
+}
+@ %def getReferenceEdgesCache
+
+\subsubsection{[[getReferenceUsersCache]](0)}
+<<Get reference to users cache>>=
+public final ConcurrentHashMap<Integer, int[]> getReferenceUsersCache() {
+  return this.storage.getReferenceUsersCache();
+}
+@ %def getReferenceUsersCache
+
+\subsubsection{[[returnRequest]](1)}
+<<Return request to queue>>=
+public void returnRequest(final int rid) {
+  this.controller.returnRequest(rid);
+}
+@ %def returnRequest
+
+\subsection{Write Methods}
+\label{sec:write-methods}
+
+\subsubsection{[[updateServerRoute]](3)}
+<<Update server route>>=
+public boolean updateServerRoute(final int sid, final int[] route, final int[] sched)
+throws UserNotFoundException, EdgeNotFoundException, SQLException {
+  boolean success = false;
+  if (route[0] >= this.world_time) {
+    this.storage.DBUpdateServerRoute(sid, route, sched);
+    success = true;
+  }
+  return success;
+}
+@ %def updateServerRoute
+
+\subsubsection{[[updateServerAddToSchedule]](4)}
+<<Update server add to schedule>>=
+public boolean updateServerAddToSchedule(
+    final int sid, final int[] route, final int[] sched, final int[] rid)
+throws UserNotFoundException, EdgeNotFoundException, SQLException {
+  final int t = this.world_time;
+  final int[] current = this.storage.DBQueryServerRoute(sid);
+  int i = 0;
+  while (i < current.length && current[i] != route[0]) {
+    i += 2;
+  }
+  if (i == current.length) {
+    // branch point not found
+    return false;
+  }
+  int j = 0;
+  while (i < current.length && (current[i] <= t && current[(i + 1)] != 0)) {
+    if (current[i] != route[j] || current[(i + 1)] != route[(j + 1)]) {
+      // overwrite history occurred
+      return false;
+    }
+    i += 2;
+    j += 2;
+  }
+  this.storage.DBUpdateServerAddToSchedule(sid, route, sched, rid);
+  return true;
+}
+@ %def updateServerAddToSchedule
+
+\subsubsection{[[updateServerRemoveFromSchedule]](4)}
+<<Update server remove from schedule>>=
+public boolean updateServerRemoveFromSchedule(
+    final int sid, final int[] route, final int[] sched, final int[] rid)
+throws UserNotFoundException, EdgeNotFoundException, SQLException {
+  boolean success = false;
+  if (route[0] >= this.world_time) {
+    this.storage.DBUpdateServerRemoveFromSchedule(sid, route, sched, rid);
+  }
+  return success;
+}
+@ %def updateServerRemoveFromSchedule
+
+\subsection{Read Methods}
+\label{sec:read-methods}
+
+\subsubsection{[[queryVertex]](1)}
+<<Query vertex>>=
+public int[] queryVertex(final int v) throws VertexNotFoundException {
+  return this.storage.DBQueryVertex(v);
+}
+@ %def queryVertex
+
+\subsubsection{[[queryEdge]](2)}
+<<Query edge>>=
+public int[] queryEdge(final int v1, final int v2) throws EdgeNotFoundException {
+  return this.storage.DBQueryEdge(v1, v2);
+}
+@ %def queryEdge
+
+\subsubsection{[[queryUser]](1)}
+<<Query ridesharing user>>=
+public int[] queryUser(final int uid) throws UserNotFoundException {
+  return this.storage.DBQueryUser(uid);
+}
+@ %def queryUser
+
+\subsubsection{[[queryServerLocationsActive]](1)}
+<<Query active server locations>>=
+public int[] queryServerLocationsActive(final int t) throws SQLException {
+  return this.storage.DBQueryServerLocationsActive(t);
+}
+@ %def queryServerLocationsActive
+
+\subsubsection{[[queryServerRemainingRoute]](2)}
+<<Query routes>>=
+public int[] queryServerRemainingRoute(final int sid, final int t) throws SQLException {
+  return this.storage.DBQueryServerRemainingRoute(sid, t);
+}
+@ %def queryServerRemainingRoute
+
+\subsubsection{[[queryServerRemainingSchedule]](2)}
+<<Query schedules>>=
+public int[] queryServerRemainingSchedule(final int sid, final int t) throws SQLException {
+  return this.storage.DBQueryServerRemainingSchedule(sid, t);
+}
+@ %def queryServerRemainingSchedule
+
+<<Query remaining distance>>=
+public int[] queryServerRemainingDistance(final int sid, final int t) throws SQLException {
+  return this.storage.DBQueryServerRemainingDistance(sid, t);
+}
+@ %def queryServerRemainingDistance
+
+<<Query remaining duration>>=
+public int[] queryServerRemainingDuration(final int sid, final int t) throws SQLException {
+  return this.storage.DBQueryServerRemainingDuration(sid, t);
+}
+@ %def queryServerRemainingDuration
+
+\subsubsection{[[queryServerMaxLoad]](2)}
+<<Query max load>>=
+public int[] queryServerMaxLoad(final int sid, final int t) throws SQLException {
+  return this.storage.DBQueryServerMaxLoad(sid, t);
+}
+@ %def queryServerMaxLoad
+
+\section{Private Methods}
+\label{sec:private-methods}
+
+\appendix
+
+\section{Appendix: List of Chunks}
+\label{ap:list-of-chunks}
+\nowebchunks
+
+\section{Appendix: List of Identifiers}
+\label{ap:list-of-identifiers}
+\nowebindex
+
