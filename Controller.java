@@ -11,6 +11,9 @@ import com.github.jargors.exceptions.DuplicateUserException;
 import com.github.jargors.exceptions.EdgeNotFoundException;
 import com.github.jargors.exceptions.UserNotFoundException;
 import com.github.jargors.exceptions.VertexNotFoundException;
+import com.github.jargors.exceptions.GtreeNotLoadedException;
+import com.github.jargors.exceptions.GtreeIllegalSourceException;
+import com.github.jargors.exceptions.GtreeIllegalTargetException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -136,7 +139,7 @@ public class Controller {
   }
   public void setClient(final Client target) {
     this.client = target;
-    this.client.setCommunicator(this.communicator);
+    this.client.registerCommunicator(this.communicator);
   }
   public void setInitialWorldTime(final int t) {
     this.initial_world_time = t;
@@ -203,7 +206,8 @@ public class Controller {
     this.tools.registerEdges(this.storage.getReferenceEdgesCache());
   }
   public void loadProblem(String p)
-  throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException, SQLException {
+  throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException, SQLException,
+         GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException {
     Scanner sc = new Scanner(new File(p));
     for (int i = 0; i < 6; i++) {
       sc.nextLine();
@@ -223,7 +227,7 @@ public class Controller {
       }
     }
   }
-  public void loadGTree(String p) {
+  public void loadGTree(String p) throws FileNotFoundException {
     this.tools.loadGTree(p);
   }
   public void start(final Consumer app_cb) {
@@ -374,7 +378,8 @@ public class Controller {
     return storage.DBQueryServerArrivalTime(sid);
   }
   public void addNewServer(final int[] u)
-  throws DuplicateUserException, EdgeNotFoundException, SQLException {
+  throws DuplicateUserException, EdgeNotFoundException, SQLException,
+         GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException {
     this.storage.DBAddNewServer(u, this.tools.computeRoute(u[4], u[5], u[2]));
   }
   public void addNewRequest(final int[] u) throws DuplicateUserException, SQLException {

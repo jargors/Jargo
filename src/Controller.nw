@@ -1,37 +1,3 @@
-\documentclass{article}
-
-\usepackage{noweb}
-\noweboptions{smallcode,longchunks}
-\usepackage[a4paper,margin=1in]{geometry}
-\usepackage{booktabs}
-\usepackage{caption}
-\usepackage{colortbl}
-\usepackage[colorlinks=true]{hyperref}
-\usepackage{graphicx}
-
-\newcommand{\hi}[1]{\noindent {\bf #1}}     % Define a handy paragraph opener
-
-\def\nwendcode{\endtrivlist \endgroup}      % Remove noweb page break penalty
-\let\nwdocspar=\par
-
-\definecolor{TableTitle}{rgb}{0.900, 0.900, 0.900}  % Define colors for tables
-\definecolor{TableHeader}{rgb}{0.900, 0.900, 0.900}
-
-\captionsetup{labelfont={bf},textfont={bf,it}}
-\setlength{\abovecaptionskip}{1mm}
-\setlength{\belowcaptionskip}{1mm}
-
-\title{Jargo Simulation Controller\footnote{
-  \url{https://github.com/jargors/Controller}}}
-\author{James J. Pan\\
-  \small{\href{mailto:pan-j16@mails.tsinghua.edu.cn}{pan-j16@mails.tsinghua.edu.cn}}}
-
-\begin{document}
-\maketitle
-\pagestyle{noweb}
-
-\tableofcontents
-
 \section{Introduction}
 \label{sec:introduction}
 The simulation controller is intended to be the sole interface for an
@@ -83,6 +49,9 @@ import com.github.jargors.exceptions.DuplicateUserException;
 import com.github.jargors.exceptions.EdgeNotFoundException;
 import com.github.jargors.exceptions.UserNotFoundException;
 import com.github.jargors.exceptions.VertexNotFoundException;
+import com.github.jargors.exceptions.GtreeNotLoadedException;
+import com.github.jargors.exceptions.GtreeIllegalSourceException;
+import com.github.jargors.exceptions.GtreeIllegalTargetException;
 @ \item standard utilities for concurrent execution;
 <<Controller.java preamble>>=
 import java.util.concurrent.CompletableFuture;
@@ -455,7 +424,7 @@ public void closeInstance() throws SQLException {
 <<Set client>>=
 public void setClient(final Client target) {
   this.client = target;
-  this.client.setCommunicator(this.communicator);
+  this.client.registerCommunicator(this.communicator);
 }
 @ %def setClient
 
@@ -587,7 +556,8 @@ try {
 \subsubsection{[[loadProblem(1)]]}
 <<Load problem>>=
 public void loadProblem(String p)
-throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException, SQLException {
+throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException, SQLException,
+       GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException {
   Scanner sc = new Scanner(new File(p));
   <<..skip header rows>>
   while (sc.hasNext()) {
@@ -614,7 +584,7 @@ for (int i = 0; i < 6; i++) {
 
 \subsubsection{[[loadGTree]](1)}
 <<Load GTree>>=
-public void loadGTree(String p) {
+public void loadGTree(String p) throws FileNotFoundException {
   this.tools.loadGTree(p);
 }
 @ %def loadGTree
@@ -912,7 +882,8 @@ public int[] queryServerArrivalTime(final int sid) throws SQLException {
 \subsubsection{[[addNewServer]](1)}
 <<Add new server>>=
 public void addNewServer(final int[] u)
-throws DuplicateUserException, EdgeNotFoundException, SQLException {
+throws DuplicateUserException, EdgeNotFoundException, SQLException,
+       GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException {
   this.storage.DBAddNewServer(u, this.tools.computeRoute(u[4], u[5], u[2]));
 }
 @ %def addNewServer
@@ -933,7 +904,3 @@ public void addNewRequest(final int[] u) throws DuplicateUserException, SQLExcep
 \section{Appendix: List of Identifiers}
 \label{ap:list-of-identifiers}
 \nowebindex
-
-\end{document}
-
-
