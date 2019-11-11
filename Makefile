@@ -49,7 +49,7 @@ $(CLASSES) : com/github/jargors/%.class: java/%.java
 com/github/jargors/Desktop.class : java/Desktop.java
 	@javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:$(CLASSPATH)/* $<
 
-jar : $(CLASSES)
+jar : $(CLASSES) com/github/jargors/Desktop.class
 	@jar cvf jar/jargors-$(VERSION).jar com
 
 pdf : $(TEXSRCS)
