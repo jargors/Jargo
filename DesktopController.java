@@ -1,8 +1,10 @@
 package com.github.jargors;
 import com.github.jargors.Controller;
 import com.github.jargors.Client;
+import com.github.jargors.exceptions.*;
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.concurrent.CompletableFuture;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -74,7 +76,12 @@ public class DesktopController {
     this.lbl_status.setText("Create new Jargo instance...");
     CompletableFuture.runAsync(() -> {
       this.controller = new Controller();
-      this.controller.createNewInstance();
+      try {
+        this.controller.createNewInstance();
+      } catch (SQLException se) {
+        System.err.println("Could not create new instance");
+        System.exit(1);
+      }
       this.controller.loadDataModel();
       this.db = "no-name";
       Platform.runLater(() -> {
@@ -102,23 +109,28 @@ public class DesktopController {
       this.circ_status.setFill(C_WARN);
       this.lbl_status.setText("Load '"+this.db+"'...");
       CompletableFuture.runAsync(() -> {
-        this.controller = new Controller();
-        this.controller.loadBackup(this.db);
-        int nv = this.controller.queryCountVertices()[0];
-        int ne = this.controller.queryCountEdges()[0];
-        Platform.runLater(() -> {
-          this.btn_prob     .setDisable(true);
-          this.btn_road     .setDisable(true);
-          this.btn_gtree    .setDisable(false);
-          this.btn_client   .setDisable(false);
-          this.btn_stop     .setDisable(false);
-          this.tf_class     .setDisable(false);
-          this.tf_t0        .setDisable(false);
-          this.tf_t1        .setDisable(false);
-          this.circ_status.setFill(C_SUCCESS);
-          this.lbl_status.setText("Loaded Jargo instance (#vertices="+nv+"; #edges="+ne+")");
-          this.drawRoadNetwork();
-        });
+        try {
+          this.controller = new Controller();
+          this.controller.loadBackup(this.db);
+          int nv = this.controller.queryCountVertices()[0];
+          int ne = this.controller.queryCountEdges()[0];
+          Platform.runLater(() -> {
+            this.btn_prob     .setDisable(true);
+            this.btn_road     .setDisable(true);
+            this.btn_gtree    .setDisable(false);
+            this.btn_client   .setDisable(false);
+            this.btn_stop     .setDisable(false);
+            this.tf_class     .setDisable(false);
+            this.tf_t0        .setDisable(false);
+            this.tf_t1        .setDisable(false);
+            this.circ_status.setFill(C_SUCCESS);
+            this.lbl_status.setText("Loaded Jargo instance (#vertices="+nv+"; #edges="+ne+")");
+            this.drawRoadNetwork();
+          });
+        } catch (SQLException se) {
+          System.err.println("Failed");
+          return;
+        }
       });
     } else {
       this.btn_new      .setDisable(false);
@@ -132,22 +144,27 @@ public class DesktopController {
       this.circ_status.setFill(C_WARN);
       this.lbl_status.setText("Close '"+this.db+"'...");
       CompletableFuture.runAsync(() -> {
-        this.controller.closeInstance();
-        Platform.runLater(() -> {
-          this.btn_new      .setDisable(false);
-          this.btn_load     .setDisable(false);
-          this.btn_stop     .setDisable(false);
-          this.btn_prob     .setDisable(true);
-          this.btn_road     .setDisable(true);
-          this.btn_gtree    .setDisable(true);
-          this.btn_client   .setDisable(true);
-          this.tf_class     .setDisable(true);
-          this.tf_t0        .setDisable(true);
-          this.tf_t1        .setDisable(true);
-          this.container_canvas.setContent(null);
-          this.circ_status.setFill(C_SUCCESS);
-          this.lbl_status.setText("Closed instance.");
-        });
+        try {
+          this.controller.closeInstance();
+          Platform.runLater(() -> {
+            this.btn_new      .setDisable(false);
+            this.btn_load     .setDisable(false);
+            this.btn_stop     .setDisable(false);
+            this.btn_prob     .setDisable(true);
+            this.btn_road     .setDisable(true);
+            this.btn_gtree    .setDisable(true);
+            this.btn_client   .setDisable(true);
+            this.tf_class     .setDisable(true);
+            this.tf_t0        .setDisable(true);
+            this.tf_t1        .setDisable(true);
+            this.container_canvas.setContent(null);
+            this.circ_status.setFill(C_SUCCESS);
+            this.lbl_status.setText("Closed instance.");
+          });
+        } catch (SQLException se) {
+          System.err.println("Failure");
+          System.exit(1);
+        }
       });
     } else {
       this.lbl_status.setText("Ready.");
@@ -174,28 +191,36 @@ public class DesktopController {
   }
 
   private void drawRoadNetwork() {
-    this.edges    = this.controller.queryAllEdges();
-    this.mbr      = this.controller.queryMBR();
+    try {
+      this.edges    = this.controller.queryAllEdges();
+      this.mbr      = this.controller.queryMBR();
 
-    this.can_road = new Canvas(this.window_width, this.window_height);
-    this.xunit    = this.can_road.getWidth() /(double) (this.mbr[1] - this.mbr[0]);
-    this.yunit    = this.can_road.getHeight()/(double) (this.mbr[3] - this.mbr[2]);
-    double unit   = Math.min(xunit, yunit);
+      this.can_road = new Canvas(this.window_width, this.window_height);
+      this.xunit    = this.can_road.getWidth() /(double) (this.mbr[1] - this.mbr[0]);
+      this.yunit    = this.can_road.getHeight()/(double) (this.mbr[3] - this.mbr[2]);
+      double unit   = Math.min(xunit, yunit);
 
-    this.gc = this.can_road.getGraphicsContext2D();
-    this.gc.setLineWidth(0.1);
-    this.gc.setStroke(Color.BLUE);
-    for (int i = 0; i < (this.edges.length - 3); i += 4) {
-      if (this.edges[(i + 0)] != 0 && this.edges[(i + 1)] != 0) {
-        int[] v1 = this.controller.queryVertex(this.edges[(i + 0)]);
-        int[] v2 = this.controller.queryVertex(this.edges[(i + 1)]);
-        this.gc.strokeLine(unit*(v1[0] - this.mbr[0]), unit*(v1[1] - this.mbr[2]),
-                           unit*(v2[0] - this.mbr[0]), unit*(v2[1] - this.mbr[2]));
+      this.gc = this.can_road.getGraphicsContext2D();
+      this.gc.setLineWidth(0.1);
+      this.gc.setStroke(Color.BLUE);
+      for (int i = 0; i < (this.edges.length - 3); i += 4) {
+        if (this.edges[(i + 0)] != 0 && this.edges[(i + 1)] != 0) {
+          int[] v1 = this.controller.queryVertex(this.edges[(i + 0)]);
+          int[] v2 = this.controller.queryVertex(this.edges[(i + 1)]);
+          this.gc.strokeLine(unit*(v1[0] - this.mbr[0]), unit*(v1[1] - this.mbr[2]),
+                             unit*(v2[0] - this.mbr[0]), unit*(v2[1] - this.mbr[2]));
+        }
       }
+      this.container_canvas.setContent(this.can_road);
+      this.can_road.setOnMousePressed((e) -> { actionRecordMousePress(e); });
+      this.can_road.setOnMouseDragged((e) -> { actionTranslateCanvas(e); });
+    } catch (SQLException se) {
+      System.err.println("Failed");
+      return;
+    } catch (VertexNotFoundException ve) {
+      System.err.println("Failed");
+      return;
     }
-    this.container_canvas.setContent(this.can_road);
-    this.can_road.setOnMousePressed((e) -> { actionRecordMousePress(e); });
-    this.can_road.setOnMouseDragged((e) -> { actionTranslateCanvas(e); });
   }
   public void initialize() { }
 }
