@@ -1,0 +1,162 @@
+\documentclass{article}
+
+\usepackage{noweb}
+\noweboptions{smallcode,longchunks}
+
+\usepackage[a4paper,margin=1in]{geometry}
+
+\usepackage{colortbl}
+\usepackage[colorlinks=true]{hyperref}
+\usepackage{tikz}
+
+% Define a handy paragraph opener
+\newcommand{\hi}[1]{\noindent {\bf #1}}
+
+% Remove noweb page break penalty
+\def\nwendcode{\endtrivlist \endgroup}
+\let\nwdocspar=\par
+
+\title{Jargo Distance Utilities\footnote{\url{https://github.com/jargors/Distance-Utilities}}}
+\author{James J. Pan\\
+  \small{\href{mailto:pan-j16@mails.tsinghua.edu.cn}{pan-j16@mails.tsinghua.edu.cn}}
+}
+
+\begin{document}
+\maketitle
+\pagestyle{noweb}
+
+\tableofcontents
+
+\section{Introduction}
+\label{sec:introduction}
+
+\section{Implementation Overview}
+\nwfilename{src/DistanceUtilities.nw}\nwbegincode{1}\sublabel{NW4CyoaY-1j4DS0-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4CyoaY-1j4DS0-1}}}\moddef{DistanceUtilities.java~{\nwtagstyle{}\subpageref{NW4CyoaY-1j4DS0-1}}}\endmoddef\nwnotused{DistanceUtilities.java}
+  \LA{}DistanceUtilities.java preamble~{\nwtagstyle{}\subpageref{NW4CyoaY-2W5PIO-1}}\RA{}
+  \LA{}\code{}DistanceUtilities\edoc{} definition~{\nwtagstyle{}\subpageref{NW4CyoaY-2DxtOO-1}}\RA{}
+\nwendcode{}\nwbegindocs{2}\nwdocspar
+
+\nwenddocs{}\nwbegincode{3}\sublabel{NW4CyoaY-2W5PIO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4CyoaY-2W5PIO-1}}}\moddef{DistanceUtilities.java preamble~{\nwtagstyle{}\subpageref{NW4CyoaY-2W5PIO-1}}}\endmoddef\nwused{\\{NW4CyoaY-1j4DS0-1}}
+package com.github.jargors;
+import com.github.jargors.gtreeJNI.*;
+\nwendcode{}\nwbegindocs{4}\nwdocspar
+\nwenddocs{}\nwbegincode{5}\sublabel{NW4CyoaY-2DxtOO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4CyoaY-2DxtOO-1}}}\moddef{\code{}DistanceUtilities\edoc{} definition~{\nwtagstyle{}\subpageref{NW4CyoaY-2DxtOO-1}}}\endmoddef\nwused{\\{NW4CyoaY-1j4DS0-1}}
+public class DistanceUtilities \{
+  \LA{}Member variables~{\nwtagstyle{}\subpageref{NW4CyoaY-aPohW-1}}\RA{}
+  \LA{}Constructor~{\nwtagstyle{}\subpageref{NW4CyoaY-4exbaU-1}}\RA{}
+  \LA{}Public methods~{\nwtagstyle{}\subpageref{NW4CyoaY-1eKCCy-1}}\RA{}
+\}
+\nwendcode{}\nwbegindocs{6}\nwdocspar
+
+\nwenddocs{}\nwbegincode{7}\sublabel{NW4CyoaY-aPohW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4CyoaY-aPohW-1}}}\moddef{Member variables~{\nwtagstyle{}\subpageref{NW4CyoaY-aPohW-1}}}\endmoddef\nwused{\\{NW4CyoaY-2DxtOO-1}}
+private G_Tree gtree;
+\nwendcode{}\nwbegindocs{8}\nwdocspar
+
+\nwenddocs{}\nwbegincode{9}\sublabel{NW4CyoaY-4exbaU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4CyoaY-4exbaU-1}}}\moddef{Constructor~{\nwtagstyle{}\subpageref{NW4CyoaY-4exbaU-1}}}\endmoddef\nwused{\\{NW4CyoaY-2DxtOO-1}}
+public DistanceUtilities() \{ \}
+\nwendcode{}\nwbegindocs{10}\nwdocspar
+
+\section{Public Methods}
+\nwenddocs{}\nwbegincode{11}\sublabel{NW4CyoaY-1eKCCy-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4CyoaY-1eKCCy-1}}}\moddef{Public methods~{\nwtagstyle{}\subpageref{NW4CyoaY-1eKCCy-1}}}\endmoddef\nwused{\\{NW4CyoaY-2DxtOO-1}}
+  \LA{}Load GTree~{\nwtagstyle{}\subpageref{NW4CyoaY-b7Jka-1}}\RA{}
+  \LA{}Compute haversine~{\nwtagstyle{}\subpageref{NW4CyoaY-1XfngC-1}}\RA{}
+  \LA{}Compute shortest path~{\nwtagstyle{}\subpageref{NW4CyoaY-1XAjSF-1}}\RA{}
+  \LA{}Compute shortest path distance~{\nwtagstyle{}\subpageref{NW4CyoaY-1A9hi2-1}}\RA{}
+\nwendcode{}\nwbegindocs{12}\nwdocspar
+
+\subsection{{\tt{}\protect\nosublabel{NW4CyoaY-1eKCCy-1-u4}\protect\nwindexuse{loadGTree}{loadGTree}{NW4CyoaY-b7Jka-1}loadGTree}(1)}
+The {\tt{}gtreeJNI.load}(1) method can do strange things if {\tt{}f{\char95}gtree} is empty,
+so we do some basic validation here before proceeding.
+\nwenddocs{}\nwbegincode{13}\sublabel{NW4CyoaY-b7Jka-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4CyoaY-b7Jka-1}}}\moddef{Load GTree~{\nwtagstyle{}\subpageref{NW4CyoaY-b7Jka-1}}}\endmoddef\nwused{\\{NW4CyoaY-1eKCCy-1}}
+public void loadGTree(String p) \{
+  try \{
+    System.loadLibrary("gtree");
+  \} catch (UnsatisfiedLinkError e) \{
+    System.err.println("Native code library failed to load: "+e);
+    System.exit(1);
+  \}
+  if (p.length() > 0) \{
+    gtreeJNI.load(p);
+    gtree = gtreeJNI.get();
+  \} else \{
+    System.out.println("Bad path to gtree");
+  \}
+\}
+\nwindexdefn{loadGTree}{loadGTree}{NW4CyoaY-b7Jka-1}\eatline
+\nwidentdefs{\\{{loadGTree}{loadGTree}}}\nwendcode{}\nwbegindocs{14}\nwdocspar
+\subsection{{\tt{}\protect\nwindexuse{computeHaversine}{computeHaversine}{NW4CyoaY-1XfngC-1}computeHaversine}(4)}
+Most of this code is Copyright 2017 Juliano Macedo and is licensed under the
+MIT License. It has been modified from its original form.
+\nwenddocs{}\nwbegincode{15}\sublabel{NW4CyoaY-1XfngC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4CyoaY-1XfngC-1}}}\moddef{Compute haversine~{\nwtagstyle{}\subpageref{NW4CyoaY-1XfngC-1}}}\endmoddef\nwused{\\{NW4CyoaY-1eKCCy-1}}
+public int computeHaversine(double lng1, double lat1, double lng2, double lat2) \{
+  double dlat = Math.toRadians(lat2 - lat1);
+  double dlng = Math.toRadians(lng2 - lng1);
+  double rlat1 = Math.toRadians(lat1);
+  double rlat2 = Math.toRadians(lat2);
+  double a = Math.pow(Math.sin(dlat / 2), 2)
+    + Math.pow(Math.sin(dlng / 2), 2)
+    * Math.cos(rlat1) * Math.cos(rlat2);
+  double c = 2 * Math.asin(Math.sqrt(a));
+  int d = (int) Math.round(c * 6371000);
+  \LA{}..round to nearest meter~{\nwtagstyle{}\subpageref{NW4CyoaY-1p0YRJ-1}}\RA{}
+  return d;
+\}
+\nosublabel{NW4CyoaY-1XfngC-1-u1}\nwindexdefn{computeHaversine}{computeHaversine}{NW4CyoaY-1XfngC-1}\eatline
+\nwidentdefs{\\{{computeHaversine}{computeHaversine}}}\nwendcode{}\nwbegindocs{16}If the nearest meter is 0 and the two points are not equal, then the distance
+is rounded up to 1 meter.
+\nwenddocs{}\nwbegincode{17}\sublabel{NW4CyoaY-1p0YRJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4CyoaY-1p0YRJ-1}}}\moddef{..round to nearest meter~{\nwtagstyle{}\subpageref{NW4CyoaY-1p0YRJ-1}}}\endmoddef\nwused{\\{NW4CyoaY-1XfngC-1}}
+if (d == 0 && (lng1 != lng2 || lat1 != lat2)) \{
+  d = 1;
+\}
+\nwendcode{}\nwbegindocs{18}\nwdocspar
+
+\nwenddocs{}\nwbegincode{19}\sublabel{NW4CyoaY-1XAjSF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4CyoaY-1XAjSF-1}}}\moddef{Compute shortest path~{\nwtagstyle{}\subpageref{NW4CyoaY-1XAjSF-1}}}\endmoddef\nwused{\\{NW4CyoaY-1eKCCy-1}}
+public int[] computeShortestPath(int u, int v) \{
+  IntVector path = null;
+  int[] output = null;
+  gtree.find_path(u, v, path);
+  if (path != null) \{
+    output = new int[path.size()];
+    for (int i = 0; i < path.size(); i++) \{
+      output[i] = path.get(i);
+    \}
+  \}
+  return output;
+\}
+\nwindexdefn{computeShortestPath}{computeShortestPath}{NW4CyoaY-1XAjSF-1}\eatline
+\nwidentdefs{\\{{computeShortestPath}{computeShortestPath}}}\nwendcode{}\nwbegindocs{20}\nwdocspar
+\nwenddocs{}\nwbegincode{21}\sublabel{NW4CyoaY-1A9hi2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4CyoaY-1A9hi2-1}}}\moddef{Compute shortest path distance~{\nwtagstyle{}\subpageref{NW4CyoaY-1A9hi2-1}}}\endmoddef\nwused{\\{NW4CyoaY-1eKCCy-1}}
+public int computeShortestPathDistance(int u, int v) \{
+  return gtree.search(u, v);
+\}
+\nwendcode{}
+
+\nwixlogsorted{c}{{..round to nearest meter}{NW4CyoaY-1p0YRJ-1}{\nwixu{NW4CyoaY-1XfngC-1}\nwixd{NW4CyoaY-1p0YRJ-1}}}%
+\nwixlogsorted{c}{{\code{}DistanceUtilities\edoc{} definition}{NW4CyoaY-2DxtOO-1}{\nwixu{NW4CyoaY-1j4DS0-1}\nwixd{NW4CyoaY-2DxtOO-1}}}%
+\nwixlogsorted{c}{{Compute haversine}{NW4CyoaY-1XfngC-1}{\nwixu{NW4CyoaY-1eKCCy-1}\nwixd{NW4CyoaY-1XfngC-1}}}%
+\nwixlogsorted{c}{{Compute shortest path}{NW4CyoaY-1XAjSF-1}{\nwixu{NW4CyoaY-1eKCCy-1}\nwixd{NW4CyoaY-1XAjSF-1}}}%
+\nwixlogsorted{c}{{Compute shortest path distance}{NW4CyoaY-1A9hi2-1}{\nwixu{NW4CyoaY-1eKCCy-1}\nwixd{NW4CyoaY-1A9hi2-1}}}%
+\nwixlogsorted{c}{{Constructor}{NW4CyoaY-4exbaU-1}{\nwixu{NW4CyoaY-2DxtOO-1}\nwixd{NW4CyoaY-4exbaU-1}}}%
+\nwixlogsorted{c}{{DistanceUtilities.java}{NW4CyoaY-1j4DS0-1}{\nwixd{NW4CyoaY-1j4DS0-1}}}%
+\nwixlogsorted{c}{{DistanceUtilities.java preamble}{NW4CyoaY-2W5PIO-1}{\nwixu{NW4CyoaY-1j4DS0-1}\nwixd{NW4CyoaY-2W5PIO-1}}}%
+\nwixlogsorted{c}{{Load GTree}{NW4CyoaY-b7Jka-1}{\nwixu{NW4CyoaY-1eKCCy-1}\nwixd{NW4CyoaY-b7Jka-1}}}%
+\nwixlogsorted{c}{{Member variables}{NW4CyoaY-aPohW-1}{\nwixu{NW4CyoaY-2DxtOO-1}\nwixd{NW4CyoaY-aPohW-1}}}%
+\nwixlogsorted{c}{{Public methods}{NW4CyoaY-1eKCCy-1}{\nwixu{NW4CyoaY-2DxtOO-1}\nwixd{NW4CyoaY-1eKCCy-1}}}%
+\nwixlogsorted{i}{{computeHaversine}{computeHaversine}}%
+\nwixlogsorted{i}{{computeShortestPath}{computeShortestPath}}%
+\nwixlogsorted{i}{{loadGTree}{loadGTree}}%
+\nwbegindocs{22}\nwdocspar
+
+\appendix
+
+\section{Appendix: List of Chunks}
+\label{ap:list-of-chunks}
+\nowebchunks
+
+\section{Appendix: List of Identifiers}
+\label{ap:list-of-identifiers}
+\nowebindex
+
+\end{document}
+
+\nwenddocs{}
