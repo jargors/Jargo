@@ -5,5 +5,5 @@ java \
     -Xmx6g \
     -Djava.library.path=$LD_LIBRARY_PATH \
     -Dderby.storage.pageCacheSize=8000 \
-    -cp .:$CLASSPATH/*:jar/*$DERBYPATH/derby.jar \
+    -cp .:$CLASSPATH/*:jar/*:$DERBYPATH/derby.jar \
 com.github.jargors.Desktop
