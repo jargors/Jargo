@@ -1,6 +1,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 # Storage Interface
 # - Set CLASSPATH environmental variable before running `make`.
 # - Command `make clean` does NOT remove the compressed jar from $CLASSPATH/.
@@ -27,10 +28,18 @@ WIDGET=Communicator
 #   Do that manually.
 WIDGET=Client
 >>>>>>> 07460a53ab04f3b98d0f84bd7e8ac3ecea017ba1
+=======
+# Desktop
+# - Set CLASSPATH environmental variable before running `make`.
+# - Command `make clean` does NOT remove the compressed jar from $CLASSPATH/.
+#   Do that manually.
+WIDGET=DesktopController
+>>>>>>> 30fea70ff88428ba48b47386584487936844d1ae
 VERSION=1.0.0
 
 .PHONY : all clean
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -54,10 +63,20 @@ jar : java
 >>>>>>> 07460a53ab04f3b98d0f84bd7e8ac3ecea017ba1
 	javac -Xlint:deprecation -d . -cp .:$(CLASSPATH)/* $(WIDGET).java
 	jar cvf $(CLASSPATH)/jargors-$(WIDGET)-$(VERSION).jar com
+=======
+all : pdf class app
+
+app : Desktop.java
+	javac -Xlint:deprecation -d . -cp .:$(CLASSPATH)/* --module-path $(CLASSPATH) --add-modules javafx.controls Desktop.java
+
+class : java
+	javac -Xlint:deprecation -d . -cp .:$(CLASSPATH)/* --module-path $(CLASSPATH) --add-modules javafx.controls $(WIDGET).java
+>>>>>>> 30fea70ff88428ba48b47386584487936844d1ae
 
 java : src/$(WIDGET).nw
 	notangle -R$(WIDGET).java src/$(WIDGET).nw > $(WIDGET).java
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -71,6 +90,9 @@ pdf : tex
 =======
 pdf : tex
 >>>>>>> 07460a53ab04f3b98d0f84bd7e8ac3ecea017ba1
+=======
+pdf : tex
+>>>>>>> 30fea70ff88428ba48b47386584487936844d1ae
 	pdflatex doc/$(WIDGET).tex
 
 tex : src/$(WIDGET).nw
