@@ -220,7 +220,12 @@ PD, CPD, and CQ in the database instance underlying {\tt{}\protect\nwindexuse{st
 \bottomrule
 \end{tabular}
 \nwenddocs{}\nwbegincode{35}\sublabel{NW2ZDXo8-3rcRXt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-3rcRXt-1}}}\moddef{Definition of engine loop~{\nwtagstyle{}\subpageref{NW2ZDXo8-3rcRXt-1}}}\endmoddef\nwused{\\{NW2ZDXo8-2e0Sfa-1}}
-private Runnable EngineLoop = () -> \{ \};
+private Runnable EngineLoop = () -> \{
+  // Idea: what if we apply traffic effects at the time a server route is
+  // submitted? we can do it because we know what the future traffic will
+  // be and we also know where the future location will be of the server.
+  // then, is this loop necessary?
+\};
 \nwindexdefn{EngineLoop}{EngineLoop}{NW2ZDXo8-3rcRXt-1}\eatline
 \nwidentdefs{\\{{EngineLoop}{EngineLoop}}}\nwendcode{}\nwbegindocs{36}\nwdocspar
 \subsubsection{Request Collection Loop}
@@ -385,8 +390,8 @@ memory heap, modifies {\tt{}\protect\nwindexuse{storage}{storage}{NW2ZDXo8-OUspt
 public Controller() \{
   this.storage = new Storage();
   this.communicator = new Communicator();
-  this.communicator.setStorage(storage);
-  this.communicator.setController(this);
+  this.communicator.registerStorage(storage);
+  this.communicator.registerController(this);
 \}
 \nwidentuses{\\{{communicator}{communicator}}\\{{storage}{storage}}}\nwindexuse{communicator}{communicator}{NW2ZDXo8-3AyyZG-1}\nwindexuse{storage}{storage}{NW2ZDXo8-3AyyZG-1}\nwendcode{}\nwbegindocs{44}\nwdocspar
 

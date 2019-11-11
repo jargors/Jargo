@@ -45,7 +45,12 @@ public class Controller {
           this.world_time, (this.world_time % 2 == 0 ? "ping" : "pong"));
     }
   };
-  private Runnable EngineLoop = () -> { };
+  private Runnable EngineLoop = () -> {
+    // Idea: what if we apply traffic effects at the time a server route is
+    // submitted? we can do it because we know what the future traffic will
+    // be and we also know where the future location will be of the server.
+    // then, is this loop necessary?
+  };
   private Runnable RequestCollectionLoop = () -> {
     long A0 = 0;
     if (DEBUG) {
@@ -120,8 +125,8 @@ public class Controller {
   public Controller() {
     this.storage = new Storage();
     this.communicator = new Communicator();
-    this.communicator.setStorage(storage);
-    this.communicator.setController(this);
+    this.communicator.registerStorage(storage);
+    this.communicator.registerController(this);
   }
   public void createNewInstance() throws SQLException {
     this.storage.DBCreateNewInstance();

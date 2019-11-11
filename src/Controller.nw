@@ -220,7 +220,12 @@ PD, CPD, and CQ in the database instance underlying [[storage]].\\
 \bottomrule
 \end{tabular}
 <<Definition of engine loop>>=
-private Runnable EngineLoop = () -> { };
+private Runnable EngineLoop = () -> {
+  // Idea: what if we apply traffic effects at the time a server route is
+  // submitted? we can do it because we know what the future traffic will
+  // be and we also know where the future location will be of the server.
+  // then, is this loop necessary?
+};
 @ %def EngineLoop
 
 \subsubsection{Request Collection Loop}
@@ -385,8 +390,8 @@ memory heap, modifies [[storage]] and [[communicator]].\\
 public Controller() {
   this.storage = new Storage();
   this.communicator = new Communicator();
-  this.communicator.setStorage(storage);
-  this.communicator.setController(this);
+  this.communicator.registerStorage(storage);
+  this.communicator.registerController(this);
 }
 @
 
