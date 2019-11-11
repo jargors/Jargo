@@ -1,9 +1,10 @@
 package com.github.jargors;
 import com.github.jargors.Communicator;
 import com.github.jargors.Tools;
-import java.util.function.Supplier;
+import com.github.jargors.exceptions.ClientException;
+import com.github.jargors.exceptions.ClientFatalException;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.time.LocalDateTime;
+import java.io.FileNotFoundException;
 public abstract class Client {
   protected ConcurrentLinkedQueue<int[]> queue = new ConcurrentLinkedQueue();
   protected int r_collection_period = 1;  // how many sec before collecting new req?
@@ -11,61 +12,53 @@ public abstract class Client {
   protected int s_collection_period = 10;
   protected Communicator communicator;
   protected Tools tools = new Tools();
-  protected boolean DEBUG = false;
+  private final boolean DEBUG = "true".equals(System.getProperty("jargors.client.debug"));
   public Client() { }
-    public void notifyNew() throws RuntimeException {
-      if (!queue.isEmpty()) {
-        try {
-          handleRequest(queue.remove());
-        } catch (RuntimeException e) {
-          throw e;
-        }
+    public void notifyNew() throws ClientException, ClientFatalException {
+      if (!this.queue.isEmpty()) {
+        this.handleRequest(this.queue.remove());
       }
     }
-    public void collectRequest(int[] r) {
-      queue.add(r);
+    public void collectRequest(final int[] r) {
+      this.queue.add(r);
     }
-    public void collectServerLocations(int[] src) {
-      int[] locations = src.clone();
-      endCollectServerLocations(locations);
+    public void collectServerLocations(final int[] src) {
+      this.endCollectServerLocations(src.clone());
     }
-    public void setCommunicator(Communicator src) {
-      communicator = src;
-    }
-    public void setDebug(boolean flag) {
-      DEBUG = flag;
+    public void registerCommunicator(final Communicator src) {
+      this.communicator = src;
     }
     public int getRequestCollectionPeriod() {
-      return r_collection_period;
+      return this.r_collection_period;
     }
-    public void setRequestCollectionPeriod(int t) {
-      r_collection_period = t;
+    public void setRequestCollectionPeriod(final int t) {
+      this.r_collection_period = t;
     }
     public int getRequestHandlingPeriod() {
-      return r_handling_period;
+      return this.r_handling_period;
     }
-    public void setRequestHandlingPeriod(int t) {
-      r_handling_period = t;
+    public void setRequestHandlingPeriod(final int t) {
+      this.r_handling_period = t;
     }
     public int getServerLocationCollectionPeriod () {
-      return s_collection_period;
+      return this.s_collection_period;
     }
-    public void setServerLocationCollectionPeriod(int t) {
-      s_collection_period = t;
+    public void setServerLocationCollectionPeriod(final int t) {
+      this.s_collection_period = t;
     }
-    public void loadGTree(String p) {
-      tools.loadGTree(p);
+    public void loadGTree(final String p) throws FileNotFoundException {
+      this.tools.loadGTree(p);
     }
     public void registerRoadNetwork() {
-      tools.registerVertices(communicator.getReferenceVerticesCache());
-      tools.registerEdges(communicator.getReferenceEdgesCache());
+      this.tools.registerVertices(this.communicator.getReferenceVerticesCache());
+      this.tools.registerEdges(this.communicator.getReferenceEdgesCache());
     }
     public void registerUsers() {
-      tools.registerUsers(communicator.getReferenceUsersCache());
+      this.tools.registerUsers(this.communicator.getReferenceUsersCache());
     }
-    protected void endCollectServerLocations(int[] locations) {
+    protected void endCollectServerLocations(final int[] locations) {
       for (int i = 0; i < (locations.length - 2); i += 3) {
-        handleServerLocation(new int[] {
+        this.handleServerLocation(new int[] {
           locations[i],
           locations[(i + 1)],
           locations[(i + 2)]
@@ -73,12 +66,6 @@ public abstract class Client {
       }
     }
     protected void end() { }
-    protected void handleRequest(int[] r) throws RuntimeException { }
-    protected void handleServerLocation(int[] loc) { }
-    protected void Print(String msg) {
-      if (DEBUG) {
-        System.out.println("[Client]["+LocalDateTime.now()+"]"
-          + "[t="+communicator.getSimulationWorldTime()+"] "+msg);
-      }
-    }
+    protected void handleRequest(final int[] r) throws ClientException, ClientFatalException { }
+    protected void handleServerLocation(final int[] loc) { }
 }

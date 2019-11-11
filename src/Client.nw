@@ -60,9 +60,10 @@ logging purposes.
 <<Client.java preamble>>=
 import com.github.jargors.Communicator;
 import com.github.jargors.Tools;
-import java.util.function.Supplier;
+import com.github.jargors.exceptions.ClientException;
+import com.github.jargors.exceptions.ClientFatalException;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.time.LocalDateTime;
+import java.io.FileNotFoundException;
 @
 
 \subsection{Class Definition}
@@ -86,7 +87,7 @@ protected int r_handling_period = 1;  // how many msec before handling queued re
 protected int s_collection_period = 10;
 protected Communicator communicator;
 protected Tools tools = new Tools();
-protected boolean DEBUG = false;
+private final boolean DEBUG = "true".equals(System.getProperty("jargors.client.debug"));
 @ %def queue r_collection_period r_handling_period s_collection_period communicator tools DEBUG
 
 \subsection{Constructor}
@@ -99,8 +100,7 @@ public Client() { }
   <<Notify new requests>>
   <<Collect request into queue>>
   <<Collect server locations>>
-  <<Set simulation interface>>
-  <<Set debug flag>>
+  <<Register simulation interface>>
   <<Get/set request collection period>>
   <<Get/set request handling period>>
   <<Get/set server location collection period>>
@@ -113,21 +113,17 @@ public Client() { }
 
 \subsubsection{[[notifyNew]](0)}
 <<Notify new requests>>=
-public void notifyNew() throws RuntimeException {
-  if (!queue.isEmpty()) {
-    try {
-      handleRequest(queue.remove());
-    } catch (RuntimeException e) {
-      throw e;
-    }
+public void notifyNew() throws ClientException, ClientFatalException {
+  if (!this.queue.isEmpty()) {
+    this.handleRequest(this.queue.remove());
   }
 }
 @ %def notifyNew
 
 \subsubsection{[[collectRequest]](1)}
 <<Collect request into queue>>=
-public void collectRequest(int[] r) {
-  queue.add(r);
+public void collectRequest(final int[] r) {
+  this.queue.add(r);
 }
 @ %def addRequest
 
@@ -153,89 +149,81 @@ is the waypoint in the server's traveled route that is nearest $t'$.  After
 copying [[src]] into [[locations]], the [[endCollectServerLocations]](0) method
 is executed.
 <<Collect server locations>>=
-public void collectServerLocations(int[] src) {
-  int[] locations = src.clone();
-  endCollectServerLocations(locations);
+public void collectServerLocations(final int[] src) {
+  this.endCollectServerLocations(src.clone());
 }
 @ %def collectServerLocations
 
 \subsection{Getters and Setters}
 
-\subsubsection{[[setCommunicator]](1)}
-<<Set simulation interface>>=
-public void setCommunicator(Communicator src) {
-  communicator = src;
+\subsubsection{[[registerCommunicator]](1)}
+<<Register simulation interface>>=
+public void registerCommunicator(final Communicator src) {
+  this.communicator = src;
 }
-@ %def setCommunicator
-
-\subsubsection{[[setDebug]](1)}
-<<Set debug flag>>=
-public void setDebug(boolean flag) {
-  DEBUG = flag;
-}
-@ %def setDebug
+@ %def registerCommunicator
 
 \subsubsection{[[getRequestCollectionPeriod]](0)}
 <<Get/set request collection period>>=
 public int getRequestCollectionPeriod() {
-  return r_collection_period;
+  return this.r_collection_period;
 }
 @ %def getRequestCollectionPeriod
 
 \subsubsection{[[setRequestCollectionPeriod]](1)}
 <<Get/set request collection period>>=
-public void setRequestCollectionPeriod(int t) {
-  r_collection_period = t;
+public void setRequestCollectionPeriod(final int t) {
+  this.r_collection_period = t;
 }
 @ %def setRequestCollectionPeriod
 
 \subsubsection{[[getRequestHandlingPeriod]](1)}
 <<Get/set request handling period>>=
 public int getRequestHandlingPeriod() {
-  return r_handling_period;
+  return this.r_handling_period;
 }
 @ %def getRequestHandlingPeriod
 
 \subsubsection{[[setRequestHandlingPeriod]](0)}
 <<Get/set request handling period>>=
-public void setRequestHandlingPeriod(int t) {
-  r_handling_period = t;
+public void setRequestHandlingPeriod(final int t) {
+  this.r_handling_period = t;
 }
 @ %def setRequestHandlingPeriod
 
 \subsubsection{[[getServerLocationCollectionPeriod]](0)}
 <<Get/set server location collection period>>=
 public int getServerLocationCollectionPeriod () {
-  return s_collection_period;
+  return this.s_collection_period;
 }
 @ %def getServerLocationCollectionPeriod
 
 \subsubsection{[[setServerLocationCollectionPeriod]](1)}
 <<Get/set server location collection period>>=
-public void setServerLocationCollectionPeriod(int t) {
-  s_collection_period = t;
+public void setServerLocationCollectionPeriod(final int t) {
+  this.s_collection_period = t;
 }
 @ %def setServerLocationCollectionPeriod
 
 \subsubsection{[[loadGTree]](1)}
 <<Load GTree>>=
-public void loadGTree(String p) {
-  tools.loadGTree(p);
+public void loadGTree(final String p) throws FileNotFoundException {
+  this.tools.loadGTree(p);
 }
 @ %def loadGTree
 
 \subsubsection{[[registerRoadNetwork]](0)}
 <<Register road network>>=
 public void registerRoadNetwork() {
-  tools.registerVertices(communicator.getReferenceVerticesCache());
-  tools.registerEdges(communicator.getReferenceEdgesCache());
+  this.tools.registerVertices(this.communicator.getReferenceVerticesCache());
+  this.tools.registerEdges(this.communicator.getReferenceEdgesCache());
 }
 @ %def registerRoadNetwork
 
 \subsubsection{[[registerUsers]](0)}
 <<Register users>>=
 public void registerUsers() {
-  tools.registerUsers(communicator.getReferenceUsersCache());
+  this.tools.registerUsers(this.communicator.getReferenceUsersCache());
 }
 @ %def registerUsers
 
@@ -245,16 +233,13 @@ public void registerUsers() {
   <<End simulation>>
   <<Handle request>>
   <<Handle server location>>
-  <<Print a message>>
 @
 
 \subsection{[[endCollectServerLocations]](0)}
-After server locations are collected, [[handleServerLocation]](1) is executed
-on each one.
 <<End collect server locations>>=
-protected void endCollectServerLocations(int[] locations) {
+protected void endCollectServerLocations(final int[] locations) {
   for (int i = 0; i < (locations.length - 2); i += 3) {
-    handleServerLocation(new int[] {
+    this.handleServerLocation(new int[] {
       locations[i],
       locations[(i + 1)],
       locations[(i + 2)]
@@ -281,7 +266,7 @@ Array [[r]] =
 \end{tikzpicture}
 
 <<Handle request>>=
-protected void handleRequest(int[] r) throws RuntimeException { }
+protected void handleRequest(final int[] r) throws ClientException, ClientFatalException { }
 @ %def handleRequest
 
 \subsection{[[handleServerLocation]](1)}
@@ -297,18 +282,8 @@ Array [[loc]] =
 \end{tikzpicture}
 
 <<Handle server location>>=
-protected void handleServerLocation(int[] loc) { }
+protected void handleServerLocation(final int[] loc) { }
 @ %def handleServerLocation
-
-\subsection{[[Print]](1)}
-<<Print a message>>=
-protected void Print(String msg) {
-  if (DEBUG) {
-    System.out.println("[Client]["+LocalDateTime.now()+"]"
-      + "[t="+communicator.getSimulationWorldTime()+"] "+msg);
-  }
-}
-@ %def Print
 
 \appendix
 
