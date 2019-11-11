@@ -1,0 +1,133 @@
+\section{Introduction}
+\label{sec:introduction}
+We supply an abstract base class for developing Jargo traffic functions.  The
+base class is developed using the
+Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
+programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
+({\tt{}src/Traffic.nw}) is the source for both the documentation
+({\tt{}doc/Traffic.tex}) and the Java code (Traffic.java)\footnote{See the
+{\tt{}Makefile} for build details.}.
+
+
+\section{Implementation Overview}
+\nwfilename{src/Traffic.nw}\nwbegincode{1}\sublabel{NW24od5B-2eR0nK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-2eR0nK-1}}}\moddef{Traffic.java~{\nwtagstyle{}\subpageref{NW24od5B-2eR0nK-1}}}\endmoddef\nwnotused{Traffic.java}
+\LA{}Traffic.java preamble~{\nwtagstyle{}\subpageref{NW24od5B-1UV5UV-1}}\RA{}
+\LA{}\code{}Traffic\edoc{} definition~{\nwtagstyle{}\subpageref{NW24od5B-4MDcMU-1}}\RA{}
+\nwendcode{}\nwbegindocs{2}\nwdocspar
+
+\subsection{Preamble}
+The preamble declares the package and imports dependencies.
+\nwenddocs{}\nwbegincode{3}\sublabel{NW24od5B-1UV5UV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-1UV5UV-1}}}\moddef{Traffic.java preamble~{\nwtagstyle{}\subpageref{NW24od5B-1UV5UV-1}}}\endmoddef\nwused{\\{NW24od5B-2eR0nK-1}}
+package com.github.jargors;
+import java.util.Map;
+import java.util.HashMap;
+import java.time.LocalDateTime;
+\nwendcode{}\nwbegindocs{4}\nwdocspar
+
+\subsection{Class Definition}
+\nwenddocs{}\nwbegincode{5}\sublabel{NW24od5B-4MDcMU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-4MDcMU-1}}}\moddef{\code{}Traffic\edoc{} definition~{\nwtagstyle{}\subpageref{NW24od5B-4MDcMU-1}}}\endmoddef\nwused{\\{NW24od5B-2eR0nK-1}}
+public abstract class Traffic \{
+  \LA{}\code{}Traffic\edoc{} member variables~{\nwtagstyle{}\subpageref{NW24od5B-1j90we-1}}\RA{}
+  \LA{}\code{}Traffic\edoc{} constructor~{\nwtagstyle{}\subpageref{NW24od5B-4V88df-1}}\RA{}
+  \LA{}\code{}Traffic\edoc{} public methods~{\nwtagstyle{}\subpageref{NW24od5B-1DGDoJ-1}}\RA{}
+  \LA{}\code{}Traffic\edoc{} protected methods~{\nwtagstyle{}\subpageref{NW24od5B-1OojUg-1}}\RA{}
+\}
+\nwendcode{}\nwbegindocs{6}\nwdocspar
+
+\subsection{Member Variables}
+\nwenddocs{}\nwbegincode{7}\sublabel{NW24od5B-1j90we-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-1j90we-1}}}\moddef{\code{}Traffic\edoc{} member variables~{\nwtagstyle{}\subpageref{NW24od5B-1j90we-1}}}\endmoddef\nwused{\\{NW24od5B-4MDcMU-1}}
+protected Map<Integer, int[]> lu_vertices = new HashMap<>();
+protected Map<Integer, Map<Integer, int[]>> lu_edges = new HashMap<>();
+protected boolean DEBUG = false;
+\nwindexdefn{lu{\char95}vertices}{lu:unvertices}{NW24od5B-1j90we-1}\nwindexdefn{lu{\char95}edges}{lu:unedges}{NW24od5B-1j90we-1}\nwindexdefn{DEBUG}{DEBUG}{NW24od5B-1j90we-1}\eatline
+\nwidentdefs{\\{{DEBUG}{DEBUG}}\\{{lu{\char95}edges}{lu:unedges}}\\{{lu{\char95}vertices}{lu:unvertices}}}\nwendcode{}\nwbegindocs{8}\nwdocspar
+
+\subsection{Constructor}
+\nwenddocs{}\nwbegincode{9}\sublabel{NW24od5B-4V88df-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-4V88df-1}}}\moddef{\code{}Traffic\edoc{} constructor~{\nwtagstyle{}\subpageref{NW24od5B-4V88df-1}}}\endmoddef\nwused{\\{NW24od5B-4MDcMU-1}}
+public Traffic() \{ \}
+\nwendcode{}\nwbegindocs{10}\nwdocspar
+
+
+\section{Public Methods}
+\nwenddocs{}\nwbegincode{11}\sublabel{NW24od5B-1DGDoJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-1DGDoJ-1}}}\moddef{\code{}Traffic\edoc{} public methods~{\nwtagstyle{}\subpageref{NW24od5B-1DGDoJ-1}}}\endmoddef\nwused{\\{NW24od5B-4MDcMU-1}}
+\LA{}Set debug flag~{\nwtagstyle{}\subpageref{NW24od5B-2DhHFw-1}}\RA{}
+\LA{}Register vertices~{\nwtagstyle{}\subpageref{NW24od5B-2ZKKW-1}}\RA{}
+\LA{}Register edges~{\nwtagstyle{}\subpageref{NW24od5B-3Nu1Fg-1}}\RA{}
+\LA{}Apply traffic~{\nwtagstyle{}\subpageref{NW24od5B-1uVqQO-1}}\RA{}
+\nwendcode{}\nwbegindocs{12}\nwdocspar
+
+\subsection{{\tt{}\protect\nosublabel{NW24od5B-1DGDoJ-1-u4}\protect\nwindexuse{setDebug}{setDebug}{NW24od5B-2DhHFw-1}setDebug}(1)}
+\nwenddocs{}\nwbegincode{13}\sublabel{NW24od5B-2DhHFw-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-2DhHFw-1}}}\moddef{Set debug flag~{\nwtagstyle{}\subpageref{NW24od5B-2DhHFw-1}}}\endmoddef\nwused{\\{NW24od5B-1DGDoJ-1}}
+public void setDebug(boolean flag) \{
+  DEBUG = flag;
+\}
+\nwindexdefn{setDebug}{setDebug}{NW24od5B-2DhHFw-1}\eatline
+\nwidentdefs{\\{{setDebug}{setDebug}}}\nwidentuses{\\{{DEBUG}{DEBUG}}}\nwindexuse{DEBUG}{DEBUG}{NW24od5B-2DhHFw-1}\nwendcode{}\nwbegindocs{14}\nwdocspar
+\subsection{{\tt{}\protect\nwindexuse{registerVertices}{registerVertices}{NW24od5B-2ZKKW-1}registerVertices}(1)}
+\nwenddocs{}\nwbegincode{15}\sublabel{NW24od5B-2ZKKW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-2ZKKW-1}}}\moddef{Register vertices~{\nwtagstyle{}\subpageref{NW24od5B-2ZKKW-1}}}\endmoddef\nwused{\\{NW24od5B-1DGDoJ-1}}
+public void registerVertices(Map<Integer, int[]> src) \{
+  lu_vertices = src;
+\}
+\nwindexdefn{registerVertices}{registerVertices}{NW24od5B-2ZKKW-1}\eatline
+\nwidentdefs{\\{{registerVertices}{registerVertices}}}\nwidentuses{\\{{lu{\char95}vertices}{lu:unvertices}}}\nwindexuse{lu{\char95}vertices}{lu:unvertices}{NW24od5B-2ZKKW-1}\nwendcode{}\nwbegindocs{16}\nwdocspar
+\subsection{{\tt{}\protect\nwindexuse{registerEdges}{registerEdges}{NW24od5B-3Nu1Fg-1}registerEdges}(1)}
+\nwenddocs{}\nwbegincode{17}\sublabel{NW24od5B-3Nu1Fg-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-3Nu1Fg-1}}}\moddef{Register edges~{\nwtagstyle{}\subpageref{NW24od5B-3Nu1Fg-1}}}\endmoddef\nwused{\\{NW24od5B-1DGDoJ-1}}
+public void registerEdges(Map<Integer, Map<Integer, int[]>> src) \{
+  lu_edges = src;
+\}
+\nwindexdefn{registerEdges}{registerEdges}{NW24od5B-3Nu1Fg-1}\eatline
+\nwidentdefs{\\{{registerEdges}{registerEdges}}}\nwidentuses{\\{{lu{\char95}edges}{lu:unedges}}}\nwindexuse{lu{\char95}edges}{lu:unedges}{NW24od5B-3Nu1Fg-1}\nwendcode{}\nwbegindocs{18}\nwdocspar
+
+\subsection{{\tt{}apply}(1)}
+\nwenddocs{}\nwbegincode{19}\sublabel{NW24od5B-1uVqQO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-1uVqQO-1}}}\moddef{Apply traffic~{\nwtagstyle{}\subpageref{NW24od5B-1uVqQO-1}}}\endmoddef\nwused{\\{NW24od5B-1DGDoJ-1}}
+public float apply(int v1, int v2, int t) \{
+  Print("Call apply("+v1+", "+v2+", "+t+")");
+  return 0;
+\}
+\nwidentuses{\\{{Print}{Print}}}\nwindexuse{Print}{Print}{NW24od5B-1uVqQO-1}\nwendcode{}\nwbegindocs{20}\nwdocspar
+
+\section{Protected Methods}
+\nwenddocs{}\nwbegincode{21}\sublabel{NW24od5B-1OojUg-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-1OojUg-1}}}\moddef{\code{}Traffic\edoc{} protected methods~{\nwtagstyle{}\subpageref{NW24od5B-1OojUg-1}}}\endmoddef\nwused{\\{NW24od5B-4MDcMU-1}}
+\LA{}Print a message~{\nwtagstyle{}\subpageref{NW24od5B-2wEn3G-1}}\RA{}
+\nwendcode{}\nwbegindocs{22}\nwdocspar
+
+\subsection{{\tt{}\protect\nosublabel{NW24od5B-1OojUg-1-u1}\protect\nwindexuse{Print}{Print}{NW24od5B-2wEn3G-1}Print}(1)}
+\nwenddocs{}\nwbegincode{23}\sublabel{NW24od5B-2wEn3G-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-2wEn3G-1}}}\moddef{Print a message~{\nwtagstyle{}\subpageref{NW24od5B-2wEn3G-1}}}\endmoddef\nwused{\\{NW24od5B-1OojUg-1}}
+protected void Print(String msg) \{
+  if (DEBUG) \{
+    System.out.println("[Traffic]["+LocalDateTime.now()+"] "+msg);
+  \}
+\}
+\nwindexdefn{Print}{Print}{NW24od5B-2wEn3G-1}\eatline
+\nwidentdefs{\\{{Print}{Print}}}\nwidentuses{\\{{DEBUG}{DEBUG}}}\nwindexuse{DEBUG}{DEBUG}{NW24od5B-2wEn3G-1}\nwendcode{}
+
+\nwixlogsorted{c}{{\code{}Traffic\edoc{} constructor}{NW24od5B-4V88df-1}{\nwixu{NW24od5B-4MDcMU-1}\nwixd{NW24od5B-4V88df-1}}}%
+\nwixlogsorted{c}{{\code{}Traffic\edoc{} definition}{NW24od5B-4MDcMU-1}{\nwixu{NW24od5B-2eR0nK-1}\nwixd{NW24od5B-4MDcMU-1}}}%
+\nwixlogsorted{c}{{\code{}Traffic\edoc{} member variables}{NW24od5B-1j90we-1}{\nwixu{NW24od5B-4MDcMU-1}\nwixd{NW24od5B-1j90we-1}}}%
+\nwixlogsorted{c}{{\code{}Traffic\edoc{} protected methods}{NW24od5B-1OojUg-1}{\nwixu{NW24od5B-4MDcMU-1}\nwixd{NW24od5B-1OojUg-1}}}%
+\nwixlogsorted{c}{{\code{}Traffic\edoc{} public methods}{NW24od5B-1DGDoJ-1}{\nwixu{NW24od5B-4MDcMU-1}\nwixd{NW24od5B-1DGDoJ-1}}}%
+\nwixlogsorted{c}{{Apply traffic}{NW24od5B-1uVqQO-1}{\nwixu{NW24od5B-1DGDoJ-1}\nwixd{NW24od5B-1uVqQO-1}}}%
+\nwixlogsorted{c}{{Print a message}{NW24od5B-2wEn3G-1}{\nwixu{NW24od5B-1OojUg-1}\nwixd{NW24od5B-2wEn3G-1}}}%
+\nwixlogsorted{c}{{Register edges}{NW24od5B-3Nu1Fg-1}{\nwixu{NW24od5B-1DGDoJ-1}\nwixd{NW24od5B-3Nu1Fg-1}}}%
+\nwixlogsorted{c}{{Register vertices}{NW24od5B-2ZKKW-1}{\nwixu{NW24od5B-1DGDoJ-1}\nwixd{NW24od5B-2ZKKW-1}}}%
+\nwixlogsorted{c}{{Set debug flag}{NW24od5B-2DhHFw-1}{\nwixu{NW24od5B-1DGDoJ-1}\nwixd{NW24od5B-2DhHFw-1}}}%
+\nwixlogsorted{c}{{Traffic.java}{NW24od5B-2eR0nK-1}{\nwixd{NW24od5B-2eR0nK-1}}}%
+\nwixlogsorted{c}{{Traffic.java preamble}{NW24od5B-1UV5UV-1}{\nwixu{NW24od5B-2eR0nK-1}\nwixd{NW24od5B-1UV5UV-1}}}%
+\nwixlogsorted{i}{{DEBUG}{DEBUG}}%
+\nwixlogsorted{i}{{lu{\char95}edges}{lu:unedges}}%
+\nwixlogsorted{i}{{lu{\char95}vertices}{lu:unvertices}}%
+\nwixlogsorted{i}{{Print}{Print}}%
+\nwixlogsorted{i}{{registerEdges}{registerEdges}}%
+\nwixlogsorted{i}{{registerVertices}{registerVertices}}%
+\nwixlogsorted{i}{{setDebug}{setDebug}}%
+\nwbegindocs{24}\nwdocspar
+\appendix
+
+\section{Appendix: List of Chunks}
+\label{ap:list-of-chunks}
+\nowebchunks
+
+\section{Appendix: List of Identifiers}
+\label{ap:list-of-identifiers}
+\nowebindex
+\nwenddocs{}

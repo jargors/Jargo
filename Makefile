@@ -3,10 +3,14 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 7024b96d220438258d424b4c832154430670dbad
 # Storage Interface
 # - Set CLASSPATH environmental variable before running `make`.
 # - Command `make clean` does NOT remove the compressed jar from $CLASSPATH/.
 #   Do that manually.
+<<<<<<< HEAD
 WIDGET=Storage
 =======
 # Simulation Controller
@@ -43,10 +47,14 @@ WIDGET=DesktopController
 #   Do that manually.
 WIDGET=Tools
 >>>>>>> 2b1f3949411ac90371d3590b42ad3403e1fea9a2
+=======
+WIDGET=Traffic
+>>>>>>> 7024b96d220438258d424b4c832154430670dbad
 VERSION=1.0.0
 
 .PHONY : all clean
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -82,16 +90,22 @@ class : java
 	javac -Xlint:deprecation -d . -cp .:$(CLASSPATH)/* --module-path $(CLASSPATH) --add-modules javafx.controls $(WIDGET).java
 >>>>>>> 30fea70ff88428ba48b47386584487936844d1ae
 =======
+=======
+>>>>>>> 7024b96d220438258d424b4c832154430670dbad
 all : pdf jar
 
 jar : java
 	javac -Xlint:deprecation -d . -cp .:$(CLASSPATH)/* $(WIDGET).java
 	jar cvf $(CLASSPATH)/jargors-$(WIDGET)-$(VERSION).jar com
+<<<<<<< HEAD
 >>>>>>> 2b1f3949411ac90371d3590b42ad3403e1fea9a2
+=======
+>>>>>>> 7024b96d220438258d424b4c832154430670dbad
 
 java : src/$(WIDGET).nw
 	notangle -R$(WIDGET).java src/$(WIDGET).nw > $(WIDGET).java
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -113,6 +127,9 @@ pdf : tex
 =======
 pdf : tex
 >>>>>>> 2b1f3949411ac90371d3590b42ad3403e1fea9a2
+=======
+pdf : tex
+>>>>>>> 7024b96d220438258d424b4c832154430670dbad
 	pdflatex doc/$(WIDGET).tex
 
 tex : src/$(WIDGET).nw
