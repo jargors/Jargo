@@ -1,5 +1,6 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 # Storage Interface
 # - Set CLASSPATH environmental variable before running `make`.
 # - Command `make clean` does NOT remove the compressed jar from $CLASSPATH/.
@@ -19,10 +20,18 @@ WIDGET=Controller
 #   Do that manually.
 WIDGET=Communicator
 >>>>>>> e4903e6712f100d8acd875fb96c63dff0b780d8e
+=======
+# Base Client
+# - Set CLASSPATH environmental variable before running `make`.
+# - Command `make clean` does NOT remove the compressed jar from $CLASSPATH/.
+#   Do that manually.
+WIDGET=Client
+>>>>>>> 07460a53ab04f3b98d0f84bd7e8ac3ecea017ba1
 VERSION=1.0.0
 
 .PHONY : all clean
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 all : java tex pdf jar
@@ -38,12 +47,18 @@ all : pdf jar
 
 jar : java
 >>>>>>> e4903e6712f100d8acd875fb96c63dff0b780d8e
+=======
+all : pdf jar
+
+jar : java
+>>>>>>> 07460a53ab04f3b98d0f84bd7e8ac3ecea017ba1
 	javac -Xlint:deprecation -d . -cp .:$(CLASSPATH)/* $(WIDGET).java
 	jar cvf $(CLASSPATH)/jargors-$(WIDGET)-$(VERSION).jar com
 
 java : src/$(WIDGET).nw
 	notangle -R$(WIDGET).java src/$(WIDGET).nw > $(WIDGET).java
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 pdf : doc/$(WIDGET).tex
@@ -53,6 +68,9 @@ pdf : tex
 =======
 pdf : tex
 >>>>>>> e4903e6712f100d8acd875fb96c63dff0b780d8e
+=======
+pdf : tex
+>>>>>>> 07460a53ab04f3b98d0f84bd7e8ac3ecea017ba1
 	pdflatex doc/$(WIDGET).tex
 
 tex : src/$(WIDGET).nw

@@ -1,0 +1,265 @@
+\section{Introduction}
+\label{sec:introduction}
+We supply an abstract base class for developing Jargo client ridesharing
+algorithms. The class provides a standard interface for interacting with the
+simulation engine (Figure~\ref{fig:client}). Algorithm developers extend the
+base class to add specific customer-to-vehicle matching and vehicle routing
+functionality.  The base class is developed using the
+Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
+programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
+([[src/Client.nw]]) is the source for both the documentation
+([[doc/Client.tex]]) and the Java code (Client.java)\footnote{See the
+[[Makefile]] for build details.}.
+
+\section{Implementation Overview}
+<<Client.java>>=
+<<Client.java preamble>>
+<<[[Client]] definition>>
+@
+
+\subsection{Preamble}
+The preamble declares the package and imports dependencies.
+<<Client.java preamble>>=
+package com.github.jargors;
+@
+We import [[Communicator]] so we can interact with the simulated world,
+and we import [[LocalDateTime]] so we can query the physical time for
+logging purposes.
+<<Client.java preamble>>=
+import com.github.jargors.Communicator;
+import com.github.jargors.Tools;
+import com.github.jargors.exceptions.ClientException;
+import com.github.jargors.exceptions.ClientFatalException;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.io.FileNotFoundException;
+@
+
+\subsection{Class Definition}
+The [[Client]] class consists of member variables, a constructor, and
+public and protected methods. Note the [[abstract]] keyword indicates the class
+cannot be used directly.
+<<[[Client]] definition>>=
+public abstract class Client {
+  <<[[Client]] member variables>>
+  <<[[Client]] constructor>>
+  <<[[Client]] public methods>>
+  <<[[Client]] protected methods>>
+}
+@
+
+\subsection{Member Variables}
+<<[[Client]] member variables>>=
+protected ConcurrentLinkedQueue<int[]> queue = new ConcurrentLinkedQueue();
+protected int r_collection_period = 1;  // how many sec before collecting new req?
+protected int r_handling_period = 1;  // how many msec before handling queued req?
+protected int s_collection_period = 10;
+protected Communicator communicator;
+protected Tools tools = new Tools();
+private final boolean DEBUG = "true".equals(System.getProperty("jargors.client.debug"));
+@ %def queue r_collection_period r_handling_period s_collection_period communicator tools DEBUG
+
+\subsection{Constructor}
+<<[[Client]] constructor>>=
+public Client() { }
+@
+
+\section{Public Methods}
+<<[[Client]] public methods>>=
+  <<Notify new requests>>
+  <<Collect request into queue>>
+  <<Collect server locations>>
+  <<Register simulation interface>>
+  <<Get/set request collection period>>
+  <<Get/set request handling period>>
+  <<Get/set server location collection period>>
+  <<Load GTree>>
+  <<Register road network>>
+  <<Register users>>
+@
+
+\subsection{Obtaining Requests and Server Locations}
+
+\subsubsection{[[notifyNew]](0)}
+<<Notify new requests>>=
+public void notifyNew() throws ClientException, ClientFatalException {
+  if (!this.queue.isEmpty()) {
+    this.handleRequest(this.queue.remove());
+  }
+}
+@ %def notifyNew
+
+\subsubsection{[[collectRequest]](1)}
+<<Collect request into queue>>=
+public void collectRequest(final int[] r) {
+  this.queue.add(r);
+}
+@ %def addRequest
+
+\subsubsection{[[collectServerLocations]](1)}
+Array [[src]] =
+
+\noindent
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{[[sid]] of server }s$};
+ &\node {$1:\textrm{time of $s$'s last location}$};
+ &\node {$2:\textrm{vertex of $s$'s last location}$};
+ &\node[minimum width=12mm] {...};\\
+};
+\end{tikzpicture}
+
+\noindent If locations are polled for and stored into [[src]] at $t'$ world
+time, then formally the last location for server $s$ is defined as waypoint
+$(t,v)$ that satisfies $t=\textrm{argmin}_{(t,v)\in w_{\leq t'}} (t-t')$, where
+$w_{\leq t'}$ is the server's traveled route.  In other words the last location
+is the waypoint in the server's traveled route that is nearest $t'$.  After
+copying [[src]] into [[locations]], the [[endCollectServerLocations]](0) method
+is executed.
+<<Collect server locations>>=
+public void collectServerLocations(final int[] src) {
+  this.endCollectServerLocations(src.clone());
+}
+@ %def collectServerLocations
+
+\subsection{Getters and Setters}
+
+\subsubsection{[[registerCommunicator]](1)}
+<<Register simulation interface>>=
+public void registerCommunicator(final Communicator src) {
+  this.communicator = src;
+}
+@ %def registerCommunicator
+
+\subsubsection{[[getRequestCollectionPeriod]](0)}
+<<Get/set request collection period>>=
+public int getRequestCollectionPeriod() {
+  return this.r_collection_period;
+}
+@ %def getRequestCollectionPeriod
+
+\subsubsection{[[setRequestCollectionPeriod]](1)}
+<<Get/set request collection period>>=
+public void setRequestCollectionPeriod(final int t) {
+  this.r_collection_period = t;
+}
+@ %def setRequestCollectionPeriod
+
+\subsubsection{[[getRequestHandlingPeriod]](1)}
+<<Get/set request handling period>>=
+public int getRequestHandlingPeriod() {
+  return this.r_handling_period;
+}
+@ %def getRequestHandlingPeriod
+
+\subsubsection{[[setRequestHandlingPeriod]](0)}
+<<Get/set request handling period>>=
+public void setRequestHandlingPeriod(final int t) {
+  this.r_handling_period = t;
+}
+@ %def setRequestHandlingPeriod
+
+\subsubsection{[[getServerLocationCollectionPeriod]](0)}
+<<Get/set server location collection period>>=
+public int getServerLocationCollectionPeriod () {
+  return this.s_collection_period;
+}
+@ %def getServerLocationCollectionPeriod
+
+\subsubsection{[[setServerLocationCollectionPeriod]](1)}
+<<Get/set server location collection period>>=
+public void setServerLocationCollectionPeriod(final int t) {
+  this.s_collection_period = t;
+}
+@ %def setServerLocationCollectionPeriod
+
+\subsubsection{[[loadGTree]](1)}
+<<Load GTree>>=
+public void loadGTree(final String p) throws FileNotFoundException {
+  this.tools.loadGTree(p);
+}
+@ %def loadGTree
+
+\subsubsection{[[registerRoadNetwork]](0)}
+<<Register road network>>=
+public void registerRoadNetwork() {
+  this.tools.registerVertices(this.communicator.getReferenceVerticesCache());
+  this.tools.registerEdges(this.communicator.getReferenceEdgesCache());
+}
+@ %def registerRoadNetwork
+
+\subsubsection{[[registerUsers]](0)}
+<<Register users>>=
+public void registerUsers() {
+  this.tools.registerUsers(this.communicator.getReferenceUsersCache());
+}
+@ %def registerUsers
+
+\section{Private Methods}
+<<[[Client]] protected methods>>=
+  <<End collect server locations>>
+  <<End simulation>>
+  <<Handle request>>
+  <<Handle server location>>
+@
+
+\subsection{[[endCollectServerLocations]](0)}
+<<End collect server locations>>=
+protected void endCollectServerLocations(final int[] locations) {
+  for (int i = 0; i < (locations.length - 2); i += 3) {
+    this.handleServerLocation(new int[] {
+      locations[i],
+      locations[(i + 1)],
+      locations[(i + 2)]
+    });
+  }
+}
+@ %def endCollectServerLocations
+
+\subsection{[[end]](0)}
+<<End simulation>>=
+protected void end() { }
+@ %def end
+
+\subsection{[[handleRequest]](1)}
+Array [[r]] =
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{[[rid]] of request $r$}$};
+ &\node {$1:r_q$}; & \node {$2:r_e$}; & \node {$3:r_l$};
+ &\node {$4:r_o$}; & \node {$5:r_d$}; & \node {$6:d_r$};\\
+};
+\end{tikzpicture}
+
+<<Handle request>>=
+protected void handleRequest(final int[] r) throws ClientException, ClientFatalException { }
+@ %def handleRequest
+
+\subsection{[[handleServerLocation]](1)}
+Array [[loc]] =
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{[[sid]] of server $s$}$};
+ &\node {$1:\textrm{time of $s$'s last location}$};
+ &\node {$2:\textrm{vertex of $s$'s last location}$};\\
+};
+\end{tikzpicture}
+
+<<Handle server location>>=
+protected void handleServerLocation(final int[] loc) { }
+@ %def handleServerLocation
+
+\appendix
+
+\section{Appendix: List of Chunks}
+\label{ap:list-of-chunks}
+\nowebchunks
+
+\section{Appendix: List of Identifiers}
+\label{ap:list-of-identifiers}
+\nowebindex
+
