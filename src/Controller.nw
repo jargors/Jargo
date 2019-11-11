@@ -1,0 +1,906 @@
+\section{Introduction}
+\label{sec:introduction}
+The simulation controller is intended to be the sole interface for an
+evaluation program to control Jargo's simulation environment. The controller
+advances the simulation world time, ``pushes'' server locations and new
+requests to the client, perturbs server routes stored in the data layer in
+order to mimic traffic and other stochastic vehicle processes, and can be used
+to report evaluation metrics to the program.  The simulation controller is
+developed using the Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}}
+literate programming\footnote{\url{http://literateprogramming.com/}} tool.
+This file ([[src/Controller.nw]]) is the source for the documentation
+([[doc/Controller.tex]]) and the Java code ([[Controller.java]])\footnote{See
+the [[Makefile]] for build details.}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=150mm]{src/fig/controller-fig}
+\caption{Controller within the Jargo stack.}
+\label{fig:controller}
+\end{figure}
+
+\section{Implementation Overview}
+The code consist of the \emph{preamble} (\S\ref{sec:preamble})
+and the \emph{class definition} (\S\ref{sec:class-definition}).
+<<Controller.java>>=
+<<Controller.java preamble>>
+<<[[Controller]] definition>>
+@
+
+\subsection{Preamble}
+\label{sec:preamble}
+The preamble declares the package and imports dependencies.
+<<Controller.java preamble>>=
+package com.github.jargors;
+@
+We import:
+\begin{itemize}
+\item all parts of the Jargo stack;
+<<Controller.java preamble>>=
+import com.github.jargors.Storage;
+import com.github.jargors.Communicator;
+import com.github.jargors.Client;
+import com.github.jargors.Tools;
+import com.github.jargors.exceptions.ClientException;
+import com.github.jargors.exceptions.ClientFatalException;
+import com.github.jargors.exceptions.DuplicateVertexException;
+import com.github.jargors.exceptions.DuplicateEdgeException;
+import com.github.jargors.exceptions.DuplicateUserException;
+import com.github.jargors.exceptions.EdgeNotFoundException;
+import com.github.jargors.exceptions.UserNotFoundException;
+import com.github.jargors.exceptions.VertexNotFoundException;
+import com.github.jargors.exceptions.GtreeNotLoadedException;
+import com.github.jargors.exceptions.GtreeIllegalSourceException;
+import com.github.jargors.exceptions.GtreeIllegalTargetException;
+@ \item standard utilities for concurrent execution;
+<<Controller.java preamble>>=
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+@ \item standard classes for file operations;
+<<Controller.java preamble>>=
+import java.util.Scanner;
+import java.io.File;
+import java.io.FileNotFoundException;
+@ \item standard map classes for caching various items.
+<<Controller.java preamble>>=
+import java.util.Map;
+import java.util.HashMap;
+@
+<<Controller.java preamble>>=
+import java.sql.SQLException;
+@
+\end{itemize}
+
+\subsection{Class Definition}
+\label{sec:class-definition}
+<<[[Controller]] definition>>=
+public class Controller {
+  <<[[Controller]] member variables>>
+  <<[[Controller]] constructor>>
+  <<[[Controller]] public methods>>
+}
+@
+
+\subsection{Member Variables}
+Member variables are grouped into \emph{containers}, \emph{settings}, and
+\emph{loops}.
+<<[[Controller]] member variables>>=
+<<Container objects>>
+<<Settings objects>>
+<<Loop objects>>
+@
+\hi{Containers.}
+<<Container objects>>=
+private Storage storage;
+private Communicator communicator;
+private Tools tools = new Tools();
+private Client client;
+private Map<Integer, Boolean> lu_seen = new HashMap<>();
+@ %def storage communicator tools client lu_seen
+
+\hi{Settings.} Settings objects configure various aspects of the simulation.
+Some settings can be configured using the public setters, others can
+be configured through system properties, and others are non-configurable.
+<<Settings objects>>=
+private int initial_world_time = 0;
+private int final_world_time = 86400;
+@ %def initial_world_time final_world_time
+The simulation world time is stored in [[world_time]] and is upated by the
+clock loop. The time advances in increments of 1 from [[initial_world_time]]
+to [[final_world_time]].
+<<Settings objects>>=
+private int world_time = 0;
+@ %def world_time
+The [[loop_delay]] configures how many seconds to wait until the controller
+loops start. The update periods configure how often particular loops should
+execute, in seconds.
+<<Settings objects>>=
+private int loop_delay = 0;
+private int engine_update_period = 10;
+// private int deviation_rate = 0.02;
+// private int breakdown_rate = 0.005;
+@ %def loop_delay engine_update_period
+The [[CSHIFT]] setting configures the precision for longitude and latitude
+coordiates (see [[Storage.DBAddNewVertex]](3))\footnote{Beware, if [[CSHIFT]]
+is changed here, it should also be changed in Tools.}.
+<<Settings objects>>=
+private final double CSHIFT = 10000000.0;
+@ %def CSHIFT
+The [[DEBUG]] setting controls whether certain messages are print to screen.
+Pass [[-Djargors.controller.debug=true]] to the [[java]] command to set
+[[DEBUG]] to [[true]].
+<<Settings objects>>=
+private final boolean DEBUG = "true".equals(System.getProperty("jargors.controller.debug"));
+@ %def DEBUG
+
+\hi{Loops.} Jargo's simulation environment comprises four ``loops'', defined
+here, running in parallel. They are executed using Java's
+[[ScheduledExecutorService]] to control timing.
+<<Loop objects>>=
+<<Definition of clock loop>>
+<<Definition of engine loop>>
+<<Definition of request collection loop>>
+<<Definition of request handling loop>>
+<<Definition of server collection loop>>
+@
+
+\subsubsection{Clock Loop}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Member \textcolor{blue}{[[ClockLoop]]} is a [[Runnable]] that does two things.
+First it advances the simulation world time, and then it tells [[communicator]]
+about the new time.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} increments [[world_time]] by 1, may modify
+[[communicator]] by changing [[Communicator.world_time]], may print to
+standard error if [[DEBUG]] is [[true]].\\
+\textbf{Throws:} nothing.\\
+\bottomrule
+\end{tabular}
+<<Definition of clock loop>>=
+private Runnable ClockLoop = () -> {
+  this.communicator.setSimulationWorldTime(++(this.world_time));
+  if (DEBUG) {
+    System.err.printf("[t=%d] Controller.ClockLoop says: %s!",
+        this.world_time, (this.world_time % 2 == 0 ? "ping" : "pong"));
+  }
+};
+@ %def ClockLoop
+
+\subsubsection{Engine Loop}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Member \textcolor{blue}{[[EngineLoop]]} is a [[Runnable]] that simulates
+stochastic effects on the ridesharing vehicles.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} may insert, delete, or update rows in Tables W, CW,
+PD, CPD, and CQ in the database instance underlying [[storage]].\\
+\textbf{Throws:} nothing.\\
+\bottomrule
+\end{tabular}
+<<Definition of engine loop>>=
+private Runnable EngineLoop = () -> {
+  // Idea: what if we apply traffic effects at the time a server route is
+  // submitted? we can do it because we know what the future traffic will
+  // be and we also know where the future location will be of the server.
+  // then, is this loop necessary?
+};
+@ %def EngineLoop
+
+\subsubsection{Request Collection Loop}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Member \textcolor{blue}{[[RequestCollectionLoop]]} is a [[Runnable]] that
+collects requests eligible for assignment at the current world time.  A request
+$r$ is ``eligible'' if it is not assigned at the current world time, and if the
+world time is between the request's early time $r_\texttt{e}$ and
+$(r_\texttt{e}+\texttt{REQUEST\_TIMEOUT})$ (see
+[[Storage.DBQueryQueuedRequests]](1)). If the eligible requests cannot be
+collected, we consider this failure to be fatal and exit immediately. A possible
+reason may be database failure in [[storage]]. \\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} may modify [[client]] by adding objects into
+[[Client.queue]], may put new entries or modify existing entries in
+[[lu_seen]], may print to standard error if [[DEBUG]] is [[true]], or exits the JVM if
+failure occurs.\\
+\textbf{Throws:} nothing.\\
+\bottomrule
+\end{tabular}
+<<Definition of request collection loop>>=
+private Runnable RequestCollectionLoop = () -> {
+  long A0 = 0;
+  if (DEBUG) {
+    A0 = System.currentTimeMillis();
+  }
+  try {
+    int[] output = this.storage.DBQueryQueuedRequests(this.world_time);
+    for (int i = 0; i < (output.length - 6); i += 7) {
+      if (!this.lu_seen.containsKey(output[i]) || this.lu_seen.get(output[i]) == false) {
+        this.client.collectRequest(new int[] {
+          output[(i + 0)],
+          output[(i + 1)],
+          output[(i + 2)],
+          output[(i + 3)],
+          output[(i + 4)],
+          output[(i + 5)],
+          output[(i + 6)] });
+        this.lu_seen.put(output[i], true);
+      }
+    }
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    System.err.println(e.toString());
+    e.printStackTrace();
+    System.exit(1);
+  }
+  if (DEBUG) {
+    System.err.printf("Controller.RequestCollectionLoop completed in %d ms\n",
+        (System.currentTimeMillis() - A0));
+  }
+};
+@ %def RequestCollectionLoop
+
+\subsubsection{Request Handling Loop}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Member \textcolor{blue}{[[RequestHandlingLoop]]} is a [[Runnable]] that
+notifies the client algorithm to check for and process new requests.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} may indirectly modify the database underlying
+[[storage]] depending on the body of [[Client.notifyNew]](0). May print to
+standard error if a [[ClientException]] occurs or [[ClientFatalException]]
+occurs or [[DEBUG]] is [[true]], or exits the JVM if [[ClientFatalException]]
+occurs.\\
+\textbf{Throws:} nothing.\\
+\bottomrule
+\end{tabular}
+<<Definition of request handling loop>>=
+private Runnable RequestHandlingLoop = () -> {
+  long A0 = 0;
+  if (DEBUG) {
+    A0 = System.currentTimeMillis();
+  }
+  try {
+    this.client.notifyNew();
+  } catch (ClientException e) {
+    System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a non-fatal Client exception: %s",
+        this.world_time, e.toString());
+  } catch (ClientFatalException e) {
+    System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a FATAL Client exception: %s",
+        this.world_time, e.toString());
+    e.printStackTrace();
+    System.exit(1);
+  }
+  if (DEBUG) {
+    System.err.printf("Controller.RequestHandlingLoop completed in %d ms\n",
+        (System.currentTimeMillis() - A0));
+  }
+};
+@ %def RequestHandlingLoop
+
+\subsubsection{Server Loop}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Member \textcolor{blue}{[[ServerLoop]]} is a [[Runnable]] that collects
+last-known locations of all active servers at the current word time.  A server
+is ``active'' if its service has not ended, in other words it has not arrived
+at its own destination.  The ``last-known location'' is the waypoint in the
+server's route $w$ with a time component closest to but not exceeding the given
+time, in other words ${w_{\leq t}}_{|w_{\leq t}|}$ (see
+[[Storage.DBQueryServerLocationsActive]](1)).  If the last-known locations
+cannot be collected, we consider this failure to be fatal and exit immediately.
+A possible reason may be database failure in [[storage]]. \\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} may indirectly modify the database underlying
+[[storage]] depending on the body of [[Client.collectServerLocations]](1).
+May print to standard error if [[DEBUG]] is [[true]], or
+exits the JVM if failure occurs.\\
+\textbf{Throws:} nothing.\\
+\bottomrule
+\end{tabular}
+<<Definition of server collection loop>>=
+private Runnable ServerLoop = () -> {
+  long A0 = 0;
+  if (DEBUG) {
+    A0 = System.currentTimeMillis();
+  }
+  try {
+    int[] output = this.storage.DBQueryServerLocationsActive(this.world_time);
+    this.client.collectServerLocations(output);
+  } catch (SQLException e) {
+    System.err.println("Encountered fatal error");
+    System.err.println(e.toString());
+    e.printStackTrace();
+    System.exit(1);
+  }
+  if (DEBUG) {
+    System.err.printf("Controller.ServerLoop completed in %d ms\n",
+        (System.currentTimeMillis() - A0));
+  }
+};
+@ %def ServerLoop
+
+\subsection{Constructor}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Constructor \textcolor{blue}{[[Controller]]}(0) registers a new [[Storage]] to
+the [[storage]] member variable. It also registers a new [[Communicator]] to
+the [[communicator]] member variable. It then registers itself and the new
+[[Storage]] to [[communicator]].\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} creates a new [[Storage]] and [[Communicator]] on the
+memory heap, modifies [[storage]] and [[communicator]].\\
+\textbf{Throws:} nothing.\\
+\bottomrule
+\end{tabular}
+<<[[Controller]] constructor>>=
+public Controller() {
+  this.storage = new Storage();
+  this.communicator = new Communicator();
+  this.communicator.registerStorage(storage);
+  this.communicator.registerController(this);
+}
+@
+
+\section{Public Methods}
+\label{sec:public-methods}
+\hi{General methods.}
+<<[[Controller]] public methods>>=
+<<Initialize new empty database>>
+<<Close database>>
+<<Set client>>
+<<Set initial world time>>
+<<Set final world time>>
+<<Set engine update period>>
+<<Get world time>>
+<<Return request to queue>>
+<<Save backup>>
+<<Load backup>>
+<<Load data model>>
+<<Load road network>>
+<<Load problem>>
+<<Load GTree>>
+<<Start dynamic simulation>>
+<<Start static simulation>>
+@
+\hi{Read methods.}
+<<[[Controller]] public methods>>=
+<<Query custom statement>>
+<<Query all vertices>>
+<<Query all edges>>
+<<Query vertex>>
+<<Query edge>>
+<<Query ridesharing user>>
+<<Query queued requests>>
+<<Query routes>>
+<<Query schedules>>
+<<Query various metrics>>
+@
+\hi{Write methods.}
+<<[[Controller]] public methods>>=
+<<Add new server>>
+<<Add new request>>
+@
+
+\subsection{General methods}
+
+\subsubsection{[[createNewInstance]](0)}
+<<Initialize new empty database>>=
+public void createNewInstance() throws SQLException {
+  this.storage.DBCreateNewInstance();
+}
+@ %def createNewInstance
+
+\subsubsection{[[closeInstance]](0)}
+<<Close database>>=
+public void closeInstance() throws SQLException {
+  this.storage.DBCloseInstance();
+}
+@ %def closeInstance
+
+\subsubsection{[[setClient]](1)}
+<<Set client>>=
+public void setClient(final Client target) {
+  this.client = target;
+  this.client.registerCommunicator(this.communicator);
+}
+@ %def setClient
+
+\subsubsection{[[setInitialWorldTime(1)]]}
+<<Set initial world time>>=
+public void setInitialWorldTime(final int t) {
+  this.initial_world_time = t;
+}
+@ %def setInitialWorldTime
+
+\subsubsection{[[setFinalWorldTime(1)]]}
+<<Set final world time>>=
+public void setFinalWorldTime(final int t) {
+  this.final_world_time = t;
+}
+@ %def setFinalWorldTime
+
+\subsubsection{[[setEngineUpdatePeriod(1)]]}
+<<Set engine update period>>=
+public void setEngineUpdatePeriod(final int t) {
+  this.engine_update_period = t;
+}
+@ %def setEngineUpdatePeriod
+
+\subsubsection{[[getSimulationWorldTime(0)]]}
+<<Get world time>>=
+public int getSimulationWorldTime() {
+  return this.world_time;
+}
+@ %def getSimulationWorldTime
+
+
+\subsubsection{[[returnRequest]](1)}
+<<Return request to queue>>=
+public void returnRequest(final int rid) {
+  this.lu_seen.put(rid, false);
+}
+@ %def returnRequest
+
+\subsubsection{[[save]](1)}
+<<Save backup>>=
+public void saveBackup(final String p) throws SQLException {
+  this.storage.DBSaveBackup(p);
+}
+@ %def saveBackup
+
+\subsubsection{[[loadBackup]](1)}
+<<Load backup>>=
+public void loadBackup(final String p) throws SQLException {
+  this.storage.DBLoadBackup(p);
+  this.storage.DBLoadRoadNetworkFromDB();
+  this.storage.DBLoadUsersFromDB();
+}
+@ %def loadBackup
+
+\subsubsection{[[loadDataModel]](0)}
+<<Load data model>>=
+public void loadDataModel() {
+  this.storage.DBLoadDataModel();
+}
+@
+
+\subsubsection{[[loadRoadNetwork]](1)}
+<<Load road network>>=
+public void loadRoadNetwork(final String f_rnet)
+throws FileNotFoundException, SQLException {
+  Scanner sc = new Scanner(new File(f_rnet));
+  while (sc.hasNext()) {
+    <<..parse a line of the road network>>
+    <<..insert vertex coordinates>>
+    <<..compute edge weight [[dist]]>>
+    <<..insert edge>>
+  }
+  this.tools.registerVertices(this.storage.getReferenceVerticesCache());
+  this.tools.registerEdges(this.storage.getReferenceEdgesCache());
+}
+@ %def loadRoadNetwork
+If a vertex identifier is $0$, then we store its coordinates as $(0,0)$. We
+still call [[Scanner.nextDouble]](0) because we need to advance to the next
+token.
+<<..parse a line of the road network>>=
+final int col0 = sc.nextInt();
+final int col1 = sc.nextInt();
+final int col2 = sc.nextInt();
+final int col3 = (col1 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
+final int col4 = (col1 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
+final int col5 = (col2 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
+final int col6 = (col2 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
+@
+<<..insert vertex coordinates>>=
+try {
+  this.storage.DBAddNewVertex(col1, col3, col4);
+} catch (DuplicateVertexException e) {
+  if (DEBUG) {
+    System.out.println("Warning! Duplicate vertex ignored.");
+  }
+}
+try {
+  this.storage.DBAddNewVertex(col2, col5, col6);
+} catch (DuplicateVertexException e) {
+  if (DEBUG) {
+    System.out.println("Warning! Duplicate vertex ignored.");
+  }
+}
+@
+We use haversine to compute edge weights\footnote{If the distance between two
+vertices is 0 due to rounding, then we round it up to 1.}.  If one of the
+vertices in the edge is a dummy vertex, we set the weight to 0\footnote{The
+dummy vertex should only terminate and never begin an edge in the road network,
+otherwise a shortest path could take a shortcut through the dummy vertex to
+reach any other vertex with 0 weight!}.
+<<..compute edge weight [[dist]]>>=
+final int dist = ((col1 != 0 && col2 != 0)
+  ? tools.computeHaversine(
+        col3/CSHIFT, col4/CSHIFT,
+        col5/CSHIFT, col6/CSHIFT) : 0);
+@
+The fifth parameter is the \textit{initial speed} on all the edges \footnote{In
+the future, the speed on each edge may be recorded directly in the road network
+file instead of hardcoded here.}.
+<<..insert edge>>=
+try {
+  this.storage.DBAddNewEdge(col1, col2, dist, 10);
+} catch (DuplicateEdgeException e) {
+  System.out.println("Warning! Duplicate edge ignored.");
+}
+@
+
+\subsubsection{[[loadProblem(1)]]}
+<<Load problem>>=
+public void loadProblem(String p)
+throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException, SQLException,
+       GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException {
+  Scanner sc = new Scanner(new File(p));
+  <<..skip header rows>>
+  while (sc.hasNext()) {
+    final int uid = sc.nextInt();
+    final int  uo = sc.nextInt();
+    final int  ud = sc.nextInt();
+    final int  uq = sc.nextInt();
+    final int  ue = sc.nextInt();
+    final int  ul = sc.nextInt();
+    final int  ub = this.tools.computeShortestPathDistance(uo, ud);
+    if (uq < 0) {
+      this.addNewServer(new int[] { uid, uq, ue, ul, uo, ud, ub });
+    } else {
+      this.addNewRequest(new int[] { uid, uq, ue, ul, uo, ud, ub });
+    }
+  }
+}
+@ %def loadProblem
+<<..skip header rows>>=
+for (int i = 0; i < 6; i++) {
+  sc.nextLine();
+}
+@
+
+\subsubsection{[[loadGTree]](1)}
+<<Load GTree>>=
+public void loadGTree(String p) throws FileNotFoundException {
+  this.tools.loadGTree(p);
+}
+@ %def loadGTree
+
+\subsubsection{[[start]](0)}
+<<Start dynamic simulation>>=
+public void start(final Consumer app_cb) {
+  this.world_time = this.initial_world_time;
+
+  int simulation_duration = (this.final_world_time - this.initial_world_time);
+
+  ScheduledExecutorService exe = Executors.newScheduledThreadPool(5);
+
+  ScheduledFuture<?> cb1 = exe.scheduleAtFixedRate(
+    this.ClockLoop, 0, 1, TimeUnit.SECONDS);
+
+  ScheduledFuture<?> cb2 = exe.scheduleAtFixedRate(
+    this.EngineLoop, this.loop_delay, this.engine_update_period, TimeUnit.SECONDS);
+
+  int request_collection_period = this.client.getRequestCollectionPeriod();
+  ScheduledFuture<?> cb3 = exe.scheduleAtFixedRate(
+    this.RequestCollectionLoop, this.loop_delay, request_collection_period, TimeUnit.SECONDS);
+
+  int request_handling_period = this.client.getRequestHandlingPeriod();
+  ScheduledFuture<?> cb4 = exe.scheduleAtFixedRate(
+    this.RequestHandlingLoop, this.loop_delay, request_handling_period, TimeUnit.MILLISECONDS);
+
+  int server_collection_period = this.client.getServerLocationCollectionPeriod();
+  ScheduledFuture<?> cb5 = exe.scheduleAtFixedRate(
+    this.ServerLoop, this.loop_delay, server_collection_period, TimeUnit.SECONDS);
+
+  exe.schedule(() -> {
+    cb1.cancel(false);
+    cb2.cancel(false);
+    cb3.cancel(false);
+    cb4.cancel(false);
+    cb5.cancel(false);
+    exe.shutdown();
+    this.client.end();
+    app_cb.accept(true);
+  }, simulation_duration, TimeUnit.SECONDS);
+}
+@ %def start
+
+\subsubsection{[[startStatic]](0)}
+<<Start static simulation>>=
+public void startStatic(final Consumer app_cb) {
+  this.world_time = this.initial_world_time;
+  while (this.world_time < this.final_world_time) {
+    this.ClockLoop.run();  // this.world_time gets incremented here!
+    this.EngineLoop.run();
+    this.ServerLoop.run();
+    this.RequestCollectionLoop.run();
+    this.RequestHandlingLoop.run();
+  }
+  this.client.end();
+  app_cb.accept(true);
+}
+@ %def startStatic
+
+
+\subsection{Read Methods}
+\subsubsection{[[query]](2)}
+<<Query custom statement>>=
+public int[] query(String sql, int ncols) throws SQLException {
+  return storage.DBQuery(sql, ncols);
+}
+@ %def query
+
+\subsubsection{[[queryAllVertices]](0)}
+<<Query all vertices>>=
+public int[] queryAllVertices() throws SQLException {
+  return storage.DBQueryAllVertices();
+}
+@ %def queryAllVertices
+
+\subsubsection{[[queryAllEdges]](0)}
+<<Query all edges>>=
+public int[] queryAllEdges() throws SQLException {
+  return storage.DBQueryAllEdges();
+}
+@ %def queryAllEdges
+
+\subsubsection{[[queryVertex]](1)}
+<<Query vertex>>=
+public int[] queryVertex(final int v) throws VertexNotFoundException, SQLException {
+  return storage.DBQueryVertex(v);
+}
+@ %def queryVertex
+
+\subsubsection{[[queryEdge]](2)}
+<<Query edge>>=
+public int[] queryEdge(final int v1, final int v2) throws EdgeNotFoundException, SQLException {
+  return storage.DBQueryEdge(v1, v2);
+}
+@ %def queryEdge
+
+\subsubsection{[[queryUser]](1)}
+<<Query ridesharing user>>=
+public int[] queryUser(final int rid) throws UserNotFoundException, SQLException {
+  return storage.DBQueryUser(rid);
+}
+@ %def queryUser
+
+\subsubsection{[[queryQueuedRequests]](1)}
+<<Query queued requests>>=
+public int[] queryQueuedRequests(final int t) throws SQLException {
+  return storage.DBQueryQueuedRequests(t);
+}
+@ %def queryQueuedRequests
+
+\subsubsection{[[queryRoute]](1)}
+<<Query routes>>=
+public int[] queryRoute(final int sid) throws SQLException {
+  return storage.DBQueryServerRoute(sid);
+}
+@ %def queryRoute
+
+\subsubsection{[[querySchedule]](1)}
+<<Query schedules>>=
+public int[] querySchedule(final int sid) throws SQLException {
+  return storage.DBQueryServerSchedule(sid);
+}
+@ %def querySchedule
+
+\subsubsection{[[queryCountVertices]](0)}
+<<Query various metrics>>=
+public int[] queryCountVertices() throws SQLException {
+  return storage.DBQueryCountVertices();
+}
+@ %def queryCountVertices
+
+\subsubsection{[[queryCountEdges]](0)}
+<<Query various metrics>>=
+public int[] queryCountEdges() throws SQLException {
+  return storage.DBQueryCountEdges();
+}
+@ %def queryCountEdges
+
+\subsubsection{[[queryStatisticsEdges]](0)}
+<<Query various metrics>>=
+public int[] queryStatisticsEdges() throws SQLException {
+  return storage.DBQueryStatisticsEdges();
+}
+@ %def queryStatisticsEdges
+
+\subsubsection{[[queryMBR]](0)}
+<<Query various metrics>>=
+public int[] queryMBR() throws SQLException {
+  return storage.DBQueryMBR();
+}
+@ %def queryMBR
+
+\subsubsection{[[queryCountServers]](0)}
+<<Query various metrics>>=
+public int[] queryCountServers() throws SQLException {
+  return storage.DBQueryCountServers();
+}
+@ %def queryCountServers
+
+\subsubsection{[[queryCountRequests]](0)}
+<<Query various metrics>>=
+public int[] queryCountRequests() throws SQLException {
+  return storage.DBQueryCountRequests();
+}
+@ %def queryCountRequests
+
+\subsubsection{[[queryServiceRate]](0)}
+<<Query various metrics>>=
+public int[] queryServiceRate() throws SQLException {
+  return storage.DBQueryServiceRate();
+}
+@ %def queryServiceRate
+
+\subsubsection{[[queryBaseDistanceTotal]](0)}
+<<Query various metrics>>=
+public int[] queryBaseDistanceTotal() throws SQLException {
+  return storage.DBQueryBaseDistanceTotal();
+}
+@ %def queryBaseDistanceTotal
+
+\subsubsection{[[queryServerBaseDistanceTotal]](0)}
+<<Query various metrics>>=
+public int[] queryServerBaseDistanceTotal() throws SQLException {
+  return storage.DBQueryServerBaseDistanceTotal();
+}
+@ %def queryServerBaseDistanceTotal
+
+\subsubsection{[[queryRequestBaseDistanceTotal]](0)}
+<<Query various metrics>>=
+public int[] queryRequestBaseDistanceTotal() throws SQLException {
+  return storage.DBQueryRequestBaseDistanceTotal();
+}
+@ %def queryRequestBaseDistanceTotal
+
+\subsubsection{[[queryRequestBaseDistanceUnassigned]](0)}
+<<Query various metrics>>=
+public int[] queryRequestBaseDistanceUnassigned() throws SQLException {
+  return storage.DBQueryRequestBaseDistanceUnassigned();
+}
+@ %def queryRequestBaseDistanceUnassigned
+
+\subsubsection{[[queryServerTravelDistanceTotal]](0)}
+<<Query various metrics>>=
+public int[] queryServerTravelDistanceTotal() throws SQLException {
+  return storage.DBQueryServerTravelDistanceTotal();
+}
+@ %def queryServerTravelDistanceTotal
+
+\subsubsection{[[queryServerCruisingDistanceTotal]](0)}
+<<Query various metrics>>=
+public int[] queryServerCruisingDistanceTotal() throws SQLException {
+  return storage.DBQueryServerCruisingDistanceTotal();
+}
+@ %def queryServerCruisingDistanceTotal
+
+\subsubsection{[[queryServerServiceDistanceTotal]](0)}
+<<Query various metrics>>=
+public int[] queryServerServiceDistanceTotal() throws SQLException {
+  return storage.DBQueryServerServiceDistanceTotal();
+}
+@ %def queryServerServiceDistanceTotal
+
+\subsubsection{[[queryRequestDetourDistanceTotal]](0)}
+<<Query various metrics>>=
+public int[] queryRequestDetourDistanceTotal() throws SQLException {
+  return storage.DBQueryRequestDetourDistanceTotal();
+}
+@ %def queryRequestDetourDistanceTotal
+
+\subsubsection{[[queryRequestTransitDistanceTotal]](0)}
+<<Query various metrics>>=
+public int[] queryRequestTransitDistanceTotal() throws SQLException {
+  return storage.DBQueryRequestTransitDistanceTotal();
+}
+@ %def queryRequestTransitDistanceTotal
+
+\subsubsection{[[queryServerTravelDurationTotal]](0)}
+<<Query various metrics>>=
+public int[] queryServerTravelDurationTotal() throws SQLException {
+  return storage.DBQueryServerTravelDurationTotal();
+}
+@ %def queryServerTravelDurationTotal
+
+\subsubsection{[[queryRequestPickupDurationTotal]](0)}
+<<Query various metrics>>=
+public int[] queryRequestPickupDurationTotal() throws SQLException {
+  return storage.DBQueryRequestPickupDurationTotal();
+}
+@ %def queryRequestPickupDurationTotal
+
+\subsubsection{[[queryRequestTransitDurationTotal]](0)}
+<<Query various metrics>>=
+public int[] queryRequestTransitDurationTotal() throws SQLException {
+  return storage.DBQueryRequestTransitDurationTotal();
+}
+@ %def queryRequestTransitDurationTotal
+
+\subsubsection{[[queryRequestTravelDurationTotal]](0)}
+<<Query various metrics>>=
+public int[] queryRequestTravelDurationTotal() throws SQLException {
+  return storage.DBQueryRequestTravelDurationTotal();
+}
+@ %def queryRequestTravelDurationTotal
+
+\subsubsection{[[queryRequestDepartureTime]](1)}
+<<Query various metrics>>=
+public int[] queryRequestDepartureTime(final int rid) throws SQLException {
+  return storage.DBQueryRequestDepartureTime(rid);
+}
+@ %def queryRequestDepartureTime
+
+\subsubsection{[[queryServerDepartureTime]](1)}
+<<Query various metrics>>=
+public int[] queryServerDepartureTime(final int sid) throws SQLException {
+  return storage.DBQueryServerDepartureTime(sid);
+}
+@ %def queryServerDepartureTime
+
+\subsubsection{[[queryRequestArrivalTime]](1)}
+<<Query various metrics>>=
+public int[] queryRequestArrivalTime(final int rid) throws SQLException {
+  return storage.DBQueryRequestArrivalTime(rid);
+}
+@ %def queryRequestArrivalTime
+
+\subsubsection{[[queryServerArrivalTime]](1)}
+<<Query various metrics>>=
+public int[] queryServerArrivalTime(final int sid) throws SQLException {
+  return storage.DBQueryServerArrivalTime(sid);
+}
+@ %def queryServerArrivalTime
+
+\subsection{Write Methods}
+\subsubsection{[[addNewServer]](1)}
+<<Add new server>>=
+public void addNewServer(final int[] u)
+throws DuplicateUserException, EdgeNotFoundException, SQLException,
+       GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException {
+  this.storage.DBAddNewServer(u, this.tools.computeRoute(u[4], u[5], u[2]));
+}
+@ %def addNewServer
+
+\subsubsection{[[addNewRequest]](1)}
+<<Add new request>>=
+public void addNewRequest(final int[] u) throws DuplicateUserException, SQLException {
+  this.storage.DBAddNewRequest(u);
+}
+@ %def addNewRequest
+
+\appendix
+
+\section{Appendix: List of Chunks}
+\label{ap:list-of-chunks}
+\nowebchunks
+
+\section{Appendix: List of Identifiers}
+\label{ap:list-of-identifiers}
+\nowebindex
