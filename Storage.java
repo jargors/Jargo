@@ -75,8 +75,7 @@ public class Storage {
       throw e;
     }
   }
-  public int[] DBQueryVertex(final int v)
-  throws VertexNotFoundException, SQLException {
+  public int[] DBQueryVertex(final int v) throws VertexNotFoundException {
     if (!this.lu_vertices.containsKey(v)) {
       throw new VertexNotFoundException("Vertex "+v+" not found.");
     }
@@ -89,8 +88,7 @@ public class Storage {
       throw e;
     }
   }
-  public int[] DBQueryEdge(final int v1, final int v2)
-  throws EdgeNotFoundException, SQLException {
+  public int[] DBQueryEdge(final int v1, final int v2) throws EdgeNotFoundException {
     if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
       throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
     }
@@ -139,7 +137,7 @@ public class Storage {
     }
   }
   public int[] DBQueryUser(final int uid)
-  throws UserNotFoundException, SQLException {
+  throws UserNotFoundException {
     if (!this.lu_users.containsKey(uid)) {
       throw new UserNotFoundException("User "+uid+" not found.");
     }

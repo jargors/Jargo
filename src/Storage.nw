@@ -3424,8 +3424,7 @@ public int[] DBQueryCountEdges() throws SQLException {
 \rowcolor{TableTitle}
 Method \textcolor{blue}{[[DBQueryVertex]]}(1) returns the longitude and
 latitude coordinates of the given vertex. If the vertex does not exist,
-a [[VertexNotFoundException]] is thrown.
-A [[SQLException]] is thrown in case of database failure.\\
+a [[VertexNotFoundException]] is thrown.\\
 \midrule
 \textbf{Parameters:} \\
 \begin{tabular}{lp{116mm}}
@@ -3442,13 +3441,11 @@ Integer [[v]] (param. 1):&vertex identifier.
 };
 \end{tikzpicture}\\
 \textbf{Side Effects:} none.\\
-\textbf{Throws:} [[VertexNotFoundException]] if vertex does not exist, or
-[[SQLException]] if database failure is encountered.\\
+\textbf{Throws:} [[VertexNotFoundException]] if vertex does not exist\\
 \bottomrule
 \end{tabular}
 <<Query vertex>>=
-public int[] DBQueryVertex(final int v)
-throws VertexNotFoundException, SQLException {
+public int[] DBQueryVertex(final int v) throws VertexNotFoundException {
   if (!this.lu_vertices.containsKey(v)) {
     throw new VertexNotFoundException("Vertex "+v+" not found.");
   }
@@ -3496,8 +3493,7 @@ public int[] DBQueryAllVertices() throws SQLException {
 \rowcolor{TableTitle}
 Method \textcolor{blue}{[[DBQueryEdge]]}(2) returns the distance and
 maximum free-flow speed along the given edge.
-An [[EdgeNotFoundException]] is thrown if the edge does not exist.
-A [[SQLException]] is thrown in case of database failure.\\
+An [[EdgeNotFoundException]] is thrown if the edge does not exist.\\
 \midrule
 \textbf{Parameters:} \\
 \begin{tabular}{lp{116mm}}
@@ -3514,12 +3510,11 @@ Integer [[v2]] (param. 2):&target vertex identifier $v_2$
 };
 \end{tikzpicture}\\
 \textbf{Side Effects:} none.\\
-\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\textbf{Throws:} [[EdgeNotFoundException]] if edge does not exit.\\
 \bottomrule
 \end{tabular}
 <<Query edge>>=
-public int[] DBQueryEdge(final int v1, final int v2)
-throws EdgeNotFoundException, SQLException {
+public int[] DBQueryEdge(final int v1, final int v2) throws EdgeNotFoundException {
   if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
     throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
   }
@@ -3741,8 +3736,7 @@ public int[] DBQueryAllUsers() throws SQLException {
 \rowcolor{TableTitle}
 Method \textcolor{blue}{[[DBQueryUser]]}(0) returns the properties of the
 given user.
-A [[UserNotFoundException]] is thrown if the user does not exist.
-A [[SQLException]] is thrown in case of database failure.\\
+A [[UserNotFoundException]] is thrown if the user does not exist.\\
 \midrule
 \textbf{Parameters:} \\
 \begin{tabular}{lp{116mm}}
@@ -3764,13 +3758,12 @@ Integer [[uid]] (param. 1):&user identifier for user $u$
 };
 \end{tikzpicture}\\
 \textbf{Side Effects:} none.\\
-\textbf{Throws:} [[UserNotFoundException]] if user does not exist, or
-[[SQLException]] if database failure is encountered.\\
+\textbf{Throws:} [[UserNotFoundException]] if user does not exist.\\
 \bottomrule
 \end{tabular}
 <<Query ridesharing user>>=
 public int[] DBQueryUser(final int uid)
-throws UserNotFoundException, SQLException {
+throws UserNotFoundException {
   if (!this.lu_users.containsKey(uid)) {
     throw new UserNotFoundException("User "+uid+" not found.");
   }
