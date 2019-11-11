@@ -27,11 +27,13 @@
 \label{sec:introduction}
 Jargo's communicator intends to be the sole way for Jargo clients to interact
 with the Jargo simulated world (Figure~\ref{fig:interface-fig}). The
-
 communicator exposes only the subset of Jargo's storage interface API that a
 client would possibly have access to in the real world, including querying and
-submitting server routes and schedules.  The communicator is developed using
-the Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
+submitting server routes and schedules. The communicator also performs some
+\emph{input validation} on submitted routes to prevent clients from overwriting
+historical traveled routes depending on time of submission.  The communicator
+is developed using the
+Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
 programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
 ({\tt{}src/Communicator.nw}) is the source for the documentation
 ({\tt{}doc/Communicator.tex}) and the Java code
@@ -60,11 +62,17 @@ package com.github.jargors;
 \nwenddocs{}\nwbegincode{5}\sublabel{NWvbkzY-3IAuyF-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-3IAuyF-2}}}\moddef{Communicator.java preamble~{\nwtagstyle{}\subpageref{NWvbkzY-3IAuyF-1}}}\plusendmoddef
 import com.github.jargors.Storage;
 import com.github.jargors.Controller;
-import java.util.function.Supplier;
-import java.time.LocalDateTime;
+import com.github.jargors.exceptions.ClientException;
+import com.github.jargors.exceptions.ClientFatalException;
+import com.github.jargors.exceptions.DuplicateVertexException;
+import com.github.jargors.exceptions.DuplicateEdgeException;
+import com.github.jargors.exceptions.DuplicateUserException;
+import com.github.jargors.exceptions.EdgeNotFoundException;
+import com.github.jargors.exceptions.UserNotFoundException;
+import com.github.jargors.exceptions.VertexNotFoundException;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.sql.SQLException;
 \nwendcode{}\nwbegindocs{6}\nwdocspar
 
 \subsection{Class Definition}
@@ -74,20 +82,18 @@ public class Communicator \{
   \LA{}\code{}Communicator\edoc{} member variables~{\nwtagstyle{}\subpageref{NWvbkzY-18oERh-1}}\RA{}
   \LA{}\code{}Communicator\edoc{} constructor~{\nwtagstyle{}\subpageref{NWvbkzY-1EwPlT-1}}\RA{}
   \LA{}\code{}Communicator\edoc{} public methods~{\nwtagstyle{}\subpageref{NWvbkzY-3YjONp-1}}\RA{}
-  \LA{}\code{}Communicator\edoc{} private methods~{\nwtagstyle{}\subpageref{NWvbkzY-yUDLL-1}}\RA{}
 \}
 \nwendcode{}\nwbegindocs{8}\nwdocspar
 
 \subsection{Member Variables}
 \label{sec:member-variables}
-We define a {\tt{}Storage} and a container for the simulation world time.
 \nwenddocs{}\nwbegincode{9}\sublabel{NWvbkzY-18oERh-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-18oERh-1}}}\moddef{\code{}Communicator\edoc{} member variables~{\nwtagstyle{}\subpageref{NWvbkzY-18oERh-1}}}\endmoddef\nwused{\\{NWvbkzY-1DdrEr-1}}
 private Storage storage;
 private Controller controller;
 private int world_time = 0;
-private boolean DEBUG = false;
-\nwindexdefn{storage}{storage}{NWvbkzY-18oERh-1}\nwindexdefn{world{\char95}time}{world:untime}{NWvbkzY-18oERh-1}\nwindexdefn{DEBUG}{DEBUG}{NWvbkzY-18oERh-1}\eatline
-\nwidentdefs{\\{{DEBUG}{DEBUG}}\\{{storage}{storage}}\\{{world{\char95}time}{world:untime}}}\nwendcode{}\nwbegindocs{10}\nwdocspar
+private final boolean DEBUG = "true".equals(System.getProperty("jargors.communicator.debug"));
+\nwindexdefn{this.storage}{this.storage}{NWvbkzY-18oERh-1}\nwindexdefn{controller}{controller}{NWvbkzY-18oERh-1}\nwindexdefn{world{\char95}time}{world:untime}{NWvbkzY-18oERh-1}\nwindexdefn{DEBUG}{DEBUG}{NWvbkzY-18oERh-1}\eatline
+\nwidentdefs{\\{{controller}{controller}}\\{{DEBUG}{DEBUG}}\\{{this.storage}{this.storage}}\\{{world{\char95}time}{world:untime}}}\nwendcode{}\nwbegindocs{10}\nwdocspar
 \subsection{Constructor}
 \label{sec:constructor}
 \nwenddocs{}\nwbegincode{11}\sublabel{NWvbkzY-1EwPlT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-1EwPlT-1}}}\moddef{\code{}Communicator\edoc{} constructor~{\nwtagstyle{}\subpageref{NWvbkzY-1EwPlT-1}}}\endmoddef\nwused{\\{NWvbkzY-1DdrEr-1}}
@@ -98,9 +104,8 @@ public Communicator() \{ \}
 \label{sec:public-methods}
 \hi{General Methods.}
 \nwenddocs{}\nwbegincode{13}\sublabel{NWvbkzY-3YjONp-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-3YjONp-1}}}\moddef{\code{}Communicator\edoc{} public methods~{\nwtagstyle{}\subpageref{NWvbkzY-3YjONp-1}}}\endmoddef\nwalsodefined{\\{NWvbkzY-3YjONp-2}\\{NWvbkzY-3YjONp-3}}\nwused{\\{NWvbkzY-1DdrEr-1}}
-\LA{}Set debug~{\nwtagstyle{}\subpageref{NWvbkzY-3gdf2G-1}}\RA{}
-\LA{}Set storage~{\nwtagstyle{}\subpageref{NWvbkzY-2XfZ13-1}}\RA{}
-\LA{}Set controller~{\nwtagstyle{}\subpageref{NWvbkzY-ttlf9-1}}\RA{}
+\LA{}Register storage~{\nwtagstyle{}\subpageref{NWvbkzY-36wG7h-1}}\RA{}
+\LA{}Register controller~{\nwtagstyle{}\subpageref{NWvbkzY-133LE8-1}}\RA{}
 \LA{}Set/get simulation world time~{\nwtagstyle{}\subpageref{NWvbkzY-3SIXWk-1}}\RA{}
 \LA{}Get reference to vertices cache~{\nwtagstyle{}\subpageref{NWvbkzY-21qmOa-1}}\RA{}
 \LA{}Get reference to edges cache~{\nwtagstyle{}\subpageref{NWvbkzY-3KzwIy-1}}\RA{}
@@ -129,232 +134,191 @@ public Communicator() \{ \}
 \subsection{General Methods}
 \label{sec:general-methods}
 
-\subsubsection{{\tt{}\protect\nosublabel{NWvbkzY-3YjONp-3-u9}\protect\nwindexuse{setDebug}{setDebug}{NWvbkzY-3gdf2G-1}setDebug}(1)}
-\nwenddocs{}\nwbegincode{19}\sublabel{NWvbkzY-3gdf2G-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-3gdf2G-1}}}\moddef{Set debug~{\nwtagstyle{}\subpageref{NWvbkzY-3gdf2G-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-1}}
-public void setDebug(boolean flag) \{
-  DEBUG = flag;
+\subsubsection{{\tt{}registerStorage}(1)}
+\nwenddocs{}\nwbegincode{19}\sublabel{NWvbkzY-36wG7h-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-36wG7h-1}}}\moddef{Register storage~{\nwtagstyle{}\subpageref{NWvbkzY-36wG7h-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-1}}
+public void registerStorage(final Storage src) \{
+  this.storage = src;
 \}
-\nwindexdefn{setDebug}{setDebug}{NWvbkzY-3gdf2G-1}\eatline
-\nwidentdefs{\\{{setDebug}{setDebug}}}\nwidentuses{\\{{DEBUG}{DEBUG}}}\nwindexuse{DEBUG}{DEBUG}{NWvbkzY-3gdf2G-1}\nwendcode{}\nwbegindocs{20}\nwdocspar
-\subsubsection{{\tt{}\protect\nwindexuse{setStorage}{setStorage}{NWvbkzY-2XfZ13-1}setStorage}(1)}
-\nwenddocs{}\nwbegincode{21}\sublabel{NWvbkzY-2XfZ13-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-2XfZ13-1}}}\moddef{Set storage~{\nwtagstyle{}\subpageref{NWvbkzY-2XfZ13-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-1}}
-public void setStorage(Storage src) \{
-  storage = src;
+\nwindexdefn{setStorage}{setStorage}{NWvbkzY-36wG7h-1}\eatline
+\nwidentdefs{\\{{setStorage}{setStorage}}}\nwidentuses{\\{{this.storage}{this.storage}}}\nwindexuse{this.storage}{this.storage}{NWvbkzY-36wG7h-1}\nwendcode{}\nwbegindocs{20}\nwdocspar
+\subsubsection{{\tt{}registerController}(1)}
+\nwenddocs{}\nwbegincode{21}\sublabel{NWvbkzY-133LE8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-133LE8-1}}}\moddef{Register controller~{\nwtagstyle{}\subpageref{NWvbkzY-133LE8-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-1}}
+public void registerController(final Controller src) \{
+  this.controller = src;
 \}
-\nwindexdefn{setStorage}{setStorage}{NWvbkzY-2XfZ13-1}\eatline
-\nwidentdefs{\\{{setStorage}{setStorage}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NWvbkzY-2XfZ13-1}\nwendcode{}\nwbegindocs{22}\nwdocspar
-\subsubsection{{\tt{}\protect\nwindexuse{setController}{setController}{NWvbkzY-ttlf9-1}setController}(1)}
-\nwenddocs{}\nwbegincode{23}\sublabel{NWvbkzY-ttlf9-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-ttlf9-1}}}\moddef{Set controller~{\nwtagstyle{}\subpageref{NWvbkzY-ttlf9-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-1}}
-public void setController(Controller src) \{
-  controller = src;
-\}
-\nwindexdefn{setController}{setController}{NWvbkzY-ttlf9-1}\eatline
-\nwidentdefs{\\{{setController}{setController}}}\nwendcode{}\nwbegindocs{24}\nwdocspar
+\nwindexdefn{setController}{setController}{NWvbkzY-133LE8-1}\eatline
+\nwidentdefs{\\{{setController}{setController}}}\nwidentuses{\\{{controller}{controller}}}\nwindexuse{controller}{controller}{NWvbkzY-133LE8-1}\nwendcode{}\nwbegindocs{22}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{setSimulationWorldTime}{setSimulationWorldTime}{NWvbkzY-3SIXWk-1}setSimulationWorldTime}(1)}
 We depend on the controller to tell the simulation interface about the current
 world time.
-\nwenddocs{}\nwbegincode{25}\sublabel{NWvbkzY-3SIXWk-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-3SIXWk-1}}}\moddef{Set/get simulation world time~{\nwtagstyle{}\subpageref{NWvbkzY-3SIXWk-1}}}\endmoddef\nwalsodefined{\\{NWvbkzY-3SIXWk-2}}\nwused{\\{NWvbkzY-3YjONp-1}}
-public void setSimulationWorldTime(int t) \{
-  world_time = t;
+\nwenddocs{}\nwbegincode{23}\sublabel{NWvbkzY-3SIXWk-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-3SIXWk-1}}}\moddef{Set/get simulation world time~{\nwtagstyle{}\subpageref{NWvbkzY-3SIXWk-1}}}\endmoddef\nwalsodefined{\\{NWvbkzY-3SIXWk-2}}\nwused{\\{NWvbkzY-3YjONp-1}}
+public void setSimulationWorldTime(final int t) \{
+  this.world_time = t;
 \}
 \nwindexdefn{setSimulationWorldTime}{setSimulationWorldTime}{NWvbkzY-3SIXWk-1}\eatline
-\nwidentdefs{\\{{setSimulationWorldTime}{setSimulationWorldTime}}}\nwidentuses{\\{{world{\char95}time}{world:untime}}}\nwindexuse{world{\char95}time}{world:untime}{NWvbkzY-3SIXWk-1}\nwendcode{}\nwbegindocs{26}\nwdocspar
+\nwidentdefs{\\{{setSimulationWorldTime}{setSimulationWorldTime}}}\nwidentuses{\\{{world{\char95}time}{world:untime}}}\nwindexuse{world{\char95}time}{world:untime}{NWvbkzY-3SIXWk-1}\nwendcode{}\nwbegindocs{24}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{getSimulationWorldTime}{getSimulationWorldTime}{NWvbkzY-3SIXWk-2}getSimulationWorldTime}(0)}
-\nwenddocs{}\nwbegincode{27}\sublabel{NWvbkzY-3SIXWk-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-3SIXWk-2}}}\moddef{Set/get simulation world time~{\nwtagstyle{}\subpageref{NWvbkzY-3SIXWk-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{25}\sublabel{NWvbkzY-3SIXWk-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-3SIXWk-2}}}\moddef{Set/get simulation world time~{\nwtagstyle{}\subpageref{NWvbkzY-3SIXWk-1}}}\plusendmoddef
 public int getSimulationWorldTime() \{
-  return world_time;
+  return this.world_time;
 \}
 \nwindexdefn{getSimulationWorldTime}{getSimulationWorldTime}{NWvbkzY-3SIXWk-2}\eatline
-\nwidentdefs{\\{{getSimulationWorldTime}{getSimulationWorldTime}}}\nwidentuses{\\{{world{\char95}time}{world:untime}}}\nwindexuse{world{\char95}time}{world:untime}{NWvbkzY-3SIXWk-2}\nwendcode{}\nwbegindocs{28}\nwdocspar
+\nwidentdefs{\\{{getSimulationWorldTime}{getSimulationWorldTime}}}\nwidentuses{\\{{world{\char95}time}{world:untime}}}\nwindexuse{world{\char95}time}{world:untime}{NWvbkzY-3SIXWk-2}\nwendcode{}\nwbegindocs{26}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{getReferenceVerticesCache}{getReferenceVerticesCache}{NWvbkzY-21qmOa-1}getReferenceVerticesCache}(0)}
-\nwenddocs{}\nwbegincode{29}\sublabel{NWvbkzY-21qmOa-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-21qmOa-1}}}\moddef{Get reference to vertices cache~{\nwtagstyle{}\subpageref{NWvbkzY-21qmOa-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-1}}
+\nwenddocs{}\nwbegincode{27}\sublabel{NWvbkzY-21qmOa-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-21qmOa-1}}}\moddef{Get reference to vertices cache~{\nwtagstyle{}\subpageref{NWvbkzY-21qmOa-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-1}}
 public final ConcurrentHashMap<Integer, int[]> getReferenceVerticesCache() \{
-  return storage.getReferenceVerticesCache();
+  return this.storage.getReferenceVerticesCache();
 \}
 \nwindexdefn{getReferenceVerticesCache}{getReferenceVerticesCache}{NWvbkzY-21qmOa-1}\eatline
-\nwidentdefs{\\{{getReferenceVerticesCache}{getReferenceVerticesCache}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NWvbkzY-21qmOa-1}\nwendcode{}\nwbegindocs{30}\nwdocspar
+\nwidentdefs{\\{{getReferenceVerticesCache}{getReferenceVerticesCache}}}\nwidentuses{\\{{this.storage}{this.storage}}}\nwindexuse{this.storage}{this.storage}{NWvbkzY-21qmOa-1}\nwendcode{}\nwbegindocs{28}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{getReferenceEdgesCache}{getReferenceEdgesCache}{NWvbkzY-3KzwIy-1}getReferenceEdgesCache}(0)}
-\nwenddocs{}\nwbegincode{31}\sublabel{NWvbkzY-3KzwIy-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-3KzwIy-1}}}\moddef{Get reference to edges cache~{\nwtagstyle{}\subpageref{NWvbkzY-3KzwIy-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-1}}
+\nwenddocs{}\nwbegincode{29}\sublabel{NWvbkzY-3KzwIy-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-3KzwIy-1}}}\moddef{Get reference to edges cache~{\nwtagstyle{}\subpageref{NWvbkzY-3KzwIy-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-1}}
 public final ConcurrentHashMap<Integer,
     ConcurrentHashMap<Integer, int[]>> getReferenceEdgesCache() \{
-  return storage.getReferenceEdgesCache();
+  return this.storage.getReferenceEdgesCache();
 \}
 \nwindexdefn{getReferenceEdgesCache}{getReferenceEdgesCache}{NWvbkzY-3KzwIy-1}\eatline
-\nwidentdefs{\\{{getReferenceEdgesCache}{getReferenceEdgesCache}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NWvbkzY-3KzwIy-1}\nwendcode{}\nwbegindocs{32}\nwdocspar
+\nwidentdefs{\\{{getReferenceEdgesCache}{getReferenceEdgesCache}}}\nwidentuses{\\{{this.storage}{this.storage}}}\nwindexuse{this.storage}{this.storage}{NWvbkzY-3KzwIy-1}\nwendcode{}\nwbegindocs{30}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{getReferenceUsersCache}{getReferenceUsersCache}{NWvbkzY-1EJdXT-1}getReferenceUsersCache}(0)}
-\nwenddocs{}\nwbegincode{33}\sublabel{NWvbkzY-1EJdXT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-1EJdXT-1}}}\moddef{Get reference to users cache~{\nwtagstyle{}\subpageref{NWvbkzY-1EJdXT-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-1}}
+\nwenddocs{}\nwbegincode{31}\sublabel{NWvbkzY-1EJdXT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-1EJdXT-1}}}\moddef{Get reference to users cache~{\nwtagstyle{}\subpageref{NWvbkzY-1EJdXT-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-1}}
 public final ConcurrentHashMap<Integer, int[]> getReferenceUsersCache() \{
-  return storage.getReferenceUsersCache();
+  return this.storage.getReferenceUsersCache();
 \}
 \nwindexdefn{getReferenceUsersCache}{getReferenceUsersCache}{NWvbkzY-1EJdXT-1}\eatline
-\nwidentdefs{\\{{getReferenceUsersCache}{getReferenceUsersCache}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NWvbkzY-1EJdXT-1}\nwendcode{}\nwbegindocs{34}\nwdocspar
+\nwidentdefs{\\{{getReferenceUsersCache}{getReferenceUsersCache}}}\nwidentuses{\\{{this.storage}{this.storage}}}\nwindexuse{this.storage}{this.storage}{NWvbkzY-1EJdXT-1}\nwendcode{}\nwbegindocs{32}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{returnRequest}{returnRequest}{NWvbkzY-3SURrj-1}returnRequest}(1)}
-\nwenddocs{}\nwbegincode{35}\sublabel{NWvbkzY-3SURrj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-3SURrj-1}}}\moddef{Return request to queue~{\nwtagstyle{}\subpageref{NWvbkzY-3SURrj-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-1}}
-public void returnRequest(int rid) \{
-  controller.returnRequest(rid);
+\nwenddocs{}\nwbegincode{33}\sublabel{NWvbkzY-3SURrj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-3SURrj-1}}}\moddef{Return request to queue~{\nwtagstyle{}\subpageref{NWvbkzY-3SURrj-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-1}}
+public void returnRequest(final int rid) \{
+  this.controller.returnRequest(rid);
 \}
 \nwindexdefn{returnRequest}{returnRequest}{NWvbkzY-3SURrj-1}\eatline
-\nwidentdefs{\\{{returnRequest}{returnRequest}}}\nwendcode{}\nwbegindocs{36}\nwdocspar
+\nwidentdefs{\\{{returnRequest}{returnRequest}}}\nwidentuses{\\{{controller}{controller}}}\nwindexuse{controller}{controller}{NWvbkzY-3SURrj-1}\nwendcode{}\nwbegindocs{34}\nwdocspar
 \subsection{Write Methods}
 \label{sec:write-methods}
 
-If the submitted route results in overwriting waypoints that a server has
-already visited, in other words if {\tt{}route[0]} is less than {\tt{}\protect\nwindexuse{world{\char95}time}{world:untime}{NWvbkzY-18oERh-1}world{\char95}time},
-then Communicator rejects the write. The client should be aware and handle
-appropriately. To reduce rejections, ensure any submitted route does not
-overwrite traveled waypoints.
-
 \subsubsection{{\tt{}\protect\nwindexuse{updateServerRoute}{updateServerRoute}{NWvbkzY-4VFddh-1}updateServerRoute}(3)}
-\nwenddocs{}\nwbegincode{37}\sublabel{NWvbkzY-4VFddh-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-4VFddh-1}}}\moddef{Update server route~{\nwtagstyle{}\subpageref{NWvbkzY-4VFddh-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-2}}
-public boolean updateServerRoute(int sid, int[] route, int[] sched) \{
+\nwenddocs{}\nwbegincode{35}\sublabel{NWvbkzY-4VFddh-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-4VFddh-1}}}\moddef{Update server route~{\nwtagstyle{}\subpageref{NWvbkzY-4VFddh-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-2}}
+public boolean updateServerRoute(final int sid, final int[] route, final int[] sched)
+throws UserNotFoundException, EdgeNotFoundException, SQLException \{
   boolean success = false;
-  if (route[0] >= world_time) \{
-    storage.DBUpdateServerRoute(sid, route, sched);
+  if (route[0] >= this.world_time) \{
+    this.storage.DBUpdateServerRoute(sid, route, sched);
     success = true;
   \}
   return success;
 \}
 \nwindexdefn{updateServerRoute}{updateServerRoute}{NWvbkzY-4VFddh-1}\eatline
-\nwidentdefs{\\{{updateServerRoute}{updateServerRoute}}}\nwidentuses{\\{{storage}{storage}}\\{{world{\char95}time}{world:untime}}}\nwindexuse{storage}{storage}{NWvbkzY-4VFddh-1}\nwindexuse{world{\char95}time}{world:untime}{NWvbkzY-4VFddh-1}\nwendcode{}\nwbegindocs{38}\nwdocspar
+\nwidentdefs{\\{{updateServerRoute}{updateServerRoute}}}\nwidentuses{\\{{this.storage}{this.storage}}\\{{world{\char95}time}{world:untime}}}\nwindexuse{this.storage}{this.storage}{NWvbkzY-4VFddh-1}\nwindexuse{world{\char95}time}{world:untime}{NWvbkzY-4VFddh-1}\nwendcode{}\nwbegindocs{36}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{updateServerAddToSchedule}{updateServerAddToSchedule}{NWvbkzY-y828a-1}updateServerAddToSchedule}(4)}
-Beware, {\tt{}sched} is 3-element per stop, not 4-element like returned from the query
-methods. Maybe should make consistent in the future.
-\nwenddocs{}\nwbegincode{39}\sublabel{NWvbkzY-y828a-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-y828a-1}}}\moddef{Update server add to schedule~{\nwtagstyle{}\subpageref{NWvbkzY-y828a-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-2}}
+\nwenddocs{}\nwbegincode{37}\sublabel{NWvbkzY-y828a-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-y828a-1}}}\moddef{Update server add to schedule~{\nwtagstyle{}\subpageref{NWvbkzY-y828a-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-2}}
 public boolean updateServerAddToSchedule(
-    int sid, int[] route, int[] sched, int[] rid) \{
-  final int t = world_time;
-  final int[] current = storage.DBQueryServerRoute(sid);
+    final int sid, final int[] route, final int[] sched, final int[] rid)
+throws UserNotFoundException, EdgeNotFoundException, SQLException \{
+  final int t = this.world_time;
+  final int[] current = this.storage.DBQueryServerRoute(sid);
   int i = 0;
-  Print("Set i=0");
-  Print("Set current <length>="+current.length);
-  for (int q = 0; q < (current.length - 1); q += 2) \{
-    System.out.print("("+current[q]+", "+current[(q + 1)]+") ");
-  \}
-  System.out.println();
   while (i < current.length && current[i] != route[0]) \{
-    Print("Detected current["+i+"]!=route[0] ("+current[i]+"!="+route[0]+")");
     i += 2;
   \}
-  Print("Got i="+i);
   if (i == current.length) \{
     // branch point not found
-    Print("Branch point not found");
     return false;
-  \} else \{
-    Print("Found branch point at i="+i);
   \}
   int j = 0;
   while (i < current.length && (current[i] <= t && current[(i + 1)] != 0)) \{
     if (current[i] != route[j] || current[(i + 1)] != route[(j + 1)]) \{
       // overwrite history occurred
-      Print("Overwrite history detected, i="+i+", j="+j+" ("+current[i]+"!="+route[j]+", "
-        +current[(i + 1)]+"!="+route[(j + 1)]+")");
       return false;
-    \} else \{
-      Print("Detected matching history, i="+i+", j="+j+" ("+current[i]+"="+route[j]+", "
-        +current[(i + 1)]+"="+route[(j + 1)]+")");
     \}
     i += 2;
     j += 2;
   \}
-  storage.DBUpdateServerAddToSchedule(sid, route, sched, rid);
+  this.storage.DBUpdateServerAddToSchedule(sid, route, sched, rid);
   return true;
 \}
 \nwindexdefn{updateServerAddToSchedule}{updateServerAddToSchedule}{NWvbkzY-y828a-1}\eatline
-\nwidentdefs{\\{{updateServerAddToSchedule}{updateServerAddToSchedule}}}\nwidentuses{\\{{Print}{Print}}\\{{storage}{storage}}\\{{world{\char95}time}{world:untime}}}\nwindexuse{Print}{Print}{NWvbkzY-y828a-1}\nwindexuse{storage}{storage}{NWvbkzY-y828a-1}\nwindexuse{world{\char95}time}{world:untime}{NWvbkzY-y828a-1}\nwendcode{}\nwbegindocs{40}\nwdocspar
+\nwidentdefs{\\{{updateServerAddToSchedule}{updateServerAddToSchedule}}}\nwidentuses{\\{{this.storage}{this.storage}}\\{{world{\char95}time}{world:untime}}}\nwindexuse{this.storage}{this.storage}{NWvbkzY-y828a-1}\nwindexuse{world{\char95}time}{world:untime}{NWvbkzY-y828a-1}\nwendcode{}\nwbegindocs{38}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{updateServerRemoveFromSchedule}{updateServerRemoveFromSchedule}{NWvbkzY-lMiTm-1}updateServerRemoveFromSchedule}(4)}
-\nwenddocs{}\nwbegincode{41}\sublabel{NWvbkzY-lMiTm-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-lMiTm-1}}}\moddef{Update server remove from schedule~{\nwtagstyle{}\subpageref{NWvbkzY-lMiTm-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-2}}
+\nwenddocs{}\nwbegincode{39}\sublabel{NWvbkzY-lMiTm-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-lMiTm-1}}}\moddef{Update server remove from schedule~{\nwtagstyle{}\subpageref{NWvbkzY-lMiTm-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-2}}
 public boolean updateServerRemoveFromSchedule(
-    int sid, int[] route, int[] sched, int[] rid) \{
+    final int sid, final int[] route, final int[] sched, final int[] rid)
+throws UserNotFoundException, EdgeNotFoundException, SQLException \{
   boolean success = false;
-  if (route[0] >= world_time) \{
-    storage.DBUpdateServerRemoveFromSchedule(sid, route, sched, rid);
+  if (route[0] >= this.world_time) \{
+    this.storage.DBUpdateServerRemoveFromSchedule(sid, route, sched, rid);
   \}
   return success;
 \}
 \nwindexdefn{updateServerRemoveFromSchedule}{updateServerRemoveFromSchedule}{NWvbkzY-lMiTm-1}\eatline
-\nwidentdefs{\\{{updateServerRemoveFromSchedule}{updateServerRemoveFromSchedule}}}\nwidentuses{\\{{storage}{storage}}\\{{world{\char95}time}{world:untime}}}\nwindexuse{storage}{storage}{NWvbkzY-lMiTm-1}\nwindexuse{world{\char95}time}{world:untime}{NWvbkzY-lMiTm-1}\nwendcode{}\nwbegindocs{42}\nwdocspar
+\nwidentdefs{\\{{updateServerRemoveFromSchedule}{updateServerRemoveFromSchedule}}}\nwidentuses{\\{{this.storage}{this.storage}}\\{{world{\char95}time}{world:untime}}}\nwindexuse{this.storage}{this.storage}{NWvbkzY-lMiTm-1}\nwindexuse{world{\char95}time}{world:untime}{NWvbkzY-lMiTm-1}\nwendcode{}\nwbegindocs{40}\nwdocspar
 \subsection{Read Methods}
 \label{sec:read-methods}
 
 \subsubsection{{\tt{}\protect\nwindexuse{queryVertex}{queryVertex}{NWvbkzY-4IfXsG-1}queryVertex}(1)}
-\nwenddocs{}\nwbegincode{43}\sublabel{NWvbkzY-4IfXsG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-4IfXsG-1}}}\moddef{Query vertex~{\nwtagstyle{}\subpageref{NWvbkzY-4IfXsG-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-3}}
-public int[] queryVertex(int v) throws RuntimeException \{
-  return storage.DBQueryVertex(v);
+\nwenddocs{}\nwbegincode{41}\sublabel{NWvbkzY-4IfXsG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-4IfXsG-1}}}\moddef{Query vertex~{\nwtagstyle{}\subpageref{NWvbkzY-4IfXsG-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-3}}
+public int[] queryVertex(final int v) throws VertexNotFoundException \{
+  return this.storage.DBQueryVertex(v);
 \}
 \nwindexdefn{queryVertex}{queryVertex}{NWvbkzY-4IfXsG-1}\eatline
-\nwidentdefs{\\{{queryVertex}{queryVertex}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NWvbkzY-4IfXsG-1}\nwendcode{}\nwbegindocs{44}\nwdocspar
+\nwidentdefs{\\{{queryVertex}{queryVertex}}}\nwidentuses{\\{{this.storage}{this.storage}}}\nwindexuse{this.storage}{this.storage}{NWvbkzY-4IfXsG-1}\nwendcode{}\nwbegindocs{42}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryEdge}{queryEdge}{NWvbkzY-1E2aru-1}queryEdge}(2)}
-\nwenddocs{}\nwbegincode{45}\sublabel{NWvbkzY-1E2aru-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-1E2aru-1}}}\moddef{Query edge~{\nwtagstyle{}\subpageref{NWvbkzY-1E2aru-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-3}}
-public int[] queryEdge(int v1, int v2) throws RuntimeException \{
-  return storage.DBQueryEdge(v1, v2);
+\nwenddocs{}\nwbegincode{43}\sublabel{NWvbkzY-1E2aru-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-1E2aru-1}}}\moddef{Query edge~{\nwtagstyle{}\subpageref{NWvbkzY-1E2aru-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-3}}
+public int[] queryEdge(final int v1, final int v2) throws EdgeNotFoundException \{
+  return this.storage.DBQueryEdge(v1, v2);
 \}
 \nwindexdefn{queryEdge}{queryEdge}{NWvbkzY-1E2aru-1}\eatline
-\nwidentdefs{\\{{queryEdge}{queryEdge}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NWvbkzY-1E2aru-1}\nwendcode{}\nwbegindocs{46}\nwdocspar
+\nwidentdefs{\\{{queryEdge}{queryEdge}}}\nwidentuses{\\{{this.storage}{this.storage}}}\nwindexuse{this.storage}{this.storage}{NWvbkzY-1E2aru-1}\nwendcode{}\nwbegindocs{44}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryUser}{queryUser}{NWvbkzY-3isdeu-1}queryUser}(1)}
-\nwenddocs{}\nwbegincode{47}\sublabel{NWvbkzY-3isdeu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-3isdeu-1}}}\moddef{Query ridesharing user~{\nwtagstyle{}\subpageref{NWvbkzY-3isdeu-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-3}}
-public int[] queryUser(int uid) throws RuntimeException \{
-  return storage.DBQueryUser(uid);
+\nwenddocs{}\nwbegincode{45}\sublabel{NWvbkzY-3isdeu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-3isdeu-1}}}\moddef{Query ridesharing user~{\nwtagstyle{}\subpageref{NWvbkzY-3isdeu-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-3}}
+public int[] queryUser(final int uid) throws UserNotFoundException \{
+  return this.storage.DBQueryUser(uid);
 \}
 \nwindexdefn{queryUser}{queryUser}{NWvbkzY-3isdeu-1}\eatline
-\nwidentdefs{\\{{queryUser}{queryUser}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NWvbkzY-3isdeu-1}\nwendcode{}\nwbegindocs{48}\nwdocspar
+\nwidentdefs{\\{{queryUser}{queryUser}}}\nwidentuses{\\{{this.storage}{this.storage}}}\nwindexuse{this.storage}{this.storage}{NWvbkzY-3isdeu-1}\nwendcode{}\nwbegindocs{46}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryServerLocationsActive}{queryServerLocationsActive}{NWvbkzY-3UaQCb-1}queryServerLocationsActive}(1)}
-\nwenddocs{}\nwbegincode{49}\sublabel{NWvbkzY-3UaQCb-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-3UaQCb-1}}}\moddef{Query active server locations~{\nwtagstyle{}\subpageref{NWvbkzY-3UaQCb-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-3}}
-public int[] queryServerLocationsActive(int t) throws RuntimeException \{
-  return storage.DBQueryServerLocationsActive(t);
+\nwenddocs{}\nwbegincode{47}\sublabel{NWvbkzY-3UaQCb-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-3UaQCb-1}}}\moddef{Query active server locations~{\nwtagstyle{}\subpageref{NWvbkzY-3UaQCb-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-3}}
+public int[] queryServerLocationsActive(final int t) throws SQLException \{
+  return this.storage.DBQueryServerLocationsActive(t);
 \}
 \nwindexdefn{queryServerLocationsActive}{queryServerLocationsActive}{NWvbkzY-3UaQCb-1}\eatline
-\nwidentdefs{\\{{queryServerLocationsActive}{queryServerLocationsActive}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NWvbkzY-3UaQCb-1}\nwendcode{}\nwbegindocs{50}\nwdocspar
+\nwidentdefs{\\{{queryServerLocationsActive}{queryServerLocationsActive}}}\nwidentuses{\\{{this.storage}{this.storage}}}\nwindexuse{this.storage}{this.storage}{NWvbkzY-3UaQCb-1}\nwendcode{}\nwbegindocs{48}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryServerRemainingRoute}{queryServerRemainingRoute}{NWvbkzY-1AprqI-1}queryServerRemainingRoute}(2)}
-\nwenddocs{}\nwbegincode{51}\sublabel{NWvbkzY-1AprqI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-1AprqI-1}}}\moddef{Query routes~{\nwtagstyle{}\subpageref{NWvbkzY-1AprqI-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-3}}
-public int[] queryServerRemainingRoute(int sid, int t) throws RuntimeException \{
-  return storage.DBQueryServerRemainingRoute(sid, t);
+\nwenddocs{}\nwbegincode{49}\sublabel{NWvbkzY-1AprqI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-1AprqI-1}}}\moddef{Query routes~{\nwtagstyle{}\subpageref{NWvbkzY-1AprqI-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-3}}
+public int[] queryServerRemainingRoute(final int sid, final int t) throws SQLException \{
+  return this.storage.DBQueryServerRemainingRoute(sid, t);
 \}
 \nwindexdefn{queryServerRemainingRoute}{queryServerRemainingRoute}{NWvbkzY-1AprqI-1}\eatline
-\nwidentdefs{\\{{queryServerRemainingRoute}{queryServerRemainingRoute}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NWvbkzY-1AprqI-1}\nwendcode{}\nwbegindocs{52}\nwdocspar
+\nwidentdefs{\\{{queryServerRemainingRoute}{queryServerRemainingRoute}}}\nwidentuses{\\{{this.storage}{this.storage}}}\nwindexuse{this.storage}{this.storage}{NWvbkzY-1AprqI-1}\nwendcode{}\nwbegindocs{50}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryServerRemainingSchedule}{queryServerRemainingSchedule}{NWvbkzY-3yA8FQ-1}queryServerRemainingSchedule}(2)}
-\nwenddocs{}\nwbegincode{53}\sublabel{NWvbkzY-3yA8FQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-3yA8FQ-1}}}\moddef{Query schedules~{\nwtagstyle{}\subpageref{NWvbkzY-3yA8FQ-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-3}}
-public int[] queryServerRemainingSchedule(int sid, int t) throws RuntimeException \{
-  return storage.DBQueryServerRemainingSchedule(sid, t);
+\nwenddocs{}\nwbegincode{51}\sublabel{NWvbkzY-3yA8FQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-3yA8FQ-1}}}\moddef{Query schedules~{\nwtagstyle{}\subpageref{NWvbkzY-3yA8FQ-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-3}}
+public int[] queryServerRemainingSchedule(final int sid, final int t) throws SQLException \{
+  return this.storage.DBQueryServerRemainingSchedule(sid, t);
 \}
 \nwindexdefn{queryServerRemainingSchedule}{queryServerRemainingSchedule}{NWvbkzY-3yA8FQ-1}\eatline
-\nwidentdefs{\\{{queryServerRemainingSchedule}{queryServerRemainingSchedule}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NWvbkzY-3yA8FQ-1}\nwendcode{}\nwbegindocs{54}\nwdocspar
-\nwenddocs{}\nwbegincode{55}\sublabel{NWvbkzY-3tQic5-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-3tQic5-1}}}\moddef{Query remaining distance~{\nwtagstyle{}\subpageref{NWvbkzY-3tQic5-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-3}}
-public int[] queryServerRemainingDistance(int sid, int t) throws RuntimeException \{
-  return storage.DBQueryServerRemainingDistance(sid, t);
+\nwidentdefs{\\{{queryServerRemainingSchedule}{queryServerRemainingSchedule}}}\nwidentuses{\\{{this.storage}{this.storage}}}\nwindexuse{this.storage}{this.storage}{NWvbkzY-3yA8FQ-1}\nwendcode{}\nwbegindocs{52}\nwdocspar
+\nwenddocs{}\nwbegincode{53}\sublabel{NWvbkzY-3tQic5-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-3tQic5-1}}}\moddef{Query remaining distance~{\nwtagstyle{}\subpageref{NWvbkzY-3tQic5-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-3}}
+public int[] queryServerRemainingDistance(final int sid, final int t) throws SQLException \{
+  return this.storage.DBQueryServerRemainingDistance(sid, t);
 \}
 \nwindexdefn{queryServerRemainingDistance}{queryServerRemainingDistance}{NWvbkzY-3tQic5-1}\eatline
-\nwidentdefs{\\{{queryServerRemainingDistance}{queryServerRemainingDistance}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NWvbkzY-3tQic5-1}\nwendcode{}\nwbegindocs{56}\nwdocspar
-\nwenddocs{}\nwbegincode{57}\sublabel{NWvbkzY-2cRw59-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-2cRw59-1}}}\moddef{Query remaining duration~{\nwtagstyle{}\subpageref{NWvbkzY-2cRw59-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-3}}
-public int[] queryServerRemainingDuration(int sid, int t) throws RuntimeException \{
-  return storage.DBQueryServerRemainingDuration(sid, t);
+\nwidentdefs{\\{{queryServerRemainingDistance}{queryServerRemainingDistance}}}\nwidentuses{\\{{this.storage}{this.storage}}}\nwindexuse{this.storage}{this.storage}{NWvbkzY-3tQic5-1}\nwendcode{}\nwbegindocs{54}\nwdocspar
+\nwenddocs{}\nwbegincode{55}\sublabel{NWvbkzY-2cRw59-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-2cRw59-1}}}\moddef{Query remaining duration~{\nwtagstyle{}\subpageref{NWvbkzY-2cRw59-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-3}}
+public int[] queryServerRemainingDuration(final int sid, final int t) throws SQLException \{
+  return this.storage.DBQueryServerRemainingDuration(sid, t);
 \}
 \nwindexdefn{queryServerRemainingDuration}{queryServerRemainingDuration}{NWvbkzY-2cRw59-1}\eatline
-\nwidentdefs{\\{{queryServerRemainingDuration}{queryServerRemainingDuration}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NWvbkzY-2cRw59-1}\nwendcode{}\nwbegindocs{58}\nwdocspar
+\nwidentdefs{\\{{queryServerRemainingDuration}{queryServerRemainingDuration}}}\nwidentuses{\\{{this.storage}{this.storage}}}\nwindexuse{this.storage}{this.storage}{NWvbkzY-2cRw59-1}\nwendcode{}\nwbegindocs{56}\nwdocspar
 \subsubsection{{\tt{}\protect\nwindexuse{queryServerMaxLoad}{queryServerMaxLoad}{NWvbkzY-3KLGqo-1}queryServerMaxLoad}(2)}
-\nwenddocs{}\nwbegincode{59}\sublabel{NWvbkzY-3KLGqo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-3KLGqo-1}}}\moddef{Query max load~{\nwtagstyle{}\subpageref{NWvbkzY-3KLGqo-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-3}}
-public int[] queryServerMaxLoad(int sid, int t) throws RuntimeException \{
-  return storage.DBQueryServerMaxLoad(sid, t);
+\nwenddocs{}\nwbegincode{57}\sublabel{NWvbkzY-3KLGqo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-3KLGqo-1}}}\moddef{Query max load~{\nwtagstyle{}\subpageref{NWvbkzY-3KLGqo-1}}}\endmoddef\nwused{\\{NWvbkzY-3YjONp-3}}
+public int[] queryServerMaxLoad(final int sid, final int t) throws SQLException \{
+  return this.storage.DBQueryServerMaxLoad(sid, t);
 \}
 \nwindexdefn{queryServerMaxLoad}{queryServerMaxLoad}{NWvbkzY-3KLGqo-1}\eatline
-\nwidentdefs{\\{{queryServerMaxLoad}{queryServerMaxLoad}}}\nwidentuses{\\{{storage}{storage}}}\nwindexuse{storage}{storage}{NWvbkzY-3KLGqo-1}\nwendcode{}\nwbegindocs{60}\nwdocspar
-\section{Private Methods}
-\label{sec:private-methods}
-
-\subsection{{\tt{}\protect\nwindexuse{Print}{Print}{NWvbkzY-yUDLL-1}Print}(1)}
-\nwenddocs{}\nwbegincode{61}\sublabel{NWvbkzY-yUDLL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-yUDLL-1}}}\moddef{\code{}Communicator\edoc{} private methods~{\nwtagstyle{}\subpageref{NWvbkzY-yUDLL-1}}}\endmoddef\nwused{\\{NWvbkzY-1DdrEr-1}}
-private void Print(String msg) \{
-  if (DEBUG) \{
-    System.out.println("[Jargo][Communicator]["+LocalDateTime.now()+"] "+msg);
-  \}
-\}
-\nwindexdefn{Print}{Print}{NWvbkzY-yUDLL-1}\eatline
-\nwidentdefs{\\{{Print}{Print}}}\nwidentuses{\\{{DEBUG}{DEBUG}}}\nwindexuse{DEBUG}{DEBUG}{NWvbkzY-yUDLL-1}\nwendcode{}
+\nwidentdefs{\\{{queryServerMaxLoad}{queryServerMaxLoad}}}\nwidentuses{\\{{this.storage}{this.storage}}}\nwindexuse{this.storage}{this.storage}{NWvbkzY-3KLGqo-1}\nwendcode{}
 
 \nwixlogsorted{c}{{\code{}Communicator\edoc{} constructor}{NWvbkzY-1EwPlT-1}{\nwixu{NWvbkzY-1DdrEr-1}\nwixd{NWvbkzY-1EwPlT-1}}}%
 \nwixlogsorted{c}{{\code{}Communicator\edoc{} definition}{NWvbkzY-1DdrEr-1}{\nwixu{NWvbkzY-1uGZre-1}\nwixd{NWvbkzY-1DdrEr-1}}}%
 \nwixlogsorted{c}{{\code{}Communicator\edoc{} member variables}{NWvbkzY-18oERh-1}{\nwixu{NWvbkzY-1DdrEr-1}\nwixd{NWvbkzY-18oERh-1}}}%
-\nwixlogsorted{c}{{\code{}Communicator\edoc{} private methods}{NWvbkzY-yUDLL-1}{\nwixu{NWvbkzY-1DdrEr-1}\nwixd{NWvbkzY-yUDLL-1}}}%
 \nwixlogsorted{c}{{\code{}Communicator\edoc{} public methods}{NWvbkzY-3YjONp-1}{\nwixu{NWvbkzY-1DdrEr-1}\nwixd{NWvbkzY-3YjONp-1}\nwixd{NWvbkzY-3YjONp-2}\nwixd{NWvbkzY-3YjONp-3}}}%
 \nwixlogsorted{c}{{Communicator.java}{NWvbkzY-1uGZre-1}{\nwixd{NWvbkzY-1uGZre-1}}}%
 \nwixlogsorted{c}{{Communicator.java preamble}{NWvbkzY-3IAuyF-1}{\nwixu{NWvbkzY-1uGZre-1}\nwixd{NWvbkzY-3IAuyF-1}\nwixd{NWvbkzY-3IAuyF-2}}}%
@@ -370,20 +334,19 @@ private void Print(String msg) \{
 \nwixlogsorted{c}{{Query routes}{NWvbkzY-1AprqI-1}{\nwixu{NWvbkzY-3YjONp-3}\nwixd{NWvbkzY-1AprqI-1}}}%
 \nwixlogsorted{c}{{Query schedules}{NWvbkzY-3yA8FQ-1}{\nwixu{NWvbkzY-3YjONp-3}\nwixd{NWvbkzY-3yA8FQ-1}}}%
 \nwixlogsorted{c}{{Query vertex}{NWvbkzY-4IfXsG-1}{\nwixu{NWvbkzY-3YjONp-3}\nwixd{NWvbkzY-4IfXsG-1}}}%
+\nwixlogsorted{c}{{Register controller}{NWvbkzY-133LE8-1}{\nwixu{NWvbkzY-3YjONp-1}\nwixd{NWvbkzY-133LE8-1}}}%
+\nwixlogsorted{c}{{Register storage}{NWvbkzY-36wG7h-1}{\nwixu{NWvbkzY-3YjONp-1}\nwixd{NWvbkzY-36wG7h-1}}}%
 \nwixlogsorted{c}{{Return request to queue}{NWvbkzY-3SURrj-1}{\nwixu{NWvbkzY-3YjONp-1}\nwixd{NWvbkzY-3SURrj-1}}}%
-\nwixlogsorted{c}{{Set controller}{NWvbkzY-ttlf9-1}{\nwixu{NWvbkzY-3YjONp-1}\nwixd{NWvbkzY-ttlf9-1}}}%
-\nwixlogsorted{c}{{Set debug}{NWvbkzY-3gdf2G-1}{\nwixu{NWvbkzY-3YjONp-1}\nwixd{NWvbkzY-3gdf2G-1}}}%
-\nwixlogsorted{c}{{Set storage}{NWvbkzY-2XfZ13-1}{\nwixu{NWvbkzY-3YjONp-1}\nwixd{NWvbkzY-2XfZ13-1}}}%
 \nwixlogsorted{c}{{Set/get simulation world time}{NWvbkzY-3SIXWk-1}{\nwixu{NWvbkzY-3YjONp-1}\nwixd{NWvbkzY-3SIXWk-1}\nwixd{NWvbkzY-3SIXWk-2}}}%
 \nwixlogsorted{c}{{Update server add to schedule}{NWvbkzY-y828a-1}{\nwixu{NWvbkzY-3YjONp-2}\nwixd{NWvbkzY-y828a-1}}}%
 \nwixlogsorted{c}{{Update server remove from schedule}{NWvbkzY-lMiTm-1}{\nwixu{NWvbkzY-3YjONp-2}\nwixd{NWvbkzY-lMiTm-1}}}%
 \nwixlogsorted{c}{{Update server route}{NWvbkzY-4VFddh-1}{\nwixu{NWvbkzY-3YjONp-2}\nwixd{NWvbkzY-4VFddh-1}}}%
+\nwixlogsorted{i}{{controller}{controller}}%
 \nwixlogsorted{i}{{DEBUG}{DEBUG}}%
 \nwixlogsorted{i}{{getReferenceEdgesCache}{getReferenceEdgesCache}}%
 \nwixlogsorted{i}{{getReferenceUsersCache}{getReferenceUsersCache}}%
 \nwixlogsorted{i}{{getReferenceVerticesCache}{getReferenceVerticesCache}}%
 \nwixlogsorted{i}{{getSimulationWorldTime}{getSimulationWorldTime}}%
-\nwixlogsorted{i}{{Print}{Print}}%
 \nwixlogsorted{i}{{queryEdge}{queryEdge}}%
 \nwixlogsorted{i}{{queryServerLocationsActive}{queryServerLocationsActive}}%
 \nwixlogsorted{i}{{queryServerMaxLoad}{queryServerMaxLoad}}%
@@ -395,15 +358,17 @@ private void Print(String msg) \{
 \nwixlogsorted{i}{{queryVertex}{queryVertex}}%
 \nwixlogsorted{i}{{returnRequest}{returnRequest}}%
 \nwixlogsorted{i}{{setController}{setController}}%
-\nwixlogsorted{i}{{setDebug}{setDebug}}%
 \nwixlogsorted{i}{{setSimulationWorldTime}{setSimulationWorldTime}}%
 \nwixlogsorted{i}{{setStorage}{setStorage}}%
-\nwixlogsorted{i}{{storage}{storage}}%
+\nwixlogsorted{i}{{this.storage}{this.storage}}%
 \nwixlogsorted{i}{{updateServerAddToSchedule}{updateServerAddToSchedule}}%
 \nwixlogsorted{i}{{updateServerRemoveFromSchedule}{updateServerRemoveFromSchedule}}%
 \nwixlogsorted{i}{{updateServerRoute}{updateServerRoute}}%
 \nwixlogsorted{i}{{world{\char95}time}{world:untime}}%
-\nwbegindocs{62}\nwdocspar
+\nwbegindocs{58}\nwdocspar
+\section{Private Methods}
+\label{sec:private-methods}
+
 \appendix
 
 \section{Appendix: List of Chunks}

@@ -1,131 +1,116 @@
 package com.github.jargors;
 import com.github.jargors.Storage;
 import com.github.jargors.Controller;
-import java.util.function.Supplier;
-import java.time.LocalDateTime;
+import com.github.jargors.exceptions.ClientException;
+import com.github.jargors.exceptions.ClientFatalException;
+import com.github.jargors.exceptions.DuplicateVertexException;
+import com.github.jargors.exceptions.DuplicateEdgeException;
+import com.github.jargors.exceptions.DuplicateUserException;
+import com.github.jargors.exceptions.EdgeNotFoundException;
+import com.github.jargors.exceptions.UserNotFoundException;
+import com.github.jargors.exceptions.VertexNotFoundException;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.sql.SQLException;
 public class Communicator {
   private Storage storage;
   private Controller controller;
   private int world_time = 0;
-  private boolean DEBUG = false;
+  private final boolean DEBUG = "true".equals(System.getProperty("jargors.communicator.debug"));
   public Communicator() { }
-  public void setDebug(boolean flag) {
-    DEBUG = flag;
+  public void registerStorage(final Storage src) {
+    this.storage = src;
   }
-  public void setStorage(Storage src) {
-    storage = src;
+  public void registerController(final Controller src) {
+    this.controller = src;
   }
-  public void setController(Controller src) {
-    controller = src;
-  }
-  public void setSimulationWorldTime(int t) {
-    world_time = t;
+  public void setSimulationWorldTime(final int t) {
+    this.world_time = t;
   }
   public int getSimulationWorldTime() {
-    return world_time;
+    return this.world_time;
   }
   public final ConcurrentHashMap<Integer, int[]> getReferenceVerticesCache() {
-    return storage.getReferenceVerticesCache();
+    return this.storage.getReferenceVerticesCache();
   }
   public final ConcurrentHashMap<Integer,
       ConcurrentHashMap<Integer, int[]>> getReferenceEdgesCache() {
-    return storage.getReferenceEdgesCache();
+    return this.storage.getReferenceEdgesCache();
   }
   public final ConcurrentHashMap<Integer, int[]> getReferenceUsersCache() {
-    return storage.getReferenceUsersCache();
+    return this.storage.getReferenceUsersCache();
   }
-  public void returnRequest(int rid) {
-    controller.returnRequest(rid);
+  public void returnRequest(final int rid) {
+    this.controller.returnRequest(rid);
   }
-  public boolean updateServerRoute(int sid, int[] route, int[] sched) {
+  public boolean updateServerRoute(final int sid, final int[] route, final int[] sched)
+  throws UserNotFoundException, EdgeNotFoundException, SQLException {
     boolean success = false;
-    if (route[0] >= world_time) {
-      storage.DBUpdateServerRoute(sid, route, sched);
+    if (route[0] >= this.world_time) {
+      this.storage.DBUpdateServerRoute(sid, route, sched);
       success = true;
     }
     return success;
   }
   public boolean updateServerAddToSchedule(
-      int sid, int[] route, int[] sched, int[] rid) {
-    final int t = world_time;
-    final int[] current = storage.DBQueryServerRoute(sid);
+      final int sid, final int[] route, final int[] sched, final int[] rid)
+  throws UserNotFoundException, EdgeNotFoundException, SQLException {
+    final int t = this.world_time;
+    final int[] current = this.storage.DBQueryServerRoute(sid);
     int i = 0;
-    Print("Set i=0");
-    Print("Set current <length>="+current.length);
-    for (int q = 0; q < (current.length - 1); q += 2) {
-      System.out.print("("+current[q]+", "+current[(q + 1)]+") ");
-    }
-    System.out.println();
     while (i < current.length && current[i] != route[0]) {
-      Print("Detected current["+i+"]!=route[0] ("+current[i]+"!="+route[0]+")");
       i += 2;
     }
-    Print("Got i="+i);
     if (i == current.length) {
       // branch point not found
-      Print("Branch point not found");
       return false;
-    } else {
-      Print("Found branch point at i="+i);
     }
     int j = 0;
     while (i < current.length && (current[i] <= t && current[(i + 1)] != 0)) {
       if (current[i] != route[j] || current[(i + 1)] != route[(j + 1)]) {
         // overwrite history occurred
-        Print("Overwrite history detected, i="+i+", j="+j+" ("+current[i]+"!="+route[j]+", "
-          +current[(i + 1)]+"!="+route[(j + 1)]+")");
         return false;
-      } else {
-        Print("Detected matching history, i="+i+", j="+j+" ("+current[i]+"="+route[j]+", "
-          +current[(i + 1)]+"="+route[(j + 1)]+")");
       }
       i += 2;
       j += 2;
     }
-    storage.DBUpdateServerAddToSchedule(sid, route, sched, rid);
+    this.storage.DBUpdateServerAddToSchedule(sid, route, sched, rid);
     return true;
   }
   public boolean updateServerRemoveFromSchedule(
-      int sid, int[] route, int[] sched, int[] rid) {
+      final int sid, final int[] route, final int[] sched, final int[] rid)
+  throws UserNotFoundException, EdgeNotFoundException, SQLException {
     boolean success = false;
-    if (route[0] >= world_time) {
-      storage.DBUpdateServerRemoveFromSchedule(sid, route, sched, rid);
+    if (route[0] >= this.world_time) {
+      this.storage.DBUpdateServerRemoveFromSchedule(sid, route, sched, rid);
     }
     return success;
   }
-  public int[] queryVertex(int v) throws RuntimeException {
-    return storage.DBQueryVertex(v);
+  public int[] queryVertex(final int v) throws VertexNotFoundException {
+    return this.storage.DBQueryVertex(v);
   }
-  public int[] queryEdge(int v1, int v2) throws RuntimeException {
-    return storage.DBQueryEdge(v1, v2);
+  public int[] queryEdge(final int v1, final int v2) throws EdgeNotFoundException {
+    return this.storage.DBQueryEdge(v1, v2);
   }
-  public int[] queryUser(int uid) throws RuntimeException {
-    return storage.DBQueryUser(uid);
+  public int[] queryUser(final int uid) throws UserNotFoundException {
+    return this.storage.DBQueryUser(uid);
   }
-  public int[] queryServerLocationsActive(int t) throws RuntimeException {
-    return storage.DBQueryServerLocationsActive(t);
+  public int[] queryServerLocationsActive(final int t) throws SQLException {
+    return this.storage.DBQueryServerLocationsActive(t);
   }
-  public int[] queryServerRemainingRoute(int sid, int t) throws RuntimeException {
-    return storage.DBQueryServerRemainingRoute(sid, t);
+  public int[] queryServerRemainingRoute(final int sid, final int t) throws SQLException {
+    return this.storage.DBQueryServerRemainingRoute(sid, t);
   }
-  public int[] queryServerRemainingSchedule(int sid, int t) throws RuntimeException {
-    return storage.DBQueryServerRemainingSchedule(sid, t);
+  public int[] queryServerRemainingSchedule(final int sid, final int t) throws SQLException {
+    return this.storage.DBQueryServerRemainingSchedule(sid, t);
   }
-  public int[] queryServerRemainingDistance(int sid, int t) throws RuntimeException {
-    return storage.DBQueryServerRemainingDistance(sid, t);
+  public int[] queryServerRemainingDistance(final int sid, final int t) throws SQLException {
+    return this.storage.DBQueryServerRemainingDistance(sid, t);
   }
-  public int[] queryServerRemainingDuration(int sid, int t) throws RuntimeException {
-    return storage.DBQueryServerRemainingDuration(sid, t);
+  public int[] queryServerRemainingDuration(final int sid, final int t) throws SQLException {
+    return this.storage.DBQueryServerRemainingDuration(sid, t);
   }
-  public int[] queryServerMaxLoad(int sid, int t) throws RuntimeException {
-    return storage.DBQueryServerMaxLoad(sid, t);
-  }
-  private void Print(String msg) {
-    if (DEBUG) {
-      System.out.println("[Jargo][Communicator]["+LocalDateTime.now()+"] "+msg);
-    }
+  public int[] queryServerMaxLoad(final int sid, final int t) throws SQLException {
+    return this.storage.DBQueryServerMaxLoad(sid, t);
   }
 }

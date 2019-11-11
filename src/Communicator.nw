@@ -27,11 +27,13 @@
 \label{sec:introduction}
 Jargo's communicator intends to be the sole way for Jargo clients to interact
 with the Jargo simulated world (Figure~\ref{fig:interface-fig}). The
-
 communicator exposes only the subset of Jargo's storage interface API that a
 client would possibly have access to in the real world, including querying and
-submitting server routes and schedules.  The communicator is developed using
-the Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
+submitting server routes and schedules. The communicator also performs some
+\emph{input validation} on submitted routes to prevent clients from overwriting
+historical traveled routes depending on time of submission.  The communicator
+is developed using the
+Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
 programming\footnote{\url{http://literateprogramming.com/}} tool.  This file
 ([[src/Communicator.nw]]) is the source for the documentation
 ([[doc/Communicator.tex]]) and the Java code
@@ -60,11 +62,17 @@ package com.github.jargors;
 <<Communicator.java preamble>>=
 import com.github.jargors.Storage;
 import com.github.jargors.Controller;
-import java.util.function.Supplier;
-import java.time.LocalDateTime;
+import com.github.jargors.exceptions.ClientException;
+import com.github.jargors.exceptions.ClientFatalException;
+import com.github.jargors.exceptions.DuplicateVertexException;
+import com.github.jargors.exceptions.DuplicateEdgeException;
+import com.github.jargors.exceptions.DuplicateUserException;
+import com.github.jargors.exceptions.EdgeNotFoundException;
+import com.github.jargors.exceptions.UserNotFoundException;
+import com.github.jargors.exceptions.VertexNotFoundException;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.sql.SQLException;
 @
 
 \subsection{Class Definition}
@@ -74,19 +82,17 @@ public class Communicator {
   <<[[Communicator]] member variables>>
   <<[[Communicator]] constructor>>
   <<[[Communicator]] public methods>>
-  <<[[Communicator]] private methods>>
 }
 @
 
 \subsection{Member Variables}
 \label{sec:member-variables}
-We define a [[Storage]] and a container for the simulation world time.
 <<[[Communicator]] member variables>>=
 private Storage storage;
 private Controller controller;
 private int world_time = 0;
-private boolean DEBUG = false;
-@ %def storage world_time DEBUG
+private final boolean DEBUG = "true".equals(System.getProperty("jargors.communicator.debug"));
+@ %def this.storage controller world_time DEBUG
 
 \subsection{Constructor}
 \label{sec:constructor}
@@ -98,9 +104,8 @@ public Communicator() { }
 \label{sec:public-methods}
 \hi{General Methods.}
 <<[[Communicator]] public methods>>=
-<<Set debug>>
-<<Set storage>>
-<<Set controller>>
+<<Register storage>>
+<<Register controller>>
 <<Set/get simulation world time>>
 <<Get reference to vertices cache>>
 <<Get reference to edges cache>>
@@ -129,24 +134,17 @@ public Communicator() { }
 \subsection{General Methods}
 \label{sec:general-methods}
 
-\subsubsection{[[setDebug]](1)}
-<<Set debug>>=
-public void setDebug(boolean flag) {
-  DEBUG = flag;
-}
-@ %def setDebug
-
-\subsubsection{[[setStorage]](1)}
-<<Set storage>>=
-public void setStorage(Storage src) {
-  storage = src;
+\subsubsection{[[registerStorage]](1)}
+<<Register storage>>=
+public void registerStorage(final Storage src) {
+  this.storage = src;
 }
 @ %def setStorage
 
-\subsubsection{[[setController]](1)}
-<<Set controller>>=
-public void setController(Controller src) {
-  controller = src;
+\subsubsection{[[registerController]](1)}
+<<Register controller>>=
+public void registerController(final Controller src) {
+  this.controller = src;
 }
 @ %def setController
 
@@ -154,22 +152,22 @@ public void setController(Controller src) {
 We depend on the controller to tell the simulation interface about the current
 world time.
 <<Set/get simulation world time>>=
-public void setSimulationWorldTime(int t) {
-  world_time = t;
+public void setSimulationWorldTime(final int t) {
+  this.world_time = t;
 }
 @ %def setSimulationWorldTime
 
 \subsubsection{[[getSimulationWorldTime]](0)}
 <<Set/get simulation world time>>=
 public int getSimulationWorldTime() {
-  return world_time;
+  return this.world_time;
 }
 @ %def getSimulationWorldTime
 
 \subsubsection{[[getReferenceVerticesCache]](0)}
 <<Get reference to vertices cache>>=
 public final ConcurrentHashMap<Integer, int[]> getReferenceVerticesCache() {
-  return storage.getReferenceVerticesCache();
+  return this.storage.getReferenceVerticesCache();
 }
 @ %def getReferenceVerticesCache
 
@@ -177,39 +175,34 @@ public final ConcurrentHashMap<Integer, int[]> getReferenceVerticesCache() {
 <<Get reference to edges cache>>=
 public final ConcurrentHashMap<Integer,
     ConcurrentHashMap<Integer, int[]>> getReferenceEdgesCache() {
-  return storage.getReferenceEdgesCache();
+  return this.storage.getReferenceEdgesCache();
 }
 @ %def getReferenceEdgesCache
 
 \subsubsection{[[getReferenceUsersCache]](0)}
 <<Get reference to users cache>>=
 public final ConcurrentHashMap<Integer, int[]> getReferenceUsersCache() {
-  return storage.getReferenceUsersCache();
+  return this.storage.getReferenceUsersCache();
 }
 @ %def getReferenceUsersCache
 
 \subsubsection{[[returnRequest]](1)}
 <<Return request to queue>>=
-public void returnRequest(int rid) {
-  controller.returnRequest(rid);
+public void returnRequest(final int rid) {
+  this.controller.returnRequest(rid);
 }
 @ %def returnRequest
 
 \subsection{Write Methods}
 \label{sec:write-methods}
 
-If the submitted route results in overwriting waypoints that a server has
-already visited, in other words if [[route[0]]] is less than [[world_time]],
-then Communicator rejects the write. The client should be aware and handle
-appropriately. To reduce rejections, ensure any submitted route does not
-overwrite traveled waypoints.
-
 \subsubsection{[[updateServerRoute]](3)}
 <<Update server route>>=
-public boolean updateServerRoute(int sid, int[] route, int[] sched) {
+public boolean updateServerRoute(final int sid, final int[] route, final int[] sched)
+throws UserNotFoundException, EdgeNotFoundException, SQLException {
   boolean success = false;
-  if (route[0] >= world_time) {
-    storage.DBUpdateServerRoute(sid, route, sched);
+  if (route[0] >= this.world_time) {
+    this.storage.DBUpdateServerRoute(sid, route, sched);
     success = true;
   }
   return success;
@@ -217,47 +210,30 @@ public boolean updateServerRoute(int sid, int[] route, int[] sched) {
 @ %def updateServerRoute
 
 \subsubsection{[[updateServerAddToSchedule]](4)}
-Beware, [[sched]] is 3-element per stop, not 4-element like returned from the query
-methods. Maybe should make consistent in the future.
 <<Update server add to schedule>>=
 public boolean updateServerAddToSchedule(
-    int sid, int[] route, int[] sched, int[] rid) {
-  final int t = world_time;
-  final int[] current = storage.DBQueryServerRoute(sid);
+    final int sid, final int[] route, final int[] sched, final int[] rid)
+throws UserNotFoundException, EdgeNotFoundException, SQLException {
+  final int t = this.world_time;
+  final int[] current = this.storage.DBQueryServerRoute(sid);
   int i = 0;
-  Print("Set i=0");
-  Print("Set current <length>="+current.length);
-  for (int q = 0; q < (current.length - 1); q += 2) {
-    System.out.print("("+current[q]+", "+current[(q + 1)]+") ");
-  }
-  System.out.println();
   while (i < current.length && current[i] != route[0]) {
-    Print("Detected current["+i+"]!=route[0] ("+current[i]+"!="+route[0]+")");
     i += 2;
   }
-  Print("Got i="+i);
   if (i == current.length) {
     // branch point not found
-    Print("Branch point not found");
     return false;
-  } else {
-    Print("Found branch point at i="+i);
   }
   int j = 0;
   while (i < current.length && (current[i] <= t && current[(i + 1)] != 0)) {
     if (current[i] != route[j] || current[(i + 1)] != route[(j + 1)]) {
       // overwrite history occurred
-      Print("Overwrite history detected, i="+i+", j="+j+" ("+current[i]+"!="+route[j]+", "
-        +current[(i + 1)]+"!="+route[(j + 1)]+")");
       return false;
-    } else {
-      Print("Detected matching history, i="+i+", j="+j+" ("+current[i]+"="+route[j]+", "
-        +current[(i + 1)]+"="+route[(j + 1)]+")");
     }
     i += 2;
     j += 2;
   }
-  storage.DBUpdateServerAddToSchedule(sid, route, sched, rid);
+  this.storage.DBUpdateServerAddToSchedule(sid, route, sched, rid);
   return true;
 }
 @ %def updateServerAddToSchedule
@@ -265,10 +241,11 @@ public boolean updateServerAddToSchedule(
 \subsubsection{[[updateServerRemoveFromSchedule]](4)}
 <<Update server remove from schedule>>=
 public boolean updateServerRemoveFromSchedule(
-    int sid, int[] route, int[] sched, int[] rid) {
+    final int sid, final int[] route, final int[] sched, final int[] rid)
+throws UserNotFoundException, EdgeNotFoundException, SQLException {
   boolean success = false;
-  if (route[0] >= world_time) {
-    storage.DBUpdateServerRemoveFromSchedule(sid, route, sched, rid);
+  if (route[0] >= this.world_time) {
+    this.storage.DBUpdateServerRemoveFromSchedule(sid, route, sched, rid);
   }
   return success;
 }
@@ -279,76 +256,67 @@ public boolean updateServerRemoveFromSchedule(
 
 \subsubsection{[[queryVertex]](1)}
 <<Query vertex>>=
-public int[] queryVertex(int v) throws RuntimeException {
-  return storage.DBQueryVertex(v);
+public int[] queryVertex(final int v) throws VertexNotFoundException {
+  return this.storage.DBQueryVertex(v);
 }
 @ %def queryVertex
 
 \subsubsection{[[queryEdge]](2)}
 <<Query edge>>=
-public int[] queryEdge(int v1, int v2) throws RuntimeException {
-  return storage.DBQueryEdge(v1, v2);
+public int[] queryEdge(final int v1, final int v2) throws EdgeNotFoundException {
+  return this.storage.DBQueryEdge(v1, v2);
 }
 @ %def queryEdge
 
 \subsubsection{[[queryUser]](1)}
 <<Query ridesharing user>>=
-public int[] queryUser(int uid) throws RuntimeException {
-  return storage.DBQueryUser(uid);
+public int[] queryUser(final int uid) throws UserNotFoundException {
+  return this.storage.DBQueryUser(uid);
 }
 @ %def queryUser
 
 \subsubsection{[[queryServerLocationsActive]](1)}
 <<Query active server locations>>=
-public int[] queryServerLocationsActive(int t) throws RuntimeException {
-  return storage.DBQueryServerLocationsActive(t);
+public int[] queryServerLocationsActive(final int t) throws SQLException {
+  return this.storage.DBQueryServerLocationsActive(t);
 }
 @ %def queryServerLocationsActive
 
 \subsubsection{[[queryServerRemainingRoute]](2)}
 <<Query routes>>=
-public int[] queryServerRemainingRoute(int sid, int t) throws RuntimeException {
-  return storage.DBQueryServerRemainingRoute(sid, t);
+public int[] queryServerRemainingRoute(final int sid, final int t) throws SQLException {
+  return this.storage.DBQueryServerRemainingRoute(sid, t);
 }
 @ %def queryServerRemainingRoute
 
 \subsubsection{[[queryServerRemainingSchedule]](2)}
 <<Query schedules>>=
-public int[] queryServerRemainingSchedule(int sid, int t) throws RuntimeException {
-  return storage.DBQueryServerRemainingSchedule(sid, t);
+public int[] queryServerRemainingSchedule(final int sid, final int t) throws SQLException {
+  return this.storage.DBQueryServerRemainingSchedule(sid, t);
 }
 @ %def queryServerRemainingSchedule
 
 <<Query remaining distance>>=
-public int[] queryServerRemainingDistance(int sid, int t) throws RuntimeException {
-  return storage.DBQueryServerRemainingDistance(sid, t);
+public int[] queryServerRemainingDistance(final int sid, final int t) throws SQLException {
+  return this.storage.DBQueryServerRemainingDistance(sid, t);
 }
 @ %def queryServerRemainingDistance
 
 <<Query remaining duration>>=
-public int[] queryServerRemainingDuration(int sid, int t) throws RuntimeException {
-  return storage.DBQueryServerRemainingDuration(sid, t);
+public int[] queryServerRemainingDuration(final int sid, final int t) throws SQLException {
+  return this.storage.DBQueryServerRemainingDuration(sid, t);
 }
 @ %def queryServerRemainingDuration
 
 \subsubsection{[[queryServerMaxLoad]](2)}
 <<Query max load>>=
-public int[] queryServerMaxLoad(int sid, int t) throws RuntimeException {
-  return storage.DBQueryServerMaxLoad(sid, t);
+public int[] queryServerMaxLoad(final int sid, final int t) throws SQLException {
+  return this.storage.DBQueryServerMaxLoad(sid, t);
 }
 @ %def queryServerMaxLoad
 
 \section{Private Methods}
 \label{sec:private-methods}
-
-\subsection{[[Print]](1)}
-<<[[Communicator]] private methods>>=
-private void Print(String msg) {
-  if (DEBUG) {
-    System.out.println("[Jargo][Communicator]["+LocalDateTime.now()+"] "+msg);
-  }
-}
-@ %def Print
 
 \appendix
 
