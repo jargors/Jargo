@@ -55,25 +55,29 @@ of reach for most researchers.}
 \end{figure}
 
 Jargo is the name of our environment for evaluating the quality of ridesharing
-algorithms. It captures assignment dependence by simulating real-time motion of
-vehicles and capacity, and it simulates stochastic processes by perturbing
-route segment durations and locations. To simulate real-time, it executes a
-ridesharing algorithm in parallel alongside new requests so that an algorithm
-can be running while requests are arriving. The present document concerns the
-storage interface, used by Jargo's simulation engine to read and write data
-describing the state of the environment. The storage interface (more precisely
-the underlying data model) is responsible for guaranteeing the integrity of the
-state, in other words that impossible circumstances in the real world do not
-end up in the simulation data. The following is an explanation of how the data
-is organized, beginning with a description of physical ridesharing
-(\S\ref{sec:ridesharing-systems}), then the mathematical model to describe
-physical ridesharing (\S\ref{sec:ridesharing-formulation}), and finally the SQL
-schema to store the state data (\S\ref{sec:ridesharing-data-model}).  Those
-interested in the implementation code can skip directly to
-\S\ref{sec:implementation-overview}.
+algorithms (Figure~\ref{fig:architecture}). It captures assignment dependence by
+simulating real-time motion of vehicles and capacity, and it simulates
+stochastic processes by perturbing route segment durations and locations. To
+simulate real-time, it executes a ridesharing algorithm in parallel alongside
+new requests so that an algorithm can be running while requests are arriving.
+This chapter explains how Jargo's simulation data is organized, beginning with
+a description of physical ridesharing (\S\ref{ch:1:sec:ridesharing-systems}), then
+the mathematical model to describe physical ridesharing
+(\S\ref{ch:1:sec:ridesharing-formulation}), and finally the SQL schema to store the
+state data (\S\ref{ch:1:sec:ridesharing-data-model}).
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=120mm]{src/fig/architecture}
+\caption{Alternatively, ridesharing algorithms can be evaluated on a software
+simulator such as Jargo. The architecture and Jargo's ridesharing data model
+are designed to protect simulation integrity and to provide analysis
+capabilities.}
+\label{fig:architecture}
+\end{figure}
 
 \section{Ridesharing Systems}
-\label{sec:ridesharing-systems}
+\label{ch:1:sec:ridesharing-systems}
 To determine the best way to organize the state data, we first start with
 examining real-world ridesharing systems.  Ridesharing involves the
 \emph{users} and the \emph{rules} governing their behavior. The users can be
@@ -163,7 +167,7 @@ before the drop-off; or \emph{arrived} at destination. A vehicle can be either
 \end{table}
 
 \section{Ridesharing Formulation}
-\label{sec:ridesharing-formulation}
+\label{ch:1:sec:ridesharing-formulation}
 We can now try to mathematically describe the system.  Users can naturally be
 described by a set of values for their P1--P3 properties.  Each vehicle can
 also be associated with a sequence of values describing its past and future
@@ -239,7 +243,7 @@ and the $\texttt{y}$ component is extracted with
 $R_\texttt{y}=\pi_\texttt{y}(R)$.
 
 \subsection{Setting}
-\label{sec:setting}
+\label{ch:1:sec:setting}
 Now we begin to assign variables and constants to the ridesharing
 system, starting with the setting.
 
@@ -335,7 +339,7 @@ for example to describe road speed limits.
 %convertible through the speeds along each of the edges.
 
 \subsection{Requests and Servers}
-\label{sec:requests-and-servers}
+\label{ch:1:sec:requests-and-servers}
 Now we define the requests and servers.
 The basic entity representing a ridesharing participant is the \emph{user}.  A
 user is classified as a \emph{request} if it represents a Type~1 or Type~2
@@ -527,7 +531,7 @@ From P6, server routes are subject to the additional rule:
 \end{enumerate}
 
 \subsection{Ridesharing Metrics}
-\label{sec:ridesharing-metrics}
+\label{ch:1:sec:ridesharing-metrics}
 As a benefit from using relations, a variety of metrics can now be measured by
 simple operations on $\mathcal{U}$ and $\mathcal{X}$.  The following lists
 common metrics found in existing ridesharing studies, but others may be possible.
@@ -687,12 +691,12 @@ The distance utilization is
 \end{equation}
 
 \section{Ridesharing Data Model}
-\label{sec:ridesharing-data-model}
+\label{ch:1:sec:ridesharing-data-model}
 The simple constraints allowed by the SQL standard\footnote{ISO/IEC 9075}
 (\texttt{CHECK}, \texttt{UNIQUE}, \texttt{NOT NULL}, \texttt{FOREIGN KEY}) are
 unable to express the complex ridesharing properties
-(\S\ref{sec:ridesharing-systems}, P1--P7) and rules
-(\S\ref{sec:ridesharing-formulation}, R1--R11), and consequently a direct
+(\S\ref{ch:1:sec:ridesharing-systems}, P1--P7) and rules
+(\S\ref{ch:1:sec:ridesharing-formulation}, R1--R11), and consequently a direct
 ``translation'' of the ridesharing relations into SQL is not possible without
 either making code extensions to SQL or reorganizing the relational ridesharing
 model.
@@ -702,9 +706,9 @@ code extensions while staying faithful to the model.  In this schema,
 \textit{tables} capture the descriptive elements of the model and
 \textit{views} express the analytical measures.  Tables are further organized
 into \emph{property}, \emph{solution}, and \emph{constraint} tables.  Property
-tables store the road network $\mathcal{G}$ (\S\ref{sec:setting}) and the user
-relation $\mathcal{U}$ (\S\ref{sec:requests-and-servers}).  Solution tables
-store the server relation $\mathcal{X}$ (\S\ref{sec:requests-and-servers}).
+tables store the road network $\mathcal{G}$ (\S\ref{ch:1:sec:setting}) and the user
+relation $\mathcal{U}$ (\S\ref{ch:1:sec:requests-and-servers}).  Solution tables
+store the server relation $\mathcal{X}$ (\S\ref{ch:1:sec:requests-and-servers}).
 Constraint tables store copies of data from other tables for validation
 purposes.  The views are mostly defined on the constraint tables.
 
@@ -775,7 +779,7 @@ and \texttt{d} components. Each row is a key-value pair, storing a unique
 \textsf{uid} for user identification as the key alongside the component value,
 and each row is also its own primary key.  A sixth table UB is introduced to
 store base costs for computing $D^\textrm{base}$ and $\rho^\textrm{distance}$
-(\S\ref{sec:ridesharing-metrics}).  Table UO and UD can be referenced to Table
+(\S\ref{ch:1:sec:ridesharing-metrics}).  Table UO and UD can be referenced to Table
 V to validate against property P2 and rule P4.
 \begin{table}[h]
 \centering

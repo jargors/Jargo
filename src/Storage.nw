@@ -1,4 +1,4 @@
-Jargo's storage interface is a data access layer (Figure~\ref{fig:storage}) for
+Jargo's storage interface is a data access layer for
 Jargo to record the ground-truth state of ridesharing users (customers and
 vehicles) as they evolve over time, and to query analytical metrics about the
 state.  The storage engine is Apache
@@ -9,13 +9,6 @@ simulation to be in an invalid state. At all other times, Jargo's data model
 guarantees the integrity of the simulation. The storage interface is written in
 Java so it can communicate with Derby using JDBC. A listing of the public
 methods is shown in Figure~\ref{fig:methods}.
-
-\begin{figure}[h]
-\centering
-\includegraphics[width=150mm]{src/fig/storage-fig}
-\caption{Storage interface and data layer within the Jargo stack.}
-\label{fig:storage}
-\end{figure}
 
 \begin{figure}
 \adjustbox{scale=1.00}{
@@ -246,10 +239,7 @@ example,
 \noindent shows an array with three elements. The value at position 0 is $a$; the
 value at position 1 is $b$; the value at position 2 is $c$.
 
-\subsection{Utilities}
-\label{sec:utilities}
-
-\subsubsection{[[DBCreateNewInstance]](0)}
+\subsection{[[DBCreateNewInstance]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -284,7 +274,7 @@ public void DBCreateNewInstance() throws SQLException {
 }
 @ %def DBCreateNewInstance
 
-\subsubsection{[[DBCloseInstance]](0)}
+\subsection{[[DBCloseInstance]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -312,7 +302,7 @@ public void DBCloseInstance() throws SQLException {
 }
 @ %def DBCloseInstance
 
-\subsubsection{[[getReferenceVerticesCache]](0)}
+\subsection{[[getReferenceVerticesCache]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -331,7 +321,7 @@ public final ConcurrentHashMap<Integer, int[]> getReferenceVerticesCache() {
 }
 @ %def getReferenceVerticesCache
 
-\subsubsection{[[getReferenceEdgesCache]](0)}
+\subsection{[[getReferenceEdgesCache]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -351,7 +341,7 @@ public final ConcurrentHashMap<Integer,
 }
 @ %def getReferenceEdgesCache
 
-\subsubsection{[[getReferenceUsersCache]](0)}
+\subsection{[[getReferenceUsersCache]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -370,7 +360,7 @@ public final ConcurrentHashMap<Integer, int[]> getReferenceUsersCache() {
 }
 @ %def getReferenceUsersCache
 
-\subsubsection{[[DBLoadDataModel]](0)}
+\subsection{[[DBLoadDataModel]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -454,7 +444,7 @@ public void DBLoadDataModel() {
 }
 @ %def DBLoadDataModel
 
-\subsubsection{[[DBLoadBackup]](1)}
+\subsection{[[DBLoadBackup]](1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -489,7 +479,7 @@ public void DBLoadBackup(final String p) throws SQLException {
 }
 @ %def DBLoadBackup
 
-\subsubsection{[[DBLoadRoadNetworkFromDB]](0)}
+\subsection{[[DBLoadRoadNetworkFromDB]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -559,7 +549,7 @@ populated.)}
 }
 @
 
-\subsubsection{[[DBLoadUsersFromDB]](0)}
+\subsection{[[DBLoadUsersFromDB]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -616,7 +606,7 @@ we query the request's assignment status.}
 }
 @
 
-\subsubsection{[[DBSaveBackup]](1)}
+\subsection{[[DBSaveBackup]](1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -643,7 +633,7 @@ public void DBSaveBackup(final String p) throws SQLException {
 }
 @ %def DBSaveBackup
 
-\subsubsection{[[_printSQLDriverStatistics]](0)}
+\subsection{[[_printSQLDriverStatistics]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -666,7 +656,7 @@ public void _printSQLDriverStatistics() throws SQLException {
 }
 @ %def printSQLDriverStatistics
 
-\subsubsection{[[_getConnection]](0)}
+\subsection{[[_getConnection]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -688,7 +678,7 @@ public Connection _getConnection() throws SQLException {
 \subsection{Write Methods}
 \label{sec:write-methods}
 
-\subsubsection{[[DBAddNewVertex]](3)}
+\subsection{[[DBAddNewVertex]](3)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -750,7 +740,7 @@ will appear in other write methods. If all succeeds, we put the vertex into
 }
 @
 
-\subsubsection{[[DBAddNewEdge]](4)}
+\subsection{[[DBAddNewEdge]](4)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -799,7 +789,7 @@ throws DuplicateEdgeException, SQLException {
 }
 @ %def DBAddNewEdge
 
-\subsubsection{[[DBUpdateEdgeSpeed]](3)}
+\subsection{[[DBUpdateEdgeSpeed]](3)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -848,7 +838,7 @@ throws EdgeNotFoundException, SQLException {
 }
 @ %def DBUpdateEdgeSpeed
 
-\subsubsection{[[DBAddNewRequest]](1)}
+\subsection{[[DBAddNewRequest]](1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -933,7 +923,7 @@ this.PSAdd(pS9, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
 this.PSSubmit(pS9);
 @
 
-\subsubsection{[[DBAddNewServer]](2)}
+\subsection{[[DBAddNewServer]](2)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -1072,7 +1062,7 @@ this.PSAdd(pS14, uid, u[1], u[2], null, u[2], u[4], null, u[1],
 this.PSSubmit(pS14);
 @
 
-\subsubsection{[[DBUpdateServerRoute]](3)}
+\subsection{[[DBUpdateServerRoute]](3)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -1317,7 +1307,7 @@ for (int j = 0; j < (sched.length - 2); j += 3) {
 this.PSSubmit(pS14);
 @
 
-\subsubsection{[[DBUpdateServerAddToSchedule]](4)}
+\subsection{[[DBUpdateServerAddToSchedule]](4)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -1539,7 +1529,7 @@ for (final int r : rid) {
 this.PSSubmit(pS12, pS13);
 @
 
-\subsubsection{[[DBUpdateServerRemoveFromSchedule]](4)}
+\subsection{[[DBUpdateServerRemoveFromSchedule]](4)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -1670,7 +1660,7 @@ this.PSSubmit(pS42, pS43);
 \subsection{Read Methods}
 \label{sec:read-methods}
 
-\subsubsection{[[DBQuery]](2)}
+\subsection{[[DBQuery]](2)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -1735,7 +1725,7 @@ do {
 } while (res.next());
 @
 
-\subsubsection{[[DBQueryCountVertices]](0)}
+\subsection{[[DBQueryCountVertices]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -1767,7 +1757,7 @@ public int[] DBQueryCountVertices() throws SQLException {
 }
 @ %def DBQueryCountVertices
 
-\subsubsection{[[DBQueryCountEdges]](0)}
+\subsection{[[DBQueryCountEdges]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -1799,7 +1789,7 @@ public int[] DBQueryCountEdges() throws SQLException {
 }
 @ %def DBQueryCountEdges
 
-\subsubsection{[[DBQueryVertex]](1)}
+\subsection{[[DBQueryVertex]](1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -1834,7 +1824,7 @@ public int[] DBQueryVertex(final int v) throws VertexNotFoundException {
 }
 @ %def DBQueryVertex
 
-\subsubsection{[[DBQueryAllVertices]](0)}
+\subsection{[[DBQueryAllVertices]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -1868,7 +1858,7 @@ public int[] DBQueryAllVertices() throws SQLException {
 }
 @ %def DBQueryAllVertices
 
-\subsubsection{[[DBQueryEdge]](2)}
+\subsection{[[DBQueryEdge]](2)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -1903,7 +1893,7 @@ public int[] DBQueryEdge(final int v1, final int v2) throws EdgeNotFoundExceptio
 }
 @ %def DBQueryEdge
 
-\subsubsection{[[DBQueryAllEdges]](0)}
+\subsection{[[DBQueryAllEdges]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -1938,7 +1928,7 @@ public int[] DBQueryAllEdges() throws SQLException {
 }
 @ %def DBQueryAllEdges
 
-\subsubsection{[[DBQueryStatisticsEdges]](0)}
+\subsection{[[DBQueryStatisticsEdges]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -1974,7 +1964,7 @@ public int[] DBQueryStatisticsEdges() throws SQLException {
 }
 @ %def DBQueryStatisticsEdges
 
-\subsubsection{[[DBQueryMBR]](0)}
+\subsection{[[DBQueryMBR]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -2009,7 +1999,7 @@ public int[] DBQueryMBR() throws SQLException {
 }
 @ %def DBQueryMBR
 
-\subsubsection{[[DBQueryCountServers]](0)}
+\subsection{[[DBQueryCountServers]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -2041,7 +2031,7 @@ public int[] DBQueryCountServers() throws SQLException {
 }
 @ %def DBQueryCountServers
 
-\subsubsection{[[DBQueryCountRequests]](0)}
+\subsection{[[DBQueryCountRequests]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -2073,7 +2063,7 @@ public int[] DBQueryCountRequests() throws SQLException {
 }
 @ %def DBQueryCountRequests
 
-\subsubsection{[[DBQueryAllUsers]](0)}
+\subsection{[[DBQueryAllUsers]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -2111,7 +2101,7 @@ public int[] DBQueryAllUsers() throws SQLException {
 }
 @ %def DBQueryAllUsers
 
-\subsubsection{[[DBQueryUser]](1)}
+\subsection{[[DBQueryUser]](1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -2152,7 +2142,7 @@ throws UserNotFoundException {
 }
 @ %def DBQueryUser
 
-\subsubsection{[[DBQueryRequestStatus]](2)}
+\subsection{[[DBQueryRequestStatus]](2)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -2194,7 +2184,7 @@ throws UserNotFoundException, SQLException {
 }
 @ %def DBQueryRequestStatus
 
-\subsubsection{[[DBQueryRequestIsAssigned]](1)}
+\subsection{[[DBQueryRequestIsAssigned]](1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -2232,7 +2222,7 @@ public int[] DBQueryRequestIsAssigned(final int rid) throws SQLException {
 }
 @ %def DBQueryRequestIsAssigned
 
-\subsubsection{[[DBQueryQueuedRequests]](1)}
+\subsection{[[DBQueryQueuedRequests]](1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -2314,7 +2304,7 @@ pre-filter number of requests.}
 }
 @
 
-\subsubsection{[[DBQueryActiveServers]](1)}
+\subsection{[[DBQueryActiveServers]](1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -2351,7 +2341,7 @@ public int[] DBQueryActiveServers(final int t) throws SQLException {
 }
 @ %def DBQueryActiveServers
 
-\subsubsection{[[DBQueryServerLocationsAll]](1)}
+\subsection{[[DBQueryServerLocationsAll]](1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -2392,7 +2382,7 @@ public int[] DBQueryServerLocationsAll(final int t) throws SQLException {
 }
 @ %def DBQueryServerLocationsAll
 
-\subsubsection{[[DBQueryServerLocationsActive]](1)}
+\subsection{[[DBQueryServerLocationsActive]](1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -2461,7 +2451,7 @@ servers. Then for each active server, we use either statement [[S135]] or
 }
 @
 
-\subsubsection{[[DBQueryServerRoute]](1)}
+\subsection{[[DBQueryServerRoute]](1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -2502,7 +2492,7 @@ public int[] DBQueryServerRoute(final int sid) throws SQLException {
 }
 @ %def DBQueryServerRoute
 
-\subsubsection{[[DBQueryServerSchedule]](1)}
+\subsection{[[DBQueryServerSchedule]](1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -2552,7 +2542,7 @@ public int[] DBQueryServerSchedule(final int sid) throws SQLException {
 }
 @ %def DBQueryServerSchedule
 
-\subsubsection{[[DBQueryServerRemainingRoute]](2)}
+\subsection{[[DBQueryServerRemainingRoute]](2)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -2594,7 +2584,7 @@ public int[] DBQueryServerRemainingRoute(final int sid, final int t) throws SQLE
 }
 @ %def DBQueryServerRemainingRoute
 
-\subsubsection{[[DBQueryServerRemainingSchedule]](2)}
+\subsection{[[DBQueryServerRemainingSchedule]](2)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -2660,7 +2650,7 @@ throws SQLException {
 }
 @ %def DBQueryServerRemainingSchedule
 
-\subsubsection{[[DBQueryServerRemainingDistance]](2)}
+\subsection{[[DBQueryServerRemainingDistance]](2)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -2699,7 +2689,7 @@ throws SQLException {
 }
 @ %def DBQueryServerRemainingDistance
 
-\subsubsection{[[DBQueryServerRemainingDuration]](2)}
+\subsection{[[DBQueryServerRemainingDuration]](2)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -2742,7 +2732,7 @@ throws SQLException {
 }
 @ %def DBQueryServerRemainingDuration
 
-\subsubsection{[[DBQueryServerMaxLoad]](2)}
+\subsection{[[DBQueryServerMaxLoad]](2)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -2781,7 +2771,7 @@ public int[] DBQueryServerMaxLoad(final int sid, final int t) throws SQLExceptio
 }
 @ %def DBQueryServerMaxLoad
 
-\subsubsection{[[DBQueryServerPendingAssignments]](2)}
+\subsection{[[DBQueryServerPendingAssignments]](2)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -2825,7 +2815,7 @@ throws SQLException {
 }
 @ %def DBQueryServerPendingAssignments
 
-\subsubsection{[[DBQueryServerCompletedAssignments]](2)}
+\subsection{[[DBQueryServerCompletedAssignments]](2)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -2869,7 +2859,7 @@ throws SQLException {
 }
 @ %def DBQueryServerCompletedAssignments
 
-\subsubsection{[[DBQueryServiceRate]](0)}
+\subsection{[[DBQueryServiceRate]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -2905,7 +2895,7 @@ public int[] DBQueryServiceRate() throws SQLException {
 }
 @ %def DBQueryServiceRate
 
-\subsubsection{[[DBQueryBaseDistanceTotal]](0)}
+\subsection{[[DBQueryBaseDistanceTotal]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -2937,7 +2927,7 @@ public int[] DBQueryBaseDistanceTotal() throws SQLException {
 }
 @ %def DBQueryBaseDistanceTotal
 
-\subsubsection{[[DBQueryServerBaseDistanceTotal]](0)}
+\subsection{[[DBQueryServerBaseDistanceTotal]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -2969,7 +2959,7 @@ public int[] DBQueryServerBaseDistanceTotal() throws SQLException {
 }
 @ %def DBQueryServerBaseDistanceTotal
 
-\subsubsection{[[DBQueryRequestBaseDistanceTotal]](0)}
+\subsection{[[DBQueryRequestBaseDistanceTotal]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -3001,7 +2991,7 @@ public int[] DBQueryRequestBaseDistanceTotal() throws SQLException {
 }
 @ %def DBQueryRequestBaseDistanceTotal
 
-\subsubsection{[[DBQueryRequestBaseDistanceUnassigned]](0)}
+\subsection{[[DBQueryRequestBaseDistanceUnassigned]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -3035,7 +3025,7 @@ public int[] DBQueryRequestBaseDistanceUnassigned() throws SQLException {
 }
 @ %def DBQueryRequestBaseDistanceUnassigned
 
-\subsubsection{[[DBQueryServerTravelDistance]](1)}
+\subsection{[[DBQueryServerTravelDistance]](1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -3072,7 +3062,7 @@ public int[] DBQueryServerTravelDistance(final int sid) throws SQLException {
 }
 @ %def DBQueryServerTravelDistance
 
-\subsubsection{[[DBQueryServerTravelDistanceTotal]](0)}
+\subsection{[[DBQueryServerTravelDistanceTotal]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -3104,7 +3094,7 @@ public int[] DBQueryServerTravelDistanceTotal() throws SQLException {
 }
 @ %def DBQueryServerTravelDistanceTotal
 
-\subsubsection{[[DBQueryServerCruisingDistance]](1)}
+\subsection{[[DBQueryServerCruisingDistance]](1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -3142,7 +3132,7 @@ public int[] DBQueryServerCruisingDistance(final int sid) throws SQLException {
 }
 @ %def DBQueryServerCruisingDistance
 
-\subsubsection{[[DBQueryServerCruisingDistanceTotal]](0)}
+\subsection{[[DBQueryServerCruisingDistanceTotal]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -3174,7 +3164,7 @@ public int[] DBQueryServerCruisingDistanceTotal() throws SQLException {
 }
 @ %def DBQueryServerCruisingDistanceTotal
 
-\subsubsection{[[DBQueryServerServiceDistance]](1)}
+\subsection{[[DBQueryServerServiceDistance]](1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -3212,7 +3202,7 @@ public int[] DBQueryServerServiceDistance(final int sid) throws SQLException {
 }
 @ %def DBQueryServerServiceDistance
 
-\subsubsection{[[DBQueryServerServiceDistanceTotal]](0)}
+\subsection{[[DBQueryServerServiceDistanceTotal]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -3244,7 +3234,7 @@ public int[] DBQueryServerServiceDistanceTotal() throws SQLException {
 }
 @ %def DBQueryServerServiceDistanceTotal
 
-\subsubsection{[[DBQueryRequestDetourDistance]](1)}
+\subsection{[[DBQueryRequestDetourDistance]](1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -3282,7 +3272,7 @@ public int[] DBQueryRequestDetourDistance(final int rid) throws SQLException {
 }
 @ %def DBQueryRequestDetourDistance
 
-\subsubsection{[[DBQueryRequestDetourDistanceTotal]](0)}
+\subsection{[[DBQueryRequestDetourDistanceTotal]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -3314,7 +3304,7 @@ public int[] DBQueryRequestDetourDistanceTotal() throws SQLException {
 }
 @ %def DBQueryRequestDetourDistanceTotal
 
-\subsubsection{[[DBQueryRequestTransitDistance]](1)}
+\subsection{[[DBQueryRequestTransitDistance]](1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -3352,7 +3342,7 @@ public int[] DBQueryRequestTransitDistance(final int rid) throws SQLException {
 }
 @ %def DBQueryRequestTransitDistance
 
-\subsubsection{[[DBQueryRequestTransitDistanceTotal]](0)}
+\subsection{[[DBQueryRequestTransitDistanceTotal]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -3384,7 +3374,7 @@ public int[] DBQueryRequestTransitDistanceTotal() throws SQLException {
 }
 @ %def DBQueryRequestTransitDistanceTotal
 
-\subsubsection{[[DBQueryServerTravelDuration]](1)}
+\subsection{[[DBQueryServerTravelDuration]](1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -3422,7 +3412,7 @@ public int[] DBQueryServerTravelDuration(final int sid) throws SQLException {
 }
 @ %def DBQueryServerTravelDuration
 
-\subsubsection{[[DBQueryServerTravelDurationTotal]](0)}
+\subsection{[[DBQueryServerTravelDurationTotal]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -3454,7 +3444,7 @@ public int[] DBQueryServerTravelDurationTotal() throws SQLException {
 }
 @ %def DBQueryServerTravelDurationTotal
 
-\subsubsection{[[DBQueryRequestPickupDuration]](1)}
+\subsection{[[DBQueryRequestPickupDuration]](1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -3492,7 +3482,7 @@ public int[] DBQueryRequestPickupDuration(final int rid) throws SQLException {
 }
 @ %def DBQueryRequestPickupDuration
 
-\subsubsection{[[DBQueryRequestPickupDurationTotal]](0)}
+\subsection{[[DBQueryRequestPickupDurationTotal]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -3524,7 +3514,7 @@ public int[] DBQueryRequestPickupDurationTotal() throws SQLException {
 }
 @ %def DBQueryRequestPickupDurationTotal
 
-\subsubsection{[[DBQueryRequestTransitDuration]](1)}
+\subsection{[[DBQueryRequestTransitDuration]](1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -3562,7 +3552,7 @@ public int[] DBQueryRequestTransitDuration(final int rid) throws SQLException {
 }
 @ %def DBQueryRequestTransitDuration
 
-\subsubsection{[[DBQueryRequestTransitDurationTotal]](0)}
+\subsection{[[DBQueryRequestTransitDurationTotal]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -3594,7 +3584,7 @@ public int[] DBQueryRequestTransitDurationTotal() throws SQLException {
 }
 @ %def DBQueryRequestTransitDurationTotal
 
-\subsubsection{[[DBQueryRequestTravelDuration]](1)}
+\subsection{[[DBQueryRequestTravelDuration]](1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -3632,7 +3622,7 @@ public int[] DBQueryRequestTravelDuration(final int rid) throws SQLException {
 }
 @ %def DBQueryRequestTravelDuration
 
-\subsubsection{[[DBQueryRequestTravelDurationTotal]](0)}
+\subsection{[[DBQueryRequestTravelDurationTotal]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -3664,7 +3654,7 @@ public int[] DBQueryRequestTravelDurationTotal() throws SQLException {
 }
 @ %def DBQueryRequestTravelDurationTotal
 
-\subsubsection{[[DBQueryRequestDepartureTime]](1)}
+\subsection{[[DBQueryRequestDepartureTime]](1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -3702,7 +3692,7 @@ public int[] DBQueryRequestDepartureTime(final int rid) throws SQLException {
 }
 @ %def DBQueryRequestDepartureTime
 
-\subsubsection{[[DBQueryServerDepartureTime]](1)}
+\subsection{[[DBQueryServerDepartureTime]](1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -3740,7 +3730,7 @@ public int[] DBQueryServerDepartureTime(final int sid) throws SQLException {
 }
 @ %def DBQueryServerDepartureTime
 
-\subsubsection{[[DBQueryRequestArrivalTime]](1)}
+\subsection{[[DBQueryRequestArrivalTime]](1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -3778,7 +3768,7 @@ public int[] DBQueryRequestArrivalTime(final int rid) throws SQLException {
 }
 @ %def DBQueryRequestArrivalTime
 
-\subsubsection{[[DBQueryServerArrivalTime]](1)}
+\subsection{[[DBQueryServerArrivalTime]](1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -4705,14 +4695,14 @@ weight. To implement the dummy vertex, we add a constraint ([[C11]]) that
   + ")"
 @
 
-\subsubsection{View r\_user (User Relation)}
+\subsection{View r\_user (User Relation)}
 The user relation $\mathcal{U}$ can be formed by a union of Table S and R.
 <<Create View r\_user statement>>=
 "CREATE VIEW r_user (uid, uq, ue, ul, uo, ud, ub) AS "
   + "SELECT * from S UNION SELECT * from R"
 @
 
-\subsubsection{View r\_server (Server Relation)}
+\subsection{View r\_server (Server Relation)}
 The server relation $\mathcal{X}$ can be constructed by joining the routes in
 Table W with the labels in CW and PD.
 <<Create View r\_server statement>>=
@@ -4722,7 +4712,7 @@ Table W with the labels in CW and PD.
   + "  LEFT OUTER JOIN PD ON W.sid = PD.sid AND W.t2 = PD.t2"
 @
 
-\subsubsection{View f\_distance\_blocks (Distance Partitions)}
+\subsection{View f\_distance\_blocks (Distance Partitions)}
 The cruising and service distances $D^\textrm{cruise}$ and $D^\textrm{service}$
 require an auxilliary view. This view joins Table W with
 CQ in such a way that the distances in column \textsf{dd} of W
@@ -4747,7 +4737,7 @@ waypoint.
 @ Cruising and service distances are obtained by querying
 f\_distance\_blocks where \textsf{dtype} is true or false, respectively.
 
-\subsubsection{View f\_status (Request Status)}
+\subsection{View f\_status (Request Status)}
 Request status can also be obtained using an auxilliary view.  This view lists
 the count of occurrences of a request in column \textsf{rid} of CQ,
 corresponding to the request status.  Table CQ is used to get the counts over
@@ -4761,7 +4751,7 @@ for the request is ``waiting''.
   + "GROUP BY a.t2, a.sid, a.rid"
 @
 
-\subsubsection{Analytical Views}
+\subsection{Analytical Views}
 Most of the analytical measures in \S\ref{sec:ridesharing-metrics} can
 be expressed using simple statements.
 
