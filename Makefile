@@ -2,6 +2,14 @@
 # - jargors-GTreeJNI-1.0.0.jar (https://github.com/jargors/GTreeJNI)
 # - jargors-Exceptions-1.0.0.jar (https://github.com/jargors/Exceptions)
 VERSION = 1.0.0
+SRCS = \
+	src/Storage.nw \
+	src/Controller.nw \
+	src/Communicator.nw \
+	src/Client.nw \
+	src/Traffic.nw \
+	src/Tools.nw \
+	src/DesktopController.nw
 JAVASRCS = \
 	java/Tools.java \
 	java/Storage.java \
@@ -18,14 +26,6 @@ CLASSES = \
 	com/github/jargors/Client.class \
 	com/github/jargors/DesktopController.class \
 	com/github/jargors/Traffic.class
-TEXSRCS = \
-	doc/Tools.tex \
-	doc/Storage.tex \
-	doc/Controller.tex \
-	doc/Communicator.tex \
-	doc/Client.tex \
-	doc/DesktopController.tex \
-	doc/Traffic.tex
 
 .PHONY : all java compile tex clean purge
 
@@ -35,13 +35,11 @@ java : $(JAVASRCS)
 
 compile : $(CLASSES) com/github/jargors/Desktop.class
 
-tex : $(TEXSRCS)
+tex : $(SRCS)
+	@noweave -delay -index $(SRCS) > doc/body.tex
 
 $(JAVASRCS): java/%.java: src/%.nw
 	@notangle -R$(subst java/,,$@) $< > $@
-
-$(TEXSRCS) : doc/%.tex : src/%.nw
-	@noweave -delay -index $< > $@
 
 $(CLASSES) : com/github/jargors/%.class: java/%.java
 	@javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:$(CLASSPATH)/* $<
@@ -52,7 +50,7 @@ com/github/jargors/Desktop.class : java/Desktop.java
 jar : $(CLASSES) com/github/jargors/Desktop.class
 	@jar cvf jar/jargors-$(VERSION).jar com
 
-pdf : $(TEXSRCS)
+pdf : doc/body.tex
 	@texfot pdflatex -halt-on-error jargo.tex
 
 clean :
@@ -60,4 +58,4 @@ clean :
 	@latexmk -f -c jargo.tex
 
 purge : clean
-	@rm -rf $(TEXSRCS) $(JAVASRCS)
+	@rm -rf doc/body.tex $(JAVASRCS)
