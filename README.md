@@ -1,5 +1,7 @@
 # Jargo
 
+![Screenshot of Jargo Desktop](res/scrot.png)
+
 Created July 2, 2019 | Latest Version 1.0.0 (Nov. 11, 2019) (in-development)
 -------------------- | -----------------------------------------------------
 
@@ -10,8 +12,6 @@ the `Makefile` for details.
 
 For those without notangle and noweave, the "woven" `doc/*.tex` and "tangled"
 `java/*.java` codes are provided.
-
-![Screenshot of Jargo Desktop](res/scrot.png)
 
 ### BUILD PREREQUISITES
 *(versions not shown here are unsupported)*
