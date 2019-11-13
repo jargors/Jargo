@@ -3,6 +3,8 @@
 # - jargors-Exceptions-1.0.0.jar (https://github.com/jargors/Exceptions)
 VERSION = 1.0.0
 SRCS = \
+	src/0-Preface.nw \
+	src/0-Overview.nw \
 	src/1-Introduction.nw \
 	src/2-Reading.nw \
 	src/3-Writing.nw \
