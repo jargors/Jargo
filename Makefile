@@ -3,6 +3,11 @@
 # - jargors-Exceptions-1.0.0.jar (https://github.com/jargors/Exceptions)
 VERSION = 1.0.0
 SRCS = \
+	src/1-Introduction.nw \
+	src/2-Reading.nw \
+	src/3-Writing.nw \
+	src/4-Administration.nw \
+	src/5-Gtree.nw \
 	src/Storage.nw \
 	src/Controller.nw \
 	src/Communicator.nw \
@@ -31,15 +36,17 @@ CLASSES = \
 
 all : java compile jar tex pdf
 
-java : $(JAVASRCS)
+java : $(JAVASRCS) $(SRCS)
 
 compile : $(CLASSES) com/github/jargors/Desktop.class
 
 tex : $(SRCS)
 	@noweave -delay -index $(SRCS) > doc/body.tex
 
+# We put all the sources here so notangle can find chunks in the other
+# source files.
 $(JAVASRCS): java/%.java: src/%.nw
-	@notangle -R$(subst java/,,$@) $< > $@
+	@notangle -R$(subst java/,,$@) $(SRCS) > $@
 
 $(CLASSES) : com/github/jargors/%.class: java/%.java
 	@javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:$(CLASSPATH)/* $<
@@ -50,7 +57,7 @@ com/github/jargors/Desktop.class : java/Desktop.java
 jar : $(CLASSES) com/github/jargors/Desktop.class
 	@jar cvf jar/jargors-$(VERSION).jar com
 
-pdf : doc/body.tex
+pdf : tex
 	@texfot pdflatex -halt-on-error jargo.tex
 
 clean :

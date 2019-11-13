@@ -1,0 +1,1007 @@
+\chapter{Writing to Jargo}
+\label{write}
+
+\section{Chunks}
+
+\subsection{Select latest order number from CQ}
+<<Select latest order number from CQ>>=
+final int[] output = (route[0] == 0 ? null : this.DBFetch(conn, "S87", 3, sid, route[0]));
+int t1 = (route[0] == 0 ?  0 : output[0]);
+int q1 = (route[0] == 0 ? sq : output[1]);
+int o1 = (route[0] == 0 ?  1 : output[2]);
+@
+
+\subsection{Insert new user into user tables}
+<<Insert new user into user tables>>=
+PreparedStatement pS2 = this.PS(conn, "S2");
+PreparedStatement pS3 = this.PS(conn, "S3");
+PreparedStatement pS4 = this.PS(conn, "S4");
+PreparedStatement pS5 = this.PS(conn, "S5");
+PreparedStatement pS6 = this.PS(conn, "S6");
+PreparedStatement pS7 = this.PS(conn, "S7");
+this.PSAdd(pS2, uid, u[1]);
+this.PSAdd(pS3, uid, u[2]);
+this.PSAdd(pS4, uid, u[3]);
+this.PSAdd(pS5, uid, u[4]);
+this.PSAdd(pS6, uid, u[5]);
+this.PSAdd(pS7, uid, u[6]);
+this.PSSubmit(pS2, pS3, pS4, pS5, pS6, pS7);
+@
+
+\subsection{Insert new request into R}
+<<Insert new request into R>>=
+PreparedStatement pS9 = this.PS(conn, "S9");
+this.PSAdd(pS9, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
+this.PSSubmit(pS9);
+@
+
+\subsection{Insert new server into S}
+<<Insert new server into S>>=
+PreparedStatement pS8 = this.PS(conn, "S8");
+this.PSAdd(pS8, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
+this.PSSubmit(pS8);
+@
+
+\subsection{Insert new server route into W}
+<<Insert new server route into W>>=
+<<Procedure to insert [[route]] into W>>
+pS10 = this.PS(conn, "S10");
+this.PSAdd(pS10, uid, se, null, null, route[0], route[1], null, null);
+this.PSSubmit(pS10);
+@
+
+\subsection{Insert new remaining route into W}
+<<Insert new remaining route into W>>=
+final int uid = sid;
+<<Procedure to insert [[route]] into W>>
+@
+
+\subsection{Insert new server route into CW}
+<<Insert new server route into CW>>=
+PreparedStatement pS11 = this.PS(conn, "S11");
+final int te = route[(route.length - 2)];
+this.PSAdd(pS11, uid, u[2], u[3], u[4], u[5], u[2], u[4], te, u[5]);
+this.PSSubmit(pS11);
+@
+
+\subsection{Insert new server into CQ}
+<<Insert new server into CQ>>=
+PreparedStatement pS14 = this.PS(conn, "S14");
+this.PSAdd(pS14, uid, u[1], u[2], null, u[2], u[4], null, u[1],
+    null, null, null, null, null, 1);
+this.PSSubmit(pS14);
+@
+
+\subsection{Insert new remaining schedule into CQ}
+<<Insert new remaining schedule into CQ>>=
+PreparedStatement pS14 = PS(conn, "S14");
+for (int j = 0; j < (sched.length - 2); j += 3) {
+  final int t2 = sched[(j + 0)];
+  final int v2 = sched[(j + 1)];
+  final int Lj = sched[(j + 2)];
+  if (Lj != sid) {
+    final int[] qpd = cache.get(Lj);
+    final int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
+    final int o2 = o1 + 1;
+    this.PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
+          qpd[0], qpd[1], qpd[2], o1, o2);
+    t1 = t2;
+    q1 = q2;
+    o1 = o2;
+  }
+}
+this.PSSubmit(pS14);
+@
+
+\subsection{Insert new jobs into PD, CPD}
+<<Insert new jobs into PD, CPD>>=
+PreparedStatement pS12 = this.PS(conn, "S12");
+PreparedStatement pS13 = this.PS(conn, "S13");
+for (final int r : rid) {
+  final int[] output2 = this.DBFetch(conn, "S51", 5, r);
+  final int rq = output2[0];
+  final int re = output2[1];
+  final int rl = output2[2];
+  final int ro = output2[3];
+  final int rd = output2[4];
+  final int[] qpd = cache.get(r);
+  final int[]  pd = cache2.get(r);
+  this.PSAdd(pS12, sid, qpd[1], pd[0], r);
+  this.PSAdd(pS12, sid, qpd[2], pd[1], r);
+  this.PSAdd(pS13, sid, se, route[(route.length - 2)], qpd[1], pd[0], qpd[2], pd[1],
+        r, re, rl, ro, rd);
+}
+this.PSSubmit(pS12, pS13);
+@
+
+\subsection{Update route endpoint in CW, CPD}
+<<Update route endpoint in CW, CPD>>=
+PreparedStatement pS77 = this.PS(conn, "S77");
+PreparedStatement pS139 = this.PS(conn, "S139");
+final int te = sched[(sched.length - 3)];
+final int ve = sched[(sched.length - 2)];
+this.PSAdd(pS77, te, ve, sid);
+this.PSAdd(pS139, te, sid);
+this.PSSubmit(pS77, pS139);
+@
+
+\subsection{Update times in PD and CPD}
+<<Update times in PD and CPD>>=
+PreparedStatement pS82 = this.PS(conn, "S82");
+PreparedStatement pS83 = this.PS(conn, "S83");
+PreparedStatement pS84 = this.PS(conn, "S84");
+for (int j = 0; j < (sched.length - 2); j += 3) {
+  final int tj = sched[(j + 0)];
+  final int vj = sched[(j + 1)];
+  final int Lj = sched[(j + 2)];
+  if (Lj != sid) {
+    this.PSAdd(pS82, tj, vj, Lj);
+    this.PSAdd(pS83, tj, vj, Lj);
+    this.PSAdd(pS84, tj, vj, Lj);
+  }
+}
+this.PSSubmit(pS82, pS83, pS84);
+@
+
+\subsection{Delete remaining schedule from CQ}
+<<Delete remaining schedule from CQ>>=
+PreparedStatement pS80 = this.PS(conn, "S80");
+this.PSAdd(pS80, sid, route[0]);
+this.PSSubmit(pS80);
+@
+
+\subsection{Delete remaining route from W}
+<<Delete remaining route from W>>=
+PreparedStatement pS76 = this.PS(conn, "S76");
+this.PSAdd(pS76, sid, route[0]);
+this.PSSubmit(pS76);
+@
+
+\subsection{Delete jobs from PD, CPD}
+<<Delete jobs from PD, CPD>>=
+PreparedStatement pS42 = this.PS(conn, "S42");
+PreparedStatement pS43 = this.PS(conn, "S43");
+for (final int r : rid) {
+  this.PSAdd(pS42, r);
+  this.PSAdd(pS43, r);
+}
+this.PSSubmit(pS42, pS43);
+@
+
+\subsection{Procedure to update route}
+<<Procedure to update route>>=
+<<Delete remaining route from W>>
+<<Insert new remaining route into W>>
+<<Update route endpoint in CW, CPD>>
+@
+
+\subsection{Procedure to update schedule}
+<<Procedure to update schedule>>=
+<<Update times in PD and CPD>>
+<<Populate the tp, td cache and update CQ>>
+<<Select latest order number from CQ>>
+<<Delete remaining schedule from CQ>>
+<<Insert new remaining schedule into CQ>>
+@
+
+<<Procedure to update and add to schedule>>=
+<<Update times in PD and CPD>>
+<<Populate the tp, td cache and vp, vd cache and update CQ>>
+<<Select latest order number from CQ>>
+<<Delete remaining schedule from CQ>>
+<<Insert new remaining schedule into CQ>>
+<<Insert new jobs into PD, CPD>>
+@
+
+\subsection{Procedure to insert \texttt{route} into W}
+<<Procedure to insert [[route]] into W>>=
+PreparedStatement pS10 = this.PS(conn, "S10");
+for (int i = 0; i < (route.length - 3); i += 2) {
+  final int t1 = route[(i + 0)];
+  final int v1 = route[(i + 1)];
+  final int t2 = route[(i + 2)];
+  final int v2 = route[(i + 3)];
+  if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
+    throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
+  }
+  final int dd = this.lu_edges.get(v1).get(v2)[0];
+  final int nu = this.lu_edges.get(v1).get(v2)[1];
+  this.PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
+}
+this.PSSubmit(pS10);
+@
+
+\subsection{Populate the tp, td cache and update CQ}
+<<Populate the tp, td cache and update CQ>>=
+PreparedStatement pS140 = this.PS(conn, "S140");
+for (int j = 0; j < (sched.length - 2); j += 3) {
+  final int Lj = sched[(j + 2)];
+  if (Lj != sid) {
+    if (!cache.containsKey(Lj)) {
+      final int[] output = DBFetch(conn, "S86", 2, Lj);
+      final int tp = output[0];
+      final int td = output[1];
+      final int rq = this.lu_users.get(Lj)[1];
+      cache.put(Lj, new int[] { rq, tp, td });
+      this.PSAdd(pS140, tp, td, Lj);
+    }
+  }
+}
+this.PSSubmit(pS140);
+@
+
+\subsection{Populate the tp, td cache and vp, vd cache and update CQ}
+<<Populate the tp, td cache and vp, vd cache and update CQ>>=
+PreparedStatement pS140 = this.PS(conn, "S140");
+for (int j = 0; j < (sched.length - 2); j += 3) {
+  final int Lj = sched[(j + 2)];
+  if (Lj != sid && !cache.containsKey(Lj)) {
+    final int rq = lu_users.get(Lj)[1];
+    boolean flagged = false;
+    for (final int r : rid) {
+      if (Lj == r) {
+        flagged = true;
+        break;
+      }
+    }
+    if (flagged) {
+      final int tp = sched[(j + 0)];
+      final int vp = sched[(j + 1)];
+      for (int k = (j + 3); k < (sched.length - 2); k += 3) {
+        if (Lj == sched[(k + 2)]) {
+          final int td = sched[(k + 0)];
+          final int vd = sched[(k + 1)];
+          cache. put(Lj, new int[] { rq, tp, td });
+          cache2.put(Lj, new int[] { vp, vd });
+          break;
+        }
+      }
+    } else {
+      final int[] output = this.DBFetch(conn, "S86", 2, Lj);
+      final int tp = output[0];
+      final int td = output[1];
+      this.PSAdd(pS140, tp, td, Lj);
+      cache.put(Lj, new int[] { rq, tp, td });
+    }
+  }
+}
+this.PSSubmit(pS140);
+@
+
+\section{Methods}
+
+\subsection{\texttt{DBAddNewVertex}(3)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBAddNewVertex]]}(3) inserts a vertex into
+Table V and into [[lu_vertices]] if all succeeds. If the vertex attemping
+to be inserted already exists, a [[DuplicateVertexException]] is thrown.
+A [[SQLException]] is thrown for other database failures.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[v]] (param. 1):&vertex identifier.\\
+Integer [[lng]] (param. 2):&longitude, written to an \emph{integer
+precision}, \emph{e.g.} for longitude $123.456789$, pass $123456789$ for
+$10^6$ precision. \textbf{The caller is responsible for remembering the
+precision.}\\
+Integer [[lat]] (param. 3):&latitude, written to an \emph{integer
+precision} as above.
+\end{tabular}\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} inserts a row into Table V, puts an entry into
+[[lu_vertices]].\\
+\textbf{Throws:} [[DuplicateVertexException]] if vertex already exists,
+or [[SQLException]] for other database failures.\\
+\bottomrule
+\end{tabular}
+<<Write: DBAddNewVertex(3)>>=
+void DBAddNewVertex(final int v, final int lng, final int lat)
+throws DuplicateVertexException, SQLException {
+@ %def DBAddNewVertex
+{\small If only [[DBAddNewVertex]](3) is ever used to write vertices into Table
+V, we can be sure that any vertex appearing in Table V also appears in
+[[lu_vertices]].  To check if the vertex in param. 1 is a duplicate entry, it
+is sufficient to check [[lu_vertices]].}
+<<Write: DBAddNewVertex(3)>>=
+  if (this.lu_vertices.containsKey(v)) {
+    throw new DuplicateVertexException("Vertex "+v+" already exists.");
+  }
+@
+{\small All we do is use statement [[S0]] to submit the insert statement
+against Table V. By putting [[conn]] in the resources of the outer try, we
+ensure [[conn]] gets closed in the end no matter what happens. This pattern
+will appear in other write methods. If all succeeds, we put the vertex into
+[[lu_vertices]].}
+<<Write: DBAddNewVertex(3)>>=
+  try (<<Open [[conn]]>>) {
+    try {
+      PreparedStatement pS0 = this.PS(conn, "S0");
+      this.PSAdd(pS0, v, lng, lat);
+      this.PSSubmit(pS0);
+      conn.commit();
+    } catch (SQLException e) {
+      conn.rollback();
+      throw e;
+    }
+  } catch (SQLException e) {
+    throw e;
+  }
+  this.lu_vertices.put(v, new int[] { lng, lat });
+}
+@
+
+\subsection{\texttt{DBAddNewEdge}(4)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBAddNewEdge]]}(4) inserts an edge into Table E
+and into [[lu_edges]] if all succeeds. If the edge attempting to be inserted
+already exists, a [[DuplicateEdgeException]] is thrown. A [[SQLException]]
+is thrown for other database failures.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[v1]] (param. 1):&source vertex identifier.\\
+Integer [[v2]] (param. 2):&target vertex identifier.\\
+Integer [[dd]] (param. 3):&distance along the edge, in meters.\\
+Integer [[nu]] (param. 4):&maximum free-flow speed along the edge, in meters per second.\\
+\end{tabular}\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} inserts a row into Table E, puts an entry into
+[[lu_edges]].\\
+\textbf{Throws:} [[DuplicateEdgeException]] if edge already exists, or
+[[SQLException]] for other database failures.\\
+\bottomrule
+\end{tabular}
+<<Write: DBAddNewEdge(4)>>=
+void DBAddNewEdge(final int v1, final int v2, final int dd, final int nu)
+throws DuplicateEdgeException, SQLException {
+  if (this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2)) {
+    throw new DuplicateEdgeException("Edge ("+v1+", "+v2+") already exists.");
+  }
+  if (!this.lu_edges.containsKey(v1)) {
+    this.lu_edges.put(v1, new ConcurrentHashMap());
+  }
+  try (<<Open [[conn]]>>) {
+    try {
+      PreparedStatement pS1 = this.PS(conn, "S1");
+      this.PSAdd(pS1, v1, v2, dd, nu);
+      this.PSSubmit(pS1);
+      conn.commit();
+    } catch (SQLException e) {
+      conn.rollback();
+      throw e;
+    }
+  } catch (SQLException e) {
+    throw e;
+  }
+  this.lu_edges.get(v1).put(v2, new int[] { dd, nu });
+}
+@ %def DBAddNewEdge
+
+\subsection{\texttt{DBAddNewRequest}(1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBAddNewRequest]]}(1) inserts a new request into the
+user tables and into [[lu_users]] and [[lu_rstatus]] if all succeeds.  If the
+request attempting to be inserted already exists, a [[DuplicateUserException]]
+is thrown. A [[SQLException]] is thrown for other database failures.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Array [[u]] (param. 1):&7-element integer array storing values of
+request $r$'s components.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{identifier}$}; & \node {$1:r_\texttt{q}$}; & \node {$2:r_\texttt{e}$};
+ &\node {$3:r_\texttt{l}$}; & \node {$4:r_\texttt{o}$}; & \node {$5:r_\texttt{d}$}; & \node {$6:d_r$};\\
+};
+\end{tikzpicture}
+\end{tabular}\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} inserts a row into each of the user tables, insert a
+row into Table R, puts an entry into [[lu_users]] and into [[lu_rstatus]].\\
+\textbf{Throws:} [[DuplicateUserException]] if request already exists, or
+[[SQLException]] for other database failures.\\
+\bottomrule
+\end{tabular}
+<<Write: DBAddNewRequest(1)>>=
+void DBAddNewRequest(final int[] u)
+throws DuplicateUserException, SQLException {
+  final int uid = u[0];
+  if (this.lu_users.containsKey(uid)) {
+    throw new DuplicateUserException("User "+uid+" already exists.");
+  }
+  try (<<Open [[conn]]>>) {
+    try {
+      <<Insert new user into user tables>>
+      <<Insert new request into R>>
+      conn.commit();
+    } catch (SQLException e) {
+      conn.rollback();
+      throw e;
+    }
+  } catch (SQLException e) {
+    throw e;
+  }
+@ %def DBAddNewRequest
+{\small In the last step, we put $r$ into [[lu_users]] and put it into
+[[lu_rstatus]] with the value set to [[false]] to indicate that it is
+unassigned. When we put it into [[lu_users]], we store a cloned array [[u]] as
+the value because we don't want any changes to [[u]] on the caller side showing
+up in our cache (we are considering users to be immutable).}
+<<Write: DBAddNewRequest(1)>>=
+  this.lu_users.put(u[0], u.clone());
+  this.lu_rstatus.put(u[0], false);
+}
+@
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[addNewRequest]]}(1) wraps [[DBAddNewRequest]](1).\\
+\bottomrule
+\end{tabular}
+<<Write: addNewRequest(1)>>=
+void addNewRequest(final int[] u) throws DuplicateUserException, SQLException {
+  this.storage.DBAddNewRequest(u);
+}
+@ %def addNewRequest
+
+\subsection{\texttt{DBAddNewServer}(2)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBAddNewServer]]}(2) inserts a new server into the
+user tables and into [[lu_users]] if all succeeds.  If the server attempting to
+be inserted already exists, a [[DuplicateUserException]] is thrown. The method
+requires the server's initial route be given in the second parameter. If the
+supplied route contains an edge that does not exist in Table E, an
+[[EdgeNotFoundException]] is thrown. A [[SQLException]] is thrown for other
+database failures.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Array [[u]] (param. 1):&7-element integer array storing values of
+server $s$'s components.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{identifier}$}; & \node {$1:s_\texttt{q}$}; & \node {$2:s_\texttt{e}$};
+ &\node {$3:s_\texttt{l}$}; & \node {$4:s_\texttt{o}$}; & \node {$5:s_\texttt{d}$}; & \node {$6:d_s$};\\
+};
+\end{tikzpicture}\\
+Array [[route]] (param. 2):&$(2|w|)$-element integer array storing values of
+waypoint components in the server's route $w$.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:t_1$}; & \node {$1:v_1$}; & \node[minimum width=6mm] {...};
+ &\node {$(2|w|-2):t_{|w|}$}; & \node {$(2|w|-1):v_{|w|}$}; \\
+};
+\end{tikzpicture}\\
+\end{tabular}\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} inserts a row into each of the user tables, insert a
+row into Table S, inserts at least two rows into Table W, inserts a row into Table CW,
+inserts a row into Table CQ, puts an entry into [[lu_users]].\\
+\textbf{Throws:} [[DuplicateUserException]] if server already exists,
+[[EdgeNotFoundException]] if [[route]] contains an edge that does not exist
+in Table E, or [[SQLException]] for other database failures.\\
+\bottomrule
+\end{tabular}
+<<Write: DBAddNewServer(2)>>=
+void DBAddNewServer(final int[] u, final int[] route)
+throws DuplicateUserException, EdgeNotFoundException, SQLException {
+  final int uid = u[0];
+  if (this.lu_users.containsKey(uid)) {
+    throw new DuplicateUserException("User "+uid+" already exists.");
+  }
+  try (<<Open [[conn]]>>) {
+    try {
+      final int se = u[2];
+      <<Insert new user into user tables>>
+      <<Insert new server into S>>
+      <<Insert new server route into W>>
+      <<Insert new server route into CW>>
+      <<Insert new server into CQ>>
+      conn.commit();
+    } catch (SQLException e) {
+      conn.rollback();
+      throw e;
+    }
+  } catch (SQLException e) {
+    throw e;
+  }
+@
+{\small In the last step, we put $s$ into [[lu_users]].}
+<<Write: DBAddNewServer(2)>>=
+  this.lu_users.put(uid, u.clone());
+}
+@
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[addNewServer]]}(2) wraps [[addNewServer]](2).\\
+\bottomrule
+\end{tabular}
+<<Write: addNewServer(2)>>=
+void addNewServer(final int[] u)
+throws DuplicateUserException, EdgeNotFoundException, SQLException,
+       GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException {
+  this.storage.DBAddNewServer(u, this.tools.computeRoute(u[4], u[5], u[2]));
+}
+@ %def addNewServer
+
+\subsection{\texttt{DBUpdateEdgeSpeed}(3)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBUpdateEdgeSpeed]]}(3) updates the maximum free-flow
+speed of an edge in the road network. If the edge attempting to be updated
+does not exist, an [[EdgeNotFoundException]] is throw.
+A [[SQLException]] is thrown for other database failures.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[v1]] (param. 1):&source vertex identifier.\\
+Integer [[v2]] (param. 2):&target vertex identifier.\\
+Integer [[nu]] (param. 3):&new maximum free-flow speed, in meters per second.
+\end{tabular}\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} updates a row in Table E, updates an entry in
+[[lu_edges]]. \textbf{May update rows in Table W if edge belongs to
+any server route. This update may cause C56 violations if waypoint times
+(columns \textsf{t1}, \textsf{t2}) are not updated accordingly!}\\
+\textbf{Throws:} [[EdgeNotFoundException]] if edge does not exist,
+or [[SQLException]] for other database failures.\\
+\bottomrule
+\end{tabular}
+<<Write: DBUpdateEdgeSpeed(3)>>=
+void DBUpdateEdgeSpeed(final int v1, final int v2, final int nu)
+throws EdgeNotFoundException, SQLException {
+  if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
+    throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
+  }
+  try (<<Open [[conn]]>>) {
+    try {
+      PreparedStatement pS15 = this.PS(conn, "S15");
+      PreparedStatement pS131 = this.PS(conn, "S131");
+      this.PSAdd(pS15, nu, v1, v2);
+      this.PSAdd(pS131, nu, v1, v2);
+      this.PSSubmit(pS15, pS131);
+      conn.commit();
+    } catch (SQLException e) {
+      conn.rollback();
+      throw e;
+    }
+  } catch (SQLException e) {
+    throw e;
+  }
+  this.lu_edges.get(v1).get(v2)[1] = nu;
+}
+@ %def DBUpdateEdgeSpeed
+
+
+\subsection{\texttt{DBUpdateServerRoute}(3)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBUpdateServerRoute]]}(3) inserts a new
+\emph{remaining route} for server $s$ into Table W. As the timing of waypoints
+may change, the method also updates timings in the \emph{remaining schedule}.
+If the server to be updated does not exist, a [[UserNotFoundException]] is
+thrown.  If the supplied route contains an edge that does not exist in Table E,
+an [[EdgeNotFoundException]] is thrown. A [[SQLException]] is thrown for other
+database failures.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[sid]] (param. 1):&server identifier.\\
+Array [[route]] (param. 2):&$2n$-element integer array storing values of
+waypoint components in the server's $n$-length remaining route $w_{>t}$.
+In the diagram, $|w|-i=n$.
+Here $t$ is taken to be [[route[0]]]. Consequently, $(t_i,v_i)$ is \emph{not} part
+of the remaining route, in other words \textbf{it must pre-exist in Table W}.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:t_i$}; & \node {$1:v_i$}; & \node[minimum width=6mm] {...};
+ &\node {$(2|w|-2):t_{|w|}$}; & \node {$(2|w|-1):v_{|w|}$}; \\
+};
+\end{tikzpicture}\\
+Array [[sched]] (param. 2):&$3m$-element integer array storing values of
+waypoint components and their labels in the server's $m$-length remaining
+schedule $b_{>t}$, where $m\leq n$. In the diagram, $|b|-j=m$.  Note
+$(t_{i_j},v_{i_j})$ \emph{cannot equal} $(t_i,v_i)$, as $(t_i,v_i)$ is part of
+the traveled route and not the remaining route (we cannot change the past).
+Therefore $t_{i_j}$ \textbf{must be greater than} $t_i$. Due to rule R3,
+$(t_{i_{|b|}},v_{i_{|b|}})$ \textbf{must equal} $(t_{|w|},v_{|w|})$.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:t_{i_j}$}; & \node {$1:v_{i_j}$}; & \node {$2:L(b_j)$}; & \node[minimum width=6mm] {...};
+ &\node {$(2|b|-3):t_{i_{|b|}}$}; & \node {$(2|b|-2):v_{i_{|b|}}$}; & \node {$(2|b|-1):L(b_{|b|})$};\\
+};
+\end{tikzpicture}
+
+If a waypoint has multiple labels, write them side-by-side, \textit{e.g.}
+to record two labels $L_1(b_j)$ and $L_2(b_j)$ on waypoint $b_j$, write
+(indices omitted for clarity):
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node[minimum width=6mm] {...};
+ &\node {$t_{i_j}$}; & \node {$v_{i_j}$};
+ &\node {$L_1(b_j)$};
+ &\node {$t_{i_j}$}; & \node {$v_{i_j}$};
+ &\node {$L_2(b_j)$};
+ &\node[minimum width=6mm] {...};\\
+};
+\end{tikzpicture}
+
+If a waypoint has multiple labels with some indicating drop-offs, \textbf{write
+the drop-offs first} before any of the pick-ups, otherwise C98 violation may
+occur.
+\end{tabular}\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} may delete and insert rows into Table W, may
+update columns in Table CW, may update columns in Tables PD and CPD,
+may delete and insert rows into Table CQ.\\
+\textbf{Throws:} [[UserNotFoundException]] if server does not exist,
+[[EdgeNotFoundException]] if [[route]] contains an edge that does not exist
+in Table E, or [[SQLException]] for other database failures.\\
+\bottomrule
+\end{tabular}
+<<Write: DBUpdateServerRoute(3)>>=
+void DBUpdateServerRoute(final int sid, final int[] route, final int[] sched)
+throws UserNotFoundException, EdgeNotFoundException, SQLException {
+  if (!this.lu_users.containsKey(sid)) {
+    throw new UserNotFoundException("User "+sid+" not found.");
+  }
+  try (<<Open [[conn]]>>) {
+    try {
+      final int sq = lu_users.get(sid)[1];
+      final int se = lu_users.get(sid)[2];
+      <<Procedure to update route>>
+      if (sched.length > 0) {
+        Map<Integer, int[]> cache = new HashMap<>();
+        <<Procedure to update schedule>>
+      }
+      conn.commit();
+    } catch (SQLException e) {
+      conn.rollback();
+      throw e;
+    }
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBUpdateServerRoute
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[updateServerRoute]]}(3) wraps [[DBUpdateServerRoute]](3).
+This wrapper adds an additional condition before calling [[DBUpdateServerRoute]](3).
+Given some arbitrary [[world_time]], the first element in [[route]] (param. 2)
+must not be less than the [[world_time]], otherwise the wrapper does not perform
+the method call and returns [[false]].\\
+\bottomrule
+\end{tabular}
+<<Write: updateServerRoute(3)>>=
+boolean updateServerRoute(final int sid, final int[] route, final int[] sched)
+throws UserNotFoundException, EdgeNotFoundException, SQLException {
+  boolean success = false;
+  if (route[0] >= this.forwardSimulationWorldTime()) {
+    this.storage.DBUpdateServerRoute(sid, route, sched);
+    success = true;
+  }
+  return success;
+}
+@ %def updateServerRoute
+
+\subsection{\texttt{DBUpdateServerAddToSchedule}(4)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBUpdateServerAddToSchedule]]}(4) inserts a new
+\emph{remaining route} for server $s$ into Table W, and a new \emph{remaining
+schedule} with \emph{new labeled waypoints} not found in the pre-existing
+remaining schedule into Tables PD, CPD, and CQ.  If the server to be updated
+does not exist, a [[UserNotFoundException]] is thrown.  This exception is also
+thrown if any labels in the new labeled waypoints is not an existing user.  If
+the supplied route contains an edge that does not exist in Table E, an
+[[EdgeNotFoundException]] is thrown.  A [[SQLException]] is thrown for other
+database failures.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[sid]] (param. 1):&server identifier.\\
+Array [[route]] (param. 2):&$2n$-element integer array storing values of
+waypoint components in the server's $n$-length remaining route $w_{>t}$.
+In the diagram, $|w|-i=n$.
+Here $t$ is taken to be [[route[0]]]. Consequently, $(t_i,v_i)$ is \emph{not} part
+of the remaining route, in other words \textbf{it must pre-exist in Table W}.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:t_i$}; & \node {$1:v_i$}; & \node[minimum width=6mm] {...};
+ &\node {$(2|w|-2):t_{|w|}$}; & \node {$(2|w|-1):v_{|w|}$}; \\
+};
+\end{tikzpicture}\\
+Array [[sched]] (param. 2):&$3m$-element integer array storing values of
+waypoint components and their labels in the server's $m$-length remaining
+schedule $b_{>t}$, where $m\leq n$. In the diagram, $|b|-j=m$.  Note
+$(t_{i_j},v_{i_j})$ \emph{cannot equal} $(t_i,v_i)$, as $(t_i,v_i)$ is part of
+the traveled route and not the remaining route (we cannot change the past).
+Therefore $t_{i_j}$ \textbf{must be greater than} $t_i$. Due to rule R3,
+$(t_{i_{|b|}},v_{i_{|b|}})$ \textbf{must equal} $(t_{|w|},v_{|w|})$.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:t_{i_j}$}; & \node {$1:v_{i_j}$}; & \node {$2:L(b_j)$}; & \node[minimum width=6mm] {...};
+ &\node {$(2|b|-3):t_{i_{|b|}}$}; & \node {$(2|b|-2):v_{i_{|b|}}$}; & \node {$(2|b|-1):L(b_{|b|})$};\\
+};
+\end{tikzpicture}
+
+If a waypoint has multiple labels, write them side-by-side, \textit{e.g.}
+to record two labels $L_1(b_j)$ and $L_2(b_j)$ on waypoint $b_j$, write
+(indices omitted for clarity):
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node[minimum width=6mm] {...};
+ &\node {$t_{i_j}$}; & \node {$v_{i_j}$};
+ &\node {$L_1(b_j)$};
+ &\node {$t_{i_j}$}; & \node {$v_{i_j}$};
+ &\node {$L_2(b_j)$};
+ &\node[minimum width=6mm] {...};\\
+};
+\end{tikzpicture}
+
+If a waypoint has multiple labels with some indicating drop-offs, \textbf{write
+the drop-offs first} before any of the pick-ups, otherwise C98 violation may
+occur.\\
+Array [[rid]] (param. 4):&$k$-element integer array storing request identifiers
+used to label \emph{new waypoints} not found in the pre-existing schedule but
+found in the new remaining schedule [[sched]]. The order of this array doesn't
+matter.
+\end{tabular}\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} may delete and insert rows into Table W, may
+update columns in Table CW, may update columns in Tables PD and CPD,
+may delete and insert rows into Table CQ.\\
+\textbf{Throws:} [[UserNotFoundException]] if server does not exist or if
+any request identifier in [[rid]] (param. 4) cannot be found,
+[[EdgeNotFoundException]] if [[route]] contains an edge that does not exist
+in Table E, or [[SQLException]] for other database failures.\\
+\bottomrule
+\end{tabular}
+<<Write: DBUpdateServerAddToSchedule(4)>>=
+void DBUpdateServerAddToSchedule(
+    final int sid, final int[] route, final int[] sched, final int[] rid)
+throws UserNotFoundException, EdgeNotFoundException, SQLException {
+  if (!this.lu_users.containsKey(sid)) {
+    throw new UserNotFoundException("User "+sid+" not found.");
+  }
+  for (final int r : rid) {
+    if (!this.lu_users.containsKey(r)) {
+      throw new UserNotFoundException("User "+r+" not found.");
+    }
+  }
+  Map<Integer, int[]> cache  = new HashMap<>();
+  Map<Integer, int[]> cache2 = new HashMap<>();
+  try (<<Open [[conn]]>>) {
+    try {
+      final int sq = lu_users.get(sid)[1];
+      final int se = lu_users.get(sid)[2];
+      <<Procedure to update route>>
+      <<Procedure to update and add to schedule>>
+      conn.commit();
+    } catch (SQLException e) {
+      conn.rollback();
+      throw e;
+    }
+  } catch (SQLException e) {
+    throw e;
+  }
+@ %def DBUpdateServerAddToSchedule
+{\small If all goes well, we add each request identifier in [[rid]] into
+[[lu_rstatus]] and change the value to [[true]], indicating that the request
+is now \emph{assigned}.}
+<<Write: DBUpdateServerAddToSchedule(4)>>=
+  for (final int r : rid) {
+    this.lu_rstatus.put(r, true);
+  }
+}
+@
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[updateServerAddToSchedule]]}(4) wraps
+[[DBUpdateServerAddToSchedule]](4).  This wrapper adds an additional condition
+before calling [[DBUpdateServerAddToSchedule]](4).  Given some arbitrary
+[[world_time]], all waypoints in [[route]] (param. 2) occurring before
+[[world_time]] must have an equivalent waypoint in the server's (identified by
+param. 1) current route, otherwise the wrapper does not perform the method call
+and returns [[false]].\\
+\bottomrule
+\end{tabular}
+<<Write: updateServerAddToSchedule(4)>>=
+boolean updateServerAddToSchedule(
+    final int sid, final int[] route, final int[] sched, final int[] rid)
+throws UserNotFoundException, EdgeNotFoundException, SQLException {
+  final int t = this.forwardSimulationWorldTime();
+  final int[] current = this.storage.DBQueryServerRoute(sid);
+  int i = 0;
+  while (i < current.length && current[i] != route[0]) {
+    i += 2;
+  }
+  if (i == current.length) {
+    // branch point not found
+    return false;
+  }
+  int j = 0;
+  while (i < current.length && (current[i] <= t && current[(i + 1)] != 0)) {
+    if (current[i] != route[j] || current[(i + 1)] != route[(j + 1)]) {
+      // overwrite history occurred
+      return false;
+    }
+    i += 2;
+    j += 2;
+  }
+  this.storage.DBUpdateServerAddToSchedule(sid, route, sched, rid);
+  return true;
+}
+@ %def updateServerAddToSchedule
+
+\subsection{\texttt{DBUpdateServerRemoveFromSchedule}(4)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBUpdateServerRemoveFromSchedule]](4)} inserts a new
+\emph{remaining route} for server $s$ into Table W, and a new \emph{remaining
+schedule} with \emph{some pre-existing labeled waypoints removed} into Tables
+PD, CPD, and CQ. If the server to be update does not exist, a
+[[UserNotFoundException]] is thrown.  This exception is also thrown if any
+labels in the new labeled waypoints is not an existing user.  If the supplied
+route contains an edge that does not exist in Table E, an
+[[EdgeNotFoundException]] is thrown.  A [[SQLException]] is thrown for other
+database failures.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[sid]] (param. 1):&server identifier.\\
+Array [[route]] (param. 2):&$2n$-element integer array storing values of
+waypoint components in the server's $n$-length remaining route $w_{>t}$.
+In the diagram, $|w|-i=n$.
+Here $t$ is taken to be [[route[0]]]. Consequently, $(t_i,v_i)$ is \emph{not} part
+of the remaining route, in other words \textbf{it must pre-exist in Table W}.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:t_i$}; & \node {$1:v_i$}; & \node[minimum width=6mm] {...};
+ &\node {$(2|w|-2):t_{|w|}$}; & \node {$(2|w|-1):v_{|w|}$}; \\
+};
+\end{tikzpicture}\\
+Array [[sched]] (param. 2):&$3m$-element integer array storing values of
+waypoint components and their labels in the server's $m$-length remaining
+schedule $b_{>t}$, where $m\leq n$. In the diagram, $|b|-j=m$.  Note
+$(t_{i_j},v_{i_j})$ \emph{cannot equal} $(t_i,v_i)$, as $(t_i,v_i)$ is part of
+the traveled route and not the remaining route (we cannot change the past).
+Therefore $t_{i_j}$ \textbf{must be greater than} $t_i$. Due to rule R3,
+$(t_{i_{|b|}},v_{i_{|b|}})$ \textbf{must equal} $(t_{|w|},v_{|w|})$.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:t_{i_j}$}; & \node {$1:v_{i_j}$}; & \node {$2:L(b_j)$}; & \node[minimum width=6mm] {...};
+ &\node {$(2|b|-3):t_{i_{|b|}}$}; & \node {$(2|b|-2):v_{i_{|b|}}$}; & \node {$(2|b|-1):L(b_{|b|})$};\\
+};
+\end{tikzpicture}
+
+If a waypoint has multiple labels, write them side-by-side, \textit{e.g.}
+to record two labels $L_1(b_j)$ and $L_2(b_j)$ on waypoint $b_j$, write
+(indices omitted for clarity):
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node[minimum width=6mm] {...};
+ &\node {$t_{i_j}$}; & \node {$v_{i_j}$};
+ &\node {$L_1(b_j)$};
+ &\node {$t_{i_j}$}; & \node {$v_{i_j}$};
+ &\node {$L_2(b_j)$};
+ &\node[minimum width=6mm] {...};\\
+};
+\end{tikzpicture}
+
+If a waypoint has multiple labels with some indicating drop-offs, \textbf{write
+the drop-offs first} before any of the pick-ups, otherwise C98 violation may
+occur.\\ Array [[rid]] (param. 4):&$k$-element integer array storing request
+identifiers found in the pre-existing schedule \emph{but not found in the new
+remaining schedule} [[sched]]. The order of this array doesn't matter.
+\end{tabular}\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} may delete and insert rows into Table W, may
+update columns in Table CW, may update columns in Tables PD and CPD,
+may delete and insert rows into Table CQ.\\
+\textbf{Throws:} [[UserNotFoundException]] if server does not exist or if
+any request identifier in [[rid]] (param. 4) cannot be found,
+[[EdgeNotFoundException]] if [[route]] contains an edge that does not exist
+in Table E, or [[SQLException]] for other database failures.\\
+\bottomrule
+\end{tabular}
+<<Write: DBUpdateServerRemoveFromSchedule(4)>>=
+void DBUpdateServerRemoveFromSchedule(
+    final int sid, final int[] route, final int[] sched, final int[] rid)
+throws UserNotFoundException, EdgeNotFoundException, SQLException {
+  if (!this.lu_users.containsKey(sid)) {
+    throw new UserNotFoundException("User "+sid+" not found.");
+  }
+  for (final int r : rid) {
+    if (!this.lu_users.containsKey(r)) {
+      throw new UserNotFoundException("User "+r+" not found.");
+    }
+  }
+  Map<Integer, int[]> cache = new HashMap<>();
+  try (<<Open [[conn]]>>) {
+    try {
+      final int sq = lu_users.get(sid)[1];
+      final int se = lu_users.get(sid)[2];
+      <<Procedure to update route>>
+      <<Procedure to update schedule>>
+      <<Delete jobs from PD, CPD>>
+      conn.commit();
+    } catch (SQLException e) {
+      conn.rollback();
+      throw e;
+    }
+  } catch (SQLException e) {
+    throw e;
+  }
+@ %def DBUpdateServerRemoveFromSchedule
+{\small If all goes well, we put each request indentifier in [[rid]] into
+[[lu_rstatus]] and change the value to [[false]], indicating that the request
+is now \emph{unassigned}.}
+<<Write: DBUpdateServerRemoveFromSchedule(4)>>=
+  for (final int r : rid) {
+    this.lu_rstatus.put(r, false);
+  }
+}
+@
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[updateServerRemoveFromSchedule]]}(4) wraps [[DBUpdateServerRemoveFromSchedule]](4).
+This wrapper adds an additional condition before calling [[DBUpdateServerRemoveFromSchedule]](4).
+Given some arbitrary [[world_time]], the first element in [[route]] (param. 2)
+must not be less than the [[world_time]], otherwise the wrapper does not perform
+the method call and returns [[false]].\\
+\bottomrule
+\end{tabular}
+<<Write: updateServerRemoveFromSchedule(4)>>=
+boolean updateServerRemoveFromSchedule(
+    final int sid, final int[] route, final int[] sched, final int[] rid)
+throws UserNotFoundException, EdgeNotFoundException, SQLException {
+  boolean success = false;
+  if (route[0] >= this.forwardSimulationWorldTime()) {
+    this.storage.DBUpdateServerRemoveFromSchedule(sid, route, sched, rid);
+  }
+  return success;
+}
+@ %def updateServerRemoveFromSchedule
+

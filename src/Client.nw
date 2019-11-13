@@ -1,16 +1,59 @@
+\chapter{Class: Client}
+\label{client}
+
+<<Client.java>>=
+<<Client.java preamble>>
+public abstract class Client {
+  <<[[Client]] member variables>>
+  <<[[Client]] constructor>>
+  <<[[Client]] methods>>
+}
+@
+
 We supply an abstract base class for developing Jargo client ridesharing
 algorithms. The class provides a standard interface for interacting with the
 simulation engine (Figure~\ref{fig:client}). Algorithm developers extend the
 base class to add specific customer-to-vehicle matching and vehicle routing
 functionality.
 
-\section{Implementation Overview}
-<<Client.java>>=
-<<Client.java preamble>>
-<<[[Client]] definition>>
+\begin{figure}
+\adjustbox{scale=.8}{
+\begin{minipage}[t]{0.6\textwidth}
+\hi{Read Methods}
+<<[[Client]] methods>>=
 @
+\end{minipage}
+\begin{minipage}[t]{0.6\textwidth}
+\hi{Write Methods}
+<<[[Client]] methods>>=
+@
+\hi{Utilities}
+<<[[Client]] methods>>=
+public <<Gtree: loadGtree(1)>>
+public <<notifyNew(0)>>
+public <<collectRequest(1)>>
+public <<collectServerLocations(1)>>
+public <<registerCommunicator(1)>>
+public <<getRequestCollectionPeriod(0)>>
+public <<setRequestCollectionPeriod(1)>>
+public <<getRequestHandlingPeriod(0)>>
+public <<setRequestHandlingPeriod(1)>>
+public <<getServerLocationCollectionPeriod(0)>>
+public <<setServerLocationCollectionPeriod(1)>>
+public <<registerRoadNetwork(0)>>
+public <<registerUsers(0)>>
+protected <<endCollectServerLocations(1)>>
+protected <<end(0)>>
+protected <<handleRequest(1)>>
+protected <<handleServerLocation(1)>>
+@
+\end{minipage}
+}
+\caption{Client methods.}
+\label{client:fig:methods}
+\end{figure}
 
-\subsection{Preamble}
+\section{Preamble}
 The preamble declares the package and imports dependencies.
 <<Client.java preamble>>=
 package com.github.jargors;
@@ -27,20 +70,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.io.FileNotFoundException;
 @
 
-\subsection{Class Definition}
-The [[Client]] class consists of member variables, a constructor, and
-public and protected methods. Note the [[abstract]] keyword indicates the class
-cannot be used directly.
-<<[[Client]] definition>>=
-public abstract class Client {
-  <<[[Client]] member variables>>
-  <<[[Client]] constructor>>
-  <<[[Client]] public methods>>
-  <<[[Client]] protected methods>>
-}
-@
-
-\subsection{Member Variables}
+\section{Member Variables}
 <<[[Client]] member variables>>=
 protected ConcurrentLinkedQueue<int[]> queue = new ConcurrentLinkedQueue();
 protected int r_collection_period = 1;  // how many sec before collecting new req?
@@ -49,46 +79,32 @@ protected int s_collection_period = 10;
 protected Communicator communicator;
 protected Tools tools = new Tools();
 private final boolean DEBUG = "true".equals(System.getProperty("jargors.client.debug"));
-@ %def queue r_collection_period r_handling_period s_collection_period communicator tools DEBUG
+@
 
-\subsection{Constructor}
+\section{Constructor}
 <<[[Client]] constructor>>=
 public Client() { }
 @
 
-\section{Public Methods}
-<<[[Client]] public methods>>=
-  <<Notify new requests>>
-  <<Collect request into queue>>
-  <<Collect server locations>>
-  <<Register simulation interface>>
-  <<Get/set request collection period>>
-  <<Get/set request handling period>>
-  <<Get/set server location collection period>>
-  <<Load GTree>>
-  <<Register road network>>
-  <<Register users>>
-@
+\section{Methods}
 
-\subsection{Obtaining Requests and Server Locations}
-
-\subsubsection{[[notifyNew]](0)}
-<<Notify new requests>>=
-public void notifyNew() throws ClientException, ClientFatalException {
+\subsection{\texttt{notifyNew}(0)}
+<<notifyNew(0)>>=
+void notifyNew() throws ClientException, ClientFatalException {
   if (!this.queue.isEmpty()) {
     this.handleRequest(this.queue.remove());
   }
 }
 @ %def notifyNew
 
-\subsubsection{[[collectRequest]](1)}
-<<Collect request into queue>>=
-public void collectRequest(final int[] r) {
+\subsection{\texttt{collectRequest}(1)}
+<<collectRequest(1)>>=
+void collectRequest(final int[] r) {
   this.queue.add(r);
 }
 @ %def addRequest
 
-\subsubsection{[[collectServerLocations]](1)}
+\subsection{\texttt{collectServerLocations}(1)}
 Array [[src]] =
 
 \noindent
@@ -109,96 +125,81 @@ $w_{\leq t'}$ is the server's traveled route.  In other words the last location
 is the waypoint in the server's traveled route that is nearest $t'$.  After
 copying [[src]] into [[locations]], the [[endCollectServerLocations]](0) method
 is executed.
-<<Collect server locations>>=
-public void collectServerLocations(final int[] src) {
+<<collectServerLocations(1)>>=
+void collectServerLocations(final int[] src) {
   this.endCollectServerLocations(src.clone());
 }
 @ %def collectServerLocations
 
-\subsection{Getters and Setters}
 
-\subsubsection{[[registerCommunicator]](1)}
-<<Register simulation interface>>=
-public void registerCommunicator(final Communicator src) {
+\subsection{\texttt{registerCommunicator}(1)}
+<<registerCommunicator(1)>>=
+void registerCommunicator(final Communicator src) {
   this.communicator = src;
 }
 @ %def registerCommunicator
 
-\subsubsection{[[getRequestCollectionPeriod]](0)}
-<<Get/set request collection period>>=
-public int getRequestCollectionPeriod() {
+\subsection{\texttt{getRequestCollectionPeriod}(0)}
+<<getRequestCollectionPeriod(0)>>=
+int getRequestCollectionPeriod() {
   return this.r_collection_period;
 }
 @ %def getRequestCollectionPeriod
 
-\subsubsection{[[setRequestCollectionPeriod]](1)}
-<<Get/set request collection period>>=
-public void setRequestCollectionPeriod(final int t) {
+\subsection{\texttt{setRequestCollectionPeriod}(1)}
+<<setRequestCollectionPeriod(1)>>=
+void setRequestCollectionPeriod(final int t) {
   this.r_collection_period = t;
 }
 @ %def setRequestCollectionPeriod
 
-\subsubsection{[[getRequestHandlingPeriod]](1)}
-<<Get/set request handling period>>=
-public int getRequestHandlingPeriod() {
+\subsection{\texttt{getRequestHandlingPeriod}(0)}
+<<getRequestHandlingPeriod(0)>>=
+int getRequestHandlingPeriod() {
   return this.r_handling_period;
 }
 @ %def getRequestHandlingPeriod
 
-\subsubsection{[[setRequestHandlingPeriod]](0)}
-<<Get/set request handling period>>=
-public void setRequestHandlingPeriod(final int t) {
+\subsection{\texttt{setRequestHandlingPeriod}(1)}
+<<setRequestHandlingPeriod(1)>>=
+void setRequestHandlingPeriod(final int t) {
   this.r_handling_period = t;
 }
 @ %def setRequestHandlingPeriod
 
-\subsubsection{[[getServerLocationCollectionPeriod]](0)}
-<<Get/set server location collection period>>=
-public int getServerLocationCollectionPeriod () {
+\subsection{\texttt{getServerLocationCollectionPeriod}(0)}
+<<getServerLocationCollectionPeriod(0)>>=
+int getServerLocationCollectionPeriod () {
   return this.s_collection_period;
 }
 @ %def getServerLocationCollectionPeriod
 
-\subsubsection{[[setServerLocationCollectionPeriod]](1)}
-<<Get/set server location collection period>>=
-public void setServerLocationCollectionPeriod(final int t) {
+\subsection{\texttt{setServerLocationCollectionPeriod}(1)}
+<<setServerLocationCollectionPeriod(1)>>=
+void setServerLocationCollectionPeriod(final int t) {
   this.s_collection_period = t;
 }
 @ %def setServerLocationCollectionPeriod
 
-\subsubsection{[[loadGTree]](1)}
-<<Load GTree>>=
-public void loadGTree(final String p) throws FileNotFoundException {
-  this.tools.loadGTree(p);
-}
-@ %def loadGTree
 
-\subsubsection{[[registerRoadNetwork]](0)}
-<<Register road network>>=
-public void registerRoadNetwork() {
-  this.tools.registerVertices(this.communicator.getReferenceVerticesCache());
-  this.tools.registerEdges(this.communicator.getReferenceEdgesCache());
+\subsection{\texttt{registerRoadNetwork}(0)}
+<<registerRoadNetwork(0)>>=
+void registerRoadNetwork() {
+  this.tools.registerVertices(this.communicator.forwardReferenceVerticesCache());
+  this.tools.registerEdges(this.communicator.forwardReferenceEdgesCache());
 }
 @ %def registerRoadNetwork
 
-\subsubsection{[[registerUsers]](0)}
-<<Register users>>=
-public void registerUsers() {
-  this.tools.registerUsers(this.communicator.getReferenceUsersCache());
+\subsection{\texttt{registerUsers}(0)}
+<<registerUsers(0)>>=
+void registerUsers() {
+  this.tools.registerUsers(this.communicator.forwardReferenceUsersCache());
 }
 @ %def registerUsers
 
-\section{Private Methods}
-<<[[Client]] protected methods>>=
-  <<End collect server locations>>
-  <<End simulation>>
-  <<Handle request>>
-  <<Handle server location>>
-@
-
-\subsection{[[endCollectServerLocations]](0)}
-<<End collect server locations>>=
-protected void endCollectServerLocations(final int[] locations) {
+\subsection{\texttt{endCollectServerLocations}(1)}
+<<endCollectServerLocations(1)>>=
+void endCollectServerLocations(final int[] locations) {
   for (int i = 0; i < (locations.length - 2); i += 3) {
     this.handleServerLocation(new int[] {
       locations[i],
@@ -209,12 +210,12 @@ protected void endCollectServerLocations(final int[] locations) {
 }
 @ %def endCollectServerLocations
 
-\subsection{[[end]](0)}
-<<End simulation>>=
-protected void end() { }
+\subsection{\texttt{end}(0)}
+<<end(0)>>=
+void end() { }
 @ %def end
 
-\subsection{[[handleRequest]](1)}
+\subsection{\texttt{handleRequest}(1)}
 Array [[r]] =
 
 \begin{tikzpicture}
@@ -226,11 +227,11 @@ Array [[r]] =
 };
 \end{tikzpicture}
 
-<<Handle request>>=
-protected void handleRequest(final int[] r) throws ClientException, ClientFatalException { }
+<<handleRequest(1)>>=
+void handleRequest(final int[] r) throws ClientException, ClientFatalException { }
 @ %def handleRequest
 
-\subsection{[[handleServerLocation]](1)}
+\subsection{\texttt{handleServerLocation}(1)}
 Array [[loc]] =
 
 \begin{tikzpicture}
@@ -242,17 +243,7 @@ Array [[loc]] =
 };
 \end{tikzpicture}
 
-<<Handle server location>>=
-protected void handleServerLocation(final int[] loc) { }
+<<handleServerLocation(1)>>=
+void handleServerLocation(final int[] loc) { }
 @ %def handleServerLocation
-
-%\appendix
-%
-%\section{Appendix: List of Chunks}
-%\label{ap:list-of-chunks}
-%\nowebchunks
-%
-%\section{Appendix: List of Identifiers}
-%\label{ap:list-of-identifiers}
-%\nowebindex
 

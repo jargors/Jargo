@@ -1,14 +1,39 @@
-\section{Introduction}
-\label{sec:introduction}
-We supply an abstract base class for developing Jargo traffic functions.
+\chapter{Class: Traffic}
+\label{traffic}
 
-\section{Implementation Overview}
 <<Traffic.java>>=
 <<Traffic.java preamble>>
-<<[[Traffic]] definition>>
+public abstract class Traffic {
+  <<[[Traffic]] member variables>>
+  <<[[Traffic]] constructor>>
+  <<[[Traffic]] methods>>
+}
 @
 
-\subsection{Preamble}
+We supply an abstract base class for developing Jargo traffic functions.
+
+\begin{figure}
+\adjustbox{scale=.8}{
+\begin{minipage}[t]{0.6\textwidth}
+\hi{Read Methods}
+<<[[Traffic]] methods>>=
+@
+\end{minipage}
+\begin{minipage}[t]{0.6\textwidth}
+\hi{Write Methods}
+<<[[Traffic]] methods>>=
+@
+\hi{Utilities}
+<<[[Traffic]] methods>>=
+public <<apply(3)>>
+@
+\end{minipage}
+}
+\caption{Traffic methods.}
+\label{traffic:fig:methods}
+\end{figure}
+
+\section{Preamble}
 The preamble declares the package and imports dependencies.
 <<Traffic.java preamble>>=
 package com.github.jargors;
@@ -17,88 +42,24 @@ import java.util.HashMap;
 import java.time.LocalDateTime;
 @
 
-\subsection{Class Definition}
-<<[[Traffic]] definition>>=
-public abstract class Traffic {
-  <<[[Traffic]] member variables>>
-  <<[[Traffic]] constructor>>
-  <<[[Traffic]] public methods>>
-  <<[[Traffic]] protected methods>>
-}
+\section{Member Variables}
+<<[[Traffic]] member variables>>=
+private final boolean DEBUG = "true".equals(System.getProperty("jargors.traffic.debug"));
 @
 
-\subsection{Member Variables}
-<<[[Traffic]] member variables>>=
-protected Map<Integer, int[]> lu_vertices = new HashMap<>();
-protected Map<Integer, Map<Integer, int[]>> lu_edges = new HashMap<>();
-protected boolean DEBUG = false;
-@ %def lu_vertices lu_edges DEBUG
 
-
-\subsection{Constructor}
+\section{Constructor}
 <<[[Traffic]] constructor>>=
 public Traffic() { }
 @
 
+\section{Methods}
 
-\section{Public Methods}
-<<[[Traffic]] public methods>>=
-<<Set debug flag>>
-<<Register vertices>>
-<<Register edges>>
-<<Apply traffic>>
-@
-
-\subsection{[[setDebug]](1)}
-<<Set debug flag>>=
-public void setDebug(boolean flag) {
-  DEBUG = flag;
-}
-@ %def setDebug
-
-\subsection{[[registerVertices]](1)}
-<<Register vertices>>=
-public void registerVertices(Map<Integer, int[]> src) {
-  lu_vertices = src;
-}
-@ %def registerVertices
-
-\subsection{[[registerEdges]](1)}
-<<Register edges>>=
-public void registerEdges(Map<Integer, Map<Integer, int[]>> src) {
-  lu_edges = src;
-}
-@ %def registerEdges
-
-
-\subsection{[[apply]](1)}
-<<Apply traffic>>=
-public float apply(int v1, int v2, int t) {
-  Print("Call apply("+v1+", "+v2+", "+t+")");
+\subsection{\texttt{apply}(3)}
+<<apply(3)>>=
+float apply(int v1, int v2, int t) {
+  System.out.println("Call apply("+v1+", "+v2+", "+t+")");
   return 0;
 }
-@
+@ %def apply
 
-\section{Protected Methods}
-<<[[Traffic]] protected methods>>=
-<<Print a message>>
-@
-
-\subsection{[[Print]](1)}
-<<Print a message>>=
-protected void Print(String msg) {
-  if (DEBUG) {
-    System.out.println("[Traffic]["+LocalDateTime.now()+"] "+msg);
-  }
-}
-@ %def Print
-
-%\appendix
-%
-%\section{Appendix: List of Chunks}
-%\label{ap:list-of-chunks}
-%\nowebchunks
-%
-%\section{Appendix: List of Identifiers}
-%\label{ap:list-of-identifiers}
-%\nowebindex

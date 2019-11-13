@@ -1,0 +1,2577 @@
+\chapter{Reading from Jargo}
+\label{read}
+
+\section{Chunks}
+
+\subsection{Flatten results}
+<<Flatten results>>=
+output = new int[(ncols*res.getRow())];
+res.first();
+do {
+  for (int j = 1; j <= ncols; j++) {
+    output[((res.getRow() - 1)*ncols + (j - 1))] = res.getInt(j);
+  }
+} while (res.next());
+@
+
+\section{Methods}
+
+\subsection{\texttt{DBQuery}(2)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQuery]]}(2) executes an arbitrary [[SELECT]]
+query against the Jargo database instance.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+String [[sql]] (param. 1):&[[SELECT]] statement to execute.\\
+Integer [[ncols]] (param. 2):&number of columns $n$ in the selection.\\
+\end{tabular}
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node {...};
+ &\node[draw] {$in+j:\textrm{value at column $j$, row $i$ of the result set}$};
+ &\node {...};\\
+};
+\end{tikzpicture}
+
+where $i$, $j$ start from 0.\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQuery(2)>>=
+int[] DBQuery(final String sql, final int ncols) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    Statement stmt = conn.createStatement(
+      ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+    ResultSet res = stmt.executeQuery(sql);
+    if (res.last()) {
+      <<Flatten results>>
+    }
+    conn.close();
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
+}
+@ %def DBQuery
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[query]]}(2) wraps [[DBQuery]](2).\\
+\bottomrule
+\end{tabular}
+<<Read: query(2)>>=
+int[] query(String sql, int ncols) throws SQLException {
+  return storage.DBQuery(sql, ncols);
+}
+@ %def query
+
+\subsection{\texttt{DBQueryCountVertices}(0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryCountVertices]]}(0) returns the total number
+of vertices in Table V.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{number of vertices in Table V}$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryCountVertices(0)>>=
+int[] DBQueryCountVertices() throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return this.DBFetch(conn, "S62", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryCountVertices
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryCountVertices]]}(0) wraps [[DBQueryCountVertices]](0).\\
+\bottomrule
+\end{tabular}
+<<Read: queryCountVertices(0)>>=
+int[] queryCountVertices() throws SQLException {
+  return storage.DBQueryCountVertices();
+}
+@ %def queryCountVertices
+
+\subsection{[[DBQueryCountEdges]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryCountEdges]]}(0) returns the total number
+of vertices in Table V.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{number of edges in Table E}$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryCountEdges(0)>>=
+int[] DBQueryCountEdges() throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return this.DBFetch(conn, "S63", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryCountEdges
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryCountEdges]]}(0) wraps [[DBQueryCountEdges]](0).\\
+\bottomrule
+\end{tabular}
+<<Read: queryCountEdges(0)>>=
+int[] queryCountEdges() throws SQLException {
+  return storage.DBQueryCountEdges();
+}
+@ %def queryCountEdges
+
+\subsection{[[DBQueryVertex]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryVertex]]}(1) returns the longitude and
+latitude coordinates of the given vertex. If the vertex does not exist,
+a [[VertexNotFoundException]] is thrown.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[v]] (param. 1):&vertex identifier.
+\end{tabular}
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{longitude of }\texttt{v}$};
+ &\node {$1:\textrm{latitude of }\texttt{v}$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[VertexNotFoundException]] if vertex does not exist\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryVertex(1)>>=
+int[] DBQueryVertex(final int v) throws VertexNotFoundException {
+  if (!this.lu_vertices.containsKey(v)) {
+    throw new VertexNotFoundException("Vertex "+v+" not found.");
+  }
+  return this.lu_vertices.get(v).clone();
+}
+@ %def DBQueryVertex
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryVertex]]}(1) wraps [[DBQueryVertex]](1).\\
+\bottomrule
+\end{tabular}
+<<Read: queryVertex(1)>>=
+int[] queryVertex(final int v) throws VertexNotFoundException, SQLException {
+  return storage.DBQueryVertex(v);
+}
+@ %def queryVertex
+
+\subsection{[[DBQueryAllVertices]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryAllVertices]]}(0) returns all rows in Table V.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{vertex identifier}$};
+ &\node {$1:\textrm{longitude of the vertex}$};
+ &\node {$2:\textrm{latitude of the vertex}$};
+ &\node {...};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryAllVertices(0)>>=
+int[] DBQueryAllVertices() throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return this.DBFetch(conn, "S136", 3);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryAllVertices
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryAllVertices]]}(2) wraps [[DBQueryAllVertices]](2).\\
+\bottomrule
+\end{tabular}
+<<Read: queryAllVertices(0)>>=
+int[] queryAllVertices() throws SQLException {
+  return storage.DBQueryAllVertices();
+}
+@ %def queryAllVertices
+
+\subsection{[[DBQueryEdge]](2)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryEdge]]}(2) returns the distance and
+maximum free-flow speed along the given edge.
+An [[EdgeNotFoundException]] is thrown if the edge does not exist.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[v1]] (param. 1):&source vertex identifier $v_1$\\
+Integer [[v2]] (param. 2):&target vertex identifier $v_2$
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:d(v_1,v_2)$}; & \node {$1:v^\textrm{max}(v_1,v_2)$}; \\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[EdgeNotFoundException]] if edge does not exit.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryEdge(2)>>=
+int[] DBQueryEdge(final int v1, final int v2) throws EdgeNotFoundException {
+  if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
+    throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
+  }
+  return this.lu_edges.get(v1).get(v2).clone();
+}
+@ %def DBQueryEdge
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryEdge]]}(2) wraps [[DBQueryEdge]](2).\\
+\bottomrule
+\end{tabular}
+<<Read: queryEdge(2)>>=
+int[] queryEdge(final int v1, final int v2) throws EdgeNotFoundException, SQLException {
+  return storage.DBQueryEdge(v1, v2);
+}
+@ %def queryEdge
+
+\subsection{[[DBQueryAllEdges]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryAllEdges]]}(0) returns all rows in Table E.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{source vertex identifier $v_1$}$};
+ &\node {$1:\textrm{target vertex identifier $v_2$}$};
+ &\node {$2:d(v_1,v_2)$};
+ &\node {$3:v^\textrm{max}(v_1,v_2)$};
+ &\node {...};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryAllEdges(0)>>=
+int[] DBQueryAllEdges() throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return this.DBFetch(conn, "S137", 4);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryAllEdges
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryAllEdges]]}(2) wraps [[DBQueryAllEdges]](2).\\
+\bottomrule
+\end{tabular}
+<<Read: queryAllEdges(0)>>=
+int[] queryAllEdges() throws SQLException {
+  return storage.DBQueryAllEdges();
+}
+@ %def queryAllEdges
+
+\subsection{[[DBQueryStatisticsEdges]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryStatisticsEdges]]}(0) returns some edge statistics.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{min. weight}$};
+ &\node {$1:\textrm{max. weight}$};
+ &\node {$2:\textrm{avg. weight}$};
+ &\node {$3:\textrm{min. speed}$};
+ &\node {$4:\textrm{max. speed}$};
+ &\node {$5:\textrm{avg. speed}$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryStatisticsEdges(0)>>=
+int[] DBQueryStatisticsEdges() throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return this.DBFetch(conn, "S65", 6);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryStatisticsEdges
+
+\subsection{[[DBQueryMBR]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryMBR]]}(0) returns the minimum-bounding
+rectangle of the road network.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{min. longitude}$};
+ &\node {$1:\textrm{max. longitude}$};
+ &\node {$2:\textrm{min. latitude}$};
+ &\node {$3:\textrm{max. latitude}$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryMBR(0)>>=
+int[] DBQueryMBR() throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return this.DBFetch(conn, "S64", 4);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryMBR
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryMBR]]}(0) wraps [[DBQueryMBR]](0).\\
+\bottomrule
+\end{tabular}
+<<Read: queryMBR(0)>>=
+int[] queryMBR() throws SQLException {
+  return storage.DBQueryMBR();
+}
+@ %def queryMBR
+
+\subsection{[[DBQueryCountServers]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryCountSevers]]}(0) returns the total number
+of servers in Table S.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{number of servers in Table S}$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryCountServers(0)>>=
+int[] DBQueryCountServers() throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return this.DBFetch(conn, "S66", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryCountServers
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryCountServers]]}(0) wraps [[DBQueryCountServers]](0).\\
+\bottomrule
+\end{tabular}
+<<Read: queryCountServers(0)>>=
+int[] queryCountServers() throws SQLException {
+  return storage.DBQueryCountServers();
+}
+@ %def queryCountServers
+
+\subsection{[[DBQueryCountRequests]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryCountRequests]]}(0) returns the total number
+of requests in Table R.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{number of requests in Table R}$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryCountRequests(0)>>=
+int[] DBQueryCountRequests() throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return this.DBFetch(conn, "S67", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryCountRequests
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryCountRequests]]}(0) wraps [[DBQueryCountRequests]](0).\\
+\bottomrule
+\end{tabular}
+<<Read: queryCountRequests(0)>>=
+int[] queryCountRequests() throws SQLException {
+  return storage.DBQueryCountRequests();
+}
+@ %def queryCountRequests
+
+\subsection{[[DBQueryAllUsers]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryAllUsers]]}(0) returns all rows in view [[r_user]].
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{user identifier for user $u$}$};
+ &\node {$1:u_\texttt{q}$};
+ &\node {$2:u_\texttt{e}$};
+ &\node {$3:u_\texttt{l}$};
+ &\node {$4:u_\texttt{o}$};
+ &\node {$5:u_\texttt{d}$};
+ &\node {$6:d_u$};
+ &\node {...};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryAllUsers(0)>>=
+int[] DBQueryAllUsers() throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return this.DBFetch(conn, "S141", 7);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryAllUsers
+
+\subsection{[[DBQueryUser]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryUser]]}(0) returns the properties of the
+given user.
+A [[UserNotFoundException]] is thrown if the user does not exist.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[uid]] (param. 1):&user identifier for user $u$
+\end{tabular}
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{user identifier}$};
+ &\node {$1:u_\texttt{q}$};
+ &\node {$2:u_\texttt{e}$};
+ &\node {$3:u_\texttt{l}$};
+ &\node {$4:u_\texttt{o}$};
+ &\node {$5:u_\texttt{d}$};
+ &\node {$6:d_u$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[UserNotFoundException]] if user does not exist.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryUser(1)>>=
+int[] DBQueryUser(final int uid)
+throws UserNotFoundException {
+  if (!this.lu_users.containsKey(uid)) {
+    throw new UserNotFoundException("User "+uid+" not found.");
+  }
+  return this.lu_users.get(uid).clone();
+}
+@ %def DBQueryUser
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryUser]]}(1) wraps [[DBQueryUser]](1).\\
+\bottomrule
+\end{tabular}
+<<Read: queryUser(1)>>=
+int[] queryUser(final int rid) throws UserNotFoundException, SQLException {
+  return storage.DBQueryUser(rid);
+}
+@ %def queryUser
+
+\subsection{[[DBQueryRequestStatus]](2)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryRequestStatus]]}(0) returns the status of
+the given request at the given time (Eq.~\ref{eq:status}).
+A [[UserNotFoundException]] is thrown if the user does not exist.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[rid]] (param. 1):&user identifier for request $r$\\
+Integer [[t]] (param. 2):&a time
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{status of $r$ at time $t$}$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[UserNotFoundException]] if user does not exist, or
+[[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryRequestStatus(2)>>=
+int[] DBQueryRequestStatus(final int rid, final int t)
+throws UserNotFoundException, SQLException {
+  if (!this.lu_users.containsKey(rid)) {
+    throw new UserNotFoundException("User "+rid+" not found.");
+  }
+  try (<<Open [[conn]]>>) {
+    return this.DBFetch(conn, "S133", 1, rid, t);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryRequestStatus
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryStatisticsEdges]]}(0) wraps [[DBQueryStatisticsEdges]](0).\\
+\bottomrule
+\end{tabular}
+<<Read: queryStatisticsEdges(0)>>=
+int[] queryStatisticsEdges() throws SQLException {
+  return storage.DBQueryStatisticsEdges();
+}
+@ %def queryStatisticsEdges
+
+\subsection{[[DBQueryRequestIsAssigned]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryRequestIsAssigned]]}(1) returns a
+positive-length array if the given request is assigned (even if the request is
+not yet picked-up), or [[null]] if the request is not.  A
+[[UserNotFoundException]] is thrown if the user does not exist.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[rid]] (param. 1):&user identifier for request $r$
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:1$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[UserNotFoundException]] if user does not exist, or
+[[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryRequestIsAssigned(1)>>=
+int[] DBQueryRequestIsAssigned(final int rid) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return this.DBFetch(conn, "S148", 1, rid);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryRequestIsAssigned
+
+\subsection{[[DBQueryQueuedRequests]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryQueuedRequests]]}(1) returns the requests
+eligible for assignment at the given time. A request $r$ is ``eligible'' if it
+is not assigned at the given time, and if the given time is between the
+request's early time $r_\texttt{e}$ and
+$(r_\texttt{e}+\texttt{REQUEST\_TIMEOUT})$.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[t]] (param. 1):&a time
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{user identifier for user $u$}$};
+ &\node {$1:u_\texttt{q}$};
+ &\node {$2:u_\texttt{e}$};
+ &\node {$3:u_\texttt{l}$};
+ &\node {$4:u_\texttt{o}$};
+ &\node {$5:u_\texttt{d}$};
+ &\node {$6:d_u$};
+ &\node {...};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryQueuedRequests(1)>>=
+int[] DBQueryQueuedRequests(final int t) throws SQLException {
+  try (<<Open [[conn]]>>) {
+@ %def DBQueryQueuedRequests
+{\small Our approach is to first select all requests where $t$ is between the
+request's early time $r_\texttt{e}$ and
+$r_\texttt{e}+\texttt{REQUEST\_TIMEOUT}$.  Then, we return a filtered subset of
+these requests that are unassigned. As we don't know how many requests will
+returned in the end, we initialize a temporary array [[temp1]] to hold the
+pre-filter number of requests.}
+<<Read: DBQueryQueuedRequests(1)>>=
+    final int[] output = this.DBFetch(conn, "S143", 7, t, t, REQUEST_TIMEOUT);
+    int[] temp1 = new int[output.length];
+    int j = 0;
+    for (int i = 0; i < (output.length - 6); i += 7) {
+      if (this.lu_rstatus.get(output[i]) == false) {
+        temp1[(j + 0)] = output[(i + 0)];
+        temp1[(j + 1)] = output[(i + 1)];
+        temp1[(j + 2)] = output[(i + 2)];
+        temp1[(j + 3)] = output[(i + 3)];
+        temp1[(j + 4)] = output[(i + 4)];
+        temp1[(j + 5)] = output[(i + 5)];
+        temp1[(j + 6)] = output[(i + 6)];
+        j += 7;
+      }
+    }
+@
+{\small We copy the non-null elements of [[temp1]] into a second array
+[[temp2]] and return [[temp2]].}
+<<Read: DBQueryQueuedRequests(1)>>=
+    int[] temp2 = new int[j];
+    for (int i = 0; i < j; i += 7) {
+      temp2[(i + 0)] = temp1[(i + 0)];
+      temp2[(i + 1)] = temp1[(i + 1)];
+      temp2[(i + 2)] = temp1[(i + 2)];
+      temp2[(i + 3)] = temp1[(i + 3)];
+      temp2[(i + 4)] = temp1[(i + 4)];
+      temp2[(i + 5)] = temp1[(i + 5)];
+      temp2[(i + 6)] = temp1[(i + 6)];
+    }
+    return temp2;
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryQueuedRequests]]}(1) wraps [[DBQueryQueuedRequests]](1).\\
+\bottomrule
+\end{tabular}
+<<Read: queryQueuedRequests(1)>>=
+int[] queryQueuedRequests(final int t) throws SQLException {
+  return storage.DBQueryQueuedRequests(t);
+}
+@ %def queryQueuedRequests
+
+\subsection{[[DBQueryActiveServers]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryActiveServers]]}(1) returns the identifiers
+of the active servers at the given time. A server is ``active'' if its
+service has not ended.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[t]] (param. 1):&a time
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{a server identifier}$};
+ &\node {...};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryActiveServers(1)>>=
+int[] DBQueryActiveServers(final int t) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return this.DBFetch(conn, "S134", 1, t, t, t);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryActiveServers
+
+\subsection{[[DBQueryServerLocationsAll]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServerLocationsAll]]}(1) returns the
+last-known locations of all servers (including inactive servers) at the given
+time. The ``last-known location'' is the waypoint in the server's route $w$
+with a time component closest to but not exceeding the given time, in other
+words ${w_{\leq t}}_{|w_{\leq t}|}$.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[t]] (param. 1):&a time
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{a server identifier}$};
+ &\node {$1:\textrm{time of last-known location}$};
+ &\node {$2:\textrm{vertex of last-known location}$};
+ &\node {...};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryServerLocationsAll(1)>>=
+int[] DBQueryServerLocationsAll(final int t) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return this.DBFetch(conn, "S59", 3, t, t, t, t);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryServerLocationsAll
+
+\subsection{[[DBQueryServerLocationsActive]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServerLocationsActive]]}(1) returns the
+last-known locations of all active servers at the given time. A server is
+``active'' if its service has not ended, in other words it has not arrived
+at its own destination.
+The ``last-known location'' is the waypoint in the server's route $w$
+with a time component closest to but not exceeding the given time, in other
+words ${w_{\leq t}}_{|w_{\leq t}|}$.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[t]] (param. 1):&a time
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\scriptsize
+\matrix[nodes={minimum size=6mm}] {
+  \node {...};
+ &\node[draw] {$3(i-1):\textrm{identifier for server $s_i$}$};
+ &\node[draw] {$3(i-1)+1:\pi_\texttt{t}\textrm{ of last-known location of $s_i$}$};
+ &\node[draw] {$3(i-1)+2:\pi_\texttt{v}\textrm{ of last-known location of $s_i$}$};
+ &\node {...};\\
+};
+\end{tikzpicture}\\
+
+where $1\leq i\leq |\mathcal{S}^\textrm{active}|$,
+$s_i\in \mathcal{S}^\textrm{active}$, and
+$\mathcal{S}^\textrm{active}= \{s\in\mathcal{S}\mid t^\textrm{arrive}(\mathcal{X},s)>t\}|$
+for $t$ given by param. 1.\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryServerLocationsActive(1)>>=
+int[] DBQueryServerLocationsActive(final int t) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    int j = 0;
+@ %def DBQueryServerLocationsActive
+{\small Our approach is to first use statement [[S134]] to get the active
+servers. Then for each active server, we use either statement [[S135]] or
+[[S147]] to get its last-known location.}
+<<Read: DBQueryServerLocationsActive(1)>>=
+    final int[] temp1 = this.DBFetch(conn, "S134", 2, t, t, t);  // <-- 10 ms/call
+    output = new int[(3*(temp1.length/2))];
+    for (int i = 0; i < temp1.length - 1; i += 2) {
+      final int sid = temp1[(i + 0)];
+      final int  te = temp1[(i + 1)];
+      final int[] temp2 = (t < te
+        ? this.DBFetch(conn, "S135", 2, sid, sid, t, t)  // <-- 0.07-0.15 ms/call
+        : this.DBFetch(conn, "S147", 2, sid, sid));      // <-- 0.04-0.15 ms/call
+      output[(j + 0)] = sid;
+      output[(j + 1)] = temp2[0];
+      output[(j + 2)] = temp2[1];
+      j += 3;
+    }
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
+}
+@
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryServerLocationsActive]]}(1) wraps [[DBQueryServerLocationsActive]](1).\\
+\bottomrule
+\end{tabular}
+<<Read: queryServerLocationsActive(1)>>=
+int[] queryServerLocationsActive(final int t) throws SQLException {
+  return this.storage.DBQueryServerLocationsActive(t);
+}
+@ %def queryServerLocationsActive
+
+\subsection{[[DBQueryServerRoute]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServerRoute]]}(1) returns the route for the
+given server identified by [[sid]] (param. 1) at time $t$ (param. 2).
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[sid]] (param. 1):&server identifier.\\
+\end{tabular}
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node {...};
+ &\node[draw] {$2(i-1):\pi_\texttt{t}(w_i)$};
+ &\node[draw] {$2(i-1)+1:\pi_\texttt{v}(w_i)$};
+ &\node {...};\\
+};
+\end{tikzpicture}
+
+where $1\leq i\leq |w|$ and $w$ is the route for the given server
+identified by [[sid]] (param. 1).\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryServerRoute(1)>>=
+int[] DBQueryServerRoute(final int sid) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S60", 2, sid);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryServerRoute
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryServerRoute]]}(1) wraps [[DBQueryServerRoute]](1).\\
+\bottomrule
+\end{tabular}
+<<Read: queryServerRoute(1)>>=
+int[] queryServerRoute(final int sid) throws SQLException {
+  return storage.DBQueryServerRoute(sid);
+}
+@ %def queryServerRoute
+
+\subsection{[[DBQueryServerSchedule]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServerSchedule]]}(1) returns the schedule
+for the given server.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[sid]] (param. 1):&server identifier.\\
+\end{tabular}
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\scriptsize
+\matrix[nodes={}] {
+  \node {...};
+ &\node[draw] {$4(j-1):\pi_\texttt{t}(b_j)$};
+ &\node[draw] {$4(j-1)+1:\pi_\texttt{v}(b_j)$};
+ &\node[draw] {$4(j-1)+2:\textrm{a server ID in }\pi_\texttt{L}(b_j)$};
+ &\node[draw] {$4(j-1)+3:\textrm{a request ID in }\pi_\texttt{L}(b_j)$};
+ &\node {...};\\
+};
+\end{tikzpicture}
+
+where $1\leq j\leq |b|$ and $b$ is the schedule for the
+given server  identified by [[sid]] (param. 1).
+If a label is empty (\textit{e.g.} not all waypoints will have a server
+identifier in their label set), the element will be 0. If a waypoint has
+multiple labels, the waypoint will be written once for each of the labels.
+The returned sequence is in time-ascending order but \textbf{is not guaranteed}
+to be in the same order as the actual pick-ups and drop-offs, \textit{e.g.} if a
+waypoint has multiple labels with some indicating pick-ups and some indicating
+drop-offs, the ordering of these waypoints is uncertain.\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryServerSchedule(1)>>=
+int[] DBQueryServerSchedule(final int sid) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S61", 4, sid);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryServerSchedule
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryServerSchedule]]}(1) wraps [[DBQueryServerSchedule]](1).\\
+\bottomrule
+\end{tabular}
+<<Read: queryServerSchedule(1)>>=
+int[] queryServerSchedule(final int sid) throws SQLException {
+  return storage.DBQueryServerSchedule(sid);
+}
+@ %def queryServerSchedule
+
+\subsection{[[DBQueryServerRemainingRoute]](2)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServerRemainingRoute]]}(2) returns the
+remaining route for the given server at the given time.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[sid]] (param. 1):&server identifier.\\
+Integer [[t]] (param. 2):&a time.\\
+\end{tabular}
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node {...};
+ &\node[draw] {$2(i-1):\pi_\texttt{t}({(w_{>t}})_i)$};
+ &\node[draw] {$2(i-1)+1:\pi_\texttt{v}({(w_{>t}})_i)$};
+ &\node {...};\\
+};
+\end{tikzpicture}
+
+where $1\leq i\leq |w_{>t}|$ and $w_{>t}$ is the remaining route for the
+given server identified by [[sid]] (param. 1) at time $t$ (param. 2).\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryServerRemainingRoute(2)>>=
+int[] DBQueryServerRemainingRoute(final int sid, final int t) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S129", 2, sid, t);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryServerRemainingRoute
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryServerRemainingRoute]]}(2) wraps [[DBQueryServerRemainingRoute]](2).\\
+\bottomrule
+\end{tabular}
+<<Read: queryServerRemainingRoute(2)>>=
+int[] queryServerRemainingRoute(final int sid, final int t) throws SQLException {
+  return this.storage.DBQueryServerRemainingRoute(sid, t);
+}
+@ %def queryServerRemainingRoute
+
+\subsection{[[DBQueryServerRemainingSchedule]](2)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServerRemainingSchedule]]}(2) returns the
+remaining schedule for the given server at the given time.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[sid]] (param. 1):&server identifier.\\
+Integer [[t]] (param. 2):&a time.\\
+\end{tabular}
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\scriptsize
+\matrix[nodes={}] {
+  \node {...};
+ &\node[draw] {$4(j-1):\pi_\texttt{t}((b_{>t})_j)$};
+ &\node[draw] {$4(j-1)+1:\pi_\texttt{v}((b_{>t})_j)$};
+ &\node[draw] {$4(j-1)+2:\textrm{a server ID in }\pi_\texttt{L}((b_{>t})_j)$};
+ &\node[draw] {$4(j-1)+3:\textrm{a request ID in }\pi_\texttt{L}((b_{>t})_j)$};
+ &\node {...};\\
+};
+\end{tikzpicture}
+
+where $1\leq j\leq |b_{>t}|$ and $b_{>t}$ is the remaining schedule for the
+given server identified by [[sid]] (param. 1) at time $t$ (param. 2).
+If a label is empty (\textit{e.g.} not all waypoints will have a server
+identifier in their label set), the element will be 0. If a waypoint has
+multiple labels, the waypoint will be written once for each of the labels.
+The returned sequence is in time-ascending order and \textbf{is guaranteed}
+to be in the same order as the actual pick-ups and drop-offs.\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryServerRemainingSchedule(2)>>=
+int[] DBQueryServerRemainingSchedule(final int sid, final int t)
+throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    int[] temp = DBFetch(conn, "S144", 3, sid, t);
+    output = new int[(4*temp.length/3 + 4)];
+    int j = 0;
+    for (int i = 0; i < (temp.length - 2); i += 3) {
+      output[(j + 0)] = temp[(i + 0)];
+      output[(j + 1)] = temp[(i + 1)];
+      output[(j + 2)] = 0;
+      output[(j + 3)] = temp[(i + 2)];
+      j += 4;
+    }
+    temp = DBFetch(conn, "S145", 2, sid);
+    output[(j + 0)] = temp[0];
+    output[(j + 1)] = temp[1];
+    output[(j + 2)] = sid;
+    output[(j + 3)] = 0;
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
+}
+@ %def DBQueryServerRemainingSchedule
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryServerRemainingSchedule]]}(2) wraps [[DBQueryServerRemainingSchedule]](2).\\
+\bottomrule
+\end{tabular}
+<<Read: queryServerRemainingSchedule(2)>>=
+int[] queryServerRemainingSchedule(final int sid, final int t) throws SQLException {
+  return this.storage.DBQueryServerRemainingSchedule(sid, t);
+}
+@ %def queryServerRemainingSchedule
+
+\subsection{[[DBQueryServerRemainingDistance]](2)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServerRemainingDistance]]}(2) returns the
+remaining distance $D(w_{>t})$ for the given server at the given time.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[sid]] (param. 1):&server identifier.\\
+Integer [[t]] (param. 2):&a time.\\
+\end{tabular}
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:D(w_{>t})$};\\
+};
+\end{tikzpicture}
+
+where $w_{>t}$ is the remaining route for the given server identified by [[sid]] (param. 1).\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryServerRemainingDistance(2)>>=
+int[] DBQueryServerRemainingDistance(final int sid, final int t)
+throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S142", 1, sid, t);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryServerRemainingDistance
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryServerRemainingDistance]]}(2) wraps [[DBQueryServerRemainingDistance]](2).\\
+\bottomrule
+\end{tabular}
+<<Read: queryServerRemainingDistance(2)>>=
+int[] queryServerRemainingDistance(final int sid, final int t) throws SQLException {
+  return this.storage.DBQueryServerRemainingDistance(sid, t);
+}
+@ %def queryServerRemainingDistance
+
+\subsection{[[DBQueryServerRemainingDuration]](2)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServerRemainingDuration]]}(2) returns the
+remaining duration $\delta(w_{>t})$ for the given server at the given time.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[sid]] (param. 1):&server identifier.\\
+Integer [[t]] (param. 2):&a time.\\
+\end{tabular}
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\delta(w_{>t})$};\\
+};
+\end{tikzpicture}
+
+where $w_{>t}$ is the remaining route for the given server identified by [[sid]] (param. 1).\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryServerRemainingDuration(2)>>=
+int[] DBQueryServerRemainingDuration(final int sid, final int t)
+throws SQLException {
+  try (<<Open [[conn]]>>) {
+    int[] output = DBFetch(conn, "S127", 1, sid, t);
+    if (output != null) {
+      output[0] -= t;
+    }
+    return output;
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryServerRemainingDuration
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryServerRemainingDuration]]}(2) wraps [[DBQueryServerRemainingDuration]](2).\\
+\bottomrule
+\end{tabular}
+<<Read: queryServerRemainingDuration(2)>>=
+int[] queryServerRemainingDuration(final int sid, final int t) throws SQLException {
+  return this.storage.DBQueryServerRemainingDuration(sid, t);
+}
+@ %def queryServerRemainingDuration
+
+\subsection{[[DBQueryServerMaxLoad]](2)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServerMaxLoad]]}(2) returns the maximum load
+for the given server at the given time. The ``maximum load'' is equal to the
+load burden $Q(\mathcal{X},s,t)$ \emph{plus} the sum of the loads of the
+requests that are dropped off by the server at $t$. In other words it is the
+number of occupied seats at $t$ before any drop-offs happen.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[sid]] (param. 1):&server identifier.\\
+Integer [[t]] (param. 2):&a time.\\
+\end{tabular}
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{maximum load on the server}$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryServerMaxLoad(2)>>=
+int[] DBQueryServerMaxLoad(final int sid, final int t) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S73", 1, sid, t);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryServerMaxLoad
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryServerMaxLoad]]}(2) wraps [[DBQueryServerMaxLoad]](2).\\
+\bottomrule
+\end{tabular}
+<<Read: queryServerMaxLoad(2)>>=
+int[] queryServerMaxLoad(final int sid, final int t) throws SQLException {
+  return this.storage.DBQueryServerMaxLoad(sid, t);
+}
+@ %def queryServerMaxLoad
+
+\subsection{[[DBQueryServerPendingAssignments]](2)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServerPendingAssignments]]}(2) returns the
+requests that will be picked up by the given server beyond the given time.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[sid]] (param. 1):&server identifier.\\
+Integer [[t]] (param. 2):&a time.\\
+\end{tabular}
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node {...};
+ &\node[draw] {$i:\textrm{identifier for request }r_i$};
+ &\node {...};\\
+};
+\end{tikzpicture}
+
+where $1\leq i\leq |R^\textrm{pending}(\mathcal{X}, s, t)|$,
+$r_i\in R^\textrm{pending}(\mathcal{X}, s, t)$, and
+$R^\textrm{pending}(\mathcal{X}, s, t)= (R(\mathcal{X},s,H)\setminus R(\mathcal{X},s,t))$ for
+time horizon $H$, server $s$ identified by [[sid]] (param. 1), and time $t$ given by param. 2.\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryServerPendingAssignments(2)>>=
+int[] DBQueryServerPendingAssignments(final int sid, final int t)
+throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S100", 1, t, sid);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryServerPendingAssignments
+
+\subsection{[[DBQueryServerCompletedAssignments]](2)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServerCompletedAssignments]]}(2) returns the
+requests that have been dropped off by the given server on or before the given time,
+in other words $R(\mathcal{X},s,t)$ (Eq.~\ref{eq:R(X,s,t)}).
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[sid]] (param. 1):&server identifier.\\
+Integer [[t]] (param. 2):&a time.\\
+\end{tabular}
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node {...};
+ &\node[draw] {$i:\textrm{identifier for request }r_i$};
+ &\node {...};\\
+};
+\end{tikzpicture}
+
+where $1\leq i\leq |R(\mathcal{X},s,t)|$ and
+$r_i\in R(\mathcal{X},s,t)$ for server $s$ identified by [[sid]] (param. 1)
+at time $t$ given by param. 2.\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryServerCompletedAssignments(2)>>=
+int[] DBQueryServerCompletedAssignments(final int sid, final int t)
+throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S101", 1, t, sid);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryServerCompletedAssignments
+
+\subsection{[[DBQueryServiceRate]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServiceRate]]}(0) returns the
+service rate $\mu$ (Eq.~\ref{eq:service-rate}).
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:\mu\times 10^4$};\\
+};
+\end{tikzpicture}
+
+Note that the service rate is \textbf{multiplied by $10^4$} so that it can be
+returned as an integer with 2 decimal points precision, for example if
+$\mu=.1234$, then [[DBQueryServiceRate]](0) returns $1234$.\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryServiceRate(0)>>=
+int[] DBQueryServiceRate() throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S102", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryServiceRate
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryServiceRate]]}(0) wraps [[DBQueryServiceRate]](0).\\
+\bottomrule
+\end{tabular}
+<<Read: queryServiceRate(0)>>=
+int[] queryServiceRate() throws SQLException {
+  return storage.DBQueryServiceRate();
+}
+@ %def queryServiceRate
+
+\subsection{[[DBQueryBaseDistanceTotal]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryBaseDistanceTotal]]}(0) returns the
+base distance $D^\textrm{base}(\mathcal{U})$ (Eq.~\ref{eq:base-distance}).
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:D^\textrm{base}(\mathcal{U})$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryBaseDistanceTotal(0)>>=
+int[] DBQueryBaseDistanceTotal() throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S103", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryBaseDistanceTotal
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryBaseDistanceTotal]]}(0) wraps [[DBQueryBaseDistanceTotal]](0).\\
+\bottomrule
+\end{tabular}
+<<Read: queryBaseDistanceTotal(0)>>=
+int[] queryBaseDistanceTotal() throws SQLException {
+  return storage.DBQueryBaseDistanceTotal();
+}
+@ %def queryBaseDistanceTotal
+
+\subsection{[[DBQueryServerBaseDistanceTotal]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServerBaseDistanceTotal]]}(0) returns the
+base distance of all the servers.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:\sum_{s\in\mathcal{S}}d_s$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryServerBaseDistanceTotal(0)>>=
+int[] DBQueryServerBaseDistanceTotal() throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S110", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryServerBaseDistanceTotal
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryServerBaseDistanceTotal]]}(0) wraps [[DBQueryServerBaseDistanceTotal]](0).\\
+\bottomrule
+\end{tabular}
+<<Read: queryServerBaseDistanceTotal(0)>>=
+int[] queryServerBaseDistanceTotal() throws SQLException {
+  return storage.DBQueryServerBaseDistanceTotal();
+}
+@ %def queryServerBaseDistanceTotal
+
+\subsection{[[DBQueryRequestBaseDistanceTotal]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryRequestBaseDistanceTotal]]}(0) returns the
+base distance of all the requests.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:\sum_{r\in\mathcal{R}}d_r$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryRequestBaseDistanceTotal(0)>>=
+int[] DBQueryRequestBaseDistanceTotal() throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S111", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryRequestBaseDistanceTotal
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryRequestBaseDistanceTotal]]}(0) wraps [[DBQueryRequestBaseDistanceTotal]](0).\\
+\bottomrule
+\end{tabular}
+<<Read: queryRequestBaseDistanceTotal(0)>>=
+int[] queryRequestBaseDistanceTotal() throws SQLException {
+  return storage.DBQueryRequestBaseDistanceTotal();
+}
+@ %def queryRequestBaseDistanceTotal
+
+\subsection{[[DBQueryRequestBaseDistanceUnassigned]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryRequestBaseDistanceUnassigned]]}(0) returns the
+base distance of all the unassigned requests.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:\sum_{r\in R^{ko}(\mathcal{X},H)}d_r$};\\
+};
+\end{tikzpicture}
+
+where $H$ is the time horizon.\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryRequestBaseDistanceUnassigned(0)>>=
+int[] DBQueryRequestBaseDistanceUnassigned() throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S138", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryRequestBaseDistanceUnassigned
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryRequestBaseDistanceUnassigned]]}(0) wraps [[DBQueryRequestBaseDistanceUnassigned]](0).\\
+\bottomrule
+\end{tabular}
+<<Read: queryRequestBaseDistanceUnassigned(0)>>=
+int[] queryRequestBaseDistanceUnassigned() throws SQLException {
+  return storage.DBQueryRequestBaseDistanceUnassigned();
+}
+@ %def queryRequestBaseDistanceUnassigned
+
+\subsection{[[DBQueryServerTravelDistance]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServerTravelDistance]]}(1) returns the
+travel distance $D(w)$ of the given server.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[sid]] (param. 1):&server identifier.
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:D(w)$};\\
+};
+\end{tikzpicture}
+
+where $w$ is the route of the given server identified by [[sid]] (param. 1).\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryServerTravelDistance(1)>>=
+int[] DBQueryServerTravelDistance(final int sid) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S104", 1, sid);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryServerTravelDistance
+
+\subsection{[[DBQueryServerTravelDistanceTotal]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServerTravelDistanceTotal]]}(0) returns the
+total travel distance of all the servers.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:\sum_{s\in\mathcal{S}}D(W(\mathcal{X},s))$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryServerTravelDistanceTotal(0)>>=
+int[] DBQueryServerTravelDistanceTotal() throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S105", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryServerTravelDistanceTotal
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryServerTravelDistanceTotal]]}(0) wraps [[DBQueryServerTravelDistanceTotal]](0).\\
+\bottomrule
+\end{tabular}
+<<Read: queryServerTravelDistanceTotal(0)>>=
+int[] queryServerTravelDistanceTotal() throws SQLException {
+  return storage.DBQueryServerTravelDistanceTotal();
+}
+@ %def queryServerTravelDistanceTotal
+
+\subsection{[[DBQueryServerCruisingDistance]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServerCruisingDistance]]}(1) returns the
+cruising distance $D^\textrm{cruise}(\mathcal{X},s)$
+(Eq.~\ref{eq:cruising-distance}) of the given server.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:}\\
+\begin{tabular}{lp{116mm}}
+Integer [[sid]] (param. 1):&server identifier.
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:D^\textrm{cruise}(\mathcal{X},s)$};\\
+};
+\end{tikzpicture}
+
+where $s$ is the server identified by [[sid]] (param. 1).\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryServerCruisingDistance(1)>>=
+int[] DBQueryServerCruisingDistance(final int sid) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S106", 1, sid);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryServerCruisingDistance
+
+\subsection{[[DBQueryServerCruisingDistanceTotal]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServerCruisingDistanceTotal]]}(0) returns the
+total cruising distance of all servers.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:\sum_{s\in\mathcal{S}}D^\textrm{cruise}(\mathcal{X},s)$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryServerCruisingDistanceTotal(0)>>=
+int[] DBQueryServerCruisingDistanceTotal() throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S107", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryServerCruisingDistanceTotal
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryServerCruisingDistanceTotal]]}(0) wraps [[DBQueryServerCruisingDistanceTotal]](0).\\
+\bottomrule
+\end{tabular}
+<<Read: queryServerCruisingDistanceTotal(0)>>=
+int[] queryServerCruisingDistanceTotal() throws SQLException {
+  return storage.DBQueryServerCruisingDistanceTotal();
+}
+@ %def queryServerCruisingDistanceTotal
+
+\subsection{[[DBQueryServerServiceDistance]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServerServiceDistance]]}(1) returns the
+service distance $D^\textrm{service}(\mathcal{X},s)$
+(Eq.~\ref{eq:service-distance}) of the given server.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:}\\
+\begin{tabular}{lp{116mm}}
+Integer [[sid]] (param. 1):&server identifier.
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:D^\textrm{service}(\mathcal{X},s)$};\\
+};
+\end{tikzpicture}
+
+where $s$ is the server identified by [[sid]] (param. 1).\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryServerServiceDistance(1)>>=
+int[] DBQueryServerServiceDistance(final int sid) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S108", 1, sid);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryServerServiceDistance
+
+\subsection{[[DBQueryServerServiceDistanceTotal]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServerServiceDistanceTotal]]}(0) returns the
+total service distance of all servers.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:\sum_{s\in\mathcal{S}}D^\textrm{service}(\mathcal{X},s)$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryServerServiceDistanceTotal(0)>>=
+int[] DBQueryServerServiceDistanceTotal() throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S109", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryServerServiceDistanceTotal
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryServerServiceDistanceTotal]]}(0) wraps [[DBQueryServerServiceDistanceTotal]](0).\\
+\bottomrule
+\end{tabular}
+<<Read: queryServerServiceDistanceTotal(0)>>=
+int[] queryServerServiceDistanceTotal() throws SQLException {
+  return storage.DBQueryServerServiceDistanceTotal();
+}
+@ %def queryServerServiceDistanceTotal
+
+\subsection{[[DBQueryRequestDetourDistance]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryRequestDetourDistance]]}(1) returns the
+detour distance $D^\textrm{detour}(\mathcal{X},r)$
+(Eq.~\ref{eq:detour-distance}) of the given request.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:}\\
+\begin{tabular}{lp{116mm}}
+Integer [[rid]] (param. 1):&request identifier.
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:D^\textrm{detour}(\mathcal{X},r)$};\\
+};
+\end{tikzpicture}
+
+where $r$ is the request identified by [[rid]] (param. 1).\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryRequestDetourDistance(1)>>=
+int[] DBQueryRequestDetourDistance(final int rid) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S112", 1, rid);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryRequestDetourDistance
+
+\subsection{[[DBQueryRequestDetourDistanceTotal]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryRequestDetourDistanceTotal]]}(0) returns the
+total detour distance of all requests.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:\sum_{r\in\mathcal{R}}D^\textrm{detour}(\mathcal{X},r)$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryRequestDetourDistanceTotal(0)>>=
+int[] DBQueryRequestDetourDistanceTotal() throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S113", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryRequestDetourDistanceTotal
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryRequestDetourDistanceTotal]]}(0) wraps [[DBQueryRequestDetourDistanceTotal]](0).\\
+\bottomrule
+\end{tabular}
+<<Read: queryRequestDetourDistanceTotal(0)>>=
+int[] queryRequestDetourDistanceTotal() throws SQLException {
+  return storage.DBQueryRequestDetourDistanceTotal();
+}
+@ %def queryRequestDetourDistanceTotal
+
+\subsection{[[DBQueryRequestTransitDistance]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryRequestTransitDistance]]}(1) returns the
+transit distance $D^\textrm{transit}(\mathcal{X},r)$
+(Eq.~\ref{eq:transit-distance}) of the given request.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:}\\
+\begin{tabular}{lp{116mm}}
+Integer [[rid]] (param. 1):&request identifier.
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:D^\textrm{transit}(\mathcal{X},r)$};\\
+};
+\end{tikzpicture}
+
+where $r$ is the request identified by [[rid]] (param. 1).\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryRequestTransitDistance(1)>>=
+int[] DBQueryRequestTransitDistance(final int rid) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S114", 1, rid);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryRequestTransitDistance
+
+\subsection{[[DBQueryRequestTransitDistanceTotal]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryRequestTransitDistanceTotal]]}(0) returns the
+total transit distance of all requests.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:\sum_{r\in\mathcal{R}}D^\textrm{transit}(\mathcal{X},r)$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryRequestTransitDistanceTotal(0)>>=
+int[] DBQueryRequestTransitDistanceTotal() throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S115", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryRequestTransitDistanceTotal
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryRequestTransitDistanceTotal]]}(0) wraps [[DBQueryRequestTransitDistanceTotal]](0).\\
+\bottomrule
+\end{tabular}
+<<Read: queryRequestTransitDistanceTotal(0)>>=
+int[] queryRequestTransitDistanceTotal() throws SQLException {
+  return storage.DBQueryRequestTransitDistanceTotal();
+}
+@ %def queryRequestTransitDistanceTotal
+
+\subsection{[[DBQueryServerTravelDuration]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServerTravelDuration]]}(1) returns the
+travel duration $\delta^\textrm{travel}(\mathcal{X},r)$
+(Eq.~\ref{eq:travel-duration}) of the given server.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:}\\
+\begin{tabular}{lp{116mm}}
+Integer [[sid]] (param. 1):&server identifier.
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:\delta^\textrm{travel}(\mathcal{X},s)$};\\
+};
+\end{tikzpicture}
+
+where $s$ is the server identified by [[sid]] (param. 1).\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryServerTravelDuration(1)>>=
+int[] DBQueryServerTravelDuration(final int sid) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S116", 1, sid);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryServerTravelDuration
+
+\subsection{[[DBQueryServerTravelDurationTotal]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServerTravelDurationTotal]]}(0) returns the
+total travel duration of all servers.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:\sum_{s\in\mathcal{S}}\delta^\textrm{travel}(\mathcal{X},s)$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryServerTravelDurationTotal(0)>>=
+int[] DBQueryServerTravelDurationTotal() throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S117", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryServerTravelDurationTotal
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryServerTravelDurationTotal]]}(0) wraps [[DBQueryServerTravelDurationTotal]](0).\\
+\bottomrule
+\end{tabular}
+<<Read: queryServerTravelDurationTotal(0)>>=
+int[] queryServerTravelDurationTotal() throws SQLException {
+  return storage.DBQueryServerTravelDurationTotal();
+}
+@ %def queryServerTravelDurationTotal
+
+\subsection{[[DBQueryRequestPickupDuration]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryRequestPickupDuration]]}(1) returns the
+pickup delay $\delta^\textrm{pickup}(\mathcal{X},r)$
+(Eq.~\ref{eq:pick-up delay}) of the given request.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:}\\
+\begin{tabular}{lp{116mm}}
+Integer [[rid]] (param. 1):&request identifier.
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:\delta^\textrm{pickup}(\mathcal{X},r)$};\\
+};
+\end{tikzpicture}
+
+where $r$ is the request identified by [[rid]] (param. 1).\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryRequestPickupDuration(1)>>=
+int[] DBQueryRequestPickupDuration(final int rid) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S118", 1, rid);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryRequestPickupDuration
+
+\subsection{[[DBQueryRequestPickupDurationTotal]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryRequestPickupDurationTotal]]}(0) returns the
+total pickup delay of all requests.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:\sum_{r\in\mathcal{R}}\delta^\textrm{pickup}(\mathcal{X},r)$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryRequestPickupDurationTotal(0)>>=
+int[] DBQueryRequestPickupDurationTotal() throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S119", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryRequestPickupDurationTotal
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryRequestPickupDurationTotal]]}(0) wraps [[DBQueryRequestPickupDurationTotal]](0).\\
+\bottomrule
+\end{tabular}
+<<Read: queryRequestPickupDurationTotal(0)>>=
+int[] queryRequestPickupDurationTotal() throws SQLException {
+  return storage.DBQueryRequestPickupDurationTotal();
+}
+@ %def queryRequestPickupDurationTotal
+
+\subsection{[[DBQueryRequestTransitDuration]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryRequestTransitDuration]]}(1) returns the
+transit duration $\delta^\textrm{transit}(\mathcal{X},r)$
+(Eq.~\ref{eq:transit-duration}) of the given request.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:}\\
+\begin{tabular}{lp{116mm}}
+Integer [[rid]] (param. 1):&request identifier.
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:\delta^\textrm{transit}(\mathcal{X},r)$};\\
+};
+\end{tikzpicture}
+
+where $r$ is the request identified by [[rid]] (param. 1).\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryRequestTransitDuration(1)>>=
+int[] DBQueryRequestTransitDuration(final int rid) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S120", 1, rid);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryRequestTransitDuration
+
+\subsection{[[DBQueryRequestTransitDurationTotal]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryRequestTransitDurationTotal]]}(0) returns the
+total transit duration of all requests.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:\sum_{r\in\mathcal{R}}\delta^\textrm{transit}(\mathcal{X},r)$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryRequestTransitDurationTotal(0)>>=
+int[] DBQueryRequestTransitDurationTotal() throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S121", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryRequestTransitDurationTotal
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryRequestTransitDurationTotal]]}(0) wraps [[DBQueryRequestTransitDurationTotal]](0).\\
+\bottomrule
+\end{tabular}
+<<Read: queryRequestTransitDurationTotal(0)>>=
+int[] queryRequestTransitDurationTotal() throws SQLException {
+  return storage.DBQueryRequestTransitDurationTotal();
+}
+@ %def queryRequestTransitDurationTotal
+
+\subsection{[[DBQueryRequestTravelDuration]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryRequestTravelDuration]]}(1) returns the
+travel duration $\delta^\textrm{travel}(\mathcal{X},r)$
+(Eq.~\ref{eq:travel-duration}) of the given request.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:}\\
+\begin{tabular}{lp{116mm}}
+Integer [[rid]] (param. 1):&request identifier.
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:\delta^\textrm{travel}(\mathcal{X},r)$};\\
+};
+\end{tikzpicture}
+
+where $r$ is the request identified by [[rid]] (param. 1).\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryRequestTravelDuration(1)>>=
+int[] DBQueryRequestTravelDuration(final int rid) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S122", 1, rid);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryRequestTravelDuration
+
+\subsection{[[DBQueryRequestTravelDurationTotal]](0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryRequestTravelDurationTotal]]}(0) returns the
+total travel duration of all requests.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:\sum_{r\in\mathcal{R}}\delta^\textrm{travel}(\mathcal{X},r)$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryRequestTravelDurationTotal(0)>>=
+int[] DBQueryRequestTravelDurationTotal() throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S123", 1);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryRequestTravelDurationTotal
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryRequestTravelDurationTotal]]}(0) wraps [[DBQueryRequestTravelDurationTotal]](0).\\
+\bottomrule
+\end{tabular}
+<<Read: queryRequestTravelDurationTotal(0)>>=
+int[] queryRequestTravelDurationTotal() throws SQLException {
+  return storage.DBQueryRequestTravelDurationTotal();
+}
+@ %def queryRequestTravelDurationTotal
+
+\subsection{[[DBQueryRequestDepartureTime]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryRequestDepartureTime]]}(1) returns the
+departure time $t^\textrm{depart}(\mathcal{X},r)$
+(Eq.~\ref{eq:departure-time}) of the given request.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:}\\
+\begin{tabular}{lp{116mm}}
+Integer [[rid]] (param. 1):&request identifier.
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:t^\textrm{depart}(\mathcal{X},r)$};\\
+};
+\end{tikzpicture}
+
+where $r$ is the request identified by [[rid]] (param. 1).\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryRequestDepartureTime(1)>>=
+int[] DBQueryRequestDepartureTime(final int rid) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S124", 1, rid);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryRequestDepartureTime
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryRequestDepartureTime]]}(1) wraps [[DBQueryRequestDepartureTime]](1).\\
+\bottomrule
+\end{tabular}
+<<Read: queryRequestDepartureTime(1)>>=
+int[] queryRequestDepartureTime(final int rid) throws SQLException {
+  return storage.DBQueryRequestDepartureTime(rid);
+}
+@ %def queryRequestDepartureTime
+
+\subsection{[[DBQueryServerDepartureTime]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServerDepartureTime]]}(1) returns the
+departure time $t^\textrm{depart}(\mathcal{X},s)$
+(Eq.~\ref{eq:departure-time}) of the given server.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:}\\
+\begin{tabular}{lp{116mm}}
+Integer [[sid]] (param. 1):&server identifier.
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:t^\textrm{depart}(\mathcal{X},s)$};\\
+};
+\end{tikzpicture}
+
+where $s$ is the server identified by [[sid]] (param. 1).\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryServerDepartureTime(1)>>=
+int[] DBQueryServerDepartureTime(final int sid) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S125", 1, sid);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryServerDepartureTime
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryServerDepartureTime]]}(1) wraps [[DBQueryServerDepartureTime]](1).\\
+\bottomrule
+\end{tabular}
+<<Read: queryServerDepartureTime(1)>>=
+int[] queryServerDepartureTime(final int sid) throws SQLException {
+  return storage.DBQueryServerDepartureTime(sid);
+}
+@ %def queryServerDepartureTime
+
+
+\subsection{[[DBQueryRequestArrivalTime]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryRequestArrivalTime]]}(1) returns the
+arrival time $t^\textrm{arrive}(\mathcal{X},r)$
+(Eq.~\ref{eq:arrival-time}) of the given request.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:}\\
+\begin{tabular}{lp{116mm}}
+Integer [[rid]] (param. 1):&request identifier.
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:t^\textrm{arrive}(\mathcal{X},r)$};\\
+};
+\end{tikzpicture}
+
+where $r$ is the request identified by [[rid]] (param. 1).\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryRequestArrivalTime(1)>>=
+int[] DBQueryRequestArrivalTime(final int rid) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S126", 1, rid);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryRequestArrivalTime
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryRequestArrivalTime]]}(1) wraps [[DBQueryRequestArrivalTime]](1).\\
+\bottomrule
+\end{tabular}
+<<Read: queryRequestArrivalTime(1)>>=
+int[] queryRequestArrivalTime(final int rid) throws SQLException {
+  return storage.DBQueryRequestArrivalTime(rid);
+}
+@ %def queryRequestArrivalTime
+
+\subsection{[[DBQueryServerArrivalTime]](1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServerArrivalTime]]}(1) returns the
+arrival time $t^\textrm{arrive}(\mathcal{X},s)$
+(Eq.~\ref{eq:arrival-time}) of the given server.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:}\\
+\begin{tabular}{lp{116mm}}
+Integer [[sid]] (param. 1):&server identifier.
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:t^\textrm{arrive}(\mathcal{X},s)$};\\
+};
+\end{tikzpicture}
+
+where $s$ is the request identified by [[sid]] (param. 1).\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryServerArrivalTime(1)>>=
+int[] DBQueryServerArrivalTime(final int sid) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S127", 1, sid);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryServerArrivalTime
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryServerArrivalTime]]}(1) wraps [[DBQueryServerArrivalTime]](1).\\
+\bottomrule
+\end{tabular}
+<<Read: queryServerArrivalTime(1)>>=
+int[] queryServerArrivalTime(final int sid) throws SQLException {
+  return storage.DBQueryServerArrivalTime(sid);
+}
+@ %def queryServerArrivalTime
+

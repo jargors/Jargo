@@ -1,15 +1,57 @@
-\section{Introduction}
-\label{sec:introduction}
+\chapter{Class: Tools}
+\label{tools}
+
+<<Tools.java>>=
+<<Tools.java preamble>>
+public class Tools {
+  <<[[Tools]] member variables>>
+  <<[[Tools]] constructor>>
+  <<[[Tools]] methods>>
+}
+@
+
 The Tools class that provides some helper procedures, including computing
 shortest paths.
 
-\section{Implementation Overview}
-<<Tools.java>>=
-<<Tools.java preamble>>
-<<[[Tools]] definition>>
+\begin{figure}
+\adjustbox{scale=.8}{
+\begin{minipage}[t]{0.6\textwidth}
+\hi{Read Methods}
+<<[[Tools]] methods>>=
 @
+\end{minipage}
+\begin{minipage}[t]{0.6\textwidth}
+\hi{Write Methods}
+<<[[Tools]] methods>>=
+@
+\hi{Utilities}
+<<[[Tools]] methods>>=
+public <<Gtree: GTLoadGtree(1)>>
+public <<registerVertices(1)>>
+public <<registerEdges(1)>>
+public <<registerUsers(1)>>
+public <<computeHaversine(4)>>
+public <<computeHaversine(2)>>
+public <<computeDuration(2)>>
+public <<computeShortestPath(2)>>
+public <<computeShortestPathDistance(2)>>
+public <<computeRoute(3)>>
+public <<filterByHaversine(3)>>
+public <<printUser(1)>>
+public <<printPath(1)>>
+public <<printRoute(1)>>
+public <<printSchedule(1)>>
+public static <<Print(2)>>
+public static <<Print(1)>>
+public static <<PrintSQLException(1)>>
+@
+\end{minipage}
+}
+\caption{Tools methods.}
+\label{tools:fig:methods}
+\end{figure}
 
-\subsection{Preamble}
+\section{Preamble}
 The preamble declares the package and imports dependencies.
 <<Tools.java preamble>>=
 package com.github.jargors;
@@ -25,17 +67,8 @@ import java.sql.SQLException;
 import java.io.FileNotFoundException;
 @
 
-\subsection{Class Definition}
-<<[[Tools]] definition>>=
-public class Tools {
-  <<Member variables>>
-  <<Public methods>>
-  <<Static methods>>
-}
-@
-
-\subsection{Member Variables}
-<<Member variables>>=
+\section{Member Variables}
+<<[[Tools]] member variables>>=
 private G_Tree gtree;
 private boolean flag_gtree_loaded = false;
 private ConcurrentHashMap<Integer, int[]> lu_vertices = new ConcurrentHashMap();
@@ -44,72 +77,40 @@ private ConcurrentHashMap<Integer,
 private ConcurrentHashMap<Integer, int[]> lu_users    = new ConcurrentHashMap();
 private final double CSHIFT = 10000000.0;
 private final boolean DEBUG = "true".equals(System.getProperty("jargors.tools.debug"));
-@ %def gtree flag_gtree_loaded lu_vertices lu_edges lu_users CSHIFT DEBUG
-
-\section{Public Methods}
-<<Public methods>>=
-  <<Load GTree>>
-  <<Register vertices>>
-  <<Register edges>>
-  <<Register users>>
-  <<Compute haversine>>
-  <<Compute duration>>
-  <<Compute shortest path>>
-  <<Compute shortest path distance>>
-  <<Compute route>>
-  <<Filter locs by haversine distance>>
-  <<Print user>>
-  <<Print path>>
-  <<Print route>>
-  <<Print schedule>>
 @
 
-\subsection{[[loadGTree]](1)}
-The [[gtreeJNI.load]](1) method can do strange things if [[f_gtree]] is empty,
-so we do some basic validation here before proceeding.
-<<Load GTree>>=
-public void loadGTree(final String p) throws FileNotFoundException {
-  try {
-    System.loadLibrary("gtree");
-  } catch (UnsatisfiedLinkError e) {
-    System.err.println("Native code library failed to load: "+e);
-    System.exit(1);
-  }
-  if (p.length() > 0) {
-    gtreeJNI.load(p);
-    this.gtree = gtreeJNI.get();
-    this.flag_gtree_loaded = true;
-  } else {
-    throw new FileNotFoundException("Bad path to gtree");
-  }
-}
-@ %def loadGTree
+\section{Constructor}
+<<[[Tools]] constructor>>=
+public Tools() { }
+@
 
-\subsection{[[registerVertices]](1)}
-<<Register vertices>>=
-public void registerVertices(final ConcurrentHashMap<Integer, int[]> src) {
+\section{Methods}
+
+\subsection{\texttt{registerVertices}(1)}
+<<registerVertices(1)>>=
+void registerVertices(final ConcurrentHashMap<Integer, int[]> src) {
   this.lu_vertices = src;
 }
 @ %def registerVertices
 
-\subsection{[[registerEdges]](1)}
-<<Register edges>>=
-public void registerEdges(final ConcurrentHashMap<Integer,
+\subsection{\texttt{registerEdges}(1)}
+<<registerEdges(1)>>=
+void registerEdges(final ConcurrentHashMap<Integer,
     ConcurrentHashMap<Integer, int[]>> src) {
   this.lu_edges = src;
 }
 @ %def registerEdges
 
-\subsection{[[registerUsers]](1)}
-<<Register users>>=
-public void registerUsers(final ConcurrentHashMap<Integer, int[]> src) {
+\subsection{\texttt{registerUsers}(1)}
+<<registerUsers(1)>>=
+void registerUsers(final ConcurrentHashMap<Integer, int[]> src) {
   this.lu_users = src;
 }
 @ %def registerUsers
 
-\subsection{[[computeHaversine]](4)}
-<<Compute haversine>>=
-public int computeHaversine(
+\subsection{\texttt{computeHaversine}(4)}
+<<computeHaversine(4)>>=
+int computeHaversine(
     final double lng1, final double lat1, final double lng2, final double lat2) {
   final double  dlat = Math.toRadians((lat2 - lat1));
   final double  dlng = Math.toRadians((lng2 - lng1));
@@ -131,9 +132,9 @@ if (d == 0 && (lng1 != lng2 || lat1 != lat2)) {
 }
 @
 
-\subsection{[[computeHaversine]](2)}
-<<Compute haversine>>=
-public int computeHaversine(final int u, final int v) throws VertexNotFoundException {
+\subsection{\texttt{computeHaversine}(2)}
+<<computeHaversine(2)>>=
+int computeHaversine(final int u, final int v) throws VertexNotFoundException {
   if (!this.lu_vertices.containsKey(u)) {
     throw new VertexNotFoundException("Vertex "+u+" not found.");
   }
@@ -146,16 +147,15 @@ public int computeHaversine(final int u, final int v) throws VertexNotFoundExcep
 }
 @
 
-\subsection{[[computeDuration]](2)}
-<<Compute duration>>=
-public int computeDuration(final int dd, final int nu) {
+\subsection{\texttt{computeDuration}(2)}
+<<computeDuration(2)>>=
+int computeDuration(final int dd, final int nu) {
   int d = (int) Math.ceil(dd/(float) nu);
   return (d == 0 ? 1 : d);
 }
 @
 
-
-\subsection{[[computeShortestPath]](2)}
+\subsection{\texttt{computeShortestPath}(2)}
 Beware, two important notes:
 \begin{itemize}
 \item The vertices in G-tree are 0-indexed while they are 1-indexed in Jargo.  To
@@ -165,8 +165,8 @@ location [[L2]] we add 1 to the vertices returned in the path.
 from any other vertex $v$ is always $\{v, 0\}$. The path from 0 to any other
 vertex is undefined and throws a [[RuntimeException]].
 \end{itemize}
-<<Compute shortest path>>=
-public int[] computeShortestPath(final int u, final int v)
+<<computeShortestPath(2)>>=
+int[] computeShortestPath(final int u, final int v)
 throws GtreeNotLoadedException, GtreeIllegalSourceException {
   int[] output = null;
   if (!this.flag_gtree_loaded) {
@@ -191,7 +191,7 @@ throws GtreeNotLoadedException, GtreeIllegalSourceException {
 }
 @ %def computeShortestPath
 
-\subsection{[[computeShortestPathDistance]](2)}
+\subsection{\texttt{computeShortestPathDistance}(2)}
 Beware, two important notes:
 \begin{itemize}
 \item The vertices in G-tree are 0-indexed while they are 1-indexed in Jargo.
@@ -200,8 +200,8 @@ To compensate, at we subtract 1 from [[u]] and [[v]] when calling
 \item We consider vertex 0 to be a dummy vertex. The distance to this vertex
 is always 0.
 \end{itemize}
-<<Compute shortest path distance>>=
-public int computeShortestPathDistance(final int u, final int v)
+<<computeShortestPathDistance(2)>>=
+int computeShortestPathDistance(final int u, final int v)
 throws GtreeNotLoadedException, GtreeIllegalSourceException {
   int d = 0;
   if (!this.flag_gtree_loaded) {
@@ -215,9 +215,9 @@ throws GtreeNotLoadedException, GtreeIllegalSourceException {
 }
 @ %def computeShortestPathDistance
 
-\subsection{[[computeRoute]](3)}
-<<Compute route>>=
-public int[] computeRoute(final int source, final int target, final int starttime)
+\subsection{\texttt{computeRoute}(3)}
+<<computeRoute(3)>>=
+int[] computeRoute(final int source, final int target, final int starttime)
 throws GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException {
   int[] output = null;
   if (source == 0) {
@@ -248,7 +248,7 @@ throws GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetE
 }
 @ %def computeRoute
 
-\subsection{[[filterByHaversine]](3)}
+\subsection{\texttt{filterByHaversine}(3)}
 This function takes a request origin [[ro]], a locations array [[locs]], and
 a distance threshold [[threshold]] as input, and returns a copy of [[locs]]
 that keeps only those location triplets where the haversine distance between
@@ -275,8 +275,8 @@ where $\pi_t(w_{|w_{\leq t}|})$ gives the time component of a server's
 last-visited waypoint, and $\pi_v(w_{|w_{\leq t}|})$ gives the vertex
 component.
 
-<<Filter locs by haversine distance>>=
-public int[] filterByHaversine(final int ro, final int[] locs, final int threshold)
+<<filterByHaversine(3)>>=
+int[] filterByHaversine(final int ro, final int[] locs, final int threshold)
 throws VertexNotFoundException {
   final int n = (locs.length/3);
   int[] temp = new int[n];
@@ -290,20 +290,17 @@ throws VertexNotFoundException {
 }
 @ %def filterByHaversine
 
-\subsection{[[printUser]](1)}
-The [[printUser]](1) method can be used to print properties of a ridesharing
-user.
-<<Print user>>=
-public void printUser(final int[] u) {
+\subsection{\texttt{printUser}(1)}
+<<printUser(1)>>=
+void printUser(final int[] u) {
   System.out.println("User {uid="+u[0]+", q="+u[1]+", e="+u[2]+", l="+u[3]
     +", o="+u[4]+", d="+u[5]+", b="+u[6]+"}");
 }
 @ %def printUser
 
-\subsection{[[printPath]](1)}
-The [[printPath]](1) method can be used to print a path.
-<<Print path>>=
-public void printPath(final int[] p) {
+\subsection{\texttt{printPath}(1)}
+<<printPath(1)>>=
+void printPath(final int[] p) {
   for (Integer i : p) {
     System.out.print(i+" ");
   }
@@ -311,10 +308,9 @@ public void printPath(final int[] p) {
 }
 @ %def printPath
 
-\subsection{[[printRoute]](1)}
-The [[printRoute]](1) method can be used to print a route.
-<<Print route>>=
-public void printRoute(final int[] w) {
+\subsection{\texttt{printRoute}(1)}
+<<printRoute(1)>>=
+void printRoute(final int[] w) {
   for (int i = 0; i < (w.length - 1); i += 2) {
     System.out.print("("+w[i]+", "+w[(i + 1)]+") ");
   }
@@ -322,10 +318,9 @@ public void printRoute(final int[] w) {
 }
 @ %def printRoute
 
-\subsection{[[printSchedule]](1)}
-The [[printSchedule]](1) method can be used to print a schedule.
-<<Print schedule>>=
-public void printSchedule(final int[] b) {
+\subsection{\texttt{printSchedule}(1)}
+<<printSchedule(1)>>=
+void printSchedule(final int[] b) {
   for (int i = 0; i < (b.length - 3); i += 4) {
     System.out.print("("+b[i]+", "+b[(i + 1)]
       + ", "+b[(i + 2)]+", "+b[(i + 3)]+") ");
@@ -334,28 +329,24 @@ public void printSchedule(final int[] b) {
 }
 @ %def printSchedule
 
-\section{Static Methods}
-<<Static methods>>=
-<<Print statement>>
-<<Print SQL exception>>
-@
 
-\subsection{[[Print]](2)}
-<<Print statement>>=
-public static void Print(final String a, final String b) {
+\subsection{\texttt{Print}(2)}
+<<Print(2)>>=
+void Print(final String a, final String b) {
   System.out.println(String.format("[%s][%s] %s", a, LocalDateTime.now(), b));
 }
 @ %def Print
 
-<<Print statement>>=
-public static void Print(final String b) {
+\subsection{\texttt{Print}(1)}
+<<Print(1)>>=
+void Print(final String b) {
   System.out.println(String.format("[*][%s] %s", LocalDateTime.now(), b));
 }
-@ %def Print
+@
 
-\subsection{[[PrintSQLException]](1)}
-<<Print SQL exception>>=
-public static void PrintSQLException(SQLException e) {
+\subsection{\texttt{PrintSQLException}(1)}
+<<PrintSQLException(1)>>=
+void PrintSQLException(SQLException e) {
   while (e != null) {
     System.err.println("\n----- SQLException -----");
     System.err.println("  SQL State:  " + e.getSQLState());
@@ -366,14 +357,4 @@ public static void PrintSQLException(SQLException e) {
   }
 }
 @ %def PrintSQLException
-
-%\appendix
-%
-%\section{Appendix: List of Chunks}
-%\label{ap:list-of-chunks}
-%\nowebchunks
-%
-%\section{Appendix: List of Identifiers}
-%\label{ap:list-of-identifiers}
-%\nowebindex
 

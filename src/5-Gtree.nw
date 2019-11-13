@@ -1,0 +1,37 @@
+\chapter{Using G-tree}
+\label{gtree}
+
+\section{Chunks}
+
+\section{Methods}
+
+\subsection{\texttt{GTLoadGtree}(1)}
+<<Gtree: GTLoadGtree(1)>>=
+void GTLoadGtree(final String p) throws FileNotFoundException {
+  try {
+    System.loadLibrary("gtree");
+  } catch (UnsatisfiedLinkError e) {
+    System.err.println("Native code library failed to load: "+e);
+    System.exit(1);
+  }
+  if (p.length() > 0) {
+    gtreeJNI.load(p);
+    this.gtree = gtreeJNI.get();
+    this.flag_gtree_loaded = true;
+  } else {
+    throw new FileNotFoundException("Bad path to gtree");
+  }
+}
+@ %def GTLoadGtree
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[loadGtree]]}(1) wraps [[GTLoadGtree]](1).\\
+\bottomrule
+\end{tabular}
+<<Gtree: loadGtree(1)>>=
+void loadGtree(String p) throws FileNotFoundException {
+  this.tools.GTLoadGtree(p);
+}
+@ %def loadGtree
+

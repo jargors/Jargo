@@ -1,13 +1,48 @@
-\section{Introduction}
-\label{sec:introduction}
+\chapter{Class: DesktopController}
+\label{deskcon}
 
-\section{Implementation Overview}
 <<DesktopController.java>>=
 <<DesktopController.java preamble>>
-<<[[DesktopController]] definition>>
+public class DesktopController {
+  <<[[DesktopController]] member variables>>
+  <<[[DesktopController]] methods>>
+  public void initialize() { }
+}
 @
 
-\subsection{Preamble}
+\begin{figure}
+\adjustbox{scale=.8}{
+\begin{minipage}[t]{0.6\textwidth}
+\hi{Read Methods}
+<<[[DesktopController]] methods>>=
+@
+\end{minipage}
+\begin{minipage}[t]{0.6\textwidth}
+\hi{Write Methods}
+<<[[DesktopController]] methods>>=
+@
+\hi{Utilities}
+<<[[DesktopController]] methods>>=
+public <<actionQuit(1)>>
+public <<actionGitHub(1)>>
+public <<actionAbout(1)>>
+public <<actionNew(1)>>
+public <<actionLoad(1)>>
+public <<actionStop(1)>>
+public <<actionRecordMousePress(1)>>
+public <<actionTranslateCanvas(1)>>
+public <<setWindowWidth(1)>>
+public <<setWindowHeight(1)>>
+public <<setStage(1)>>
+private <<drawRoadNetwork(0)>>
+@
+\end{minipage}
+}
+\caption{DesktopController methods.}
+\label{deskcon:fig:methods}
+\end{figure}
+
+\section{Preamble}
 <<DesktopController.java preamble>>=
 package com.github.jargors;
 import com.github.jargors.Controller;
@@ -41,22 +76,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 @
 
-\subsection{Class Definition}
-<<[[DesktopController]] definition>>=
-public class DesktopController {
-  <<Member variables>>
-  <<Event handlers>>
-  <<Private methods>>
-  <<Initialization routine>>
-}
+\section{Member Variables}
+<<[[DesktopController]] member variables>>=
+private Stage stage;
 @
 
-\subsection{Member Variables}
-<<Member variables>>=
-private Stage stage;
-@ %def stage
-
-<<Member variables>>=
+<<[[DesktopController]] member variables>>=
 @FXML private ScrollPane container_canvas;
 @FXML private Button btn_new;
 @FXML private Button btn_load;
@@ -75,21 +100,21 @@ private Stage stage;
 @FXML private Circle circ_status;
 @
 
-<<Member variables>>=
+<<[[DesktopController]] member variables>>=
 private final Color C_SUCCESS = Color.GREEN;
 private final Color C_WARN = Color.YELLOW;
 private final Color C_ERROR = Color.RED;
 private final String TITLE_STRING = "Jargo Desktop";
-@ %def TITLE_STRING
+@
 
-<<Member variables>>=
+<<[[DesktopController]] member variables>>=
 private Controller controller = null;
 private Client client = null;
 private String db = null;
 private Canvas can_road;
-@ %def controller client
+@
 
-<<Member variables>>=
+<<[[DesktopController]] member variables>>=
 private GraphicsContext gc = null;
 private double window_height = 0;
 private double window_width = 0;
@@ -101,41 +126,32 @@ private double xunit = 0;
 private double yunit = 0;
 @
 
-\subsection{Event Handlers}
-<<Event handlers>>=
-<<Action: quit>>
-<<Action: github>>
-<<Action: about>>
-<<Action: new>>
-<<Action: load>>
-<<Action: stop>>
-<<Action: record mouse press>>
-<<Action: translate canvas>>
-<<Action: set window width>>
-<<Action: set window height>>
-<<Action: set stage>>
-@
+\section{Methods}
 
-<<Action: quit>>=
-public void actionQuit(ActionEvent e) {
+\subsection{\texttt{actionQuit}(1)}
+<<actionQuit(1)>>=
+void actionQuit(ActionEvent e) {
   System.exit(0);
 }
-@
+@ %def actionQuit
 
-<<Action: github>>=
-public void actionGitHub(ActionEvent e) {
+\subsection{\texttt{actionGitHub}(1)}
+<<actionGitHub(1)>>=
+void actionGitHub(ActionEvent e) {
   // ...
 }
-@
+@ %def actionGitHub
 
-<<Action: about>>=
-public void actionAbout(ActionEvent e) {
+\subsection{\texttt{actionAbout}(1)}
+<<actionAbout(1)>>=
+void actionAbout(ActionEvent e) {
   // ...
 }
-@
+@ %def actionAbout
 
-<<Action: new>>=
-public void actionNew(ActionEvent e) {
+\subsection{\texttt{actionNew}(1)}
+<<actionNew(1)>>=
+void actionNew(ActionEvent e) {
   this.btn_new      .setDisable(true);
   this.btn_load     .setDisable(true);
   this.btn_stop     .setDisable(true);
@@ -165,10 +181,11 @@ public void actionNew(ActionEvent e) {
     });
   });
 }
-@
+@ %def actionNew
 
-<<Action: load>>=
-public void actionLoad(ActionEvent e) {
+\subsection{\texttt{actionLoad}(1)}
+<<actionLoad(1)>>=
+void actionLoad(ActionEvent e) {
   this.btn_new      .setDisable(true);
   this.btn_load     .setDisable(true);
   this.btn_stop     .setDisable(true);
@@ -208,10 +225,11 @@ public void actionLoad(ActionEvent e) {
     this.btn_stop     .setDisable(false);
   }
 }
-@
+@ %def actionLoad
 
-<<Action: stop>>=
-public void actionStop(ActionEvent e) {
+\subsection{\texttt{actionStop}(1)}
+<<actionStop(1)>>=
+void actionStop(ActionEvent e) {
   if (this.controller != null) {
     this.btn_stop     .setDisable(true);
     this.circ_status.setFill(C_WARN);
@@ -243,30 +261,29 @@ public void actionStop(ActionEvent e) {
     this.lbl_status.setText("Ready.");
   }
 }
-@
+@ %def actionStop
 
-<<Action: record mouse press>>=
-public void actionRecordMousePress(MouseEvent e) {
+\subsection{\texttt{actionRecordMousePress}(1)}
+<<actionRecordMousePress(1)>>=
+void actionRecordMousePress(MouseEvent e) {
   this.mouse_x = e.getX();
   this.mouse_y = e.getY();
   e.consume();
 }
-@
+@ %def actionRecordMousePress
 
-<<Action: translate canvas>>=
-public void actionTranslateCanvas(MouseEvent e) {
+\subsection{\texttt{actionTranslateCanvas}(1)}
+<<actionTranslateCanvas(1)>>=
+void actionTranslateCanvas(MouseEvent e) {
   this.can_road.setTranslateX(this.can_road.getTranslateX() + e.getX() - this.mouse_x);
   this.can_road.setTranslateY(this.can_road.getTranslateY() + e.getY() - this.mouse_y);
   e.consume();
 }
-@
+@ %def actionTranslateCanvas
 
-<<Private methods>>=
-<<Draw road network>>
-@
-
-<<Draw road network>>=
-private void drawRoadNetwork() {
+\subsection{\texttt{drawRoadNetwork}(0)}
+<<drawRoadNetwork(0)>>=
+void drawRoadNetwork() {
   try {
     this.edges    = this.controller.queryAllEdges();
     this.mbr      = this.controller.queryMBR();
@@ -298,35 +315,26 @@ private void drawRoadNetwork() {
     return;
   }
 }
-@
+@ %def drawRoadNetwork
 
-<<Action: set window width>>=
-public void setWindowWidth(double w) {
+\subsection{\texttt{setWindowWidth}(1)}
+<<setWindowWidth(1)>>=
+void setWindowWidth(double w) {
   this.window_width = w;
 }
-@
+@ %def setWindowWidth
 
-<<Action: set window height>>=
-public void setWindowHeight(double h) {
+\subsection{\texttt{setWindowHeight}(1)}
+<<setWindowHeight(1)>>=
+void setWindowHeight(double h) {
   this.window_height = h;
 }
-@
+@ %def setWindowHeight
 
-<<Action: set stage>>=
-public void setStage(Stage s) {
+\subsection{\texttt{setStage}(1)}
+<<setStage(1)>>=
+void setStage(Stage s) {
   this.stage = s;
 }
+@ %def setStage
 
-<<Initialization routine>>=
-public void initialize() { }
-@
-
-%\appendix
-
-%\section{Appendix: List of Chunks}
-%\label{ap:list-of-chunks}
-%\nowebchunks
-%
-%\section{Appendix: List of Identifiers}
-%\label{ap:list-of-identifiers}
-%\nowebindex

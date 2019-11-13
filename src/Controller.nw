@@ -1,23 +1,96 @@
-\section{Introduction}
-\label{sec:introduction}
+\chapter{Class: Controller}
+\label{controller}
+
+<<Controller.java>>=
+<<Controller.java preamble>>
+public class Controller {
+  <<[[Controller]] member variables>>
+  <<[[Controller]] constructor>>
+  <<[[Controller]] methods>>
+}
+@
+
 The simulation controller is intended to be the sole interface for an
 evaluation program to control Jargo's simulation environment. The controller
 advances the simulation world time, ``pushes'' server locations and new
 requests to the client, perturbs server routes stored in the data layer in
 order to mimic traffic and other stochastic vehicle processes, and can be used
-to report evaluation metrics to the program.
+to report evaluation metrics to the program.  A listing of the methods is shown
+in Figure~\ref{controller:fig:methods}.
 
-\section{Implementation Overview}
-The code consist of the \emph{preamble} (\S\ref{sec:preamble})
-and the \emph{class definition} (\S\ref{sec:class-definition}).
-<<Controller.java>>=
-<<Controller.java preamble>>
-<<[[Controller]] definition>>
+\begin{figure}
+\adjustbox{scale=.8}{
+\begin{minipage}[t]{0.6\textwidth}
+\hi{Read Methods}
+<<[[Controller]] methods>>=
+public <<Read: query(2)>>
+public <<Read: queryAllVertices(0)>>
+public <<Read: queryAllEdges(0)>>
+public <<Read: queryVertex(1)>>
+public <<Read: queryEdge(2)>>
+public <<Read: queryUser(1)>>
+public <<Read: queryQueuedRequests(1)>>
+public <<Read: queryServerRoute(1)>>
+public <<Read: queryServerSchedule(1)>>
+public <<Read: queryCountVertices(0)>>
+public <<Read: queryCountEdges(0)>>
+public <<Read: queryStatisticsEdges(0)>>
+public <<Read: queryMBR(0)>>
+public <<Read: queryCountServers(0)>>
+public <<Read: queryCountRequests(0)>>
+public <<Read: queryServiceRate(0)>>
+public <<Read: queryBaseDistanceTotal(0)>>
+public <<Read: queryServerBaseDistanceTotal(0)>>
+public <<Read: queryRequestBaseDistanceTotal(0)>>
+public <<Read: queryRequestBaseDistanceUnassigned(0)>>
+public <<Read: queryServerTravelDistanceTotal(0)>>
+public <<Read: queryServerCruisingDistanceTotal(0)>>
+public <<Read: queryServerServiceDistanceTotal(0)>>
+public <<Read: queryRequestDetourDistanceTotal(0)>>
+public <<Read: queryRequestTransitDistanceTotal(0)>>
+public <<Read: queryServerTravelDurationTotal(0)>>
+public <<Read: queryRequestPickupDurationTotal(0)>>
+public <<Read: queryRequestTransitDurationTotal(0)>>
+public <<Read: queryRequestTravelDurationTotal(0)>>
+public <<Read: queryRequestDepartureTime(1)>>
+public <<Read: queryServerDepartureTime(1)>>
+public <<Read: queryRequestArrivalTime(1)>>
 @
+\end{minipage}
+\begin{minipage}[t]{0.6\textwidth}
+\hi{Write Methods}
+<<[[Controller]] methods>>=
+public <<Write: addNewServer(2)>>
+public <<Write: addNewRequest(1)>>
+public <<loadRoadNetworkFromFile(1)>>
+public <<loadProblem(1)>>
+@
+\hi{Utilities}
+<<[[Controller]] methods>>=
+public <<Admin: createNewInstance(0)>>
+public <<Admin: closeInstance(0)>>
+public <<Admin: loadDataModel(0)>>
+public <<Admin: loadBackup(1)>>
+public <<Admin: loadRoadNetworkFromDB(0)>>
+public <<Admin: loadUsersFromDB(0)>>
+public <<Admin: saveBackup(1)>>
+public <<Gtree: loadGtree(1)>>
+public <<getSimulationWorldTime(0)>>
+public <<setEngineUpdatePeriod(1)>>
+public <<setFinalWorldTime(1)>>
+public <<setInitialWorldTime(1)>>
+public <<startRealtime(1)>>
+public <<startSequential(1)>>
+public <<registerClient(1)>>
+public <<returnRequest(1)>>
+@
+\end{minipage}
+}
+\caption{Controller methods.}
+\label{controller:fig:methods}
+\end{figure}
 
-\subsection{Preamble}
-\label{sec:preamble}
-The preamble declares the package and imports dependencies.
+\section{Preamble}
 <<Controller.java preamble>>=
 package com.github.jargors;
 @
@@ -63,17 +136,7 @@ import java.sql.SQLException;
 @
 \end{itemize}
 
-\subsection{Class Definition}
-\label{sec:class-definition}
-<<[[Controller]] definition>>=
-public class Controller {
-  <<[[Controller]] member variables>>
-  <<[[Controller]] constructor>>
-  <<[[Controller]] public methods>>
-}
-@
-
-\subsection{Member Variables}
+\section{Member Variables}
 Member variables are grouped into \emph{containers}, \emph{settings}, and
 \emph{loops}.
 <<[[Controller]] member variables>>=
@@ -88,7 +151,7 @@ private Communicator communicator;
 private Tools tools = new Tools();
 private Client client;
 private Map<Integer, Boolean> lu_seen = new HashMap<>();
-@ %def storage communicator tools client lu_seen
+@
 
 \hi{Settings.} Settings objects configure various aspects of the simulation.
 Some settings can be configured using the public setters, others can
@@ -96,13 +159,13 @@ be configured through system properties, and others are non-configurable.
 <<Settings objects>>=
 private int initial_world_time = 0;
 private int final_world_time = 86400;
-@ %def initial_world_time final_world_time
+@
 The simulation world time is stored in [[world_time]] and is upated by the
 clock loop. The time advances in increments of 1 from [[initial_world_time]]
 to [[final_world_time]].
 <<Settings objects>>=
 private int world_time = 0;
-@ %def world_time
+@
 The [[loop_delay]] configures how many seconds to wait until the controller
 loops start. The update periods configure how often particular loops should
 execute, in seconds.
@@ -111,19 +174,19 @@ private int loop_delay = 0;
 private int engine_update_period = 10;
 // private int deviation_rate = 0.02;
 // private int breakdown_rate = 0.005;
-@ %def loop_delay engine_update_period
+@
 The [[CSHIFT]] setting configures the precision for longitude and latitude
 coordiates (see [[Storage.DBAddNewVertex]](3))\footnote{Beware, if [[CSHIFT]]
 is changed here, it should also be changed in Tools.}.
 <<Settings objects>>=
 private final double CSHIFT = 10000000.0;
-@ %def CSHIFT
+@
 The [[DEBUG]] setting controls whether certain messages are print to screen.
 Pass [[-Djargors.controller.debug=true]] to the [[java]] command to set
 [[DEBUG]] to [[true]].
 <<Settings objects>>=
 private final boolean DEBUG = "true".equals(System.getProperty("jargors.controller.debug"));
-@ %def DEBUG
+@
 
 \hi{Loops.} Jargo's simulation environment comprises four ``loops'', defined
 here, running in parallel. They are executed using Java's
@@ -136,7 +199,7 @@ here, running in parallel. They are executed using Java's
 <<Definition of server collection loop>>
 @
 
-\subsubsection{Clock Loop}
+\subsection{Clock Loop}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -154,15 +217,15 @@ standard error if [[DEBUG]] is [[true]].\\
 \end{tabular}
 <<Definition of clock loop>>=
 private Runnable ClockLoop = () -> {
-  this.communicator.setSimulationWorldTime(++(this.world_time));
+  ++(this.world_time);
   if (DEBUG) {
     System.err.printf("[t=%d] Controller.ClockLoop says: %s!",
         this.world_time, (this.world_time % 2 == 0 ? "ping" : "pong"));
   }
 };
-@ %def ClockLoop
+@
 
-\subsubsection{Engine Loop}
+\subsection{Engine Loop}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -183,9 +246,9 @@ private Runnable EngineLoop = () -> {
   // be and we also know where the future location will be of the server.
   // then, is this loop necessary?
 };
-@ %def EngineLoop
+@
 
-\subsubsection{Request Collection Loop}
+\subsection{Request Collection Loop}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -239,9 +302,9 @@ private Runnable RequestCollectionLoop = () -> {
         (System.currentTimeMillis() - A0));
   }
 };
-@ %def RequestCollectionLoop
+@
 
-\subsubsection{Request Handling Loop}
+\subsection{Request Handling Loop}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -280,9 +343,9 @@ private Runnable RequestHandlingLoop = () -> {
         (System.currentTimeMillis() - A0));
   }
 };
-@ %def RequestHandlingLoop
+@
 
-\subsubsection{Server Loop}
+\subsection{Server Loop}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -325,9 +388,9 @@ private Runnable ServerLoop = () -> {
         (System.currentTimeMillis() - A0));
   }
 };
-@ %def ServerLoop
+@
 
-\subsection{Constructor}
+\section{Constructor}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -352,148 +415,18 @@ public Controller() {
 }
 @
 
-\section{Public Methods}
-\label{sec:public-methods}
-\hi{General methods.}
-<<[[Controller]] public methods>>=
-<<Initialize new empty database>>
-<<Close database>>
-<<Set client>>
-<<Set initial world time>>
-<<Set final world time>>
-<<Set engine update period>>
-<<Get world time>>
-<<Return request to queue>>
-<<Save backup>>
-<<Load backup>>
-<<Load data model>>
-<<Load road network>>
-<<Load problem>>
-<<Load GTree>>
-<<Start dynamic simulation>>
-<<Start static simulation>>
-@
-\hi{Read methods.}
-<<[[Controller]] public methods>>=
-<<Query custom statement>>
-<<Query all vertices>>
-<<Query all edges>>
-<<Query vertex>>
-<<Query edge>>
-<<Query ridesharing user>>
-<<Query queued requests>>
-<<Query routes>>
-<<Query schedules>>
-<<Query various metrics>>
-@
-\hi{Write methods.}
-<<[[Controller]] public methods>>=
-<<Add new server>>
-<<Add new request>>
-@
+\section{Methods}
 
-\subsection{General methods}
-
-\subsubsection{[[createNewInstance]](0)}
-<<Initialize new empty database>>=
-public void createNewInstance() throws SQLException {
-  this.storage.DBCreateNewInstance();
-}
-@ %def createNewInstance
-
-\subsubsection{[[closeInstance]](0)}
-<<Close database>>=
-public void closeInstance() throws SQLException {
-  this.storage.DBCloseInstance();
-}
-@ %def closeInstance
-
-\subsubsection{[[setClient]](1)}
-<<Set client>>=
-public void setClient(final Client target) {
-  this.client = target;
-  this.client.registerCommunicator(this.communicator);
-}
-@ %def setClient
-
-\subsubsection{[[setInitialWorldTime(1)]]}
-<<Set initial world time>>=
-public void setInitialWorldTime(final int t) {
-  this.initial_world_time = t;
-}
-@ %def setInitialWorldTime
-
-\subsubsection{[[setFinalWorldTime(1)]]}
-<<Set final world time>>=
-public void setFinalWorldTime(final int t) {
-  this.final_world_time = t;
-}
-@ %def setFinalWorldTime
-
-\subsubsection{[[setEngineUpdatePeriod(1)]]}
-<<Set engine update period>>=
-public void setEngineUpdatePeriod(final int t) {
-  this.engine_update_period = t;
-}
-@ %def setEngineUpdatePeriod
-
-\subsubsection{[[getSimulationWorldTime(0)]]}
-<<Get world time>>=
-public int getSimulationWorldTime() {
-  return this.world_time;
-}
-@ %def getSimulationWorldTime
-
-
-\subsubsection{[[returnRequest]](1)}
-<<Return request to queue>>=
-public void returnRequest(final int rid) {
-  this.lu_seen.put(rid, false);
-}
-@ %def returnRequest
-
-\subsubsection{[[save]](1)}
-<<Save backup>>=
-public void saveBackup(final String p) throws SQLException {
-  this.storage.DBSaveBackup(p);
-}
-@ %def saveBackup
-
-\subsubsection{[[loadBackup]](1)}
-<<Load backup>>=
-public void loadBackup(final String p) throws SQLException {
-  this.storage.DBLoadBackup(p);
-  this.storage.DBLoadRoadNetworkFromDB();
-  this.storage.DBLoadUsersFromDB();
-}
-@ %def loadBackup
-
-\subsubsection{[[loadDataModel]](0)}
-<<Load data model>>=
-public void loadDataModel() {
-  this.storage.DBLoadDataModel();
-}
-@
-
-\subsubsection{[[loadRoadNetwork]](1)}
-<<Load road network>>=
-public void loadRoadNetwork(final String f_rnet)
-throws FileNotFoundException, SQLException {
+\subsection{[[loadRoadNetworkFromFile]](1)}
+<<loadRoadNetworkFromFile(1)>>=
+void loadRoadNetworkFromFile(final String f_rnet) throws FileNotFoundException, SQLException {
   Scanner sc = new Scanner(new File(f_rnet));
   while (sc.hasNext()) {
-    <<..parse a line of the road network>>
-    <<..insert vertex coordinates>>
-    <<..compute edge weight [[dist]]>>
-    <<..insert edge>>
-  }
-  this.tools.registerVertices(this.storage.getReferenceVerticesCache());
-  this.tools.registerEdges(this.storage.getReferenceEdgesCache());
-}
-@ %def loadRoadNetwork
-If a vertex identifier is $0$, then we store its coordinates as $(0,0)$. We
+@ %def loadRoadNetworkFromFile
+{\small If a vertex identifier is $0$, then we store its coordinates as $(0,0)$. We
 still call [[Scanner.nextDouble]](0) because we need to advance to the next
-token.
-<<..parse a line of the road network>>=
+token.}
+<<loadRoadNetworkFromFile(1)>>=
 final int col0 = sc.nextInt();
 final int col1 = sc.nextInt();
 final int col2 = sc.nextInt();
@@ -502,7 +435,8 @@ final int col4 = (col1 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.ne
 final int col5 = (col2 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
 final int col6 = (col2 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
 @
-<<..insert vertex coordinates>>=
+{\small Now we insert the vertices into the database.}
+<<loadRoadNetworkFromFile(1)>>=
 try {
   this.storage.DBAddNewVertex(col1, col3, col4);
 } catch (DuplicateVertexException e) {
@@ -518,32 +452,41 @@ try {
   }
 }
 @
-We use haversine to compute edge weights\footnote{If the distance between two
+{\small We use haversine to compute edge weights\footnote{If the distance between two
 vertices is 0 due to rounding, then we round it up to 1.}.  If one of the
 vertices in the edge is a dummy vertex, we set the weight to 0\footnote{The
 dummy vertex should only terminate and never begin an edge in the road network,
 otherwise a shortest path could take a shortcut through the dummy vertex to
-reach any other vertex with 0 weight!}.
-<<..compute edge weight [[dist]]>>=
+reach any other vertex with 0 weight!}.}
+<<loadRoadNetworkFromFile(1)>>=
 final int dist = ((col1 != 0 && col2 != 0)
-  ? tools.computeHaversine(
+  ? this.tools.computeHaversine(
         col3/CSHIFT, col4/CSHIFT,
         col5/CSHIFT, col6/CSHIFT) : 0);
 @
-The fifth parameter is the \textit{initial speed} on all the edges \footnote{In
-the future, the speed on each edge may be recorded directly in the road network
-file instead of hardcoded here.}.
-<<..insert edge>>=
+{\small The fifth parameter is the \textit{initial speed} on all the edges
+\footnote{In the future, the speed on each edge may be recorded directly in the
+road network file instead of hardcoded here.}.}
+<<loadRoadNetworkFromFile(1)>>=
 try {
   this.storage.DBAddNewEdge(col1, col2, dist, 10);
 } catch (DuplicateEdgeException e) {
-  System.out.println("Warning! Duplicate edge ignored.");
+  if (DEBUG) {
+    System.out.println("Warning! Duplicate edge ignored.");
+  }
+}
+@
+{\small Now we close the [[while]] loop and register the caches to Tools.}
+<<loadRoadNetworkFromFile(1)>>=
+  }
+  this.tools.registerVertices(this.storage.getReferenceVerticesCache());
+  this.tools.registerEdges(this.storage.getReferenceEdgesCache());
 }
 @
 
-\subsubsection{[[loadProblem(1)]]}
-<<Load problem>>=
-public void loadProblem(String p)
+\subsection{[[loadProblem(1)]]}
+<<loadProblem(1)>>=
+void loadProblem(String p)
 throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException, SQLException,
        GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException {
   Scanner sc = new Scanner(new File(p));
@@ -570,16 +513,53 @@ for (int i = 0; i < 6; i++) {
 }
 @
 
-\subsubsection{[[loadGTree]](1)}
-<<Load GTree>>=
-public void loadGTree(String p) throws FileNotFoundException {
-  this.tools.loadGTree(p);
+\subsection{[[registerClient]](1)}
+<<registerClient(1)>>=
+void registerClient(final Client target) {
+  this.client = target;
+  this.client.registerCommunicator(this.communicator);
 }
-@ %def loadGTree
+@ %def registerClient
 
-\subsubsection{[[start]](0)}
-<<Start dynamic simulation>>=
-public void start(final Consumer app_cb) {
+\subsection{[[setInitialWorldTime(1)]]}
+<<setInitialWorldTime(1)>>=
+void setInitialWorldTime(final int t) {
+  this.initial_world_time = t;
+}
+@ %def setInitialWorldTime
+
+\subsection{[[setFinalWorldTime(1)]]}
+<<setFinalWorldTime(1)>>=
+void setFinalWorldTime(final int t) {
+  this.final_world_time = t;
+}
+@ %def setFinalWorldTime
+
+\subsection{[[setEngineUpdatePeriod(1)]]}
+<<setEngineUpdatePeriod(1)>>=
+void setEngineUpdatePeriod(final int t) {
+  this.engine_update_period = t;
+}
+@ %def setEngineUpdatePeriod
+
+\subsection{[[getSimulationWorldTime(0)]]}
+<<getSimulationWorldTime(0)>>=
+int getSimulationWorldTime() {
+  return this.world_time;
+}
+@ %def getSimulationWorldTime
+
+
+\subsection{[[returnRequest]](1)}
+<<returnRequest(1)>>=
+void returnRequest(final int rid) {
+  this.lu_seen.put(rid, false);
+}
+@ %def returnRequest
+
+\subsection{[[startRealtime]](1)}
+<<startRealtime(1)>>=
+void startRealtime(final Consumer app_cb) {
   this.world_time = this.initial_world_time;
 
   int simulation_duration = (this.final_world_time - this.initial_world_time);
@@ -615,11 +595,11 @@ public void start(final Consumer app_cb) {
     app_cb.accept(true);
   }, simulation_duration, TimeUnit.SECONDS);
 }
-@ %def start
+@ %def startRealtime
 
-\subsubsection{[[startStatic]](0)}
-<<Start static simulation>>=
-public void startStatic(final Consumer app_cb) {
+\subsection{[[startSequential]](1)}
+<<startSequential(1)>>=
+void startSequential(final Consumer app_cb) {
   this.world_time = this.initial_world_time;
   while (this.world_time < this.final_world_time) {
     this.ClockLoop.run();  // this.world_time gets incremented here!
@@ -631,264 +611,29 @@ public void startStatic(final Consumer app_cb) {
   this.client.end();
   app_cb.accept(true);
 }
-@ %def startStatic
+@ %def startSequential
 
 
-\subsection{Read Methods}
-\subsubsection{[[query]](2)}
-<<Query custom statement>>=
-public int[] query(String sql, int ncols) throws SQLException {
-  return storage.DBQuery(sql, ncols);
-}
-@ %def query
 
-\subsubsection{[[queryAllVertices]](0)}
-<<Query all vertices>>=
-public int[] queryAllVertices() throws SQLException {
-  return storage.DBQueryAllVertices();
-}
-@ %def queryAllVertices
 
-\subsubsection{[[queryAllEdges]](0)}
-<<Query all edges>>=
-public int[] queryAllEdges() throws SQLException {
-  return storage.DBQueryAllEdges();
-}
-@ %def queryAllEdges
 
-\subsubsection{[[queryVertex]](1)}
-<<Query vertex>>=
-public int[] queryVertex(final int v) throws VertexNotFoundException, SQLException {
-  return storage.DBQueryVertex(v);
-}
-@ %def queryVertex
 
-\subsubsection{[[queryEdge]](2)}
-<<Query edge>>=
-public int[] queryEdge(final int v1, final int v2) throws EdgeNotFoundException, SQLException {
-  return storage.DBQueryEdge(v1, v2);
-}
-@ %def queryEdge
 
-\subsubsection{[[queryUser]](1)}
-<<Query ridesharing user>>=
-public int[] queryUser(final int rid) throws UserNotFoundException, SQLException {
-  return storage.DBQueryUser(rid);
-}
-@ %def queryUser
 
-\subsubsection{[[queryQueuedRequests]](1)}
-<<Query queued requests>>=
-public int[] queryQueuedRequests(final int t) throws SQLException {
-  return storage.DBQueryQueuedRequests(t);
-}
-@ %def queryQueuedRequests
 
-\subsubsection{[[queryRoute]](1)}
-<<Query routes>>=
-public int[] queryRoute(final int sid) throws SQLException {
-  return storage.DBQueryServerRoute(sid);
-}
-@ %def queryRoute
 
-\subsubsection{[[querySchedule]](1)}
-<<Query schedules>>=
-public int[] querySchedule(final int sid) throws SQLException {
-  return storage.DBQueryServerSchedule(sid);
-}
-@ %def querySchedule
 
-\subsubsection{[[queryCountVertices]](0)}
-<<Query various metrics>>=
-public int[] queryCountVertices() throws SQLException {
-  return storage.DBQueryCountVertices();
-}
-@ %def queryCountVertices
 
-\subsubsection{[[queryCountEdges]](0)}
-<<Query various metrics>>=
-public int[] queryCountEdges() throws SQLException {
-  return storage.DBQueryCountEdges();
-}
-@ %def queryCountEdges
 
-\subsubsection{[[queryStatisticsEdges]](0)}
-<<Query various metrics>>=
-public int[] queryStatisticsEdges() throws SQLException {
-  return storage.DBQueryStatisticsEdges();
-}
-@ %def queryStatisticsEdges
 
-\subsubsection{[[queryMBR]](0)}
-<<Query various metrics>>=
-public int[] queryMBR() throws SQLException {
-  return storage.DBQueryMBR();
-}
-@ %def queryMBR
 
-\subsubsection{[[queryCountServers]](0)}
-<<Query various metrics>>=
-public int[] queryCountServers() throws SQLException {
-  return storage.DBQueryCountServers();
-}
-@ %def queryCountServers
 
-\subsubsection{[[queryCountRequests]](0)}
-<<Query various metrics>>=
-public int[] queryCountRequests() throws SQLException {
-  return storage.DBQueryCountRequests();
-}
-@ %def queryCountRequests
 
-\subsubsection{[[queryServiceRate]](0)}
-<<Query various metrics>>=
-public int[] queryServiceRate() throws SQLException {
-  return storage.DBQueryServiceRate();
-}
-@ %def queryServiceRate
 
-\subsubsection{[[queryBaseDistanceTotal]](0)}
-<<Query various metrics>>=
-public int[] queryBaseDistanceTotal() throws SQLException {
-  return storage.DBQueryBaseDistanceTotal();
-}
-@ %def queryBaseDistanceTotal
 
-\subsubsection{[[queryServerBaseDistanceTotal]](0)}
-<<Query various metrics>>=
-public int[] queryServerBaseDistanceTotal() throws SQLException {
-  return storage.DBQueryServerBaseDistanceTotal();
-}
-@ %def queryServerBaseDistanceTotal
 
-\subsubsection{[[queryRequestBaseDistanceTotal]](0)}
-<<Query various metrics>>=
-public int[] queryRequestBaseDistanceTotal() throws SQLException {
-  return storage.DBQueryRequestBaseDistanceTotal();
-}
-@ %def queryRequestBaseDistanceTotal
 
-\subsubsection{[[queryRequestBaseDistanceUnassigned]](0)}
-<<Query various metrics>>=
-public int[] queryRequestBaseDistanceUnassigned() throws SQLException {
-  return storage.DBQueryRequestBaseDistanceUnassigned();
-}
-@ %def queryRequestBaseDistanceUnassigned
 
-\subsubsection{[[queryServerTravelDistanceTotal]](0)}
-<<Query various metrics>>=
-public int[] queryServerTravelDistanceTotal() throws SQLException {
-  return storage.DBQueryServerTravelDistanceTotal();
-}
-@ %def queryServerTravelDistanceTotal
 
-\subsubsection{[[queryServerCruisingDistanceTotal]](0)}
-<<Query various metrics>>=
-public int[] queryServerCruisingDistanceTotal() throws SQLException {
-  return storage.DBQueryServerCruisingDistanceTotal();
-}
-@ %def queryServerCruisingDistanceTotal
 
-\subsubsection{[[queryServerServiceDistanceTotal]](0)}
-<<Query various metrics>>=
-public int[] queryServerServiceDistanceTotal() throws SQLException {
-  return storage.DBQueryServerServiceDistanceTotal();
-}
-@ %def queryServerServiceDistanceTotal
 
-\subsubsection{[[queryRequestDetourDistanceTotal]](0)}
-<<Query various metrics>>=
-public int[] queryRequestDetourDistanceTotal() throws SQLException {
-  return storage.DBQueryRequestDetourDistanceTotal();
-}
-@ %def queryRequestDetourDistanceTotal
-
-\subsubsection{[[queryRequestTransitDistanceTotal]](0)}
-<<Query various metrics>>=
-public int[] queryRequestTransitDistanceTotal() throws SQLException {
-  return storage.DBQueryRequestTransitDistanceTotal();
-}
-@ %def queryRequestTransitDistanceTotal
-
-\subsubsection{[[queryServerTravelDurationTotal]](0)}
-<<Query various metrics>>=
-public int[] queryServerTravelDurationTotal() throws SQLException {
-  return storage.DBQueryServerTravelDurationTotal();
-}
-@ %def queryServerTravelDurationTotal
-
-\subsubsection{[[queryRequestPickupDurationTotal]](0)}
-<<Query various metrics>>=
-public int[] queryRequestPickupDurationTotal() throws SQLException {
-  return storage.DBQueryRequestPickupDurationTotal();
-}
-@ %def queryRequestPickupDurationTotal
-
-\subsubsection{[[queryRequestTransitDurationTotal]](0)}
-<<Query various metrics>>=
-public int[] queryRequestTransitDurationTotal() throws SQLException {
-  return storage.DBQueryRequestTransitDurationTotal();
-}
-@ %def queryRequestTransitDurationTotal
-
-\subsubsection{[[queryRequestTravelDurationTotal]](0)}
-<<Query various metrics>>=
-public int[] queryRequestTravelDurationTotal() throws SQLException {
-  return storage.DBQueryRequestTravelDurationTotal();
-}
-@ %def queryRequestTravelDurationTotal
-
-\subsubsection{[[queryRequestDepartureTime]](1)}
-<<Query various metrics>>=
-public int[] queryRequestDepartureTime(final int rid) throws SQLException {
-  return storage.DBQueryRequestDepartureTime(rid);
-}
-@ %def queryRequestDepartureTime
-
-\subsubsection{[[queryServerDepartureTime]](1)}
-<<Query various metrics>>=
-public int[] queryServerDepartureTime(final int sid) throws SQLException {
-  return storage.DBQueryServerDepartureTime(sid);
-}
-@ %def queryServerDepartureTime
-
-\subsubsection{[[queryRequestArrivalTime]](1)}
-<<Query various metrics>>=
-public int[] queryRequestArrivalTime(final int rid) throws SQLException {
-  return storage.DBQueryRequestArrivalTime(rid);
-}
-@ %def queryRequestArrivalTime
-
-\subsubsection{[[queryServerArrivalTime]](1)}
-<<Query various metrics>>=
-public int[] queryServerArrivalTime(final int sid) throws SQLException {
-  return storage.DBQueryServerArrivalTime(sid);
-}
-@ %def queryServerArrivalTime
-
-\subsection{Write Methods}
-\subsubsection{[[addNewServer]](1)}
-<<Add new server>>=
-public void addNewServer(final int[] u)
-throws DuplicateUserException, EdgeNotFoundException, SQLException,
-       GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException {
-  this.storage.DBAddNewServer(u, this.tools.computeRoute(u[4], u[5], u[2]));
-}
-@ %def addNewServer
-
-\subsubsection{[[addNewRequest]](1)}
-<<Add new request>>=
-public void addNewRequest(final int[] u) throws DuplicateUserException, SQLException {
-  this.storage.DBAddNewRequest(u);
-}
-@ %def addNewRequest
-
-%\appendix
-%
-%\section{Appendix: List of Chunks}
-%\label{ap:list-of-chunks}
-%\nowebchunks
-%
-%\section{Appendix: List of Identifiers}
-%\label{ap:list-of-identifiers}
-%\nowebindex
