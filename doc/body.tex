@@ -5530,14 +5530,13 @@ the method call and returns {\tt{}false}.\\
 \bottomrule
 \end{tabular}
 \nwenddocs{}\nwbegincode{67}\sublabel{NW3NfwZQ-3PimUR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3PimUR-1}}}\moddef{Write: updateServerRoute(3)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3PimUR-1}}}\endmoddef\nwused{\\{NWvbkzY-2Rlctf-2}}
-boolean updateServerRoute(final int sid, final int[] route, final int[] sched)
-throws UserNotFoundException, EdgeNotFoundException, SQLException \{
-  boolean success = false;
+void updateServerRoute(final int sid, final int[] route, final int[] sched)
+throws RouteIllegalOverwriteException, UserNotFoundException, EdgeNotFoundException, SQLException \{
   if (route[0] >= this.forwardSimulationWorldTime()) \{
     this.storage.DBUpdateServerRoute(sid, route, sched);
-    success = true;
+  \} else \{
+    throw new RouteIllegalOverwriteException();
   \}
-  return success;
 \}
 \nwindexdefn{updateServerRoute}{updateServerRoute}{NW3NfwZQ-3PimUR-1}\eatline
 \nwidentdefs{\\{{updateServerRoute}{updateServerRoute}}}\nwidentuses{\\{{DBUpdateServerRoute}{DBUpdateServerRoute}}\\{{forwardSimulationWorldTime}{forwardSimulationWorldTime}}}\nwindexuse{DBUpdateServerRoute}{DBUpdateServerRoute}{NW3NfwZQ-3PimUR-1}\nwindexuse{forwardSimulationWorldTime}{forwardSimulationWorldTime}{NW3NfwZQ-3PimUR-1}\nwendcode{}\nwbegindocs{68}\nwdocspar
@@ -5672,9 +5671,8 @@ and returns {\tt{}false}.\\
 \bottomrule
 \end{tabular}
 \nwenddocs{}\nwbegincode{73}\sublabel{NW3NfwZQ-42pL1g-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-42pL1g-1}}}\moddef{Write: updateServerAddToSchedule(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-42pL1g-1}}}\endmoddef\nwused{\\{NWvbkzY-2Rlctf-2}}
-boolean updateServerAddToSchedule(
-    final int sid, final int[] route, final int[] sched, final int[] rid)
-throws UserNotFoundException, EdgeNotFoundException, SQLException \{
+void updateServerAddToSchedule( final int sid, final int[] route, final int[] sched, final int[] rid)
+throws RouteIllegalOverwriteException, UserNotFoundException, EdgeNotFoundException, SQLException \{
   final int t = this.forwardSimulationWorldTime();
   final int[] current = this.storage.DBQueryServerRoute(sid);
   int i = 0;
@@ -5683,19 +5681,18 @@ throws UserNotFoundException, EdgeNotFoundException, SQLException \{
   \}
   if (i == current.length) \{
     // branch point not found
-    return false;
+    throw new RouteIllegalOverwriteException();
   \}
   int j = 0;
   while (i < current.length && (current[i] <= t && current[(i + 1)] != 0)) \{
     if (current[i] != route[j] || current[(i + 1)] != route[(j + 1)]) \{
       // overwrite history occurred
-      return false;
+      throw new RouteIllegalOverwriteException();
     \}
     i += 2;
     j += 2;
   \}
   this.storage.DBUpdateServerAddToSchedule(sid, route, sched, rid);
-  return true;
 \}
 \nwindexdefn{updateServerAddToSchedule}{updateServerAddToSchedule}{NW3NfwZQ-42pL1g-1}\eatline
 \nwidentdefs{\\{{updateServerAddToSchedule}{updateServerAddToSchedule}}}\nwidentuses{\\{{DBQueryServerRoute}{DBQueryServerRoute}}\\{{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}}\\{{forwardSimulationWorldTime}{forwardSimulationWorldTime}}}\nwindexuse{DBQueryServerRoute}{DBQueryServerRoute}{NW3NfwZQ-42pL1g-1}\nwindexuse{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}{NW3NfwZQ-42pL1g-1}\nwindexuse{forwardSimulationWorldTime}{forwardSimulationWorldTime}{NW3NfwZQ-42pL1g-1}\nwendcode{}\nwbegindocs{74}\nwdocspar
@@ -5826,14 +5823,13 @@ the method call and returns {\tt{}false}.\\
 \bottomrule
 \end{tabular}
 \nwenddocs{}\nwbegincode{79}\sublabel{NW3NfwZQ-3O61Nf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3O61Nf-1}}}\moddef{Write: updateServerRemoveFromSchedule(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3O61Nf-1}}}\endmoddef\nwused{\\{NWvbkzY-2Rlctf-2}}
-boolean updateServerRemoveFromSchedule(
-    final int sid, final int[] route, final int[] sched, final int[] rid)
-throws UserNotFoundException, EdgeNotFoundException, SQLException \{
-  boolean success = false;
+void updateServerRemoveFromSchedule( final int sid, final int[] route, final int[] sched, final int[] rid)
+throws RouteIllegalOverwriteException, UserNotFoundException, EdgeNotFoundException, SQLException \{
   if (route[0] >= this.forwardSimulationWorldTime()) \{
     this.storage.DBUpdateServerRemoveFromSchedule(sid, route, sched, rid);
+  \} else \{
+    throw new RouteIllegalOverwriteException();
   \}
-  return success;
 \}
 \nwindexdefn{updateServerRemoveFromSchedule}{updateServerRemoveFromSchedule}{NW3NfwZQ-3O61Nf-1}\eatline
 \nwidentdefs{\\{{updateServerRemoveFromSchedule}{updateServerRemoveFromSchedule}}}\nwidentuses{\\{{DBUpdateServerRemoveFromSchedule}{DBUpdateServerRemoveFromSchedule}}\\{{forwardSimulationWorldTime}{forwardSimulationWorldTime}}}\nwindexuse{DBUpdateServerRemoveFromSchedule}{DBUpdateServerRemoveFromSchedule}{NW3NfwZQ-3O61Nf-1}\nwindexuse{forwardSimulationWorldTime}{forwardSimulationWorldTime}{NW3NfwZQ-3O61Nf-1}\nwendcode{}\nwbegindocs{80}\nwdocspar
@@ -7848,6 +7844,7 @@ import com.github.jargors.exceptions.DuplicateUserException;
 import com.github.jargors.exceptions.EdgeNotFoundException;
 import com.github.jargors.exceptions.UserNotFoundException;
 import com.github.jargors.exceptions.VertexNotFoundException;
+import com.github.jargors.exceptions.RouteIllegalOverwriteException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.sql.SQLException;

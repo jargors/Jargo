@@ -9,6 +9,7 @@ import com.github.jargors.exceptions.DuplicateUserException;
 import com.github.jargors.exceptions.EdgeNotFoundException;
 import com.github.jargors.exceptions.UserNotFoundException;
 import com.github.jargors.exceptions.VertexNotFoundException;
+import com.github.jargors.exceptions.RouteIllegalOverwriteException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.sql.SQLException;
@@ -44,18 +45,16 @@ public class Communicator {
   public int[] queryServerMaxLoad(final int sid, final int t) throws SQLException {
            return this.storage.DBQueryServerMaxLoad(sid, t);
          }
-  public boolean updateServerRoute(final int sid, final int[] route, final int[] sched)
-         throws UserNotFoundException, EdgeNotFoundException, SQLException {
-           boolean success = false;
+  public void updateServerRoute(final int sid, final int[] route, final int[] sched)
+         throws RouteIllegalOverwriteException, UserNotFoundException, EdgeNotFoundException, SQLException {
            if (route[0] >= this.forwardSimulationWorldTime()) {
              this.storage.DBUpdateServerRoute(sid, route, sched);
-             success = true;
+           } else {
+             throw new RouteIllegalOverwriteException();
            }
-           return success;
          }
-  public boolean updateServerAddToSchedule(
-             final int sid, final int[] route, final int[] sched, final int[] rid)
-         throws UserNotFoundException, EdgeNotFoundException, SQLException {
+  public void updateServerAddToSchedule( final int sid, final int[] route, final int[] sched, final int[] rid)
+         throws RouteIllegalOverwriteException, UserNotFoundException, EdgeNotFoundException, SQLException {
            final int t = this.forwardSimulationWorldTime();
            final int[] current = this.storage.DBQueryServerRoute(sid);
            int i = 0;
@@ -64,28 +63,26 @@ public class Communicator {
            }
            if (i == current.length) {
              // branch point not found
-             return false;
+             throw new RouteIllegalOverwriteException();
            }
            int j = 0;
            while (i < current.length && (current[i] <= t && current[(i + 1)] != 0)) {
              if (current[i] != route[j] || current[(i + 1)] != route[(j + 1)]) {
                // overwrite history occurred
-               return false;
+               throw new RouteIllegalOverwriteException();
              }
              i += 2;
              j += 2;
            }
            this.storage.DBUpdateServerAddToSchedule(sid, route, sched, rid);
-           return true;
          }
-  public boolean updateServerRemoveFromSchedule(
-             final int sid, final int[] route, final int[] sched, final int[] rid)
-         throws UserNotFoundException, EdgeNotFoundException, SQLException {
-           boolean success = false;
+  public void updateServerRemoveFromSchedule( final int sid, final int[] route, final int[] sched, final int[] rid)
+         throws RouteIllegalOverwriteException, UserNotFoundException, EdgeNotFoundException, SQLException {
            if (route[0] >= this.forwardSimulationWorldTime()) {
              this.storage.DBUpdateServerRemoveFromSchedule(sid, route, sched, rid);
+           } else {
+             throw new RouteIllegalOverwriteException();
            }
-           return success;
          }
   public void registerStorage(final Storage src) {
            this.storage = src;
