@@ -44,7 +44,7 @@ public class Controller {
   private Runnable ClockLoop = () -> {
     ++(this.world_time);
     if (DEBUG) {
-      System.err.printf("[t=%d] Controller.ClockLoop says: %s!",
+      System.err.printf("[t=%d] Controller.ClockLoop says: %s!\n",
           this.world_time, (this.world_time % 2 == 0 ? "ping" : "pong"));
     }
   };
@@ -249,14 +249,14 @@ public class Controller {
            this.storage.DBAddNewVertex(col1, col3, col4);
          } catch (DuplicateVertexException e) {
            if (DEBUG) {
-             System.out.println("Warning! Duplicate vertex ignored.");
+             System.err.println("Warning! Duplicate vertex ignored.");
            }
          }
          try {
            this.storage.DBAddNewVertex(col2, col5, col6);
          } catch (DuplicateVertexException e) {
            if (DEBUG) {
-             System.out.println("Warning! Duplicate vertex ignored.");
+             System.err.println("Warning! Duplicate vertex ignored.");
            }
          }
          final int dist = ((col1 != 0 && col2 != 0)
@@ -267,7 +267,7 @@ public class Controller {
            this.storage.DBAddNewEdge(col1, col2, dist, 10);
          } catch (DuplicateEdgeException e) {
            if (DEBUG) {
-             System.out.println("Warning! Duplicate edge ignored.");
+             System.err.println("Warning! Duplicate edge ignored.");
            }
          }
            }
@@ -319,6 +319,9 @@ public class Controller {
          }
   public void loadGtree(String p) throws FileNotFoundException {
            this.tools.GTLoadGtree(p);
+         }
+  public void closeGtree() {
+           this.tools.GTCloseGtree();
          }
   public int getSimulationWorldTime() {
            return this.world_time;

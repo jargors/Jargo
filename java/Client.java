@@ -12,10 +12,13 @@ public abstract class Client {
   protected int s_collection_period = 10;
   protected Communicator communicator;
   protected Tools tools = new Tools();
-  private final boolean DEBUG = "true".equals(System.getProperty("jargors.client.debug"));
+  protected final boolean DEBUG = "true".equals(System.getProperty("jargors.client.debug"));
   public Client() { }
   public void loadGtree(String p) throws FileNotFoundException {
            this.tools.GTLoadGtree(p);
+         }
+  public void closeGtree() {
+           this.tools.GTCloseGtree();
          }
   public void notifyNew() throws ClientException, ClientFatalException {
            if (!this.queue.isEmpty()) {

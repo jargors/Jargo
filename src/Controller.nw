@@ -147,7 +147,7 @@ standard error if [[DEBUG]] is [[true]].\\
 private Runnable ClockLoop = () -> {
   ++(this.world_time);
   if (DEBUG) {
-    System.err.printf("[t=%d] Controller.ClockLoop says: %s!",
+    System.err.printf("[t=%d] Controller.ClockLoop says: %s!\n",
         this.world_time, (this.world_time % 2 == 0 ? "ping" : "pong"));
   }
 };
@@ -369,14 +369,14 @@ try {
   this.storage.DBAddNewVertex(col1, col3, col4);
 } catch (DuplicateVertexException e) {
   if (DEBUG) {
-    System.out.println("Warning! Duplicate vertex ignored.");
+    System.err.println("Warning! Duplicate vertex ignored.");
   }
 }
 try {
   this.storage.DBAddNewVertex(col2, col5, col6);
 } catch (DuplicateVertexException e) {
   if (DEBUG) {
-    System.out.println("Warning! Duplicate vertex ignored.");
+    System.err.println("Warning! Duplicate vertex ignored.");
   }
 }
 @
@@ -400,7 +400,7 @@ try {
   this.storage.DBAddNewEdge(col1, col2, dist, 10);
 } catch (DuplicateEdgeException e) {
   if (DEBUG) {
-    System.out.println("Warning! Duplicate edge ignored.");
+    System.err.println("Warning! Duplicate edge ignored.");
   }
 }
 @

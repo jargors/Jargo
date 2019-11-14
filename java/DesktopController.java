@@ -1,9 +1,11 @@
 package com.github.jargors;
 import com.github.jargors.Controller;
 import com.github.jargors.Client;
+import com.github.jargors.Tools;
 import com.github.jargors.exceptions.*;
 import java.io.File;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.sql.SQLException;
 import java.util.concurrent.CompletableFuture;
 import javafx.application.Application;
@@ -11,6 +13,8 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.stage.Stage;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.Scene;
@@ -49,6 +53,7 @@ public class DesktopController {
   private Controller controller = null;
   private Client client = null;
   private String db = null;
+  private String gtree = null;
   private Canvas can_road;
   private GraphicsContext gc = null;
   private double window_height = 0;
@@ -88,7 +93,6 @@ public class DesktopController {
                this.btn_prob     .setDisable(false);
                this.btn_road     .setDisable(false);
                this.btn_gtree    .setDisable(false);
-               this.btn_client   .setDisable(false);
                this.btn_stop     .setDisable(false);
                this.tf_class     .setDisable(false);
                this.tf_t0        .setDisable(false);
@@ -112,23 +116,25 @@ public class DesktopController {
                try {
                  this.controller = new Controller();
                  this.controller.loadBackup(this.db);
+                 this.controller.loadRoadNetworkFromDB();
+                 this.controller.loadUsersFromDB();
                  int nv = this.controller.queryCountVertices()[0];
                  int ne = this.controller.queryCountEdges()[0];
                  Platform.runLater(() -> {
                    this.btn_prob     .setDisable(true);
                    this.btn_road     .setDisable(true);
                    this.btn_gtree    .setDisable(false);
-                   this.btn_client   .setDisable(false);
                    this.btn_stop     .setDisable(false);
                    this.tf_class     .setDisable(false);
                    this.tf_t0        .setDisable(false);
                    this.tf_t1        .setDisable(false);
-                   this.circ_status.setFill(C_SUCCESS);
-                   this.lbl_status.setText("Loaded Jargo instance (#vertices="+nv+"; #edges="+ne+")");
+                   this.circ_status  .setFill(C_SUCCESS);
+                   this.lbl_status   .setText("Loaded Jargo instance (#vertices="+nv+"; #edges="+ne+")");
                    this.drawRoadNetwork();
                  });
                } catch (SQLException se) {
                  System.err.println("Failed");
+                 Tools.PrintSQLException(se);
                  return;
                }
              });
@@ -138,6 +144,53 @@ public class DesktopController {
              this.btn_stop     .setDisable(false);
            }
          }
+  public void actionGtree(ActionEvent e) {
+           boolean state_btn_prob = this.btn_prob.isDisabled();
+           boolean state_btn_road = this.btn_road.isDisabled();
+           this.btn_prob     .setDisable(true);
+           this.btn_road     .setDisable(true);
+           this.btn_stop     .setDisable(true);
+           this.btn_gtree    .setDisable(true);
+           this.circ_status  .setFill(C_WARN);
+           this.lbl_status   .setText("Select *.gtree...");
+           FileChooser fc = new FileChooser();
+           fc.getExtensionFilters().addAll(new ExtensionFilter("G-tree", "*.gtree"));
+           File gt = fc.showOpenDialog(this.stage);
+           if (gt != null) {
+             if (this.gtree != null) {
+               this.controller.closeGtree();
+             }
+             this.gtree = gt.toString();
+             this.lbl_status.setText("/Load '"+this.gtree+"'...");
+             CompletableFuture.runAsync(() -> {
+               try {
+                 this.controller.loadGtree(this.gtree);
+                 Platform.runLater(() -> {
+                   this.btn_prob     .setDisable(state_btn_prob);
+                   this.btn_road     .setDisable(state_btn_road);
+                   this.btn_client   .setDisable(false);
+                   this.btn_stop     .setDisable(false);
+                   this.btn_gtree    .setDisable(false);
+                   this.btn_gtree    .setText(gt.getName());
+                   this.circ_status  .setFill(C_SUCCESS);
+                   this.lbl_status   .setText("Loaded "+gt.getName());
+                 });
+               } catch (FileNotFoundException fe) {
+                 System.err.println("Failed: "+fe.toString());
+                 return;
+               }
+             });
+           } else {
+             this.btn_prob     .setDisable(state_btn_prob);
+             this.btn_road     .setDisable(state_btn_road);
+             this.btn_stop     .setDisable(false);
+             this.btn_gtree    .setDisable(false);
+             this.circ_status  .setFill(C_SUCCESS);
+             this.lbl_status   .setText("Cancelled load gtree.");
+           }
+         }
+  public void actionProb(ActionEvent e) {
+         }
   public void actionStop(ActionEvent e) {
            if (this.controller != null) {
              this.btn_stop     .setDisable(true);
@@ -146,6 +199,7 @@ public class DesktopController {
              CompletableFuture.runAsync(() -> {
                try {
                  this.controller.closeInstance();
+                 this.controller.closeGtree();
                  Platform.runLater(() -> {
                    this.btn_new      .setDisable(false);
                    this.btn_load     .setDisable(false);
@@ -153,6 +207,7 @@ public class DesktopController {
                    this.btn_prob     .setDisable(true);
                    this.btn_road     .setDisable(true);
                    this.btn_gtree    .setDisable(true);
+                   this.btn_gtree    .setText("empty G-tree");
                    this.btn_client   .setDisable(true);
                    this.tf_class     .setDisable(true);
                    this.tf_t0        .setDisable(true);
@@ -214,10 +269,11 @@ public class DesktopController {
               this.can_road.setOnMousePressed((e) -> { actionRecordMousePress(e); });
               this.can_road.setOnMouseDragged((e) -> { actionTranslateCanvas(e); });
             } catch (SQLException se) {
-              System.err.println("Failed");
+              System.err.println("Failed with SQLException");
+              Tools.PrintSQLException(se);
               return;
             } catch (VertexNotFoundException ve) {
-              System.err.println("Failed");
+              System.err.println(ve.toString());
               return;
             }
           }

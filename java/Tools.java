@@ -34,6 +34,10 @@ public class Tools {
              throw new FileNotFoundException("Bad path to gtree");
            }
          }
+  public void GTCloseGtree() {
+           this.gtree = null;
+           this.flag_gtree_loaded = false;
+         }
   public void registerVertices(final ConcurrentHashMap<Integer, int[]> src) {
            this.lu_vertices = src;
          }
