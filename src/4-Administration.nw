@@ -273,9 +273,9 @@ temporary maps if all succeeds. This way we don't corrupt [[lu_vertices]] and
 hard to imagine why this method would ever be called if the caches are already
 populated.)}
 <<Admin: DBLoadRoadNetworkFromDB(0)>>=
-  ConcurrentHashMap<Integer, int[]>    lu1 = new ConcurrentHashMap<>();
+  ConcurrentHashMap<Integer, int[]>    lu1 = new ConcurrentHashMap<Integer, int[]>();
   ConcurrentHashMap<Integer,
-    ConcurrentHashMap<Integer, int[]>> lu2 = new ConcurrentHashMap<>();
+    ConcurrentHashMap<Integer, int[]>> lu2 = new ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>>();
 @
 {\small We start by querying the vertices.}
 <<Admin: DBLoadRoadNetworkFromDB(0)>>=
@@ -301,7 +301,7 @@ populated.)}
       final int dd = output[(i + 2)];
       final int nu = output[(i + 3)];
       if (!lu2.containsKey(v1)) {
-        lu2.put(v1, new ConcurrentHashMap());
+        lu2.put(v1, new ConcurrentHashMap<Integer, int[]>());
       }
       lu2.get(v1).put(v2, new int[] { dd, nu });
     }
@@ -349,8 +349,8 @@ void DBLoadUsersFromDB() throws SQLException {
 {\small Our approach follows the approach for [[DBLoadRoadNetworkFromDB]](0).
 We start by creating two temporary maps on the heap.}
 <<Admin: DBLoadUsersFromDB(0)>>=
-  ConcurrentHashMap<Integer, int[]> lu1 = new ConcurrentHashMap<>();
-  Map<Integer, Boolean>             lu2 = new HashMap<>();
+  ConcurrentHashMap<Integer, int[]> lu1 = new ConcurrentHashMap<Integer, int[]>();
+  Map<Integer, Boolean>             lu2 = new HashMap<Integer, Boolean>();
 @
 {\small Then we query the users.}
 <<Admin: DBLoadUsersFromDB(0)>>=
@@ -513,11 +513,11 @@ void setupDriver() throws SQLException, ClassNotFoundException {
   poolableconnection_factory.setPoolStatements(true);
   poolableconnection_factory.setDefaultAutoCommit(false);
   poolableconnection_factory.setMaxOpenPreparedStatements(STATEMENTS_MAX_COUNT);
-  GenericObjectPoolConfig cfg = new GenericObjectPoolConfig();
+  GenericObjectPoolConfig<PoolableConnection> cfg = new GenericObjectPoolConfig<PoolableConnection>();
   cfg.setMinIdle(100000);
   cfg.setMaxIdle(100000);
   cfg.setMaxTotal(100000);
-  pool = new GenericObjectPool<>(poolableconnection_factory, cfg);
+  pool = new GenericObjectPool<PoolableConnection>(poolableconnection_factory, cfg);
   poolableconnection_factory.setPool(pool);
   Class.forName("org.apache.commons.dbcp2.PoolingDriver");
   driver = (PoolingDriver) DriverManager.getDriver(CONNECTIONS_DRIVER_URL);

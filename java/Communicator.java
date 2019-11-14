@@ -103,7 +103,7 @@ public class Communicator {
   public final ConcurrentHashMap<Integer, int[]> forwardReferenceUsersCache() {
            return this.storage.getReferenceUsersCache();
          }
-  public void forwardReturnRequest(final int rid) {
-           this.controller.returnRequest(rid);
+  public void forwardReturnRequest(final int[] r) {
+           this.controller.returnRequest(r);
          }
 }

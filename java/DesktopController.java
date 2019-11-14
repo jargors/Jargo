@@ -54,6 +54,8 @@ public class DesktopController {
   private Client client = null;
   private String db = null;
   private String gtree = null;
+  private String prob = null;
+  private String road = null;
   private Canvas can_road;
   private GraphicsContext gc = null;
   private double window_height = 0;
@@ -90,7 +92,6 @@ public class DesktopController {
              this.controller.loadDataModel();
              this.db = "no-name";
              Platform.runLater(() -> {
-               this.btn_prob     .setDisable(false);
                this.btn_road     .setDisable(false);
                this.btn_gtree    .setDisable(false);
                this.btn_stop     .setDisable(false);
@@ -154,7 +155,7 @@ public class DesktopController {
            this.circ_status  .setFill(C_WARN);
            this.lbl_status   .setText("Select *.gtree...");
            FileChooser fc = new FileChooser();
-           fc.getExtensionFilters().addAll(new ExtensionFilter("G-tree", "*.gtree"));
+           fc.getExtensionFilters().addAll(new ExtensionFilter("G-tree *.gtree", "*.gtree"));
            File gt = fc.showOpenDialog(this.stage);
            if (gt != null) {
              if (this.gtree != null) {
@@ -189,7 +190,65 @@ public class DesktopController {
              this.lbl_status   .setText("Cancelled load gtree.");
            }
          }
+  public void actionRoad(ActionEvent e) {
+           FileChooser fc = new FileChooser();
+           fc.getExtensionFilters().addAll(new ExtensionFilter("Road network *.rnet", "*.rnet"));
+           File road = fc.showOpenDialog(this.stage);
+           if (road != null) {
+             this.road = road.toString();
+             CompletableFuture.runAsync(() -> {
+               try {
+                 this.controller.loadRoadNetworkFromFile(this.road);
+                 Platform.runLater(() -> {
+                 });
+               } catch (FileNotFoundException fe) {
+                 System.err.println("Failed: "+fe.toString());
+                 return;
+               } catch (SQLException se) {
+                 System.err.println("SQL error:");
+                 Tools.PrintSQLException(se);
+                 return;
+               }
+             });
+           }
+         }
   public void actionProb(ActionEvent e) {
+           FileChooser fc = new FileChooser();
+           fc.getExtensionFilters().addAll(new ExtensionFilter("Problem Instance *.instance", "*.instance"));
+           File prob = fc.showOpenDialog(this.stage);
+           if (prob != null) {
+             this.prob = prob.toString();
+             CompletableFuture.runAsync(() -> {
+               try {
+                 this.controller.loadProblem(this.prob);
+                 Platform.runLater(() -> {
+
+                 });
+               } catch (FileNotFoundException fe) {
+                 System.err.println("File not found: "+fe.toString());
+                 return;
+               } catch (DuplicateUserException de) {
+                 System.err.println("Duplicate user: "+de.toString());
+                 return;
+               } catch (EdgeNotFoundException ee) {
+                 System.err.println("Edge not found: "+ee.toString());
+                 return;
+               } catch (SQLException se) {
+                 System.err.println("SQL error:");
+                 Tools.PrintSQLException(se);
+                 return;
+               } catch (GtreeNotLoadedException ge) {
+                 System.err.println("Gtree not loaded? "+ge.toString());
+                 return;
+               } catch (GtreeIllegalSourceException ge) {
+                 System.err.println("Gtree illegal source? "+ge.toString());
+                 return;
+               } catch (GtreeIllegalTargetException ge) {
+                 System.err.println("Gtree illegal target? "+ge.toString());
+                 return;
+               }
+             });
+           }
          }
   public void actionStop(ActionEvent e) {
            if (this.controller != null) {

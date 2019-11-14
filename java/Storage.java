@@ -22,13 +22,13 @@ import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 public class Storage {
   private Map<Integer, Boolean> lu_rstatus = new HashMap<>();  //*
-  private ConcurrentHashMap<String, String> lu_pstr     = new ConcurrentHashMap<>();
-  private ConcurrentHashMap<Integer, int[]> lu_vertices = new ConcurrentHashMap<>();
+  private ConcurrentHashMap<String, String> lu_pstr     = new ConcurrentHashMap<String, String>();
+  private ConcurrentHashMap<Integer, int[]> lu_vertices = new ConcurrentHashMap<Integer, int[]>();
   private ConcurrentHashMap<Integer,
-      ConcurrentHashMap<Integer, int[]>>    lu_edges    = new ConcurrentHashMap<>();
-  private ConcurrentHashMap<Integer, int[]> lu_users    = new ConcurrentHashMap<>();
+      ConcurrentHashMap<Integer, int[]>>    lu_edges    = new ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>>();
+  private ConcurrentHashMap<Integer, int[]> lu_users    = new ConcurrentHashMap<Integer, int[]>();
   private final int    STATEMENTS_MAX_COUNT   = 20;
-  private final int    REQUEST_TIMEOUT        = 30;
+  private       int    REQUEST_TIMEOUT        = 30;
   private       String CONNECTIONS_URL        = "jdbc:derby:memory:jargo;create=true";
   private final String CONNECTIONS_DRIVER_URL = "jdbc:apache:commons:dbcp:";
   private final String CONNECTIONS_POOL_NAME  = "jargo";
@@ -532,7 +532,7 @@ public class Storage {
              throw new DuplicateEdgeException("Edge ("+v1+", "+v2+") already exists.");
            }
            if (!this.lu_edges.containsKey(v1)) {
-             this.lu_edges.put(v1, new ConcurrentHashMap());
+             this.lu_edges.put(v1, new ConcurrentHashMap<Integer, int[]>());
            }
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
              try {
@@ -1375,9 +1375,9 @@ public class Storage {
            }
          }
   public void DBLoadRoadNetworkFromDB() throws SQLException {
-           ConcurrentHashMap<Integer, int[]>    lu1 = new ConcurrentHashMap<>();
+           ConcurrentHashMap<Integer, int[]>    lu1 = new ConcurrentHashMap<Integer, int[]>();
            ConcurrentHashMap<Integer,
-             ConcurrentHashMap<Integer, int[]>> lu2 = new ConcurrentHashMap<>();
+             ConcurrentHashMap<Integer, int[]>> lu2 = new ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>>();
            try {
              final int[] output = this.DBQueryAllVertices();
              for (int i = 0; i < (output.length - 2); i += 3) {
@@ -1397,7 +1397,7 @@ public class Storage {
                final int dd = output[(i + 2)];
                final int nu = output[(i + 3)];
                if (!lu2.containsKey(v1)) {
-                 lu2.put(v1, new ConcurrentHashMap());
+                 lu2.put(v1, new ConcurrentHashMap<Integer, int[]>());
                }
                lu2.get(v1).put(v2, new int[] { dd, nu });
              }
@@ -1408,8 +1408,8 @@ public class Storage {
            this.lu_edges    = lu2;
          }
   public void DBLoadUsersFromDB() throws SQLException {
-           ConcurrentHashMap<Integer, int[]> lu1 = new ConcurrentHashMap<>();
-           Map<Integer, Boolean>             lu2 = new HashMap<>();
+           ConcurrentHashMap<Integer, int[]> lu1 = new ConcurrentHashMap<Integer, int[]>();
+           Map<Integer, Boolean>             lu2 = new HashMap<Integer, Boolean>();
            try {
              final int[] output = this.DBQueryAllUsers();
              for (int i = 0; i < (output.length - 6); i += 7) {
@@ -1474,11 +1474,11 @@ public class Storage {
             poolableconnection_factory.setPoolStatements(true);
             poolableconnection_factory.setDefaultAutoCommit(false);
             poolableconnection_factory.setMaxOpenPreparedStatements(STATEMENTS_MAX_COUNT);
-            GenericObjectPoolConfig cfg = new GenericObjectPoolConfig();
+            GenericObjectPoolConfig<PoolableConnection> cfg = new GenericObjectPoolConfig<PoolableConnection>();
             cfg.setMinIdle(100000);
             cfg.setMaxIdle(100000);
             cfg.setMaxTotal(100000);
-            pool = new GenericObjectPool<>(poolableconnection_factory, cfg);
+            pool = new GenericObjectPool<PoolableConnection>(poolableconnection_factory, cfg);
             poolableconnection_factory.setPool(pool);
             Class.forName("org.apache.commons.dbcp2.PoolingDriver");
             driver = (PoolingDriver) DriverManager.getDriver(CONNECTIONS_DRIVER_URL);
@@ -1570,6 +1570,9 @@ public class Storage {
               throw e;
             }
           }
+  public void setRequestTimeout(final int t) {
+           this.REQUEST_TIMEOUT = t;
+         }
   public final ConcurrentHashMap<Integer, int[]> getReferenceVerticesCache() {
            return this.lu_vertices;
          }

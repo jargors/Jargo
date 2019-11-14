@@ -6,13 +6,14 @@ import com.github.jargors.exceptions.ClientFatalException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.io.FileNotFoundException;
 public abstract class Client {
-  protected ConcurrentLinkedQueue<int[]> queue = new ConcurrentLinkedQueue();
+  protected ConcurrentLinkedQueue<int[]> queue = new ConcurrentLinkedQueue<int[]>();
   protected int r_collection_period = 1;  // how many sec before collecting new req?
   protected int r_handling_period = 1;  // how many msec before handling queued req?
   protected int s_collection_period = 10;
   protected Communicator communicator;
   protected Tools tools = new Tools();
-  protected final boolean DEBUG = "true".equals(System.getProperty("jargors.client.debug"));
+  protected final boolean DEBUG =
+      "true".equals(System.getProperty("jargors.client.debug"));
   public Client() { }
   public void loadGtree(String p) throws FileNotFoundException {
            this.tools.GTLoadGtree(p);
@@ -21,7 +22,7 @@ public abstract class Client {
            this.tools.GTCloseGtree();
          }
   public void notifyNew() throws ClientException, ClientFatalException {
-           if (!this.queue.isEmpty()) {
+           while (!this.queue.isEmpty()) {
              this.handleRequest(this.queue.remove());
            }
          }

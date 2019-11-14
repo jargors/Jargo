@@ -31,16 +31,23 @@ public class Controller {
   private Communicator communicator;
   private Tools tools = new Tools();
   private Client client;
-  private Map<Integer, Boolean> lu_seen = new HashMap<>();
-  private int initial_world_time = 0;
-  private int final_world_time = 86400;
+  private Map<Integer, Boolean> lu_seen = new HashMap<Integer, Boolean>();
+  private final int clockstart =
+      Integer.parseInt(System.getProperty("jargors.controller.clockstart", "0"));
+  private final int clockend =
+      Integer.parseInt(System.getProperty("jargors.controller.clockend", "1800"));
+  private final int request_timeout =
+      Integer.parseInt(System.getProperty("jargors.controller.request_timeout", "30"));
+  private final int queue_timeout =
+      Integer.parseInt(System.getProperty("jargors.controller.queue_timeout", "30"));
   private int world_time = 0;
   private int loop_delay = 0;
   private int engine_update_period = 10;
   // private int deviation_rate = 0.02;
   // private int breakdown_rate = 0.005;
   private final double CSHIFT = 10000000.0;
-  private final boolean DEBUG = "true".equals(System.getProperty("jargors.controller.debug"));
+  private final boolean DEBUG =
+      "true".equals(System.getProperty("jargors.controller.debug"));
   private Runnable ClockLoop = () -> {
     ++(this.world_time);
     if (DEBUG) {
@@ -93,10 +100,10 @@ public class Controller {
     try {
       this.client.notifyNew();
     } catch (ClientException e) {
-      System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a non-fatal Client exception: %s",
+      System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientException: %s",
           this.world_time, e.toString());
     } catch (ClientFatalException e) {
-      System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a FATAL Client exception: %s",
+      System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientFatalException: %s",
           this.world_time, e.toString());
       e.printStackTrace();
       System.exit(1);
@@ -127,6 +134,7 @@ public class Controller {
   };
   public Controller() {
     this.storage = new Storage();
+    this.storage.setRequestTimeout(request_timeout);
     this.communicator = new Communicator();
     this.communicator.registerStorage(storage);
     this.communicator.registerController(this);
@@ -249,14 +257,14 @@ public class Controller {
            this.storage.DBAddNewVertex(col1, col3, col4);
          } catch (DuplicateVertexException e) {
            if (DEBUG) {
-             System.err.println("Warning! Duplicate vertex ignored.");
+             // System.err.println("Warning! Duplicate vertex ignored.");
            }
          }
          try {
            this.storage.DBAddNewVertex(col2, col5, col6);
          } catch (DuplicateVertexException e) {
            if (DEBUG) {
-             System.err.println("Warning! Duplicate vertex ignored.");
+             // System.err.println("Warning! Duplicate vertex ignored.");
            }
          }
          final int dist = ((col1 != 0 && col2 != 0)
@@ -267,7 +275,7 @@ public class Controller {
            this.storage.DBAddNewEdge(col1, col2, dist, 10);
          } catch (DuplicateEdgeException e) {
            if (DEBUG) {
-             System.err.println("Warning! Duplicate edge ignored.");
+             // System.err.println("Warning! Duplicate edge ignored.");
            }
          }
            }
@@ -329,16 +337,10 @@ public class Controller {
   public void setEngineUpdatePeriod(final int t) {
            this.engine_update_period = t;
          }
-  public void setFinalWorldTime(final int t) {
-           this.final_world_time = t;
-         }
-  public void setInitialWorldTime(final int t) {
-           this.initial_world_time = t;
-         }
-  public void startRealtime(final Consumer app_cb) {
-           this.world_time = this.initial_world_time;
+  public void startRealtime(final Consumer<Boolean> app_cb) {
+           this.world_time = this.clockstart;
 
-           int simulation_duration = (this.final_world_time - this.initial_world_time);
+           int simulation_duration = (this.clockend - this.clockstart);
 
            ScheduledExecutorService exe = Executors.newScheduledThreadPool(5);
 
@@ -371,9 +373,9 @@ public class Controller {
              app_cb.accept(true);
            }, simulation_duration, TimeUnit.SECONDS);
          }
-  public void startSequential(final Consumer app_cb) {
-           this.world_time = this.initial_world_time;
-           while (this.world_time < this.final_world_time) {
+  public void startSequential(final Consumer<Boolean> app_cb) {
+           this.world_time = this.clockstart;
+           while (this.world_time < this.clockend) {
              this.ClockLoop.run();  // this.world_time gets incremented here!
              this.EngineLoop.run();
              this.ServerLoop.run();
@@ -387,7 +389,9 @@ public class Controller {
            this.client = target;
            this.client.registerCommunicator(this.communicator);
          }
-  public void returnRequest(final int rid) {
-           this.lu_seen.put(rid, false);
+  public void returnRequest(final int[] r) {
+           if (this.world_time - r[2] < this.queue_timeout) {
+             this.lu_seen.put(r[0], false);
+           }
          }
 }

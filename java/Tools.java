@@ -12,10 +12,10 @@ import java.io.FileNotFoundException;
 public class Tools {
   private G_Tree gtree;
   private boolean flag_gtree_loaded = false;
-  private ConcurrentHashMap<Integer, int[]> lu_vertices = new ConcurrentHashMap();
+  private ConcurrentHashMap<Integer, int[]> lu_vertices = new ConcurrentHashMap<Integer, int[]>();
   private ConcurrentHashMap<Integer,
-      ConcurrentHashMap<Integer, int[]>>    lu_edges    = new ConcurrentHashMap();
-  private ConcurrentHashMap<Integer, int[]> lu_users    = new ConcurrentHashMap();
+      ConcurrentHashMap<Integer, int[]>>    lu_edges    = new ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>>();
+  private ConcurrentHashMap<Integer, int[]> lu_users    = new ConcurrentHashMap<Integer, int[]>();
   private final double CSHIFT = 10000000.0;
   private final boolean DEBUG = "true".equals(System.getProperty("jargors.tools.debug"));
   public Tools() { }

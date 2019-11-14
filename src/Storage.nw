@@ -75,11 +75,11 @@ private Map<Integer, Boolean> lu_rstatus = new HashMap<>();  //*
 held by other threads. To avoid accidental corruption due to concurrent access,
 we use [[ConcurrentHashMap]].
 <<[[Storage]] member variables>>=
-private ConcurrentHashMap<String, String> lu_pstr     = new ConcurrentHashMap<>();
-private ConcurrentHashMap<Integer, int[]> lu_vertices = new ConcurrentHashMap<>();
+private ConcurrentHashMap<String, String> lu_pstr     = new ConcurrentHashMap<String, String>();
+private ConcurrentHashMap<Integer, int[]> lu_vertices = new ConcurrentHashMap<Integer, int[]>();
 private ConcurrentHashMap<Integer,
-    ConcurrentHashMap<Integer, int[]>>    lu_edges    = new ConcurrentHashMap<>();
-private ConcurrentHashMap<Integer, int[]> lu_users    = new ConcurrentHashMap<>();
+    ConcurrentHashMap<Integer, int[]>>    lu_edges    = new ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>>();
+private ConcurrentHashMap<Integer, int[]> lu_users    = new ConcurrentHashMap<Integer, int[]>();
 @
 \end{itemize}
 
@@ -93,7 +93,7 @@ $\pi_\texttt{e}(r)+\texttt{REQUEST\_TIMEOUT}$, then it is not tried again.
 The remaining parameters configure the Derby database connection.
 <<[[Storage]] member variables>>=
 private final int    STATEMENTS_MAX_COUNT   = 20;
-private final int    REQUEST_TIMEOUT        = 30;
+private       int    REQUEST_TIMEOUT        = 30;
 private       String CONNECTIONS_URL        = "jdbc:derby:memory:jargo;create=true";
 private final String CONNECTIONS_DRIVER_URL = "jdbc:apache:commons:dbcp:";
 private final String CONNECTIONS_POOL_NAME  = "jargo";
@@ -134,6 +134,13 @@ public Storage() {
 
 \section{Methods}
 
+\subsection{[[setRequestTimeout]](1)}
+<<setRequestTimeout(1)>>=
+void setRequestTimeout(final int t) {
+  this.REQUEST_TIMEOUT = t;
+}
+@ %def setRequestTimeout
+
 \subsection{[[getReferenceVerticesCache]](0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -151,7 +158,7 @@ reference to [[lu_vertices]].\\
 final ConcurrentHashMap<Integer, int[]> getReferenceVerticesCache() {
   return this.lu_vertices;
 }
-@
+@ %def getReferenceVerticesCache
 
 \subsection{[[getReferenceEdgesCache]](0)}
 \begin{tabular}{p{\textwidth}}

@@ -78,19 +78,23 @@ private Storage storage;
 private Communicator communicator;
 private Tools tools = new Tools();
 private Client client;
-private Map<Integer, Boolean> lu_seen = new HashMap<>();
+private Map<Integer, Boolean> lu_seen = new HashMap<Integer, Boolean>();
 @
 
 \hi{Settings.} Settings objects configure various aspects of the simulation.
-Some settings can be configured using the public setters, others can
-be configured through system properties, and others are non-configurable.
 <<Settings objects>>=
-private int initial_world_time = 0;
-private int final_world_time = 86400;
+private final int clockstart =
+    Integer.parseInt(System.getProperty("jargors.controller.clockstart", "0"));
+private final int clockend =
+    Integer.parseInt(System.getProperty("jargors.controller.clockend", "1800"));
+private final int request_timeout =
+    Integer.parseInt(System.getProperty("jargors.controller.request_timeout", "30"));
+private final int queue_timeout =
+    Integer.parseInt(System.getProperty("jargors.controller.queue_timeout", "30"));
 @
 The simulation world time is stored in [[world_time]] and is upated by the
-clock loop. The time advances in increments of 1 from [[initial_world_time]]
-to [[final_world_time]].
+clock loop. The time advances in increments of 1 from [[clockstart]]
+to [[clockend]].
 <<Settings objects>>=
 private int world_time = 0;
 @
@@ -113,7 +117,8 @@ The [[DEBUG]] setting controls whether certain messages are print to screen.
 Pass [[-Djargors.controller.debug=true]] to the [[java]] command to set
 [[DEBUG]] to [[true]].
 <<Settings objects>>=
-private final boolean DEBUG = "true".equals(System.getProperty("jargors.controller.debug"));
+private final boolean DEBUG =
+    "true".equals(System.getProperty("jargors.controller.debug"));
 @
 
 \hi{Loops.} Jargo's simulation environment comprises four ``loops'', defined
@@ -258,10 +263,10 @@ private Runnable RequestHandlingLoop = () -> {
   try {
     this.client.notifyNew();
   } catch (ClientException e) {
-    System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a non-fatal Client exception: %s",
+    System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientException: %s",
         this.world_time, e.toString());
   } catch (ClientFatalException e) {
-    System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a FATAL Client exception: %s",
+    System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientFatalException: %s",
         this.world_time, e.toString());
     e.printStackTrace();
     System.exit(1);
@@ -337,6 +342,7 @@ memory heap, modifies [[storage]] and [[communicator]].\\
 <<[[Controller]] constructor>>=
 public Controller() {
   this.storage = new Storage();
+  this.storage.setRequestTimeout(request_timeout);
   this.communicator = new Communicator();
   this.communicator.registerStorage(storage);
   this.communicator.registerController(this);
@@ -369,14 +375,14 @@ try {
   this.storage.DBAddNewVertex(col1, col3, col4);
 } catch (DuplicateVertexException e) {
   if (DEBUG) {
-    System.err.println("Warning! Duplicate vertex ignored.");
+    // System.err.println("Warning! Duplicate vertex ignored.");
   }
 }
 try {
   this.storage.DBAddNewVertex(col2, col5, col6);
 } catch (DuplicateVertexException e) {
   if (DEBUG) {
-    System.err.println("Warning! Duplicate vertex ignored.");
+    // System.err.println("Warning! Duplicate vertex ignored.");
   }
 }
 @
@@ -400,7 +406,7 @@ try {
   this.storage.DBAddNewEdge(col1, col2, dist, 10);
 } catch (DuplicateEdgeException e) {
   if (DEBUG) {
-    System.err.println("Warning! Duplicate edge ignored.");
+    // System.err.println("Warning! Duplicate edge ignored.");
   }
 }
 @
@@ -449,20 +455,6 @@ void registerClient(final Client target) {
 }
 @ %def registerClient
 
-\subsection{[[setInitialWorldTime(1)]]}
-<<setInitialWorldTime(1)>>=
-void setInitialWorldTime(final int t) {
-  this.initial_world_time = t;
-}
-@ %def setInitialWorldTime
-
-\subsection{[[setFinalWorldTime(1)]]}
-<<setFinalWorldTime(1)>>=
-void setFinalWorldTime(final int t) {
-  this.final_world_time = t;
-}
-@ %def setFinalWorldTime
-
 \subsection{[[setEngineUpdatePeriod(1)]]}
 <<setEngineUpdatePeriod(1)>>=
 void setEngineUpdatePeriod(final int t) {
@@ -480,17 +472,19 @@ int getSimulationWorldTime() {
 
 \subsection{[[returnRequest]](1)}
 <<returnRequest(1)>>=
-void returnRequest(final int rid) {
-  this.lu_seen.put(rid, false);
+void returnRequest(final int[] r) {
+  if (this.world_time - r[2] < this.queue_timeout) {
+    this.lu_seen.put(r[0], false);
+  }
 }
 @ %def returnRequest
 
 \subsection{[[startRealtime]](1)}
 <<startRealtime(1)>>=
-void startRealtime(final Consumer app_cb) {
-  this.world_time = this.initial_world_time;
+void startRealtime(final Consumer<Boolean> app_cb) {
+  this.world_time = this.clockstart;
 
-  int simulation_duration = (this.final_world_time - this.initial_world_time);
+  int simulation_duration = (this.clockend - this.clockstart);
 
   ScheduledExecutorService exe = Executors.newScheduledThreadPool(5);
 
@@ -527,9 +521,9 @@ void startRealtime(final Consumer app_cb) {
 
 \subsection{[[startSequential]](1)}
 <<startSequential(1)>>=
-void startSequential(final Consumer app_cb) {
-  this.world_time = this.initial_world_time;
-  while (this.world_time < this.final_world_time) {
+void startSequential(final Consumer<Boolean> app_cb) {
+  this.world_time = this.clockstart;
+  while (this.world_time < this.clockend) {
     this.ClockLoop.run();  // this.world_time gets incremented here!
     this.EngineLoop.run();
     this.ServerLoop.run();

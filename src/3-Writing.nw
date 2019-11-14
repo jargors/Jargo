@@ -362,7 +362,7 @@ throws DuplicateEdgeException, SQLException {
     throw new DuplicateEdgeException("Edge ("+v1+", "+v2+") already exists.");
   }
   if (!this.lu_edges.containsKey(v1)) {
-    this.lu_edges.put(v1, new ConcurrentHashMap());
+    this.lu_edges.put(v1, new ConcurrentHashMap<Integer, int[]>());
   }
   try (<<Open [[conn]]>>) {
     try {
