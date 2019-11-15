@@ -1570,7 +1570,7 @@ public class Storage {
               throw e;
             }
           }
-  public void setRequestTimeout(final int t) {
+  public void forwardRequestTimeout(final int t) {
            this.REQUEST_TIMEOUT = t;
          }
   public final ConcurrentHashMap<Integer, int[]> getReferenceVerticesCache() {

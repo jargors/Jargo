@@ -83,13 +83,13 @@ private Map<Integer, Boolean> lu_seen = new HashMap<Integer, Boolean>();
 
 \hi{Settings.} Settings objects configure various aspects of the simulation.
 <<Settings objects>>=
-private final int clockstart =
+private int clockstart =
     Integer.parseInt(System.getProperty("jargors.controller.clockstart", "0"));
-private final int clockend =
+private int clockend =
     Integer.parseInt(System.getProperty("jargors.controller.clockend", "1800"));
-private final int request_timeout =
+private int request_timeout =
     Integer.parseInt(System.getProperty("jargors.controller.request_timeout", "30"));
-private final int queue_timeout =
+private int queue_timeout =
     Integer.parseInt(System.getProperty("jargors.controller.queue_timeout", "30"));
 @
 The simulation world time is stored in [[world_time]] and is upated by the
@@ -265,6 +265,7 @@ private Runnable RequestHandlingLoop = () -> {
   } catch (ClientException e) {
     System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientException: %s",
         this.world_time, e.toString());
+    e.printStackTrace();
   } catch (ClientFatalException e) {
     System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientFatalException: %s",
         this.world_time, e.toString());
@@ -342,7 +343,6 @@ memory heap, modifies [[storage]] and [[communicator]].\\
 <<[[Controller]] constructor>>=
 public Controller() {
   this.storage = new Storage();
-  this.storage.setRequestTimeout(request_timeout);
   this.communicator = new Communicator();
   this.communicator.registerStorage(storage);
   this.communicator.registerController(this);
@@ -455,6 +455,34 @@ void registerClient(final Client target) {
 }
 @ %def registerClient
 
+\subsection{\texttt{setClockStart}(1)}
+<<setClockStart(1)>>=
+void setClockStart(final int t) {
+  this.clockstart = t;
+}
+@ %def setClockStart
+
+\subsection{\texttt{setClockEnd}(1)}
+<<setClockEnd(1)>>=
+void setClockEnd(final int t) {
+  this.clockend = t;
+}
+@ %def setClockEnd
+
+\subsection{\texttt{setRequestTimeout}(1)}
+<<setRequestTimeout(1)>>=
+void setRequestTimeout(final int t) {
+  this.request_timeout = t;
+}
+@ %def setRequestTimeout
+
+\subsection{\texttt{setQueueTimeout}(1)}
+<<setQueueTimeout(1)>>=
+void setQueueTimeout(final int t) {
+  this.queue_timeout = t;
+}
+@ %def setQueueTimeout
+
 \subsection{[[setEngineUpdatePeriod(1)]]}
 <<setEngineUpdatePeriod(1)>>=
 void setEngineUpdatePeriod(final int t) {
@@ -482,6 +510,7 @@ void returnRequest(final int[] r) {
 \subsection{[[startRealtime]](1)}
 <<startRealtime(1)>>=
 void startRealtime(final Consumer<Boolean> app_cb) {
+  this.storage.forwardRequestTimeout(request_timeout);
   this.world_time = this.clockstart;
 
   int simulation_duration = (this.clockend - this.clockstart);
@@ -522,6 +551,7 @@ void startRealtime(final Consumer<Boolean> app_cb) {
 \subsection{[[startSequential]](1)}
 <<startSequential(1)>>=
 void startSequential(final Consumer<Boolean> app_cb) {
+  this.storage.forwardRequestTimeout(request_timeout);
   this.world_time = this.clockstart;
   while (this.world_time < this.clockend) {
     this.ClockLoop.run();  // this.world_time gets incremented here!

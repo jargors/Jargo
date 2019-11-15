@@ -24,6 +24,11 @@ import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
 import java.util.concurrent.CompletableFuture;
+import java.net.URLClassLoader;
+import java.net.URL;
+import java.net.MalformedURLException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 @
 <<DesktopController.java preamble>>=
 import javafx.application.Application;
@@ -86,6 +91,8 @@ private String db = null;
 private String gtree = null;
 private String prob = null;
 private String road = null;
+private String jar = null;
+private String jarclass = null;
 private Canvas can_road;
 @
 
@@ -105,28 +112,28 @@ private double yunit = 0;
 
 \subsection{\texttt{actionQuit}(1)}
 <<actionQuit(1)>>=
-void actionQuit(ActionEvent e) {
+void actionQuit(final ActionEvent e) {
   System.exit(0);
 }
 @ %def actionQuit
 
 \subsection{\texttt{actionGitHub}(1)}
 <<actionGitHub(1)>>=
-void actionGitHub(ActionEvent e) {
+void actionGitHub(final ActionEvent e) {
   // ...
 }
 @ %def actionGitHub
 
 \subsection{\texttt{actionAbout}(1)}
 <<actionAbout(1)>>=
-void actionAbout(ActionEvent e) {
+void actionAbout(final ActionEvent e) {
   // ...
 }
 @ %def actionAbout
 
 \subsection{\texttt{actionNew}(1)}
 <<actionNew(1)>>=
-void actionNew(ActionEvent e) {
+void actionNew(final ActionEvent e) {
   this.btn_new      .setDisable(true);
   this.btn_load     .setDisable(true);
   this.btn_stop     .setDisable(true);
@@ -158,7 +165,7 @@ void actionNew(ActionEvent e) {
 
 \subsection{\texttt{actionLoad}(1)}
 <<actionLoad(1)>>=
-void actionLoad(ActionEvent e) {
+void actionLoad(final ActionEvent e) {
   this.btn_new      .setDisable(true);
   this.btn_load     .setDisable(true);
   this.btn_stop     .setDisable(true);
@@ -176,16 +183,22 @@ void actionLoad(ActionEvent e) {
         this.controller.loadUsersFromDB();
         int nv = this.controller.queryCountVertices()[0];
         int ne = this.controller.queryCountEdges()[0];
+        int ns = this.controller.queryCountServers()[0];
+        int nr = this.controller.queryCountRequests()[0];
         Platform.runLater(() -> {
           this.btn_prob     .setDisable(true);
+          this.btn_prob     .setText("*in-instance problem*");
+          this.prob = "*in-instance problem*";
           this.btn_road     .setDisable(true);
+          this.btn_road     .setText("*in-instance road network*");
+          this.road = "*in-instance road network*";
           this.btn_gtree    .setDisable(false);
           this.btn_stop     .setDisable(false);
           this.tf_class     .setDisable(false);
           this.tf_t0        .setDisable(false);
           this.tf_t1        .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
-          this.lbl_status   .setText("Loaded Jargo instance (#vertices="+nv+"; #edges="+ne+")");
+          this.lbl_status   .setText("Loaded Jargo instance (#vertices="+nv+"; #edges="+ne+") (#servers="+ns+"; #requests="+nr+")");
           this.drawRoadNetwork();
         });
       } catch (SQLException se) {
@@ -204,16 +217,40 @@ void actionLoad(ActionEvent e) {
 
 \subsection{\texttt{actionRoad(1)}}
 <<actionRoad(1)>>=
-void actionRoad(ActionEvent e) {
+void actionRoad(final ActionEvent e) {
+  boolean state_btn_gtree = this.btn_gtree.isDisabled();
+  this.btn_road     .setDisable(true);
+  this.btn_gtree    .setDisable(true);
+  this.btn_stop     .setDisable(true);
+  this.tf_class     .setDisable(true);
+  this.tf_t0        .setDisable(true);
+  this.tf_t1        .setDisable(true);
+  this.circ_status  .setFill(C_WARN);
+  this.lbl_status   .setText("Select *.rnet...");
   FileChooser fc = new FileChooser();
   fc.getExtensionFilters().addAll(new ExtensionFilter("Road network *.rnet", "*.rnet"));
   File road = fc.showOpenDialog(this.stage);
   if (road != null) {
     this.road = road.toString();
+    this.lbl_status.setText("Load '"+this.road+"'...");
     CompletableFuture.runAsync(() -> {
       try {
         this.controller.loadRoadNetworkFromFile(this.road);
+        int nv = this.controller.queryCountVertices()[0];
+        int ne = this.controller.queryCountEdges()[0];
         Platform.runLater(() -> {
+          this.btn_gtree    .setDisable(state_btn_gtree);
+          this.btn_stop     .setDisable(false);
+          this.btn_road     .setText(road.getName());
+          if (this.gtree != null) {
+            this.btn_prob   .setDisable(false);
+          }
+          this.tf_class     .setDisable(false);
+          this.tf_t0        .setDisable(false);
+          this.tf_t1        .setDisable(false);
+          this.circ_status  .setFill(C_SUCCESS);
+          this.lbl_status   .setText("Loaded "+road.getName()+" (#vertices="+nv+"; #edges="+ne+")");
+          this.drawRoadNetwork();
         });
       } catch (FileNotFoundException fe) {
         System.err.println("Failed: "+fe.toString());
@@ -230,7 +267,7 @@ void actionRoad(ActionEvent e) {
 
 \subsection{\texttt{actionGtree(1)}}
 <<actionGtree(1)>>=
-void actionGtree(ActionEvent e) {
+void actionGtree(final ActionEvent e) {
   boolean state_btn_prob = this.btn_prob.isDisabled();
   boolean state_btn_road = this.btn_road.isDisabled();
   this.btn_prob     .setDisable(true);
@@ -247,16 +284,20 @@ void actionGtree(ActionEvent e) {
       this.controller.closeGtree();
     }
     this.gtree = gt.toString();
-    this.lbl_status.setText("/Load '"+this.gtree+"'...");
+    this.lbl_status.setText("Load '"+this.gtree+"'...");
     CompletableFuture.runAsync(() -> {
       try {
         this.controller.loadGtree(this.gtree);
         Platform.runLater(() -> {
           this.btn_prob     .setDisable(state_btn_prob);
           this.btn_road     .setDisable(state_btn_road);
-          this.btn_client   .setDisable(false);
           this.btn_stop     .setDisable(false);
-          this.btn_gtree    .setDisable(false);
+          if (this.road != null && this.prob == null) {
+            this.btn_prob   .setDisable(false);
+          }
+          if (this.road != null && this.prob != null) {
+            this.btn_client .setDisable(false);
+          }
           this.btn_gtree    .setText(gt.getName());
           this.circ_status  .setFill(C_SUCCESS);
           this.lbl_status   .setText("Loaded "+gt.getName());
@@ -279,17 +320,25 @@ void actionGtree(ActionEvent e) {
 
 \subsection{\texttt{actionProb}(1)}
 <<actionProb(1)>>=
-void actionProb(ActionEvent e) {
+void actionProb(final ActionEvent e) {
+  this.btn_prob     .setDisable(true);
+  this.circ_status  .setFill(C_WARN);
+  this.lbl_status   .setText("Select *.instance...");
   FileChooser fc = new FileChooser();
   fc.getExtensionFilters().addAll(new ExtensionFilter("Problem Instance *.instance", "*.instance"));
-  File prob = fc.showOpenDialog(this.stage);
-  if (prob != null) {
-    this.prob = prob.toString();
+  File pb = fc.showOpenDialog(this.stage);
+  if (pb != null) {
+    this.prob = pb.toString();
+    this.lbl_status.setText("Load '"+this.prob+"'...");
     CompletableFuture.runAsync(() -> {
       try {
         this.controller.loadProblem(this.prob);
+        int ns = this.controller.queryCountServers()[0];
+        int nr = this.controller.queryCountRequests()[0];
         Platform.runLater(() -> {
-
+          this.btn_client   .setDisable(false);
+          this.circ_status  .setFill(C_SUCCESS);
+          this.lbl_status   .setText("Loaded "+pb.getName()+"(#servers="+ns+"; #requests="+nr+")");
         });
       } catch (FileNotFoundException fe) {
         System.err.println("File not found: "+fe.toString());
@@ -318,9 +367,84 @@ void actionProb(ActionEvent e) {
   }
 }
 @
+
+\subsection{\texttt{actionClient}(1)}
+<<actionClient(1)>>=
+void actionClient(final ActionEvent e) {
+  this.btn_client   .setDisable(true);
+  this.circ_status  .setFill(C_WARN);
+  this.lbl_status   .setText("Select *.jar...");
+  FileChooser fc = new FileChooser();
+  fc.getExtensionFilters().addAll(new ExtensionFilter("Client *.jar", "*.jar"));
+  File cj = fc.showOpenDialog(this.stage);
+  if (cj != null) {
+    this.jar = cj.toString();
+    this.btn_client   .setText(cj.getName());
+    this.btn_startseq .setDisable(false);
+    this.btn_startreal.setDisable(false);
+    this.circ_status  .setFill(C_SUCCESS);
+    this.lbl_status   .setText("Loaded "+cj.getName());
+  }
+}
+@
+
+\subsection{\texttt{actionStartSequential}(1)}
+<<actionStartSequential(1)>>=
+void actionStartSequential(final ActionEvent e) {
+  this.jarclass = this.tf_class.getText();
+  if ("".equals(this.jarclass)) {
+    System.err.println("Class empty!");
+    return;
+  }
+  this.circ_status  .setFill(C_WARN);
+  this.lbl_status   .setText("Loading '"+this.jarclass+"'...");
+  try {
+    URLClassLoader loader = new URLClassLoader(new URL[] {new URL("file://"+this.jar)},
+        this.getClass().getClassLoader());
+    Class<?> tempclass = Class.forName(this.jarclass, true, loader);
+    Constructor<?> tempcstor = tempclass.getDeclaredConstructor();
+    this.client = (Client) tempcstor.newInstance();
+    this.circ_status  .setFill(C_SUCCESS);
+    this.lbl_status   .setText("Simulation started.");
+    CompletableFuture.runAsync(() -> {
+      this.controller.registerClient(this.client);
+      this.client.registerRoadNetwork();
+      this.client.registerUsers();
+      try {
+        this.client.loadGtree(this.gtree);
+      } catch (FileNotFoundException fe) {
+        System.err.println(e.toString());
+        return;
+      }
+      this.controller.setClockStart(Integer.parseInt(this.tf_t0.getText()));
+      this.controller.setClockEnd(Integer.parseInt(this.tf_t1.getText()));
+      this.controller.startSequential((status) -> {
+        Platform.runLater(() -> {
+          this.lbl_status.setText("Simulation "+(status ? "ended." : "failed."));
+        });
+      });
+    });
+  } catch (MalformedURLException
+      | ClassNotFoundException
+      | NoSuchMethodException
+      | InstantiationException
+      | IllegalAccessException
+      | InvocationTargetException me) {
+    System.err.println(me.toString());
+    return;
+  }
+}
+@ %def actionStartSequential
+
+\subsection{\texttt{actionStartRealtime}(1)}
+<<actionStartRealtime(1)>>=
+void actionStartRealtime(final ActionEvent e) {
+}
+@ %def actionStartRealtime
+
 \subsection{\texttt{actionStop}(1)}
 <<actionStop(1)>>=
-void actionStop(ActionEvent e) {
+void actionStop(final ActionEvent e) {
   if (this.controller != null) {
     this.btn_stop     .setDisable(true);
     this.circ_status.setFill(C_WARN);
@@ -334,13 +458,25 @@ void actionStop(ActionEvent e) {
           this.btn_load     .setDisable(false);
           this.btn_stop     .setDisable(false);
           this.btn_prob     .setDisable(true);
+          this.btn_prob     .setText("(empty problem instance)");
+          this.prob = null;
           this.btn_road     .setDisable(true);
+          this.btn_road     .setText("(empty road network)");
+          this.road = null;
           this.btn_gtree    .setDisable(true);
-          this.btn_gtree    .setText("empty G-tree");
+          this.btn_gtree    .setText("(empty G-tree)");
+          this.gtree = null;
           this.btn_client   .setDisable(true);
+          this.btn_client   .setText("(empty client)");
+          this.client = null;
+          this.jar = null;
+          this.jarclass = null;
           this.tf_class     .setDisable(true);
           this.tf_t0        .setDisable(true);
           this.tf_t1        .setDisable(true);
+          this.btn_startseq .setDisable(true);
+          this.btn_startreal.setDisable(true);
+          this.db = null;
           this.container_canvas.setContent(null);
           this.circ_status.setFill(C_SUCCESS);
           this.lbl_status.setText("Closed instance.");

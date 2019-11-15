@@ -32,13 +32,13 @@ public class Controller {
   private Tools tools = new Tools();
   private Client client;
   private Map<Integer, Boolean> lu_seen = new HashMap<Integer, Boolean>();
-  private final int clockstart =
+  private int clockstart =
       Integer.parseInt(System.getProperty("jargors.controller.clockstart", "0"));
-  private final int clockend =
+  private int clockend =
       Integer.parseInt(System.getProperty("jargors.controller.clockend", "1800"));
-  private final int request_timeout =
+  private int request_timeout =
       Integer.parseInt(System.getProperty("jargors.controller.request_timeout", "30"));
-  private final int queue_timeout =
+  private int queue_timeout =
       Integer.parseInt(System.getProperty("jargors.controller.queue_timeout", "30"));
   private int world_time = 0;
   private int loop_delay = 0;
@@ -102,6 +102,7 @@ public class Controller {
     } catch (ClientException e) {
       System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientException: %s",
           this.world_time, e.toString());
+      e.printStackTrace();
     } catch (ClientFatalException e) {
       System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientFatalException: %s",
           this.world_time, e.toString());
@@ -134,7 +135,6 @@ public class Controller {
   };
   public Controller() {
     this.storage = new Storage();
-    this.storage.setRequestTimeout(request_timeout);
     this.communicator = new Communicator();
     this.communicator.registerStorage(storage);
     this.communicator.registerController(this);
@@ -334,10 +334,23 @@ public class Controller {
   public int getSimulationWorldTime() {
            return this.world_time;
          }
+  public void setClockStart(final int t) {
+           this.clockstart = t;
+         }
+  public void setClockEnd(final int t) {
+           this.clockend = t;
+         }
+  public void setRequestTimeout(final int t) {
+           this.request_timeout = t;
+         }
+  public void setQueueTimeout(final int t) {
+           this.queue_timeout = t;
+         }
   public void setEngineUpdatePeriod(final int t) {
            this.engine_update_period = t;
          }
   public void startRealtime(final Consumer<Boolean> app_cb) {
+           this.storage.forwardRequestTimeout(request_timeout);
            this.world_time = this.clockstart;
 
            int simulation_duration = (this.clockend - this.clockstart);
@@ -374,6 +387,7 @@ public class Controller {
            }, simulation_duration, TimeUnit.SECONDS);
          }
   public void startSequential(final Consumer<Boolean> app_cb) {
+           this.storage.forwardRequestTimeout(request_timeout);
            this.world_time = this.clockstart;
            while (this.world_time < this.clockend) {
              this.ClockLoop.run();  // this.world_time gets incremented here!

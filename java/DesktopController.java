@@ -8,6 +8,11 @@ import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
 import java.util.concurrent.CompletableFuture;
+import java.net.URLClassLoader;
+import java.net.URL;
+import java.net.MalformedURLException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -56,6 +61,8 @@ public class DesktopController {
   private String gtree = null;
   private String prob = null;
   private String road = null;
+  private String jar = null;
+  private String jarclass = null;
   private Canvas can_road;
   private GraphicsContext gc = null;
   private double window_height = 0;
@@ -66,16 +73,16 @@ public class DesktopController {
   private int[] mbr = null;
   private double xunit = 0;
   private double yunit = 0;
-  public void actionQuit(ActionEvent e) {
+  public void actionQuit(final ActionEvent e) {
            System.exit(0);
          }
-  public void actionGitHub(ActionEvent e) {
+  public void actionGitHub(final ActionEvent e) {
            // ...
          }
-  public void actionAbout(ActionEvent e) {
+  public void actionAbout(final ActionEvent e) {
            // ...
          }
-  public void actionNew(ActionEvent e) {
+  public void actionNew(final ActionEvent e) {
            this.btn_new      .setDisable(true);
            this.btn_load     .setDisable(true);
            this.btn_stop     .setDisable(true);
@@ -103,7 +110,7 @@ public class DesktopController {
              });
            });
          }
-  public void actionLoad(ActionEvent e) {
+  public void actionLoad(final ActionEvent e) {
            this.btn_new      .setDisable(true);
            this.btn_load     .setDisable(true);
            this.btn_stop     .setDisable(true);
@@ -121,16 +128,22 @@ public class DesktopController {
                  this.controller.loadUsersFromDB();
                  int nv = this.controller.queryCountVertices()[0];
                  int ne = this.controller.queryCountEdges()[0];
+                 int ns = this.controller.queryCountServers()[0];
+                 int nr = this.controller.queryCountRequests()[0];
                  Platform.runLater(() -> {
                    this.btn_prob     .setDisable(true);
+                   this.btn_prob     .setText("*in-instance problem*");
+                   this.prob = "*in-instance problem*";
                    this.btn_road     .setDisable(true);
+                   this.btn_road     .setText("*in-instance road network*");
+                   this.road = "*in-instance road network*";
                    this.btn_gtree    .setDisable(false);
                    this.btn_stop     .setDisable(false);
                    this.tf_class     .setDisable(false);
                    this.tf_t0        .setDisable(false);
                    this.tf_t1        .setDisable(false);
                    this.circ_status  .setFill(C_SUCCESS);
-                   this.lbl_status   .setText("Loaded Jargo instance (#vertices="+nv+"; #edges="+ne+")");
+                   this.lbl_status   .setText("Loaded Jargo instance (#vertices="+nv+"; #edges="+ne+") (#servers="+ns+"; #requests="+nr+")");
                    this.drawRoadNetwork();
                  });
                } catch (SQLException se) {
@@ -145,7 +158,7 @@ public class DesktopController {
              this.btn_stop     .setDisable(false);
            }
          }
-  public void actionGtree(ActionEvent e) {
+  public void actionGtree(final ActionEvent e) {
            boolean state_btn_prob = this.btn_prob.isDisabled();
            boolean state_btn_road = this.btn_road.isDisabled();
            this.btn_prob     .setDisable(true);
@@ -162,16 +175,20 @@ public class DesktopController {
                this.controller.closeGtree();
              }
              this.gtree = gt.toString();
-             this.lbl_status.setText("/Load '"+this.gtree+"'...");
+             this.lbl_status.setText("Load '"+this.gtree+"'...");
              CompletableFuture.runAsync(() -> {
                try {
                  this.controller.loadGtree(this.gtree);
                  Platform.runLater(() -> {
                    this.btn_prob     .setDisable(state_btn_prob);
                    this.btn_road     .setDisable(state_btn_road);
-                   this.btn_client   .setDisable(false);
                    this.btn_stop     .setDisable(false);
-                   this.btn_gtree    .setDisable(false);
+                   if (this.road != null && this.prob == null) {
+                     this.btn_prob   .setDisable(false);
+                   }
+                   if (this.road != null && this.prob != null) {
+                     this.btn_client .setDisable(false);
+                   }
                    this.btn_gtree    .setText(gt.getName());
                    this.circ_status  .setFill(C_SUCCESS);
                    this.lbl_status   .setText("Loaded "+gt.getName());
@@ -190,16 +207,40 @@ public class DesktopController {
              this.lbl_status   .setText("Cancelled load gtree.");
            }
          }
-  public void actionRoad(ActionEvent e) {
+  public void actionRoad(final ActionEvent e) {
+           boolean state_btn_gtree = this.btn_gtree.isDisabled();
+           this.btn_road     .setDisable(true);
+           this.btn_gtree    .setDisable(true);
+           this.btn_stop     .setDisable(true);
+           this.tf_class     .setDisable(true);
+           this.tf_t0        .setDisable(true);
+           this.tf_t1        .setDisable(true);
+           this.circ_status  .setFill(C_WARN);
+           this.lbl_status   .setText("Select *.rnet...");
            FileChooser fc = new FileChooser();
            fc.getExtensionFilters().addAll(new ExtensionFilter("Road network *.rnet", "*.rnet"));
            File road = fc.showOpenDialog(this.stage);
            if (road != null) {
              this.road = road.toString();
+             this.lbl_status.setText("Load '"+this.road+"'...");
              CompletableFuture.runAsync(() -> {
                try {
                  this.controller.loadRoadNetworkFromFile(this.road);
+                 int nv = this.controller.queryCountVertices()[0];
+                 int ne = this.controller.queryCountEdges()[0];
                  Platform.runLater(() -> {
+                   this.btn_gtree    .setDisable(state_btn_gtree);
+                   this.btn_stop     .setDisable(false);
+                   this.btn_road     .setText(road.getName());
+                   if (this.gtree != null) {
+                     this.btn_prob   .setDisable(false);
+                   }
+                   this.tf_class     .setDisable(false);
+                   this.tf_t0        .setDisable(false);
+                   this.tf_t1        .setDisable(false);
+                   this.circ_status  .setFill(C_SUCCESS);
+                   this.lbl_status   .setText("Loaded "+road.getName()+" (#vertices="+nv+"; #edges="+ne+")");
+                   this.drawRoadNetwork();
                  });
                } catch (FileNotFoundException fe) {
                  System.err.println("Failed: "+fe.toString());
@@ -212,17 +253,25 @@ public class DesktopController {
              });
            }
          }
-  public void actionProb(ActionEvent e) {
+  public void actionProb(final ActionEvent e) {
+           this.btn_prob     .setDisable(true);
+           this.circ_status  .setFill(C_WARN);
+           this.lbl_status   .setText("Select *.instance...");
            FileChooser fc = new FileChooser();
            fc.getExtensionFilters().addAll(new ExtensionFilter("Problem Instance *.instance", "*.instance"));
-           File prob = fc.showOpenDialog(this.stage);
-           if (prob != null) {
-             this.prob = prob.toString();
+           File pb = fc.showOpenDialog(this.stage);
+           if (pb != null) {
+             this.prob = pb.toString();
+             this.lbl_status.setText("Load '"+this.prob+"'...");
              CompletableFuture.runAsync(() -> {
                try {
                  this.controller.loadProblem(this.prob);
+                 int ns = this.controller.queryCountServers()[0];
+                 int nr = this.controller.queryCountRequests()[0];
                  Platform.runLater(() -> {
-
+                   this.btn_client   .setDisable(false);
+                   this.circ_status  .setFill(C_SUCCESS);
+                   this.lbl_status   .setText("Loaded "+pb.getName()+"(#servers="+ns+"; #requests="+nr+")");
                  });
                } catch (FileNotFoundException fe) {
                  System.err.println("File not found: "+fe.toString());
@@ -250,7 +299,23 @@ public class DesktopController {
              });
            }
          }
-  public void actionStop(ActionEvent e) {
+  public void actionClient(final ActionEvent e) {
+           this.btn_client   .setDisable(true);
+           this.circ_status  .setFill(C_WARN);
+           this.lbl_status   .setText("Select *.jar...");
+           FileChooser fc = new FileChooser();
+           fc.getExtensionFilters().addAll(new ExtensionFilter("Client *.jar", "*.jar"));
+           File cj = fc.showOpenDialog(this.stage);
+           if (cj != null) {
+             this.jar = cj.toString();
+             this.btn_client   .setText(cj.getName());
+             this.btn_startseq .setDisable(false);
+             this.btn_startreal.setDisable(false);
+             this.circ_status  .setFill(C_SUCCESS);
+             this.lbl_status   .setText("Loaded "+cj.getName());
+           }
+         }
+  public void actionStop(final ActionEvent e) {
            if (this.controller != null) {
              this.btn_stop     .setDisable(true);
              this.circ_status.setFill(C_WARN);
@@ -264,13 +329,25 @@ public class DesktopController {
                    this.btn_load     .setDisable(false);
                    this.btn_stop     .setDisable(false);
                    this.btn_prob     .setDisable(true);
+                   this.btn_prob     .setText("(empty problem instance)");
+                   this.prob = null;
                    this.btn_road     .setDisable(true);
+                   this.btn_road     .setText("(empty road network)");
+                   this.road = null;
                    this.btn_gtree    .setDisable(true);
-                   this.btn_gtree    .setText("empty G-tree");
+                   this.btn_gtree    .setText("(empty G-tree)");
+                   this.gtree = null;
                    this.btn_client   .setDisable(true);
+                   this.btn_client   .setText("(empty client)");
+                   this.client = null;
+                   this.jar = null;
+                   this.jarclass = null;
                    this.tf_class     .setDisable(true);
                    this.tf_t0        .setDisable(true);
                    this.tf_t1        .setDisable(true);
+                   this.btn_startseq .setDisable(true);
+                   this.btn_startreal.setDisable(true);
+                   this.db = null;
                    this.container_canvas.setContent(null);
                    this.circ_status.setFill(C_SUCCESS);
                    this.lbl_status.setText("Closed instance.");
@@ -283,6 +360,52 @@ public class DesktopController {
            } else {
              this.lbl_status.setText("Ready.");
            }
+         }
+  public void actionStartSequential(final ActionEvent e) {
+           this.jarclass = this.tf_class.getText();
+           if ("".equals(this.jarclass)) {
+             System.err.println("Class empty!");
+             return;
+           }
+           this.circ_status  .setFill(C_WARN);
+           this.lbl_status   .setText("Loading '"+this.jarclass+"'...");
+           try {
+             URLClassLoader loader = new URLClassLoader(new URL[] {new URL("file://"+this.jar)},
+                 this.getClass().getClassLoader());
+             Class<?> tempclass = Class.forName(this.jarclass, true, loader);
+             Constructor<?> tempcstor = tempclass.getDeclaredConstructor();
+             this.client = (Client) tempcstor.newInstance();
+             this.circ_status  .setFill(C_SUCCESS);
+             this.lbl_status   .setText("Simulation started.");
+             CompletableFuture.runAsync(() -> {
+               this.controller.registerClient(this.client);
+               this.client.registerRoadNetwork();
+               this.client.registerUsers();
+               try {
+                 this.client.loadGtree(this.gtree);
+               } catch (FileNotFoundException fe) {
+                 System.err.println(e.toString());
+                 return;
+               }
+               this.controller.setClockStart(Integer.parseInt(this.tf_t0.getText()));
+               this.controller.setClockEnd(Integer.parseInt(this.tf_t1.getText()));
+               this.controller.startSequential((status) -> {
+                 Platform.runLater(() -> {
+                   this.lbl_status.setText("Simulation "+(status ? "ended." : "failed."));
+                 });
+               });
+             });
+           } catch (MalformedURLException
+               | ClassNotFoundException
+               | NoSuchMethodException
+               | InstantiationException
+               | IllegalAccessException
+               | InvocationTargetException me) {
+             System.err.println(me.toString());
+             return;
+           }
+         }
+  public void actionStartRealtime(final ActionEvent e) {
          }
   public void actionRecordMousePress(MouseEvent e) {
            this.mouse_x = e.getX();
