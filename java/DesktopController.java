@@ -4,6 +4,7 @@ import com.github.jargors.Client;
 import com.github.jargors.Tools;
 import com.github.jargors.exceptions.*;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
@@ -13,6 +14,10 @@ import java.net.URL;
 import java.net.MalformedURLException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipEntry;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -139,9 +144,6 @@ public class DesktopController {
                    this.road = "*in-instance road network*";
                    this.btn_gtree    .setDisable(false);
                    this.btn_stop     .setDisable(false);
-                   this.tf_class     .setDisable(false);
-                   this.tf_t0        .setDisable(false);
-                   this.tf_t1        .setDisable(false);
                    this.circ_status  .setFill(C_SUCCESS);
                    this.lbl_status   .setText("Loaded Jargo instance (#vertices="+nv+"; #edges="+ne+") (#servers="+ns+"; #requests="+nr+")");
                    this.drawRoadNetwork();
@@ -269,6 +271,7 @@ public class DesktopController {
                  int ns = this.controller.queryCountServers()[0];
                  int nr = this.controller.queryCountRequests()[0];
                  Platform.runLater(() -> {
+                   this.btn_prob     .setText(pb.getName());
                    this.btn_client   .setDisable(false);
                    this.circ_status  .setFill(C_SUCCESS);
                    this.lbl_status   .setText("Loaded "+pb.getName()+"(#servers="+ns+"; #requests="+nr+")");
@@ -308,7 +311,32 @@ public class DesktopController {
            File cj = fc.showOpenDialog(this.stage);
            if (cj != null) {
              this.jar = cj.toString();
+
+             try {
+         /*https://stackoverflow.com/questions/15720822/how-to-get-names-of-classes-inside-a-jar-file*/
+         List<String> classNames = new ArrayList<String>();
+         ZipInputStream zip = new ZipInputStream(new FileInputStream(this.jar));
+         for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
+           if (!entry.isDirectory() && entry.getName().endsWith(".class")) {
+             String className = entry.getName().replace('/', '.');
+             classNames.add(className.substring(0, className.length() - ".class".length()));
+           }
+         }
+         /******/
+               if (classNames.size() == 0) {
+                 System.err.println("Bad jar?");
+                 return;
+               }
+               this.jarclass = classNames.get(0);
+             } catch (IOException ie) {
+               System.err.println(ie.toString());
+               return;
+             }
+             this.tf_class.setText(this.jarclass);
              this.btn_client   .setText(cj.getName());
+             this.tf_class     .setDisable(false);
+             this.tf_t0        .setDisable(false);
+             this.tf_t1        .setDisable(false);
              this.btn_startseq .setDisable(false);
              this.btn_startreal.setDisable(false);
              this.circ_status  .setFill(C_SUCCESS);
@@ -343,8 +371,11 @@ public class DesktopController {
                    this.jar = null;
                    this.jarclass = null;
                    this.tf_class     .setDisable(true);
+                   this.tf_class     .setText("");
                    this.tf_t0        .setDisable(true);
+                   this.tf_t0        .setText("");
                    this.tf_t1        .setDisable(true);
+                   this.tf_t1        .setText("");
                    this.btn_startseq .setDisable(true);
                    this.btn_startreal.setDisable(true);
                    this.db = null;
@@ -367,6 +398,15 @@ public class DesktopController {
              System.err.println("Class empty!");
              return;
            }
+           if ("".equals(this.tf_t0.getText())) {
+             this.tf_t0.setText("0");
+           }
+           if ("".equals(this.tf_t1.getText())) {
+             this.tf_t1.setText("1800");
+           }
+           this.tf_class     .setDisable(true);
+           this.tf_t0        .setDisable(true);
+           this.tf_t1        .setDisable(true);
            this.circ_status  .setFill(C_WARN);
            this.lbl_status   .setText("Loading '"+this.jarclass+"'...");
            try {
@@ -377,18 +417,18 @@ public class DesktopController {
              this.client = (Client) tempcstor.newInstance();
              this.circ_status  .setFill(C_SUCCESS);
              this.lbl_status   .setText("Simulation started.");
+             this.controller.registerClient(this.client);
+             this.client.registerRoadNetwork();
+             this.client.registerUsers();
+             try {
+               this.client.loadGtree(this.gtree);
+             } catch (FileNotFoundException fe) {
+               System.err.println(e.toString());
+               return;
+             }
+             this.controller.setClockStart(Integer.parseInt(this.tf_t0.getText()));
+             this.controller.setClockEnd(Integer.parseInt(this.tf_t1.getText()));
              CompletableFuture.runAsync(() -> {
-               this.controller.registerClient(this.client);
-               this.client.registerRoadNetwork();
-               this.client.registerUsers();
-               try {
-                 this.client.loadGtree(this.gtree);
-               } catch (FileNotFoundException fe) {
-                 System.err.println(e.toString());
-                 return;
-               }
-               this.controller.setClockStart(Integer.parseInt(this.tf_t0.getText()));
-               this.controller.setClockEnd(Integer.parseInt(this.tf_t1.getText()));
                this.controller.startSequential((status) -> {
                  Platform.runLater(() -> {
                    this.lbl_status.setText("Simulation "+(status ? "ended." : "failed."));
