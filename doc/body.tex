@@ -1901,6 +1901,7 @@ To list base distances $d$ of all servers:
 \nwixlogsorted{c}{{Admin: saveBackup(1)}{NW3jCmQJ-4Yjzpx-1}{\nwixu{NW1GVbai-2u8vSA-3}\nwixd{NW3jCmQJ-4Yjzpx-1}}}%
 \nwixlogsorted{c}{{Admin: setupDriver(0)}{NW3jCmQJ-4E8cu3-1}{\nwixu{NW1GVbai-Oyob-3}\nwixd{NW3jCmQJ-4E8cu3-1}}}%
 \nwixlogsorted{c}{{apply(3)}{NW24od5B-14vbUh-1}{\nwixu{NW1GVbai-1sp72R-3}\nwixd{NW24od5B-14vbUh-1}}}%
+\nwixlogsorted{c}{{Check request time window violation}{NW3NfwZQ-1pQbuw-1}{\nwixu{NW3NfwZQ-2B99VS-1}\nwixu{NW3NfwZQ-1O0X6W-1}\nwixd{NW3NfwZQ-1pQbuw-1}}}%
 \nwixlogsorted{c}{{Check server time window violation}{NW3NfwZQ-3GUcPe-1}{\nwixd{NW3NfwZQ-3GUcPe-1}\nwixu{NW3NfwZQ-MMhxz-1}\nwixu{NW3NfwZQ-3yF6ns-1}\nwixu{NW3NfwZQ-PxyQL-1}}}%
 \nwixlogsorted{c}{{Client.java}{NW2q3QGT-bpC9O-1}{\nwixd{NW2q3QGT-bpC9O-1}}}%
 \nwixlogsorted{c}{{Client.java preamble}{NW2q3QGT-xBgX1-1}{\nwixu{NW2q3QGT-bpC9O-1}\nwixd{NW2q3QGT-xBgX1-1}\nwixd{NW2q3QGT-xBgX1-2}}}%
@@ -5407,6 +5408,7 @@ for (int j = 0; j < (sched.length - 2); j += 3) \{
       final int[] output = DBFetch(conn, "S86", 2, Lj);
       final int tp = output[0];
       final int td = output[1];
+      \LA{}Check request time window violation~{\nwtagstyle{}\subpageref{NW3NfwZQ-1pQbuw-1}}\RA{}
       final int rq = this.lu_users.get(Lj)[1];
       cache.put(Lj, new int[] \{ rq, tp, td \});
       this.PSAdd(pS140, tp, td, Lj);
@@ -5437,6 +5439,7 @@ for (int j = 0; j < (sched.length - 2); j += 3) \{
         if (Lj == sched[(k + 2)]) \{
           final int td = sched[(k + 0)];
           final int vd = sched[(k + 1)];
+          \LA{}Check request time window violation~{\nwtagstyle{}\subpageref{NW3NfwZQ-1pQbuw-1}}\RA{}
           cache. put(Lj, new int[] \{ rq, tp, td \});
           cache2.put(Lj, new int[] \{ vp, vd \});
           break;
@@ -5446,6 +5449,7 @@ for (int j = 0; j < (sched.length - 2); j += 3) \{
       final int[] output = this.DBFetch(conn, "S86", 2, Lj);
       final int tp = output[0];
       final int td = output[1];
+      \LA{}Check request time window violation~{\nwtagstyle{}\subpageref{NW3NfwZQ-1pQbuw-1}}\RA{}
       this.PSAdd(pS140, tp, td, Lj);
       cache.put(Lj, new int[] \{ rq, tp, td \});
     \}
@@ -5459,9 +5463,18 @@ this.PSSubmit(pS140);
 final int sl = lu_users.get(sid)[3];
 if (route[(route.length - 2)] > sl) \{
   throw new TimeWindowViolation("Route end (t="+route[(route.length - 2)]+") "
-      +"after late window (t="+sl+")");
+      +"after late window (t="+sl+", sid="+sid+")");
 \}
 \nwidentuses{\\{{end}{end}}}\nwindexuse{end}{end}{NW3NfwZQ-3GUcPe-1}\nwendcode{}\nwbegindocs{44}\nwdocspar
+
+\subsection{Check request time window violation}
+\nwenddocs{}\nwbegincode{45}\sublabel{NW3NfwZQ-1pQbuw-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-1pQbuw-1}}}\moddef{Check request time window violation~{\nwtagstyle{}\subpageref{NW3NfwZQ-1pQbuw-1}}}\endmoddef\nwused{\\{NW3NfwZQ-2B99VS-1}\\{NW3NfwZQ-1O0X6W-1}}
+final int rl = lu_users.get(Lj)[3];
+if (td > rl) \{
+  throw new TimeWindowViolation("Drop-off (t="+td+") "
+      +"after late window (t="+rl+", rid="+Lj+")");
+\}
+\nwendcode{}\nwbegindocs{46}\nwdocspar
 
 \section{Methods}
 
@@ -5491,25 +5504,25 @@ precision} as above.
 or {\tt{}SQLException} for other database failures.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{45}\sublabel{NW3NfwZQ-1gwy3q-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-1gwy3q-1}}}\moddef{Write: DBAddNewVertex(3)~{\nwtagstyle{}\subpageref{NW3NfwZQ-1gwy3q-1}}}\endmoddef\nwalsodefined{\\{NW3NfwZQ-1gwy3q-2}\\{NW3NfwZQ-1gwy3q-3}}\nwused{\\{NW1GVbai-Oyob-2}}
+\nwenddocs{}\nwbegincode{47}\sublabel{NW3NfwZQ-1gwy3q-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-1gwy3q-1}}}\moddef{Write: DBAddNewVertex(3)~{\nwtagstyle{}\subpageref{NW3NfwZQ-1gwy3q-1}}}\endmoddef\nwalsodefined{\\{NW3NfwZQ-1gwy3q-2}\\{NW3NfwZQ-1gwy3q-3}}\nwused{\\{NW1GVbai-Oyob-2}}
 void DBAddNewVertex(final int v, final int lng, final int lat)
 throws DuplicateVertexException, SQLException \{
 \nwindexdefn{DBAddNewVertex}{DBAddNewVertex}{NW3NfwZQ-1gwy3q-1}\eatline
-\nwidentdefs{\\{{DBAddNewVertex}{DBAddNewVertex}}}\nwendcode{}\nwbegindocs{46}{\small If only {\tt{}\protect\nwindexuse{DBAddNewVertex}{DBAddNewVertex}{NW3NfwZQ-1gwy3q-1}DBAddNewVertex}(3) is ever used to write vertices into Table
+\nwidentdefs{\\{{DBAddNewVertex}{DBAddNewVertex}}}\nwendcode{}\nwbegindocs{48}{\small If only {\tt{}\protect\nwindexuse{DBAddNewVertex}{DBAddNewVertex}{NW3NfwZQ-1gwy3q-1}DBAddNewVertex}(3) is ever used to write vertices into Table
 V, we can be sure that any vertex appearing in Table V also appears in
 {\tt{}lu{\char95}vertices}.  To check if the vertex in param. 1 is a duplicate entry, it
 is sufficient to check {\tt{}lu{\char95}vertices}.}
-\nwenddocs{}\nwbegincode{47}\sublabel{NW3NfwZQ-1gwy3q-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-1gwy3q-2}}}\moddef{Write: DBAddNewVertex(3)~{\nwtagstyle{}\subpageref{NW3NfwZQ-1gwy3q-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{49}\sublabel{NW3NfwZQ-1gwy3q-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-1gwy3q-2}}}\moddef{Write: DBAddNewVertex(3)~{\nwtagstyle{}\subpageref{NW3NfwZQ-1gwy3q-1}}}\plusendmoddef
   if (this.lu_vertices.containsKey(v)) \{
     throw new DuplicateVertexException("Vertex "+v+" already exists.");
   \}
-\nwendcode{}\nwbegindocs{48}\nwdocspar
+\nwendcode{}\nwbegindocs{50}\nwdocspar
 {\small All we do is use statement {\tt{}\protect\nwindexuse{S0}{S0}{NW3jCmQJ-9czRY-1}S0} to submit the insert statement
 against Table V. By putting {\tt{}conn} in the resources of the outer try, we
 ensure {\tt{}conn} gets closed in the end no matter what happens. This pattern
 will appear in other write methods. If all succeeds, we put the vertex into
 {\tt{}lu{\char95}vertices}.}
-\nwenddocs{}\nwbegincode{49}\sublabel{NW3NfwZQ-1gwy3q-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-1gwy3q-3}}}\moddef{Write: DBAddNewVertex(3)~{\nwtagstyle{}\subpageref{NW3NfwZQ-1gwy3q-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{51}\sublabel{NW3NfwZQ-1gwy3q-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-1gwy3q-3}}}\moddef{Write: DBAddNewVertex(3)~{\nwtagstyle{}\subpageref{NW3NfwZQ-1gwy3q-1}}}\plusendmoddef
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW3jCmQJ-JT1v9-1}}\RA{}) \{
     try \{
       PreparedStatement pS0 = this.PS(conn, "S0");
@@ -5525,7 +5538,7 @@ will appear in other write methods. If all succeeds, we put the vertex into
   \}
   this.lu_vertices.put(v, new int[] \{ lng, lat \});
 \}
-\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S0}{S0}}}\nwindexuse{PS}{PS}{NW3NfwZQ-1gwy3q-3}\nwindexuse{PSAdd}{PSAdd}{NW3NfwZQ-1gwy3q-3}\nwindexuse{PSSubmit}{PSSubmit}{NW3NfwZQ-1gwy3q-3}\nwindexuse{S0}{S0}{NW3NfwZQ-1gwy3q-3}\nwendcode{}\nwbegindocs{50}\nwdocspar
+\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S0}{S0}}}\nwindexuse{PS}{PS}{NW3NfwZQ-1gwy3q-3}\nwindexuse{PSAdd}{PSAdd}{NW3NfwZQ-1gwy3q-3}\nwindexuse{PSSubmit}{PSSubmit}{NW3NfwZQ-1gwy3q-3}\nwindexuse{S0}{S0}{NW3NfwZQ-1gwy3q-3}\nwendcode{}\nwbegindocs{52}\nwdocspar
 
 \subsection{\texttt{DBAddNewEdge}(4)}
 \begin{tabular}{p{\textwidth}}
@@ -5550,7 +5563,7 @@ Integer {\tt{}nu} (param. 4):&maximum free-flow speed along the edge, in meters 
 {\tt{}SQLException} for other database failures.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{51}\sublabel{NW3NfwZQ-4T48Fl-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-4T48Fl-1}}}\moddef{Write: DBAddNewEdge(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-4T48Fl-1}}}\endmoddef\nwused{\\{NW1GVbai-Oyob-2}}
+\nwenddocs{}\nwbegincode{53}\sublabel{NW3NfwZQ-4T48Fl-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-4T48Fl-1}}}\moddef{Write: DBAddNewEdge(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-4T48Fl-1}}}\endmoddef\nwused{\\{NW1GVbai-Oyob-2}}
 void DBAddNewEdge(final int v1, final int v2, final int dd, final int nu)
 throws DuplicateEdgeException, SQLException \{
   if (this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2)) \{
@@ -5575,7 +5588,9 @@ throws DuplicateEdgeException, SQLException \{
   this.lu_edges.get(v1).put(v2, new int[] \{ dd, nu \});
 \}
 \nwindexdefn{DBAddNewEdge}{DBAddNewEdge}{NW3NfwZQ-4T48Fl-1}\eatline
-\nwidentdefs{\\{{DBAddNewEdge}{DBAddNewEdge}}}\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S1}{S1}}}\nwindexuse{PS}{PS}{NW3NfwZQ-4T48Fl-1}\nwindexuse{PSAdd}{PSAdd}{NW3NfwZQ-4T48Fl-1}\nwindexuse{PSSubmit}{PSSubmit}{NW3NfwZQ-4T48Fl-1}\nwindexuse{S1}{S1}{NW3NfwZQ-4T48Fl-1}\nwendcode{}\nwbegindocs{52}\nwdocspar
+\nwidentdefs{\\{{DBAddNewEdge}{DBAddNewEdge}}}\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S1}{S1}}}\nwindexuse{PS}{PS}{NW3NfwZQ-4T48Fl-1}\nwindexuse{PSAdd}{PSAdd}{NW3NfwZQ-4T48Fl-1}\nwindexuse{PSSubmit}{PSSubmit}{NW3NfwZQ-4T48Fl-1}\nwindexuse{S1}{S1}{NW3NfwZQ-4T48Fl-1}\nwendcode{}
+
+\nwbegindocs{54}\nwdocspar
 \subsection{\texttt{DBAddNewRequest}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -5605,7 +5620,7 @@ row into Table R, puts an entry into {\tt{}lu{\char95}users} and into {\tt{}lu{\
 {\tt{}SQLException} for other database failures.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{53}\sublabel{NW3NfwZQ-3NS7mW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3NS7mW-1}}}\moddef{Write: DBAddNewRequest(1)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3NS7mW-1}}}\endmoddef\nwalsodefined{\\{NW3NfwZQ-3NS7mW-2}}\nwused{\\{NW1GVbai-Oyob-2}}
+\nwenddocs{}\nwbegincode{55}\sublabel{NW3NfwZQ-3NS7mW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3NS7mW-1}}}\moddef{Write: DBAddNewRequest(1)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3NS7mW-1}}}\endmoddef\nwalsodefined{\\{NW3NfwZQ-3NS7mW-2}}\nwused{\\{NW1GVbai-Oyob-2}}
 void DBAddNewRequest(final int[] u)
 throws DuplicateUserException, SQLException \{
   final int uid = u[0];
@@ -5625,30 +5640,28 @@ throws DuplicateUserException, SQLException \{
     throw e;
   \}
 \nosublabel{NW3NfwZQ-3NS7mW-1-u3}\nwindexdefn{DBAddNewRequest}{DBAddNewRequest}{NW3NfwZQ-3NS7mW-1}\eatline
-\nwidentdefs{\\{{DBAddNewRequest}{DBAddNewRequest}}}\nwendcode{}
-
-\nwbegindocs{54}{\small In the last step, we put $r$ into {\tt{}lu{\char95}users} and put it into
+\nwidentdefs{\\{{DBAddNewRequest}{DBAddNewRequest}}}\nwendcode{}\nwbegindocs{56}{\small In the last step, we put $r$ into {\tt{}lu{\char95}users} and put it into
 {\tt{}lu{\char95}rstatus} with the value set to {\tt{}false} to indicate that it is
 unassigned. When we put it into {\tt{}lu{\char95}users}, we store a cloned array {\tt{}u} as
 the value because we don't want any changes to {\tt{}u} on the caller side showing
 up in our cache (we are considering users to be immutable).}
-\nwenddocs{}\nwbegincode{55}\sublabel{NW3NfwZQ-3NS7mW-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3NS7mW-2}}}\moddef{Write: DBAddNewRequest(1)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3NS7mW-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{57}\sublabel{NW3NfwZQ-3NS7mW-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3NS7mW-2}}}\moddef{Write: DBAddNewRequest(1)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3NS7mW-1}}}\plusendmoddef
   this.lu_users.put(u[0], u.clone());
   this.lu_rstatus.put(u[0], false);
 \}
-\nwendcode{}\nwbegindocs{56}\nwdocspar
+\nwendcode{}\nwbegindocs{58}\nwdocspar
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\tt{}\protect\nwindexuse{addNewRequest}{addNewRequest}{NW3NfwZQ-3DooRA-1}addNewRequest}}(1) wraps {\tt{}\protect\nwindexuse{DBAddNewRequest}{DBAddNewRequest}{NW3NfwZQ-3NS7mW-1}DBAddNewRequest}(1).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{57}\sublabel{NW3NfwZQ-3DooRA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3DooRA-1}}}\moddef{Write: addNewRequest(1)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3DooRA-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-2}}
+\nwenddocs{}\nwbegincode{59}\sublabel{NW3NfwZQ-3DooRA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3DooRA-1}}}\moddef{Write: addNewRequest(1)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3DooRA-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-2}}
 void addNewRequest(final int[] u) throws DuplicateUserException, SQLException \{
   this.storage.DBAddNewRequest(u);
 \}
 \nwindexdefn{addNewRequest}{addNewRequest}{NW3NfwZQ-3DooRA-1}\eatline
-\nwidentdefs{\\{{addNewRequest}{addNewRequest}}}\nwidentuses{\\{{DBAddNewRequest}{DBAddNewRequest}}}\nwindexuse{DBAddNewRequest}{DBAddNewRequest}{NW3NfwZQ-3DooRA-1}\nwendcode{}\nwbegindocs{58}\nwdocspar
+\nwidentdefs{\\{{addNewRequest}{addNewRequest}}}\nwidentuses{\\{{DBAddNewRequest}{DBAddNewRequest}}}\nwindexuse{DBAddNewRequest}{DBAddNewRequest}{NW3NfwZQ-3DooRA-1}\nwendcode{}\nwbegindocs{60}\nwdocspar
 \subsection{\texttt{DBAddNewServer}(2)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -5693,7 +5706,7 @@ inserts a row into Table CQ, puts an entry into {\tt{}lu{\char95}users}.\\
 in Table E, or {\tt{}SQLException} for other database failures.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{59}\sublabel{NW3NfwZQ-2BLjqQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-2BLjqQ-1}}}\moddef{Write: DBAddNewServer(2)~{\nwtagstyle{}\subpageref{NW3NfwZQ-2BLjqQ-1}}}\endmoddef\nwalsodefined{\\{NW3NfwZQ-2BLjqQ-2}}\nwused{\\{NW1GVbai-Oyob-2}}
+\nwenddocs{}\nwbegincode{61}\sublabel{NW3NfwZQ-2BLjqQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-2BLjqQ-1}}}\moddef{Write: DBAddNewServer(2)~{\nwtagstyle{}\subpageref{NW3NfwZQ-2BLjqQ-1}}}\endmoddef\nwalsodefined{\\{NW3NfwZQ-2BLjqQ-2}}\nwused{\\{NW1GVbai-Oyob-2}}
 void DBAddNewServer(final int[] u, final int[] route)
 throws DuplicateUserException, EdgeNotFoundException, SQLException \{
   final int uid = u[0];
@@ -5716,26 +5729,26 @@ throws DuplicateUserException, EdgeNotFoundException, SQLException \{
   \} catch (SQLException e) \{
     throw e;
   \}
-\nwendcode{}\nwbegindocs{60}\nwdocspar
+\nwendcode{}\nwbegindocs{62}\nwdocspar
 {\small In the last step, we put $s$ into {\tt{}lu{\char95}users}.}
-\nwenddocs{}\nwbegincode{61}\sublabel{NW3NfwZQ-2BLjqQ-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-2BLjqQ-2}}}\moddef{Write: DBAddNewServer(2)~{\nwtagstyle{}\subpageref{NW3NfwZQ-2BLjqQ-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{63}\sublabel{NW3NfwZQ-2BLjqQ-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-2BLjqQ-2}}}\moddef{Write: DBAddNewServer(2)~{\nwtagstyle{}\subpageref{NW3NfwZQ-2BLjqQ-1}}}\plusendmoddef
   this.lu_users.put(uid, u.clone());
 \}
-\nwendcode{}\nwbegindocs{62}\nwdocspar
+\nwendcode{}\nwbegindocs{64}\nwdocspar
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\tt{}\protect\nwindexuse{addNewServer}{addNewServer}{NW3NfwZQ-1CFsEo-1}addNewServer}}(2) wraps {\tt{}\protect\nwindexuse{addNewServer}{addNewServer}{NW3NfwZQ-1CFsEo-1}addNewServer}(2).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{63}\sublabel{NW3NfwZQ-1CFsEo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-1CFsEo-1}}}\moddef{Write: addNewServer(2)~{\nwtagstyle{}\subpageref{NW3NfwZQ-1CFsEo-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-2}}
+\nwenddocs{}\nwbegincode{65}\sublabel{NW3NfwZQ-1CFsEo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-1CFsEo-1}}}\moddef{Write: addNewServer(2)~{\nwtagstyle{}\subpageref{NW3NfwZQ-1CFsEo-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-2}}
 void addNewServer(final int[] u)
 throws DuplicateUserException, EdgeNotFoundException, SQLException,
        GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException \{
   this.storage.DBAddNewServer(u, this.tools.computeRoute(u[4], u[5], u[2]));
 \}
 \nwindexdefn{addNewServer}{addNewServer}{NW3NfwZQ-1CFsEo-1}\eatline
-\nwidentdefs{\\{{addNewServer}{addNewServer}}}\nwidentuses{\\{{computeRoute}{computeRoute}}}\nwindexuse{computeRoute}{computeRoute}{NW3NfwZQ-1CFsEo-1}\nwendcode{}\nwbegindocs{64}\nwdocspar
+\nwidentdefs{\\{{addNewServer}{addNewServer}}}\nwidentuses{\\{{computeRoute}{computeRoute}}}\nwindexuse{computeRoute}{computeRoute}{NW3NfwZQ-1CFsEo-1}\nwendcode{}\nwbegindocs{66}\nwdocspar
 \subsection{\texttt{DBUpdateEdgeSpeed}(3)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -5760,7 +5773,7 @@ any server route. This update may cause C56 violations if waypoint times
 or {\tt{}SQLException} for other database failures.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{65}\sublabel{NW3NfwZQ-4RKqny-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-4RKqny-1}}}\moddef{Write: DBUpdateEdgeSpeed(3)~{\nwtagstyle{}\subpageref{NW3NfwZQ-4RKqny-1}}}\endmoddef\nwused{\\{NW1GVbai-Oyob-2}}
+\nwenddocs{}\nwbegincode{67}\sublabel{NW3NfwZQ-4RKqny-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-4RKqny-1}}}\moddef{Write: DBUpdateEdgeSpeed(3)~{\nwtagstyle{}\subpageref{NW3NfwZQ-4RKqny-1}}}\endmoddef\nwused{\\{NW1GVbai-Oyob-2}}
 void DBUpdateEdgeSpeed(final int v1, final int v2, final int nu)
 throws EdgeNotFoundException, SQLException \{
   if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) \{
@@ -5784,7 +5797,7 @@ throws EdgeNotFoundException, SQLException \{
   this.lu_edges.get(v1).get(v2)[1] = nu;
 \}
 \nwindexdefn{DBUpdateEdgeSpeed}{DBUpdateEdgeSpeed}{NW3NfwZQ-4RKqny-1}\eatline
-\nwidentdefs{\\{{DBUpdateEdgeSpeed}{DBUpdateEdgeSpeed}}}\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S131}{S131}}\\{{S15}{S15}}}\nwindexuse{PS}{PS}{NW3NfwZQ-4RKqny-1}\nwindexuse{PSAdd}{PSAdd}{NW3NfwZQ-4RKqny-1}\nwindexuse{PSSubmit}{PSSubmit}{NW3NfwZQ-4RKqny-1}\nwindexuse{S131}{S131}{NW3NfwZQ-4RKqny-1}\nwindexuse{S15}{S15}{NW3NfwZQ-4RKqny-1}\nwendcode{}\nwbegindocs{66}\nwdocspar
+\nwidentdefs{\\{{DBUpdateEdgeSpeed}{DBUpdateEdgeSpeed}}}\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S131}{S131}}\\{{S15}{S15}}}\nwindexuse{PS}{PS}{NW3NfwZQ-4RKqny-1}\nwindexuse{PSAdd}{PSAdd}{NW3NfwZQ-4RKqny-1}\nwindexuse{PSSubmit}{PSSubmit}{NW3NfwZQ-4RKqny-1}\nwindexuse{S131}{S131}{NW3NfwZQ-4RKqny-1}\nwindexuse{S15}{S15}{NW3NfwZQ-4RKqny-1}\nwendcode{}\nwbegindocs{68}\nwdocspar
 
 \subsection{\texttt{DBUpdateServerRoute}(3)}
 \begin{tabular}{p{\textwidth}}
@@ -5861,7 +5874,7 @@ in Table E,
 or {\tt{}SQLException} for other database failures.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{67}\sublabel{NW3NfwZQ-MMhxz-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-MMhxz-1}}}\moddef{Write: DBUpdateServerRoute(3)~{\nwtagstyle{}\subpageref{NW3NfwZQ-MMhxz-1}}}\endmoddef\nwused{\\{NW1GVbai-Oyob-2}}
+\nwenddocs{}\nwbegincode{69}\sublabel{NW3NfwZQ-MMhxz-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-MMhxz-1}}}\moddef{Write: DBUpdateServerRoute(3)~{\nwtagstyle{}\subpageref{NW3NfwZQ-MMhxz-1}}}\endmoddef\nwused{\\{NW1GVbai-Oyob-2}}
 void DBUpdateServerRoute(final int sid, final int[] route, final int[] sched)
 throws UserNotFoundException, EdgeNotFoundException, TimeWindowViolation, SQLException \{
   if (!this.lu_users.containsKey(sid)) \{
@@ -5887,7 +5900,7 @@ throws UserNotFoundException, EdgeNotFoundException, TimeWindowViolation, SQLExc
   \}
 \}
 \nosublabel{NW3NfwZQ-MMhxz-1-u4}\nwindexdefn{DBUpdateServerRoute}{DBUpdateServerRoute}{NW3NfwZQ-MMhxz-1}\eatline
-\nwidentdefs{\\{{DBUpdateServerRoute}{DBUpdateServerRoute}}}\nwendcode{}\nwbegindocs{68}\begin{tabular}{p{\textwidth}}
+\nwidentdefs{\\{{DBUpdateServerRoute}{DBUpdateServerRoute}}}\nwendcode{}\nwbegindocs{70}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\tt{}\protect\nwindexuse{updateServerRoute}{updateServerRoute}{NW3NfwZQ-3PimUR-1}updateServerRoute}}(3) wraps {\tt{}\protect\nwindexuse{DBUpdateServerRoute}{DBUpdateServerRoute}{NW3NfwZQ-MMhxz-1}DBUpdateServerRoute}(3).
@@ -5897,7 +5910,7 @@ must not be less than the {\tt{}world{\char95}time}, otherwise the wrapper does 
 the method call and returns {\tt{}false}.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{69}\sublabel{NW3NfwZQ-3PimUR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3PimUR-1}}}\moddef{Write: updateServerRoute(3)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3PimUR-1}}}\endmoddef\nwused{\\{NW1GVbai-2Rlctf-2}}
+\nwenddocs{}\nwbegincode{71}\sublabel{NW3NfwZQ-3PimUR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3PimUR-1}}}\moddef{Write: updateServerRoute(3)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3PimUR-1}}}\endmoddef\nwused{\\{NW1GVbai-2Rlctf-2}}
 void updateServerRoute(final int sid, final int[] route, final int[] sched)
 throws RouteIllegalOverwriteException, UserNotFoundException,
        EdgeNotFoundException, TimeWindowViolation, SQLException \{
@@ -5908,7 +5921,7 @@ throws RouteIllegalOverwriteException, UserNotFoundException,
   \}
 \}
 \nwindexdefn{updateServerRoute}{updateServerRoute}{NW3NfwZQ-3PimUR-1}\eatline
-\nwidentdefs{\\{{updateServerRoute}{updateServerRoute}}}\nwidentuses{\\{{DBUpdateServerRoute}{DBUpdateServerRoute}}\\{{forwardSimulationWorldTime}{forwardSimulationWorldTime}}}\nwindexuse{DBUpdateServerRoute}{DBUpdateServerRoute}{NW3NfwZQ-3PimUR-1}\nwindexuse{forwardSimulationWorldTime}{forwardSimulationWorldTime}{NW3NfwZQ-3PimUR-1}\nwendcode{}\nwbegindocs{70}\nwdocspar
+\nwidentdefs{\\{{updateServerRoute}{updateServerRoute}}}\nwidentuses{\\{{DBUpdateServerRoute}{DBUpdateServerRoute}}\\{{forwardSimulationWorldTime}{forwardSimulationWorldTime}}}\nwindexuse{DBUpdateServerRoute}{DBUpdateServerRoute}{NW3NfwZQ-3PimUR-1}\nwindexuse{forwardSimulationWorldTime}{forwardSimulationWorldTime}{NW3NfwZQ-3PimUR-1}\nwendcode{}\nwbegindocs{72}\nwdocspar
 \subsection{\texttt{DBUpdateServerAddToSchedule}(4)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -5988,7 +6001,7 @@ any request identifier in {\tt{}rid} (param. 4) cannot be found,
 in Table E, or {\tt{}SQLException} for other database failures.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{71}\sublabel{NW3NfwZQ-3yF6ns-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3yF6ns-1}}}\moddef{Write: DBUpdateServerAddToSchedule(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3yF6ns-1}}}\endmoddef\nwalsodefined{\\{NW3NfwZQ-3yF6ns-2}}\nwused{\\{NW1GVbai-Oyob-2}}
+\nwenddocs{}\nwbegincode{73}\sublabel{NW3NfwZQ-3yF6ns-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3yF6ns-1}}}\moddef{Write: DBUpdateServerAddToSchedule(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3yF6ns-1}}}\endmoddef\nwalsodefined{\\{NW3NfwZQ-3yF6ns-2}}\nwused{\\{NW1GVbai-Oyob-2}}
 void DBUpdateServerAddToSchedule(
     final int sid, final int[] route, final int[] sched, final int[] rid)
 throws UserNotFoundException, EdgeNotFoundException, TimeWindowViolation, SQLException \{
@@ -6018,15 +6031,15 @@ throws UserNotFoundException, EdgeNotFoundException, TimeWindowViolation, SQLExc
     throw e;
   \}
 \nosublabel{NW3NfwZQ-3yF6ns-1-u4}\nwindexdefn{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}{NW3NfwZQ-3yF6ns-1}\eatline
-\nwidentdefs{\\{{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}}}\nwendcode{}\nwbegindocs{72}{\small If all goes well, we add each request identifier in {\tt{}rid} into
+\nwidentdefs{\\{{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}}}\nwendcode{}\nwbegindocs{74}{\small If all goes well, we add each request identifier in {\tt{}rid} into
 {\tt{}lu{\char95}rstatus} and change the value to {\tt{}true}, indicating that the request
 is now \emph{assigned}.}
-\nwenddocs{}\nwbegincode{73}\sublabel{NW3NfwZQ-3yF6ns-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3yF6ns-2}}}\moddef{Write: DBUpdateServerAddToSchedule(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3yF6ns-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{75}\sublabel{NW3NfwZQ-3yF6ns-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3yF6ns-2}}}\moddef{Write: DBUpdateServerAddToSchedule(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3yF6ns-1}}}\plusendmoddef
   for (final int r : rid) \{
     this.lu_rstatus.put(r, true);
   \}
 \}
-\nwendcode{}\nwbegindocs{74}\nwdocspar
+\nwendcode{}\nwbegindocs{76}\nwdocspar
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -6039,7 +6052,7 @@ param. 1) current route, otherwise the wrapper does not perform the method call
 and returns {\tt{}false}.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{75}\sublabel{NW3NfwZQ-42pL1g-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-42pL1g-1}}}\moddef{Write: updateServerAddToSchedule(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-42pL1g-1}}}\endmoddef\nwused{\\{NW1GVbai-2Rlctf-2}}
+\nwenddocs{}\nwbegincode{77}\sublabel{NW3NfwZQ-42pL1g-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-42pL1g-1}}}\moddef{Write: updateServerAddToSchedule(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-42pL1g-1}}}\endmoddef\nwused{\\{NW1GVbai-2Rlctf-2}}
 void updateServerAddToSchedule(final int sid, final int[] route, final int[] sched, final int[] rid)
 throws RouteIllegalOverwriteException, UserNotFoundException,
        EdgeNotFoundException, TimeWindowViolation, SQLException \{
@@ -6065,7 +6078,7 @@ throws RouteIllegalOverwriteException, UserNotFoundException,
   this.storage.DBUpdateServerAddToSchedule(sid, route, sched, rid);
 \}
 \nwindexdefn{updateServerAddToSchedule}{updateServerAddToSchedule}{NW3NfwZQ-42pL1g-1}\eatline
-\nwidentdefs{\\{{updateServerAddToSchedule}{updateServerAddToSchedule}}}\nwidentuses{\\{{DBQueryServerRoute}{DBQueryServerRoute}}\\{{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}}\\{{forwardSimulationWorldTime}{forwardSimulationWorldTime}}}\nwindexuse{DBQueryServerRoute}{DBQueryServerRoute}{NW3NfwZQ-42pL1g-1}\nwindexuse{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}{NW3NfwZQ-42pL1g-1}\nwindexuse{forwardSimulationWorldTime}{forwardSimulationWorldTime}{NW3NfwZQ-42pL1g-1}\nwendcode{}\nwbegindocs{76}\nwdocspar
+\nwidentdefs{\\{{updateServerAddToSchedule}{updateServerAddToSchedule}}}\nwidentuses{\\{{DBQueryServerRoute}{DBQueryServerRoute}}\\{{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}}\\{{forwardSimulationWorldTime}{forwardSimulationWorldTime}}}\nwindexuse{DBQueryServerRoute}{DBQueryServerRoute}{NW3NfwZQ-42pL1g-1}\nwindexuse{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}{NW3NfwZQ-42pL1g-1}\nwindexuse{forwardSimulationWorldTime}{forwardSimulationWorldTime}{NW3NfwZQ-42pL1g-1}\nwendcode{}\nwbegindocs{78}\nwdocspar
 \subsection{\texttt{DBUpdateServerRemoveFromSchedule}(4)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -6144,7 +6157,7 @@ any request identifier in {\tt{}rid} (param. 4) cannot be found,
 in Table E, or {\tt{}SQLException} for other database failures.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{77}\sublabel{NW3NfwZQ-PxyQL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-PxyQL-1}}}\moddef{Write: DBUpdateServerRemoveFromSchedule(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-PxyQL-1}}}\endmoddef\nwalsodefined{\\{NW3NfwZQ-PxyQL-2}}\nwused{\\{NW1GVbai-Oyob-2}}
+\nwenddocs{}\nwbegincode{79}\sublabel{NW3NfwZQ-PxyQL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-PxyQL-1}}}\moddef{Write: DBUpdateServerRemoveFromSchedule(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-PxyQL-1}}}\endmoddef\nwalsodefined{\\{NW3NfwZQ-PxyQL-2}}\nwused{\\{NW1GVbai-Oyob-2}}
 void DBUpdateServerRemoveFromSchedule(
     final int sid, final int[] route, final int[] sched, final int[] rid)
 throws UserNotFoundException, EdgeNotFoundException, TimeWindowViolation, SQLException \{
@@ -6174,15 +6187,15 @@ throws UserNotFoundException, EdgeNotFoundException, TimeWindowViolation, SQLExc
     throw e;
   \}
 \nosublabel{NW3NfwZQ-PxyQL-1-u5}\nwindexdefn{DBUpdateServerRemoveFromSchedule}{DBUpdateServerRemoveFromSchedule}{NW3NfwZQ-PxyQL-1}\eatline
-\nwidentdefs{\\{{DBUpdateServerRemoveFromSchedule}{DBUpdateServerRemoveFromSchedule}}}\nwendcode{}\nwbegindocs{78}{\small If all goes well, we put each request indentifier in {\tt{}rid} into
+\nwidentdefs{\\{{DBUpdateServerRemoveFromSchedule}{DBUpdateServerRemoveFromSchedule}}}\nwendcode{}\nwbegindocs{80}{\small If all goes well, we put each request indentifier in {\tt{}rid} into
 {\tt{}lu{\char95}rstatus} and change the value to {\tt{}false}, indicating that the request
 is now \emph{unassigned}.}
-\nwenddocs{}\nwbegincode{79}\sublabel{NW3NfwZQ-PxyQL-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-PxyQL-2}}}\moddef{Write: DBUpdateServerRemoveFromSchedule(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-PxyQL-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{81}\sublabel{NW3NfwZQ-PxyQL-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-PxyQL-2}}}\moddef{Write: DBUpdateServerRemoveFromSchedule(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-PxyQL-1}}}\plusendmoddef
   for (final int r : rid) \{
     this.lu_rstatus.put(r, false);
   \}
 \}
-\nwendcode{}\nwbegindocs{80}\nwdocspar
+\nwendcode{}\nwbegindocs{82}\nwdocspar
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -6193,7 +6206,7 @@ must not be less than the {\tt{}world{\char95}time}, otherwise the wrapper does 
 the method call and returns {\tt{}false}.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{81}\sublabel{NW3NfwZQ-3O61Nf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3O61Nf-1}}}\moddef{Write: updateServerRemoveFromSchedule(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3O61Nf-1}}}\endmoddef\nwused{\\{NW1GVbai-2Rlctf-2}}
+\nwenddocs{}\nwbegincode{83}\sublabel{NW3NfwZQ-3O61Nf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3O61Nf-1}}}\moddef{Write: updateServerRemoveFromSchedule(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3O61Nf-1}}}\endmoddef\nwused{\\{NW1GVbai-2Rlctf-2}}
 void updateServerRemoveFromSchedule( final int sid, final int[] route, final int[] sched, final int[] rid)
 throws RouteIllegalOverwriteException, UserNotFoundException,
        EdgeNotFoundException, TimeWindowViolation, SQLException \{
@@ -6204,7 +6217,7 @@ throws RouteIllegalOverwriteException, UserNotFoundException,
   \}
 \}
 \nwindexdefn{updateServerRemoveFromSchedule}{updateServerRemoveFromSchedule}{NW3NfwZQ-3O61Nf-1}\eatline
-\nwidentdefs{\\{{updateServerRemoveFromSchedule}{updateServerRemoveFromSchedule}}}\nwidentuses{\\{{DBUpdateServerRemoveFromSchedule}{DBUpdateServerRemoveFromSchedule}}\\{{forwardSimulationWorldTime}{forwardSimulationWorldTime}}}\nwindexuse{DBUpdateServerRemoveFromSchedule}{DBUpdateServerRemoveFromSchedule}{NW3NfwZQ-3O61Nf-1}\nwindexuse{forwardSimulationWorldTime}{forwardSimulationWorldTime}{NW3NfwZQ-3O61Nf-1}\nwendcode{}\nwbegindocs{82}\nwdocspar
+\nwidentdefs{\\{{updateServerRemoveFromSchedule}{updateServerRemoveFromSchedule}}}\nwidentuses{\\{{DBUpdateServerRemoveFromSchedule}{DBUpdateServerRemoveFromSchedule}}\\{{forwardSimulationWorldTime}{forwardSimulationWorldTime}}}\nwindexuse{DBUpdateServerRemoveFromSchedule}{DBUpdateServerRemoveFromSchedule}{NW3NfwZQ-3O61Nf-1}\nwindexuse{forwardSimulationWorldTime}{forwardSimulationWorldTime}{NW3NfwZQ-3O61Nf-1}\nwendcode{}\nwbegindocs{84}\nwdocspar
 \nwenddocs{}\nwfilename{src/4-Administration.nw}\nwbegindocs{0}\chapter{Administering Jargo Instances}
 \label{admin}
 

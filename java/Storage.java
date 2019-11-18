@@ -679,7 +679,7 @@ public class Storage {
                final int sl = lu_users.get(sid)[3];
                if (route[(route.length - 2)] > sl) {
                  throw new TimeWindowViolation("Route end (t="+route[(route.length - 2)]+") "
-                     +"after late window (t="+sl+")");
+                     +"after late window (t="+sl+", sid="+sid+")");
                }
                PreparedStatement pS76 = this.PS(conn, "S76");
                this.PSAdd(pS76, sid, route[0]);
@@ -730,6 +730,11 @@ public class Storage {
                        final int[] output = DBFetch(conn, "S86", 2, Lj);
                        final int tp = output[0];
                        final int td = output[1];
+                       final int rl = lu_users.get(Lj)[3];
+                       if (td > rl) {
+                         throw new TimeWindowViolation("Drop-off (t="+td+") "
+                             +"after late window (t="+rl+", rid="+Lj+")");
+                       }
                        final int rq = this.lu_users.get(Lj)[1];
                        cache.put(Lj, new int[] { rq, tp, td });
                        this.PSAdd(pS140, tp, td, Lj);
@@ -791,7 +796,7 @@ public class Storage {
                final int sl = lu_users.get(sid)[3];
                if (route[(route.length - 2)] > sl) {
                  throw new TimeWindowViolation("Route end (t="+route[(route.length - 2)]+") "
-                     +"after late window (t="+sl+")");
+                     +"after late window (t="+sl+", sid="+sid+")");
                }
                PreparedStatement pS76 = this.PS(conn, "S76");
                this.PSAdd(pS76, sid, route[0]);
@@ -851,6 +856,11 @@ public class Storage {
                        if (Lj == sched[(k + 2)]) {
                          final int td = sched[(k + 0)];
                          final int vd = sched[(k + 1)];
+                         final int rl = lu_users.get(Lj)[3];
+                         if (td > rl) {
+                           throw new TimeWindowViolation("Drop-off (t="+td+") "
+                               +"after late window (t="+rl+", rid="+Lj+")");
+                         }
                          cache. put(Lj, new int[] { rq, tp, td });
                          cache2.put(Lj, new int[] { vp, vd });
                          break;
@@ -860,6 +870,11 @@ public class Storage {
                      final int[] output = this.DBFetch(conn, "S86", 2, Lj);
                      final int tp = output[0];
                      final int td = output[1];
+                     final int rl = lu_users.get(Lj)[3];
+                     if (td > rl) {
+                       throw new TimeWindowViolation("Drop-off (t="+td+") "
+                           +"after late window (t="+rl+", rid="+Lj+")");
+                     }
                      this.PSAdd(pS140, tp, td, Lj);
                      cache.put(Lj, new int[] { rq, tp, td });
                    }
@@ -938,7 +953,7 @@ public class Storage {
                final int sl = lu_users.get(sid)[3];
                if (route[(route.length - 2)] > sl) {
                  throw new TimeWindowViolation("Route end (t="+route[(route.length - 2)]+") "
-                     +"after late window (t="+sl+")");
+                     +"after late window (t="+sl+", sid="+sid+")");
                }
                PreparedStatement pS76 = this.PS(conn, "S76");
                this.PSAdd(pS76, sid, route[0]);
@@ -987,6 +1002,11 @@ public class Storage {
                      final int[] output = DBFetch(conn, "S86", 2, Lj);
                      final int tp = output[0];
                      final int td = output[1];
+                     final int rl = lu_users.get(Lj)[3];
+                     if (td > rl) {
+                       throw new TimeWindowViolation("Drop-off (t="+td+") "
+                           +"after late window (t="+rl+", rid="+Lj+")");
+                     }
                      final int rq = this.lu_users.get(Lj)[1];
                      cache.put(Lj, new int[] { rq, tp, td });
                      this.PSAdd(pS140, tp, td, Lj);
