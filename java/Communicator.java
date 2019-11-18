@@ -47,7 +47,8 @@ public class Communicator {
            return this.storage.DBQueryServerMaxLoad(sid, t);
          }
   public void updateServerRoute(final int sid, final int[] route, final int[] sched)
-         throws RouteIllegalOverwriteException, UserNotFoundException, EdgeNotFoundException, SQLException {
+         throws RouteIllegalOverwriteException, UserNotFoundException,
+                EdgeNotFoundException, TimeWindowViolation, SQLException {
            if (route[0] >= this.forwardSimulationWorldTime()) {
              this.storage.DBUpdateServerRoute(sid, route, sched);
            } else {
