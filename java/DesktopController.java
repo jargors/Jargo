@@ -404,6 +404,8 @@ public class DesktopController {
            if ("".equals(this.tf_t1.getText())) {
              this.tf_t1.setText("1800");
            }
+           this.btn_startseq .setDisable(true);
+           this.btn_startreal.setDisable(true);
            this.tf_class     .setDisable(true);
            this.tf_t0        .setDisable(true);
            this.tf_t1        .setDisable(true);
