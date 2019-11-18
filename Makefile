@@ -46,6 +46,7 @@ compile : $(CLASSES) com/github/jargors/Desktop.class
 
 # This target zips up com/ into jar/jargors-*.jar
 jar : $(CLASSES) com/github/jargors/Desktop.class
+	cp java/*.java com/github/jargors/.
 	jar cvf jar/jargors-$(VERSION).jar com
 
 # This target compiles doc/body.tex from src/*nw files
