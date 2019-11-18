@@ -419,9 +419,18 @@ public class Controller {
            this.client = target;
            this.client.registerCommunicator(this.communicator);
          }
+  public void registerTraffic(final Traffic target) {
+           this.communicator.forwardTraffic(target);
+         }
   public void returnRequest(final int[] r) {
            if (this.world_time - r[2] < this.queue_timeout) {
              this.lu_seen.put(r[0], false);
            }
+         }
+  public Storage internalRefStorage() {
+           return this.storage;
+         }
+  public Communicator internalRefCommunicator() {
+           return this.communicator;
          }
 }

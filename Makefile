@@ -13,8 +13,8 @@ SRCS = \
 	src/Storage.nw \
 	src/Controller.nw \
 	src/Communicator.nw \
-	src/Client.nw \
 	src/Traffic.nw \
+	src/Client.nw \
 	src/Tools.nw \
 	src/DesktopController.nw
 JAVASRCS = \
@@ -22,17 +22,17 @@ JAVASRCS = \
 	java/Storage.java \
 	java/Controller.java \
 	java/Communicator.java \
+	java/Traffic.java \
 	java/Client.java \
-	java/DesktopController.java \
-	java/Traffic.java
+	java/DesktopController.java
 CLASSES = \
 	com/github/jargors/Tools.class \
 	com/github/jargors/Storage.class \
 	com/github/jargors/Controller.class \
 	com/github/jargors/Communicator.class \
+	com/github/jargors/Traffic.class \
 	com/github/jargors/Client.class \
-	com/github/jargors/DesktopController.class \
-	com/github/jargors/Traffic.class
+	com/github/jargors/DesktopController.class
 
 .PHONY : all java compile tex clean purge
 
@@ -63,8 +63,8 @@ $(JAVASRCS) : java/%.java: src/%.nw
 # If any SRCS change (not just pattern-matched sources), then rebuild JAVASRCS
 $(JAVASRCS) : $(SRCS)
 
-$(CLASSES) : com/github/jargors/%.class: java/%.java
-	javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:$(CLASSPATH)/* $<
+$(CLASSES) : $(JAVASRCS)
+	javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:$(CLASSPATH)/* $(JAVASRCS)
 
 com/github/jargors/Desktop.class : java/Desktop.java
 	javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:$(CLASSPATH)/* $<

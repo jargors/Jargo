@@ -1,6 +1,7 @@
 package com.github.jargors;
 import com.github.jargors.Storage;
 import com.github.jargors.Controller;
+import com.github.jargors.Traffic;
 import com.github.jargors.exceptions.ClientException;
 import com.github.jargors.exceptions.ClientFatalException;
 import com.github.jargors.exceptions.DuplicateVertexException;
@@ -17,6 +18,7 @@ import java.sql.SQLException;
 public class Communicator {
   private Storage storage;
   private Controller controller;
+  private Traffic traffic = null;
   private final boolean DEBUG = "true".equals(System.getProperty("jargors.communicator.debug"));
   public Communicator() { }
   public int[] queryVertex(final int v) throws VertexNotFoundException, SQLException {
@@ -57,7 +59,34 @@ public class Communicator {
                      +"after late window (t="+tl+", uid="+sched[(k + 2)]+")");
                }
              }
-             this.storage.DBUpdateServerRoute(sid, route, sched);
+             int[] mutroute = route.clone();
+             int[] mutsched = sched.clone();
+             if (this.traffic != null) {
+               for (int k = 0; k < (mutroute.length - 3); k += 4) {
+                 final int t1 = mutroute[k];
+                 final int v1 = mutroute[(k + 1)];
+                 final int t2 = mutroute[(k + 2)];
+                 final int v2 = mutroute[(k + 3)];
+                 int[] ddnu = this.storage.DBQueryEdge(v1, v2);
+                 final int dd = ddnu[0];
+                 final int nu_old = ddnu[1];
+                 final int nu_new = Math.max(1, (int) Math.round(this.traffic.apply(v1, v2, t1)*nu_old));
+                 final int diff = ((dd/(t2 - t1)) > nu_new
+                     ? ((int) Math.ceil((dd/(float) nu_new + t1))) - t2
+                     : 0);
+                 if (diff != 0) {
+                   for (int p = 0; p < (mutsched.length - 2); p += 3) {
+                     if (mutsched[p] >= mutroute[(k + 2)]) {
+                       mutsched[p] += diff;
+                     }
+                   }
+                   for (int q = (k + 2); q < (mutroute.length - 1); q += 2) {
+                     mutroute[q] += diff;
+                   }
+                 }
+               }
+             }
+             this.storage.DBUpdateServerRoute(sid, mutroute, mutsched);
            } else {
              throw new RouteIllegalOverwriteException();
            }
@@ -91,7 +120,34 @@ public class Communicator {
                    +"after late window (t="+tl+", uid="+sched[(k + 2)]+")");
              }
            }
-           this.storage.DBUpdateServerAddToSchedule(sid, route, sched, rid);
+           int[] mutroute = route.clone();
+           int[] mutsched = sched.clone();
+           if (this.traffic != null) {
+             for (int k = 0; k < (mutroute.length - 3); k += 4) {
+               final int t1 = mutroute[k];
+               final int v1 = mutroute[(k + 1)];
+               final int t2 = mutroute[(k + 2)];
+               final int v2 = mutroute[(k + 3)];
+               int[] ddnu = this.storage.DBQueryEdge(v1, v2);
+               final int dd = ddnu[0];
+               final int nu_old = ddnu[1];
+               final int nu_new = Math.max(1, (int) Math.round(this.traffic.apply(v1, v2, t1)*nu_old));
+               final int diff = ((dd/(t2 - t1)) > nu_new
+                   ? ((int) Math.ceil((dd/(float) nu_new + t1))) - t2
+                   : 0);
+               if (diff != 0) {
+                 for (int p = 0; p < (mutsched.length - 2); p += 3) {
+                   if (mutsched[p] >= mutroute[(k + 2)]) {
+                     mutsched[p] += diff;
+                   }
+                 }
+                 for (int q = (k + 2); q < (mutroute.length - 1); q += 2) {
+                   mutroute[q] += diff;
+                 }
+               }
+             }
+           }
+           this.storage.DBUpdateServerAddToSchedule(sid, mutroute, mutsched, rid);
          }
   public void updateServerRemoveFromSchedule( final int sid, final int[] route, final int[] sched, final int[] rid)
          throws RouteIllegalOverwriteException, UserNotFoundException,
@@ -104,7 +160,34 @@ public class Communicator {
                      +"after late window (t="+tl+", uid="+sched[(k + 2)]+")");
                }
              }
-             this.storage.DBUpdateServerRemoveFromSchedule(sid, route, sched, rid);
+             int[] mutroute = route.clone();
+             int[] mutsched = sched.clone();
+             if (this.traffic != null) {
+               for (int k = 0; k < (mutroute.length - 3); k += 4) {
+                 final int t1 = mutroute[k];
+                 final int v1 = mutroute[(k + 1)];
+                 final int t2 = mutroute[(k + 2)];
+                 final int v2 = mutroute[(k + 3)];
+                 int[] ddnu = this.storage.DBQueryEdge(v1, v2);
+                 final int dd = ddnu[0];
+                 final int nu_old = ddnu[1];
+                 final int nu_new = Math.max(1, (int) Math.round(this.traffic.apply(v1, v2, t1)*nu_old));
+                 final int diff = ((dd/(t2 - t1)) > nu_new
+                     ? ((int) Math.ceil((dd/(float) nu_new + t1))) - t2
+                     : 0);
+                 if (diff != 0) {
+                   for (int p = 0; p < (mutsched.length - 2); p += 3) {
+                     if (mutsched[p] >= mutroute[(k + 2)]) {
+                       mutsched[p] += diff;
+                     }
+                   }
+                   for (int q = (k + 2); q < (mutroute.length - 1); q += 2) {
+                     mutroute[q] += diff;
+                   }
+                 }
+               }
+             }
+             this.storage.DBUpdateServerRemoveFromSchedule(sid, mutroute, mutsched, rid);
            } else {
              throw new RouteIllegalOverwriteException();
            }
@@ -114,6 +197,11 @@ public class Communicator {
          }
   public void registerController(final Controller src) {
            this.controller = src;
+         }
+  public void forwardTraffic (final Traffic src) {
+           this.traffic = src;
+           this.traffic.forwardVertices(this.storage.getReferenceVerticesCache());
+           this.traffic.forwardEdges(this.storage.getReferenceEdgesCache());
          }
   public int forwardSimulationWorldTime() {
            return this.controller.getSimulationWorldTime();

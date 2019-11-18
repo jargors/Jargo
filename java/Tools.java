@@ -1,5 +1,6 @@
 package com.github.jargors;
 import com.github.jargors.gtreeJNI.*;
+import com.github.jargors.exceptions.EdgeNotFoundException;
 import com.github.jargors.exceptions.VertexNotFoundException;
 import com.github.jargors.exceptions.GtreeNotLoadedException;
 import com.github.jargors.exceptions.GtreeIllegalSourceException;
@@ -19,6 +20,18 @@ public class Tools {
   private final double CSHIFT = 10000000.0;
   private final boolean DEBUG = "true".equals(System.getProperty("jargors.tools.debug"));
   public Tools() { }
+  public int[] DBQueryVertex(final int v) throws VertexNotFoundException {
+           if (!this.lu_vertices.containsKey(v)) {
+             throw new VertexNotFoundException("Vertex "+v+" not found.");
+           }
+           return this.lu_vertices.get(v).clone();
+         }
+  public int[] DBQueryEdge(final int v1, final int v2) throws EdgeNotFoundException {
+           if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
+             throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
+           }
+           return this.lu_edges.get(v1).get(v2).clone();
+         }
   public void GTLoadGtree(final String p) throws FileNotFoundException {
            try {
              System.loadLibrary("gtree");

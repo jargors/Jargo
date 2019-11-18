@@ -465,6 +465,11 @@ void registerClient(final Client target) {
 }
 @ %def registerClient
 
+<<registerTraffic(1)>>=
+void registerTraffic(final Traffic target) {
+  this.communicator.forwardTraffic(target);
+}
+@ %def registerTraffic
 \subsection{\texttt{setClockStart}(1)}
 <<setClockStart(1)>>=
 void setClockStart(final int t) {
@@ -575,27 +580,16 @@ void startSequential(final Consumer<Boolean> app_cb) {
 }
 @ %def startSequential
 
+\subsection{\texttt{internalRefStorage}(0)}
+<<internalRefStorage(0)>>=
+Storage internalRefStorage() {
+  return this.storage;
+}
+@ %def internalRefStorage
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+\subsection{\texttt{internalRefCommunicator}(0)}
+<<internalRefCommunicator(0)>>=
+Communicator internalRefCommunicator() {
+  return this.communicator;
+}
+@ %def internalRefCommunicator

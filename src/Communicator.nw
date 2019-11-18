@@ -26,6 +26,7 @@ package com.github.jargors;
 <<Communicator.java preamble>>=
 import com.github.jargors.Storage;
 import com.github.jargors.Controller;
+import com.github.jargors.Traffic;
 import com.github.jargors.exceptions.ClientException;
 import com.github.jargors.exceptions.ClientFatalException;
 import com.github.jargors.exceptions.DuplicateVertexException;
@@ -45,6 +46,7 @@ import java.sql.SQLException;
 <<[[Communicator]] member variables>>=
 private Storage storage;
 private Controller controller;
+private Traffic traffic = null;
 private final boolean DEBUG = "true".equals(System.getProperty("jargors.communicator.debug"));
 @
 
@@ -69,6 +71,14 @@ void registerController(final Controller src) {
 }
 @ %def setController
 
+\subsection{\texttt{forwardTraffic}(1)}
+<<forwardTraffic(1)>>=
+void forwardTraffic (final Traffic src) {
+  this.traffic = src;
+  this.traffic.forwardVertices(this.storage.getReferenceVerticesCache());
+  this.traffic.forwardEdges(this.storage.getReferenceEdgesCache());
+}
+@ %def registerTraffic
 
 \subsection{\texttt{forwardSimulationWorldTime}(0)}
 <<forwardSimulationWorldTime(0)>>=

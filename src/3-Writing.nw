@@ -280,6 +280,37 @@ for (int k = 0; k < (sched.length - 2); k += 3) {
 }
 @
 
+\subsection{Apply traffic to route, sched}
+<<Apply traffic to route, sched>>=
+int[] mutroute = route.clone();
+int[] mutsched = sched.clone();
+if (this.traffic != null) {
+  for (int k = 0; k < (mutroute.length - 3); k += 4) {
+    final int t1 = mutroute[k];
+    final int v1 = mutroute[(k + 1)];
+    final int t2 = mutroute[(k + 2)];
+    final int v2 = mutroute[(k + 3)];
+    int[] ddnu = this.storage.DBQueryEdge(v1, v2);
+    final int dd = ddnu[0];
+    final int nu_old = ddnu[1];
+    final int nu_new = Math.max(1, (int) Math.round(this.traffic.apply(v1, v2, t1)*nu_old));
+    final int diff = ((dd/(t2 - t1)) > nu_new
+        ? ((int) Math.ceil((dd/(float) nu_new + t1))) - t2
+        : 0);
+    if (diff != 0) {
+      for (int p = 0; p < (mutsched.length - 2); p += 3) {
+        if (mutsched[p] >= mutroute[(k + 2)]) {
+          mutsched[p] += diff;
+        }
+      }
+      for (int q = (k + 2); q < (mutroute.length - 1); q += 2) {
+        mutroute[q] += diff;
+      }
+    }
+  }
+}
+@
+
 \section{Methods}
 
 \subsection{\texttt{DBAddNewVertex}(3)}
@@ -629,7 +660,7 @@ of the remaining route, in other words \textbf{it must pre-exist in Table W}.
  &\node {$(2|w|-2):t_{|w|}$}; & \node {$(2|w|-1):v_{|w|}$}; \\
 };
 \end{tikzpicture}\\
-Array [[sched]] (param. 2):&$3m$-element integer array storing values of
+Array [[sched]] (param. 3):&$3m$-element integer array storing values of
 waypoint components and their labels in the server's $m$-length remaining
 schedule $b_{>t}$, where $m\leq n$. In the diagram, $|b|-j=m$.  Note
 $(t_{i_j},v_{i_j})$ \emph{cannot equal} $(t_i,v_i)$, as $(t_i,v_i)$ is part of
@@ -714,7 +745,8 @@ throws RouteIllegalOverwriteException, UserNotFoundException,
        EdgeNotFoundException, TimeWindowViolation, SQLException {
   if (route[0] >= this.forwardSimulationWorldTime()) {
     <<Check time window violation>>
-    this.storage.DBUpdateServerRoute(sid, route, sched);
+    <<Apply traffic to route, sched>>
+    this.storage.DBUpdateServerRoute(sid, mutroute, mutsched);
   } else {
     throw new RouteIllegalOverwriteException();
   }
@@ -874,7 +906,8 @@ throws RouteIllegalOverwriteException, UserNotFoundException,
     j += 2;
   }
   <<Check time window violation>>
-  this.storage.DBUpdateServerAddToSchedule(sid, route, sched, rid);
+  <<Apply traffic to route, sched>>
+  this.storage.DBUpdateServerAddToSchedule(sid, mutroute, mutsched, rid);
 }
 @ %def updateServerAddToSchedule
 
@@ -1010,7 +1043,8 @@ throws RouteIllegalOverwriteException, UserNotFoundException,
        EdgeNotFoundException, TimeWindowViolation, SQLException {
   if (route[0] >= this.forwardSimulationWorldTime()) {
     <<Check time window violation>>
-    this.storage.DBUpdateServerRemoveFromSchedule(sid, route, sched, rid);
+    <<Apply traffic to route, sched>>
+    this.storage.DBUpdateServerRemoveFromSchedule(sid, mutroute, mutsched, rid);
   } else {
     throw new RouteIllegalOverwriteException();
   }

@@ -200,7 +200,10 @@ public \LA{}setEngineUpdatePeriod(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-1q9MsZ-1
 public \LA{}startRealtime(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-1dNtp8-1}}\RA{}
 public \LA{}startSequential(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-2R9Ikm-1}}\RA{}
 public \LA{}registerClient(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-1UtY1X-1}}\RA{}
+public \LA{}registerTraffic(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-1eYS0t-1}}\RA{}
 public \LA{}returnRequest(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-23SuC3-1}}\RA{}
+public \LA{}internalRefStorage(0)~{\nwtagstyle{}\subpageref{NW2ZDXo8-2om7IF-1}}\RA{}
+public \LA{}internalRefCommunicator(0)~{\nwtagstyle{}\subpageref{NW2ZDXo8-UOHfO-1}}\RA{}
 \nwendcode{}\nwbegindocs{12}\nwdocspar
 
 \section*{Class: Communicator}
@@ -227,6 +230,7 @@ public \LA{}Write: updateServerRemoveFromSchedule(4)~{\nwtagstyle{}\subpageref{N
 \nwenddocs{}\nwbegincode{17}\sublabel{NW1GVbai-2Rlctf-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW1GVbai-2Rlctf-3}}}\moddef{\code{}Communicator\edoc{} methods~{\nwtagstyle{}\subpageref{NW1GVbai-2Rlctf-1}}}\plusendmoddef
 public \LA{}registerStorage(1)~{\nwtagstyle{}\subpageref{NWvbkzY-1d2hIb-1}}\RA{}
 public \LA{}registerController(1)~{\nwtagstyle{}\subpageref{NWvbkzY-1VEXly-1}}\RA{}
+public \LA{}forwardTraffic(1)~{\nwtagstyle{}\subpageref{NWvbkzY-7Z7vS-1}}\RA{}
 public \LA{}forwardSimulationWorldTime(0)~{\nwtagstyle{}\subpageref{NWvbkzY-4Z8TrL-1}}\RA{}
 public \LA{}forwardReferenceVerticesCache(0)~{\nwtagstyle{}\subpageref{NWvbkzY-3GKJpj-1}}\RA{}
 public \LA{}forwardReferenceEdgesCache(0)~{\nwtagstyle{}\subpageref{NWvbkzY-2kHShr-1}}\RA{}
@@ -275,12 +279,16 @@ protected \LA{}handleServerLocation(1)~{\nwtagstyle{}\subpageref{NW2q3QGT-4Q1Upa
 \hi{Utilities}
 \nwenddocs{}\nwbegincode{29}\sublabel{NW1GVbai-1sp72R-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW1GVbai-1sp72R-3}}}\moddef{\code{}Traffic\edoc{} methods~{\nwtagstyle{}\subpageref{NW1GVbai-1sp72R-1}}}\plusendmoddef
 public \LA{}apply(3)~{\nwtagstyle{}\subpageref{NW24od5B-14vbUh-1}}\RA{}
+final public \LA{}forwardVertices(1)~{\nwtagstyle{}\subpageref{NW24od5B-2on0WY-1}}\RA{}
+final public \LA{}forwardEdges(1)~{\nwtagstyle{}\subpageref{NW24od5B-kWcFd-1}}\RA{}
 \nwendcode{}\nwbegindocs{30}\nwdocspar
 
 \section*{Class: Tools}
 \addcontentsline{toc}{section}{Class: Tools}
 \hi{Read Methods}
 \nwenddocs{}\nwbegincode{31}\sublabel{NW1GVbai-3QhyAk-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1GVbai-3QhyAk-1}}}\moddef{\code{}Tools\edoc{} methods~{\nwtagstyle{}\subpageref{NW1GVbai-3QhyAk-1}}}\endmoddef\nwalsodefined{\\{NW1GVbai-3QhyAk-2}\\{NW1GVbai-3QhyAk-3}}\nwused{\\{NW3zOIuJ-2Vh5vZ-1}}
+public \LA{}Read: DBQueryVertex(1)~{\nwtagstyle{}\subpageref{NWavjwc-48j64d-1}}\RA{}
+public \LA{}Read: DBQueryEdge(2)~{\nwtagstyle{}\subpageref{NWavjwc-1eCWox-1}}\RA{}
 \nwendcode{}\nwbegindocs{32}\nwdocspar
 \hi{Write Methods}
 \nwenddocs{}\nwbegincode{33}\sublabel{NW1GVbai-3QhyAk-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW1GVbai-3QhyAk-2}}}\moddef{\code{}Tools\edoc{} methods~{\nwtagstyle{}\subpageref{NW1GVbai-3QhyAk-1}}}\plusendmoddef
@@ -1904,6 +1912,7 @@ To list base distances $d$ of all servers:
 \nwixlogsorted{c}{{Admin: PSSubmit(1..)}{NW3jCmQJ-1S1xBT-1}{\nwixu{NW1GVbai-Oyob-3}\nwixd{NW3jCmQJ-1S1xBT-1}}}%
 \nwixlogsorted{c}{{Admin: saveBackup(1)}{NW3jCmQJ-4Yjzpx-1}{\nwixu{NW1GVbai-2u8vSA-3}\nwixd{NW3jCmQJ-4Yjzpx-1}}}%
 \nwixlogsorted{c}{{Admin: setupDriver(0)}{NW3jCmQJ-4E8cu3-1}{\nwixu{NW1GVbai-Oyob-3}\nwixd{NW3jCmQJ-4E8cu3-1}}}%
+\nwixlogsorted{c}{{Apply traffic to route, sched}{NW3NfwZQ-UeHS0-1}{\nwixd{NW3NfwZQ-UeHS0-1}\nwixu{NW3NfwZQ-3PimUR-1}\nwixu{NW3NfwZQ-42pL1g-1}\nwixu{NW3NfwZQ-3O61Nf-1}}}%
 \nwixlogsorted{c}{{apply(3)}{NW24od5B-14vbUh-1}{\nwixu{NW1GVbai-1sp72R-3}\nwixd{NW24od5B-14vbUh-1}}}%
 \nwixlogsorted{c}{{Check time window violation}{NW3NfwZQ-3kBClV-1}{\nwixd{NW3NfwZQ-3kBClV-1}\nwixu{NW3NfwZQ-3PimUR-1}\nwixu{NW3NfwZQ-42pL1g-1}\nwixu{NW3NfwZQ-3O61Nf-1}}}%
 \nwixlogsorted{c}{{Client.java}{NW2q3QGT-bpC9O-1}{\nwixd{NW2q3QGT-bpC9O-1}}}%
@@ -1977,12 +1986,15 @@ To list base distances $d$ of all servers:
 \nwixlogsorted{c}{{endCollectServerLocations(1)}{NW2q3QGT-hKCVj-1}{\nwixu{NW1GVbai-1aFZ2n-3}\nwixd{NW2q3QGT-hKCVj-1}}}%
 \nwixlogsorted{c}{{filterByHaversine(3)}{NW3zOIuJ-3xPljQ-1}{\nwixu{NW1GVbai-3QhyAk-3}\nwixd{NW3zOIuJ-3xPljQ-1}}}%
 \nwixlogsorted{c}{{Flatten results}{NWavjwc-3qcw3I-1}{\nwixd{NWavjwc-3qcw3I-1}\nwixu{NWavjwc-3OEpPU-1}\nwixu{NW3jCmQJ-2t4n1u-1}}}%
+\nwixlogsorted{c}{{forwardEdges(1)}{NW24od5B-kWcFd-1}{\nwixu{NW1GVbai-1sp72R-3}\nwixd{NW24od5B-kWcFd-1}}}%
 \nwixlogsorted{c}{{forwardReferenceEdgesCache(0)}{NWvbkzY-2kHShr-1}{\nwixu{NW1GVbai-2Rlctf-3}\nwixd{NWvbkzY-2kHShr-1}}}%
 \nwixlogsorted{c}{{forwardReferenceUsersCache(0)}{NWvbkzY-QpzxP-1}{\nwixu{NW1GVbai-2Rlctf-3}\nwixd{NWvbkzY-QpzxP-1}}}%
 \nwixlogsorted{c}{{forwardReferenceVerticesCache(0)}{NWvbkzY-3GKJpj-1}{\nwixu{NW1GVbai-2Rlctf-3}\nwixd{NWvbkzY-3GKJpj-1}}}%
 \nwixlogsorted{c}{{forwardRequestTimeout(1)}{NW27XAxz-1EZDVM-1}{\nwixu{NW1GVbai-Oyob-3}\nwixd{NW27XAxz-1EZDVM-1}}}%
 \nwixlogsorted{c}{{forwardReturnRequest(1)}{NWvbkzY-49Aupt-1}{\nwixu{NW1GVbai-2Rlctf-3}\nwixd{NWvbkzY-49Aupt-1}}}%
 \nwixlogsorted{c}{{forwardSimulationWorldTime(0)}{NWvbkzY-4Z8TrL-1}{\nwixu{NW1GVbai-2Rlctf-3}\nwixd{NWvbkzY-4Z8TrL-1}}}%
+\nwixlogsorted{c}{{forwardTraffic(1)}{NWvbkzY-7Z7vS-1}{\nwixu{NW1GVbai-2Rlctf-3}\nwixd{NWvbkzY-7Z7vS-1}}}%
+\nwixlogsorted{c}{{forwardVertices(1)}{NW24od5B-2on0WY-1}{\nwixu{NW1GVbai-1sp72R-3}\nwixd{NW24od5B-2on0WY-1}}}%
 \nwixlogsorted{c}{{getReferenceEdgesCache(0)}{NW27XAxz-2MmSry-1}{\nwixu{NW1GVbai-Oyob-3}\nwixd{NW27XAxz-2MmSry-1}}}%
 \nwixlogsorted{c}{{getReferenceUsersCache(0)}{NW27XAxz-3X6fi-1}{\nwixu{NW1GVbai-Oyob-3}\nwixd{NW27XAxz-3X6fi-1}}}%
 \nwixlogsorted{c}{{getReferenceVerticesCache(0)}{NW27XAxz-Qiygh-1}{\nwixu{NW1GVbai-Oyob-3}\nwixd{NW27XAxz-Qiygh-1}}}%
@@ -2005,6 +2017,8 @@ To list base distances $d$ of all servers:
 \nwixlogsorted{c}{{Insert new server route into CW}{NW3NfwZQ-2QIBl1-1}{\nwixd{NW3NfwZQ-2QIBl1-1}\nwixu{NW3NfwZQ-2BLjqQ-1}}}%
 \nwixlogsorted{c}{{Insert new server route into W}{NW3NfwZQ-3WUYey-1}{\nwixd{NW3NfwZQ-3WUYey-1}\nwixu{NW3NfwZQ-2BLjqQ-1}}}%
 \nwixlogsorted{c}{{Insert new user into user tables}{NW3NfwZQ-4QLdOg-1}{\nwixd{NW3NfwZQ-4QLdOg-1}\nwixu{NW3NfwZQ-3NS7mW-1}\nwixu{NW3NfwZQ-2BLjqQ-1}}}%
+\nwixlogsorted{c}{{internalRefCommunicator(0)}{NW2ZDXo8-UOHfO-1}{\nwixu{NW1GVbai-2u8vSA-3}\nwixd{NW2ZDXo8-UOHfO-1}}}%
+\nwixlogsorted{c}{{internalRefStorage(0)}{NW2ZDXo8-2om7IF-1}{\nwixu{NW1GVbai-2u8vSA-3}\nwixd{NW2ZDXo8-2om7IF-1}}}%
 \nwixlogsorted{c}{{loadProblem(1)}{NW2ZDXo8-1LrOKh-1}{\nwixu{NW1GVbai-2u8vSA-2}\nwixd{NW2ZDXo8-1LrOKh-1}}}%
 \nwixlogsorted{c}{{loadRoadNetworkFromFile(1)}{NW2ZDXo8-f2kmq-1}{\nwixu{NW1GVbai-2u8vSA-2}\nwixd{NW2ZDXo8-f2kmq-1}\nwixd{NW2ZDXo8-f2kmq-2}\nwixd{NW2ZDXo8-f2kmq-3}\nwixd{NW2ZDXo8-f2kmq-4}\nwixd{NW2ZDXo8-f2kmq-5}\nwixd{NW2ZDXo8-f2kmq-6}}}%
 \nwixlogsorted{c}{{Loop objects}{NW2ZDXo8-2e0Sfa-1}{\nwixu{NW2ZDXo8-3yXfwG-1}\nwixd{NW2ZDXo8-2e0Sfa-1}}}%
@@ -2033,7 +2047,7 @@ To list base distances $d$ of all servers:
 \nwixlogsorted{c}{{Read: DBQueryCountRequests(0)}{NWavjwc-dGxOV-1}{\nwixu{NW1GVbai-Oyob-1}\nwixd{NWavjwc-dGxOV-1}}}%
 \nwixlogsorted{c}{{Read: DBQueryCountServers(0)}{NWavjwc-1LmDSJ-1}{\nwixu{NW1GVbai-Oyob-1}\nwixd{NWavjwc-1LmDSJ-1}}}%
 \nwixlogsorted{c}{{Read: DBQueryCountVertices(0)}{NWavjwc-2dkWU2-1}{\nwixu{NW1GVbai-Oyob-1}\nwixd{NWavjwc-2dkWU2-1}}}%
-\nwixlogsorted{c}{{Read: DBQueryEdge(2)}{NWavjwc-1eCWox-1}{\nwixu{NW1GVbai-Oyob-1}\nwixd{NWavjwc-1eCWox-1}}}%
+\nwixlogsorted{c}{{Read: DBQueryEdge(2)}{NWavjwc-1eCWox-1}{\nwixu{NW1GVbai-Oyob-1}\nwixu{NW1GVbai-3QhyAk-1}\nwixd{NWavjwc-1eCWox-1}}}%
 \nwixlogsorted{c}{{Read: DBQueryMBR(0)}{NWavjwc-17SWaf-1}{\nwixu{NW1GVbai-Oyob-1}\nwixd{NWavjwc-17SWaf-1}}}%
 \nwixlogsorted{c}{{Read: DBQueryQueuedRequests(1)}{NWavjwc-1W6rbZ-1}{\nwixu{NW1GVbai-Oyob-1}\nwixd{NWavjwc-1W6rbZ-1}\nwixd{NWavjwc-1W6rbZ-2}\nwixd{NWavjwc-1W6rbZ-3}}}%
 \nwixlogsorted{c}{{Read: DBQueryRequestArrivalTime(1)}{NWavjwc-rK1Pb-1}{\nwixu{NW1GVbai-Oyob-1}\nwixd{NWavjwc-rK1Pb-1}}}%
@@ -2079,7 +2093,7 @@ To list base distances $d$ of all servers:
 \nwixlogsorted{c}{{Read: DBQueryServiceRate(0)}{NWavjwc-1fF8rW-1}{\nwixu{NW1GVbai-Oyob-1}\nwixd{NWavjwc-1fF8rW-1}}}%
 \nwixlogsorted{c}{{Read: DBQueryStatisticsEdges(0)}{NWavjwc-OqL9m-1}{\nwixu{NW1GVbai-Oyob-1}\nwixd{NWavjwc-OqL9m-1}}}%
 \nwixlogsorted{c}{{Read: DBQueryUser(1)}{NWavjwc-8IJdE-1}{\nwixu{NW1GVbai-Oyob-1}\nwixd{NWavjwc-8IJdE-1}}}%
-\nwixlogsorted{c}{{Read: DBQueryVertex(1)}{NWavjwc-48j64d-1}{\nwixu{NW1GVbai-Oyob-1}\nwixd{NWavjwc-48j64d-1}}}%
+\nwixlogsorted{c}{{Read: DBQueryVertex(1)}{NWavjwc-48j64d-1}{\nwixu{NW1GVbai-Oyob-1}\nwixu{NW1GVbai-3QhyAk-1}\nwixd{NWavjwc-48j64d-1}}}%
 \nwixlogsorted{c}{{Read: query(2)}{NWavjwc-47dtTX-1}{\nwixu{NW1GVbai-2u8vSA-1}\nwixd{NWavjwc-47dtTX-1}}}%
 \nwixlogsorted{c}{{Read: queryAllEdges(0)}{NWavjwc-3wFal3-1}{\nwixu{NW1GVbai-2u8vSA-1}\nwixd{NWavjwc-3wFal3-1}}}%
 \nwixlogsorted{c}{{Read: queryAllVertices(0)}{NWavjwc-2lFfT1-1}{\nwixu{NW1GVbai-2u8vSA-1}\nwixd{NWavjwc-2lFfT1-1}}}%
@@ -2127,6 +2141,7 @@ To list base distances $d$ of all servers:
 \nwixlogsorted{c}{{registerEdges(1)}{NW3zOIuJ-1lN1oP-1}{\nwixu{NW1GVbai-3QhyAk-3}\nwixd{NW3zOIuJ-1lN1oP-1}}}%
 \nwixlogsorted{c}{{registerRoadNetwork(0)}{NW2q3QGT-3Uw53q-1}{\nwixu{NW1GVbai-1aFZ2n-3}\nwixd{NW2q3QGT-3Uw53q-1}}}%
 \nwixlogsorted{c}{{registerStorage(1)}{NWvbkzY-1d2hIb-1}{\nwixu{NW1GVbai-2Rlctf-3}\nwixd{NWvbkzY-1d2hIb-1}}}%
+\nwixlogsorted{c}{{registerTraffic(1)}{NW2ZDXo8-1eYS0t-1}{\nwixu{NW1GVbai-2u8vSA-3}\nwixd{NW2ZDXo8-1eYS0t-1}}}%
 \nwixlogsorted{c}{{registerUsers(0)}{NW2q3QGT-4UuqZ1-1}{\nwixu{NW1GVbai-1aFZ2n-3}\nwixd{NW2q3QGT-4UuqZ1-1}}}%
 \nwixlogsorted{c}{{registerUsers(1)}{NW3zOIuJ-4UXTPH-1}{\nwixu{NW1GVbai-3QhyAk-3}\nwixd{NW3zOIuJ-4UXTPH-1}}}%
 \nwixlogsorted{c}{{registerVertices(1)}{NW3zOIuJ-283eDq-1}{\nwixu{NW1GVbai-3QhyAk-3}\nwixd{NW3zOIuJ-283eDq-1}}}%
@@ -2360,11 +2375,13 @@ To list base distances $d$ of all servers:
 \nwixlogsorted{i}{{end}{end}}%
 \nwixlogsorted{i}{{endCollectServerLocations}{endCollectServerLocations}}%
 \nwixlogsorted{i}{{filterByHaversine}{filterByHaversine}}%
+\nwixlogsorted{i}{{forwardEdges}{forwardEdges}}%
 \nwixlogsorted{i}{{forwardReferenceEdgesCache}{forwardReferenceEdgesCache}}%
 \nwixlogsorted{i}{{forwardReferenceUsersCache}{forwardReferenceUsersCache}}%
 \nwixlogsorted{i}{{forwardRequestTimeout}{forwardRequestTimeout}}%
 \nwixlogsorted{i}{{forwardReturnRequest}{forwardReturnRequest}}%
 \nwixlogsorted{i}{{forwardSimulationWorldTime}{forwardSimulationWorldTime}}%
+\nwixlogsorted{i}{{forwardVertices}{forwardVertices}}%
 \nwixlogsorted{i}{{fowardReferenceVerticesCache}{fowardReferenceVerticesCache}}%
 \nwixlogsorted{i}{{getReferenceEdgesCache}{getReferenceEdgesCache}}%
 \nwixlogsorted{i}{{getReferenceUsersCache}{getReferenceUsersCache}}%
@@ -2377,6 +2394,8 @@ To list base distances $d$ of all servers:
 \nwixlogsorted{i}{{GTLoadGtree}{GTLoadGtree}}%
 \nwixlogsorted{i}{{handleRequest}{handleRequest}}%
 \nwixlogsorted{i}{{handleServerLocation}{handleServerLocation}}%
+\nwixlogsorted{i}{{internalRefCommunicator}{internalRefCommunicator}}%
+\nwixlogsorted{i}{{internalRefStorage}{internalRefStorage}}%
 \nwixlogsorted{i}{{loadBackup}{loadBackup}}%
 \nwixlogsorted{i}{{loadDataModel}{loadDataModel}}%
 \nwixlogsorted{i}{{loadGtree}{loadGtree}}%
@@ -2440,6 +2459,7 @@ To list base distances $d$ of all servers:
 \nwixlogsorted{i}{{registerCommunicator}{registerCommunicator}}%
 \nwixlogsorted{i}{{registerEdges}{registerEdges}}%
 \nwixlogsorted{i}{{registerRoadNetwork}{registerRoadNetwork}}%
+\nwixlogsorted{i}{{registerTraffic}{registerTraffic}}%
 \nwixlogsorted{i}{{registerUsers}{registerUsers}}%
 \nwixlogsorted{i}{{registerVertices}{registerVertices}}%
 \nwixlogsorted{i}{{returnRequest}{returnRequest}}%
@@ -2821,7 +2841,7 @@ Integer {\tt{}v} (param. 1):&vertex identifier.
 \textbf{Throws:} {\tt{}VertexNotFoundException} if vertex does not exist\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{15}\sublabel{NWavjwc-48j64d-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWavjwc-48j64d-1}}}\moddef{Read: DBQueryVertex(1)~{\nwtagstyle{}\subpageref{NWavjwc-48j64d-1}}}\endmoddef\nwused{\\{NW1GVbai-Oyob-1}}
+\nwenddocs{}\nwbegincode{15}\sublabel{NWavjwc-48j64d-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWavjwc-48j64d-1}}}\moddef{Read: DBQueryVertex(1)~{\nwtagstyle{}\subpageref{NWavjwc-48j64d-1}}}\endmoddef\nwused{\\{NW1GVbai-Oyob-1}\\{NW1GVbai-3QhyAk-1}}
 int[] DBQueryVertex(final int v) throws VertexNotFoundException \{
   if (!this.lu_vertices.containsKey(v)) \{
     throw new VertexNotFoundException("Vertex "+v+" not found.");
@@ -2912,7 +2932,7 @@ Integer {\tt{}v2} (param. 2):&target vertex identifier $v_2$
 \textbf{Throws:} {\tt{}EdgeNotFoundException} if edge does not exit.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{23}\sublabel{NWavjwc-1eCWox-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWavjwc-1eCWox-1}}}\moddef{Read: DBQueryEdge(2)~{\nwtagstyle{}\subpageref{NWavjwc-1eCWox-1}}}\endmoddef\nwused{\\{NW1GVbai-Oyob-1}}
+\nwenddocs{}\nwbegincode{23}\sublabel{NWavjwc-1eCWox-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWavjwc-1eCWox-1}}}\moddef{Read: DBQueryEdge(2)~{\nwtagstyle{}\subpageref{NWavjwc-1eCWox-1}}}\endmoddef\nwused{\\{NW1GVbai-Oyob-1}\\{NW1GVbai-3QhyAk-1}}
 int[] DBQueryEdge(final int v1, final int v2) throws EdgeNotFoundException \{
   if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) \{
     throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
@@ -5524,6 +5544,30 @@ for (int k = 0; k < (sched.length - 2); k += 3) \{
 \}
 \nwidentuses{\\{{DBQueryUser}{DBQueryUser}}}\nwindexuse{DBQueryUser}{DBQueryUser}{NW3NfwZQ-3kBClV-1}\nwendcode{}\nwbegindocs{44}\nwdocspar
 
+\subsection{Apply traffic to route, sched}
+\nwenddocs{}\nwbegincode{45}\sublabel{NW3NfwZQ-UeHS0-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-UeHS0-1}}}\moddef{Apply traffic to route, sched~{\nwtagstyle{}\subpageref{NW3NfwZQ-UeHS0-1}}}\endmoddef\nwused{\\{NW3NfwZQ-3PimUR-1}\\{NW3NfwZQ-42pL1g-1}\\{NW3NfwZQ-3O61Nf-1}}
+int[] mutroute = route.clone();
+int[] mutsched = sched.clone();
+if (this.traffic != null) \{
+  for (int k = 0; k < (mutroute.length - 3); k += 4) \{
+    final int t1 = mutroute[k];
+    final int v1 = mutroute[(k + 1)];
+    final int t2 = mutroute[(k + 2)];
+    final int v2 = mutroute[(k + 3)];
+    int[] ddnu = this.storage.DBQueryEdge(v1, v2);
+    final int dd = ddnu[0];
+    final int nu_old = ddnu[1];
+    final int nu_new = Math.max(1, (int) Math.round(this.traffic.apply(v1, v2, t1)*nu_old));
+    final int diff = ((dd/(t2 - t1)) > nu_new
+        ? ((int) Math.ceil((dd/(float) nu_new + t1))) - t2
+        : 0);
+    for (int q = (k + 2); q < (mutroute.length - 1); q += 2) \{
+      mutroute[q] += diff;
+    \}
+  \}
+\}
+\nwidentuses{\\{{apply}{apply}}\\{{DBQueryEdge}{DBQueryEdge}}}\nwindexuse{apply}{apply}{NW3NfwZQ-UeHS0-1}\nwindexuse{DBQueryEdge}{DBQueryEdge}{NW3NfwZQ-UeHS0-1}\nwendcode{}\nwbegindocs{46}\nwdocspar
+
 \section{Methods}
 
 \subsection{\texttt{DBAddNewVertex}(3)}
@@ -5552,25 +5596,25 @@ precision} as above.
 or {\tt{}SQLException} for other database failures.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{45}\sublabel{NW3NfwZQ-1gwy3q-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-1gwy3q-1}}}\moddef{Write: DBAddNewVertex(3)~{\nwtagstyle{}\subpageref{NW3NfwZQ-1gwy3q-1}}}\endmoddef\nwalsodefined{\\{NW3NfwZQ-1gwy3q-2}\\{NW3NfwZQ-1gwy3q-3}}\nwused{\\{NW1GVbai-Oyob-2}}
+\nwenddocs{}\nwbegincode{47}\sublabel{NW3NfwZQ-1gwy3q-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-1gwy3q-1}}}\moddef{Write: DBAddNewVertex(3)~{\nwtagstyle{}\subpageref{NW3NfwZQ-1gwy3q-1}}}\endmoddef\nwalsodefined{\\{NW3NfwZQ-1gwy3q-2}\\{NW3NfwZQ-1gwy3q-3}}\nwused{\\{NW1GVbai-Oyob-2}}
 void DBAddNewVertex(final int v, final int lng, final int lat)
 throws DuplicateVertexException, SQLException \{
 \nwindexdefn{DBAddNewVertex}{DBAddNewVertex}{NW3NfwZQ-1gwy3q-1}\eatline
-\nwidentdefs{\\{{DBAddNewVertex}{DBAddNewVertex}}}\nwendcode{}\nwbegindocs{46}{\small If only {\tt{}\protect\nwindexuse{DBAddNewVertex}{DBAddNewVertex}{NW3NfwZQ-1gwy3q-1}DBAddNewVertex}(3) is ever used to write vertices into Table
+\nwidentdefs{\\{{DBAddNewVertex}{DBAddNewVertex}}}\nwendcode{}\nwbegindocs{48}{\small If only {\tt{}\protect\nwindexuse{DBAddNewVertex}{DBAddNewVertex}{NW3NfwZQ-1gwy3q-1}DBAddNewVertex}(3) is ever used to write vertices into Table
 V, we can be sure that any vertex appearing in Table V also appears in
 {\tt{}lu{\char95}vertices}.  To check if the vertex in param. 1 is a duplicate entry, it
 is sufficient to check {\tt{}lu{\char95}vertices}.}
-\nwenddocs{}\nwbegincode{47}\sublabel{NW3NfwZQ-1gwy3q-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-1gwy3q-2}}}\moddef{Write: DBAddNewVertex(3)~{\nwtagstyle{}\subpageref{NW3NfwZQ-1gwy3q-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{49}\sublabel{NW3NfwZQ-1gwy3q-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-1gwy3q-2}}}\moddef{Write: DBAddNewVertex(3)~{\nwtagstyle{}\subpageref{NW3NfwZQ-1gwy3q-1}}}\plusendmoddef
   if (this.lu_vertices.containsKey(v)) \{
     throw new DuplicateVertexException("Vertex "+v+" already exists.");
   \}
-\nwendcode{}\nwbegindocs{48}\nwdocspar
+\nwendcode{}\nwbegindocs{50}\nwdocspar
 {\small All we do is use statement {\tt{}\protect\nwindexuse{S0}{S0}{NW3jCmQJ-9czRY-1}S0} to submit the insert statement
 against Table V. By putting {\tt{}conn} in the resources of the outer try, we
 ensure {\tt{}conn} gets closed in the end no matter what happens. This pattern
 will appear in other write methods. If all succeeds, we put the vertex into
 {\tt{}lu{\char95}vertices}.}
-\nwenddocs{}\nwbegincode{49}\sublabel{NW3NfwZQ-1gwy3q-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-1gwy3q-3}}}\moddef{Write: DBAddNewVertex(3)~{\nwtagstyle{}\subpageref{NW3NfwZQ-1gwy3q-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{51}\sublabel{NW3NfwZQ-1gwy3q-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-1gwy3q-3}}}\moddef{Write: DBAddNewVertex(3)~{\nwtagstyle{}\subpageref{NW3NfwZQ-1gwy3q-1}}}\plusendmoddef
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW3jCmQJ-JT1v9-1}}\RA{}) \{
     try \{
       PreparedStatement pS0 = this.PS(conn, "S0");
@@ -5586,7 +5630,7 @@ will appear in other write methods. If all succeeds, we put the vertex into
   \}
   this.lu_vertices.put(v, new int[] \{ lng, lat \});
 \}
-\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S0}{S0}}}\nwindexuse{PS}{PS}{NW3NfwZQ-1gwy3q-3}\nwindexuse{PSAdd}{PSAdd}{NW3NfwZQ-1gwy3q-3}\nwindexuse{PSSubmit}{PSSubmit}{NW3NfwZQ-1gwy3q-3}\nwindexuse{S0}{S0}{NW3NfwZQ-1gwy3q-3}\nwendcode{}\nwbegindocs{50}\nwdocspar
+\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S0}{S0}}}\nwindexuse{PS}{PS}{NW3NfwZQ-1gwy3q-3}\nwindexuse{PSAdd}{PSAdd}{NW3NfwZQ-1gwy3q-3}\nwindexuse{PSSubmit}{PSSubmit}{NW3NfwZQ-1gwy3q-3}\nwindexuse{S0}{S0}{NW3NfwZQ-1gwy3q-3}\nwendcode{}\nwbegindocs{52}\nwdocspar
 
 \subsection{\texttt{DBAddNewEdge}(4)}
 \begin{tabular}{p{\textwidth}}
@@ -5611,7 +5655,7 @@ Integer {\tt{}nu} (param. 4):&maximum free-flow speed along the edge, in meters 
 {\tt{}SQLException} for other database failures.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{51}\sublabel{NW3NfwZQ-4T48Fl-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-4T48Fl-1}}}\moddef{Write: DBAddNewEdge(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-4T48Fl-1}}}\endmoddef\nwused{\\{NW1GVbai-Oyob-2}}
+\nwenddocs{}\nwbegincode{53}\sublabel{NW3NfwZQ-4T48Fl-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-4T48Fl-1}}}\moddef{Write: DBAddNewEdge(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-4T48Fl-1}}}\endmoddef\nwused{\\{NW1GVbai-Oyob-2}}
 void DBAddNewEdge(final int v1, final int v2, final int dd, final int nu)
 throws DuplicateEdgeException, SQLException \{
   if (this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2)) \{
@@ -5636,7 +5680,9 @@ throws DuplicateEdgeException, SQLException \{
   this.lu_edges.get(v1).put(v2, new int[] \{ dd, nu \});
 \}
 \nwindexdefn{DBAddNewEdge}{DBAddNewEdge}{NW3NfwZQ-4T48Fl-1}\eatline
-\nwidentdefs{\\{{DBAddNewEdge}{DBAddNewEdge}}}\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S1}{S1}}}\nwindexuse{PS}{PS}{NW3NfwZQ-4T48Fl-1}\nwindexuse{PSAdd}{PSAdd}{NW3NfwZQ-4T48Fl-1}\nwindexuse{PSSubmit}{PSSubmit}{NW3NfwZQ-4T48Fl-1}\nwindexuse{S1}{S1}{NW3NfwZQ-4T48Fl-1}\nwendcode{}\nwbegindocs{52}\nwdocspar
+\nwidentdefs{\\{{DBAddNewEdge}{DBAddNewEdge}}}\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S1}{S1}}}\nwindexuse{PS}{PS}{NW3NfwZQ-4T48Fl-1}\nwindexuse{PSAdd}{PSAdd}{NW3NfwZQ-4T48Fl-1}\nwindexuse{PSSubmit}{PSSubmit}{NW3NfwZQ-4T48Fl-1}\nwindexuse{S1}{S1}{NW3NfwZQ-4T48Fl-1}\nwendcode{}
+
+\nwbegindocs{54}\nwdocspar
 \subsection{\texttt{DBAddNewRequest}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -5666,7 +5712,7 @@ row into Table R, puts an entry into {\tt{}lu{\char95}users} and into {\tt{}lu{\
 {\tt{}SQLException} for other database failures.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{53}\sublabel{NW3NfwZQ-3NS7mW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3NS7mW-1}}}\moddef{Write: DBAddNewRequest(1)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3NS7mW-1}}}\endmoddef\nwalsodefined{\\{NW3NfwZQ-3NS7mW-2}}\nwused{\\{NW1GVbai-Oyob-2}}
+\nwenddocs{}\nwbegincode{55}\sublabel{NW3NfwZQ-3NS7mW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3NS7mW-1}}}\moddef{Write: DBAddNewRequest(1)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3NS7mW-1}}}\endmoddef\nwalsodefined{\\{NW3NfwZQ-3NS7mW-2}}\nwused{\\{NW1GVbai-Oyob-2}}
 void DBAddNewRequest(final int[] u)
 throws DuplicateUserException, SQLException \{
   final int uid = u[0];
@@ -5686,30 +5732,28 @@ throws DuplicateUserException, SQLException \{
     throw e;
   \}
 \nosublabel{NW3NfwZQ-3NS7mW-1-u3}\nwindexdefn{DBAddNewRequest}{DBAddNewRequest}{NW3NfwZQ-3NS7mW-1}\eatline
-\nwidentdefs{\\{{DBAddNewRequest}{DBAddNewRequest}}}\nwendcode{}
-
-\nwbegindocs{54}{\small In the last step, we put $r$ into {\tt{}lu{\char95}users} and put it into
+\nwidentdefs{\\{{DBAddNewRequest}{DBAddNewRequest}}}\nwendcode{}\nwbegindocs{56}{\small In the last step, we put $r$ into {\tt{}lu{\char95}users} and put it into
 {\tt{}lu{\char95}rstatus} with the value set to {\tt{}false} to indicate that it is
 unassigned. When we put it into {\tt{}lu{\char95}users}, we store a cloned array {\tt{}u} as
 the value because we don't want any changes to {\tt{}u} on the caller side showing
 up in our cache (we are considering users to be immutable).}
-\nwenddocs{}\nwbegincode{55}\sublabel{NW3NfwZQ-3NS7mW-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3NS7mW-2}}}\moddef{Write: DBAddNewRequest(1)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3NS7mW-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{57}\sublabel{NW3NfwZQ-3NS7mW-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3NS7mW-2}}}\moddef{Write: DBAddNewRequest(1)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3NS7mW-1}}}\plusendmoddef
   this.lu_users.put(u[0], u.clone());
   this.lu_rstatus.put(u[0], false);
 \}
-\nwendcode{}\nwbegindocs{56}\nwdocspar
+\nwendcode{}\nwbegindocs{58}\nwdocspar
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\tt{}\protect\nwindexuse{addNewRequest}{addNewRequest}{NW3NfwZQ-3DooRA-1}addNewRequest}}(1) wraps {\tt{}\protect\nwindexuse{DBAddNewRequest}{DBAddNewRequest}{NW3NfwZQ-3NS7mW-1}DBAddNewRequest}(1).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{57}\sublabel{NW3NfwZQ-3DooRA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3DooRA-1}}}\moddef{Write: addNewRequest(1)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3DooRA-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-2}}
+\nwenddocs{}\nwbegincode{59}\sublabel{NW3NfwZQ-3DooRA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3DooRA-1}}}\moddef{Write: addNewRequest(1)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3DooRA-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-2}}
 void addNewRequest(final int[] u) throws DuplicateUserException, SQLException \{
   this.storage.DBAddNewRequest(u);
 \}
 \nwindexdefn{addNewRequest}{addNewRequest}{NW3NfwZQ-3DooRA-1}\eatline
-\nwidentdefs{\\{{addNewRequest}{addNewRequest}}}\nwidentuses{\\{{DBAddNewRequest}{DBAddNewRequest}}}\nwindexuse{DBAddNewRequest}{DBAddNewRequest}{NW3NfwZQ-3DooRA-1}\nwendcode{}\nwbegindocs{58}\nwdocspar
+\nwidentdefs{\\{{addNewRequest}{addNewRequest}}}\nwidentuses{\\{{DBAddNewRequest}{DBAddNewRequest}}}\nwindexuse{DBAddNewRequest}{DBAddNewRequest}{NW3NfwZQ-3DooRA-1}\nwendcode{}\nwbegindocs{60}\nwdocspar
 \subsection{\texttt{DBAddNewServer}(2)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -5754,7 +5798,7 @@ inserts a row into Table CQ, puts an entry into {\tt{}lu{\char95}users}.\\
 in Table E, or {\tt{}SQLException} for other database failures.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{59}\sublabel{NW3NfwZQ-2BLjqQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-2BLjqQ-1}}}\moddef{Write: DBAddNewServer(2)~{\nwtagstyle{}\subpageref{NW3NfwZQ-2BLjqQ-1}}}\endmoddef\nwalsodefined{\\{NW3NfwZQ-2BLjqQ-2}}\nwused{\\{NW1GVbai-Oyob-2}}
+\nwenddocs{}\nwbegincode{61}\sublabel{NW3NfwZQ-2BLjqQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-2BLjqQ-1}}}\moddef{Write: DBAddNewServer(2)~{\nwtagstyle{}\subpageref{NW3NfwZQ-2BLjqQ-1}}}\endmoddef\nwalsodefined{\\{NW3NfwZQ-2BLjqQ-2}}\nwused{\\{NW1GVbai-Oyob-2}}
 void DBAddNewServer(final int[] u, final int[] route)
 throws DuplicateUserException, EdgeNotFoundException, SQLException \{
   final int uid = u[0];
@@ -5777,26 +5821,26 @@ throws DuplicateUserException, EdgeNotFoundException, SQLException \{
   \} catch (SQLException e) \{
     throw e;
   \}
-\nwendcode{}\nwbegindocs{60}\nwdocspar
+\nwendcode{}\nwbegindocs{62}\nwdocspar
 {\small In the last step, we put $s$ into {\tt{}lu{\char95}users}.}
-\nwenddocs{}\nwbegincode{61}\sublabel{NW3NfwZQ-2BLjqQ-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-2BLjqQ-2}}}\moddef{Write: DBAddNewServer(2)~{\nwtagstyle{}\subpageref{NW3NfwZQ-2BLjqQ-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{63}\sublabel{NW3NfwZQ-2BLjqQ-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-2BLjqQ-2}}}\moddef{Write: DBAddNewServer(2)~{\nwtagstyle{}\subpageref{NW3NfwZQ-2BLjqQ-1}}}\plusendmoddef
   this.lu_users.put(uid, u.clone());
 \}
-\nwendcode{}\nwbegindocs{62}\nwdocspar
+\nwendcode{}\nwbegindocs{64}\nwdocspar
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\tt{}\protect\nwindexuse{addNewServer}{addNewServer}{NW3NfwZQ-1CFsEo-1}addNewServer}}(2) wraps {\tt{}\protect\nwindexuse{addNewServer}{addNewServer}{NW3NfwZQ-1CFsEo-1}addNewServer}(2).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{63}\sublabel{NW3NfwZQ-1CFsEo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-1CFsEo-1}}}\moddef{Write: addNewServer(2)~{\nwtagstyle{}\subpageref{NW3NfwZQ-1CFsEo-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-2}}
+\nwenddocs{}\nwbegincode{65}\sublabel{NW3NfwZQ-1CFsEo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-1CFsEo-1}}}\moddef{Write: addNewServer(2)~{\nwtagstyle{}\subpageref{NW3NfwZQ-1CFsEo-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-2}}
 void addNewServer(final int[] u)
 throws DuplicateUserException, EdgeNotFoundException, SQLException,
        GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException \{
   this.storage.DBAddNewServer(u, this.tools.computeRoute(u[4], u[5], u[2]));
 \}
 \nwindexdefn{addNewServer}{addNewServer}{NW3NfwZQ-1CFsEo-1}\eatline
-\nwidentdefs{\\{{addNewServer}{addNewServer}}}\nwidentuses{\\{{computeRoute}{computeRoute}}}\nwindexuse{computeRoute}{computeRoute}{NW3NfwZQ-1CFsEo-1}\nwendcode{}\nwbegindocs{64}\nwdocspar
+\nwidentdefs{\\{{addNewServer}{addNewServer}}}\nwidentuses{\\{{computeRoute}{computeRoute}}}\nwindexuse{computeRoute}{computeRoute}{NW3NfwZQ-1CFsEo-1}\nwendcode{}\nwbegindocs{66}\nwdocspar
 \subsection{\texttt{DBUpdateEdgeSpeed}(3)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -5821,7 +5865,7 @@ any server route. This update may cause C56 violations if waypoint times
 or {\tt{}SQLException} for other database failures.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{65}\sublabel{NW3NfwZQ-4RKqny-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-4RKqny-1}}}\moddef{Write: DBUpdateEdgeSpeed(3)~{\nwtagstyle{}\subpageref{NW3NfwZQ-4RKqny-1}}}\endmoddef\nwused{\\{NW1GVbai-Oyob-2}}
+\nwenddocs{}\nwbegincode{67}\sublabel{NW3NfwZQ-4RKqny-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-4RKqny-1}}}\moddef{Write: DBUpdateEdgeSpeed(3)~{\nwtagstyle{}\subpageref{NW3NfwZQ-4RKqny-1}}}\endmoddef\nwused{\\{NW1GVbai-Oyob-2}}
 void DBUpdateEdgeSpeed(final int v1, final int v2, final int nu)
 throws EdgeNotFoundException, SQLException \{
   if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) \{
@@ -5845,7 +5889,7 @@ throws EdgeNotFoundException, SQLException \{
   this.lu_edges.get(v1).get(v2)[1] = nu;
 \}
 \nwindexdefn{DBUpdateEdgeSpeed}{DBUpdateEdgeSpeed}{NW3NfwZQ-4RKqny-1}\eatline
-\nwidentdefs{\\{{DBUpdateEdgeSpeed}{DBUpdateEdgeSpeed}}}\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S131}{S131}}\\{{S15}{S15}}}\nwindexuse{PS}{PS}{NW3NfwZQ-4RKqny-1}\nwindexuse{PSAdd}{PSAdd}{NW3NfwZQ-4RKqny-1}\nwindexuse{PSSubmit}{PSSubmit}{NW3NfwZQ-4RKqny-1}\nwindexuse{S131}{S131}{NW3NfwZQ-4RKqny-1}\nwindexuse{S15}{S15}{NW3NfwZQ-4RKqny-1}\nwendcode{}\nwbegindocs{66}\nwdocspar
+\nwidentdefs{\\{{DBUpdateEdgeSpeed}{DBUpdateEdgeSpeed}}}\nwidentuses{\\{{PS}{PS}}\\{{PSAdd}{PSAdd}}\\{{PSSubmit}{PSSubmit}}\\{{S131}{S131}}\\{{S15}{S15}}}\nwindexuse{PS}{PS}{NW3NfwZQ-4RKqny-1}\nwindexuse{PSAdd}{PSAdd}{NW3NfwZQ-4RKqny-1}\nwindexuse{PSSubmit}{PSSubmit}{NW3NfwZQ-4RKqny-1}\nwindexuse{S131}{S131}{NW3NfwZQ-4RKqny-1}\nwindexuse{S15}{S15}{NW3NfwZQ-4RKqny-1}\nwendcode{}\nwbegindocs{68}\nwdocspar
 
 \subsection{\texttt{DBUpdateServerRoute}(3)}
 \begin{tabular}{p{\textwidth}}
@@ -5919,7 +5963,7 @@ may delete and insert rows into Table CQ.\\
 Table E, or {\tt{}SQLException} for other database failures.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{67}\sublabel{NW3NfwZQ-MMhxz-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-MMhxz-1}}}\moddef{Write: DBUpdateServerRoute(3)~{\nwtagstyle{}\subpageref{NW3NfwZQ-MMhxz-1}}}\endmoddef\nwused{\\{NW1GVbai-Oyob-2}}
+\nwenddocs{}\nwbegincode{69}\sublabel{NW3NfwZQ-MMhxz-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-MMhxz-1}}}\moddef{Write: DBUpdateServerRoute(3)~{\nwtagstyle{}\subpageref{NW3NfwZQ-MMhxz-1}}}\endmoddef\nwused{\\{NW1GVbai-Oyob-2}}
 void DBUpdateServerRoute(final int sid, final int[] route, final int[] sched)
 throws UserNotFoundException, EdgeNotFoundException, SQLException \{
   if (!this.lu_users.containsKey(sid)) \{
@@ -5944,7 +5988,7 @@ throws UserNotFoundException, EdgeNotFoundException, SQLException \{
   \}
 \}
 \nosublabel{NW3NfwZQ-MMhxz-1-u3}\nwindexdefn{DBUpdateServerRoute}{DBUpdateServerRoute}{NW3NfwZQ-MMhxz-1}\eatline
-\nwidentdefs{\\{{DBUpdateServerRoute}{DBUpdateServerRoute}}}\nwendcode{}\nwbegindocs{68}\begin{tabular}{p{\textwidth}}
+\nwidentdefs{\\{{DBUpdateServerRoute}{DBUpdateServerRoute}}}\nwendcode{}\nwbegindocs{70}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\tt{}\protect\nwindexuse{updateServerRoute}{updateServerRoute}{NW3NfwZQ-3PimUR-1}updateServerRoute}}(3) wraps {\tt{}\protect\nwindexuse{DBUpdateServerRoute}{DBUpdateServerRoute}{NW3NfwZQ-MMhxz-1}DBUpdateServerRoute}(3).
@@ -5954,19 +5998,20 @@ must not be less than the {\tt{}world{\char95}time}, otherwise the wrapper does 
 the method call and returns {\tt{}false}.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{69}\sublabel{NW3NfwZQ-3PimUR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3PimUR-1}}}\moddef{Write: updateServerRoute(3)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3PimUR-1}}}\endmoddef\nwused{\\{NW1GVbai-2Rlctf-2}}
+\nwenddocs{}\nwbegincode{71}\sublabel{NW3NfwZQ-3PimUR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3PimUR-1}}}\moddef{Write: updateServerRoute(3)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3PimUR-1}}}\endmoddef\nwused{\\{NW1GVbai-2Rlctf-2}}
 void updateServerRoute(final int sid, final int[] route, final int[] sched)
 throws RouteIllegalOverwriteException, UserNotFoundException,
        EdgeNotFoundException, TimeWindowViolation, SQLException \{
   if (route[0] >= this.forwardSimulationWorldTime()) \{
     \LA{}Check time window violation~{\nwtagstyle{}\subpageref{NW3NfwZQ-3kBClV-1}}\RA{}
-    this.storage.DBUpdateServerRoute(sid, route, sched);
+    \LA{}Apply traffic to route, sched~{\nwtagstyle{}\subpageref{NW3NfwZQ-UeHS0-1}}\RA{}
+    this.storage.DBUpdateServerRoute(sid, mutroute, mutsched);
   \} else \{
     throw new RouteIllegalOverwriteException();
   \}
 \}
 \nwindexdefn{updateServerRoute}{updateServerRoute}{NW3NfwZQ-3PimUR-1}\eatline
-\nwidentdefs{\\{{updateServerRoute}{updateServerRoute}}}\nwidentuses{\\{{DBUpdateServerRoute}{DBUpdateServerRoute}}\\{{forwardSimulationWorldTime}{forwardSimulationWorldTime}}}\nwindexuse{DBUpdateServerRoute}{DBUpdateServerRoute}{NW3NfwZQ-3PimUR-1}\nwindexuse{forwardSimulationWorldTime}{forwardSimulationWorldTime}{NW3NfwZQ-3PimUR-1}\nwendcode{}\nwbegindocs{70}\nwdocspar
+\nwidentdefs{\\{{updateServerRoute}{updateServerRoute}}}\nwidentuses{\\{{DBUpdateServerRoute}{DBUpdateServerRoute}}\\{{forwardSimulationWorldTime}{forwardSimulationWorldTime}}}\nwindexuse{DBUpdateServerRoute}{DBUpdateServerRoute}{NW3NfwZQ-3PimUR-1}\nwindexuse{forwardSimulationWorldTime}{forwardSimulationWorldTime}{NW3NfwZQ-3PimUR-1}\nwendcode{}\nwbegindocs{72}\nwdocspar
 \subsection{\texttt{DBUpdateServerAddToSchedule}(4)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -6046,7 +6091,7 @@ request identifier in {\tt{}rid} (param. 4) cannot be found,
 Table E, or {\tt{}SQLException} for other database failures.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{71}\sublabel{NW3NfwZQ-3yF6ns-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3yF6ns-1}}}\moddef{Write: DBUpdateServerAddToSchedule(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3yF6ns-1}}}\endmoddef\nwalsodefined{\\{NW3NfwZQ-3yF6ns-2}}\nwused{\\{NW1GVbai-Oyob-2}}
+\nwenddocs{}\nwbegincode{73}\sublabel{NW3NfwZQ-3yF6ns-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3yF6ns-1}}}\moddef{Write: DBUpdateServerAddToSchedule(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3yF6ns-1}}}\endmoddef\nwalsodefined{\\{NW3NfwZQ-3yF6ns-2}}\nwused{\\{NW1GVbai-Oyob-2}}
 void DBUpdateServerAddToSchedule(
     final int sid, final int[] route, final int[] sched, final int[] rid)
 throws UserNotFoundException, EdgeNotFoundException, SQLException \{
@@ -6075,15 +6120,15 @@ throws UserNotFoundException, EdgeNotFoundException, SQLException \{
     throw e;
   \}
 \nosublabel{NW3NfwZQ-3yF6ns-1-u3}\nwindexdefn{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}{NW3NfwZQ-3yF6ns-1}\eatline
-\nwidentdefs{\\{{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}}}\nwendcode{}\nwbegindocs{72}{\small If all goes well, we add each request identifier in {\tt{}rid} into
+\nwidentdefs{\\{{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}}}\nwendcode{}\nwbegindocs{74}{\small If all goes well, we add each request identifier in {\tt{}rid} into
 {\tt{}lu{\char95}rstatus} and change the value to {\tt{}true}, indicating that the request
 is now \emph{assigned}.}
-\nwenddocs{}\nwbegincode{73}\sublabel{NW3NfwZQ-3yF6ns-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3yF6ns-2}}}\moddef{Write: DBUpdateServerAddToSchedule(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3yF6ns-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{75}\sublabel{NW3NfwZQ-3yF6ns-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3yF6ns-2}}}\moddef{Write: DBUpdateServerAddToSchedule(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3yF6ns-1}}}\plusendmoddef
   for (final int r : rid) \{
     this.lu_rstatus.put(r, true);
   \}
 \}
-\nwendcode{}\nwbegindocs{74}\nwdocspar
+\nwendcode{}\nwbegindocs{76}\nwdocspar
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -6096,7 +6141,7 @@ param. 1) current route, otherwise the wrapper does not perform the method call
 and returns {\tt{}false}.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{75}\sublabel{NW3NfwZQ-42pL1g-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-42pL1g-1}}}\moddef{Write: updateServerAddToSchedule(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-42pL1g-1}}}\endmoddef\nwused{\\{NW1GVbai-2Rlctf-2}}
+\nwenddocs{}\nwbegincode{77}\sublabel{NW3NfwZQ-42pL1g-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-42pL1g-1}}}\moddef{Write: updateServerAddToSchedule(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-42pL1g-1}}}\endmoddef\nwused{\\{NW1GVbai-2Rlctf-2}}
 void updateServerAddToSchedule(final int sid, final int[] route, final int[] sched, final int[] rid)
 throws RouteIllegalOverwriteException, UserNotFoundException,
        EdgeNotFoundException, TimeWindowViolation, SQLException \{
@@ -6120,10 +6165,11 @@ throws RouteIllegalOverwriteException, UserNotFoundException,
     j += 2;
   \}
   \LA{}Check time window violation~{\nwtagstyle{}\subpageref{NW3NfwZQ-3kBClV-1}}\RA{}
-  this.storage.DBUpdateServerAddToSchedule(sid, route, sched, rid);
+  \LA{}Apply traffic to route, sched~{\nwtagstyle{}\subpageref{NW3NfwZQ-UeHS0-1}}\RA{}
+  this.storage.DBUpdateServerAddToSchedule(sid, mutroute, mutsched, rid);
 \}
 \nwindexdefn{updateServerAddToSchedule}{updateServerAddToSchedule}{NW3NfwZQ-42pL1g-1}\eatline
-\nwidentdefs{\\{{updateServerAddToSchedule}{updateServerAddToSchedule}}}\nwidentuses{\\{{DBQueryServerRoute}{DBQueryServerRoute}}\\{{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}}\\{{forwardSimulationWorldTime}{forwardSimulationWorldTime}}}\nwindexuse{DBQueryServerRoute}{DBQueryServerRoute}{NW3NfwZQ-42pL1g-1}\nwindexuse{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}{NW3NfwZQ-42pL1g-1}\nwindexuse{forwardSimulationWorldTime}{forwardSimulationWorldTime}{NW3NfwZQ-42pL1g-1}\nwendcode{}\nwbegindocs{76}\nwdocspar
+\nwidentdefs{\\{{updateServerAddToSchedule}{updateServerAddToSchedule}}}\nwidentuses{\\{{DBQueryServerRoute}{DBQueryServerRoute}}\\{{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}}\\{{forwardSimulationWorldTime}{forwardSimulationWorldTime}}}\nwindexuse{DBQueryServerRoute}{DBQueryServerRoute}{NW3NfwZQ-42pL1g-1}\nwindexuse{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}{NW3NfwZQ-42pL1g-1}\nwindexuse{forwardSimulationWorldTime}{forwardSimulationWorldTime}{NW3NfwZQ-42pL1g-1}\nwendcode{}\nwbegindocs{78}\nwdocspar
 \subsection{\texttt{DBUpdateServerRemoveFromSchedule}(4)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -6202,7 +6248,7 @@ request identifier in {\tt{}rid} (param. 4) cannot be found,
 Table E, or {\tt{}SQLException} for other database failures.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{77}\sublabel{NW3NfwZQ-PxyQL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-PxyQL-1}}}\moddef{Write: DBUpdateServerRemoveFromSchedule(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-PxyQL-1}}}\endmoddef\nwalsodefined{\\{NW3NfwZQ-PxyQL-2}}\nwused{\\{NW1GVbai-Oyob-2}}
+\nwenddocs{}\nwbegincode{79}\sublabel{NW3NfwZQ-PxyQL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-PxyQL-1}}}\moddef{Write: DBUpdateServerRemoveFromSchedule(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-PxyQL-1}}}\endmoddef\nwalsodefined{\\{NW3NfwZQ-PxyQL-2}}\nwused{\\{NW1GVbai-Oyob-2}}
 void DBUpdateServerRemoveFromSchedule(
     final int sid, final int[] route, final int[] sched, final int[] rid)
 throws UserNotFoundException, EdgeNotFoundException, SQLException \{
@@ -6231,15 +6277,15 @@ throws UserNotFoundException, EdgeNotFoundException, SQLException \{
     throw e;
   \}
 \nosublabel{NW3NfwZQ-PxyQL-1-u4}\nwindexdefn{DBUpdateServerRemoveFromSchedule}{DBUpdateServerRemoveFromSchedule}{NW3NfwZQ-PxyQL-1}\eatline
-\nwidentdefs{\\{{DBUpdateServerRemoveFromSchedule}{DBUpdateServerRemoveFromSchedule}}}\nwendcode{}\nwbegindocs{78}{\small If all goes well, we put each request indentifier in {\tt{}rid} into
+\nwidentdefs{\\{{DBUpdateServerRemoveFromSchedule}{DBUpdateServerRemoveFromSchedule}}}\nwendcode{}\nwbegindocs{80}{\small If all goes well, we put each request indentifier in {\tt{}rid} into
 {\tt{}lu{\char95}rstatus} and change the value to {\tt{}false}, indicating that the request
 is now \emph{unassigned}.}
-\nwenddocs{}\nwbegincode{79}\sublabel{NW3NfwZQ-PxyQL-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-PxyQL-2}}}\moddef{Write: DBUpdateServerRemoveFromSchedule(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-PxyQL-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{81}\sublabel{NW3NfwZQ-PxyQL-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-PxyQL-2}}}\moddef{Write: DBUpdateServerRemoveFromSchedule(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-PxyQL-1}}}\plusendmoddef
   for (final int r : rid) \{
     this.lu_rstatus.put(r, false);
   \}
 \}
-\nwendcode{}\nwbegindocs{80}\nwdocspar
+\nwendcode{}\nwbegindocs{82}\nwdocspar
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -6250,19 +6296,20 @@ must not be less than the {\tt{}world{\char95}time}, otherwise the wrapper does 
 the method call and returns {\tt{}false}.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{81}\sublabel{NW3NfwZQ-3O61Nf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3O61Nf-1}}}\moddef{Write: updateServerRemoveFromSchedule(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3O61Nf-1}}}\endmoddef\nwused{\\{NW1GVbai-2Rlctf-2}}
+\nwenddocs{}\nwbegincode{83}\sublabel{NW3NfwZQ-3O61Nf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3NfwZQ-3O61Nf-1}}}\moddef{Write: updateServerRemoveFromSchedule(4)~{\nwtagstyle{}\subpageref{NW3NfwZQ-3O61Nf-1}}}\endmoddef\nwused{\\{NW1GVbai-2Rlctf-2}}
 void updateServerRemoveFromSchedule( final int sid, final int[] route, final int[] sched, final int[] rid)
 throws RouteIllegalOverwriteException, UserNotFoundException,
        EdgeNotFoundException, TimeWindowViolation, SQLException \{
   if (route[0] >= this.forwardSimulationWorldTime()) \{
     \LA{}Check time window violation~{\nwtagstyle{}\subpageref{NW3NfwZQ-3kBClV-1}}\RA{}
-    this.storage.DBUpdateServerRemoveFromSchedule(sid, route, sched, rid);
+    \LA{}Apply traffic to route, sched~{\nwtagstyle{}\subpageref{NW3NfwZQ-UeHS0-1}}\RA{}
+    this.storage.DBUpdateServerRemoveFromSchedule(sid, mutroute, mutsched, rid);
   \} else \{
     throw new RouteIllegalOverwriteException();
   \}
 \}
 \nwindexdefn{updateServerRemoveFromSchedule}{updateServerRemoveFromSchedule}{NW3NfwZQ-3O61Nf-1}\eatline
-\nwidentdefs{\\{{updateServerRemoveFromSchedule}{updateServerRemoveFromSchedule}}}\nwidentuses{\\{{DBUpdateServerRemoveFromSchedule}{DBUpdateServerRemoveFromSchedule}}\\{{forwardSimulationWorldTime}{forwardSimulationWorldTime}}}\nwindexuse{DBUpdateServerRemoveFromSchedule}{DBUpdateServerRemoveFromSchedule}{NW3NfwZQ-3O61Nf-1}\nwindexuse{forwardSimulationWorldTime}{forwardSimulationWorldTime}{NW3NfwZQ-3O61Nf-1}\nwendcode{}\nwbegindocs{82}\nwdocspar
+\nwidentdefs{\\{{updateServerRemoveFromSchedule}{updateServerRemoveFromSchedule}}}\nwidentuses{\\{{DBUpdateServerRemoveFromSchedule}{DBUpdateServerRemoveFromSchedule}}\\{{forwardSimulationWorldTime}{forwardSimulationWorldTime}}}\nwindexuse{DBUpdateServerRemoveFromSchedule}{DBUpdateServerRemoveFromSchedule}{NW3NfwZQ-3O61Nf-1}\nwindexuse{forwardSimulationWorldTime}{forwardSimulationWorldTime}{NW3NfwZQ-3O61Nf-1}\nwendcode{}\nwbegindocs{84}\nwdocspar
 \nwenddocs{}\nwfilename{src/4-Administration.nw}\nwbegindocs{0}\chapter{Administering Jargo Instances}
 \label{admin}
 
@@ -7963,60 +8010,65 @@ void registerClient(final Client target) \{
 \}
 \nwindexdefn{registerClient}{registerClient}{NW2ZDXo8-1UtY1X-1}\eatline
 \nwidentdefs{\\{{registerClient}{registerClient}}}\nwidentuses{\\{{registerCommunicator}{registerCommunicator}}}\nwindexuse{registerCommunicator}{registerCommunicator}{NW2ZDXo8-1UtY1X-1}\nwendcode{}\nwbegindocs{59}\nwdocspar
-\subsection{\texttt{setClockStart}(1)}
-\nwenddocs{}\nwbegincode{60}\sublabel{NW2ZDXo8-3p6i4s-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-3p6i4s-1}}}\moddef{setClockStart(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-3p6i4s-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{60}\sublabel{NW2ZDXo8-1eYS0t-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1eYS0t-1}}}\moddef{registerTraffic(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-1eYS0t-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
+void registerTraffic(final Traffic target) \{
+  this.communicator.forwardTraffic(target);
+\}
+\nwindexdefn{registerTraffic}{registerTraffic}{NW2ZDXo8-1eYS0t-1}\eatline
+\nwidentdefs{\\{{registerTraffic}{registerTraffic}}}\nwendcode{}\nwbegindocs{61}\subsection{\texttt{setClockStart}(1)}
+\nwenddocs{}\nwbegincode{62}\sublabel{NW2ZDXo8-3p6i4s-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-3p6i4s-1}}}\moddef{setClockStart(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-3p6i4s-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
 void setClockStart(final int t) \{
   this.clockstart = t;
 \}
 \nwindexdefn{setClockStart}{setClockStart}{NW2ZDXo8-3p6i4s-1}\eatline
-\nwidentdefs{\\{{setClockStart}{setClockStart}}}\nwendcode{}\nwbegindocs{61}\nwdocspar
+\nwidentdefs{\\{{setClockStart}{setClockStart}}}\nwendcode{}\nwbegindocs{63}\nwdocspar
 \subsection{\texttt{setClockEnd}(1)}
-\nwenddocs{}\nwbegincode{62}\sublabel{NW2ZDXo8-4Gk1RN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-4Gk1RN-1}}}\moddef{setClockEnd(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-4Gk1RN-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{64}\sublabel{NW2ZDXo8-4Gk1RN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-4Gk1RN-1}}}\moddef{setClockEnd(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-4Gk1RN-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
 void setClockEnd(final int t) \{
   this.clockend = t;
 \}
 \nwindexdefn{setClockEnd}{setClockEnd}{NW2ZDXo8-4Gk1RN-1}\eatline
-\nwidentdefs{\\{{setClockEnd}{setClockEnd}}}\nwendcode{}\nwbegindocs{63}\nwdocspar
+\nwidentdefs{\\{{setClockEnd}{setClockEnd}}}\nwendcode{}\nwbegindocs{65}\nwdocspar
 \subsection{\texttt{setRequestTimeout}(1)}
-\nwenddocs{}\nwbegincode{64}\sublabel{NW2ZDXo8-40L33p-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-40L33p-1}}}\moddef{setRequestTimeout(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-40L33p-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{66}\sublabel{NW2ZDXo8-40L33p-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-40L33p-1}}}\moddef{setRequestTimeout(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-40L33p-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
 void setRequestTimeout(final int t) \{
   this.request_timeout = t;
 \}
 \nwindexdefn{setRequestTimeout}{setRequestTimeout}{NW2ZDXo8-40L33p-1}\eatline
-\nwidentdefs{\\{{setRequestTimeout}{setRequestTimeout}}}\nwendcode{}\nwbegindocs{65}\nwdocspar
+\nwidentdefs{\\{{setRequestTimeout}{setRequestTimeout}}}\nwendcode{}\nwbegindocs{67}\nwdocspar
 \subsection{\texttt{setQueueTimeout}(1)}
-\nwenddocs{}\nwbegincode{66}\sublabel{NW2ZDXo8-4Sx8Z3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-4Sx8Z3-1}}}\moddef{setQueueTimeout(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-4Sx8Z3-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{68}\sublabel{NW2ZDXo8-4Sx8Z3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-4Sx8Z3-1}}}\moddef{setQueueTimeout(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-4Sx8Z3-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
 void setQueueTimeout(final int t) \{
   this.queue_timeout = t;
 \}
 \nwindexdefn{setQueueTimeout}{setQueueTimeout}{NW2ZDXo8-4Sx8Z3-1}\eatline
-\nwidentdefs{\\{{setQueueTimeout}{setQueueTimeout}}}\nwendcode{}\nwbegindocs{67}\nwdocspar
+\nwidentdefs{\\{{setQueueTimeout}{setQueueTimeout}}}\nwendcode{}\nwbegindocs{69}\nwdocspar
 \subsection{\texttt{setEngineUpdatePeriod(1)}}
-\nwenddocs{}\nwbegincode{68}\sublabel{NW2ZDXo8-1q9MsZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1q9MsZ-1}}}\moddef{setEngineUpdatePeriod(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-1q9MsZ-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{70}\sublabel{NW2ZDXo8-1q9MsZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1q9MsZ-1}}}\moddef{setEngineUpdatePeriod(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-1q9MsZ-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
 void setEngineUpdatePeriod(final int t) \{
   this.engine_update_period = t;
 \}
 \nwindexdefn{setEngineUpdatePeriod}{setEngineUpdatePeriod}{NW2ZDXo8-1q9MsZ-1}\eatline
-\nwidentdefs{\\{{setEngineUpdatePeriod}{setEngineUpdatePeriod}}}\nwendcode{}\nwbegindocs{69}\nwdocspar
+\nwidentdefs{\\{{setEngineUpdatePeriod}{setEngineUpdatePeriod}}}\nwendcode{}\nwbegindocs{71}\nwdocspar
 \subsection{\texttt{getSimulationWorldTime(0)}}
-\nwenddocs{}\nwbegincode{70}\sublabel{NW2ZDXo8-4M5chG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-4M5chG-1}}}\moddef{getSimulationWorldTime(0)~{\nwtagstyle{}\subpageref{NW2ZDXo8-4M5chG-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{72}\sublabel{NW2ZDXo8-4M5chG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-4M5chG-1}}}\moddef{getSimulationWorldTime(0)~{\nwtagstyle{}\subpageref{NW2ZDXo8-4M5chG-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
 int getSimulationWorldTime() \{
   return this.world_time;
 \}
 \nwindexdefn{getSimulationWorldTime}{getSimulationWorldTime}{NW2ZDXo8-4M5chG-1}\eatline
-\nwidentdefs{\\{{getSimulationWorldTime}{getSimulationWorldTime}}}\nwendcode{}\nwbegindocs{71}\nwdocspar
+\nwidentdefs{\\{{getSimulationWorldTime}{getSimulationWorldTime}}}\nwendcode{}\nwbegindocs{73}\nwdocspar
 
 \subsection{\texttt{returnRequest}(1)}
-\nwenddocs{}\nwbegincode{72}\sublabel{NW2ZDXo8-23SuC3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-23SuC3-1}}}\moddef{returnRequest(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-23SuC3-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{74}\sublabel{NW2ZDXo8-23SuC3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-23SuC3-1}}}\moddef{returnRequest(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-23SuC3-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
 void returnRequest(final int[] r) \{
   if (this.world_time - r[2] < this.queue_timeout) \{
     this.lu_seen.put(r[0], false);
   \}
 \}
 \nwindexdefn{returnRequest}{returnRequest}{NW2ZDXo8-23SuC3-1}\eatline
-\nwidentdefs{\\{{returnRequest}{returnRequest}}}\nwendcode{}\nwbegindocs{73}\nwdocspar
+\nwidentdefs{\\{{returnRequest}{returnRequest}}}\nwendcode{}\nwbegindocs{75}\nwdocspar
 \subsection{\texttt{startRealtime}(1)}
-\nwenddocs{}\nwbegincode{74}\sublabel{NW2ZDXo8-1dNtp8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1dNtp8-1}}}\moddef{startRealtime(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-1dNtp8-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{76}\sublabel{NW2ZDXo8-1dNtp8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1dNtp8-1}}}\moddef{startRealtime(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-1dNtp8-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
 void startRealtime(final Consumer<Boolean> app_cb) \{
   this.storage.forwardRequestTimeout(request_timeout);
   this.world_time = this.clockstart;
@@ -8055,9 +8107,9 @@ void startRealtime(final Consumer<Boolean> app_cb) \{
   \}, simulation_duration, TimeUnit.SECONDS);
 \}
 \nwindexdefn{startRealtime}{startRealtime}{NW2ZDXo8-1dNtp8-1}\eatline
-\nwidentdefs{\\{{startRealtime}{startRealtime}}}\nwidentuses{\\{{end}{end}}\\{{forwardRequestTimeout}{forwardRequestTimeout}}\\{{getRequestCollectionPeriod}{getRequestCollectionPeriod}}\\{{getRequestHandlingPeriod}{getRequestHandlingPeriod}}\\{{getServerLocationCollectionPeriod}{getServerLocationCollectionPeriod}}}\nwindexuse{end}{end}{NW2ZDXo8-1dNtp8-1}\nwindexuse{forwardRequestTimeout}{forwardRequestTimeout}{NW2ZDXo8-1dNtp8-1}\nwindexuse{getRequestCollectionPeriod}{getRequestCollectionPeriod}{NW2ZDXo8-1dNtp8-1}\nwindexuse{getRequestHandlingPeriod}{getRequestHandlingPeriod}{NW2ZDXo8-1dNtp8-1}\nwindexuse{getServerLocationCollectionPeriod}{getServerLocationCollectionPeriod}{NW2ZDXo8-1dNtp8-1}\nwendcode{}\nwbegindocs{75}\nwdocspar
+\nwidentdefs{\\{{startRealtime}{startRealtime}}}\nwidentuses{\\{{end}{end}}\\{{forwardRequestTimeout}{forwardRequestTimeout}}\\{{getRequestCollectionPeriod}{getRequestCollectionPeriod}}\\{{getRequestHandlingPeriod}{getRequestHandlingPeriod}}\\{{getServerLocationCollectionPeriod}{getServerLocationCollectionPeriod}}}\nwindexuse{end}{end}{NW2ZDXo8-1dNtp8-1}\nwindexuse{forwardRequestTimeout}{forwardRequestTimeout}{NW2ZDXo8-1dNtp8-1}\nwindexuse{getRequestCollectionPeriod}{getRequestCollectionPeriod}{NW2ZDXo8-1dNtp8-1}\nwindexuse{getRequestHandlingPeriod}{getRequestHandlingPeriod}{NW2ZDXo8-1dNtp8-1}\nwindexuse{getServerLocationCollectionPeriod}{getServerLocationCollectionPeriod}{NW2ZDXo8-1dNtp8-1}\nwendcode{}\nwbegindocs{77}\nwdocspar
 \subsection{\texttt{startSequential}(1)}
-\nwenddocs{}\nwbegincode{76}\sublabel{NW2ZDXo8-2R9Ikm-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-2R9Ikm-1}}}\moddef{startSequential(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-2R9Ikm-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{78}\sublabel{NW2ZDXo8-2R9Ikm-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-2R9Ikm-1}}}\moddef{startSequential(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-2R9Ikm-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
 void startSequential(final Consumer<Boolean> app_cb) \{
   this.storage.forwardRequestTimeout(request_timeout);
   this.world_time = this.clockstart;
@@ -8072,32 +8124,21 @@ void startSequential(final Consumer<Boolean> app_cb) \{
   app_cb.accept(true);
 \}
 \nwindexdefn{startSequential}{startSequential}{NW2ZDXo8-2R9Ikm-1}\eatline
-\nwidentdefs{\\{{startSequential}{startSequential}}}\nwidentuses{\\{{end}{end}}\\{{forwardRequestTimeout}{forwardRequestTimeout}}}\nwindexuse{end}{end}{NW2ZDXo8-2R9Ikm-1}\nwindexuse{forwardRequestTimeout}{forwardRequestTimeout}{NW2ZDXo8-2R9Ikm-1}\nwendcode{}\nwbegindocs{77}\nwdocspar
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\nwenddocs{}\nwfilename{src/Communicator.nw}\nwbegindocs{0}\chapter{Class: Communicator}
+\nwidentdefs{\\{{startSequential}{startSequential}}}\nwidentuses{\\{{end}{end}}\\{{forwardRequestTimeout}{forwardRequestTimeout}}}\nwindexuse{end}{end}{NW2ZDXo8-2R9Ikm-1}\nwindexuse{forwardRequestTimeout}{forwardRequestTimeout}{NW2ZDXo8-2R9Ikm-1}\nwendcode{}\nwbegindocs{79}\nwdocspar
+\subsection{\texttt{internalRefStorage}(0)}
+\nwenddocs{}\nwbegincode{80}\sublabel{NW2ZDXo8-2om7IF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-2om7IF-1}}}\moddef{internalRefStorage(0)~{\nwtagstyle{}\subpageref{NW2ZDXo8-2om7IF-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
+Storage internalRefStorage() \{
+  return this.storage;
+\}
+\nwindexdefn{internalRefStorage}{internalRefStorage}{NW2ZDXo8-2om7IF-1}\eatline
+\nwidentdefs{\\{{internalRefStorage}{internalRefStorage}}}\nwendcode{}\nwbegindocs{81}\nwdocspar
+\subsection{\texttt{internalRefCommunicator}(0)}
+\nwenddocs{}\nwbegincode{82}\sublabel{NW2ZDXo8-UOHfO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-UOHfO-1}}}\moddef{internalRefCommunicator(0)~{\nwtagstyle{}\subpageref{NW2ZDXo8-UOHfO-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
+Communicator internalRefCommunicator() \{
+  return this.communicator;
+\}
+\nwindexdefn{internalRefCommunicator}{internalRefCommunicator}{NW2ZDXo8-UOHfO-1}\eatline
+\nwidentdefs{\\{{internalRefCommunicator}{internalRefCommunicator}}}\nwendcode{}\nwfilename{src/Communicator.nw}\nwbegindocs{0}\chapter{Class: Communicator}
 \label{communicator}
 
 \nwenddocs{}\nwbegincode{1}\sublabel{NWvbkzY-1uGZre-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-1uGZre-1}}}\moddef{Communicator.java~{\nwtagstyle{}\subpageref{NWvbkzY-1uGZre-1}}}\endmoddef\nwnotused{Communicator.java}
@@ -8125,6 +8166,7 @@ package com.github.jargors;
 \nwenddocs{}\nwbegincode{5}\sublabel{NWvbkzY-3IAuyF-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-3IAuyF-2}}}\moddef{Communicator.java preamble~{\nwtagstyle{}\subpageref{NWvbkzY-3IAuyF-1}}}\plusendmoddef
 import com.github.jargors.Storage;
 import com.github.jargors.Controller;
+import com.github.jargors.Traffic;
 import com.github.jargors.exceptions.ClientException;
 import com.github.jargors.exceptions.ClientFatalException;
 import com.github.jargors.exceptions.DuplicateVertexException;
@@ -8144,6 +8186,7 @@ import java.sql.SQLException;
 \nwenddocs{}\nwbegincode{7}\sublabel{NWvbkzY-18oERh-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-18oERh-1}}}\moddef{\code{}Communicator\edoc{} member variables~{\nwtagstyle{}\subpageref{NWvbkzY-18oERh-1}}}\endmoddef\nwused{\\{NWvbkzY-1uGZre-1}}
 private Storage storage;
 private Controller controller;
+private Traffic traffic = null;
 private final boolean DEBUG = "true".equals(System.getProperty("jargors.communicator.debug"));
 \nwendcode{}\nwbegindocs{8}\nwdocspar
 
@@ -8168,45 +8211,115 @@ void registerController(final Controller src) \{
 \}
 \nwindexdefn{setController}{setController}{NWvbkzY-1VEXly-1}\eatline
 \nwidentdefs{\\{{setController}{setController}}}\nwendcode{}\nwbegindocs{14}\nwdocspar
-
+\subsection{\texttt{forwardTraffic}(1)}
+\nwenddocs{}\nwbegincode{15}\sublabel{NWvbkzY-7Z7vS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-7Z7vS-1}}}\moddef{forwardTraffic(1)~{\nwtagstyle{}\subpageref{NWvbkzY-7Z7vS-1}}}\endmoddef\nwused{\\{NW1GVbai-2Rlctf-3}}
+void forwardTraffic (final Traffic src) \{
+  this.traffic = src;
+  this.traffic.forwardVertices(this.storage.getReferenceVerticesCache());
+  this.traffic.forwardEdges(this.storage.getReferenceEdgesCache());
+\}
+\nwindexdefn{registerTraffic}{registerTraffic}{NWvbkzY-7Z7vS-1}\eatline
+\nwidentdefs{\\{{registerTraffic}{registerTraffic}}}\nwidentuses{\\{{forwardEdges}{forwardEdges}}\\{{forwardVertices}{forwardVertices}}\\{{getReferenceEdgesCache}{getReferenceEdgesCache}}\\{{getReferenceVerticesCache}{getReferenceVerticesCache}}}\nwindexuse{forwardEdges}{forwardEdges}{NWvbkzY-7Z7vS-1}\nwindexuse{forwardVertices}{forwardVertices}{NWvbkzY-7Z7vS-1}\nwindexuse{getReferenceEdgesCache}{getReferenceEdgesCache}{NWvbkzY-7Z7vS-1}\nwindexuse{getReferenceVerticesCache}{getReferenceVerticesCache}{NWvbkzY-7Z7vS-1}\nwendcode{}\nwbegindocs{16}\nwdocspar
 \subsection{\texttt{forwardSimulationWorldTime}(0)}
-\nwenddocs{}\nwbegincode{15}\sublabel{NWvbkzY-4Z8TrL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-4Z8TrL-1}}}\moddef{forwardSimulationWorldTime(0)~{\nwtagstyle{}\subpageref{NWvbkzY-4Z8TrL-1}}}\endmoddef\nwused{\\{NW1GVbai-2Rlctf-3}}
+\nwenddocs{}\nwbegincode{17}\sublabel{NWvbkzY-4Z8TrL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-4Z8TrL-1}}}\moddef{forwardSimulationWorldTime(0)~{\nwtagstyle{}\subpageref{NWvbkzY-4Z8TrL-1}}}\endmoddef\nwused{\\{NW1GVbai-2Rlctf-3}}
 int forwardSimulationWorldTime() \{
   return this.controller.getSimulationWorldTime();
 \}
 \nwindexdefn{forwardSimulationWorldTime}{forwardSimulationWorldTime}{NWvbkzY-4Z8TrL-1}\eatline
-\nwidentdefs{\\{{forwardSimulationWorldTime}{forwardSimulationWorldTime}}}\nwidentuses{\\{{getSimulationWorldTime}{getSimulationWorldTime}}}\nwindexuse{getSimulationWorldTime}{getSimulationWorldTime}{NWvbkzY-4Z8TrL-1}\nwendcode{}\nwbegindocs{16}\nwdocspar
+\nwidentdefs{\\{{forwardSimulationWorldTime}{forwardSimulationWorldTime}}}\nwidentuses{\\{{getSimulationWorldTime}{getSimulationWorldTime}}}\nwindexuse{getSimulationWorldTime}{getSimulationWorldTime}{NWvbkzY-4Z8TrL-1}\nwendcode{}\nwbegindocs{18}\nwdocspar
 \subsection{\texttt{forwardReferenceVerticesCache}(0)}
-\nwenddocs{}\nwbegincode{17}\sublabel{NWvbkzY-3GKJpj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-3GKJpj-1}}}\moddef{forwardReferenceVerticesCache(0)~{\nwtagstyle{}\subpageref{NWvbkzY-3GKJpj-1}}}\endmoddef\nwused{\\{NW1GVbai-2Rlctf-3}}
+\nwenddocs{}\nwbegincode{19}\sublabel{NWvbkzY-3GKJpj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-3GKJpj-1}}}\moddef{forwardReferenceVerticesCache(0)~{\nwtagstyle{}\subpageref{NWvbkzY-3GKJpj-1}}}\endmoddef\nwused{\\{NW1GVbai-2Rlctf-3}}
 final ConcurrentHashMap<Integer, int[]> forwardReferenceVerticesCache() \{
   return this.storage.getReferenceVerticesCache();
 \}
 \nwindexdefn{fowardReferenceVerticesCache}{fowardReferenceVerticesCache}{NWvbkzY-3GKJpj-1}\eatline
-\nwidentdefs{\\{{fowardReferenceVerticesCache}{fowardReferenceVerticesCache}}}\nwidentuses{\\{{getReferenceVerticesCache}{getReferenceVerticesCache}}}\nwindexuse{getReferenceVerticesCache}{getReferenceVerticesCache}{NWvbkzY-3GKJpj-1}\nwendcode{}\nwbegindocs{18}\nwdocspar
+\nwidentdefs{\\{{fowardReferenceVerticesCache}{fowardReferenceVerticesCache}}}\nwidentuses{\\{{getReferenceVerticesCache}{getReferenceVerticesCache}}}\nwindexuse{getReferenceVerticesCache}{getReferenceVerticesCache}{NWvbkzY-3GKJpj-1}\nwendcode{}\nwbegindocs{20}\nwdocspar
 \subsection{\texttt{forwardReferenceEdgesCache}(0)}
-\nwenddocs{}\nwbegincode{19}\sublabel{NWvbkzY-2kHShr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-2kHShr-1}}}\moddef{forwardReferenceEdgesCache(0)~{\nwtagstyle{}\subpageref{NWvbkzY-2kHShr-1}}}\endmoddef\nwused{\\{NW1GVbai-2Rlctf-3}}
+\nwenddocs{}\nwbegincode{21}\sublabel{NWvbkzY-2kHShr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-2kHShr-1}}}\moddef{forwardReferenceEdgesCache(0)~{\nwtagstyle{}\subpageref{NWvbkzY-2kHShr-1}}}\endmoddef\nwused{\\{NW1GVbai-2Rlctf-3}}
 final ConcurrentHashMap<Integer,
     ConcurrentHashMap<Integer, int[]>> forwardReferenceEdgesCache() \{
   return this.storage.getReferenceEdgesCache();
 \}
 \nwindexdefn{forwardReferenceEdgesCache}{forwardReferenceEdgesCache}{NWvbkzY-2kHShr-1}\eatline
-\nwidentdefs{\\{{forwardReferenceEdgesCache}{forwardReferenceEdgesCache}}}\nwidentuses{\\{{getReferenceEdgesCache}{getReferenceEdgesCache}}}\nwindexuse{getReferenceEdgesCache}{getReferenceEdgesCache}{NWvbkzY-2kHShr-1}\nwendcode{}\nwbegindocs{20}\nwdocspar
+\nwidentdefs{\\{{forwardReferenceEdgesCache}{forwardReferenceEdgesCache}}}\nwidentuses{\\{{getReferenceEdgesCache}{getReferenceEdgesCache}}}\nwindexuse{getReferenceEdgesCache}{getReferenceEdgesCache}{NWvbkzY-2kHShr-1}\nwendcode{}\nwbegindocs{22}\nwdocspar
 \subsection{\texttt{forwardReferenceUsersCache}(0)}
-\nwenddocs{}\nwbegincode{21}\sublabel{NWvbkzY-QpzxP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-QpzxP-1}}}\moddef{forwardReferenceUsersCache(0)~{\nwtagstyle{}\subpageref{NWvbkzY-QpzxP-1}}}\endmoddef\nwused{\\{NW1GVbai-2Rlctf-3}}
+\nwenddocs{}\nwbegincode{23}\sublabel{NWvbkzY-QpzxP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-QpzxP-1}}}\moddef{forwardReferenceUsersCache(0)~{\nwtagstyle{}\subpageref{NWvbkzY-QpzxP-1}}}\endmoddef\nwused{\\{NW1GVbai-2Rlctf-3}}
 final ConcurrentHashMap<Integer, int[]> forwardReferenceUsersCache() \{
   return this.storage.getReferenceUsersCache();
 \}
 \nwindexdefn{forwardReferenceUsersCache}{forwardReferenceUsersCache}{NWvbkzY-QpzxP-1}\eatline
-\nwidentdefs{\\{{forwardReferenceUsersCache}{forwardReferenceUsersCache}}}\nwidentuses{\\{{getReferenceUsersCache}{getReferenceUsersCache}}}\nwindexuse{getReferenceUsersCache}{getReferenceUsersCache}{NWvbkzY-QpzxP-1}\nwendcode{}\nwbegindocs{22}\nwdocspar
+\nwidentdefs{\\{{forwardReferenceUsersCache}{forwardReferenceUsersCache}}}\nwidentuses{\\{{getReferenceUsersCache}{getReferenceUsersCache}}}\nwindexuse{getReferenceUsersCache}{getReferenceUsersCache}{NWvbkzY-QpzxP-1}\nwendcode{}\nwbegindocs{24}\nwdocspar
 \subsection{\texttt{forwardReturnRequest}(1)}
-\nwenddocs{}\nwbegincode{23}\sublabel{NWvbkzY-49Aupt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-49Aupt-1}}}\moddef{forwardReturnRequest(1)~{\nwtagstyle{}\subpageref{NWvbkzY-49Aupt-1}}}\endmoddef\nwused{\\{NW1GVbai-2Rlctf-3}}
+\nwenddocs{}\nwbegincode{25}\sublabel{NWvbkzY-49Aupt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWvbkzY-49Aupt-1}}}\moddef{forwardReturnRequest(1)~{\nwtagstyle{}\subpageref{NWvbkzY-49Aupt-1}}}\endmoddef\nwused{\\{NW1GVbai-2Rlctf-3}}
 void forwardReturnRequest(final int[] r) \{
   this.controller.returnRequest(r);
 \}
 \nwindexdefn{forwardReturnRequest}{forwardReturnRequest}{NWvbkzY-49Aupt-1}\eatline
-\nwidentdefs{\\{{forwardReturnRequest}{forwardReturnRequest}}}\nwidentuses{\\{{returnRequest}{returnRequest}}}\nwindexuse{returnRequest}{returnRequest}{NWvbkzY-49Aupt-1}\nwendcode{}\nwbegindocs{24}\nwdocspar
+\nwidentdefs{\\{{forwardReturnRequest}{forwardReturnRequest}}}\nwidentuses{\\{{returnRequest}{returnRequest}}}\nwindexuse{returnRequest}{returnRequest}{NWvbkzY-49Aupt-1}\nwendcode{}\nwbegindocs{26}\nwdocspar
 
 
+
+\nwenddocs{}\nwfilename{src/Traffic.nw}\nwbegindocs{0}\chapter{Class: Traffic}
+\label{traffic}
+
+\nwenddocs{}\nwbegincode{1}\sublabel{NW24od5B-2eR0nK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-2eR0nK-1}}}\moddef{Traffic.java~{\nwtagstyle{}\subpageref{NW24od5B-2eR0nK-1}}}\endmoddef\nwnotused{Traffic.java}
+\LA{}Traffic.java preamble~{\nwtagstyle{}\subpageref{NW24od5B-1UV5UV-1}}\RA{}
+public abstract class Traffic \{
+  \LA{}\code{}Traffic\edoc{} member variables~{\nwtagstyle{}\subpageref{NW24od5B-1j90we-1}}\RA{}
+  \LA{}\code{}Traffic\edoc{} constructor~{\nwtagstyle{}\subpageref{NW24od5B-4V88df-1}}\RA{}
+  \LA{}\code{}Traffic\edoc{} methods~{\nwtagstyle{}\subpageref{NW1GVbai-1sp72R-1}}\RA{}
+\}
+\nwendcode{}\nwbegindocs{2}\nwdocspar
+
+We supply an abstract base class for developing Jargo traffic functions.
+
+\section{Preamble}
+The preamble declares the package and imports dependencies.
+\nwenddocs{}\nwbegincode{3}\sublabel{NW24od5B-1UV5UV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-1UV5UV-1}}}\moddef{Traffic.java preamble~{\nwtagstyle{}\subpageref{NW24od5B-1UV5UV-1}}}\endmoddef\nwused{\\{NW24od5B-2eR0nK-1}}
+package com.github.jargors;
+import com.github.jargors.Tools;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
+\nwendcode{}\nwbegindocs{4}\nwdocspar
+
+\section{Member Variables}
+\nwenddocs{}\nwbegincode{5}\sublabel{NW24od5B-1j90we-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-1j90we-1}}}\moddef{\code{}Traffic\edoc{} member variables~{\nwtagstyle{}\subpageref{NW24od5B-1j90we-1}}}\endmoddef\nwused{\\{NW24od5B-2eR0nK-1}}
+protected Tools tools = new Tools();
+private final boolean DEBUG = "true".equals(System.getProperty("jargors.traffic.debug"));
+\nwendcode{}\nwbegindocs{6}\nwdocspar
+
+
+\section{Constructor}
+\nwenddocs{}\nwbegincode{7}\sublabel{NW24od5B-4V88df-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-4V88df-1}}}\moddef{\code{}Traffic\edoc{} constructor~{\nwtagstyle{}\subpageref{NW24od5B-4V88df-1}}}\endmoddef\nwused{\\{NW24od5B-2eR0nK-1}}
+public Traffic() \{ \}
+\nwendcode{}\nwbegindocs{8}\nwdocspar
+
+\section{Methods}
+
+\subsection{\texttt{forwardVertices(1)}}
+\nwenddocs{}\nwbegincode{9}\sublabel{NW24od5B-2on0WY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-2on0WY-1}}}\moddef{forwardVertices(1)~{\nwtagstyle{}\subpageref{NW24od5B-2on0WY-1}}}\endmoddef\nwused{\\{NW1GVbai-1sp72R-3}}
+void forwardVertices(final ConcurrentHashMap<Integer, int[]> src) \{
+  this.tools.registerVertices(src);
+\}
+\nwindexdefn{forwardVertices}{forwardVertices}{NW24od5B-2on0WY-1}\eatline
+\nwidentdefs{\\{{forwardVertices}{forwardVertices}}}\nwidentuses{\\{{registerVertices}{registerVertices}}}\nwindexuse{registerVertices}{registerVertices}{NW24od5B-2on0WY-1}\nwendcode{}\nwbegindocs{10}\nwdocspar
+\subsection{\texttt{forwardEdges(1)}}
+\nwenddocs{}\nwbegincode{11}\sublabel{NW24od5B-kWcFd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-kWcFd-1}}}\moddef{forwardEdges(1)~{\nwtagstyle{}\subpageref{NW24od5B-kWcFd-1}}}\endmoddef\nwused{\\{NW1GVbai-1sp72R-3}}
+void forwardEdges(final ConcurrentHashMap<Integer,
+    ConcurrentHashMap<Integer, int[]>> src) \{
+  this.tools.registerEdges(src);
+\}
+\nwindexdefn{forwardEdges}{forwardEdges}{NW24od5B-kWcFd-1}\eatline
+\nwidentdefs{\\{{forwardEdges}{forwardEdges}}}\nwidentuses{\\{{registerEdges}{registerEdges}}}\nwindexuse{registerEdges}{registerEdges}{NW24od5B-kWcFd-1}\nwendcode{}\nwbegindocs{12}\nwdocspar
+\subsection{\texttt{apply}(3)}
+\nwenddocs{}\nwbegincode{13}\sublabel{NW24od5B-14vbUh-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-14vbUh-1}}}\moddef{apply(3)~{\nwtagstyle{}\subpageref{NW24od5B-14vbUh-1}}}\endmoddef\nwused{\\{NW1GVbai-1sp72R-3}}
+float apply(int v1, int v2, int t) \{
+  System.out.println("Call apply("+v1+", "+v2+", "+t+")");
+  return 0;
+\}
+\nwindexdefn{apply}{apply}{NW24od5B-14vbUh-1}\eatline
+\nwidentdefs{\\{{apply}{apply}}}\nwendcode{}\nwbegindocs{14}\nwdocspar
 
 \nwenddocs{}\nwfilename{src/Client.nw}\nwbegindocs{0}\chapter{Class: Client}
 \label{client}
@@ -8421,50 +8534,6 @@ Array {\tt{}loc} =
 void handleServerLocation(final int[] loc) \{ \}
 \nwindexdefn{handleServerLocation}{handleServerLocation}{NW2q3QGT-4Q1Upa-1}\eatline
 \nwidentdefs{\\{{handleServerLocation}{handleServerLocation}}}\nwendcode{}\nwbegindocs{42}\nwdocspar
-\nwenddocs{}\nwfilename{src/Traffic.nw}\nwbegindocs{0}\chapter{Class: Traffic}
-\label{traffic}
-
-\nwenddocs{}\nwbegincode{1}\sublabel{NW24od5B-2eR0nK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-2eR0nK-1}}}\moddef{Traffic.java~{\nwtagstyle{}\subpageref{NW24od5B-2eR0nK-1}}}\endmoddef\nwnotused{Traffic.java}
-\LA{}Traffic.java preamble~{\nwtagstyle{}\subpageref{NW24od5B-1UV5UV-1}}\RA{}
-public abstract class Traffic \{
-  \LA{}\code{}Traffic\edoc{} member variables~{\nwtagstyle{}\subpageref{NW24od5B-1j90we-1}}\RA{}
-  \LA{}\code{}Traffic\edoc{} constructor~{\nwtagstyle{}\subpageref{NW24od5B-4V88df-1}}\RA{}
-  \LA{}\code{}Traffic\edoc{} methods~{\nwtagstyle{}\subpageref{NW1GVbai-1sp72R-1}}\RA{}
-\}
-\nwendcode{}\nwbegindocs{2}\nwdocspar
-
-We supply an abstract base class for developing Jargo traffic functions.
-
-\section{Preamble}
-The preamble declares the package and imports dependencies.
-\nwenddocs{}\nwbegincode{3}\sublabel{NW24od5B-1UV5UV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-1UV5UV-1}}}\moddef{Traffic.java preamble~{\nwtagstyle{}\subpageref{NW24od5B-1UV5UV-1}}}\endmoddef\nwused{\\{NW24od5B-2eR0nK-1}}
-package com.github.jargors;
-import java.util.Map;
-import java.util.HashMap;
-import java.time.LocalDateTime;
-\nwendcode{}\nwbegindocs{4}\nwdocspar
-
-\section{Member Variables}
-\nwenddocs{}\nwbegincode{5}\sublabel{NW24od5B-1j90we-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-1j90we-1}}}\moddef{\code{}Traffic\edoc{} member variables~{\nwtagstyle{}\subpageref{NW24od5B-1j90we-1}}}\endmoddef\nwused{\\{NW24od5B-2eR0nK-1}}
-private final boolean DEBUG = "true".equals(System.getProperty("jargors.traffic.debug"));
-\nwendcode{}\nwbegindocs{6}\nwdocspar
-
-
-\section{Constructor}
-\nwenddocs{}\nwbegincode{7}\sublabel{NW24od5B-4V88df-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-4V88df-1}}}\moddef{\code{}Traffic\edoc{} constructor~{\nwtagstyle{}\subpageref{NW24od5B-4V88df-1}}}\endmoddef\nwused{\\{NW24od5B-2eR0nK-1}}
-public Traffic() \{ \}
-\nwendcode{}\nwbegindocs{8}\nwdocspar
-
-\section{Methods}
-
-\subsection{\texttt{apply}(3)}
-\nwenddocs{}\nwbegincode{9}\sublabel{NW24od5B-14vbUh-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-14vbUh-1}}}\moddef{apply(3)~{\nwtagstyle{}\subpageref{NW24od5B-14vbUh-1}}}\endmoddef\nwused{\\{NW1GVbai-1sp72R-3}}
-float apply(int v1, int v2, int t) \{
-  System.out.println("Call apply("+v1+", "+v2+", "+t+")");
-  return 0;
-\}
-\nwindexdefn{apply}{apply}{NW24od5B-14vbUh-1}\eatline
-\nwidentdefs{\\{{apply}{apply}}}\nwendcode{}\nwbegindocs{10}\nwdocspar
 \nwenddocs{}\nwfilename{src/Tools.nw}\nwbegindocs{0}\chapter{Class: Tools}
 \label{tools}
 
@@ -8485,6 +8554,7 @@ The preamble declares the package and imports dependencies.
 \nwenddocs{}\nwbegincode{3}\sublabel{NW3zOIuJ-1ANZ96-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1ANZ96-1}}}\moddef{Tools.java preamble~{\nwtagstyle{}\subpageref{NW3zOIuJ-1ANZ96-1}}}\endmoddef\nwused{\\{NW3zOIuJ-2Vh5vZ-1}}
 package com.github.jargors;
 import com.github.jargors.gtreeJNI.*;
+import com.github.jargors.exceptions.EdgeNotFoundException;
 import com.github.jargors.exceptions.VertexNotFoundException;
 import com.github.jargors.exceptions.GtreeNotLoadedException;
 import com.github.jargors.exceptions.GtreeIllegalSourceException;
