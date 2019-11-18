@@ -1508,9 +1508,11 @@ ve & & \\
   + "CONSTRAINT F28 FOREIGN KEY (sid, sd) REFERENCES UD (uid, ud),"
   + "CONSTRAINT F29 FOREIGN KEY (sid, ts, vs) REFERENCES W (sid, t2, v2) INITIALLY DEFERRED,"
   + "CONSTRAINT F30 FOREIGN KEY (sid, te, ve) REFERENCES W (sid, t2, v2) INITIALLY DEFERRED,"
-  + "CONSTRAINT C71 CHECK (ts = se AND vs = so),"
-  + "CONSTRAINT C72 CHECK (te <= sl AND ve = sd),"
-  + "CONSTRAINT C73 CHECK (ts < te)"
+  + "CONSTRAINT C71 CHECK (ts = se),"
+  + "CONSTRAINT C72 CHECK (vs = so),"
+//+ "CONSTRAINT C73 CHECK (te <= sl),"
+  + "CONSTRAINT C74 CHECK (ve = sd),"
+  + "CONSTRAINT C75 CHECK (ts < te)"
   + ")"
 \nwendcode{}\nwbegindocs{26}\nwdocspar
 
@@ -1582,19 +1584,19 @@ rd & & \\
 \end{table}
 \nwenddocs{}\nwbegincode{27}\sublabel{NW41kEtg-q5ofx-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW41kEtg-q5ofx-1}}}\moddef{Create Table CPD statement~{\nwtagstyle{}\subpageref{NW41kEtg-q5ofx-1}}}\endmoddef\nwused{\\{NW3jCmQJ-1k9fTM-1}}
 "CREATE TABLE CPD ("
-  + "sid int  CONSTRAINT C74 NOT NULL,"
-  + "ts  int  CONSTRAINT C75 NOT NULL,"
-  + "te  int  CONSTRAINT C76 NOT NULL,"
-  + "tp  int  CONSTRAINT C77 NOT NULL,"
-  + "vp  int  CONSTRAINT C78 NOT NULL,"
-  + "td  int  CONSTRAINT C79 NOT NULL,"
-  + "vd  int  CONSTRAINT C80 NOT NULL,"
-  + "rid int  CONSTRAINT C81 NOT NULL,"
-  + "re  int  CONSTRAINT C82 NOT NULL,"
-  + "rl  int  CONSTRAINT C83 NOT NULL,"
-  + "ro  int  CONSTRAINT C84 NOT NULL,"
-  + "rd  int  CONSTRAINT C85 NOT NULL,"
-  + "CONSTRAINT C86 UNIQUE (rid),"
+  + "sid int  CONSTRAINT C76 NOT NULL,"
+  + "ts  int  CONSTRAINT C77 NOT NULL,"
+  + "te  int  CONSTRAINT C78 NOT NULL,"
+  + "tp  int  CONSTRAINT C79 NOT NULL,"
+  + "vp  int  CONSTRAINT C80 NOT NULL,"
+  + "td  int  CONSTRAINT C81 NOT NULL,"
+  + "vd  int  CONSTRAINT C82 NOT NULL,"
+  + "rid int  CONSTRAINT C83 NOT NULL,"
+  + "re  int  CONSTRAINT C84 NOT NULL,"
+  + "rl  int  CONSTRAINT C85 NOT NULL,"
+  + "ro  int  CONSTRAINT C86 NOT NULL,"
+  + "rd  int  CONSTRAINT C87 NOT NULL,"
+  + "CONSTRAINT C88 UNIQUE (rid),"
   + "CONSTRAINT P14 PRIMARY KEY (sid, tp, td, rid),"
   + "CONSTRAINT F31 FOREIGN KEY (sid) REFERENCES S,"
   + "CONSTRAINT F32 FOREIGN KEY (rid) REFERENCES R,"
@@ -1608,10 +1610,12 @@ rd & & \\
   + "CONSTRAINT F37 FOREIGN KEY (rid, rl) REFERENCES UL (uid, ul),"
   + "CONSTRAINT F38 FOREIGN KEY (rid, ro) REFERENCES UO (uid, uo),"
   + "CONSTRAINT F39 FOREIGN KEY (rid, rd) REFERENCES UD (uid, ud),"
-  + "CONSTRAINT C87 CHECK (tp BETWEEN ts AND td) INITIALLY DEFERRED,"
-  + "CONSTRAINT C88 CHECK (td BETWEEN tp AND te) INITIALLY DEFERRED,"
-  + "CONSTRAINT C89 CHECK (tp >= re AND vp = ro) INITIALLY DEFERRED,"
-  + "CONSTRAINT C90 CHECK (td <= rl AND vd = rd) INITIALLY DEFERRED"
+  + "CONSTRAINT C89 CHECK (tp BETWEEN ts AND td) INITIALLY DEFERRED,"
+  + "CONSTRAINT C90 CHECK (td BETWEEN tp AND te) INITIALLY DEFERRED,"
+  + "CONSTRAINT C91 CHECK (tp >= re) INITIALLY DEFERRED,"
+  + "CONSTRAINT C92 CHECK (vp  = ro) INITIALLY DEFERRED,"
+//+ "CONSTRAINT C93 CHECK (td <= rl) INITIALLY DEFERRED",
+  + "CONSTRAINT C94 CHECK (vd  = rd) INITIALLY DEFERRED"
   + ")"
 \nwendcode{}\nwbegindocs{28}\nwdocspar
 
@@ -1694,21 +1698,21 @@ rq & & \\
 \end{table}
 \nwenddocs{}\nwbegincode{29}\sublabel{NW41kEtg-2YsMAX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW41kEtg-2YsMAX-1}}}\moddef{Create Table CQ statement~{\nwtagstyle{}\subpageref{NW41kEtg-2YsMAX-1}}}\endmoddef\nwused{\\{NW3jCmQJ-1k9fTM-1}}
 "CREATE TABLE CQ ("
-  + "sid int  CONSTRAINT C91 NOT NULL,"
-  + "sq  int  CONSTRAINT C92 NOT NULL,"
-  + "se  int  CONSTRAINT C93 NOT NULL,"
+  + "sid int  CONSTRAINT C95 NOT NULL,"
+  + "sq  int  CONSTRAINT C96 NOT NULL,"
+  + "se  int  CONSTRAINT C97 NOT NULL,"
   + "t1  int  ,"
-  + "t2  int  CONSTRAINT C94 NOT NULL,"
+  + "t2  int  CONSTRAINT C98 NOT NULL,"
   + "v2  int  ,"
   + "q1  int  ,"
-  + "q2  int  CONSTRAINT C95 NOT NULL,"
+  + "q2  int  CONSTRAINT C99 NOT NULL,"
   + "rid int  ,"
   + "rq  int  ,"
   + "tp  int  ,"
   + "td  int  ,"
   + "o1  int  ,"
-  + "o2  int  CONSTRAINT C96 NOT NULL,"
-  + "CONSTRAINT C97 CHECK (o2 > 0),"
+  + "o2  int  CONSTRAINT C100 NOT NULL,"
+  + "CONSTRAINT C101 CHECK (o2 > 0),"
   + "CONSTRAINT P15 PRIMARY KEY (sid, t2, q2, o2),"
   + "CONSTRAINT F40 FOREIGN KEY (sid) REFERENCES S,"
   + "CONSTRAINT F41 FOREIGN KEY (rid) REFERENCES R,"
@@ -1719,16 +1723,16 @@ rq & & \\
   + "CONSTRAINT F45 FOREIGN KEY (rid, rq) REFERENCES UQ (uid, uq),"
   + "CONSTRAINT F46 FOREIGN KEY (sid, t2, v2, rid) REFERENCES PD INITIALLY DEFERRED,"
   + "CONSTRAINT F47 FOREIGN KEY (sid, tp, td, rid) REFERENCES CPD INITIALLY DEFERRED,"
-  + "CONSTRAINT C98 CHECK ("
+  + "CONSTRAINT C102 CHECK ("
   + "  CASE WHEN t1 IS NULL"
   + "    THEN t2 = se AND q1 IS NULL AND q2 = sq AND o1 IS NULL AND o2 = 1"
   + "        AND rid IS NULL AND rq IS NULL AND tp IS NULL AND td IS NULL"
   + "    ELSE q2 <= 0 AND o2 = o1 + 1"
   + "  END"
   + ") INITIALLY DEFERRED,"
-  + "CONSTRAINT  C99 CHECK (CASE WHEN t2 = tp THEN q2 = q1 + rq END) INITIALLY DEFERRED,"
-  + "CONSTRAINT C100 CHECK (CASE WHEN t2 = td THEN q2 = q1 - rq END) INITIALLY DEFERRED,"
-  + "CONSTRAINT C101 UNIQUE (t2, v2, rid)"
+  + "CONSTRAINT C103 CHECK (CASE WHEN t2 = tp THEN q2 = q1 + rq END) INITIALLY DEFERRED,"
+  + "CONSTRAINT C104 CHECK (CASE WHEN t2 = td THEN q2 = q1 - rq END) INITIALLY DEFERRED,"
+  + "CONSTRAINT C105 UNIQUE (t2, v2, rid)"
   + ")"
 \nwendcode{}\nwbegindocs{30}\nwdocspar
 
@@ -5833,8 +5837,7 @@ to record two labels $L_1(b_j)$ and $L_2(b_j)$ on waypoint $b_j$, write
 \end{tikzpicture}
 
 If a waypoint has multiple labels with some indicating drop-offs, \textbf{write
-the drop-offs first} before any of the pick-ups, otherwise C98 violation may
-occur.
+the drop-offs first} before any of the pick-ups.
 \end{tabular}\\
 \textbf{Returns:} nothing.\\
 \textbf{Side Effects:} may delete and insert rows into Table W, may
@@ -5954,8 +5957,7 @@ to record two labels $L_1(b_j)$ and $L_2(b_j)$ on waypoint $b_j$, write
 \end{tikzpicture}
 
 If a waypoint has multiple labels with some indicating drop-offs, \textbf{write
-the drop-offs first} before any of the pick-ups, otherwise C98 violation may
-occur.\\
+the drop-offs first} before any of the pick-ups.\\
 Array {\tt{}rid} (param. 4):&$k$-element integer array storing request identifiers
 used to label \emph{new waypoints} not found in the pre-existing schedule but
 found in the new remaining schedule {\tt{}sched}. The order of this array doesn't
@@ -6110,8 +6112,8 @@ to record two labels $L_1(b_j)$ and $L_2(b_j)$ on waypoint $b_j$, write
 \end{tikzpicture}
 
 If a waypoint has multiple labels with some indicating drop-offs, \textbf{write
-the drop-offs first} before any of the pick-ups, otherwise C98 violation may
-occur.\\ Array {\tt{}rid} (param. 4):&$k$-element integer array storing request
+the drop-offs first} before any of the pick-ups.\\
+Array {\tt{}rid} (param. 4):&$k$-element integer array storing request
 identifiers found in the pre-existing schedule \emph{but not found in the new
 remaining schedule} {\tt{}sched}. The order of this array doesn't matter.
 \end{tabular}\\
@@ -7673,6 +7675,7 @@ private Runnable RequestHandlingLoop = () -> \{
   \} catch (ClientException e) \{
     System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientException: %s",
         this.world_time, e.toString());
+    e.printStackTrace();
   \} catch (ClientFatalException e) \{
     System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientFatalException: %s",
         this.world_time, e.toString());
@@ -8035,6 +8038,7 @@ import com.github.jargors.exceptions.EdgeNotFoundException;
 import com.github.jargors.exceptions.UserNotFoundException;
 import com.github.jargors.exceptions.VertexNotFoundException;
 import com.github.jargors.exceptions.RouteIllegalOverwriteException;
+import com.github.jargors.exceptions.TimeWindowViolation;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.sql.SQLException;
@@ -8709,6 +8713,7 @@ import com.github.jargors.exceptions.*;
 \nwendcode{}\nwbegindocs{4}\nwdocspar
 \nwenddocs{}\nwbegincode{5}\sublabel{NW4WjzfE-4Xk0Zi-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-4Xk0Zi-2}}}\moddef{DesktopController.java preamble~{\nwtagstyle{}\subpageref{NW4WjzfE-4Xk0Zi-1}}}\plusendmoddef
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
@@ -8718,6 +8723,10 @@ import java.net.URL;
 import java.net.MalformedURLException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipEntry;
 \nwendcode{}\nwbegindocs{6}\nwdocspar
 \nwenddocs{}\nwbegincode{7}\sublabel{NW4WjzfE-4Xk0Zi-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-4Xk0Zi-3}}}\moddef{DesktopController.java preamble~{\nwtagstyle{}\subpageref{NW4WjzfE-4Xk0Zi-1}}}\plusendmoddef
 import javafx.application.Application;
@@ -8883,9 +8892,6 @@ void actionLoad(final ActionEvent e) \{
           this.road = "*in-instance road network*";
           this.btn_gtree    .setDisable(false);
           this.btn_stop     .setDisable(false);
-          this.tf_class     .setDisable(false);
-          this.tf_t0        .setDisable(false);
-          this.tf_t1        .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
           this.lbl_status   .setText("Loaded Jargo instance (#vertices="+nv+"; #edges="+ne+") (#servers="+ns+"; #requests="+nr+")");
           this.drawRoadNetwork();
@@ -9025,6 +9031,7 @@ void actionProb(final ActionEvent e) \{
         int ns = this.controller.queryCountServers()[0];
         int nr = this.controller.queryCountRequests()[0];
         Platform.runLater(() -> \{
+          this.btn_prob     .setText(pb.getName());
           this.btn_client   .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
           this.lbl_status   .setText("Loaded "+pb.getName()+"(#servers="+ns+"; #requests="+nr+")");
@@ -9068,7 +9075,32 @@ void actionClient(final ActionEvent e) \{
   File cj = fc.showOpenDialog(this.stage);
   if (cj != null) \{
     this.jar = cj.toString();
+
+    try \{
+/*https://stackoverflow.com/questions/15720822/how-to-get-names-of-classes-inside-a-jar-file*/
+List<String> classNames = new ArrayList<String>();
+ZipInputStream zip = new ZipInputStream(new FileInputStream(this.jar));
+for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) \{
+  if (!entry.isDirectory() && entry.getName().endsWith(".class")) \{
+    String className = entry.getName().replace('/', '.');
+    classNames.add(className.substring(0, className.length() - ".class".length()));
+  \}
+\}
+/******/
+      if (classNames.size() == 0) \{
+        System.err.println("Bad jar?");
+        return;
+      \}
+      this.jarclass = classNames.get(0);
+    \} catch (IOException ie) \{
+      System.err.println(ie.toString());
+      return;
+    \}
+    this.tf_class.setText(this.jarclass);
     this.btn_client   .setText(cj.getName());
+    this.tf_class     .setDisable(false);
+    this.tf_t0        .setDisable(false);
+    this.tf_t1        .setDisable(false);
     this.btn_startseq .setDisable(false);
     this.btn_startreal.setDisable(false);
     this.circ_status  .setFill(C_SUCCESS);
@@ -9085,6 +9117,17 @@ void actionStartSequential(final ActionEvent e) \{
     System.err.println("Class empty!");
     return;
   \}
+  if ("".equals(this.tf_t0.getText())) \{
+    this.tf_t0.setText("0");
+  \}
+  if ("".equals(this.tf_t1.getText())) \{
+    this.tf_t1.setText("1800");
+  \}
+  this.btn_startseq .setDisable(true);
+  this.btn_startreal.setDisable(true);
+  this.tf_class     .setDisable(true);
+  this.tf_t0        .setDisable(true);
+  this.tf_t1        .setDisable(true);
   this.circ_status  .setFill(C_WARN);
   this.lbl_status   .setText("Loading '"+this.jarclass+"'...");
   try \{
@@ -9093,9 +9136,25 @@ void actionStartSequential(final ActionEvent e) \{
     Class<?> tempclass = Class.forName(this.jarclass, true, loader);
     Constructor<?> tempcstor = tempclass.getDeclaredConstructor();
     this.client = (Client) tempcstor.newInstance();
-    Platform.runLater(() -> \{
-      this.circ_status  .setFill(C_SUCCESS);
-      this.lbl_status   .setText("Simulation started.");
+    this.circ_status  .setFill(C_SUCCESS);
+    this.lbl_status   .setText("Simulation started.");
+    this.controller.registerClient(this.client);
+    this.client.registerRoadNetwork();
+    this.client.registerUsers();
+    try \{
+      this.client.loadGtree(this.gtree);
+    \} catch (FileNotFoundException fe) \{
+      System.err.println(e.toString());
+      return;
+    \}
+    this.controller.setClockStart(Integer.parseInt(this.tf_t0.getText()));
+    this.controller.setClockEnd(Integer.parseInt(this.tf_t1.getText()));
+    CompletableFuture.runAsync(() -> \{
+      this.controller.startSequential((status) -> \{
+        Platform.runLater(() -> \{
+          this.lbl_status.setText("Simulation "+(status ? "ended." : "failed."));
+        \});
+      \});
     \});
   \} catch (MalformedURLException
       | ClassNotFoundException
@@ -9108,7 +9167,7 @@ void actionStartSequential(final ActionEvent e) \{
   \}
 \}
 \nwindexdefn{actionStartSequential}{actionStartSequential}{NW4WjzfE-2DyoOl-1}\eatline
-\nwidentdefs{\\{{actionStartSequential}{actionStartSequential}}}\nwendcode{}\nwbegindocs{38}\nwdocspar
+\nwidentdefs{\\{{actionStartSequential}{actionStartSequential}}}\nwidentuses{\\{{loadGtree}{loadGtree}}\\{{registerClient}{registerClient}}\\{{registerRoadNetwork}{registerRoadNetwork}}\\{{registerUsers}{registerUsers}}\\{{setClockEnd}{setClockEnd}}\\{{setClockStart}{setClockStart}}\\{{startSequential}{startSequential}}}\nwindexuse{loadGtree}{loadGtree}{NW4WjzfE-2DyoOl-1}\nwindexuse{registerClient}{registerClient}{NW4WjzfE-2DyoOl-1}\nwindexuse{registerRoadNetwork}{registerRoadNetwork}{NW4WjzfE-2DyoOl-1}\nwindexuse{registerUsers}{registerUsers}{NW4WjzfE-2DyoOl-1}\nwindexuse{setClockEnd}{setClockEnd}{NW4WjzfE-2DyoOl-1}\nwindexuse{setClockStart}{setClockStart}{NW4WjzfE-2DyoOl-1}\nwindexuse{startSequential}{startSequential}{NW4WjzfE-2DyoOl-1}\nwendcode{}\nwbegindocs{38}\nwdocspar
 \subsection{\texttt{actionStartRealtime}(1)}
 \nwenddocs{}\nwbegincode{39}\sublabel{NW4WjzfE-1u3CLd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-1u3CLd-1}}}\moddef{actionStartRealtime(1)~{\nwtagstyle{}\subpageref{NW4WjzfE-1u3CLd-1}}}\endmoddef\nwused{\\{NW1GVbai-14uWYi-3}}
 void actionStartRealtime(final ActionEvent e) \{
@@ -9142,9 +9201,16 @@ void actionStop(final ActionEvent e) \{
           this.btn_client   .setDisable(true);
           this.btn_client   .setText("(empty client)");
           this.client = null;
+          this.jar = null;
+          this.jarclass = null;
           this.tf_class     .setDisable(true);
+          this.tf_class     .setText("");
           this.tf_t0        .setDisable(true);
+          this.tf_t0        .setText("");
           this.tf_t1        .setDisable(true);
+          this.tf_t1        .setText("");
+          this.btn_startseq .setDisable(true);
+          this.btn_startreal.setDisable(true);
           this.db = null;
           this.container_canvas.setContent(null);
           this.circ_status.setFill(C_SUCCESS);

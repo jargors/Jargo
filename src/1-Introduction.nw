@@ -1100,6 +1100,7 @@ Table R & \textit{rid}, rq, re, rl, ro, rd, rb \\
 @
 
 \subsection{Table CW (Route Endpoint Constraints Table)}
+test
 Table CW stores the start and end waypoints of each server route.  The table
 has nine columns, \textsf{sid}, \textsf{se}, \textsf{sl}, \textsf{so},
 \textsf{sd}, \textsf{ts}, \textsf{vs}, \textsf{te}, and \textsf{ve}.  The start
@@ -1172,9 +1173,11 @@ ve & & \\
   + "CONSTRAINT F28 FOREIGN KEY (sid, sd) REFERENCES UD (uid, ud),"
   + "CONSTRAINT F29 FOREIGN KEY (sid, ts, vs) REFERENCES W (sid, t2, v2) INITIALLY DEFERRED,"
   + "CONSTRAINT F30 FOREIGN KEY (sid, te, ve) REFERENCES W (sid, t2, v2) INITIALLY DEFERRED,"
-  + "CONSTRAINT C71 CHECK (ts = se AND vs = so),"
-  + "CONSTRAINT C72 CHECK (te <= sl AND ve = sd),"
-  + "CONSTRAINT C73 CHECK (ts < te)"
+  + "CONSTRAINT C71 CHECK (ts = se),"
+  + "CONSTRAINT C72 CHECK (vs = so),"
+//+ "CONSTRAINT C73 CHECK (te <= sl),"
+  + "CONSTRAINT C74 CHECK (ve = sd),"
+  + "CONSTRAINT C75 CHECK (ts < te)"
   + ")"
 @
 
@@ -1246,19 +1249,19 @@ rd & & \\
 \end{table}
 <<Create Table CPD statement>>=
 "CREATE TABLE CPD ("
-  + "sid int  CONSTRAINT C74 NOT NULL,"
-  + "ts  int  CONSTRAINT C75 NOT NULL,"
-  + "te  int  CONSTRAINT C76 NOT NULL,"
-  + "tp  int  CONSTRAINT C77 NOT NULL,"
-  + "vp  int  CONSTRAINT C78 NOT NULL,"
-  + "td  int  CONSTRAINT C79 NOT NULL,"
-  + "vd  int  CONSTRAINT C80 NOT NULL,"
-  + "rid int  CONSTRAINT C81 NOT NULL,"
-  + "re  int  CONSTRAINT C82 NOT NULL,"
-  + "rl  int  CONSTRAINT C83 NOT NULL,"
-  + "ro  int  CONSTRAINT C84 NOT NULL,"
-  + "rd  int  CONSTRAINT C85 NOT NULL,"
-  + "CONSTRAINT C86 UNIQUE (rid),"
+  + "sid int  CONSTRAINT C76 NOT NULL,"
+  + "ts  int  CONSTRAINT C77 NOT NULL,"
+  + "te  int  CONSTRAINT C78 NOT NULL,"
+  + "tp  int  CONSTRAINT C79 NOT NULL,"
+  + "vp  int  CONSTRAINT C80 NOT NULL,"
+  + "td  int  CONSTRAINT C81 NOT NULL,"
+  + "vd  int  CONSTRAINT C82 NOT NULL,"
+  + "rid int  CONSTRAINT C83 NOT NULL,"
+  + "re  int  CONSTRAINT C84 NOT NULL,"
+  + "rl  int  CONSTRAINT C85 NOT NULL,"
+  + "ro  int  CONSTRAINT C86 NOT NULL,"
+  + "rd  int  CONSTRAINT C87 NOT NULL,"
+  + "CONSTRAINT C88 UNIQUE (rid),"
   + "CONSTRAINT P14 PRIMARY KEY (sid, tp, td, rid),"
   + "CONSTRAINT F31 FOREIGN KEY (sid) REFERENCES S,"
   + "CONSTRAINT F32 FOREIGN KEY (rid) REFERENCES R,"
@@ -1272,10 +1275,12 @@ rd & & \\
   + "CONSTRAINT F37 FOREIGN KEY (rid, rl) REFERENCES UL (uid, ul),"
   + "CONSTRAINT F38 FOREIGN KEY (rid, ro) REFERENCES UO (uid, uo),"
   + "CONSTRAINT F39 FOREIGN KEY (rid, rd) REFERENCES UD (uid, ud),"
-  + "CONSTRAINT C87 CHECK (tp BETWEEN ts AND td) INITIALLY DEFERRED,"
-  + "CONSTRAINT C88 CHECK (td BETWEEN tp AND te) INITIALLY DEFERRED,"
-  + "CONSTRAINT C89 CHECK (tp >= re AND vp = ro) INITIALLY DEFERRED,"
-  + "CONSTRAINT C90 CHECK (td <= rl AND vd = rd) INITIALLY DEFERRED"
+  + "CONSTRAINT C89 CHECK (tp BETWEEN ts AND td) INITIALLY DEFERRED,"
+  + "CONSTRAINT C90 CHECK (td BETWEEN tp AND te) INITIALLY DEFERRED,"
+  + "CONSTRAINT C91 CHECK (tp >= re) INITIALLY DEFERRED,"
+  + "CONSTRAINT C92 CHECK (vp  = ro) INITIALLY DEFERRED,"
+//+ "CONSTRAINT C93 CHECK (td <= rl) INITIALLY DEFERRED",
+  + "CONSTRAINT C94 CHECK (vd  = rd) INITIALLY DEFERRED"
   + ")"
 @
 
@@ -1358,21 +1363,21 @@ rq & & \\
 \end{table}
 <<Create Table CQ statement>>=
 "CREATE TABLE CQ ("
-  + "sid int  CONSTRAINT C91 NOT NULL,"
-  + "sq  int  CONSTRAINT C92 NOT NULL,"
-  + "se  int  CONSTRAINT C93 NOT NULL,"
+  + "sid int  CONSTRAINT C95 NOT NULL,"
+  + "sq  int  CONSTRAINT C96 NOT NULL,"
+  + "se  int  CONSTRAINT C97 NOT NULL,"
   + "t1  int  ,"
-  + "t2  int  CONSTRAINT C94 NOT NULL,"
+  + "t2  int  CONSTRAINT C98 NOT NULL,"
   + "v2  int  ,"
   + "q1  int  ,"
-  + "q2  int  CONSTRAINT C95 NOT NULL,"
+  + "q2  int  CONSTRAINT C99 NOT NULL,"
   + "rid int  ,"
   + "rq  int  ,"
   + "tp  int  ,"
   + "td  int  ,"
   + "o1  int  ,"
-  + "o2  int  CONSTRAINT C96 NOT NULL,"
-  + "CONSTRAINT C97 CHECK (o2 > 0),"
+  + "o2  int  CONSTRAINT C100 NOT NULL,"
+  + "CONSTRAINT C101 CHECK (o2 > 0),"
   + "CONSTRAINT P15 PRIMARY KEY (sid, t2, q2, o2),"
   + "CONSTRAINT F40 FOREIGN KEY (sid) REFERENCES S,"
   + "CONSTRAINT F41 FOREIGN KEY (rid) REFERENCES R,"
@@ -1383,16 +1388,16 @@ rq & & \\
   + "CONSTRAINT F45 FOREIGN KEY (rid, rq) REFERENCES UQ (uid, uq),"
   + "CONSTRAINT F46 FOREIGN KEY (sid, t2, v2, rid) REFERENCES PD INITIALLY DEFERRED,"
   + "CONSTRAINT F47 FOREIGN KEY (sid, tp, td, rid) REFERENCES CPD INITIALLY DEFERRED,"
-  + "CONSTRAINT C98 CHECK ("
+  + "CONSTRAINT C102 CHECK ("
   + "  CASE WHEN t1 IS NULL"
   + "    THEN t2 = se AND q1 IS NULL AND q2 = sq AND o1 IS NULL AND o2 = 1"
   + "        AND rid IS NULL AND rq IS NULL AND tp IS NULL AND td IS NULL"
   + "    ELSE q2 <= 0 AND o2 = o1 + 1"
   + "  END"
   + ") INITIALLY DEFERRED,"
-  + "CONSTRAINT  C99 CHECK (CASE WHEN t2 = tp THEN q2 = q1 + rq END) INITIALLY DEFERRED,"
-  + "CONSTRAINT C100 CHECK (CASE WHEN t2 = td THEN q2 = q1 - rq END) INITIALLY DEFERRED,"
-  + "CONSTRAINT C101 UNIQUE (t2, v2, rid)"
+  + "CONSTRAINT C103 CHECK (CASE WHEN t2 = tp THEN q2 = q1 + rq END) INITIALLY DEFERRED,"
+  + "CONSTRAINT C104 CHECK (CASE WHEN t2 = td THEN q2 = q1 - rq END) INITIALLY DEFERRED,"
+  + "CONSTRAINT C105 UNIQUE (t2, v2, rid)"
   + ")"
 @
 
