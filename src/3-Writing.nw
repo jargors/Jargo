@@ -619,9 +619,9 @@ Method \textcolor{blue}{[[DBUpdateServerRoute]]}(3) inserts a new
 may change, the method also updates timings in the \emph{remaining schedule}.
 If the server to be updated does not exist, a [[UserNotFoundException]] is
 thrown.  If the supplied route contains an edge that does not exist in Table E,
-an [[EdgeNotFoundException]] is thrown.
-If the route causes a time window violation, [[TimeWindowViolation]] is thrown.
-A [[SQLException]] is thrown for other database failures.\\
+an [[EdgeNotFoundException]] is thrown.  If the route causes a time window
+violation, [[TimeWindowViolation]] is thrown.  A [[SQLException]] is thrown for
+other database failures.\\
 \midrule
 \textbf{Parameters:} \\
 \begin{tabular}{lp{116mm}}
@@ -679,10 +679,9 @@ the drop-offs first} before any of the pick-ups.
 update columns in Table CW, may update columns in Tables PD and CPD,
 may delete and insert rows into Table CQ.\\
 \textbf{Throws:} [[UserNotFoundException]] if server does not exist,
-[[EdgeNotFoundException]] if [[route]] contains an edge that does not exist
-in Table E,
-[[TimeWindowViolation]] if time window violation occurs,
-or [[SQLException]] for other database failures.\\
+[[EdgeNotFoundException]] if [[route]] contains an edge that does not exist in
+Table E, [[TimeWindowViolation]] if time window violation occurs, or
+[[SQLException]] for other database failures.\\
 \bottomrule
 \end{tabular}
 <<Write: DBUpdateServerRoute(3)>>=
@@ -744,8 +743,9 @@ remaining schedule into Tables PD, CPD, and CQ.  If the server to be updated
 does not exist, a [[UserNotFoundException]] is thrown.  This exception is also
 thrown if any labels in the new labeled waypoints is not an existing user.  If
 the supplied route contains an edge that does not exist in Table E, an
-[[EdgeNotFoundException]] is thrown.  A [[SQLException]] is thrown for other
-database failures.\\
+[[EdgeNotFoundException]] is thrown.  If the route causes a time window
+violation, [[TimeWindowViolation]] is thrown.  A [[SQLException]] is thrown for
+other database failures.\\
 \midrule
 \textbf{Parameters:} \\
 \begin{tabular}{lp{116mm}}
@@ -806,10 +806,11 @@ matter.
 \textbf{Side Effects:} may delete and insert rows into Table W, may
 update columns in Table CW, may update columns in Tables PD and CPD,
 may delete and insert rows into Table CQ.\\
-\textbf{Throws:} [[UserNotFoundException]] if server does not exist or if
-any request identifier in [[rid]] (param. 4) cannot be found,
-[[EdgeNotFoundException]] if [[route]] contains an edge that does not exist
-in Table E, or [[SQLException]] for other database failures.\\
+\textbf{Throws:} [[UserNotFoundException]] if server does not exist or if any
+request identifier in [[rid]] (param. 4) cannot be found,
+[[EdgeNotFoundException]] if [[route]] contains an edge that does not exist in
+Table E, [[TimeWindowViolation]] if time window violation occurs, or
+[[SQLException]] for other database failures.\\
 \bottomrule
 \end{tabular}
 <<Write: DBUpdateServerAddToSchedule(4)>>=
@@ -901,8 +902,9 @@ PD, CPD, and CQ. If the server to be update does not exist, a
 [[UserNotFoundException]] is thrown.  This exception is also thrown if any
 labels in the new labeled waypoints is not an existing user.  If the supplied
 route contains an edge that does not exist in Table E, an
-[[EdgeNotFoundException]] is thrown.  A [[SQLException]] is thrown for other
-database failures.\\
+[[EdgeNotFoundException]] is thrown.  If the route causes a time window
+violation, [[TimeWindowViolation]] is thrown.  A [[SQLException]] is thrown for
+other database failures.\\
 \midrule
 \textbf{Parameters:} \\
 \begin{tabular}{lp{116mm}}
@@ -962,10 +964,11 @@ remaining schedule} [[sched]]. The order of this array doesn't matter.
 \textbf{Side Effects:} may delete and insert rows into Table W, may
 update columns in Table CW, may update columns in Tables PD and CPD,
 may delete and insert rows into Table CQ.\\
-\textbf{Throws:} [[UserNotFoundException]] if server does not exist or if
-any request identifier in [[rid]] (param. 4) cannot be found,
-[[EdgeNotFoundException]] if [[route]] contains an edge that does not exist
-in Table E, or [[SQLException]] for other database failures.\\
+\textbf{Throws:} [[UserNotFoundException]] if server does not exist or if any
+request identifier in [[rid]] (param. 4) cannot be found,
+[[EdgeNotFoundException]] if [[route]] contains an edge that does not exist in
+Table E, [[TimeWindowViolation]] if time window violation occurs, or
+[[SQLException]] for other database failures.\\
 \bottomrule
 \end{tabular}
 <<Write: DBUpdateServerRemoveFromSchedule(4)>>=
