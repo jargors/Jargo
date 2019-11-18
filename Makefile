@@ -38,33 +38,40 @@ CLASSES = \
 
 all : java compile jar tex pdf
 
-java : $(JAVASRCS) $(SRCS)
+# This target compiles all the java/*.java files from src/*.nw files
+java : $(JAVASRCS)
 
+# This target compiles all the com/../*.class files from java/*.java files
 compile : $(CLASSES) com/github/jargors/Desktop.class
 
-tex : $(SRCS)
-	@noweave -delay -index $(SRCS) > doc/body.tex
+# This target zips up com/ into jar/jargors-*.jar
+jar : $(CLASSES) com/github/jargors/Desktop.class
+	jar cvf jar/jargors-$(VERSION).jar com
 
-# We put all the sources here so notangle can find chunks in the other
-# source files.
-$(JAVASRCS): java/%.java: src/%.nw
-	@notangle -R$(subst java/,,$@) $(SRCS) > $@
+# This target compiles doc/body.tex from src/*nw files
+tex : $(SRCS)
+	noweave -delay -index $(SRCS) > doc/body.tex
+
+# This target compiles jargo.pdf from jargo.tex
+pdf : tex
+	texfot pdflatex -halt-on-error jargo.tex
+
+################################################################################
+$(JAVASRCS) : java/%.java: src/%.nw
+	notangle -R$(subst java/,,$@) $(SRCS) > $@
+
+# If any SRCS change (not just pattern-matched sources), then rebuild JAVASRCS
+$(JAVASRCS) : $(SRCS)
 
 $(CLASSES) : com/github/jargors/%.class: java/%.java
-	@javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:$(CLASSPATH)/* $<
+	javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:$(CLASSPATH)/* $<
 
 com/github/jargors/Desktop.class : java/Desktop.java
-	@javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:$(CLASSPATH)/* $<
-
-jar : $(CLASSES) com/github/jargors/Desktop.class $(SRCS)
-	@jar cvf jar/jargors-$(VERSION).jar com
-
-pdf : tex
-	@texfot pdflatex -halt-on-error jargo.tex
+	javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:$(CLASSPATH)/* $<
 
 clean :
-	@rm -rf jargo.pdf com/ jar/jargors-$(VERSION).jar
-	@latexmk -f -c jargo.tex
+	rm -rf jargo.pdf com/ jar/jargors-$(VERSION).jar
+	latexmk -f -c jargo.tex
 
 purge : clean
-	@rm -rf doc/body.tex $(JAVASRCS)
+	rm -rf doc/body.tex $(JAVASRCS)
