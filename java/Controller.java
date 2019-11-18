@@ -235,6 +235,12 @@ public class Controller {
   public int[] queryRequestArrivalTime(final int rid) throws SQLException {
            return storage.DBQueryRequestArrivalTime(rid);
          }
+  public int[] queryServerTWViolations() throws SQLException {
+           return storage.DBQueryServerTWViolations();
+         }
+  public int[] queryRequestTWViolations() throws SQLException {
+           return storage.DBQueryRequestTWViolations();
+         }
   public void addNewServer(final int[] u)
          throws DuplicateUserException, EdgeNotFoundException, SQLException,
                 GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException {

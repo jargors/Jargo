@@ -507,6 +507,20 @@ public class Storage {
              throw e;
            }
          }
+  public int[] DBQueryServerTWViolations() throws SQLException {
+           try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+             return DBFetch(conn, "S150", 2);
+           } catch (SQLException e) {
+             throw e;
+           }
+         }
+  public int[] DBQueryRequestTWViolations() throws SQLException {
+           try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+             return DBFetch(conn, "S151", 2);
+           } catch (SQLException e) {
+             throw e;
+           }
+         }
   public void DBAddNewVertex(final int v, final int lng, final int lat)
          throws DuplicateVertexException, SQLException {
            if (this.lu_vertices.containsKey(v)) {
@@ -1575,7 +1589,7 @@ public class Storage {
                                                                                + "SELECT t1 FROM W WHERE sid=? AND t1 <= ? AND ? < t2)");
             this.lu_pstr.put("S136", SEL+"* FROM V"); this.lu_pstr.put("S137", SEL+"* FROM E"); this.lu_pstr.put("S138", SEL+"val FROM dist_r_unassigned"); this.lu_pstr.put("S139", UPD+"CPD SET te=? WHERE sid=?"); this.lu_pstr.put("S140", UPD+"CQ SET tp=?, td=? WHERE rid=?"); this.lu_pstr.put("S141", SEL+"* FROM r_user"); this.lu_pstr.put("S142", SEL+"SUM (dd) FROM W WHERE sid=? AND t2>?"); this.lu_pstr.put("S143", SEL+"* FROM R WHERE re<=? AND ?<=re+?");
             this.lu_pstr.put("S144", SEL+"t2, v2, rid FROM CQ WHERE sid=? AND t2>? ORDER BY o2 ASC"); this.lu_pstr.put("S145", SEL+"te, ve FROM CW WHERE sid=?"); this.lu_pstr.put("S147", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
-                                  + "SELECT t1 FROM W WHERE sid=? AND v2=0)"); this.lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?"); this.lu_pstr.put("S149", SEL+"t2, v2 FROM W WHERE sid=? ORDER BY t2 ASC");
+                                  + "SELECT t1 FROM W WHERE sid=? AND v2=0)"); this.lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?"); this.lu_pstr.put("S149", SEL+"t2, v2 FROM W WHERE sid=? ORDER BY t2 ASC"); this.lu_pstr.put("S150", SEL+"sid, val FROM violations_t_s"); this.lu_pstr.put("S151", SEL+"rid, val FROM violations_t_r");
           }
   private PreparedStatement PS(final Connection conn, final String k) throws SQLException {
             PreparedStatement p = null;

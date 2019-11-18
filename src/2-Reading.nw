@@ -2575,3 +2575,34 @@ int[] queryServerArrivalTime(final int sid) throws SQLException {
 }
 @ %def queryServerArrivalTime
 
+\subsection{\texttt{DBQueryServerTWViolations}(0)}
+<<Read: DBQueryServerTWViolations(1)>>=
+int[] DBQueryServerTWViolations() throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S150", 2);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryServerTWViolations
+<<Read: queryServerTWViolations(1)>>=
+int[] queryServerTWViolations() throws SQLException {
+  return storage.DBQueryServerTWViolations();
+}
+@ %def queryServerTWViolations
+
+\subsection{\texttt{DBQueryRequestTWViolations}(0)}
+<<Read: DBQueryRequestTWViolations(1)>>=
+int[] DBQueryRequestTWViolations() throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return DBFetch(conn, "S151", 2);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryRequestTWViolations
+<<Read: queryRequestTWViolations(1)>>=
+int[] queryRequestTWViolations() throws SQLException {
+  return storage.DBQueryRequestTWViolations();
+}
+@ %def queryRequestTWViolations
