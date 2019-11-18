@@ -1957,6 +1957,8 @@ To list base distances $d$ of all servers:
 \nwixlogsorted{c}{{Create View t\_r\_depart statement (Eq.~\ref{eq:departure-time})}{NW41kEtg-45SyYZ-1}{\nwixd{NW41kEtg-45SyYZ-1}\nwixu{NW3jCmQJ-1k9fTM-1}}}%
 \nwixlogsorted{c}{{Create View t\_s\_arrive statement (Eq.~\ref{eq:arrival-time})}{NW41kEtg-3oL4CY-1}{\nwixd{NW41kEtg-3oL4CY-1}\nwixu{NW3jCmQJ-1k9fTM-1}}}%
 \nwixlogsorted{c}{{Create View t\_s\_depart statement (Eq.~\ref{eq:departure-time})}{NW41kEtg-2riY0r-1}{\nwixd{NW41kEtg-2riY0r-1}\nwixu{NW3jCmQJ-1k9fTM-1}}}%
+\nwixlogsorted{c}{{Create View violations\_t\_r}{NW41kEtg-3kJouo-1}{\nwixd{NW41kEtg-3kJouo-1}\nwixu{NW3jCmQJ-1k9fTM-1}}}%
+\nwixlogsorted{c}{{Create View violations\_t\_s}{NW41kEtg-13PgQs-1}{\nwixd{NW41kEtg-13PgQs-1}\nwixu{NW3jCmQJ-1k9fTM-1}}}%
 \nwixlogsorted{c}{{Definition of clock loop}{NW2ZDXo8-2lFPcZ-1}{\nwixu{NW2ZDXo8-2e0Sfa-1}\nwixd{NW2ZDXo8-2lFPcZ-1}}}%
 \nwixlogsorted{c}{{Definition of engine loop}{NW2ZDXo8-3rcRXt-1}{\nwixu{NW2ZDXo8-2e0Sfa-1}\nwixd{NW2ZDXo8-3rcRXt-1}}}%
 \nwixlogsorted{c}{{Definition of request collection loop}{NW2ZDXo8-10L3rI-1}{\nwixu{NW2ZDXo8-2e0Sfa-1}\nwixd{NW2ZDXo8-10L3rI-1}}}%
@@ -2605,7 +2607,16 @@ To list arrival times $t^\textrm{arrive}$ of all servers:
 "CREATE VIEW t_s_arrive (sid, val) AS "
   + "SELECT sid, te FROM CW"
 \nwendcode{}\nwbegindocs{78}\nwdocspar
-
+To list time window violations of all servers:
+\nwenddocs{}\nwbegincode{79}\sublabel{NW41kEtg-13PgQs-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW41kEtg-13PgQs-1}}}\moddef{Create View violations\_t\_s~{\nwtagstyle{}\subpageref{NW41kEtg-13PgQs-1}}}\endmoddef\nwused{\\{NW3jCmQJ-1k9fTM-1}}
+"CREATE VIEW violations_t_s (sid, val) AS "
+  + "SELECT sid, te - sl FROM CW WHERE te - sl > 0"
+\nwendcode{}\nwbegindocs{80}\nwdocspar
+To list time window violations of all requests:
+\nwenddocs{}\nwbegincode{81}\sublabel{NW41kEtg-3kJouo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW41kEtg-3kJouo-1}}}\moddef{Create View violations\_t\_r~{\nwtagstyle{}\subpageref{NW41kEtg-3kJouo-1}}}\endmoddef\nwused{\\{NW3jCmQJ-1k9fTM-1}}
+"CREATE VIEW violations_t_r (rid, val) AS "
+  + "SELECT rid, td - rl FROM CPD WHERE td - rl > 0"
+\nwendcode{}\nwbegindocs{82}\nwdocspar
 \nwenddocs{}\nwfilename{src/2-Reading.nw}\nwbegindocs{0}\chapter{Reading from Jargo}
 \label{read}
 
@@ -6394,6 +6405,8 @@ void DBLoadDataModel() \{
     stmt.addBatch(\LA{}Create View t\_s\_depart statement (Eq.~\ref{eq:departure-time})~{\nwtagstyle{}\subpageref{NW41kEtg-2riY0r-1}}\RA{});
     stmt.addBatch(\LA{}Create View t\_r\_arrive statement (Eq.~\ref{eq:arrival-time})~{\nwtagstyle{}\subpageref{NW41kEtg-28E5sQ-1}}\RA{});
     stmt.addBatch(\LA{}Create View t\_s\_arrive statement (Eq.~\ref{eq:arrival-time})~{\nwtagstyle{}\subpageref{NW41kEtg-3oL4CY-1}}\RA{});
+    stmt.addBatch(\LA{}Create View violations\_t\_s~{\nwtagstyle{}\subpageref{NW41kEtg-13PgQs-1}}\RA{});
+    stmt.addBatch(\LA{}Create View violations\_t\_r~{\nwtagstyle{}\subpageref{NW41kEtg-3kJouo-1}}\RA{});
     stmt.addBatch("CREATE INDEX W_sid_t1 ON W (sid, t1)");
     stmt.addBatch("CREATE INDEX W_sid_t2 ON W (sid, t2)");
     stmt.addBatch("CREATE INDEX W_sid_v2 ON W (sid, v2)");

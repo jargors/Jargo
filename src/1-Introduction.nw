@@ -1571,4 +1571,13 @@ To list arrival times $t^\textrm{arrive}$ of all servers:
 "CREATE VIEW t_s_arrive (sid, val) AS "
   + "SELECT sid, te FROM CW"
 @
-
+To list time window violations of all servers:
+<<Create View violations\_t\_s>>=
+"CREATE VIEW violations_t_s (sid, val) AS "
+  + "SELECT sid, te - sl FROM CW WHERE te - sl > 0"
+@
+To list time window violations of all requests:
+<<Create View violations\_t\_r>>=
+"CREATE VIEW violations_t_r (rid, val) AS "
+  + "SELECT rid, td - rl FROM CPD WHERE td - rl > 0"
+@

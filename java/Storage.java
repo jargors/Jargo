@@ -1387,6 +1387,10 @@ public class Storage {
                              + "SELECT rid, td FROM CPD");
              stmt.addBatch("CREATE VIEW t_s_arrive (sid, val) AS "
                              + "SELECT sid, te FROM CW");
+             stmt.addBatch("CREATE VIEW violations_t_s (sid, val) AS "
+                             + "SELECT sid, te - sl FROM CW WHERE te - sl > 0");
+             stmt.addBatch("CREATE VIEW violations_t_r (rid, val) AS "
+                             + "SELECT rid, td - rl FROM CPD WHERE td - rl > 0");
              stmt.addBatch("CREATE INDEX W_sid_t1 ON W (sid, t1)");
              stmt.addBatch("CREATE INDEX W_sid_t2 ON W (sid, t2)");
              stmt.addBatch("CREATE INDEX W_sid_v2 ON W (sid, v2)");
