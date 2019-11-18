@@ -49,6 +49,16 @@ public class Controller {
   private final boolean DEBUG =
       "true".equals(System.getProperty("jargors.controller.debug"));
   private Runnable ClockLoop = () -> {
+    // TODO: The speed of the updateServer.. methods is about 50ms, meaning we
+    // can do ~20 updates per second. If a problem instance has more than 20
+    // requests per second and an algo is fast enough to do more than 20 updates
+    // per second, the updates will become the bottleneck. It might be unfair
+    // to the algo if we advance the clock while waiting for updates to finish.
+    // So in this case we only advance the clock after the updates finish.
+    // How to implement? We just measure the time it takes to do an update and
+    // add that duration onto the clock. We can output a "clock rate" to show
+    // the user the current simulation rate, i.e. clock_rate=1x means real-time,
+    // clock_rate=0.5x means 1 simulated second takes 2 real seconds, etc.
     ++(this.world_time);
     if (DEBUG) {
       System.err.printf("[t=%d] Controller.ClockLoop says: %s!\n",
