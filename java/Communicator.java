@@ -55,8 +55,9 @@ public class Communicator {
              throw new RouteIllegalOverwriteException();
            }
          }
-  public void updateServerAddToSchedule( final int sid, final int[] route, final int[] sched, final int[] rid)
-         throws RouteIllegalOverwriteException, UserNotFoundException, EdgeNotFoundException, SQLException {
+  public void updateServerAddToSchedule(final int sid, final int[] route, final int[] sched, final int[] rid)
+         throws RouteIllegalOverwriteException, UserNotFoundException,
+                EdgeNotFoundException, TimeWindowViolation, SQLException {
            final int t = this.forwardSimulationWorldTime();
            final int[] current = this.storage.DBQueryServerRoute(sid);
            int i = 0;
@@ -79,7 +80,8 @@ public class Communicator {
            this.storage.DBUpdateServerAddToSchedule(sid, route, sched, rid);
          }
   public void updateServerRemoveFromSchedule( final int sid, final int[] route, final int[] sched, final int[] rid)
-         throws RouteIllegalOverwriteException, UserNotFoundException, EdgeNotFoundException, SQLException {
+         throws RouteIllegalOverwriteException, UserNotFoundException,
+                EdgeNotFoundException, TimeWindowViolation, SQLException {
            if (route[0] >= this.forwardSimulationWorldTime()) {
              this.storage.DBUpdateServerRemoveFromSchedule(sid, route, sched, rid);
            } else {

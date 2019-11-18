@@ -773,7 +773,7 @@ public class Storage {
          }
   public void DBUpdateServerAddToSchedule(
              final int sid, final int[] route, final int[] sched, final int[] rid)
-         throws UserNotFoundException, EdgeNotFoundException, SQLException {
+         throws UserNotFoundException, EdgeNotFoundException, TimeWindowViolation, SQLException {
            if (!this.lu_users.containsKey(sid)) {
              throw new UserNotFoundException("User "+sid+" not found.");
            }
@@ -788,6 +788,11 @@ public class Storage {
              try {
                final int sq = lu_users.get(sid)[1];
                final int se = lu_users.get(sid)[2];
+               final int sl = lu_users.get(sid)[3];
+               if (route[(route.length - 2)] > sl) {
+                 throw new TimeWindowViolation("Route end (t="+route[(route.length - 2)]+") "
+                     +"after late window (t="+sl+")");
+               }
                PreparedStatement pS76 = this.PS(conn, "S76");
                this.PSAdd(pS76, sid, route[0]);
                this.PSSubmit(pS76);
@@ -916,7 +921,7 @@ public class Storage {
          }
   public void DBUpdateServerRemoveFromSchedule(
              final int sid, final int[] route, final int[] sched, final int[] rid)
-         throws UserNotFoundException, EdgeNotFoundException, SQLException {
+         throws UserNotFoundException, EdgeNotFoundException, TimeWindowViolation, SQLException {
            if (!this.lu_users.containsKey(sid)) {
              throw new UserNotFoundException("User "+sid+" not found.");
            }
@@ -930,6 +935,11 @@ public class Storage {
              try {
                final int sq = lu_users.get(sid)[1];
                final int se = lu_users.get(sid)[2];
+               final int sl = lu_users.get(sid)[3];
+               if (route[(route.length - 2)] > sl) {
+                 throw new TimeWindowViolation("Route end (t="+route[(route.length - 2)]+") "
+                     +"after late window (t="+sl+")");
+               }
                PreparedStatement pS76 = this.PS(conn, "S76");
                this.PSAdd(pS76, sid, route[0]);
                this.PSSubmit(pS76);

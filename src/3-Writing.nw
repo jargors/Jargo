@@ -268,6 +268,15 @@ for (int j = 0; j < (sched.length - 2); j += 3) {
 this.PSSubmit(pS140);
 @
 
+\subsection{Check server time window violation}
+<<Check server time window violation>>=
+final int sl = lu_users.get(sid)[3];
+if (route[(route.length - 2)] > sl) {
+  throw new TimeWindowViolation("Route end (t="+route[(route.length - 2)]+") "
+      +"after late window (t="+sl+")");
+}
+@
+
 \section{Methods}
 
 \subsection{\texttt{DBAddNewVertex}(3)}
@@ -674,11 +683,7 @@ throws UserNotFoundException, EdgeNotFoundException, TimeWindowViolation, SQLExc
     try {
       final int sq = lu_users.get(sid)[1];
       final int se = lu_users.get(sid)[2];
-      final int sl = lu_users.get(sid)[3];
-      if (route[(route.length - 2)] > sl) {
-        throw new TimeWindowViolation("Route end (t="+route[(route.length - 2)]+") "
-            +"after late window (t="+sl+")");
-      }
+      <<Check server time window violation>>
       <<Procedure to update route>>
       if (sched.length > 0) {
         Map<Integer, int[]> cache = new HashMap<>();
@@ -798,7 +803,7 @@ in Table E, or [[SQLException]] for other database failures.\\
 <<Write: DBUpdateServerAddToSchedule(4)>>=
 void DBUpdateServerAddToSchedule(
     final int sid, final int[] route, final int[] sched, final int[] rid)
-throws UserNotFoundException, EdgeNotFoundException, SQLException {
+throws UserNotFoundException, EdgeNotFoundException, TimeWindowViolation, SQLException {
   if (!this.lu_users.containsKey(sid)) {
     throw new UserNotFoundException("User "+sid+" not found.");
   }
@@ -813,6 +818,7 @@ throws UserNotFoundException, EdgeNotFoundException, SQLException {
     try {
       final int sq = lu_users.get(sid)[1];
       final int se = lu_users.get(sid)[2];
+      <<Check server time window violation>>
       <<Procedure to update route>>
       <<Procedure to update and add to schedule>>
       conn.commit();
@@ -846,8 +852,9 @@ and returns [[false]].\\
 \bottomrule
 \end{tabular}
 <<Write: updateServerAddToSchedule(4)>>=
-void updateServerAddToSchedule( final int sid, final int[] route, final int[] sched, final int[] rid)
-throws RouteIllegalOverwriteException, UserNotFoundException, EdgeNotFoundException, SQLException {
+void updateServerAddToSchedule(final int sid, final int[] route, final int[] sched, final int[] rid)
+throws RouteIllegalOverwriteException, UserNotFoundException,
+       EdgeNotFoundException, TimeWindowViolation, SQLException {
   final int t = this.forwardSimulationWorldTime();
   final int[] current = this.storage.DBQueryServerRoute(sid);
   int i = 0;
@@ -952,7 +959,7 @@ in Table E, or [[SQLException]] for other database failures.\\
 <<Write: DBUpdateServerRemoveFromSchedule(4)>>=
 void DBUpdateServerRemoveFromSchedule(
     final int sid, final int[] route, final int[] sched, final int[] rid)
-throws UserNotFoundException, EdgeNotFoundException, SQLException {
+throws UserNotFoundException, EdgeNotFoundException, TimeWindowViolation, SQLException {
   if (!this.lu_users.containsKey(sid)) {
     throw new UserNotFoundException("User "+sid+" not found.");
   }
@@ -966,6 +973,7 @@ throws UserNotFoundException, EdgeNotFoundException, SQLException {
     try {
       final int sq = lu_users.get(sid)[1];
       final int se = lu_users.get(sid)[2];
+      <<Check server time window violation>>
       <<Procedure to update route>>
       <<Procedure to update schedule>>
       <<Delete jobs from PD, CPD>>
@@ -999,7 +1007,8 @@ the method call and returns [[false]].\\
 \end{tabular}
 <<Write: updateServerRemoveFromSchedule(4)>>=
 void updateServerRemoveFromSchedule( final int sid, final int[] route, final int[] sched, final int[] rid)
-throws RouteIllegalOverwriteException, UserNotFoundException, EdgeNotFoundException, SQLException {
+throws RouteIllegalOverwriteException, UserNotFoundException,
+       EdgeNotFoundException, TimeWindowViolation, SQLException {
   if (route[0] >= this.forwardSimulationWorldTime()) {
     this.storage.DBUpdateServerRemoveFromSchedule(sid, route, sched, rid);
   } else {
