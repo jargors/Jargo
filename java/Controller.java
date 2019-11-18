@@ -36,9 +36,9 @@ public class Controller {
       Integer.parseInt(System.getProperty("jargors.controller.clockstart", "0"));
   private int clockend =
       Integer.parseInt(System.getProperty("jargors.controller.clockend", "1800"));
-  private int request_timeout =
+  private int REQUEST_TIMEOUT =
       Integer.parseInt(System.getProperty("jargors.controller.request_timeout", "30"));
-  private int queue_timeout =
+  private int QUEUE_TIMEOUT =
       Integer.parseInt(System.getProperty("jargors.controller.queue_timeout", "30"));
   private int world_time = 0;
   private int loop_delay = 0;
@@ -341,6 +341,9 @@ public class Controller {
   public void saveBackup(final String p) throws SQLException {
            this.storage.DBSaveBackup(p);
          }
+  public void setRequestTimeout(final int t) {
+           this.REQUEST_TIMEOUT = t;
+         }
   public void loadGtree(String p) throws FileNotFoundException {
            this.tools.GTLoadGtree(p);
          }
@@ -356,17 +359,14 @@ public class Controller {
   public void setClockEnd(final int t) {
            this.clockend = t;
          }
-  public void setRequestTimeout(final int t) {
-           this.request_timeout = t;
-         }
   public void setQueueTimeout(final int t) {
-           this.queue_timeout = t;
+           this.QUEUE_TIMEOUT = t;
          }
   public void setEngineUpdatePeriod(final int t) {
            this.engine_update_period = t;
          }
   public void startRealtime(final Consumer<Boolean> app_cb) {
-           this.storage.forwardRequestTimeout(request_timeout);
+           this.storage.setRequestTimeout(REQUEST_TIMEOUT);
            this.world_time = this.clockstart;
 
            int simulation_duration = (this.clockend - this.clockstart);
@@ -403,7 +403,7 @@ public class Controller {
            }, simulation_duration, TimeUnit.SECONDS);
          }
   public void startSequential(final Consumer<Boolean> app_cb) {
-           this.storage.forwardRequestTimeout(request_timeout);
+           this.storage.setRequestTimeout(REQUEST_TIMEOUT);
            this.world_time = this.clockstart;
            while (this.world_time < this.clockend) {
              this.ClockLoop.run();  // this.world_time gets incremented here!
@@ -423,7 +423,7 @@ public class Controller {
            this.communicator.forwardTraffic(target);
          }
   public void returnRequest(final int[] r) {
-           if (this.world_time - r[2] < this.queue_timeout) {
+           if (this.world_time - r[2] < this.QUEUE_TIMEOUT) {
              this.lu_seen.put(r[0], false);
            }
          }
