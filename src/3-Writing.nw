@@ -184,6 +184,7 @@ this.PSSubmit(pS42, pS43);
 <<Insert new remaining schedule into CQ>>
 @
 
+\subsection{Procedure to update and add to schedule}
 <<Procedure to update and add to schedule>>=
 <<Update times in PD and CPD>>
 <<Populate the tp, td cache and vp, vd cache and update CQ>>
@@ -221,7 +222,6 @@ for (int j = 0; j < (sched.length - 2); j += 3) {
       final int[] output = DBFetch(conn, "S86", 2, Lj);
       final int tp = output[0];
       final int td = output[1];
-      <<Check request time window violation>>
       final int rq = this.lu_users.get(Lj)[1];
       cache.put(Lj, new int[] { rq, tp, td });
       this.PSAdd(pS140, tp, td, Lj);
@@ -252,7 +252,6 @@ for (int j = 0; j < (sched.length - 2); j += 3) {
         if (Lj == sched[(k + 2)]) {
           final int td = sched[(k + 0)];
           final int vd = sched[(k + 1)];
-          <<Check request time window violation>>
           cache. put(Lj, new int[] { rq, tp, td });
           cache2.put(Lj, new int[] { vp, vd });
           break;
@@ -262,7 +261,6 @@ for (int j = 0; j < (sched.length - 2); j += 3) {
       final int[] output = this.DBFetch(conn, "S86", 2, Lj);
       final int tp = output[0];
       final int td = output[1];
-      <<Check request time window violation>>
       this.PSAdd(pS140, tp, td, Lj);
       cache.put(Lj, new int[] { rq, tp, td });
     }
@@ -271,21 +269,14 @@ for (int j = 0; j < (sched.length - 2); j += 3) {
 this.PSSubmit(pS140);
 @
 
-\subsection{Check server time window violation}
-<<Check server time window violation>>=
-final int sl = lu_users.get(sid)[3];
-if (route[(route.length - 2)] > sl) {
-  throw new TimeWindowViolation("Route end (t="+route[(route.length - 2)]+") "
-      +"after late window (t="+sl+", sid="+sid+")");
-}
-@
-
-\subsection{Check request time window violation}
-<<Check request time window violation>>=
-final int rl = lu_users.get(Lj)[3];
-if (td > rl) {
-  throw new TimeWindowViolation("Drop-off (t="+td+") "
-      +"after late window (t="+rl+", rid="+Lj+")");
+\subsection{Check time window violation}
+<<Check time window violation>>=
+for (int k = 0; k < (sched.length - 2); k += 3) {
+  final int tl = this.storage.DBQueryUser(sched[(k + 2)])[3];
+  if (sched[k] > tl) {
+    throw new TimeWindowViolation("Waypoint time (t="+sched[k]+") "
+        +"after late window (t="+tl+", uid="+sched[(k + 2)]+")");
+  }
 }
 @
 
@@ -686,7 +677,7 @@ Table E, [[TimeWindowViolation]] if time window violation occurs, or
 \end{tabular}
 <<Write: DBUpdateServerRoute(3)>>=
 void DBUpdateServerRoute(final int sid, final int[] route, final int[] sched)
-throws UserNotFoundException, EdgeNotFoundException, TimeWindowViolation, SQLException {
+throws UserNotFoundException, EdgeNotFoundException, SQLException {
   if (!this.lu_users.containsKey(sid)) {
     throw new UserNotFoundException("User "+sid+" not found.");
   }
@@ -694,7 +685,6 @@ throws UserNotFoundException, EdgeNotFoundException, TimeWindowViolation, SQLExc
     try {
       final int sq = lu_users.get(sid)[1];
       final int se = lu_users.get(sid)[2];
-      <<Check server time window violation>>
       <<Procedure to update route>>
       if (sched.length > 0) {
         Map<Integer, int[]> cache = new HashMap<>();
@@ -725,6 +715,7 @@ void updateServerRoute(final int sid, final int[] route, final int[] sched)
 throws RouteIllegalOverwriteException, UserNotFoundException,
        EdgeNotFoundException, TimeWindowViolation, SQLException {
   if (route[0] >= this.forwardSimulationWorldTime()) {
+    <<Check time window violation>>
     this.storage.DBUpdateServerRoute(sid, route, sched);
   } else {
     throw new RouteIllegalOverwriteException();
@@ -816,7 +807,7 @@ Table E, [[TimeWindowViolation]] if time window violation occurs, or
 <<Write: DBUpdateServerAddToSchedule(4)>>=
 void DBUpdateServerAddToSchedule(
     final int sid, final int[] route, final int[] sched, final int[] rid)
-throws UserNotFoundException, EdgeNotFoundException, TimeWindowViolation, SQLException {
+throws UserNotFoundException, EdgeNotFoundException, SQLException {
   if (!this.lu_users.containsKey(sid)) {
     throw new UserNotFoundException("User "+sid+" not found.");
   }
@@ -831,7 +822,6 @@ throws UserNotFoundException, EdgeNotFoundException, TimeWindowViolation, SQLExc
     try {
       final int sq = lu_users.get(sid)[1];
       final int se = lu_users.get(sid)[2];
-      <<Check server time window violation>>
       <<Procedure to update route>>
       <<Procedure to update and add to schedule>>
       conn.commit();
@@ -887,6 +877,7 @@ throws RouteIllegalOverwriteException, UserNotFoundException,
     i += 2;
     j += 2;
   }
+  <<Check time window violation>>
   this.storage.DBUpdateServerAddToSchedule(sid, route, sched, rid);
 }
 @ %def updateServerAddToSchedule
@@ -974,7 +965,7 @@ Table E, [[TimeWindowViolation]] if time window violation occurs, or
 <<Write: DBUpdateServerRemoveFromSchedule(4)>>=
 void DBUpdateServerRemoveFromSchedule(
     final int sid, final int[] route, final int[] sched, final int[] rid)
-throws UserNotFoundException, EdgeNotFoundException, TimeWindowViolation, SQLException {
+throws UserNotFoundException, EdgeNotFoundException, SQLException {
   if (!this.lu_users.containsKey(sid)) {
     throw new UserNotFoundException("User "+sid+" not found.");
   }
@@ -988,7 +979,6 @@ throws UserNotFoundException, EdgeNotFoundException, TimeWindowViolation, SQLExc
     try {
       final int sq = lu_users.get(sid)[1];
       final int se = lu_users.get(sid)[2];
-      <<Check server time window violation>>
       <<Procedure to update route>>
       <<Procedure to update schedule>>
       <<Delete jobs from PD, CPD>>
@@ -1025,6 +1015,7 @@ void updateServerRemoveFromSchedule( final int sid, final int[] route, final int
 throws RouteIllegalOverwriteException, UserNotFoundException,
        EdgeNotFoundException, TimeWindowViolation, SQLException {
   if (route[0] >= this.forwardSimulationWorldTime()) {
+    <<Check time window violation>>
     this.storage.DBUpdateServerRemoveFromSchedule(sid, route, sched, rid);
   } else {
     throw new RouteIllegalOverwriteException();

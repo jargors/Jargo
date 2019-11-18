@@ -50,6 +50,13 @@ public class Communicator {
          throws RouteIllegalOverwriteException, UserNotFoundException,
                 EdgeNotFoundException, TimeWindowViolation, SQLException {
            if (route[0] >= this.forwardSimulationWorldTime()) {
+             for (int k = 0; k < (sched.length - 2); k += 3) {
+               final int tl = this.storage.DBQueryUser(sched[(k + 2)])[3];
+               if (sched[k] > tl) {
+                 throw new TimeWindowViolation("Waypoint time (t="+sched[k]+") "
+                     +"after late window (t="+tl+", uid="+sched[(k + 2)]+")");
+               }
+             }
              this.storage.DBUpdateServerRoute(sid, route, sched);
            } else {
              throw new RouteIllegalOverwriteException();
@@ -77,12 +84,26 @@ public class Communicator {
              i += 2;
              j += 2;
            }
+           for (int k = 0; k < (sched.length - 2); k += 3) {
+             final int tl = this.storage.DBQueryUser(sched[(k + 2)])[3];
+             if (sched[k] > tl) {
+               throw new TimeWindowViolation("Waypoint time (t="+sched[k]+") "
+                   +"after late window (t="+tl+", uid="+sched[(k + 2)]+")");
+             }
+           }
            this.storage.DBUpdateServerAddToSchedule(sid, route, sched, rid);
          }
   public void updateServerRemoveFromSchedule( final int sid, final int[] route, final int[] sched, final int[] rid)
          throws RouteIllegalOverwriteException, UserNotFoundException,
                 EdgeNotFoundException, TimeWindowViolation, SQLException {
            if (route[0] >= this.forwardSimulationWorldTime()) {
+             for (int k = 0; k < (sched.length - 2); k += 3) {
+               final int tl = this.storage.DBQueryUser(sched[(k + 2)])[3];
+               if (sched[k] > tl) {
+                 throw new TimeWindowViolation("Waypoint time (t="+sched[k]+") "
+                     +"after late window (t="+tl+", uid="+sched[(k + 2)]+")");
+               }
+             }
              this.storage.DBUpdateServerRemoveFromSchedule(sid, route, sched, rid);
            } else {
              throw new RouteIllegalOverwriteException();
