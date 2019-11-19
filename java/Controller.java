@@ -92,10 +92,15 @@ public class Controller {
         }
       }
     } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      System.err.println(e.toString());
-      e.printStackTrace();
-      System.exit(1);
+      if (e.getErrorCode() == 40000) {
+        System.err.println("Warning: database connection interrupted");
+      } else {
+        System.err.println("Encountered fatal error");
+        System.err.println(e.toString());
+        System.err.println(e.getErrorCode());
+        e.printStackTrace();
+        System.exit(1);
+      }
     }
     if (DEBUG) {
       System.err.printf("Controller.RequestCollectionLoop completed in %d ms\n",
@@ -133,10 +138,15 @@ public class Controller {
       int[] output = this.storage.DBQueryServerLocationsActive(this.world_time);
       this.client.collectServerLocations(output);
     } catch (SQLException e) {
-      System.err.println("Encountered fatal error");
-      System.err.println(e.toString());
-      e.printStackTrace();
-      System.exit(1);
+      if (e.getErrorCode() == 40000) {
+        System.err.println("Warning: database connection interrupted");
+      } else {
+        System.err.println("Encountered fatal error");
+        System.err.println(e.toString());
+        System.err.println(e.getErrorCode());
+        e.printStackTrace();
+        System.exit(1);
+      }
     }
     if (DEBUG) {
       System.err.printf("Controller.ServerLoop completed in %d ms\n",
@@ -392,14 +402,21 @@ public class Controller {
              this.ServerLoop, this.loop_delay, server_collection_period, TimeUnit.SECONDS);
 
            exe.schedule(() -> {
-             cb1.cancel(false);
-             cb2.cancel(false);
-             cb3.cancel(false);
-             cb4.cancel(false);
-             cb5.cancel(false);
+             cb1.cancel(true);
+             cb2.cancel(true);
+             cb3.cancel(true);
+             cb4.cancel(true);
+             cb5.cancel(true);
+             try {
+               this.client.end();
+               app_cb.accept(true);
+             } catch (Exception e) {
+               System.err.println("Error in ending callback");
+               System.err.println(e.toString());
+               e.printStackTrace();
+               return;
+             }
              exe.shutdown();
-             this.client.end();
-             app_cb.accept(true);
            }, simulation_duration, TimeUnit.SECONDS);
          }
   public void startSequential(final Consumer<Boolean> app_cb) {
@@ -412,8 +429,15 @@ public class Controller {
              this.RequestCollectionLoop.run();
              this.RequestHandlingLoop.run();
            }
-           this.client.end();
-           app_cb.accept(true);
+           try {
+             this.client.end();
+             app_cb.accept(true);
+           } catch (Exception e) {
+             System.err.println("Error in ending callback");
+             System.err.println(e.toString());
+             e.printStackTrace();
+             return;
+           }
          }
   public void registerClient(final Client target) {
            this.client = target;

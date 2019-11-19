@@ -36,6 +36,7 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipEntry;
 @
 <<DesktopController.java preamble>>=
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -99,6 +100,7 @@ private String road = null;
 private String jar = null;
 private String jarclass = null;
 private Canvas can_road;
+private AnimationTimer timer = new MyTimer();
 @
 
 <<[[DesktopController]] member variables>>=
@@ -111,6 +113,14 @@ private int[] edges = null;
 private int[] mbr = null;
 private double xunit = 0;
 private double yunit = 0;
+@
+
+<<[[DesktopController]] member variables>>=
+private class MyTimer extends AnimationTimer {
+  public void handle(long now) {
+    System.out.println(now);
+  }
+}
 @
 
 \section{Methods}
@@ -457,6 +467,7 @@ void actionStartSequential(final ActionEvent e) {
     this.controller.setClockStart(Integer.parseInt(this.tf_t0.getText()));
     this.controller.setClockEnd(Integer.parseInt(this.tf_t1.getText()));
     CompletableFuture.runAsync(() -> {
+      this.timer.start();
       this.controller.startSequential((status) -> {
         Platform.runLater(() -> {
           this.lbl_status.setText("Simulation "+(status ? "ended." : "failed."));
