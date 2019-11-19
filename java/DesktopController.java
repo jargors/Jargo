@@ -357,6 +357,11 @@ public class DesktopController {
              this.lbl_status.setText("Close '"+this.db+"'...");
              CompletableFuture.runAsync(() -> {
                try {
+                 this.controller.stop((status) -> {
+                   Platform.runLater(() -> {
+                     this.lbl_status.setText("Simulation stopped.");
+                   });
+                 });
                  this.controller.closeInstance();
                  this.controller.closeGtree();
                  Platform.runLater(() -> {
@@ -387,6 +392,7 @@ public class DesktopController {
                    this.btn_startreal.setDisable(true);
                    this.db = null;
                    this.container_canvas.setContent(null);
+                   this.timer.stop();
                    this.circ_status.setFill(C_SUCCESS);
                    this.lbl_status.setText("Closed instance.");
                  });

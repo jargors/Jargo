@@ -112,6 +112,14 @@ coordiates (see [[Storage.DBAddNewVertex]](3))\footnote{Beware, if [[CSHIFT]]
 is changed here, it should also be changed in Tools.}.
 <<Settings objects>>=
 private final double CSHIFT = 10000000.0;
+private boolean kill = false;
+private boolean working = false;
+private ScheduledExecutorService exe = null;
+private ScheduledFuture<?> cb1 = null;
+private ScheduledFuture<?> cb2 = null;
+private ScheduledFuture<?> cb3 = null;
+private ScheduledFuture<?> cb4 = null;
+private ScheduledFuture<?> cb5 = null;
 @
 The [[DEBUG]] setting controls whether certain messages are print to screen.
 Pass [[-Djargors.controller.debug=true]] to the [[java]] command to set
@@ -534,42 +542,28 @@ void startRealtime(final Consumer<Boolean> app_cb) {
 
   int simulation_duration = (this.clockend - this.clockstart);
 
-  ScheduledExecutorService exe = Executors.newScheduledThreadPool(5);
+  this.exe = Executors.newScheduledThreadPool(5);
 
-  ScheduledFuture<?> cb1 = exe.scheduleAtFixedRate(
+  this.cb1 = exe.scheduleAtFixedRate(
     this.ClockLoop, 0, 1, TimeUnit.SECONDS);
 
-  ScheduledFuture<?> cb2 = exe.scheduleAtFixedRate(
+  this.cb2 = exe.scheduleAtFixedRate(
     this.EngineLoop, this.loop_delay, this.engine_update_period, TimeUnit.SECONDS);
 
   int request_collection_period = this.client.getRequestCollectionPeriod();
-  ScheduledFuture<?> cb3 = exe.scheduleAtFixedRate(
+  this.cb3 = exe.scheduleAtFixedRate(
     this.RequestCollectionLoop, this.loop_delay, request_collection_period, TimeUnit.SECONDS);
 
   int request_handling_period = this.client.getRequestHandlingPeriod();
-  ScheduledFuture<?> cb4 = exe.scheduleAtFixedRate(
+  this.cb4 = exe.scheduleAtFixedRate(
     this.RequestHandlingLoop, this.loop_delay, request_handling_period, TimeUnit.MILLISECONDS);
 
   int server_collection_period = this.client.getServerLocationCollectionPeriod();
-  ScheduledFuture<?> cb5 = exe.scheduleAtFixedRate(
+  this.cb5 = exe.scheduleAtFixedRate(
     this.ServerLoop, this.loop_delay, server_collection_period, TimeUnit.SECONDS);
 
-  exe.schedule(() -> {
-    cb1.cancel(true);
-    cb2.cancel(true);
-    cb3.cancel(true);
-    cb4.cancel(true);
-    cb5.cancel(true);
-    try {
-      this.client.end();
-      app_cb.accept(true);
-    } catch (Exception e) {
-      System.err.println("Error in ending callback");
-      System.err.println(e.toString());
-      e.printStackTrace();
-      return;
-    }
-    exe.shutdown();
+  this.exe.schedule(() -> {
+    this.stop(app_cb);
   }, simulation_duration, TimeUnit.SECONDS);
 }
 @ %def startRealtime
@@ -579,15 +573,43 @@ void startRealtime(final Consumer<Boolean> app_cb) {
 void startSequential(final Consumer<Boolean> app_cb) {
   this.storage.setRequestTimeout(REQUEST_TIMEOUT);
   this.world_time = this.clockstart;
-  while (this.world_time < this.clockend) {
+  while (!kill && this.world_time < this.clockend) {
+    this.working = true;
     this.ClockLoop.run();  // this.world_time gets incremented here!
     this.EngineLoop.run();
     this.ServerLoop.run();
     this.RequestCollectionLoop.run();
     this.RequestHandlingLoop.run();
+    this.working = false;
+  }
+  this.stop(app_cb);
+}
+@ %def startSequential
+
+\subsection{\texttt{stop}(1)}
+<<stop(1)>>=
+void stop(final Consumer<Boolean> app_cb) {
+  if (this.exe == null) {  // sequential mode
+    this.kill = true;
+    while (this.working) {
+      try {
+        Thread.sleep(100);
+      } catch (InterruptedException e) {
+        // ...
+      }
+    }
+  } else {  // realtime mode
+    this.cb1.cancel(true);
+    this.cb2.cancel(true);
+    this.cb3.cancel(true);
+    this.cb4.cancel(true);
+    this.cb5.cancel(true);
+    this.exe.shutdown();
   }
   try {
-    this.client.end();
+    if (this.client != null) {
+      this.client.end();
+    }
     app_cb.accept(true);
   } catch (Exception e) {
     System.err.println("Error in ending callback");
@@ -596,7 +618,7 @@ void startSequential(final Consumer<Boolean> app_cb) {
     return;
   }
 }
-@ %def startSequential
+@
 
 \subsection{\texttt{internalRefStorage}(0)}
 <<internalRefStorage(0)>>=
