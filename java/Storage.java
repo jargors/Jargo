@@ -5,7 +5,7 @@ import com.github.jargors.exceptions.DuplicateUserException;
 import com.github.jargors.exceptions.EdgeNotFoundException;
 import com.github.jargors.exceptions.UserNotFoundException;
 import com.github.jargors.exceptions.VertexNotFoundException;
-import com.github.jargors.exceptions.TimeWindowViolation;
+import com.github.jargors.exceptions.TimeWindowException;
 import java.sql.CallableStatement;   import java.sql.Connection;
 import java.sql.DriverManager;       import java.sql.PreparedStatement;
 import java.sql.ResultSet;           import java.sql.SQLException;
