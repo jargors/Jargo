@@ -515,5 +515,7 @@ public class DesktopController {
               return;
             }
           }
+  private void drawServersInitial() {
+          }
   public void initialize() { }
 }

@@ -199,6 +199,7 @@ public \LA{}setQueueTimeout(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-4Sx8Z3-1}}\RA{
 public \LA{}setEngineUpdatePeriod(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-1q9MsZ-1}}\RA{}
 public \LA{}startRealtime(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-1dNtp8-1}}\RA{}
 public \LA{}startSequential(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-2R9Ikm-1}}\RA{}
+public \LA{}stop(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-3APzVY-1}}\RA{}
 public \LA{}registerClient(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-1UtY1X-1}}\RA{}
 public \LA{}registerTraffic(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-1eYS0t-1}}\RA{}
 public \LA{}returnRequest(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-23SuC3-1}}\RA{}
@@ -344,6 +345,7 @@ public \LA{}setWindowWidth(1)~{\nwtagstyle{}\subpageref{NW4WjzfE-3x7jy7-1}}\RA{}
 public \LA{}setWindowHeight(1)~{\nwtagstyle{}\subpageref{NW4WjzfE-13qzEo-1}}\RA{}
 public \LA{}setStage(1)~{\nwtagstyle{}\subpageref{NW4WjzfE-4RWb4b-1}}\RA{}
 private \LA{}drawRoadNetwork(0)~{\nwtagstyle{}\subpageref{NW4WjzfE-2vxdQO-1}}\RA{}
+private \LA{}drawServersInitial(0)~{\nwtagstyle{}\subpageref{NW4WjzfE-1MaShB-1}}\RA{}
 \nwendcode{}\nwbegindocs{42}\nwdocspar
 
 \nwenddocs{}\nwfilename{src/1-Introduction.nw}\nwbegindocs{0}\chapter{Introduction}
@@ -1859,6 +1861,13 @@ To list base distances $d$ of all requests:
 \nwenddocs{}\nwbegincode{55}\sublabel{NW41kEtg-2qZ1kZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW41kEtg-2qZ1kZ-1}}}\moddef{Create View dist\_r\_base statement~{\nwtagstyle{}\subpageref{NW41kEtg-2qZ1kZ-1}}}\endmoddef\nwused{\\{NW3jCmQJ-1k9fTM-1}}
 "CREATE VIEW dist_r_base (val) AS "
   + "SELECT SUM (rb) FROM R"
+\nwendcode{}\nwbegindocs{56}\nwdocspar
+To list base distances $d$ of all unassigned requests:
+\nwenddocs{}\nwbegincode{57}\sublabel{NW41kEtg-20Wo4P-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW41kEtg-20Wo4P-1}}}\moddef{Create View dist\_r\_unassigned statement~{\nwtagstyle{}\subpageref{NW41kEtg-20Wo4P-1}}}\endmoddef\nwused{\\{NW3jCmQJ-1k9fTM-1}}
+"CREATE VIEW dist_r_unassigned (val) AS "
+  + "SELECT SUM (rb) FROM R LEFT JOIN assignments_r "
+  + "  ON R.rid = assignments_r.rid "
+  + "WHERE assignments_r.rid IS NULL"
 \nwendcode{}
 
 \nwixlogsorted{c}{{..round to nearest meter}{NW3zOIuJ-1p0YRJ-1}{\nwixu{NW3zOIuJ-4DIogh-1}\nwixd{NW3zOIuJ-1p0YRJ-1}}}%
@@ -1987,6 +1996,7 @@ To list base distances $d$ of all requests:
 \nwixlogsorted{c}{{DesktopController.java}{NW4WjzfE-4ScqTl-1}{\nwixd{NW4WjzfE-4ScqTl-1}}}%
 \nwixlogsorted{c}{{DesktopController.java preamble}{NW4WjzfE-4Xk0Zi-1}{\nwixu{NW4WjzfE-4ScqTl-1}\nwixd{NW4WjzfE-4Xk0Zi-1}\nwixd{NW4WjzfE-4Xk0Zi-2}\nwixd{NW4WjzfE-4Xk0Zi-3}}}%
 \nwixlogsorted{c}{{drawRoadNetwork(0)}{NW4WjzfE-2vxdQO-1}{\nwixu{NW1GVbai-14uWYi-3}\nwixd{NW4WjzfE-2vxdQO-1}}}%
+\nwixlogsorted{c}{{drawServersInitial(0)}{NW4WjzfE-1MaShB-1}{\nwixu{NW1GVbai-14uWYi-3}\nwixd{NW4WjzfE-1MaShB-1}}}%
 \nwixlogsorted{c}{{end(0)}{NW2q3QGT-XQiXx-1}{\nwixu{NW1GVbai-1aFZ2n-3}\nwixd{NW2q3QGT-XQiXx-1}}}%
 \nwixlogsorted{c}{{endCollectServerLocations(1)}{NW2q3QGT-hKCVj-1}{\nwixu{NW1GVbai-1aFZ2n-3}\nwixd{NW2q3QGT-hKCVj-1}}}%
 \nwixlogsorted{c}{{filterByHaversine(3)}{NW3zOIuJ-3xPljQ-1}{\nwixu{NW1GVbai-3QhyAk-3}\nwixd{NW3zOIuJ-3xPljQ-1}}}%
@@ -2260,6 +2270,7 @@ To list base distances $d$ of all requests:
 \nwixlogsorted{c}{{setWindowWidth(1)}{NW4WjzfE-3x7jy7-1}{\nwixu{NW1GVbai-14uWYi-3}\nwixd{NW4WjzfE-3x7jy7-1}}}%
 \nwixlogsorted{c}{{startRealtime(1)}{NW2ZDXo8-1dNtp8-1}{\nwixu{NW1GVbai-2u8vSA-3}\nwixd{NW2ZDXo8-1dNtp8-1}}}%
 \nwixlogsorted{c}{{startSequential(1)}{NW2ZDXo8-2R9Ikm-1}{\nwixu{NW1GVbai-2u8vSA-3}\nwixd{NW2ZDXo8-2R9Ikm-1}}}%
+\nwixlogsorted{c}{{stop(1)}{NW2ZDXo8-3APzVY-1}{\nwixu{NW1GVbai-2u8vSA-3}\nwixd{NW2ZDXo8-3APzVY-1}}}%
 \nwixlogsorted{c}{{Storage.java}{NW27XAxz-203Bbj-1}{\nwixd{NW27XAxz-203Bbj-1}}}%
 \nwixlogsorted{c}{{Storage.java preamble}{NW27XAxz-FkGTW-1}{\nwixu{NW27XAxz-203Bbj-1}\nwixd{NW27XAxz-FkGTW-1}\nwixd{NW27XAxz-FkGTW-2}\nwixd{NW27XAxz-FkGTW-3}\nwixd{NW27XAxz-FkGTW-4}\nwixd{NW27XAxz-FkGTW-5}}}%
 \nwixlogsorted{c}{{Tools.java}{NW3zOIuJ-2Vh5vZ-1}{\nwixd{NW3zOIuJ-2Vh5vZ-1}}}%
@@ -2580,14 +2591,7 @@ To list base distances $d$ of all requests:
 \nwixlogsorted{i}{{updateServerAddToSchedule}{updateServerAddToSchedule}}%
 \nwixlogsorted{i}{{updateServerRemoveFromSchedule}{updateServerRemoveFromSchedule}}%
 \nwixlogsorted{i}{{updateServerRoute}{updateServerRoute}}%
-\nwbegindocs{56}\nwdocspar
-To list base distances $d$ of all unassigned requests:
-\nwenddocs{}\nwbegincode{57}\sublabel{NW41kEtg-20Wo4P-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW41kEtg-20Wo4P-1}}}\moddef{Create View dist\_r\_unassigned statement~{\nwtagstyle{}\subpageref{NW41kEtg-20Wo4P-1}}}\endmoddef\nwused{\\{NW3jCmQJ-1k9fTM-1}}
-"CREATE VIEW dist_r_unassigned (val) AS "
-  + "SELECT SUM (rb) FROM R LEFT JOIN assignments_r "
-  + "  ON R.rid = assignments_r.rid "
-  + "WHERE assignments_r.rid IS NULL"
-\nwendcode{}\nwbegindocs{58}\nwdocspar
+\nwbegindocs{58}\nwdocspar
 To list detour distances $D^\textrm{detour}$ of all requests:
 \nwenddocs{}\nwbegincode{59}\sublabel{NW41kEtg-4OnMrk-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW41kEtg-4OnMrk-1}}}\moddef{Create View dist\_r\_detour statement (Eq.~\ref{eq:detour-distance})~{\nwtagstyle{}\subpageref{NW41kEtg-4OnMrk-1}}}\endmoddef\nwused{\\{NW3jCmQJ-1k9fTM-1}}
 "CREATE VIEW dist_r_detour (rid, val) AS "
@@ -3344,9 +3348,7 @@ int[] DBQueryRequestIsAssigned(final int rid) throws SQLException \{
   \}
 \}
 \nwindexdefn{DBQueryRequestIsAssigned}{DBQueryRequestIsAssigned}{NWavjwc-1ZOEl0-1}\eatline
-\nwidentdefs{\\{{DBQueryRequestIsAssigned}{DBQueryRequestIsAssigned}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S148}{S148}}}\nwindexuse{DBFetch}{DBFetch}{NWavjwc-1ZOEl0-1}\nwindexuse{S148}{S148}{NWavjwc-1ZOEl0-1}\nwendcode{}
-
-\nwbegindocs{56}\nwdocspar
+\nwidentdefs{\\{{DBQueryRequestIsAssigned}{DBQueryRequestIsAssigned}}}\nwidentuses{\\{{DBFetch}{DBFetch}}\\{{S148}{S148}}}\nwindexuse{DBFetch}{DBFetch}{NWavjwc-1ZOEl0-1}\nwindexuse{S148}{S148}{NWavjwc-1ZOEl0-1}\nwendcode{}\nwbegindocs{56}\nwdocspar
 \subsection{\texttt{DBQueryQueuedRequests}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -3386,7 +3388,9 @@ Integer {\tt{}t} (param. 1):&a time
 int[] DBQueryQueuedRequests(final int t) throws SQLException \{
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW3jCmQJ-JT1v9-1}}\RA{}) \{
 \nosublabel{NWavjwc-1W6rbZ-1-u1}\nwindexdefn{DBQueryQueuedRequests}{DBQueryQueuedRequests}{NWavjwc-1W6rbZ-1}\eatline
-\nwidentdefs{\\{{DBQueryQueuedRequests}{DBQueryQueuedRequests}}}\nwendcode{}\nwbegindocs{58}{\small Our approach is to first select all requests where $t$ is between the
+\nwidentdefs{\\{{DBQueryQueuedRequests}{DBQueryQueuedRequests}}}\nwendcode{}
+
+\nwbegindocs{58}{\small Our approach is to first select all requests where $t$ is between the
 request's early time $r_\texttt{e}$ and
 $r_\texttt{e}+\texttt{REQUEST\_TIMEOUT}$.  Then, we return a filtered subset of
 these requests that are unassigned. As we don't know how many requests will
@@ -5735,9 +5739,7 @@ throws DuplicateUserException, SQLException \{
     throw e;
   \}
 \nosublabel{NW3NfwZQ-3NS7mW-1-u3}\nwindexdefn{DBAddNewRequest}{DBAddNewRequest}{NW3NfwZQ-3NS7mW-1}\eatline
-\nwidentdefs{\\{{DBAddNewRequest}{DBAddNewRequest}}}\nwendcode{}
-
-\nwbegindocs{56}{\small In the last step, we put $r$ into {\tt{}lu{\char95}users} and put it into
+\nwidentdefs{\\{{DBAddNewRequest}{DBAddNewRequest}}}\nwendcode{}\nwbegindocs{56}{\small In the last step, we put $r$ into {\tt{}lu{\char95}users} and put it into
 {\tt{}lu{\char95}rstatus} with the value set to {\tt{}false} to indicate that it is
 unassigned. When we put it into {\tt{}lu{\char95}users}, we store a cloned array {\tt{}u} as
 the value because we don't want any changes to {\tt{}u} on the caller side showing
@@ -5746,7 +5748,9 @@ up in our cache (we are considering users to be immutable).}
   this.lu_users.put(u[0], u.clone());
   this.lu_rstatus.put(u[0], false);
 \}
-\nwendcode{}\nwbegindocs{58}\nwdocspar
+\nwendcode{}
+
+\nwbegindocs{58}\nwdocspar
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -7660,6 +7664,14 @@ coordiates (see {\tt{}Storage.\protect\nwindexuse{DBAddNewVertex}{DBAddNewVertex
 is changed here, it should also be changed in Tools.}.
 \nwenddocs{}\nwbegincode{25}\sublabel{NW2ZDXo8-2svhLD-4}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-2svhLD-4}}}\moddef{Settings objects~{\nwtagstyle{}\subpageref{NW2ZDXo8-2svhLD-1}}}\plusendmoddef
 private final double CSHIFT = 10000000.0;
+private boolean kill = false;
+private boolean working = false;
+private ScheduledExecutorService exe = null;
+private ScheduledFuture<?> cb1 = null;
+private ScheduledFuture<?> cb2 = null;
+private ScheduledFuture<?> cb3 = null;
+private ScheduledFuture<?> cb4 = null;
+private ScheduledFuture<?> cb5 = null;
 \nwendcode{}\nwbegindocs{26}\nwdocspar
 The {\tt{}DEBUG} setting controls whether certain messages are print to screen.
 Pass {\tt{}-Djargors.controller.debug=true} to the {\tt{}java} command to set
@@ -7783,10 +7795,15 @@ private Runnable RequestCollectionLoop = () -> \{
       \}
     \}
   \} catch (SQLException e) \{
-    System.err.println("Encountered fatal error");
-    System.err.println(e.toString());
-    e.printStackTrace();
-    System.exit(1);
+    if (e.getErrorCode() == 40000) \{
+      System.err.println("Warning: database connection interrupted");
+    \} else \{
+      System.err.println("Encountered fatal error");
+      System.err.println(e.toString());
+      System.err.println(e.getErrorCode());
+      e.printStackTrace();
+      System.exit(1);
+    \}
   \}
   if (DEBUG) \{
     System.err.printf("Controller.RequestCollectionLoop completed in %d ms\\n",
@@ -7870,10 +7887,15 @@ private Runnable ServerLoop = () -> \{
     int[] output = this.storage.DBQueryServerLocationsActive(this.world_time);
     this.client.collectServerLocations(output);
   \} catch (SQLException e) \{
-    System.err.println("Encountered fatal error");
-    System.err.println(e.toString());
-    e.printStackTrace();
-    System.exit(1);
+    if (e.getErrorCode() == 40000) \{
+      System.err.println("Warning: database connection interrupted");
+    \} else \{
+      System.err.println("Encountered fatal error");
+      System.err.println(e.toString());
+      System.err.println(e.getErrorCode());
+      e.printStackTrace();
+      System.exit(1);
+    \}
   \}
   if (DEBUG) \{
     System.err.printf("Controller.ServerLoop completed in %d ms\\n",
@@ -8072,65 +8094,93 @@ void startRealtime(final Consumer<Boolean> app_cb) \{
 
   int simulation_duration = (this.clockend - this.clockstart);
 
-  ScheduledExecutorService exe = Executors.newScheduledThreadPool(5);
+  this.exe = Executors.newScheduledThreadPool(5);
 
-  ScheduledFuture<?> cb1 = exe.scheduleAtFixedRate(
+  this.cb1 = exe.scheduleAtFixedRate(
     this.ClockLoop, 0, 1, TimeUnit.SECONDS);
 
-  ScheduledFuture<?> cb2 = exe.scheduleAtFixedRate(
+  this.cb2 = exe.scheduleAtFixedRate(
     this.EngineLoop, this.loop_delay, this.engine_update_period, TimeUnit.SECONDS);
 
   int request_collection_period = this.client.getRequestCollectionPeriod();
-  ScheduledFuture<?> cb3 = exe.scheduleAtFixedRate(
+  this.cb3 = exe.scheduleAtFixedRate(
     this.RequestCollectionLoop, this.loop_delay, request_collection_period, TimeUnit.SECONDS);
 
   int request_handling_period = this.client.getRequestHandlingPeriod();
-  ScheduledFuture<?> cb4 = exe.scheduleAtFixedRate(
+  this.cb4 = exe.scheduleAtFixedRate(
     this.RequestHandlingLoop, this.loop_delay, request_handling_period, TimeUnit.MILLISECONDS);
 
   int server_collection_period = this.client.getServerLocationCollectionPeriod();
-  ScheduledFuture<?> cb5 = exe.scheduleAtFixedRate(
+  this.cb5 = exe.scheduleAtFixedRate(
     this.ServerLoop, this.loop_delay, server_collection_period, TimeUnit.SECONDS);
 
-  exe.schedule(() -> \{
-    cb1.cancel(false);
-    cb2.cancel(false);
-    cb3.cancel(false);
-    cb4.cancel(false);
-    cb5.cancel(false);
-    exe.shutdown();
-    this.client.end();
-    app_cb.accept(true);
+  this.exe.schedule(() -> \{
+    this.stop(app_cb);
   \}, simulation_duration, TimeUnit.SECONDS);
 \}
 \nwindexdefn{startRealtime}{startRealtime}{NW2ZDXo8-1dNtp8-1}\eatline
-\nwidentdefs{\\{{startRealtime}{startRealtime}}}\nwidentuses{\\{{end}{end}}\\{{getRequestCollectionPeriod}{getRequestCollectionPeriod}}\\{{getRequestHandlingPeriod}{getRequestHandlingPeriod}}\\{{getServerLocationCollectionPeriod}{getServerLocationCollectionPeriod}}\\{{setRequestTimeout}{setRequestTimeout}}}\nwindexuse{end}{end}{NW2ZDXo8-1dNtp8-1}\nwindexuse{getRequestCollectionPeriod}{getRequestCollectionPeriod}{NW2ZDXo8-1dNtp8-1}\nwindexuse{getRequestHandlingPeriod}{getRequestHandlingPeriod}{NW2ZDXo8-1dNtp8-1}\nwindexuse{getServerLocationCollectionPeriod}{getServerLocationCollectionPeriod}{NW2ZDXo8-1dNtp8-1}\nwindexuse{setRequestTimeout}{setRequestTimeout}{NW2ZDXo8-1dNtp8-1}\nwendcode{}\nwbegindocs{75}\nwdocspar
+\nwidentdefs{\\{{startRealtime}{startRealtime}}}\nwidentuses{\\{{getRequestCollectionPeriod}{getRequestCollectionPeriod}}\\{{getRequestHandlingPeriod}{getRequestHandlingPeriod}}\\{{getServerLocationCollectionPeriod}{getServerLocationCollectionPeriod}}\\{{setRequestTimeout}{setRequestTimeout}}}\nwindexuse{getRequestCollectionPeriod}{getRequestCollectionPeriod}{NW2ZDXo8-1dNtp8-1}\nwindexuse{getRequestHandlingPeriod}{getRequestHandlingPeriod}{NW2ZDXo8-1dNtp8-1}\nwindexuse{getServerLocationCollectionPeriod}{getServerLocationCollectionPeriod}{NW2ZDXo8-1dNtp8-1}\nwindexuse{setRequestTimeout}{setRequestTimeout}{NW2ZDXo8-1dNtp8-1}\nwendcode{}\nwbegindocs{75}\nwdocspar
 \subsection{\texttt{startSequential}(1)}
 \nwenddocs{}\nwbegincode{76}\sublabel{NW2ZDXo8-2R9Ikm-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-2R9Ikm-1}}}\moddef{startSequential(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-2R9Ikm-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
 void startSequential(final Consumer<Boolean> app_cb) \{
   this.storage.setRequestTimeout(REQUEST_TIMEOUT);
   this.world_time = this.clockstart;
-  while (this.world_time < this.clockend) \{
+  while (!kill && this.world_time < this.clockend) \{
+    this.working = true;
     this.ClockLoop.run();  // this.world_time gets incremented here!
     this.EngineLoop.run();
     this.ServerLoop.run();
     this.RequestCollectionLoop.run();
     this.RequestHandlingLoop.run();
+    this.working = false;
   \}
-  this.client.end();
-  app_cb.accept(true);
+  this.stop(app_cb);
 \}
 \nwindexdefn{startSequential}{startSequential}{NW2ZDXo8-2R9Ikm-1}\eatline
-\nwidentdefs{\\{{startSequential}{startSequential}}}\nwidentuses{\\{{end}{end}}\\{{setRequestTimeout}{setRequestTimeout}}}\nwindexuse{end}{end}{NW2ZDXo8-2R9Ikm-1}\nwindexuse{setRequestTimeout}{setRequestTimeout}{NW2ZDXo8-2R9Ikm-1}\nwendcode{}\nwbegindocs{77}\nwdocspar
+\nwidentdefs{\\{{startSequential}{startSequential}}}\nwidentuses{\\{{setRequestTimeout}{setRequestTimeout}}}\nwindexuse{setRequestTimeout}{setRequestTimeout}{NW2ZDXo8-2R9Ikm-1}\nwendcode{}\nwbegindocs{77}\nwdocspar
+\subsection{\texttt{stop}(1)}
+\nwenddocs{}\nwbegincode{78}\sublabel{NW2ZDXo8-3APzVY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-3APzVY-1}}}\moddef{stop(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-3APzVY-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
+void stop(final Consumer<Boolean> app_cb) \{
+  if (this.exe == null) \{  // sequential mode
+    this.kill = true;
+    while (this.working) \{
+      try \{
+        Thread.sleep(100);
+      \} catch (InterruptedException e) \{
+        // ...
+      \}
+    \}
+  \} else \{  // realtime mode
+    this.cb1.cancel(true);
+    this.cb2.cancel(true);
+    this.cb3.cancel(true);
+    this.cb4.cancel(true);
+    this.cb5.cancel(true);
+    this.exe.shutdown();
+  \}
+  try \{
+    if (this.client != null) \{
+      this.client.end();
+    \}
+    app_cb.accept(true);
+  \} catch (Exception e) \{
+    System.err.println("Error in ending callback");
+    System.err.println(e.toString());
+    e.printStackTrace();
+    return;
+  \}
+\}
+\nwidentuses{\\{{end}{end}}}\nwindexuse{end}{end}{NW2ZDXo8-3APzVY-1}\nwendcode{}\nwbegindocs{79}\nwdocspar
+
 \subsection{\texttt{internalRefStorage}(0)}
-\nwenddocs{}\nwbegincode{78}\sublabel{NW2ZDXo8-2om7IF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-2om7IF-1}}}\moddef{internalRefStorage(0)~{\nwtagstyle{}\subpageref{NW2ZDXo8-2om7IF-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{80}\sublabel{NW2ZDXo8-2om7IF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-2om7IF-1}}}\moddef{internalRefStorage(0)~{\nwtagstyle{}\subpageref{NW2ZDXo8-2om7IF-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
 Storage internalRefStorage() \{
   return this.storage;
 \}
 \nwindexdefn{internalRefStorage}{internalRefStorage}{NW2ZDXo8-2om7IF-1}\eatline
-\nwidentdefs{\\{{internalRefStorage}{internalRefStorage}}}\nwendcode{}\nwbegindocs{79}\nwdocspar
+\nwidentdefs{\\{{internalRefStorage}{internalRefStorage}}}\nwendcode{}\nwbegindocs{81}\nwdocspar
 \subsection{\texttt{internalRefCommunicator}(0)}
-\nwenddocs{}\nwbegincode{80}\sublabel{NW2ZDXo8-UOHfO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-UOHfO-1}}}\moddef{internalRefCommunicator(0)~{\nwtagstyle{}\subpageref{NW2ZDXo8-UOHfO-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{82}\sublabel{NW2ZDXo8-UOHfO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-UOHfO-1}}}\moddef{internalRefCommunicator(0)~{\nwtagstyle{}\subpageref{NW2ZDXo8-UOHfO-1}}}\endmoddef\nwused{\\{NW1GVbai-2u8vSA-3}}
 Communicator internalRefCommunicator() \{
   return this.communicator;
 \}
@@ -9322,12 +9372,12 @@ void actionStartSequential(final ActionEvent e) \{
     this.controller.setClockStart(Integer.parseInt(this.tf_t0.getText()));
     this.controller.setClockEnd(Integer.parseInt(this.tf_t1.getText()));
     CompletableFuture.runAsync(() -> \{
+      this.timer.start();
       this.controller.startSequential((status) -> \{
         Platform.runLater(() -> \{
           this.lbl_status.setText("Simulation "+(status ? "ended." : "failed."));
         \});
       \});
-      this.timer.start();
     \});
   \} catch (MalformedURLException
       | ClassNotFoundException
@@ -9356,6 +9406,11 @@ void actionStop(final ActionEvent e) \{
     this.lbl_status.setText("Close '"+this.db+"'...");
     CompletableFuture.runAsync(() -> \{
       try \{
+        this.controller.stop((status) -> \{
+          Platform.runLater(() -> \{
+            this.lbl_status.setText("Simulation stopped.");
+          \});
+        \});
         this.controller.closeInstance();
         this.controller.closeGtree();
         Platform.runLater(() -> \{
@@ -9386,6 +9441,7 @@ void actionStop(final ActionEvent e) \{
           this.btn_startreal.setDisable(true);
           this.db = null;
           this.container_canvas.setContent(null);
+          this.timer.stop();
           this.circ_status.setFill(C_SUCCESS);
           this.lbl_status.setText("Closed instance.");
         \});
@@ -9455,27 +9511,33 @@ void drawRoadNetwork() \{
 \}
 \nwindexdefn{drawRoadNetwork}{drawRoadNetwork}{NW4WjzfE-2vxdQO-1}\eatline
 \nwidentdefs{\\{{drawRoadNetwork}{drawRoadNetwork}}}\nwidentuses{\\{{actionRecordMousePress}{actionRecordMousePress}}\\{{actionTranslateCanvas}{actionTranslateCanvas}}\\{{PrintSQLException}{PrintSQLException}}\\{{queryAllEdges}{queryAllEdges}}\\{{queryMBR}{queryMBR}}\\{{queryVertex}{queryVertex}}}\nwindexuse{actionRecordMousePress}{actionRecordMousePress}{NW4WjzfE-2vxdQO-1}\nwindexuse{actionTranslateCanvas}{actionTranslateCanvas}{NW4WjzfE-2vxdQO-1}\nwindexuse{PrintSQLException}{PrintSQLException}{NW4WjzfE-2vxdQO-1}\nwindexuse{queryAllEdges}{queryAllEdges}{NW4WjzfE-2vxdQO-1}\nwindexuse{queryMBR}{queryMBR}{NW4WjzfE-2vxdQO-1}\nwindexuse{queryVertex}{queryVertex}{NW4WjzfE-2vxdQO-1}\nwendcode{}\nwbegindocs{50}\nwdocspar
+\subsection{\texttt{drawServersInitial}(0)}
+\nwenddocs{}\nwbegincode{51}\sublabel{NW4WjzfE-1MaShB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-1MaShB-1}}}\moddef{drawServersInitial(0)~{\nwtagstyle{}\subpageref{NW4WjzfE-1MaShB-1}}}\endmoddef\nwused{\\{NW1GVbai-14uWYi-3}}
+void drawServersInitial() \{
+\}
+\nwendcode{}\nwbegindocs{52}\nwdocspar
+
 \subsection{\texttt{setWindowWidth}(1)}
-\nwenddocs{}\nwbegincode{51}\sublabel{NW4WjzfE-3x7jy7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-3x7jy7-1}}}\moddef{setWindowWidth(1)~{\nwtagstyle{}\subpageref{NW4WjzfE-3x7jy7-1}}}\endmoddef\nwused{\\{NW1GVbai-14uWYi-3}}
+\nwenddocs{}\nwbegincode{53}\sublabel{NW4WjzfE-3x7jy7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-3x7jy7-1}}}\moddef{setWindowWidth(1)~{\nwtagstyle{}\subpageref{NW4WjzfE-3x7jy7-1}}}\endmoddef\nwused{\\{NW1GVbai-14uWYi-3}}
 void setWindowWidth(double w) \{
   this.window_width = w;
 \}
 \nwindexdefn{setWindowWidth}{setWindowWidth}{NW4WjzfE-3x7jy7-1}\eatline
-\nwidentdefs{\\{{setWindowWidth}{setWindowWidth}}}\nwendcode{}\nwbegindocs{52}\nwdocspar
+\nwidentdefs{\\{{setWindowWidth}{setWindowWidth}}}\nwendcode{}\nwbegindocs{54}\nwdocspar
 \subsection{\texttt{setWindowHeight}(1)}
-\nwenddocs{}\nwbegincode{53}\sublabel{NW4WjzfE-13qzEo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-13qzEo-1}}}\moddef{setWindowHeight(1)~{\nwtagstyle{}\subpageref{NW4WjzfE-13qzEo-1}}}\endmoddef\nwused{\\{NW1GVbai-14uWYi-3}}
+\nwenddocs{}\nwbegincode{55}\sublabel{NW4WjzfE-13qzEo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-13qzEo-1}}}\moddef{setWindowHeight(1)~{\nwtagstyle{}\subpageref{NW4WjzfE-13qzEo-1}}}\endmoddef\nwused{\\{NW1GVbai-14uWYi-3}}
 void setWindowHeight(double h) \{
   this.window_height = h;
 \}
 \nwindexdefn{setWindowHeight}{setWindowHeight}{NW4WjzfE-13qzEo-1}\eatline
-\nwidentdefs{\\{{setWindowHeight}{setWindowHeight}}}\nwendcode{}\nwbegindocs{54}\nwdocspar
+\nwidentdefs{\\{{setWindowHeight}{setWindowHeight}}}\nwendcode{}\nwbegindocs{56}\nwdocspar
 \subsection{\texttt{setStage}(1)}
-\nwenddocs{}\nwbegincode{55}\sublabel{NW4WjzfE-4RWb4b-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-4RWb4b-1}}}\moddef{setStage(1)~{\nwtagstyle{}\subpageref{NW4WjzfE-4RWb4b-1}}}\endmoddef\nwused{\\{NW1GVbai-14uWYi-3}}
+\nwenddocs{}\nwbegincode{57}\sublabel{NW4WjzfE-4RWb4b-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4WjzfE-4RWb4b-1}}}\moddef{setStage(1)~{\nwtagstyle{}\subpageref{NW4WjzfE-4RWb4b-1}}}\endmoddef\nwused{\\{NW1GVbai-14uWYi-3}}
 void setStage(Stage s) \{
   this.stage = s;
 \}
 \nwindexdefn{setStage}{setStage}{NW4WjzfE-4RWb4b-1}\eatline
 \nwidentdefs{\\{{setStage}{setStage}}}\nwendcode{}
 
-\nwbegindocs{56}\nwdocspar
+\nwbegindocs{58}\nwdocspar
 \nwenddocs{}
