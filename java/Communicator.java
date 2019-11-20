@@ -11,7 +11,7 @@ import com.github.jargors.exceptions.EdgeNotFoundException;
 import com.github.jargors.exceptions.UserNotFoundException;
 import com.github.jargors.exceptions.VertexNotFoundException;
 import com.github.jargors.exceptions.RouteIllegalOverwriteException;
-import com.github.jargors.exceptions.TimeWindowViolation;
+import com.github.jargors.exceptions.TimeWindowException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.sql.SQLException;
@@ -50,12 +50,12 @@ public class Communicator {
          }
   public void updateServerRoute(final int sid, final int[] route, final int[] sched)
          throws RouteIllegalOverwriteException, UserNotFoundException,
-                EdgeNotFoundException, TimeWindowViolation, SQLException {
+                EdgeNotFoundException, TimeWindowException, SQLException {
            if (route[0] >= this.forwardSimulationWorldTime()) {
              for (int k = 0; k < (sched.length - 2); k += 3) {
                final int tl = this.storage.DBQueryUser(sched[(k + 2)])[3];
                if (sched[k] > tl) {
-                 throw new TimeWindowViolation("Waypoint time (t="+sched[k]+") "
+                 throw new TimeWindowException("Waypoint time (t="+sched[k]+") "
                      +"after late window (t="+tl+", uid="+sched[(k + 2)]+")");
                }
              }
@@ -93,7 +93,7 @@ public class Communicator {
          }
   public void updateServerAddToSchedule(final int sid, final int[] route, final int[] sched, final int[] rid)
          throws RouteIllegalOverwriteException, UserNotFoundException,
-                EdgeNotFoundException, TimeWindowViolation, SQLException {
+                EdgeNotFoundException, TimeWindowException, SQLException {
            final int t = this.forwardSimulationWorldTime();
            final int[] current = this.storage.DBQueryServerRoute(sid);
            int i = 0;
@@ -116,7 +116,7 @@ public class Communicator {
            for (int k = 0; k < (sched.length - 2); k += 3) {
              final int tl = this.storage.DBQueryUser(sched[(k + 2)])[3];
              if (sched[k] > tl) {
-               throw new TimeWindowViolation("Waypoint time (t="+sched[k]+") "
+               throw new TimeWindowException("Waypoint time (t="+sched[k]+") "
                    +"after late window (t="+tl+", uid="+sched[(k + 2)]+")");
              }
            }
@@ -151,12 +151,12 @@ public class Communicator {
          }
   public void updateServerRemoveFromSchedule( final int sid, final int[] route, final int[] sched, final int[] rid)
          throws RouteIllegalOverwriteException, UserNotFoundException,
-                EdgeNotFoundException, TimeWindowViolation, SQLException {
+                EdgeNotFoundException, TimeWindowException, SQLException {
            if (route[0] >= this.forwardSimulationWorldTime()) {
              for (int k = 0; k < (sched.length - 2); k += 3) {
                final int tl = this.storage.DBQueryUser(sched[(k + 2)])[3];
                if (sched[k] > tl) {
-                 throw new TimeWindowViolation("Waypoint time (t="+sched[k]+") "
+                 throw new TimeWindowException("Waypoint time (t="+sched[k]+") "
                      +"after late window (t="+tl+", uid="+sched[(k + 2)]+")");
                }
              }

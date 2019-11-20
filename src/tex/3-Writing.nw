@@ -274,7 +274,7 @@ this.PSSubmit(pS140);
 for (int k = 0; k < (sched.length - 2); k += 3) {
   final int tl = this.storage.DBQueryUser(sched[(k + 2)])[3];
   if (sched[k] > tl) {
-    throw new TimeWindowViolation("Waypoint time (t="+sched[k]+") "
+    throw new TimeWindowException("Waypoint time (t="+sched[k]+") "
         +"after late window (t="+tl+", uid="+sched[(k + 2)]+")");
   }
 }
@@ -742,7 +742,7 @@ the method call and returns [[false]].\\
 <<Write: updateServerRoute(3)>>=
 void updateServerRoute(final int sid, final int[] route, final int[] sched)
 throws RouteIllegalOverwriteException, UserNotFoundException,
-       EdgeNotFoundException, TimeWindowViolation, SQLException {
+       EdgeNotFoundException, TimeWindowException, SQLException {
   if (route[0] >= this.forwardSimulationWorldTime()) {
     <<Check time window violation>>
     <<Apply traffic to route, sched>>
@@ -885,7 +885,7 @@ and returns [[false]].\\
 <<Write: updateServerAddToSchedule(4)>>=
 void updateServerAddToSchedule(final int sid, final int[] route, final int[] sched, final int[] rid)
 throws RouteIllegalOverwriteException, UserNotFoundException,
-       EdgeNotFoundException, TimeWindowViolation, SQLException {
+       EdgeNotFoundException, TimeWindowException, SQLException {
   final int t = this.forwardSimulationWorldTime();
   final int[] current = this.storage.DBQueryServerRoute(sid);
   int i = 0;
@@ -1040,7 +1040,7 @@ the method call and returns [[false]].\\
 <<Write: updateServerRemoveFromSchedule(4)>>=
 void updateServerRemoveFromSchedule( final int sid, final int[] route, final int[] sched, final int[] rid)
 throws RouteIllegalOverwriteException, UserNotFoundException,
-       EdgeNotFoundException, TimeWindowViolation, SQLException {
+       EdgeNotFoundException, TimeWindowException, SQLException {
   if (route[0] >= this.forwardSimulationWorldTime()) {
     <<Check time window violation>>
     <<Apply traffic to route, sched>>
