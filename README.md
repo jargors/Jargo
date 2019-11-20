@@ -1,4 +1,5 @@
 # Jargo
+![](https://github.com/jargors/jargo/workflows/Build/badge.svg)
 
 ![Screenshot of Jargo Desktop](res/scrot.png)
 
