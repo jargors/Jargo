@@ -9,12 +9,21 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+
+    - name: Setup Java
     - uses: actions/setup-java@v1
       with:
         java-version: '11.0.1'
-    - name: get deps
-      run: ./getdeps.sh
-    - name: make jar
+
+    - name: Cache dependencies
+    - uses: actions/cache@v1
+      with:
+        path: deps
+        key: ${{ hashFiles('getdeps.sh') }}
+
+    - name: Install dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: /.getdeps.sh
+
+    - name: Make jar
       run: make jar
-
-
