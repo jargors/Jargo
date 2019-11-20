@@ -1,4 +1,4 @@
-package com.github.jargors;
+package com.github.jargors.desktop;
 import com.github.jargors.Controller;
 import com.github.jargors.Client;
 import com.github.jargors.Tools;

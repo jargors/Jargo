@@ -1,15 +1,8 @@
-# Before building, verify `echo $CLASSPATH` is a directory that contains
-# - jargors-GTreeJNI-1.0.0.jar (https://github.com/jargors/GTreeJNI)
-# - jargors-Exceptions-1.0.0.jar (https://github.com/jargors/Exceptions)
+# Get names of *.java files by looking through src/
+JAVA1=$(addsuffix .java, $(subst src/,java/,$(basename $(wildcard src/*.nw))))
+JAVA2=$(addsuffix .java, $(subst src/desktop/,java/desktop/,$(basename $(wildcard src/desktop/*.nw))))
+
 VERSION=1.0.0
-JAVASRCS = \
-	java/Tools.java \
-	java/Storage.java \
-	java/Controller.java \
-	java/Communicator.java \
-	java/Traffic.java \
-	java/Client.java \
-	java/DesktopController.java
 
 .PHONY : all src jar pdf purge
 
@@ -25,6 +18,7 @@ pdf :
 	make -f makepdf.mf
 
 purge :
-	rm -rf jargo.pdf com/ jar/jargors-$(VERSION).jar
-	rm -rf doc/body.tex $(JAVASRCS)
+	rm -f jargo.pdf jar/jargors-$(VERSION).jar
+	rm -f doc/body.tex $(JAVA1) $(JAVA2)
+	rm -rf com/ 
 	latexmk -f -c jargo.tex
