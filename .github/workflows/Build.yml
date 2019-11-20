@@ -1,4 +1,4 @@
-name: buildjar
+name: Build
 
 on: [push]
 
@@ -16,13 +16,14 @@ jobs:
         java-version: '11.0.1'
 
     - name: Cache dependencies
+      id: cache-deps
       uses: actions/cache@v1
       with:
         path: deps
         key: ${{ hashFiles('getdeps.sh') }}
 
     - name: Install dependencies
-      if: steps.cache.outputs.cache-hit != 'true'
+      if: steps.cache-deps.outputs.cache-hit != 'true'
       run: ./getdeps.sh
 
     - name: Make jar
