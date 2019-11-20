@@ -9,5 +9,9 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
+    - name: install javafx
+      run: sudo apt install openjdk-11-jdk openjfx
     - name: make jar
+      env:
+        CLASSPATH: /usr/lib/jvm/java-8-openjdk-amd64/*:/usr/lib/jvm/java-8-openjdk-amd64/lib/*:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/*
       run: make jar
