@@ -1,6 +1,6 @@
 # Jargo
 
-![](https://github.com/jargors/jargo/workflows/Build/badge.svg)
+![](https://github.com/jargors/jargo/workflows/Build/badge.svg) (**master**)
 
 Latest Version: 1.0.0 (Nov. 20, 2019) (in-development)
 
