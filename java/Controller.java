@@ -457,6 +457,9 @@ public class Controller {
              return;
            }
          }
+  public final boolean isKilled() {
+           return this.kill;
+         }
   public void registerClient(final Client target) {
            this.client = target;
            this.client.registerCommunicator(this.communicator);

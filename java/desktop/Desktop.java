@@ -19,6 +19,7 @@ public class Desktop extends Application {
     scene.heightProperty().addListener((a, b, c) -> {
       dc.setWindowHeight((double) c);
     });
+    scene.getStylesheets().add("css/lctot.css");
     stage.setTitle("Jargo Desktop");
     stage.setScene(scene);
     stage.show();

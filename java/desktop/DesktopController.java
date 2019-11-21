@@ -9,18 +9,23 @@ import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipEntry;
 import java.net.URLClassLoader;
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipEntry;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.stage.Stage;
 import javafx.stage.DirectoryChooser;
@@ -29,10 +34,16 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.Scene;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart.Series;
+import javafx.scene.chart.XYChart.Data;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
@@ -41,7 +52,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 public class DesktopController {
   private Stage stage;
+  private Canvas can_road;
   @FXML private ScrollPane container_canvas;
+  @FXML private AnchorPane container_lctot;
   @FXML private Button btn_new;
   @FXML private Button btn_load;
   @FXML private Button btn_prob;
@@ -57,6 +70,22 @@ public class DesktopController {
   @FXML private TextField tf_t1;
   @FXML private Label lbl_status;
   @FXML private Circle circ_status;
+  @FXML private VBox vbox_metrics;
+  @FXML private CheckBox chk_service;
+  @FXML private CheckBox chk_distsavings;
+  @FXML private CheckBox chk_serverTravelDistance;
+  @FXML private CheckBox chk_serverServiceDistance;
+  @FXML private CheckBox chk_serverCruisingDistance;
+  @FXML private CheckBox chk_serverTravelDuration;
+  @FXML private CheckBox chk_serverServiceDuration;
+  @FXML private CheckBox chk_serverCruisingDuration;
+  @FXML private CheckBox chk_requestDistanceUnassigned;
+  @FXML private CheckBox chk_requestTransitDistance;
+  @FXML private CheckBox chk_requestDetourDistance;
+  @FXML private CheckBox chk_requestTransitDuration;
+  @FXML private CheckBox chk_requestDetourDuration;
+  @FXML private CheckBox chk_requestTravelDuration;
+  @FXML private CheckBox chk_requestPickupDuration;
   private final Color C_SUCCESS = Color.GREEN;
   private final Color C_WARN = Color.YELLOW;
   private final Color C_ERROR = Color.RED;
@@ -69,8 +98,6 @@ public class DesktopController {
   private String road = null;
   private String jar = null;
   private String jarclass = null;
-  private Canvas can_road;
-  private AnimationTimer timer = new MyTimer();
   private GraphicsContext gc = null;
   private double window_height = 0;
   private double window_width = 0;
@@ -80,11 +107,217 @@ public class DesktopController {
   private int[] mbr = null;
   private double xunit = 0;
   private double yunit = 0;
+  private int t0 = 0;
+  private int t1 = 0;
+  private AnimationTimer timer = new MyTimer();
+  private ScheduledExecutorService exe = null;
+  private ScheduledFuture<?> cbUpdateMap = null;
+  private ScheduledFuture<?> cbUpdateMetrics = null;
+  private boolean flagServiceRate = false;
+  private boolean flagDistanceSavings = false;
+  private boolean flagServerTravelDistance = false;
+  private boolean flagServerServiceDistance = false;
+  private boolean flagServerCruisingDistance = false;
+  private boolean flagServerTravelDuration = false;
+  private boolean flagServerServiceDuration = false;
+  private boolean flagServerCruisingDuration = false;
+  private boolean flagRequestDistanceUnassigned = false;
+  private boolean flagRequestTransitDistance = false;
+  private boolean flagRequestDetourDistance = false;
+  private boolean flagRequestTransitDuration = false;
+  private boolean flagRequestDetourDuration = false;
+  private boolean flagRequestTravelDuration = false;
+  private boolean flagRequestPickupDuration = false;
   private class MyTimer extends AnimationTimer {
     public void handle(long now) {
-      System.out.println(now);
+      // System.out.println(now);
     }
   }
+  private Runnable updateMap = () -> {
+    System.out.println("t="+controller.getSimulationWorldTime());
+  };
+  private Runnable updateMetrics = () -> {
+    final int t = this.controller.getSimulationWorldTime();
+    if (flagServiceRate) {
+      try {
+        int[] output = this.controller.queryServiceRate();
+        final int val = (output.length > 0 ? output[0] : 0);
+        Platform.runLater(() -> {
+          this.serviceRate.getData().add(new Data<Number, Number>(t, val/100.0));
+        });
+      } catch (SQLException se) {
+        System.err.println("SQL failure: "+se.getMessage());
+      }
+    }
+    if (flagDistanceSavings) {
+      try {
+        int[] output = new int[] { };
+        output = this.controller.queryServerTravelDistanceTotal();
+        final int val1 = (output.length > 0 ? output[0] : 0);
+        output = this.controller.queryRequestBaseDistanceUnassigned();
+        final int val2 = (output.length > 0 ? output[0] : 0);
+        output = this.controller.queryBaseDistanceTotal();
+        final int val3 = (output.length > 0 ? output[0] : 0);
+        Platform.runLater(() -> {
+          this.distanceSavings.getData().add(new Data<Number, Number>(t, 100.0*(1 - ((double) (val1 + val2)/val3))));
+        });
+      } catch (SQLException se) {
+        System.err.println("SQL failure: "+se.getMessage());
+      }
+    }
+    if (flagServerTravelDistance) {
+      try {
+        int[] output = this.controller.queryServerTravelDistanceTotal();
+        final int val = (output.length > 0 ? output[0] : 0);
+        Platform.runLater(() -> {
+          this.serverTravelDistance.getData().add(new Data<Number, Number>(t, val));
+        });
+      } catch (SQLException se) {
+        System.err.println("SQL failure: "+se.getMessage());
+      }
+    }
+    if (flagServerServiceDistance) {
+      try {
+        int[] output = this.controller.queryServerServiceDistanceTotal();
+        final int val = (output.length > 0 ? output[0] : 0);
+        Platform.runLater(() -> {
+          this.serverServiceDistance.getData().add(new Data<Number, Number>(t, val));
+        });
+      } catch (SQLException se) {
+        System.err.println("SQL failure: "+se.getMessage());
+      }
+    }
+    if (flagServerCruisingDistance) {
+      try {
+        int[] output = this.controller.queryServerCruisingDistanceTotal();
+        final int val = (output.length > 0 ? output[0] : 0);
+        Platform.runLater(() -> {
+          this.serverCruisingDistance.getData().add(new Data<Number, Number>(t, val));
+        });
+      } catch (SQLException se) {
+        System.err.println("SQL failure: "+se.getMessage());
+      }
+    }
+    if (flagServerTravelDuration) {
+      try {
+        int[] output = this.controller.queryServerTravelDurationTotal();
+        final int val = (output.length > 0 ? output[0] : 0);
+        Platform.runLater(() -> {
+          this.serverTravelDuration.getData().add(new Data<Number, Number>(t, val));
+        });
+      } catch (SQLException se) {
+        System.err.println("SQL failure: "+se.getMessage());
+      }
+    }
+    /*if (flagServerServiceDuration) {
+        try {
+          Platform.runLater(() -> {
+          });
+        } catch (SQLException se) {
+          System.err.println("SQL failure: "+se.getMessage());
+        }
+      }*/
+    /*if (flagServerCruisingDuration) {
+        try {
+          Platform.runLater(() -> {
+          });
+        } catch (SQLException se) {
+          System.err.println("SQL failure: "+se.getMessage());
+        }
+      }*/
+    if (flagRequestDistanceUnassigned) {
+      try {
+        int[] output = this.controller.queryRequestBaseDistanceUnassigned();
+        final int val = (output.length > 0 ? output[0] : 0);
+        Platform.runLater(() -> {
+          this.requestDistanceUnassigned.getData().add(new Data<Number, Number>(t, val));
+        });
+      } catch (SQLException se) {
+        System.err.println("SQL failure: "+se.getMessage());
+      }
+    }
+    if (flagRequestTransitDistance) {
+      try {
+        int[] output = this.controller.queryRequestTransitDistanceTotal();
+        final int val = (output.length > 0 ? output[0] : 0);
+        Platform.runLater(() -> {
+          this.requestTransitDistance.getData().add(new Data<Number, Number>(t, val));
+        });
+      } catch (SQLException se) {
+        System.err.println("SQL failure: "+se.getMessage());
+      }
+    }
+    if (flagRequestDetourDistance) {
+      try {
+        int[] output = this.controller.queryRequestDetourDistanceTotal();
+        final int val = (output.length > 0 ? output[0] : 0);
+        Platform.runLater(() -> {
+          this.requestDetourDistance.getData().add(new Data<Number, Number>(t, val));
+        });
+      } catch (SQLException se) {
+        System.err.println("SQL failure: "+se.getMessage());
+      }
+    }
+    if (flagRequestTransitDuration) {
+      try {
+        int[] output = this.controller.queryRequestTransitDurationTotal();
+        final int val = (output.length > 0 ? output[0] : 0);
+        Platform.runLater(() -> {
+          this.requestTransitDuration.getData().add(new Data<Number, Number>(t, val));
+        });
+      } catch (SQLException se) {
+        System.err.println("SQL failure: "+se.getMessage());
+      }
+    }
+    /*if (flagRequestDetourDuration) {
+        try {
+          Platform.runLater(() -> {
+          });
+        } catch (SQLException se) {
+          System.err.println("SQL failure: "+se.getMessage());
+        }
+      }*/
+    if (flagRequestTravelDuration) {
+      try {
+        int[] output = this.controller.queryRequestTravelDurationTotal();
+        final int val = (output.length > 0 ? output[0] : 0);
+        Platform.runLater(() -> {
+          this.requestTravelDuration.getData().add(new Data<Number, Number>(t, val));
+        });
+      } catch (SQLException se) {
+        System.err.println("SQL failure: "+se.getMessage());
+      }
+    }
+    if (flagRequestPickupDuration) {
+      try {
+        int[] output = this.controller.queryRequestPickupDurationTotal();
+        final int val = (output.length > 0 ? output[0] : 0);
+        Platform.runLater(() -> {
+          this.requestPickupDuration.getData().add(new Data<Number, Number>(t, val));
+        });
+      } catch (SQLException se) {
+        System.err.println("SQL failure: "+se.getMessage());
+      }
+    }
+  };
+  private NumberAxis chart_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
+  private NumberAxis chart_y = new NumberAxis("Value", 0, 100, 10);
+  private LineChart<Number, Number> lctot = new LineChart<Number, Number>(chart_x, chart_y);
+  private Series<Number, Number> serviceRate = new Series<Number, Number>();
+  private Series<Number, Number> distanceSavings = new Series<Number, Number>();
+  private Series<Number, Number> serverTravelDistance = new Series<Number, Number>();
+  private Series<Number, Number> serverServiceDistance = new Series<Number, Number>();
+  private Series<Number, Number> serverCruisingDistance = new Series<Number, Number>();
+  private Series<Number, Number> serverTravelDuration = new Series<Number, Number>();
+  private Series<Number, Number> serverServiceDuration = new Series<Number, Number>();
+  private Series<Number, Number> serverCruisingDuration = new Series<Number, Number>();
+  private Series<Number, Number> requestDistanceUnassigned = new Series<Number, Number>();
+  private Series<Number, Number> requestTransitDistance = new Series<Number, Number>();
+  private Series<Number, Number> requestDetourDistance = new Series<Number, Number>();
+  private Series<Number, Number> requestTransitDuration = new Series<Number, Number>();
+  private Series<Number, Number> requestDetourDuration = new Series<Number, Number>();
+  private Series<Number, Number> requestTravelDuration = new Series<Number, Number>();
+  private Series<Number, Number> requestPickupDuration = new Series<Number, Number>();
   public void actionQuit(final ActionEvent e) {
            System.exit(0);
          }
@@ -353,6 +586,10 @@ public class DesktopController {
   public void actionStop(final ActionEvent e) {
            if (this.controller != null) {
              this.btn_stop     .setDisable(true);
+             this.vbox_metrics .setDisable(true);
+             this.chk_service  .setSelected(false);
+             this.timer.stop();
+             this.exe.shutdown();
              this.circ_status.setFill(C_WARN);
              this.lbl_status.setText("Close '"+this.db+"'...");
              CompletableFuture.runAsync(() -> {
@@ -367,7 +604,6 @@ public class DesktopController {
                  Platform.runLater(() -> {
                    this.btn_new      .setDisable(false);
                    this.btn_load     .setDisable(false);
-                   this.btn_stop     .setDisable(false);
                    this.btn_prob     .setDisable(true);
                    this.btn_prob     .setText("(empty problem instance)");
                    this.prob = null;
@@ -392,7 +628,6 @@ public class DesktopController {
                    this.btn_startreal.setDisable(true);
                    this.db = null;
                    this.container_canvas.setContent(null);
-                   this.timer.stop();
                    this.circ_status.setFill(C_SUCCESS);
                    this.lbl_status.setText("Closed instance.");
                  });
@@ -430,8 +665,6 @@ public class DesktopController {
              Class<?> tempclass = Class.forName(this.jarclass, true, loader);
              Constructor<?> tempcstor = tempclass.getDeclaredConstructor();
              this.client = (Client) tempcstor.newInstance();
-             this.circ_status  .setFill(C_SUCCESS);
-             this.lbl_status   .setText("Simulation started.");
              this.controller.registerClient(this.client);
              this.client.registerRoadNetwork();
              this.client.registerUsers();
@@ -441,16 +674,50 @@ public class DesktopController {
                System.err.println(e.toString());
                return;
              }
-             this.controller.setClockStart(Integer.parseInt(this.tf_t0.getText()));
-             this.controller.setClockEnd(Integer.parseInt(this.tf_t1.getText()));
+             this.t0 = Integer.parseInt(this.tf_t0.getText());
+             this.t1 = Integer.parseInt(this.tf_t1.getText());
+             this.controller.setClockStart(t0);
+             this.controller.setClockEnd(t1);
+             this.timer.start();
+             this.chart_x.setAutoRanging(true);
+             this.chart_y.setAutoRanging(true);
+             this.lctot.setCreateSymbols(false);
+             this.lctot.setAnimated(false);
+             this.lctot.setLegendVisible(false);
+             this.lctot.getData().add(this.serviceRate);
+             this.lctot.getData().add(this.distanceSavings);
+             this.lctot.getData().add(this.serverTravelDistance);
+             this.lctot.getData().add(this.serverServiceDistance);
+             this.lctot.getData().add(this.serverCruisingDistance);
+             this.lctot.getData().add(this.serverTravelDuration);
+             this.lctot.getData().add(this.serverServiceDuration);
+             this.lctot.getData().add(this.serverCruisingDuration);
+             this.lctot.getData().add(this.requestDistanceUnassigned);
+             this.lctot.getData().add(this.requestTransitDistance);
+             this.lctot.getData().add(this.requestDetourDistance);
+             this.lctot.getData().add(this.requestTransitDuration);
+             this.lctot.getData().add(this.requestDetourDuration);
+             this.lctot.getData().add(this.requestTravelDuration);
+             this.lctot.getData().add(this.requestPickupDuration);
+             this.container_lctot.getChildren().clear();
+             this.container_lctot.setTopAnchor(this.lctot, 0.0);
+             this.container_lctot.setLeftAnchor(this.lctot, 0.0);
+             this.container_lctot.setRightAnchor(this.lctot, 0.0);
+             this.container_lctot.setBottomAnchor(this.lctot, 0.0);
+             this.container_lctot.getChildren().add(this.lctot);
+             this.vbox_metrics .setDisable(false);
+             this.circ_status  .setFill(C_SUCCESS);
+             this.lbl_status   .setText("Simulation started.");
              CompletableFuture.runAsync(() -> {
-               this.timer.start();
                this.controller.startSequential((status) -> {
                  Platform.runLater(() -> {
                    this.lbl_status.setText("Simulation "+(status ? "ended." : "failed."));
                  });
                });
              });
+             this.exe = Executors.newScheduledThreadPool(2);
+             this.cbUpdateMap = this.exe.scheduleAtFixedRate(this.updateMap, 0, 1, TimeUnit.SECONDS);
+             this.cbUpdateMetrics = this.exe.scheduleAtFixedRate(this.updateMetrics, 0, 1, TimeUnit.SECONDS);
            } catch (MalformedURLException
                | ClassNotFoundException
                | NoSuchMethodException
@@ -472,6 +739,126 @@ public class DesktopController {
            this.can_road.setTranslateX(this.can_road.getTranslateX() + e.getX() - this.mouse_x);
            this.can_road.setTranslateY(this.can_road.getTranslateY() + e.getY() - this.mouse_y);
            e.consume();
+         }
+  public void toggleServiceRate(ActionEvent e) {
+           if (this.chk_service.isSelected()) {
+             this.flagServiceRate = true;
+           } else {
+             this.serviceRate.getData().clear();
+             this.flagServiceRate = false;
+           }
+         }
+  public void toggleDistanceSavings(ActionEvent e) {
+           if (this.chk_distsavings.isSelected()) {
+             this.flagDistanceSavings = true;
+           } else {
+             this.distanceSavings.getData().clear();
+             this.flagDistanceSavings = false;
+           }
+         }
+  public void toggleServerTravelDistance(ActionEvent e) {
+           if (this.chk_serverTravelDistance.isSelected()) {
+             this.flagServerTravelDistance = true;
+           } else {
+             this.serverTravelDistance.getData().clear();
+             this.flagServerTravelDistance = false;
+           }
+         }
+  public void toggleServerServiceDistance(ActionEvent e) {
+           if (this.chk_serverServiceDistance.isSelected()) {
+             this.flagServerServiceDistance = true;
+           } else {
+             this.serverServiceDistance.getData().clear();
+             this.flagServerServiceDistance = false;
+           }
+         }
+  public void toggleServerCruisingDistance(ActionEvent e) {
+           if (this.chk_serverCruisingDistance.isSelected()) {
+             this.flagServerCruisingDistance = true;
+           } else {
+             this.serverCruisingDistance.getData().clear();
+             this.flagServerCruisingDistance = false;
+           }
+         }
+  public void toggleServerTravelDuration(ActionEvent e) {
+           if (this.chk_serverTravelDuration.isSelected()) {
+             this.flagServerTravelDuration = true;
+           } else {
+             this.serverTravelDuration.getData().clear();
+             this.flagServerTravelDuration = false;
+           }
+         }
+  public void toggleServerServiceDuration(ActionEvent e) {
+           if (this.chk_serverServiceDuration.isSelected()) {
+             this.flagServerServiceDuration = true;
+           } else {
+             this.serverServiceDuration.getData().clear();
+             this.flagServerServiceDuration = false;
+           }
+         }
+  public void toggleServerCruisingDuration(ActionEvent e) {
+           if (this.chk_serverCruisingDuration.isSelected()) {
+             this.flagServerCruisingDuration = true;
+           } else {
+             this.serverCruisingDuration.getData().clear();
+             this.flagServerCruisingDuration = false;
+           }
+         }
+  public void toggleRequestDistanceUnassigned(ActionEvent e) {
+           if (this.chk_requestDistanceUnassigned.isSelected()) {
+             this.flagRequestDistanceUnassigned = true;
+           } else {
+             this.requestDistanceUnassigned.getData().clear();
+             this.flagRequestDistanceUnassigned = false;
+           }
+         }
+  public void toggleRequestTransitDistance(ActionEvent e) {
+           if (this.chk_requestTransitDistance.isSelected()) {
+             this.flagRequestTransitDistance = true;
+           } else {
+             this.requestTransitDistance.getData().clear();
+             this.flagRequestTransitDistance = false;
+           }
+         }
+  public void toggleRequestDetourDistance(ActionEvent e) {
+           if (this.chk_requestDetourDistance.isSelected()) {
+             this.flagRequestDetourDistance = true;
+           } else {
+             this.requestDetourDistance.getData().clear();
+             this.flagRequestDetourDistance = false;
+           }
+         }
+  public void toggleRequestTransitDuration(ActionEvent e) {
+           if (this.chk_requestTransitDuration.isSelected()) {
+             this.flagRequestTransitDuration = true;
+           } else {
+             this.requestTransitDuration.getData().clear();
+             this.flagRequestTransitDuration = false;
+           }
+         }
+  public void toggleRequestDetourDuration(ActionEvent e) {
+           if (this.chk_requestDetourDuration.isSelected()) {
+             this.flagRequestDetourDuration = true;
+           } else {
+             this.requestDetourDuration.getData().clear();
+             this.flagRequestDetourDuration = false;
+           }
+         }
+  public void toggleRequestTravelDuration(ActionEvent e) {
+           if (this.chk_requestTravelDuration.isSelected()) {
+             this.flagRequestTravelDuration = true;
+           } else {
+             this.requestTravelDuration.getData().clear();
+             this.flagRequestTravelDuration = false;
+           }
+         }
+  public void toggleRequestPickupDuration(ActionEvent e) {
+           if (this.chk_requestPickupDuration.isSelected()) {
+             this.flagRequestPickupDuration = true;
+           } else {
+             this.requestPickupDuration.getData().clear();
+             this.flagRequestPickupDuration = false;
+           }
          }
   public void setWindowWidth(double w) {
            this.window_width = w;
