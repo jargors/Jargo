@@ -22,11 +22,12 @@ bytecode intended for the Java virtual machine using the command `make jar`.
 
 ## Quick Start: Command-line (todo: platforms?)
 
-For those who want to get up and running quickly, try the following.
-If your machine has `bash`, internet access, and the `mkdir`, `curl`, `unzip`,
-and `tar` command-line programs, run `./getdeps.sh` once to get all the build
-prerequisites into a directory called `deps/`. Then run `make jar` to produce
-the bytecode packaged into `jar/jargors-1.0.0.jar`.
+For those who want to get up and running quickly, try the following.  If your
+machine has `bash`, internet access, and the `mkdir`, `curl`, `unzip`, and
+`tar` command-line programs, run `./getdeps.sh` once to get all the build
+prerequisites into a directory called `deps/` (fetch size 49MB, extracted size
+151MB). Then run `make jar` to produce the bytecode packaged into
+`jar/jargors-1.0.0.jar`.
 
 Now try the following example.
 
