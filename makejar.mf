@@ -23,12 +23,11 @@ clean :
 
 ################################################################################
 # Just recompile all the java files for any class target
-J_LIBPATH=deps/*:deps/commons-dbcp2-2.7.0/*:deps/commons-pool2-2.7.0/*:deps/commons-logging-1.2/*:deps/javafx-sdk-13.0.1/lib/*
 com/github/jargors/%.class : java/%.java
-	javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:$(J_LIBPATH) java/*.java java/*/*.java
+	javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:deps:deps/* java/*.java java/*/*.java
 
 com/github/jargors/desktop/%.class : java/desktop/%.java
-	javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:$(J_LIBPATH) java/*.java java/*/*.java
+	javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:deps:deps/* java/*.java java/*/*.java
 
 com/github/jargors/exceptions/%.class : java/exceptions/%.java
-	javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:$(J_LIBPATH) java/*.java java/*/*.java
+	javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:deps:deps/* java/*.java java/*/*.java
