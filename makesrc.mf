@@ -19,10 +19,10 @@ clean :
 
 ################################################################################
 # Just retangle all the noweb files for any java target
-java/*.java : src/*.nw src/*/*.nw
+$(JAVA1) : src/*.nw src/*/*.nw
 	notangle -R$(subst java/,,$@) src/*.nw src/*/*.nw > $@
 
-java/desktop/*.java : src/*.nw src/*/*.nw
+$(JAVA2) : src/*.nw src/*/*.nw
 	notangle -R$(subst java/desktop/,,$@) src/*.nw src/*/*.nw > $@
 
 # Weave the *.nw files in the right order
