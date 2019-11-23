@@ -35,20 +35,23 @@ public abstract class Client {
   public void registerCommunicator(final Communicator src) {
            this.communicator = src;
          }
+  public int getApproxQueueSize() {
+           return this.queue.size();
+         }
   public int getRequestCollectionPeriod() {
            return this.r_collection_period;
-         }
-  public void setRequestCollectionPeriod(final int t) {
-           this.r_collection_period = t;
          }
   public int getRequestHandlingPeriod() {
            return this.r_handling_period;
          }
-  public void setRequestHandlingPeriod(final int t) {
-           this.r_handling_period = t;
-         }
   public int getServerLocationCollectionPeriod () {
            return this.s_collection_period;
+         }
+  public void setRequestCollectionPeriod(final int t) {
+           this.r_collection_period = t;
+         }
+  public void setRequestHandlingPeriod(final int t) {
+           this.r_handling_period = t;
          }
   public void setServerLocationCollectionPeriod(final int t) {
            this.s_collection_period = t;

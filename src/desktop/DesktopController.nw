@@ -18,6 +18,7 @@ import com.github.jargors.Client;
 import com.github.jargors.Tools;
 import com.github.jargors.exceptions.*;
 @
+
 <<DesktopController.java preamble>>=
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,6 +32,9 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipEntry;
 import java.net.URLClassLoader;
@@ -39,6 +43,7 @@ import java.net.MalformedURLException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 @
+
 <<DesktopController.java preamble>>=
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -71,17 +76,18 @@ import javafx.fxml.FXMLLoader;
 @
 
 \section{Member Variables}
+<<[[DesktopController]] member variables>>=
+private final boolean DEBUG =
+    "true".equals(System.getProperty("jargors.desktop.debug"));
+@
 
 \subsection{User Interface}
-
 <<[[DesktopController]] member variables>>=
 private Stage stage;
 private Canvas can_road;
 @
 
 <<[[DesktopController]] member variables>>=
-@FXML private ScrollPane container_canvas;
-@FXML private AnchorPane container_lctot;
 @FXML private Button btn_new;
 @FXML private Button btn_load;
 @FXML private Button btn_prob;
@@ -92,14 +98,24 @@ private Canvas can_road;
 @FXML private Button btn_startreal;
 @FXML private Button btn_pause;
 @FXML private Button btn_stop;
-@FXML private TextField tf_class;
+@FXML private TextField tf_client;
 @FXML private TextField tf_t0;
 @FXML private TextField tf_t1;
 @FXML private Label lbl_status;
 @FXML private Circle circ_status;
-@FXML private VBox vbox_metrics;
-@FXML private CheckBox chk_service;
-@FXML private CheckBox chk_distsavings;
+@FXML private ScrollPane container_canvas;
+@FXML private AnchorPane container_lc_rates;
+@FXML private AnchorPane container_lc_distances;
+@FXML private AnchorPane container_lc_durations;
+@FXML private AnchorPane container_lc_counts;
+@FXML private AnchorPane container_lc_times;
+@FXML private VBox vbox_metrics_rates;
+@FXML private VBox vbox_metrics_distances;
+@FXML private VBox vbox_metrics_durations;
+@FXML private VBox vbox_metrics_counts;
+@FXML private VBox vbox_metrics_times;
+@FXML private CheckBox chk_serviceRate;
+@FXML private CheckBox chk_distanceSavings;
 @FXML private CheckBox chk_serverTravelDistance;
 @FXML private CheckBox chk_serverServiceDistance;
 @FXML private CheckBox chk_serverCruisingDistance;
@@ -113,6 +129,15 @@ private Canvas can_road;
 @FXML private CheckBox chk_requestDetourDuration;
 @FXML private CheckBox chk_requestTravelDuration;
 @FXML private CheckBox chk_requestPickupDuration;
+@FXML private CheckBox chk_countRequestsQueue;
+@FXML private CheckBox chk_countRequestsActive;
+@FXML private CheckBox chk_countRequestsCompleted;
+@FXML private CheckBox chk_countRequestsFailed;
+@FXML private CheckBox chk_countServersActive;
+@FXML private CheckBox chk_countRequestsViolations;
+@FXML private CheckBox chk_countServersViolations;
+@FXML private CheckBox chk_timeRequestHandling;
+@FXML private CheckBox chk_timeServerHandling;
 @
 
 <<[[DesktopController]] member variables>>=
@@ -123,7 +148,6 @@ private final String TITLE_STRING = "Jargo Desktop";
 @
 
 \subsection{Jargo Interface}
-
 <<[[DesktopController]] member variables>>=
 private Controller controller = null;
 private Client client = null;
@@ -136,7 +160,6 @@ private String jarclass = null;
 @
 
 \subsection{Workspace}
-
 <<[[DesktopController]] member variables>>=
 private GraphicsContext gc = null;
 private double window_height = 0;
@@ -152,27 +175,11 @@ private int t1 = 0;
 @
 
 \subsection{Background Processes}
-
 <<[[DesktopController]] member variables>>=
 private AnimationTimer timer = new MyTimer();
 private ScheduledExecutorService exe = null;
-private ScheduledFuture<?> cbUpdateMap = null;
-private ScheduledFuture<?> cbUpdateMetrics = null;
-private boolean flagServiceRate = false;
-private boolean flagDistanceSavings = false;
-private boolean flagServerTravelDistance = false;
-private boolean flagServerServiceDistance = false;
-private boolean flagServerCruisingDistance = false;
-private boolean flagServerTravelDuration = false;
-private boolean flagServerServiceDuration = false;
-private boolean flagServerCruisingDuration = false;
-private boolean flagRequestDistanceUnassigned = false;
-private boolean flagRequestTransitDistance = false;
-private boolean flagRequestDetourDistance = false;
-private boolean flagRequestTransitDuration = false;
-private boolean flagRequestDetourDuration = false;
-private boolean flagRequestTravelDuration = false;
-private boolean flagRequestPickupDuration = false;
+private ScheduledFuture<?> cbMapUpdater = null;
+private Map<String, ScheduledFuture<?>> cbMetricFetcher = new HashMap<String, ScheduledFuture<?>>();
 @
 
 <<[[DesktopController]] member variables>>=
@@ -183,59 +190,244 @@ private class MyTimer extends AnimationTimer {
 }
 @
 <<[[DesktopController]] member variables>>=
-private Runnable updateMap = () -> {
-  System.out.println("t="+controller.getSimulationWorldTime());
-};
+private class MapUpdater implements Runnable {
+  private Controller controller = null;
+  private Label lbl_status = null;
+  private Canvas can_road = null;
+  public MapUpdater(
+      final Controller controller,
+      final Label lbl_status,
+      final Canvas can_road) {
+    this.controller = controller;
+    this.lbl_status = lbl_status;
+    this.can_road = can_road;
+  }
+  public void run() {
+    final int t = this.controller.getSimulationWorldTime();
+    Platform.runLater(() -> {
+      this.lbl_status.setText("Simulation running (t="+t+")...");
+    });
+  };
+}
 @
 
 <<[[DesktopController]] member variables>>=
-private Runnable updateMetrics = () -> {
-  final int t = this.controller.getSimulationWorldTime();
-  <<Retrieve serviceRate>>
-  <<Retrieve distanceSavings>>
-  <<Retrieve serverTravelDistance>>
-  <<Retrieve serverServiceDistance>>
-  <<Retrieve serverCruisingDistance>>
-  <<Retrieve serverTravelDuration>>
-  /*<<Retrieve serverServiceDuration>>*/
-  /*<<Retrieve serverCruisingDuration>>*/
-  <<Retrieve requestDistanceUnassigned>>
-  <<Retrieve requestTransitDistance>>
-  <<Retrieve requestDetourDistance>>
-  <<Retrieve requestTransitDuration>>
-  /*<<Retrieve requestDetourDuration>>*/
-  <<Retrieve requestTravelDuration>>
-  <<Retrieve requestPickupDuration>>
-};
+private class MetricFetcher implements Runnable {
+  private Controller controller = null;
+  private ConcurrentHashMap<String, Series<Number, Number>> series = null;
+  private String id = "";
+  private long A0 = 0;
+  public MetricFetcher(
+      final Controller controller,
+      final ConcurrentHashMap<String, Series<Number, Number>> series,
+      final String id) {
+    this.controller = controller;
+    this.series = series;
+    this.id = id;
+  }
+  public void run() {
+    if (DEBUG) {
+      this.A0 = System.currentTimeMillis();
+    }
+    final int t = this.controller.getSimulationWorldTime();
+    Number val = null;
+    try {
+      if ("chk_serviceRate".equals(this.id)) {
+        <<Retrieve serviceRate>>
+      } else if ("chk_distanceSavings".equals(this.id)) {
+        <<Retrieve distanceSavings>>
+      } else if ("chk_serverTravelDistance".equals(this.id)) {
+        <<Retrieve serverTravelDistance>>
+      } else if ("chk_serverServiceDistance".equals(this.id)) {
+        <<Retrieve serverServiceDistance>>
+      } else if ("chk_serverCruisingDistance".equals(this.id)) {
+        <<Retrieve serverCruisingDistance>>
+      } else if ("chk_serverTravelDuration".equals(this.id)) {
+        <<Retrieve serverTravelDuration>>
+      } else if ("chk_serverServiceDuration".equals(this.id)) {
+        <<Retrieve serverServiceDuration>>
+      } else if ("chk_serverCruisingDuration".equals(this.id)) {
+        <<Retrieve serverCruisingDuration>>
+      } else if ("chk_requestDistanceUnassigned".equals(this.id)) {
+        <<Retrieve requestDistanceUnassigned>>
+      } else if ("chk_requestTransitDistance".equals(this.id)) {
+        <<Retrieve requestTransitDistance>>
+      } else if ("chk_requestDetourDistance".equals(this.id)) {
+        <<Retrieve requestDetourDistance>>
+      } else if ("chk_requestTransitDuration".equals(this.id)) {
+        <<Retrieve requestTransitDuration>>
+      } else if ("chk_requestDetourDuration".equals(this.id)) {
+        <<Retrieve requestDetourDuration>>
+      } else if ("chk_requestTravelDuration".equals(this.id)) {
+        <<Retrieve requestTravelDuration>>
+      } else if ("chk_requestPickupDuration".equals(this.id)) {
+        <<Retrieve requestPickupDuration>>
+      } else if ("chk_countRequestsQueue".equals(this.id)) {
+        <<Retrieve countRequestsQueue>>
+      } else if ("chk_countRequestsActive".equals(this.id)) {
+        <<Retrieve countRequestsActive>>
+      } else if ("chk_countRequestsCompleted".equals(this.id)) {
+        <<Retrieve countRequestsCompleted>>
+      } else if ("chk_countRequestsFailed".equals(this.id)) {
+        <<Retrieve countRequestsFailed>>
+      } else if ("chk_countServersActive".equals(this.id)) {
+        <<Retrieve countServersActive>>
+      } else if ("chk_countRequestsViolations".equals(this.id)) {
+        <<Retrieve countRequestsViolations>>
+      } else if ("chk_countServersViolations".equals(this.id)) {
+        <<Retrieve countServersViolations>>
+      } else if ("chk_timeRequestHandling".equals(this.id)) {
+        <<Retrieve timeRequestHandling>>
+      } else if ("chk_timeServerHandling".equals(this.id)) {
+        <<Retrieve timeServerHandling>>
+      }
+    } catch (SQLException se) {
+      System.err.printf("SQL failure: %s\n", se.getMessage());
+    }
+    if (val != null) {
+      final Number fval = val;
+      Platform.runLater(() -> {
+        this.series.get(this.id).getData().add(new Data<Number, Number>(t, fval));
+      });
+    }
+    if (DEBUG) {
+      System.err.printf("t=%s, %s execution took %d ms\n", t, id, (System.currentTimeMillis() - this.A0));
+    }
+  }
+}
 @
 
-\subsection{Chart}
-
+\subsection{Charts}
 <<[[DesktopController]] member variables>>=
-private NumberAxis chart_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
-private NumberAxis chart_y = new NumberAxis("Value", 0, 100, 10);
-private LineChart<Number, Number> lctot = new LineChart<Number, Number>(chart_x, chart_y);
-@
-
-<<[[DesktopController]] member variables>>=
-private Series<Number, Number> serviceRate = new Series<Number, Number>();
-private Series<Number, Number> distanceSavings = new Series<Number, Number>();
-private Series<Number, Number> serverTravelDistance = new Series<Number, Number>();
-private Series<Number, Number> serverServiceDistance = new Series<Number, Number>();
-private Series<Number, Number> serverCruisingDistance = new Series<Number, Number>();
-private Series<Number, Number> serverTravelDuration = new Series<Number, Number>();
-private Series<Number, Number> serverServiceDuration = new Series<Number, Number>();
-private Series<Number, Number> serverCruisingDuration = new Series<Number, Number>();
-private Series<Number, Number> requestDistanceUnassigned = new Series<Number, Number>();
-private Series<Number, Number> requestTransitDistance = new Series<Number, Number>();
-private Series<Number, Number> requestDetourDistance = new Series<Number, Number>();
-private Series<Number, Number> requestTransitDuration = new Series<Number, Number>();
-private Series<Number, Number> requestDetourDuration = new Series<Number, Number>();
-private Series<Number, Number> requestTravelDuration = new Series<Number, Number>();
-private Series<Number, Number> requestPickupDuration = new Series<Number, Number>();
+private NumberAxis rates_x = new NumberAxis();
+private NumberAxis rates_y = new NumberAxis();
+private NumberAxis distances_x = new NumberAxis();
+private NumberAxis distances_y = new NumberAxis();
+private NumberAxis durations_x = new NumberAxis();
+private NumberAxis durations_y = new NumberAxis();
+private NumberAxis counts_x = new NumberAxis();
+private NumberAxis counts_y = new NumberAxis();
+private NumberAxis times_x = new NumberAxis();
+private NumberAxis times_y = new NumberAxis();
+private LineChart<Number, Number> lc_rates = new LineChart<Number, Number>(rates_x, rates_y);
+private LineChart<Number, Number> lc_distances = new LineChart<Number, Number>(distances_x, distances_y);
+private LineChart<Number, Number> lc_durations = new LineChart<Number, Number>(durations_x, durations_y);
+private LineChart<Number, Number> lc_counts = new LineChart<Number, Number>(counts_x, counts_y);
+private LineChart<Number, Number> lc_times = new LineChart<Number, Number>(times_x, times_y);
+private ConcurrentHashMap<String, Series<Number, Number>> lc_rates_series =
+    new ConcurrentHashMap<String, Series<Number, Number>>();
+private ConcurrentHashMap<String, Series<Number, Number>> lc_distances_series =
+    new ConcurrentHashMap<String, Series<Number, Number>>();
+private ConcurrentHashMap<String, Series<Number, Number>> lc_durations_series =
+    new ConcurrentHashMap<String, Series<Number, Number>>();
+private ConcurrentHashMap<String, Series<Number, Number>> lc_counts_series =
+    new ConcurrentHashMap<String, Series<Number, Number>>();
+private ConcurrentHashMap<String, Series<Number, Number>> lc_times_series =
+    new ConcurrentHashMap<String, Series<Number, Number>>();
+private String[] metric_rates = new String[] {
+      "chk_serviceRate",
+      "chk_distanceSavings"
+    };
+private String[] metric_distances = new String[] {
+      "chk_serverTravelDistance",
+      "chk_serverServiceDistance",
+      "chk_serverCruisingDistance",
+      "chk_requestDistanceUnassigned",
+      "chk_requestTransitDistance",
+      "chk_requestDetourDistance"
+    };
+private String[] metric_durations = new String[] {
+      "chk_serverTravelDuration",
+      "chk_serverServiceDuration",
+      "chk_serverCruisingDuration",
+      "chk_requestTransitDuration",
+      "chk_requestDetourDuration",
+      "chk_requestTravelDuration",
+      "chk_requestPickupDuration"
+    };
+private String[] metric_counts = new String[] {
+      "chk_countRequestsQueue",
+      "chk_countRequestsActive",
+      "chk_countRequestsCompleted",
+      "chk_countRequestsFailed",
+      "chk_countServersActive",
+      "chk_countRequestsViolations",
+      "chk_countServersViolations"
+    };
+private String[] metric_times = new String[] {
+      "chk_timeRequestHandling",
+      "chk_timeServerHandling"
+    };
+private ConcurrentHashMap<String, ConcurrentHashMap<String, Series<Number, Number>>> lu_series =
+    new ConcurrentHashMap<String, ConcurrentHashMap<String, Series<Number, Number>>>();
 @
 
 \section{Chunks}
+<<Initialize chart settings>>=
+this.lc_rates.setCreateSymbols(false);
+this.lc_rates.setAnimated(false);
+this.lc_rates.setLegendVisible(false);
+this.lc_distances.setCreateSymbols(false);
+this.lc_distances.setAnimated(false);
+this.lc_distances.setLegendVisible(false);
+this.lc_durations.setCreateSymbols(false);
+this.lc_durations.setAnimated(false);
+this.lc_durations.setLegendVisible(false);
+this.lc_counts.setCreateSymbols(false);
+this.lc_counts.setAnimated(false);
+this.lc_counts.setLegendVisible(false);
+this.lc_times.setCreateSymbols(false);
+this.lc_times.setAnimated(false);
+this.lc_times.setLegendVisible(false);
+this.rates_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
+this.rates_y = new NumberAxis("Value (%)", 0, 100, 10);
+this.rates_x.setAutoRanging(true);
+this.rates_y.setAutoRanging(true);
+this.distances_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
+this.distances_y = new NumberAxis("Value (meters)", 0, 100, 10);
+this.distances_x.setAutoRanging(true);
+this.distances_y.setAutoRanging(true);
+this.durations_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
+this.durations_y = new NumberAxis("Value (seconds)", 0, 100, 10);
+this.durations_x.setAutoRanging(true);
+this.durations_y.setAutoRanging(true);
+this.counts_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
+this.counts_y = new NumberAxis("Value (count)", 0, 100, 10);
+this.counts_x.setAutoRanging(true);
+this.counts_y.setAutoRanging(true);
+this.times_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
+this.times_y = new NumberAxis("Value (milliseconds)", 0, 100, 10);
+this.times_x.setAutoRanging(true);
+this.times_y.setAutoRanging(true);
+@
+
+<<Initialize chart series>>=
+for (String metric : this.metric_rates) {
+  this.lc_rates_series.put(metric, new Series<Number, Number>());
+  this.lc_rates.getData().add(this.lc_rates_series.get(metric));
+  this.lu_series.put(metric, this.lc_rates_series);
+}
+for (String metric : this.metric_distances) {
+  this.lc_distances_series.put(metric, new Series<Number, Number>());
+  this.lc_distances.getData().add(this.lc_distances_series.get(metric));
+  this.lu_series.put(metric, this.lc_distances_series);
+}
+for (String metric : this.metric_durations) {
+  this.lc_durations_series.put(metric, new Series<Number, Number>());
+  this.lc_durations.getData().add(this.lc_durations_series.get(metric));
+  this.lu_series.put(metric, this.lc_durations_series);
+}
+for (String metric : this.metric_counts) {
+  this.lc_counts_series.put(metric, new Series<Number, Number>());
+  this.lc_counts.getData().add(this.lc_counts_series.get(metric));
+  this.lu_series.put(metric, this.lc_counts_series);
+}
+for (String metric : this.metric_times) {
+  this.lc_times_series.put(metric, new Series<Number, Number>());
+  this.lc_times.getData().add(this.lc_times_series.get(metric));
+  this.lu_series.put(metric, this.lc_times_series);
+}
+@
 
 <<Set default t0, t1>>=
 if ("".equals(this.tf_t0.getText())) {
@@ -246,210 +438,181 @@ if ("".equals(this.tf_t1.getText())) {
 }
 @
 
-<<Add chart to chart container>>=
-this.container_lctot.getChildren().clear();
-this.container_lctot.setTopAnchor(this.lctot, 0.0);
-this.container_lctot.setLeftAnchor(this.lctot, 0.0);
-this.container_lctot.setRightAnchor(this.lctot, 0.0);
-this.container_lctot.setBottomAnchor(this.lctot, 0.0);
-this.container_lctot.getChildren().add(this.lctot);
+<<Add charts to chart containers>>=
+<<Initialize chart settings>>
+<<Initialize chart series>>
+this.container_lc_rates.setTopAnchor(this.lc_rates, 0.0);
+this.container_lc_rates.setLeftAnchor(this.lc_rates, 0.0);
+this.container_lc_rates.setRightAnchor(this.lc_rates, 0.0);
+this.container_lc_rates.setBottomAnchor(this.lc_rates, 0.0);
+this.container_lc_rates.getChildren().add(this.lc_rates);
+this.container_lc_distances.setTopAnchor(this.lc_distances, 0.0);
+this.container_lc_distances.setLeftAnchor(this.lc_distances, 0.0);
+this.container_lc_distances.setRightAnchor(this.lc_distances, 0.0);
+this.container_lc_distances.setBottomAnchor(this.lc_distances, 0.0);
+this.container_lc_distances.getChildren().add(this.lc_distances);
+this.container_lc_durations.setTopAnchor(this.lc_durations, 0.0);
+this.container_lc_durations.setLeftAnchor(this.lc_durations, 0.0);
+this.container_lc_durations.setRightAnchor(this.lc_durations, 0.0);
+this.container_lc_durations.setBottomAnchor(this.lc_durations, 0.0);
+this.container_lc_durations.getChildren().add(this.lc_durations);
+this.container_lc_counts.setTopAnchor(this.lc_counts, 0.0);
+this.container_lc_counts.setLeftAnchor(this.lc_counts, 0.0);
+this.container_lc_counts.setRightAnchor(this.lc_counts, 0.0);
+this.container_lc_counts.setBottomAnchor(this.lc_counts, 0.0);
+this.container_lc_counts.getChildren().add(this.lc_counts);
+this.container_lc_times.setTopAnchor(this.lc_times, 0.0);
+this.container_lc_times.setLeftAnchor(this.lc_times, 0.0);
+this.container_lc_times.setRightAnchor(this.lc_times, 0.0);
+this.container_lc_times.setBottomAnchor(this.lc_times, 0.0);
+this.container_lc_times.getChildren().add(this.lc_times);
+@
+
+<<Enable metrics checkbox containers>>=
+this.vbox_metrics_rates.setDisable(false);
+this.vbox_metrics_distances.setDisable(false);
+this.vbox_metrics_durations.setDisable(false);
+this.vbox_metrics_counts.setDisable(false);
+this.vbox_metrics_times.setDisable(false);
+@
+
+<<Disable metrics checkbox containers>>=
+this.vbox_metrics_rates.setDisable(true);
+this.vbox_metrics_distances.setDisable(true);
+this.vbox_metrics_durations.setDisable(true);
+this.vbox_metrics_counts.setDisable(true);
+this.vbox_metrics_times.setDisable(true);
+@
+
+<<Deselect metrics checkboxes>>=
+this.chk_serviceRate.setSelected(false);
+this.chk_distanceSavings.setSelected(false);
+this.chk_serverTravelDistance.setSelected(false);
+this.chk_serverServiceDistance.setSelected(false);
+this.chk_serverCruisingDistance.setSelected(false);
+this.chk_serverTravelDuration.setSelected(false);
+this.chk_serverServiceDuration.setSelected(false);
+this.chk_serverCruisingDuration.setSelected(false);
+this.chk_requestDistanceUnassigned.setSelected(false);
+this.chk_requestTransitDistance.setSelected(false);
+this.chk_requestDetourDistance.setSelected(false);
+this.chk_requestTransitDuration.setSelected(false);
+this.chk_requestDetourDuration.setSelected(false);
+this.chk_requestTravelDuration.setSelected(false);
+this.chk_requestPickupDuration.setSelected(false);
+this.chk_countRequestsQueue.setSelected(false);
+this.chk_countRequestsActive.setSelected(false);
+this.chk_countRequestsCompleted.setSelected(false);
+this.chk_countRequestsFailed.setSelected(false);
+this.chk_countServersActive.setSelected(false);
+this.chk_countRequestsViolations.setSelected(false);
+this.chk_countServersViolations.setSelected(false);
+this.chk_timeRequestHandling.setSelected(false);
+this.chk_timeServerHandling.setSelected(false);
 @
 
 <<Retrieve serviceRate>>=
-if (flagServiceRate) {
-  try {
-    int[] output = this.controller.queryServiceRate();
-    final int val = (output.length > 0 ? output[0] : 0);
-    Platform.runLater(() -> {
-      this.serviceRate.getData().add(new Data<Number, Number>(t, val/100.0));
-    });
-  } catch (SQLException se) {
-    System.err.println("SQL failure: "+se.getMessage());
-  }
-}
+int[] output = this.controller.queryServiceRate();
+val = (output.length > 0 ? (output[0]/100.0) : 0);
 @
 
 <<Retrieve distanceSavings>>=
-if (flagDistanceSavings) {
-  try {
-    int[] output = new int[] { };
-    output = this.controller.queryServerTravelDistanceTotal();
-    final int val1 = (output.length > 0 ? output[0] : 0);
-    output = this.controller.queryRequestBaseDistanceUnassigned();
-    final int val2 = (output.length > 0 ? output[0] : 0);
-    output = this.controller.queryBaseDistanceTotal();
-    final int val3 = (output.length > 0 ? output[0] : 0);
-    Platform.runLater(() -> {
-      this.distanceSavings.getData().add(new Data<Number, Number>(t, 100.0*(1 - ((double) (val1 + val2)/val3))));
-    });
-  } catch (SQLException se) {
-    System.err.println("SQL failure: "+se.getMessage());
-  }
-}
+int[] output = this.controller.queryServerTravelDistanceTotal();
+final int val1 = (output.length > 0 ? output[0] : 0);
+output = this.controller.queryRequestBaseDistanceUnassigned();
+final int val2 = (output.length > 0 ? output[0] : 0);
+output = this.controller.queryBaseDistanceTotal();
+final int val3 = (output.length > 0 ? output[0] : 0);
+val = (val3 == 0 ? 0 : (100.0*(1 - ((double) (val1 + val2)/val3))));
 @
 
 <<Retrieve serverTravelDistance>>=
-if (flagServerTravelDistance) {
-  try {
-    int[] output = this.controller.queryServerTravelDistanceTotal();
-    final int val = (output.length > 0 ? output[0] : 0);
-    Platform.runLater(() -> {
-      this.serverTravelDistance.getData().add(new Data<Number, Number>(t, val));
-    });
-  } catch (SQLException se) {
-    System.err.println("SQL failure: "+se.getMessage());
-  }
-}
+int[] output = this.controller.queryServerTravelDistanceTotal();
+val = (output.length > 0 ? output[0] : 0);
 @
 
 <<Retrieve serverServiceDistance>>=
 // VERY SLOW AND BAD
-if (flagServerServiceDistance) {
-  try {
-    int[] output = this.controller.queryServerServiceDistanceTotal();
-    final int val = (output.length > 0 ? output[0] : 0);
-    Platform.runLater(() -> {
-      this.serverServiceDistance.getData().add(new Data<Number, Number>(t, val));
-    });
-  } catch (SQLException se) {
-    System.err.println("SQL failure: "+se.getMessage());
-  }
-}
+// int[] output = this.controller.queryServerServiceDistanceTotal();
+// val = (output.length > 0 ? output[0] : 0);
 @
+
 <<Retrieve serverCruisingDistance>>=
 // VERY SLOW AND BAD
-if (flagServerCruisingDistance) {
-  try {
-    int[] output = this.controller.queryServerCruisingDistanceTotal();
-    final int val = (output.length > 0 ? output[0] : 0);
-    Platform.runLater(() -> {
-      this.serverCruisingDistance.getData().add(new Data<Number, Number>(t, val));
-    });
-  } catch (SQLException se) {
-    System.err.println("SQL failure: "+se.getMessage());
-  }
-}
+// int[] output = this.controller.queryServerCruisingDistanceTotal();
+// val = (output.length > 0 ? output[0] : 0);
 @
+
 <<Retrieve serverTravelDuration>>=
-if (flagServerTravelDuration) {
-  try {
-    int[] output = this.controller.queryServerTravelDurationTotal();
-    final int val = (output.length > 0 ? output[0] : 0);
-    Platform.runLater(() -> {
-      this.serverTravelDuration.getData().add(new Data<Number, Number>(t, val));
-    });
-  } catch (SQLException se) {
-    System.err.println("SQL failure: "+se.getMessage());
-  }
-}
+int[] output = this.controller.queryServerTravelDurationTotal();
+val = (output.length > 0 ? output[0] : 0);
 @
+
 <<Retrieve serverServiceDuration>>=
-if (flagServerServiceDuration) {
-  try {
-    Platform.runLater(() -> {
-    });
-  } catch (SQLException se) {
-    System.err.println("SQL failure: "+se.getMessage());
-  }
-}
 @
+
 <<Retrieve serverCruisingDuration>>=
-if (flagServerCruisingDuration) {
-  try {
-    Platform.runLater(() -> {
-    });
-  } catch (SQLException se) {
-    System.err.println("SQL failure: "+se.getMessage());
-  }
-}
 @
+
 <<Retrieve requestDistanceUnassigned>>=
-if (flagRequestDistanceUnassigned) {
-  try {
-    int[] output = this.controller.queryRequestBaseDistanceUnassigned();
-    final int val = (output.length > 0 ? output[0] : 0);
-    Platform.runLater(() -> {
-      this.requestDistanceUnassigned.getData().add(new Data<Number, Number>(t, val));
-    });
-  } catch (SQLException se) {
-    System.err.println("SQL failure: "+se.getMessage());
-  }
-}
+int[] output = this.controller.queryRequestBaseDistanceUnassigned();
+val = (output.length > 0 ? output[0] : 0);
 @
+
 <<Retrieve requestTransitDistance>>=
-if (flagRequestTransitDistance) {
-  try {
-    int[] output = this.controller.queryRequestTransitDistanceTotal();
-    final int val = (output.length > 0 ? output[0] : 0);
-    Platform.runLater(() -> {
-      this.requestTransitDistance.getData().add(new Data<Number, Number>(t, val));
-    });
-  } catch (SQLException se) {
-    System.err.println("SQL failure: "+se.getMessage());
-  }
-}
+int[] output = this.controller.queryRequestTransitDistanceTotal();
+val = (output.length > 0 ? output[0] : 0);
 @
+
 <<Retrieve requestDetourDistance>>=
-if (flagRequestDetourDistance) {
-  try {
-    int[] output = this.controller.queryRequestDetourDistanceTotal();
-    final int val = (output.length > 0 ? output[0] : 0);
-    Platform.runLater(() -> {
-      this.requestDetourDistance.getData().add(new Data<Number, Number>(t, val));
-    });
-  } catch (SQLException se) {
-    System.err.println("SQL failure: "+se.getMessage());
-  }
-}
+int[] output = this.controller.queryRequestDetourDistanceTotal();
+val = (output.length > 0 ? output[0] : 0);
 @
+
 <<Retrieve requestTransitDuration>>=
-if (flagRequestTransitDuration) {
-  try {
-    int[] output = this.controller.queryRequestTransitDurationTotal();
-    final int val = (output.length > 0 ? output[0] : 0);
-    Platform.runLater(() -> {
-      this.requestTransitDuration.getData().add(new Data<Number, Number>(t, val));
-    });
-  } catch (SQLException se) {
-    System.err.println("SQL failure: "+se.getMessage());
-  }
-}
+int[] output = this.controller.queryRequestTransitDurationTotal();
+val = (output.length > 0 ? output[0] : 0);
 @
+
 <<Retrieve requestDetourDuration>>=
-if (flagRequestDetourDuration) {
-  try {
-    Platform.runLater(() -> {
-    });
-  } catch (SQLException se) {
-    System.err.println("SQL failure: "+se.getMessage());
-  }
-}
 @
+
 <<Retrieve requestTravelDuration>>=
-if (flagRequestTravelDuration) {
-  try {
-    int[] output = this.controller.queryRequestTravelDurationTotal();
-    final int val = (output.length > 0 ? output[0] : 0);
-    Platform.runLater(() -> {
-      this.requestTravelDuration.getData().add(new Data<Number, Number>(t, val));
-    });
-  } catch (SQLException se) {
-    System.err.println("SQL failure: "+se.getMessage());
-  }
-}
+int[] output = this.controller.queryRequestTravelDurationTotal();
+val = (output.length > 0 ? output[0] : 0);
 @
+
 <<Retrieve requestPickupDuration>>=
-if (flagRequestPickupDuration) {
-  try {
-    int[] output = this.controller.queryRequestPickupDurationTotal();
-    final int val = (output.length > 0 ? output[0] : 0);
-    Platform.runLater(() -> {
-      this.requestPickupDuration.getData().add(new Data<Number, Number>(t, val));
-    });
-  } catch (SQLException se) {
-    System.err.println("SQL failure: "+se.getMessage());
-  }
-}
+int[] output = this.controller.queryRequestPickupDurationTotal();
+val = (output.length > 0 ? output[0] : 0);
+@
+
+<<Retrieve countRequestsQueue>>=
+val = this.controller.retrieveClientApproxQueueSize();
+@
+
+<<Retrieve countRequestsActive>>=
+@
+
+<<Retrieve countRequestsCompleted>>=
+@
+
+<<Retrieve countRequestsFailed>>=
+@
+
+<<Retrieve countServersActive>>=
+@
+
+<<Retrieve countRequestsViolations>>=
+@
+
+<<Retrieve countServersViolations>>=
+@
+
+<<Retrieve timeRequestHandling>>=
+@
+
+<<Retrieve timeServerHandling>>=
 @
 
 \section{Methods}
@@ -497,9 +660,13 @@ void actionNew(final ActionEvent e) {
       this.btn_road     .setDisable(false);
       this.btn_gtree    .setDisable(false);
       this.btn_stop     .setDisable(false);
-      this.tf_class     .setDisable(false);
+      this.tf_client     .setDisable(false);
       this.tf_t0        .setDisable(false);
       this.tf_t1        .setDisable(false);
+      this.container_canvas.setContent(null);
+      this.container_lc_rates.getChildren().clear();
+      this.container_lc_distances.getChildren().clear();
+      this.container_lc_durations.getChildren().clear();
       this.circ_status.setFill(C_SUCCESS);
       this.lbl_status.setText("Created new Jargo instance.");
     });
@@ -540,6 +707,10 @@ void actionLoad(final ActionEvent e) {
           this.btn_stop     .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
           this.lbl_status   .setText("Loaded Jargo instance (#vertices="+nv+"; #edges="+ne+") (#servers="+ns+"; #requests="+nr+")");
+          this.container_canvas.setContent(null);
+          this.container_lc_rates.getChildren().clear();
+          this.container_lc_distances.getChildren().clear();
+          this.container_lc_durations.getChildren().clear();
           this.drawRoadNetwork();
         });
       } catch (SQLException se) {
@@ -563,7 +734,7 @@ void actionRoad(final ActionEvent e) {
   this.btn_road     .setDisable(true);
   this.btn_gtree    .setDisable(true);
   this.btn_stop     .setDisable(true);
-  this.tf_class     .setDisable(true);
+  this.tf_client     .setDisable(true);
   this.tf_t0        .setDisable(true);
   this.tf_t1        .setDisable(true);
   this.circ_status  .setFill(C_WARN);
@@ -586,7 +757,7 @@ void actionRoad(final ActionEvent e) {
           if (this.gtree != null) {
             this.btn_prob   .setDisable(false);
           }
-          this.tf_class     .setDisable(false);
+          this.tf_client     .setDisable(false);
           this.tf_t0        .setDisable(false);
           this.tf_t1        .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
@@ -742,9 +913,9 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
       System.err.println(ie.toString());
       return;
     }
-    this.tf_class.setText(this.jarclass);
+    this.tf_client.setText(this.jarclass);
     this.btn_client   .setText(cj.getName());
-    this.tf_class     .setDisable(false);
+    this.tf_client     .setDisable(false);
     this.tf_t0        .setDisable(false);
     this.tf_t1        .setDisable(false);
     this.btn_startseq .setDisable(false);
@@ -758,7 +929,7 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
 \subsection{\texttt{actionStartSequential}(1)}
 <<actionStartSequential(1)>>=
 void actionStartSequential(final ActionEvent e) {
-  this.jarclass = this.tf_class.getText();
+  this.jarclass = this.tf_client.getText();
   if ("".equals(this.jarclass)) {
     System.err.println("Class empty!");
     return;
@@ -766,7 +937,7 @@ void actionStartSequential(final ActionEvent e) {
   <<Set default t0, t1>>
   this.btn_startseq .setDisable(true);
   this.btn_startreal.setDisable(true);
-  this.tf_class     .setDisable(true);
+  this.tf_client     .setDisable(true);
   this.tf_t0        .setDisable(true);
   this.tf_t1        .setDisable(true);
   this.circ_status  .setFill(C_WARN);
@@ -791,28 +962,8 @@ void actionStartSequential(final ActionEvent e) {
     this.controller.setClockStart(t0);
     this.controller.setClockEnd(t1);
     this.timer.start();
-    this.chart_x.setAutoRanging(true);
-    this.chart_y.setAutoRanging(true);
-    this.lctot.setCreateSymbols(false);
-    this.lctot.setAnimated(false);
-    this.lctot.setLegendVisible(false);
-    this.lctot.getData().add(this.serviceRate);
-    this.lctot.getData().add(this.distanceSavings);
-    this.lctot.getData().add(this.serverTravelDistance);
-    this.lctot.getData().add(this.serverServiceDistance);
-    this.lctot.getData().add(this.serverCruisingDistance);
-    this.lctot.getData().add(this.serverTravelDuration);
-    this.lctot.getData().add(this.serverServiceDuration);
-    this.lctot.getData().add(this.serverCruisingDuration);
-    this.lctot.getData().add(this.requestDistanceUnassigned);
-    this.lctot.getData().add(this.requestTransitDistance);
-    this.lctot.getData().add(this.requestDetourDistance);
-    this.lctot.getData().add(this.requestTransitDuration);
-    this.lctot.getData().add(this.requestDetourDuration);
-    this.lctot.getData().add(this.requestTravelDuration);
-    this.lctot.getData().add(this.requestPickupDuration);
-    <<Add chart to chart container>>
-    this.vbox_metrics .setDisable(false);
+    <<Add charts to chart containers>>
+    <<Enable metrics checkbox containers>>
     this.circ_status  .setFill(C_SUCCESS);
     this.lbl_status   .setText("Simulation started.");
     CompletableFuture.runAsync(() -> {
@@ -822,9 +973,8 @@ void actionStartSequential(final ActionEvent e) {
         });
       });
     });
-    this.exe = Executors.newScheduledThreadPool(2);
-    this.cbUpdateMap = this.exe.scheduleAtFixedRate(this.updateMap, 0, 1, TimeUnit.SECONDS);
-    this.cbUpdateMetrics = this.exe.scheduleAtFixedRate(this.updateMetrics, 0, 1, TimeUnit.SECONDS);
+    this.exe = Executors.newScheduledThreadPool(1);
+    this.cbMapUpdater = this.exe.scheduleAtFixedRate(new MapUpdater(this.controller, this.lbl_status, this.can_road), 0, 1, TimeUnit.SECONDS);
   } catch (MalformedURLException
       | ClassNotFoundException
       | NoSuchMethodException
@@ -848,8 +998,8 @@ void actionStartRealtime(final ActionEvent e) {
 void actionStop(final ActionEvent e) {
   if (this.controller != null) {
     this.btn_stop     .setDisable(true);
-    this.vbox_metrics .setDisable(true);
-    this.chk_service  .setSelected(false);
+    <<Disable metrics checkbox containers>>
+    <<Deselect metrics checkboxes>>
     this.timer.stop();
     this.exe.shutdown();
     this.circ_status.setFill(C_WARN);
@@ -880,8 +1030,8 @@ void actionStop(final ActionEvent e) {
           this.client = null;
           this.jar = null;
           this.jarclass = null;
-          this.tf_class     .setDisable(true);
-          this.tf_class     .setText("");
+          this.tf_client     .setDisable(true);
+          this.tf_client     .setText("");
           this.tf_t0        .setDisable(true);
           this.tf_t0        .setText("");
           this.tf_t1        .setDisable(true);
@@ -889,7 +1039,6 @@ void actionStop(final ActionEvent e) {
           this.btn_startseq .setDisable(true);
           this.btn_startreal.setDisable(true);
           this.db = null;
-          this.container_canvas.setContent(null);
           this.circ_status.setFill(C_SUCCESS);
           this.lbl_status.setText("Closed instance.");
         });
@@ -904,185 +1053,28 @@ void actionStop(final ActionEvent e) {
 }
 @ %def actionStop
 
-\subsection{\texttt{toggleServiceRate}(1)}
-<<toggleServiceRate(1)>>=
-void toggleServiceRate(ActionEvent e) {
-  if (this.chk_service.isSelected()) {
-    this.flagServiceRate = true;
+\subsection{\texttt{toggleMetric}(1)}
+<<toggleMetric(1)>>=
+void toggleMetric(final ActionEvent e) {
+  CheckBox source = (CheckBox) e.getSource();
+  final String id = source.getId();
+  if (DEBUG) {
+    System.err.printf("Toggle CheckBox(id=%s)\n", id);
+  }
+  if (source.isSelected()) {
+    this.cbMetricFetcher.put(id, this.exe.scheduleAtFixedRate(
+        new MetricFetcher(this.controller, this.lu_series.get(id), id), 0, 1, TimeUnit.SECONDS));
+    if (DEBUG) {
+      System.err.printf("Schedule MetricFetcher(%s)\n", id);
+    }
   } else {
-    this.serviceRate.getData().clear();
-    this.flagServiceRate = false;
+    if (DEBUG) {
+      System.err.printf("Cancel MetricFetcher(%s)", id);
+    }
+    this.cbMetricFetcher.get(id).cancel(true);
   }
 }
-@ %def toggleServiceRate
-
-\subsection{\texttt{toggleDistanceSavings}(1)}
-<<toggleDistanceSavings(1)>>=
-void toggleDistanceSavings(ActionEvent e) {
-  if (this.chk_distsavings.isSelected()) {
-    this.flagDistanceSavings = true;
-  } else {
-    this.distanceSavings.getData().clear();
-    this.flagDistanceSavings = false;
-  }
-}
-@ %def toggleDistanceSavings
-
-\subsection{\texttt{toggleServerTravelDistance}(1)}
-<<toggleServerTravelDistance(1)>>=
-void toggleServerTravelDistance(ActionEvent e) {
-  if (this.chk_serverTravelDistance.isSelected()) {
-    this.flagServerTravelDistance = true;
-  } else {
-    this.serverTravelDistance.getData().clear();
-    this.flagServerTravelDistance = false;
-  }
-}
-@ %def toggleServerTravelDistance
-
-\subsection{\texttt{serverServiceDistance}(1)}
-<<toggleServerServiceDistance(1)>>=
-void toggleServerServiceDistance(ActionEvent e) {
-  if (this.chk_serverServiceDistance.isSelected()) {
-    this.flagServerServiceDistance = true;
-  } else {
-    this.serverServiceDistance.getData().clear();
-    this.flagServerServiceDistance = false;
-  }
-}
-@ %def toggleServerServiceDistance
-
-\subsection{\texttt{serverCruisingDistance}(1)}
-<<toggleServerCruisingDistance(1)>>=
-void toggleServerCruisingDistance(ActionEvent e) {
-  if (this.chk_serverCruisingDistance.isSelected()) {
-    this.flagServerCruisingDistance = true;
-  } else {
-    this.serverCruisingDistance.getData().clear();
-    this.flagServerCruisingDistance = false;
-  }
-}
-@ %def toggleServerCruisingDistance
-
-\subsection{\texttt{serverTravelDuration}(1)}
-<<toggleServerTravelDuration(1)>>=
-void toggleServerTravelDuration(ActionEvent e) {
-  if (this.chk_serverTravelDuration.isSelected()) {
-    this.flagServerTravelDuration = true;
-  } else {
-    this.serverTravelDuration.getData().clear();
-    this.flagServerTravelDuration = false;
-  }
-}
-@ %def toggleServerTravelDuration
-
-\subsection{\texttt{serverServiceDuration}(1)}
-<<toggleServerServiceDuration(1)>>=
-void toggleServerServiceDuration(ActionEvent e) {
-  if (this.chk_serverServiceDuration.isSelected()) {
-    this.flagServerServiceDuration = true;
-  } else {
-    this.serverServiceDuration.getData().clear();
-    this.flagServerServiceDuration = false;
-  }
-}
-@ %def toggleServerServiceDuration
-
-\subsection{\texttt{serverCruisingDuration}(1)}
-<<toggleServerCruisingDuration(1)>>=
-void toggleServerCruisingDuration(ActionEvent e) {
-  if (this.chk_serverCruisingDuration.isSelected()) {
-    this.flagServerCruisingDuration = true;
-  } else {
-    this.serverCruisingDuration.getData().clear();
-    this.flagServerCruisingDuration = false;
-  }
-}
-@ %def toggleServerCruisingDuration
-
-\subsection{\texttt{requestDistanceUnassigned}(1)}
-<<toggleRequestDistanceUnassigned(1)>>=
-void toggleRequestDistanceUnassigned(ActionEvent e) {
-  if (this.chk_requestDistanceUnassigned.isSelected()) {
-    this.flagRequestDistanceUnassigned = true;
-  } else {
-    this.requestDistanceUnassigned.getData().clear();
-    this.flagRequestDistanceUnassigned = false;
-  }
-}
-@ %def toggleRequestDistanceUnassigned
-
-\subsection{\texttt{requestTransitDistance}(1)}
-<<toggleRequestTransitDistance(1)>>=
-void toggleRequestTransitDistance(ActionEvent e) {
-  if (this.chk_requestTransitDistance.isSelected()) {
-    this.flagRequestTransitDistance = true;
-  } else {
-    this.requestTransitDistance.getData().clear();
-    this.flagRequestTransitDistance = false;
-  }
-}
-@ %def toggleRequestTransitDistance
-
-\subsection{\texttt{requestDetourDistance}(1)}
-<<toggleRequestDetourDistance(1)>>=
-void toggleRequestDetourDistance(ActionEvent e) {
-  if (this.chk_requestDetourDistance.isSelected()) {
-    this.flagRequestDetourDistance = true;
-  } else {
-    this.requestDetourDistance.getData().clear();
-    this.flagRequestDetourDistance = false;
-  }
-}
-@ %def toggleRequestDetourDistance
-
-\subsection{\texttt{requestTransitDuration}(1)}
-<<toggleRequestTransitDuration(1)>>=
-void toggleRequestTransitDuration(ActionEvent e) {
-  if (this.chk_requestTransitDuration.isSelected()) {
-    this.flagRequestTransitDuration = true;
-  } else {
-    this.requestTransitDuration.getData().clear();
-    this.flagRequestTransitDuration = false;
-  }
-}
-@ %def toggleRequestTransitDuration
-
-\subsection{\texttt{requestDetourDuration}(1)}
-<<toggleRequestDetourDuration(1)>>=
-void toggleRequestDetourDuration(ActionEvent e) {
-  if (this.chk_requestDetourDuration.isSelected()) {
-    this.flagRequestDetourDuration = true;
-  } else {
-    this.requestDetourDuration.getData().clear();
-    this.flagRequestDetourDuration = false;
-  }
-}
-@ %def toggleRequestDetourDuration
-
-\subsection{\texttt{requestTravelDuration}(1)}
-<<toggleRequestTravelDuration(1)>>=
-void toggleRequestTravelDuration(ActionEvent e) {
-  if (this.chk_requestTravelDuration.isSelected()) {
-    this.flagRequestTravelDuration = true;
-  } else {
-    this.requestTravelDuration.getData().clear();
-    this.flagRequestTravelDuration = false;
-  }
-}
-@ %def toggleRequestTravelDuration
-
-\subsection{\texttt{requestPickupDuration}(1)}
-<<toggleRequestPickupDuration(1)>>=
-void toggleRequestPickupDuration(ActionEvent e) {
-  if (this.chk_requestPickupDuration.isSelected()) {
-    this.flagRequestPickupDuration = true;
-  } else {
-    this.requestPickupDuration.getData().clear();
-    this.flagRequestPickupDuration = false;
-  }
-}
-@ %def toggleRequestPickupDuration
+@ %def toggleMetric
 
 \subsection{\texttt{actionRecordMousePress}(1)}
 <<actionRecordMousePress(1)>>=

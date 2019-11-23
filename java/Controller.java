@@ -359,17 +359,20 @@ public class Controller {
   public void saveBackup(final String p) throws SQLException {
            this.storage.DBSaveBackup(p);
          }
-  public void setRequestTimeout(final int t) {
-           this.REQUEST_TIMEOUT = t;
-         }
   public void loadGtree(String p) throws FileNotFoundException {
            this.tools.GTLoadGtree(p);
          }
   public void closeGtree() {
            this.tools.GTCloseGtree();
          }
+  public void setRequestTimeout(final int t) {
+           this.REQUEST_TIMEOUT = t;
+         }
   public int getSimulationWorldTime() {
            return this.world_time;
+         }
+  public int retrieveClientApproxQueueSize() {
+           return this.client.getApproxQueueSize();
          }
   public void setClockStart(final int t) {
            this.clockstart = t;
