@@ -56,66 +56,9 @@ public Communicator() { }
 @
 
 \section{Methods}
-
-\subsection{\texttt{registerStorage}(1)}
-<<registerStorage(1)>>=
-void registerStorage(final Storage src) {
-  this.storage = src;
-}
-@ %def setStorage
-
-\subsection{\texttt{registerController}(1)}
-<<registerController(1)>>=
-void registerController(final Controller src) {
-  this.controller = src;
-}
-@ %def setController
-
-\subsection{\texttt{forwardTraffic}(1)}
-<<forwardTraffic(1)>>=
-void forwardTraffic (final Traffic src) {
-  this.traffic = src;
-  this.traffic.forwardVertices(this.storage.getReferenceVerticesCache());
-  this.traffic.forwardEdges(this.storage.getReferenceEdgesCache());
-}
-@ %def registerTraffic
-
-\subsection{\texttt{forwardSimulationWorldTime}(0)}
-<<forwardSimulationWorldTime(0)>>=
-int forwardSimulationWorldTime() {
-  return this.controller.getSimulationWorldTime();
-}
-@ %def forwardSimulationWorldTime
-
-\subsection{\texttt{forwardReferenceVerticesCache}(0)}
-<<forwardReferenceVerticesCache(0)>>=
-final ConcurrentHashMap<Integer, int[]> forwardReferenceVerticesCache() {
-  return this.storage.getReferenceVerticesCache();
-}
-@ %def fowardReferenceVerticesCache
-
-\subsection{\texttt{forwardReferenceEdgesCache}(0)}
-<<forwardReferenceEdgesCache(0)>>=
-final ConcurrentHashMap<Integer,
-    ConcurrentHashMap<Integer, int[]>> forwardReferenceEdgesCache() {
-  return this.storage.getReferenceEdgesCache();
-}
-@ %def forwardReferenceEdgesCache
-
-\subsection{\texttt{forwardReferenceUsersCache}(0)}
-<<forwardReferenceUsersCache(0)>>=
-final ConcurrentHashMap<Integer, int[]> forwardReferenceUsersCache() {
-  return this.storage.getReferenceUsersCache();
-}
-@ %def forwardReferenceUsersCache
-
 \subsection{\texttt{forwardReturnRequest}(1)}
 <<forwardReturnRequest(1)>>=
 void forwardReturnRequest(final int[] r) {
   this.controller.returnRequest(r);
 }
 @ %def forwardReturnRequest
-
-
-
-

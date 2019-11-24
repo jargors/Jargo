@@ -3,283 +3,6 @@
 
 \section{Chunks}
 
-\subsection{Select latest order number from CQ}
-<<Select latest order number from CQ>>=
-final int[] output = (route[0] == 0 ? null : this.DBFetch(conn, "S87", 3, sid, route[0]));
-int t1 = (route[0] == 0 ?  0 : output[0]);
-int q1 = (route[0] == 0 ? sq : output[1]);
-int o1 = (route[0] == 0 ?  1 : output[2]);
-@
-
-\subsection{Insert new user into user tables}
-<<Insert new user into user tables>>=
-PreparedStatement pS2 = this.PS(conn, "S2");
-PreparedStatement pS3 = this.PS(conn, "S3");
-PreparedStatement pS4 = this.PS(conn, "S4");
-PreparedStatement pS5 = this.PS(conn, "S5");
-PreparedStatement pS6 = this.PS(conn, "S6");
-PreparedStatement pS7 = this.PS(conn, "S7");
-this.PSAdd(pS2, uid, u[1]);
-this.PSAdd(pS3, uid, u[2]);
-this.PSAdd(pS4, uid, u[3]);
-this.PSAdd(pS5, uid, u[4]);
-this.PSAdd(pS6, uid, u[5]);
-this.PSAdd(pS7, uid, u[6]);
-this.PSSubmit(pS2, pS3, pS4, pS5, pS6, pS7);
-@
-
-\subsection{Insert new request into R}
-<<Insert new request into R>>=
-PreparedStatement pS9 = this.PS(conn, "S9");
-this.PSAdd(pS9, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
-this.PSSubmit(pS9);
-@
-
-\subsection{Insert new server into S}
-<<Insert new server into S>>=
-PreparedStatement pS8 = this.PS(conn, "S8");
-this.PSAdd(pS8, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
-this.PSSubmit(pS8);
-@
-
-\subsection{Insert new server route into W}
-<<Insert new server route into W>>=
-<<Procedure to insert [[route]] into W>>
-pS10 = this.PS(conn, "S10");
-this.PSAdd(pS10, uid, se, null, null, route[0], route[1], null, null);
-this.PSSubmit(pS10);
-@
-
-\subsection{Insert new remaining route into W}
-<<Insert new remaining route into W>>=
-final int uid = sid;
-<<Procedure to insert [[route]] into W>>
-@
-
-\subsection{Insert new server route into CW}
-<<Insert new server route into CW>>=
-PreparedStatement pS11 = this.PS(conn, "S11");
-final int te = route[(route.length - 2)];
-this.PSAdd(pS11, uid, u[2], u[3], u[4], u[5], u[2], u[4], te, u[5]);
-this.PSSubmit(pS11);
-@
-
-\subsection{Insert new server into CQ}
-<<Insert new server into CQ>>=
-PreparedStatement pS14 = this.PS(conn, "S14");
-this.PSAdd(pS14, uid, u[1], u[2], null, u[2], u[4], null, u[1],
-    null, null, null, null, null, 1);
-this.PSSubmit(pS14);
-@
-
-\subsection{Insert new remaining schedule into CQ}
-<<Insert new remaining schedule into CQ>>=
-PreparedStatement pS14 = PS(conn, "S14");
-for (int j = 0; j < (sched.length - 2); j += 3) {
-  final int t2 = sched[(j + 0)];
-  final int v2 = sched[(j + 1)];
-  final int Lj = sched[(j + 2)];
-  if (Lj != sid) {
-    final int[] qpd = cache.get(Lj);
-    final int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
-    final int o2 = o1 + 1;
-    this.PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
-          qpd[0], qpd[1], qpd[2], o1, o2);
-    t1 = t2;
-    q1 = q2;
-    o1 = o2;
-  }
-}
-this.PSSubmit(pS14);
-@
-
-\subsection{Insert new jobs into PD, CPD}
-<<Insert new jobs into PD, CPD>>=
-PreparedStatement pS12 = this.PS(conn, "S12");
-PreparedStatement pS13 = this.PS(conn, "S13");
-for (final int r : rid) {
-  final int[] output2 = this.DBFetch(conn, "S51", 5, r);
-  final int rq = output2[0];
-  final int re = output2[1];
-  final int rl = output2[2];
-  final int ro = output2[3];
-  final int rd = output2[4];
-  final int[] qpd = cache.get(r);
-  final int[]  pd = cache2.get(r);
-  this.PSAdd(pS12, sid, qpd[1], pd[0], r);
-  this.PSAdd(pS12, sid, qpd[2], pd[1], r);
-  this.PSAdd(pS13, sid, se, route[(route.length - 2)], qpd[1], pd[0], qpd[2], pd[1],
-        r, re, rl, ro, rd);
-}
-this.PSSubmit(pS12, pS13);
-@
-
-\subsection{Update route endpoint in CW, CPD}
-<<Update route endpoint in CW, CPD>>=
-PreparedStatement pS77 = this.PS(conn, "S77");
-PreparedStatement pS139 = this.PS(conn, "S139");
-final int te = sched[(sched.length - 3)];
-final int ve = sched[(sched.length - 2)];
-this.PSAdd(pS77, te, ve, sid);
-this.PSAdd(pS139, te, sid);
-this.PSSubmit(pS77, pS139);
-@
-
-\subsection{Update times in PD and CPD}
-<<Update times in PD and CPD>>=
-PreparedStatement pS82 = this.PS(conn, "S82");
-PreparedStatement pS83 = this.PS(conn, "S83");
-PreparedStatement pS84 = this.PS(conn, "S84");
-for (int j = 0; j < (sched.length - 2); j += 3) {
-  final int tj = sched[(j + 0)];
-  final int vj = sched[(j + 1)];
-  final int Lj = sched[(j + 2)];
-  if (Lj != sid) {
-    this.PSAdd(pS82, tj, vj, Lj);
-    this.PSAdd(pS83, tj, vj, Lj);
-    this.PSAdd(pS84, tj, vj, Lj);
-  }
-}
-this.PSSubmit(pS82, pS83, pS84);
-@
-
-\subsection{Delete remaining schedule from CQ}
-<<Delete remaining schedule from CQ>>=
-PreparedStatement pS80 = this.PS(conn, "S80");
-this.PSAdd(pS80, sid, route[0]);
-this.PSSubmit(pS80);
-@
-
-\subsection{Delete remaining route from W}
-<<Delete remaining route from W>>=
-PreparedStatement pS76 = this.PS(conn, "S76");
-this.PSAdd(pS76, sid, route[0]);
-this.PSSubmit(pS76);
-@
-
-\subsection{Delete jobs from PD, CPD}
-<<Delete jobs from PD, CPD>>=
-PreparedStatement pS42 = this.PS(conn, "S42");
-PreparedStatement pS43 = this.PS(conn, "S43");
-for (final int r : rid) {
-  this.PSAdd(pS42, r);
-  this.PSAdd(pS43, r);
-}
-this.PSSubmit(pS42, pS43);
-@
-
-\subsection{Procedure to update route}
-<<Procedure to update route>>=
-<<Delete remaining route from W>>
-<<Insert new remaining route into W>>
-<<Update route endpoint in CW, CPD>>
-@
-
-\subsection{Procedure to update schedule}
-<<Procedure to update schedule>>=
-<<Update times in PD and CPD>>
-<<Populate the tp, td cache and update CQ>>
-<<Select latest order number from CQ>>
-<<Delete remaining schedule from CQ>>
-<<Insert new remaining schedule into CQ>>
-@
-
-\subsection{Procedure to update and add to schedule}
-<<Procedure to update and add to schedule>>=
-<<Update times in PD and CPD>>
-<<Populate the tp, td cache and vp, vd cache and update CQ>>
-<<Select latest order number from CQ>>
-<<Delete remaining schedule from CQ>>
-<<Insert new remaining schedule into CQ>>
-<<Insert new jobs into PD, CPD>>
-@
-
-\subsection{Procedure to insert \texttt{route} into W}
-<<Procedure to insert [[route]] into W>>=
-PreparedStatement pS10 = this.PS(conn, "S10");
-for (int i = 0; i < (route.length - 3); i += 2) {
-  final int t1 = route[(i + 0)];
-  final int v1 = route[(i + 1)];
-  final int t2 = route[(i + 2)];
-  final int v2 = route[(i + 3)];
-  if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
-    throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
-  }
-  final int dd = this.lu_edges.get(v1).get(v2)[0];
-  final int nu = this.lu_edges.get(v1).get(v2)[1];
-  this.PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
-}
-this.PSSubmit(pS10);
-@
-
-\subsection{Populate the tp, td cache and update CQ}
-<<Populate the tp, td cache and update CQ>>=
-PreparedStatement pS140 = this.PS(conn, "S140");
-for (int j = 0; j < (sched.length - 2); j += 3) {
-  final int Lj = sched[(j + 2)];
-  if (Lj != sid) {
-    if (!cache.containsKey(Lj)) {
-      final int[] output = DBFetch(conn, "S86", 2, Lj);
-      final int tp = output[0];
-      final int td = output[1];
-      final int rq = this.lu_users.get(Lj)[1];
-      cache.put(Lj, new int[] { rq, tp, td });
-      this.PSAdd(pS140, tp, td, Lj);
-    }
-  }
-}
-this.PSSubmit(pS140);
-@
-
-\subsection{Populate the tp, td cache and vp, vd cache and update CQ}
-<<Populate the tp, td cache and vp, vd cache and update CQ>>=
-PreparedStatement pS140 = this.PS(conn, "S140");
-for (int j = 0; j < (sched.length - 2); j += 3) {
-  final int Lj = sched[(j + 2)];
-  if (Lj != sid && !cache.containsKey(Lj)) {
-    final int rq = lu_users.get(Lj)[1];
-    boolean flagged = false;
-    for (final int r : rid) {
-      if (Lj == r) {
-        flagged = true;
-        break;
-      }
-    }
-    if (flagged) {
-      final int tp = sched[(j + 0)];
-      final int vp = sched[(j + 1)];
-      for (int k = (j + 3); k < (sched.length - 2); k += 3) {
-        if (Lj == sched[(k + 2)]) {
-          final int td = sched[(k + 0)];
-          final int vd = sched[(k + 1)];
-          cache. put(Lj, new int[] { rq, tp, td });
-          cache2.put(Lj, new int[] { vp, vd });
-          break;
-        }
-      }
-    } else {
-      final int[] output = this.DBFetch(conn, "S86", 2, Lj);
-      final int tp = output[0];
-      final int td = output[1];
-      this.PSAdd(pS140, tp, td, Lj);
-      cache.put(Lj, new int[] { rq, tp, td });
-    }
-  }
-}
-this.PSSubmit(pS140);
-@
-
-\subsection{Check time window violation}
-<<Check time window violation>>=
-for (int k = 0; k < (sched.length - 2); k += 3) {
-  final int tl = this.storage.DBQueryUser(sched[(k + 2)])[3];
-  if (sched[k] > tl) {
-    throw new TimeWindowException("Waypoint time (t="+sched[k]+") "
-        +"after late window (t="+tl+", uid="+sched[(k + 2)]+")");
-  }
-}
-@
-
 \subsection{Apply traffic to route, sched}
 <<Apply traffic to route, sched>>=
 int[] mutroute = route.clone();
@@ -311,13 +34,290 @@ if (this.traffic != null) {
 }
 @
 
-\section{Methods}
+\subsection{Check time window violation}
+<<Check time window violation>>=
+for (int k = 0; k < (sched.length - 2); k += 3) {
+  final int tl = this.storage.DBQueryUser(sched[(k + 2)])[3];
+  if (sched[k] > tl) {
+    throw new TimeWindowException("Waypoint time (t="+sched[k]+") "
+        +"after late window (t="+tl+", uid="+sched[(k + 2)]+")");
+  }
+}
+@
 
-\subsection{\texttt{DBAddNewVertex}(3)}
+\subsection{Delete from W remaining route}
+<<Delete from W remaining route>>=
+PreparedStatement pS76 = this.PSCreate(conn, "S76");
+this.PSAdd(pS76, sid, route[0]);
+this.PSSubmit(pS76);
+@
+
+\subsection{Delete from PD, CPD jobs}
+<<Delete from PD, CPD jobs>>=
+PreparedStatement pS42 = this.PSCreate(conn, "S42");
+PreparedStatement pS43 = this.PSCreate(conn, "S43");
+for (final int r : rid) {
+  this.PSAdd(pS42, r);
+  this.PSAdd(pS43, r);
+}
+this.PSSubmit(pS42, pS43);
+@
+
+\subsection{Delete from CQ remaining schedule}
+<<Delete from CQ remaining schedule>>=
+PreparedStatement pS80 = this.PSCreate(conn, "S80");
+this.PSAdd(pS80, sid, route[0]);
+this.PSSubmit(pS80);
+@
+
+\subsection{Insert into user tables new user}
+<<Insert into user tables new user>>=
+PreparedStatement pS2 = this.PSCreate(conn, "S2");
+PreparedStatement pS3 = this.PSCreate(conn, "S3");
+PreparedStatement pS4 = this.PSCreate(conn, "S4");
+PreparedStatement pS5 = this.PSCreate(conn, "S5");
+PreparedStatement pS6 = this.PSCreate(conn, "S6");
+PreparedStatement pS7 = this.PSCreate(conn, "S7");
+this.PSAdd(pS2, uid, u[1]);
+this.PSAdd(pS3, uid, u[2]);
+this.PSAdd(pS4, uid, u[3]);
+this.PSAdd(pS5, uid, u[4]);
+this.PSAdd(pS6, uid, u[5]);
+this.PSAdd(pS7, uid, u[6]);
+this.PSSubmit(pS2, pS3, pS4, pS5, pS6, pS7);
+@
+
+\subsection{Insert into R new request}
+<<Insert into R new request>>=
+PreparedStatement pS9 = this.PSCreate(conn, "S9");
+this.PSAdd(pS9, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
+this.PSSubmit(pS9);
+@
+
+\subsection{Insert into S new server}
+<<Insert into S new server>>=
+PreparedStatement pS8 = this.PSCreate(conn, "S8");
+this.PSAdd(pS8, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
+this.PSSubmit(pS8);
+@
+
+\subsection{Insert into W new server route}
+<<Insert into W new server route>>=
+<<Procedure to insert route>>
+pS10 = this.PSCreate(conn, "S10");
+this.PSAdd(pS10, uid, se, null, null, route[0], route[1], null, null);
+this.PSSubmit(pS10);
+@
+
+\subsection{Insert into W new remaining route}
+<<Insert into W new remaining route>>=
+final int uid = sid;
+<<Procedure to insert route>>
+@
+
+\subsection{Insert into CW new server route}
+<<Insert into CW new server route>>=
+PreparedStatement pS11 = this.PSCreate(conn, "S11");
+final int te = route[(route.length - 2)];
+this.PSAdd(pS11, uid, u[2], u[3], u[4], u[5], u[2], u[4], te, u[5]);
+this.PSSubmit(pS11);
+@
+
+\subsection{Insert into CQ new server}
+<<Insert into CQ new server>>=
+PreparedStatement pS14 = this.PSCreate(conn, "S14");
+this.PSAdd(pS14, uid, u[1], u[2], null, u[2], u[4], null, u[1],
+    null, null, null, null, null, 1);
+this.PSSubmit(pS14);
+@
+
+\subsection{Insert into CQ new remaining schedule}
+<<Insert into CQ new remaining schedule>>=
+PreparedStatement pS14 = PSCreate(conn, "S14");
+for (int j = 0; j < (sched.length - 2); j += 3) {
+  final int t2 = sched[(j + 0)];
+  final int v2 = sched[(j + 1)];
+  final int Lj = sched[(j + 2)];
+  if (Lj != sid) {
+    final int[] qpd = cache.get(Lj);
+    final int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
+    final int o2 = o1 + 1;
+    this.PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
+          qpd[0], qpd[1], qpd[2], o1, o2);
+    t1 = t2;
+    q1 = q2;
+    o1 = o2;
+  }
+}
+this.PSSubmit(pS14);
+@
+
+\subsection{Insert into PD, CPD new jobs}
+<<Insert into PD, CPD new jobs>>=
+PreparedStatement pS12 = this.PSCreate(conn, "S12");
+PreparedStatement pS13 = this.PSCreate(conn, "S13");
+for (final int r : rid) {
+  final int[] output2 = this.PSQuery(conn, "S51", 5, r);
+  final int rq = output2[0];
+  final int re = output2[1];
+  final int rl = output2[2];
+  final int ro = output2[3];
+  final int rd = output2[4];
+  final int[] qpd = cache.get(r);
+  final int[]  pd = cache2.get(r);
+  this.PSAdd(pS12, sid, qpd[1], pd[0], r);
+  this.PSAdd(pS12, sid, qpd[2], pd[1], r);
+  this.PSAdd(pS13, sid, se, route[(route.length - 2)], qpd[1], pd[0], qpd[2], pd[1],
+        r, re, rl, ro, rd);
+}
+this.PSSubmit(pS12, pS13);
+@
+
+\subsection{Procedure to insert route}
+<<Procedure to insert route>>=
+PreparedStatement pS10 = this.PSCreate(conn, "S10");
+for (int i = 0; i < (route.length - 3); i += 2) {
+  final int t1 = route[(i + 0)];
+  final int v1 = route[(i + 1)];
+  final int t2 = route[(i + 2)];
+  final int v2 = route[(i + 3)];
+  if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
+    throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
+  }
+  final int dd = this.lu_edges.get(v1).get(v2)[0];
+  final int nu = this.lu_edges.get(v1).get(v2)[1];
+  this.PSAdd(pS10, uid, se, t1, v1, t2, v2, dd, nu);
+}
+this.PSSubmit(pS10);
+@
+
+\subsection{Procedure to update route}
+<<Procedure to update route>>=
+<<Delete from W remaining route>>
+<<Insert into W new remaining route>>
+<<Update CW, CPD route endpoint>>
+@
+
+\subsection{Procedure to update schedule}
+<<Procedure to update schedule>>=
+<<Update PD, CPD arrival and departure times>>
+<<Populate the tp, td cache and update CQ>>
+<<Select from CQ latest order number>>
+<<Delete from CQ remaining schedule>>
+<<Insert into CQ new remaining schedule>>
+@
+
+\subsection{Procedure to update and add to schedule}
+<<Procedure to update and add to schedule>>=
+<<Update PD, CPD arrival and departure times>>
+<<Populate the tp, td cache and vp, vd cache and update CQ>>
+<<Select from CQ latest order number>>
+<<Delete from CQ remaining schedule>>
+<<Insert into CQ new remaining schedule>>
+<<Insert into PD, CPD new jobs>>
+@
+
+\subsection{Populate the tp, td cache and update CQ}
+<<Populate the tp, td cache and update CQ>>=
+PreparedStatement pS140 = this.PSCreate(conn, "S140");
+for (int j = 0; j < (sched.length - 2); j += 3) {
+  final int Lj = sched[(j + 2)];
+  if (Lj != sid) {
+    if (!cache.containsKey(Lj)) {
+      final int[] output = PSQuery(conn, "S86", 2, Lj);
+      final int tp = output[0];
+      final int td = output[1];
+      final int rq = this.lu_users.get(Lj)[1];
+      cache.put(Lj, new int[] { rq, tp, td });
+      this.PSAdd(pS140, tp, td, Lj);
+    }
+  }
+}
+this.PSSubmit(pS140);
+@
+
+\subsection{Populate the tp, td cache and vp, vd cache and update CQ}
+<<Populate the tp, td cache and vp, vd cache and update CQ>>=
+PreparedStatement pS140 = this.PSCreate(conn, "S140");
+for (int j = 0; j < (sched.length - 2); j += 3) {
+  final int Lj = sched[(j + 2)];
+  if (Lj != sid && !cache.containsKey(Lj)) {
+    final int rq = lu_users.get(Lj)[1];
+    boolean flagged = false;
+    for (final int r : rid) {
+      if (Lj == r) {
+        flagged = true;
+        break;
+      }
+    }
+    if (flagged) {
+      final int tp = sched[(j + 0)];
+      final int vp = sched[(j + 1)];
+      for (int k = (j + 3); k < (sched.length - 2); k += 3) {
+        if (Lj == sched[(k + 2)]) {
+          final int td = sched[(k + 0)];
+          final int vd = sched[(k + 1)];
+          cache. put(Lj, new int[] { rq, tp, td });
+          cache2.put(Lj, new int[] { vp, vd });
+          break;
+        }
+      }
+    } else {
+      final int[] output = this.PSQuery(conn, "S86", 2, Lj);
+      final int tp = output[0];
+      final int td = output[1];
+      this.PSAdd(pS140, tp, td, Lj);
+      cache.put(Lj, new int[] { rq, tp, td });
+    }
+  }
+}
+this.PSSubmit(pS140);
+@
+
+\subsection{Select from CQ latest order number}
+<<Select from CQ latest order number>>=
+final int[] output = (route[0] == 0 ? null : this.PSQuery(conn, "S87", 3, sid, route[0]));
+int t1 = (route[0] == 0 ?  0 : output[0]);
+int q1 = (route[0] == 0 ? sq : output[1]);
+int o1 = (route[0] == 0 ?  1 : output[2]);
+@
+
+\subsection{Update CW, CPD route endpoint}
+<<Update CW, CPD route endpoint>>=
+PreparedStatement pS77 = this.PSCreate(conn, "S77");
+PreparedStatement pS139 = this.PSCreate(conn, "S139");
+final int te = sched[(sched.length - 3)];
+final int ve = sched[(sched.length - 2)];
+this.PSAdd(pS77, te, ve, sid);
+this.PSAdd(pS139, te, sid);
+this.PSSubmit(pS77, pS139);
+@
+
+\subsection{Update PD, CPD arrival and departure times}
+<<Update PD, CPD arrival and departure times>>=
+PreparedStatement pS82 = this.PSCreate(conn, "S82");
+PreparedStatement pS83 = this.PSCreate(conn, "S83");
+PreparedStatement pS84 = this.PSCreate(conn, "S84");
+for (int j = 0; j < (sched.length - 2); j += 3) {
+  final int tj = sched[(j + 0)];
+  final int vj = sched[(j + 1)];
+  final int Lj = sched[(j + 2)];
+  if (Lj != sid) {
+    this.PSAdd(pS82, tj, vj, Lj);
+    this.PSAdd(pS83, tj, vj, Lj);
+    this.PSAdd(pS84, tj, vj, Lj);
+  }
+}
+this.PSSubmit(pS82, pS83, pS84);
+@
+
+\section{Methods: Write Road Network}
+
+\subsection{\texttt{DBInsertVertex}(3)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBAddNewVertex]]}(3) inserts a vertex into
+Method \textcolor{blue}{[[DBInsertVertex]]}(3) inserts a vertex into
 Table V and into [[lu_vertices]] if all succeeds. If the vertex attemping
 to be inserted already exists, a [[DuplicateVertexException]] is thrown.
 A [[SQLException]] is thrown for other database failures.\\
@@ -339,15 +339,15 @@ precision} as above.
 or [[SQLException]] for other database failures.\\
 \bottomrule
 \end{tabular}
-<<Write: DBAddNewVertex(3)>>=
-void DBAddNewVertex(final int v, final int lng, final int lat)
+<<Write: DBInsertVertex(3)>>=
+void DBInsertVertex(final int v, final int lng, final int lat)
 throws DuplicateVertexException, SQLException {
-@ %def DBAddNewVertex
-{\small If only [[DBAddNewVertex]](3) is ever used to write vertices into Table
+@ %def DBInsertVertex
+{\small If only [[DBInsertVertex]](3) is ever used to write vertices into Table
 V, we can be sure that any vertex appearing in Table V also appears in
 [[lu_vertices]].  To check if the vertex in param. 1 is a duplicate entry, it
 is sufficient to check [[lu_vertices]].}
-<<Write: DBAddNewVertex(3)>>=
+<<Write: DBInsertVertex(3)>>=
   if (this.lu_vertices.containsKey(v)) {
     throw new DuplicateVertexException("Vertex "+v+" already exists.");
   }
@@ -357,10 +357,10 @@ against Table V. By putting [[conn]] in the resources of the outer try, we
 ensure [[conn]] gets closed in the end no matter what happens. This pattern
 will appear in other write methods. If all succeeds, we put the vertex into
 [[lu_vertices]].}
-<<Write: DBAddNewVertex(3)>>=
+<<Write: DBInsertVertex(3)>>=
   try (<<Open [[conn]]>>) {
     try {
-      PreparedStatement pS0 = this.PS(conn, "S0");
+      PreparedStatement pS0 = this.PSCreate(conn, "S0");
       this.PSAdd(pS0, v, lng, lat);
       this.PSSubmit(pS0);
       conn.commit();
@@ -375,11 +375,11 @@ will appear in other write methods. If all succeeds, we put the vertex into
 }
 @
 
-\subsection{\texttt{DBAddNewEdge}(4)}
+\subsection{\texttt{DBInsertEdge}(4)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBAddNewEdge]]}(4) inserts an edge into Table E
+Method \textcolor{blue}{[[DBInsertEdge]]}(4) inserts an edge into Table E
 and into [[lu_edges]] if all succeeds. If the edge attempting to be inserted
 already exists, a [[DuplicateEdgeException]] is thrown. A [[SQLException]]
 is thrown for other database failures.\\
@@ -398,8 +398,8 @@ Integer [[nu]] (param. 4):&maximum free-flow speed along the edge, in meters per
 [[SQLException]] for other database failures.\\
 \bottomrule
 \end{tabular}
-<<Write: DBAddNewEdge(4)>>=
-void DBAddNewEdge(final int v1, final int v2, final int dd, final int nu)
+<<Write: DBInsertEdge(4)>>=
+void DBInsertEdge(final int v1, final int v2, final int dd, final int nu)
 throws DuplicateEdgeException, SQLException {
   if (this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2)) {
     throw new DuplicateEdgeException("Edge ("+v1+", "+v2+") already exists.");
@@ -409,7 +409,7 @@ throws DuplicateEdgeException, SQLException {
   }
   try (<<Open [[conn]]>>) {
     try {
-      PreparedStatement pS1 = this.PS(conn, "S1");
+      PreparedStatement pS1 = this.PSCreate(conn, "S1");
       this.PSAdd(pS1, v1, v2, dd, nu);
       this.PSSubmit(pS1);
       conn.commit();
@@ -422,13 +422,64 @@ throws DuplicateEdgeException, SQLException {
   }
   this.lu_edges.get(v1).put(v2, new int[] { dd, nu });
 }
-@ %def DBAddNewEdge
+@ %def DBInsertEdge
 
-\subsection{\texttt{DBAddNewRequest}(1)}
+\subsection{\texttt{DBUpdateEdgeSpeed}(3)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBAddNewRequest]]}(1) inserts a new request into the
+Method \textcolor{blue}{[[DBUpdateEdgeSpeed]]}(3) updates the maximum free-flow
+speed of an edge in the road network. If the edge attempting to be updated
+does not exist, an [[EdgeNotFoundException]] is throw.
+A [[SQLException]] is thrown for other database failures.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[v1]] (param. 1):&source vertex identifier.\\
+Integer [[v2]] (param. 2):&target vertex identifier.\\
+Integer [[nu]] (param. 3):&new maximum free-flow speed, in meters per second.
+\end{tabular}\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} updates a row in Table E, updates an entry in
+[[lu_edges]]. \textbf{May update rows in Table W if edge belongs to
+any server route. This update may cause C56 violations if waypoint times
+(columns \textsf{t1}, \textsf{t2}) are not updated accordingly!}\\
+\textbf{Throws:} [[EdgeNotFoundException]] if edge does not exist,
+or [[SQLException]] for other database failures.\\
+\bottomrule
+\end{tabular}
+<<Write: DBUpdateEdgeSpeed(3)>>=
+void DBUpdateEdgeSpeed(final int v1, final int v2, final int nu)
+throws EdgeNotFoundException, SQLException {
+  if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
+    throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
+  }
+  try (<<Open [[conn]]>>) {
+    try {
+      PreparedStatement pS15 = this.PSCreate(conn, "S15");
+      PreparedStatement pS131 = this.PSCreate(conn, "S131");
+      this.PSAdd(pS15, nu, v1, v2);
+      this.PSAdd(pS131, nu, v1, v2);
+      this.PSSubmit(pS15, pS131);
+      conn.commit();
+    } catch (SQLException e) {
+      conn.rollback();
+      throw e;
+    }
+  } catch (SQLException e) {
+    throw e;
+  }
+  this.lu_edges.get(v1).get(v2)[1] = nu;
+}
+@ %def DBUpdateEdgeSpeed
+
+\section{Methods: Write Users}
+
+\subsection{\texttt{DBInsertRequest}(1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBInsertRequest]]}(1) inserts a new request into the
 user tables and into [[lu_users]] and [[lu_rstatus]] if all succeeds.  If the
 request attempting to be inserted already exists, a [[DuplicateUserException]]
 is thrown. A [[SQLException]] is thrown for other database failures.\\
@@ -453,8 +504,8 @@ row into Table R, puts an entry into [[lu_users]] and into [[lu_rstatus]].\\
 [[SQLException]] for other database failures.\\
 \bottomrule
 \end{tabular}
-<<Write: DBAddNewRequest(1)>>=
-void DBAddNewRequest(final int[] u)
+<<Write: DBInsertRequest(1)>>=
+void DBInsertRequest(final int[] u)
 throws DuplicateUserException, SQLException {
   final int uid = u[0];
   if (this.lu_users.containsKey(uid)) {
@@ -462,8 +513,8 @@ throws DuplicateUserException, SQLException {
   }
   try (<<Open [[conn]]>>) {
     try {
-      <<Insert new user into user tables>>
-      <<Insert new request into R>>
+      <<Insert into user tables new user>>
+      <<Insert into R new request>>
       conn.commit();
     } catch (SQLException e) {
       conn.rollback();
@@ -472,13 +523,13 @@ throws DuplicateUserException, SQLException {
   } catch (SQLException e) {
     throw e;
   }
-@ %def DBAddNewRequest
+@ %def DBInsertRequest
 {\small In the last step, we put $r$ into [[lu_users]] and put it into
 [[lu_rstatus]] with the value set to [[false]] to indicate that it is
 unassigned. When we put it into [[lu_users]], we store a cloned array [[u]] as
 the value because we don't want any changes to [[u]] on the caller side showing
 up in our cache (we are considering users to be immutable).}
-<<Write: DBAddNewRequest(1)>>=
+<<Write: DBInsertRequest(1)>>=
   this.lu_users.put(u[0], u.clone());
   this.lu_rstatus.put(u[0], false);
 }
@@ -486,20 +537,20 @@ up in our cache (we are considering users to be immutable).}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[addNewRequest]]}(1) wraps [[DBAddNewRequest]](1).\\
+Method \textcolor{blue}{[[insertRequest]]}(1) wraps [[DBInsertRequest]](1).\\
 \bottomrule
 \end{tabular}
-<<Write: addNewRequest(1)>>=
-void addNewRequest(final int[] u) throws DuplicateUserException, SQLException {
-  this.storage.DBAddNewRequest(u);
+<<Write: insertRequest(1)>>=
+void insertRequest(final int[] u) throws DuplicateUserException, SQLException {
+  this.storage.DBInsertRequest(u);
 }
-@ %def addNewRequest
+@ %def insertRequest
 
-\subsection{\texttt{DBAddNewServer}(2)}
+\subsection{\texttt{DBInsertServer}(2)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBAddNewServer]]}(2) inserts a new server into the
+Method \textcolor{blue}{[[DBInsertServer]]}(2) inserts a new server into the
 user tables and into [[lu_users]] if all succeeds.  If the server attempting to
 be inserted already exists, a [[DuplicateUserException]] is thrown. The method
 requires the server's initial route be given in the second parameter. If the
@@ -539,8 +590,8 @@ inserts a row into Table CQ, puts an entry into [[lu_users]].\\
 in Table E, or [[SQLException]] for other database failures.\\
 \bottomrule
 \end{tabular}
-<<Write: DBAddNewServer(2)>>=
-void DBAddNewServer(final int[] u, final int[] route)
+<<Write: DBInsertServer(2)>>=
+void DBInsertServer(final int[] u, final int[] route)
 throws DuplicateUserException, EdgeNotFoundException, SQLException {
   final int uid = u[0];
   if (this.lu_users.containsKey(uid)) {
@@ -549,11 +600,11 @@ throws DuplicateUserException, EdgeNotFoundException, SQLException {
   try (<<Open [[conn]]>>) {
     try {
       final int se = u[2];
-      <<Insert new user into user tables>>
-      <<Insert new server into S>>
-      <<Insert new server route into W>>
-      <<Insert new server route into CW>>
-      <<Insert new server into CQ>>
+      <<Insert into user tables new user>>
+      <<Insert into S new server>>
+      <<Insert into W new server route>>
+      <<Insert into CW new server route>>
+      <<Insert into CQ new server>>
       conn.commit();
     } catch (SQLException e) {
       conn.rollback();
@@ -564,73 +615,25 @@ throws DuplicateUserException, EdgeNotFoundException, SQLException {
   }
 @
 {\small In the last step, we put $s$ into [[lu_users]].}
-<<Write: DBAddNewServer(2)>>=
+<<Write: DBInsertServer(2)>>=
   this.lu_users.put(uid, u.clone());
 }
 @
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[addNewServer]]}(2) wraps [[addNewServer]](2).\\
+Method \textcolor{blue}{[[insertServer]]}(2) wraps [[insertServer]](2).\\
 \bottomrule
 \end{tabular}
-<<Write: addNewServer(2)>>=
-void addNewServer(final int[] u)
+<<Write: insertServer(2)>>=
+void insertServer(final int[] u)
 throws DuplicateUserException, EdgeNotFoundException, SQLException,
        GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException {
-  this.storage.DBAddNewServer(u, this.tools.computeRoute(u[4], u[5], u[2]));
+  this.storage.DBInsertServer(u, this.tools.computeRoute(u[4], u[5], u[2]));
 }
-@ %def addNewServer
+@ %def insertServer
 
-\subsection{\texttt{DBUpdateEdgeSpeed}(3)}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBUpdateEdgeSpeed]]}(3) updates the maximum free-flow
-speed of an edge in the road network. If the edge attempting to be updated
-does not exist, an [[EdgeNotFoundException]] is throw.
-A [[SQLException]] is thrown for other database failures.\\
-\midrule
-\textbf{Parameters:} \\
-\begin{tabular}{lp{116mm}}
-Integer [[v1]] (param. 1):&source vertex identifier.\\
-Integer [[v2]] (param. 2):&target vertex identifier.\\
-Integer [[nu]] (param. 3):&new maximum free-flow speed, in meters per second.
-\end{tabular}\\
-\textbf{Returns:} nothing.\\
-\textbf{Side Effects:} updates a row in Table E, updates an entry in
-[[lu_edges]]. \textbf{May update rows in Table W if edge belongs to
-any server route. This update may cause C56 violations if waypoint times
-(columns \textsf{t1}, \textsf{t2}) are not updated accordingly!}\\
-\textbf{Throws:} [[EdgeNotFoundException]] if edge does not exist,
-or [[SQLException]] for other database failures.\\
-\bottomrule
-\end{tabular}
-<<Write: DBUpdateEdgeSpeed(3)>>=
-void DBUpdateEdgeSpeed(final int v1, final int v2, final int nu)
-throws EdgeNotFoundException, SQLException {
-  if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
-    throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
-  }
-  try (<<Open [[conn]]>>) {
-    try {
-      PreparedStatement pS15 = this.PS(conn, "S15");
-      PreparedStatement pS131 = this.PS(conn, "S131");
-      this.PSAdd(pS15, nu, v1, v2);
-      this.PSAdd(pS131, nu, v1, v2);
-      this.PSSubmit(pS15, pS131);
-      conn.commit();
-    } catch (SQLException e) {
-      conn.rollback();
-      throw e;
-    }
-  } catch (SQLException e) {
-    throw e;
-  }
-  this.lu_edges.get(v1).get(v2)[1] = nu;
-}
-@ %def DBUpdateEdgeSpeed
-
+\section{Methods: Write Server Properties}
 
 \subsection{\texttt{DBUpdateServerRoute}(3)}
 \begin{tabular}{p{\textwidth}}
@@ -743,7 +746,7 @@ the method call and returns [[false]].\\
 void updateServerRoute(final int sid, final int[] route, final int[] sched)
 throws RouteIllegalOverwriteException, UserNotFoundException,
        EdgeNotFoundException, TimeWindowException, SQLException {
-  if (route[0] >= this.forwardSimulationWorldTime()) {
+  if (route[0] >= this.retrieveClockNow()) {
     <<Check time window violation>>
     <<Apply traffic to route, sched>>
     this.storage.DBUpdateServerRoute(sid, mutroute, mutsched);
@@ -886,7 +889,7 @@ and returns [[false]].\\
 void updateServerAddToSchedule(final int sid, final int[] route, final int[] sched, final int[] rid)
 throws RouteIllegalOverwriteException, UserNotFoundException,
        EdgeNotFoundException, TimeWindowException, SQLException {
-  final int t = this.forwardSimulationWorldTime();
+  final int t = this.retrieveClockNow();
   final int[] current = this.storage.DBQueryServerRoute(sid);
   int i = 0;
   while (i < current.length && current[i] != route[0]) {
@@ -1008,7 +1011,7 @@ throws UserNotFoundException, EdgeNotFoundException, SQLException {
       final int se = lu_users.get(sid)[2];
       <<Procedure to update route>>
       <<Procedure to update schedule>>
-      <<Delete jobs from PD, CPD>>
+      <<Delete from PD, CPD jobs>>
       conn.commit();
     } catch (SQLException e) {
       conn.rollback();
@@ -1041,7 +1044,7 @@ the method call and returns [[false]].\\
 void updateServerRemoveFromSchedule( final int sid, final int[] route, final int[] sched, final int[] rid)
 throws RouteIllegalOverwriteException, UserNotFoundException,
        EdgeNotFoundException, TimeWindowException, SQLException {
-  if (route[0] >= this.forwardSimulationWorldTime()) {
+  if (route[0] >= this.retrieveClockNow()) {
     <<Check time window violation>>
     <<Apply traffic to route, sched>>
     this.storage.DBUpdateServerRemoveFromSchedule(sid, mutroute, mutsched, rid);

@@ -30,15 +30,13 @@ import com.github.jargors.Tools;
 import com.github.jargors.exceptions.ClientException;
 import com.github.jargors.exceptions.ClientFatalException;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.io.FileNotFoundException;
 @
 
 \section{Member Variables}
 <<[[Client]] member variables>>=
 protected ConcurrentLinkedQueue<int[]> queue = new ConcurrentLinkedQueue<int[]>();
-protected int r_collection_period = 1;  // how many sec before collecting new req?
-protected int r_handling_period = 1;  // how many msec before handling queued req?
-protected int s_collection_period = 10;
 protected Communicator communicator;
 protected Tools tools = new Tools();
 protected final boolean DEBUG =
@@ -61,9 +59,9 @@ void notifyNew() throws ClientException, ClientFatalException {
 }
 @ %def notifyNew
 
-\subsection{\texttt{collectRequest}(1)}
-<<collectRequest(1)>>=
-void collectRequest(final int[] r) {
+\subsection{\texttt{addRequest}(1)}
+<<addRequest(1)>>=
+void addRequest(final int[] r) {
   this.queue.add(r);
 }
 @ %def addRequest
@@ -95,78 +93,6 @@ void collectServerLocations(final int[] src) {
 }
 @ %def collectServerLocations
 
-
-\subsection{\texttt{registerCommunicator}(1)}
-<<registerCommunicator(1)>>=
-void registerCommunicator(final Communicator src) {
-  this.communicator = src;
-}
-@ %def registerCommunicator
-
-\subsection{\texttt{getApproxQueueSize}(0)}
-<<getApproxQueueSize(0)>>=
-int getApproxQueueSize() {
-  return this.queue.size();
-}
-@ %def getApproxQueueSize
-
-\subsection{\texttt{getRequestCollectionPeriod}(0)}
-<<getRequestCollectionPeriod(0)>>=
-int getRequestCollectionPeriod() {
-  return this.r_collection_period;
-}
-@ %def getRequestCollectionPeriod
-
-\subsection{\texttt{getRequestHandlingPeriod}(0)}
-<<getRequestHandlingPeriod(0)>>=
-int getRequestHandlingPeriod() {
-  return this.r_handling_period;
-}
-@ %def getRequestHandlingPeriod
-
-\subsection{\texttt{getServerLocationCollectionPeriod}(0)}
-<<getServerLocationCollectionPeriod(0)>>=
-int getServerLocationCollectionPeriod () {
-  return this.s_collection_period;
-}
-@ %def getServerLocationCollectionPeriod
-
-\subsection{\texttt{setRequestCollectionPeriod}(1)}
-<<setRequestCollectionPeriod(1)>>=
-void setRequestCollectionPeriod(final int t) {
-  this.r_collection_period = t;
-}
-@ %def setRequestCollectionPeriod
-
-\subsection{\texttt{setRequestHandlingPeriod}(1)}
-<<setRequestHandlingPeriod(1)>>=
-void setRequestHandlingPeriod(final int t) {
-  this.r_handling_period = t;
-}
-@ %def setRequestHandlingPeriod
-
-\subsection{\texttt{setServerLocationCollectionPeriod}(1)}
-<<setServerLocationCollectionPeriod(1)>>=
-void setServerLocationCollectionPeriod(final int t) {
-  this.s_collection_period = t;
-}
-@ %def setServerLocationCollectionPeriod
-
-
-\subsection{\texttt{registerRoadNetwork}(0)}
-<<registerRoadNetwork(0)>>=
-void registerRoadNetwork() {
-  this.tools.registerVertices(this.communicator.forwardReferenceVerticesCache());
-  this.tools.registerEdges(this.communicator.forwardReferenceEdgesCache());
-}
-@ %def registerRoadNetwork
-
-\subsection{\texttt{registerUsers}(0)}
-<<registerUsers(0)>>=
-void registerUsers() {
-  this.tools.registerUsers(this.communicator.forwardReferenceUsersCache());
-}
-@ %def registerUsers
 
 \subsection{\texttt{endCollectServerLocations}(1)}
 <<endCollectServerLocations(1)>>=

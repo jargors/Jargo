@@ -1,4 +1,4 @@
-\chapter{Administration, Settings, and Glue}
+\chapter{Administration, Getters, and Setters}
 \label{admin}
 
 \section{Chunks}
@@ -21,12 +21,12 @@ for (int i = 0; i < values.length; i++) {
 
 \section{Methods: Administration}
 
-\subsection{\texttt{DBCreateNewInstance}(0)}
+\subsection{\texttt{JargoInstanceNew}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBCreateNewInstance]]}(0) creates a new database
-instance. It uses [[setupDriver]](0) to register the JDBC [[DriverManager]] to
+Method \textcolor{blue}{[[JargoInstanceNew]]}(0) creates a new database
+instance. It uses [[JargoSetupDriver]](0) to register the JDBC [[DriverManager]] to
 the new instance.  If the DBCP2 [[PoolingDriver]] cannot be found, a
 [[ClassNotFoundException]] is thrown. We consider this exception to be fatal
 and we exit immediately.  On the other hand if a [[SQLException]] occurs, we
@@ -42,10 +42,10 @@ cannot be loaded.\\
 reason.\\
 \bottomrule
 \end{tabular}
-<<Admin: DBCreateNewInstance(0)>>=
-void DBCreateNewInstance() throws SQLException {
+<<Admin: JargoInstanceNew(0)>>=
+void JargoInstanceNew() throws SQLException {
   try {
-    this.setupDriver();
+    this.JargoSetupDriver();
   } catch (SQLException e) {
     throw e;
   } catch (ClassNotFoundException e) {
@@ -54,69 +54,30 @@ void DBCreateNewInstance() throws SQLException {
     System.exit(1);
   }
 }
-@ %def DBCreateNewInstance
+@ %def JargoInstanceNew
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[createNewInstance]]}(0) wraps [[DBCreateNewInstance]](0).\\
+Method \textcolor{blue}{[[instanceNew]]}(0) wraps [[JargoInstanceNew]](0).\\
 \bottomrule
 \end{tabular}
-<<Admin: createNewInstance(0)>>=
-void createNewInstance() throws SQLException {
-  this.storage.DBCreateNewInstance();
+<<Admin: instanceNew(0)>>=
+void instanceNew() throws SQLException {
+  this.storage.JargoInstanceNew();
 }
-@ %def createNewInstance
+@ %def instanceNew
 
-\subsection{\texttt{DBCloseInstance}(0)}
+\subsection{\texttt{JargoInstanceInitialize}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBCloseInstance]]}(0) closes an existing Jargo
-database instance.  If the instance closes successfully, a [[SQLException]]
-with error code [[45000]] is thrown. Otherwise, some other error code is
-thrown. In this case we rethrow to let the caller handle it.\\
-\midrule
-\textbf{Parameters:} none.\\
-\textbf{Returns:} nothing.\\
-\textbf{Side Effects:} closes an existing Jargo database instance.\\
-\textbf{Throws:} [[SQLException]] if database cannot be closed for whatever
-reason.\\
-\bottomrule
-\end{tabular}
-<<Admin: DBCloseInstance(0)>>=
-void DBCloseInstance() throws SQLException {
-  try {
-    DriverManager.getConnection("jdbc:derby:memory:jargo;drop=true");
-  } catch (SQLException e) {
-    if (e.getErrorCode() != 45000) {
-      throw e;
-    }
-  }
-}
-@ %def DBCloseInstance
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[closeInstance]]}(0) wraps [[DBCloseInstance]](0).\\
-\bottomrule
-\end{tabular}
-<<Admin: closeInstance(0)>>=
-void closeInstance() throws SQLException {
-  this.storage.DBCloseInstance();
-}
-@ %def closeInstance
-
-\subsection{\texttt{DBLoadDataModel}(0)}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBLoadDataModel]]}(0) loads the data model in
+Method \textcolor{blue}{[[JargoInstanceInitialize]]}(0) loads the data model in
 \S\ref{TODO} into the Jargo database instance. If the
 data model cannot be loaded, a [[SQLException]] is thrown. We consider this
 exception to be fatal and we exit immediately. Possible reasons for such an
 exception might be because the caller forgot to first call
-[[DBCreateNewInstance]](0) resulting in ``No suitable driver found'' (error
-code 0), or because the caller previously called [[DBLoadBackup]](1) resulting
+[[JargoInstanceNew]](0) resulting in ``No suitable driver found'' (error
+code 0), or because the caller previously called [[JargoInstanceLoad]](1) resulting
 in ``Table/View V already exists'' (error code 20000). In either case we print
 a hint to terminal to guide the debugging.\\
 \midrule
@@ -127,8 +88,8 @@ into the Jargo instance, or exits the JVM if failure occurs.\\
 \textbf{Throws:} nothing.\\
 \bottomrule
 \end{tabular}
-<<Admin: DBLoadDataModel(0)>>=
-void DBLoadDataModel() {
+<<Admin: JargoInstanceInitialize(0)>>=
+void JargoInstanceInitialize() {
   try (<<Open [[conn]]>>) {
     Statement stmt = conn.createStatement();
     stmt.clearBatch();
@@ -182,33 +143,33 @@ void DBLoadDataModel() {
   } catch (SQLException e) {
     System.err.println("Fatal error.");
     if (e.getErrorCode() == 0) {
-      System.err.println("(did you forget to call Storage.DBCreateNewInstance()?)");
+      System.err.println("(did you forget to call Storage.JargoInstanceNew()?)");
     } else if (e.getErrorCode() == 20000) {
-      System.err.println("(data model already exists from Storage.DBLoadBackup()?)");
+      System.err.println("(data model already exists from Storage.JargoInstanceLoad()?)");
     }
     e.printStackTrace(System.err);
     System.exit(1);
   }
 }
-@ %def DBLoadDataModel
+@ %def JargoInstanceInitialize
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[loadDataModel]]}(0) wraps [[DBLoadDataModel]](0).\\
+Method \textcolor{blue}{[[instanceInitialize]]}(0) wraps [[JargoInstanceInitialize]](0).\\
 \bottomrule
 \end{tabular}
-<<Admin: loadDataModel(0)>>=
-void loadDataModel() {
-  this.storage.DBLoadDataModel();
+<<Admin: instanceInitialize(0)>>=
+void instanceInitialize() {
+  this.storage.JargoInstanceInitialize();
 }
-@ %def loadDataModel
+@ %def instanceInitialize
 
-\subsection{\texttt{DBLoadBackup}(1)}
+\subsection{\texttt{JargoInstanceLoad}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBLoadBackup]]}(1) loads a previously saved Jargo
-database instance from disk into working memory. It uses [[setupDriver]](0) to
+Method \textcolor{blue}{[[JargoInstanceLoad]]}(1) loads a previously saved Jargo
+database instance from disk into working memory. It uses [[JargoSetupDriver]](0) to
 register the JDBC [[DriverManager]] to the new instance.  If the DBCP2
 [[PoolingDriver]] cannot be found, a [[ClassNotFoundException]] is thrown. We
 consider this exception to be fatal and we exit immediately.  On the other hand
@@ -225,35 +186,112 @@ JVM if failure occurs.\\
 [[ClassNotFoundException]] if the DBCP2 driver cannot be found.\\
 \bottomrule
 \end{tabular}
-<<Admin: DBLoadBackup(1)>>=
-void DBLoadBackup(final String p) throws SQLException {
+<<Admin: JargoInstanceLoad(1)>>=
+void JargoInstanceLoad(final String p) throws SQLException {
   this.CONNECTIONS_URL = "jdbc:derby:memory:jargo;createFrom="+p;
   try {
-    this.setupDriver();
+    this.JargoSetupDriver();
   } catch (ClassNotFoundException e) {
     System.out.println("Fatal error.");
     e.printStackTrace();
     System.exit(1);
   }
 }
-@ %def DBLoadBackup
+@ %def JargoInstanceLoad
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[loadBackup]]}(1) wraps [[DBLoadBackup]](1).\\
+Method \textcolor{blue}{[[instanceLoad]]}(1) wraps [[JargoInstanceLoad]](1).\\
 \bottomrule
 \end{tabular}
-<<Admin: loadBackup(1)>>=
-void loadBackup(final String p) throws SQLException {
-  this.storage.DBLoadBackup(p);
+<<Admin: instanceLoad(1)>>=
+void instanceLoad(final String p) throws SQLException {
+  this.storage.JargoInstanceLoad(p);
 }
-@ %def loadBackup
+@ %def instanceLoad
 
-\subsection{\texttt{DBLoadRoadNetworkFromDB}(0)}
+\subsection{\texttt{JargoInstanceExport}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBLoadRoadNetworkFromDB]]}(0) loads two caches
+Method \textcolor{blue}{[[JargoInstanceExport]]}(1) exports the Jargo database
+instance to disk. If a [[SQLException]] occurs, we rethrow to let the caller
+handle it.\\
+\midrule
+\textbf{Parameters:} \\
+\hspace{2mm} String [[p]] (param. 1): path to directory where instance should
+be exported to.\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} writes the database to disk.\\
+\textbf{Throws:} [[SQLException]] if failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Admin: JargoInstanceExport(1)>>=
+void JargoInstanceExport(final String p) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    CallableStatement cs = conn.prepareCall("CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE('"+p+"')");
+    cs.execute();
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def JargoInstanceExport
+\noindent\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[instanceExport]]}(1) wraps [[JargoInstanceExport]](1).\\
+\bottomrule
+\end{tabular}
+<<Admin: instanceExport(1)>>=
+void instanceExport(final String p) throws SQLException {
+  this.storage.JargoInstanceExport(p);
+}
+@ %def instanceExport
+
+\subsection{\texttt{JargoInstanceClose}(0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[JargoInstanceClose]]}(0) closes an existing Jargo
+database instance.  If the instance closes successfully, a [[SQLException]]
+with error code [[45000]] is thrown. Otherwise, some other error code is
+thrown. In this case we rethrow to let the caller handle it.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} nothing.\\
+\textbf{Side Effects:} closes an existing Jargo database instance.\\
+\textbf{Throws:} [[SQLException]] if database cannot be closed for whatever
+reason.\\
+\bottomrule
+\end{tabular}
+<<Admin: JargoInstanceClose(0)>>=
+void JargoInstanceClose() throws SQLException {
+  try {
+    DriverManager.getConnection("jdbc:derby:memory:jargo;drop=true");
+  } catch (SQLException e) {
+    if (e.getErrorCode() != 45000) {
+      throw e;
+    }
+  }
+}
+@ %def JargoInstanceClose
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[instanceClose]]}(0) wraps [[JargoInstanceClose]](0).\\
+\bottomrule
+\end{tabular}
+<<Admin: instanceClose(0)>>=
+void instanceClose() throws SQLException {
+  this.storage.JargoInstanceClose();
+}
+@ %def instanceClose
+
+\subsection{\texttt{JargoCacheRoadNetworkFromDB}(0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[JargoCacheRoadNetworkFromDB]]}(0) loads two caches
 [[lu_vertices]] and [[lu_edges]] using the vertices and edges data in Tables V
 and E in the database. If queries on Tables V and E fail, this method throws a
 [[SQLException]].\\
@@ -265,24 +303,24 @@ and E in the database. If queries on Tables V and E fail, this method throws a
 other database failure is encountered.\\
 \bottomrule
 \end{tabular}
-<<Admin: DBLoadRoadNetworkFromDB(0)>>=
-void DBLoadRoadNetworkFromDB() throws SQLException {
-@ %def DBLoadRoadNetworkFromDB
+<<Admin: JargoCacheRoadNetworkFromDB(0)>>=
+void JargoCacheRoadNetworkFromDB() throws SQLException {
+@ %def JargoCacheRoadNetworkFromDB
 {\small Our approach is to create two temporary maps on the heap, populate the
 temporary maps, then assign [[lu_vertices]] and [[lu_edges]] to reference the
 temporary maps if all succeeds. This way we don't corrupt [[lu_vertices]] and
 [[lu_edges]] in case of failure. (The approach might be overly cautious as it's
 hard to imagine why this method would ever be called if the caches are already
 populated.)}
-<<Admin: DBLoadRoadNetworkFromDB(0)>>=
+<<Admin: JargoCacheRoadNetworkFromDB(0)>>=
   ConcurrentHashMap<Integer, int[]>    lu1 = new ConcurrentHashMap<Integer, int[]>();
   ConcurrentHashMap<Integer,
     ConcurrentHashMap<Integer, int[]>> lu2 = new ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>>();
 @
 {\small We start by querying the vertices.}
-<<Admin: DBLoadRoadNetworkFromDB(0)>>=
+<<Admin: JargoCacheRoadNetworkFromDB(0)>>=
   try {
-    final int[] output = this.DBQueryAllVertices();
+    final int[] output = this.DBQueryVertices();
     for (int i = 0; i < (output.length - 2); i += 3) {
       final int   v = output[(i + 0)];
       final int lng = output[(i + 1)];
@@ -294,9 +332,9 @@ populated.)}
   }
 @
 {\small Then we go on to query the edges.}
-<<Admin: DBLoadRoadNetworkFromDB(0)>>=
+<<Admin: JargoCacheRoadNetworkFromDB(0)>>=
   try {
-    final int[] output = this.DBQueryAllEdges();
+    final int[] output = this.DBQueryEdges();
     for (int i = 0; i < (output.length - 3); i += 4) {
       final int v1 = output[(i + 0)];
       final int v2 = output[(i + 1)];
@@ -312,7 +350,7 @@ populated.)}
   }
 @
 {\small Finally we do the assignment.}
-<<Admin: DBLoadRoadNetworkFromDB(0)>>=
+<<Admin: JargoCacheRoadNetworkFromDB(0)>>=
   this.lu_vertices = lu1;
   this.lu_edges    = lu2;
 }
@@ -320,22 +358,22 @@ populated.)}
 \noindent\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[loadRoadNetworkFromDB]]}(0) wraps [[DBLoadRoadNetworkFromDB]](0).\\
+Method \textcolor{blue}{[[cacheRoadNetworkFromDB]]}(0) wraps [[JargoCacheRoadNetworkFromDB]](0).\\
 \bottomrule
 \end{tabular}
-<<Admin: loadRoadNetworkFromDB(0)>>=
-void loadRoadNetworkFromDB() throws SQLException {
-  this.storage.DBLoadRoadNetworkFromDB();
+<<Admin: cacheRoadNetworkFromDB(0)>>=
+void cacheRoadNetworkFromDB() throws SQLException {
+  this.storage.JargoCacheRoadNetworkFromDB();
 }
-@ %def loadRoadNetworkFromDB
+@ %def cacheRoadNetworkFromDB
 
 
 
-\subsection{\texttt{DBLoadUsersFromDB}(0)}
+\subsection{\texttt{JargoCacheUsersFromDB}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBLoadUsersFromDB]]}(0) loads the two caches
+Method \textcolor{blue}{[[JargoCacheUsersFromDB]]}(0) loads the two caches
 [[lu_users]] and [[lu_rstatus]] using data in the user and assignment tables in
 the database. If queries on these tables fail, this method throws a
 [[SQLException]].\\
@@ -347,19 +385,19 @@ the database. If queries on these tables fail, this method throws a
 queried or other database failure is encountered.\\
 \bottomrule
 \end{tabular}
-<<Admin: DBLoadUsersFromDB(0)>>=
-void DBLoadUsersFromDB() throws SQLException {
-@ %def DBLoadUsersFromDB
-{\small Our approach follows the approach for [[DBLoadRoadNetworkFromDB]](0).
+<<Admin: JargoCacheUsersFromDB(0)>>=
+void JargoCacheUsersFromDB() throws SQLException {
+@ %def JargoCacheUsersFromDB
+{\small Our approach follows the approach for [[JargoCacheRoadNetworkFromDB]](0).
 We start by creating two temporary maps on the heap.}
-<<Admin: DBLoadUsersFromDB(0)>>=
+<<Admin: JargoCacheUsersFromDB(0)>>=
   ConcurrentHashMap<Integer, int[]> lu1 = new ConcurrentHashMap<Integer, int[]>();
   Map<Integer, Boolean>             lu2 = new HashMap<Integer, Boolean>();
 @
 {\small Then we query the users.}
-<<Admin: DBLoadUsersFromDB(0)>>=
+<<Admin: JargoCacheUsersFromDB(0)>>=
   try {
-    final int[] output = this.DBQueryAllUsers();
+    final int[] output = this.DBQueryUsers();
     for (int i = 0; i < (output.length - 6); i += 7) {
       final int uid = output[(i + 0)];
       final int  uq = output[(i + 1)];
@@ -372,7 +410,7 @@ We start by creating two temporary maps on the heap.}
 @
 {\small If the user is a request, in other words the user load is positive,
 we query the request's assignment status.}
-<<Admin: DBLoadUsersFromDB(0)>>=
+<<Admin: JargoCacheUsersFromDB(0)>>=
       if (uq > 0) {
         lu2.put(uid, (this.DBQueryRequestIsAssigned(uid).length > 0 ? true : false));
       }
@@ -382,7 +420,7 @@ we query the request's assignment status.}
   }
 @
 {\small Finally we do the assignment.}
-<<Admin: DBLoadUsersFromDB(0)>>=
+<<Admin: JargoCacheUsersFromDB(0)>>=
   this.lu_users   = lu1;
   this.lu_rstatus = lu2;
 }
@@ -390,111 +428,20 @@ we query the request's assignment status.}
 \noindent\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[loadUsersFromDB]]}(0) wraps [[DBLoadUsersFromDB]](0).\\
+Method \textcolor{blue}{[[cacheUsersFromDB]]}(0) wraps [[JargoCacheUsersFromDB]](0).\\
 \bottomrule
 \end{tabular}
-<<Admin: loadUsersFromDB(0)>>=
-void loadUsersFromDB() throws SQLException {
-  this.storage.DBLoadUsersFromDB();
+<<Admin: cacheUsersFromDB(0)>>=
+void cacheUsersFromDB() throws SQLException {
+  this.storage.JargoCacheUsersFromDB();
 }
-@ %def loadUsersFromDB
+@ %def cacheUsersFromDB
 
-\subsection{\texttt{DBSaveBackup}(1)}
+\subsection{\texttt{JargoSetupDriver}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBSaveBackup]]}(1) exports the Jargo database
-instance to disk. If a [[SQLException]] occurs, we rethrow to let the caller
-handle it.\\
-\midrule
-\textbf{Parameters:} \\
-\hspace{2mm} String [[p]] (param. 1): path to directory where instance should
-be exported to.\\
-\textbf{Returns:} nothing.\\
-\textbf{Side Effects:} writes the database to disk.\\
-\textbf{Throws:} [[SQLException]] if failure is encountered.\\
-\bottomrule
-\end{tabular}
-<<Admin: DBSaveBackup(1)>>=
-void DBSaveBackup(final String p) throws SQLException {
-  try (<<Open [[conn]]>>) {
-    CallableStatement cs = conn.prepareCall("CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE('"+p+"')");
-    cs.execute();
-  } catch (SQLException e) {
-    throw e;
-  }
-}
-@ %def DBSaveBackup
-\noindent\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[saveBackup]]}(1) wraps [[DBSaveBackup]](1).\\
-\bottomrule
-\end{tabular}
-<<Admin: saveBackup(1)>>=
-void saveBackup(final String p) throws SQLException {
-  this.storage.DBSaveBackup(p);
-}
-@ %def saveBackup
-
-\subsection{\texttt{DBFetch}(3..)}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBFetch]]}(3..) executes a predefined [[SELECT]]
-query against the Jargo database instance and returns the results in a
-flattened array. A [[SQLException]] is thrown in case of database failure.\\
-\midrule
-\textbf{Parameters:} \\
-\begin{tabular}{lp{116mm}}
-Connection [[conn]] (param. 1):&a JDBC connection.\\
-String [[k]] (param. 2):&statement identifier.\\
-Integer [[ncols]] (param. 3):&number of columns in the selection.\\
-Integer... [[values]] (param. 4..):&values to use in the statement, in order
-of appearance.
-\end{tabular}\\
-\textbf{Returns:} results of the query flattened into an integer array,
-or [[null]] if no results.
-
-\begin{tikzpicture}
-\small
-\matrix[nodes={minimum size=6mm}] {
-  \node {...};
- &\node[draw] {$in+j:\textrm{value at column $j$, row $i$ of the result set}$};
- &\node {...};\\
-};
-\end{tikzpicture}
-
-where $i$, $j$ start from 0.\\
-\textbf{Side Effects:} none.\\
-\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
-\bottomrule
-\end{tabular}
-<<Admin: DBFetch(3..)>>=
-int[] DBFetch(final Connection conn, final String k, final int ncols, final Integer... values)
-throws SQLException {
-  int[] output = new int[] { };
-  try {
-    PreparedStatement p = PS(conn, k);
-    <<Set statement values>>
-    ResultSet res = p.executeQuery();
-    if (res.last() == true) {
-      <<Flatten results>>
-    }
-    res.close();
-    p.close();
-  } catch (SQLException e) {
-    throw e;
-  }
-  return output;
-}
-@ %def DBFetch
-
-\subsection{\texttt{setupDriver}(0)}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[setupDriver]]}(0) registers a connection pool to the
+Method \textcolor{blue}{[[JargoSetupDriver]]}(0) registers a connection pool to the
 JDBC driver.
 The connection pool allows us to concurrently submit SQL
 commands against the database from different threads.
@@ -510,8 +457,8 @@ Portions of this code are licensed by the Apache Software Foundation.\\
 [[ClassNotFoundException]] if the DBCP2 driver cannot be found.\\
 \bottomrule
 \end{tabular}
-<<Admin: setupDriver(0)>>=
-void setupDriver() throws SQLException, ClassNotFoundException {
+<<Admin: JargoSetupDriver(0)>>=
+void JargoSetupDriver() throws SQLException, ClassNotFoundException {
   connection_factory = new DriverManagerConnectionFactory(CONNECTIONS_URL);
   poolableconnection_factory = new PoolableConnectionFactory(connection_factory, null);
   poolableconnection_factory.setPoolStatements(true);
@@ -527,13 +474,13 @@ void setupDriver() throws SQLException, ClassNotFoundException {
   driver = (PoolingDriver) DriverManager.getDriver(CONNECTIONS_DRIVER_URL);
   driver.registerPool(CONNECTIONS_POOL_NAME, pool);
 }
-@ %def setupDriver
+@ %def JargoSetupDriver
 
-\subsection{\texttt{PSInit}(0)}
+\subsection{\texttt{JargoSetupPreparedStatements}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[PSInit]]}(0) initializes the statement cache
+Method \textcolor{blue}{[[JargoSetupPreparedStatements]]}(0) initializes the statement cache
 [[lu_pstr]].\\
 \midrule
 \textbf{Parameters:} none.\\
@@ -542,8 +489,8 @@ Method \textcolor{blue}{[[PSInit]]}(0) initializes the statement cache
 \textbf{Throws:} nothing.\\
 \bottomrule
 \end{tabular}
-<<Admin: PSInit(0)>>=
-void PSInit() {
+<<Admin: JargoSetupPreparedStatements(0)>>=
+void JargoSetupPreparedStatements() {
   final String INS = "INSERT INTO ";
   final String UPD = "UPDATE ";
   final String DEL = "DELETE FROM ";
@@ -568,7 +515,7 @@ void PSInit() {
   <<S136>> <<S137>> <<S138>> <<S139>> <<S140>> <<S141>> <<S142>> <<S143>>
   <<S144>> <<S145>> <<S147>> <<S148>> <<S149>> <<S150>> <<S151>>
 }
-@ %def PSInit
+@ %def JargoSetupPreparedStatements
 <<S0>>=
 this.lu_pstr.put("S0", INS+"V VALUES "+q3);
 @ %def S0
@@ -878,11 +825,11 @@ this.lu_pstr.put("S150", SEL+"sid, val FROM violations_t_s");
 this.lu_pstr.put("S151", SEL+"rid, val FROM violations_t_r");
 @ %def S151
 
-\subsection{\texttt{PS}(2)}
+\subsection{\texttt{PSCreate}(2)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[PS]]}(2) returns a JDBC [[PreparedStatement]] for the
+Method \textcolor{blue}{[[PSCreate]]}(2) returns a JDBC [[PreparedStatement]] for the
 statement string identified by [[k]] (param. 2) on the connection given in
 param. 1.  A [[SQLException]] is thrown in case of database failure.\\
 \midrule
@@ -897,8 +844,8 @@ statement string identified by param. 2.\\
 \textbf{Throws:} [[SQLException]] if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-<<Admin: PS(2)>>=
-PreparedStatement PS(final Connection conn, final String k) throws SQLException {
+<<Admin: PSCreate(2)>>=
+PreparedStatement PSCreate(final Connection conn, final String k) throws SQLException {
   PreparedStatement p = null;
   try {
     p = conn.prepareStatement(lu_pstr.get(k),
@@ -910,7 +857,7 @@ PreparedStatement PS(final Connection conn, final String k) throws SQLException 
   }
   return p;
 }
-@ %def PS
+@ %def PSCreate
 
 \subsection{\texttt{PSAdd}(2..)}
 \begin{tabular}{p{\textwidth}}
@@ -971,14 +918,304 @@ void PSSubmit(PreparedStatement... statements) throws SQLException {
 }
 @ %def PSSubmit
 
-\section{Methods: Settings}
+\subsection{\texttt{PSQuery}(3..)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[PSQuery]]}(3..) executes a predefined [[SELECT]]
+query against the Jargo database instance and returns the results in a
+flattened array. A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Connection [[conn]] (param. 1):&a JDBC connection.\\
+String [[k]] (param. 2):&statement identifier.\\
+Integer [[ncols]] (param. 3):&number of columns in the selection.\\
+Integer... [[values]] (param. 4..):&values to use in the statement, in order
+of appearance.
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node {...};
+ &\node[draw] {$in+j:\textrm{value at column $j$, row $i$ of the result set}$};
+ &\node {...};\\
+};
+\end{tikzpicture}
+
+where $i$, $j$ start from 0.\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Admin: PSQuery(3..)>>=
+int[] PSQuery(final Connection conn, final String k, final int ncols, final Integer... values)
+throws SQLException {
+  int[] output = new int[] { };
+  try {
+    PreparedStatement p = PSCreate(conn, k);
+    <<Set statement values>>
+    ResultSet res = p.executeQuery();
+    if (res.last() == true) {
+      <<Flatten results>>
+    }
+    res.close();
+    p.close();
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
+}
+@ %def PSQuery
+
+\section{Methods: Getters}
+
+\subsection{\texttt{getRefCacheEdges}(0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[getRefCacheEdges]]}(0) returns a read-only
+reference to [[lu_edges]].\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} a read-only reference to [[lu_edges]].\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} nothing.\\
+\bottomrule
+\end{tabular}
+<<Get: getRefCacheEdges(0)>>=
+final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> getRefCacheEdges() {
+  return this.lu_edges;
+}
+@ %def getRefCacheEdges
+
+\subsection{\texttt{getRefCacheUsers}(0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[getRefCacheUsers]]}(0) returns a read-only
+reference to [[lu_users]].\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} a read-only reference to [[lu_users]].\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} nothing.\\
+\bottomrule
+\end{tabular}
+<<Get: getRefCacheUsers(0)>>=
+final ConcurrentHashMap<Integer, int[]> getRefCacheUsers() {
+  return this.lu_users;
+}
+@ %def getRefCacheUsers
+
+
+\subsection{\texttt{getRefCacheVertices}(0)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[getRefCacheVertices]]}(0) returns a read-only
+reference to [[lu_vertices]].\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} a read-only reference to [[lu_vertices]].\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} nothing.\\
+\bottomrule
+\end{tabular}
+<<Get: getRefCacheVertices(0)>>=
+final ConcurrentHashMap<Integer, int[]> getRefCacheVertices() {
+  return this.lu_vertices;
+}
+@ %def getRefCacheVertices
+
+\subsection{\texttt{getRefCommunicator}(0)}
+<<Get: getRefCommunicator(0)>>=
+Communicator getRefCommunicator() {
+  return this.communicator;
+}
+@ %def getRefCommunicator
+
+\subsection{\texttt{getRefStorage}(0)}
+<<Get: getRefStorage(0)>>=
+Storage getRefStorage() {
+  return this.storage;
+}
+@ %def getRefStorage
+
+\subsection{\texttt{getClockNow(0)}}
+<<Get: getClockNow(0)>>=
+int getClockNow() {
+  return this.clock_now;
+}
+@ %def getClockNow
+
+\subsection{\texttt{getQueueSize}(0)}
+<<Get: getQueueSize(0)>>=
+int getQueueSize() {
+  return this.queue.size();
+}
+@ %def getQueueSize
+
+\subsection{\texttt{retrieveQueueSize}(0)}
+<<Get: retrieveQueueSize(0)>>=
+int retrieveQueueSize() {
+  return this.client.getQueueSize();
+}
+@ %def retrieveQueueSize
+
+\subsection{\texttt{retrieveClockNow}(0)}
+<<Get: retrieveClockNow(0)>>=
+int retrieveClockNow() {
+  return this.controller.getClockNow();
+}
+@ %def retrieveClockNow
+
+\subsection{\texttt{retrieveRefCacheVertices}(0)}
+<<Get: retrieveRefCacheVertices(0)>>=
+final ConcurrentHashMap<Integer, int[]> retrieveRefCacheVertices() {
+  return this.storage.getRefCacheVertices();
+}
+@ %def retrieveRefCacheVertices
+
+\subsection{\texttt{retrieveRefCacheEdges}(0)}
+<<Get: retrieveRefCacheEdges(0)>>=
+final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> retrieveRefCacheEdges() {
+  return this.storage.getRefCacheEdges();
+}
+@ %def retrieveRefCacheEdges
+
+\subsection{\texttt{retrieveRefCacheUsers}(0)}
+<<Get: retrieveRefCacheUsers(0)>>=
+final ConcurrentHashMap<Integer, int[]> retrieveRefCacheUsers() {
+  return this.storage.getRefCacheUsers();
+}
+@ %def retrieveRefCacheUsers
+
+
+\section{Methods: Setters}
+
+\subsection{\texttt{setClockStart}(1)}
+<<Set: setClockStart(1)>>=
+void setClockStart(final int clock_start) {
+  this.CLOCK_START = clock_start;
+}
+@ %def setClockStart
+
+\subsection{\texttt{setClockEnd}(1)}
+<<Set: setClockEnd(1)>>=
+void setClockEnd(final int clock_end) {
+  this.CLOCK_END = clock_end;
+}
+@ %def setClockEnd
+
+\subsection{\texttt{setQueueTimeout}(1)}
+<<Set: setQueueTimeout(1)>>=
+void setQueueTimeout(final int queue_timeout) {
+  this.QUEUE_TIMEOUT = queue_timeout;
+}
+@ %def setQueueTimeout
 
 \subsection{\texttt{setRequestTimeout}(1)}
-<<Setting: setRequestTimeout(1)>>=
-void setRequestTimeout(final int t) {
-  this.REQUEST_TIMEOUT = t;
+<<Set: setRequestTimeout(1)>>=
+void setRequestTimeout(final int request_timeout) {
+  this.REQUEST_TIMEOUT = request_timeout;
 }
 @ %def setRequestTimeout
 
-\section{Methods: Glue}
+
+\subsection{\texttt{setRefCacheVertices}(1)}
+<<Set: setRefCacheVertices(1)>>=
+void setRefCacheVertices(final ConcurrentHashMap<Integer, int[]> lu_vertices) {
+  this.lu_vertices = lu_vertices;
+}
+@ %def setRefCacheVertices
+
+\subsection{\texttt{setRefCacheEdges}(1)}
+<<Set: setRefCacheEdges(1)>>=
+void setRefCacheEdges(final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> lu_edges) {
+  this.lu_edges = lu_edges;
+}
+@ %def setRefCacheEdges
+
+\subsection{\texttt{setRefCacheUsers}(1)}
+<<Set: setRefCacheUsers(1)>>=
+void setRefCacheUsers(final ConcurrentHashMap<Integer, int[]> lu_users) {
+  this.lu_users = lu_users;
+}
+@ %def setRefCacheUsers
+
+\subsection{\texttt{setRefClient}(1)}
+<<Set: setRefClient(1)>>=
+void setRefClient(final Client client) {
+  this.client = client;
+}
+@ %def setRefClient
+
+\subsection{\texttt{setRefCommunicator}(1)}
+<<Set: setRefCommunicator(1)>>=
+void setRefCommunicator(final Communicator communicator) {
+  this.communicator = communicator;
+}
+@ %def setRefCommunicator
+
+\subsection{\texttt{setRefController}(1)}
+<<Set: setRefController(1)>>=
+void setRefController(final Controller controller) {
+  this.controller = controller;
+}
+@ %def setRefController
+
+\subsection{\texttt{setRefStorage}(1)}
+<<Set: setRefStorage(1)>>=
+void setRefStorage(final Storage storage) {
+  this.storage = storage;
+}
+@ %def setRefStorage
+
+\subsection{\texttt{setRefTraffic}(1)}
+<<Set: setRefTraffic(1)>>=
+void setRefTraffic (final Traffic traffic) {
+  this.traffic = traffic;
+  this.traffic.forwardRefCacheVertices(this.storage.getRefCacheVertices());
+  this.traffic.forwardRefCacheEdges(this.storage.getRefCacheEdges());
+}
+@ %def setRefTraffic
+
+\subsection{\texttt{forwardRefTraffic}(1)}
+<<Set: forwardRefTraffic(1)>>=
+void forwardRefTraffic(final Traffic traffic) {
+  this.communicator.setRefTraffic(traffic);
+}
+@ %def forwardRefTraffic
+
+\subsection{\texttt{forwardRefCommunicator}(1)}
+<<Set: forwardRefCommunicator(1)>>=
+void forwardRefCommunicator(final Communicator communicator) {
+  this.client.setRefCommunicator(communicator);
+}
+@ %def forwardRefCommunicator
+
+\subsection{\texttt{forwardRefCacheEdges}(1)}
+<<Set: forwardRefCacheEdges(1)>>=
+void forwardRefCacheEdges(final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> lu_edges) {
+  this.tools.setRefCacheEdges(lu_edges);
+}
+@ %def forwardRefCacheEdges
+
+\subsection{\texttt{forwardRefCacheUsers}(1)}
+<<Set: forwardRefCacheUsers(1)>>=
+void forwardRefCacheUsers(final ConcurrentHashMap<Integer, int[]> lu_users) {
+  this.tools.setRefCacheUsers(lu_users);
+}
+@ %def forwardRefCacheUsers
+
+\subsection{\texttt{forwardRefCacheVertices}(1)}
+<<Set: forwardRefCacheVertices(1)>>=
+void forwardRefCacheVertices(final ConcurrentHashMap<Integer, int[]> lu_vertices) {
+  this.tools.setRefCacheVertices(lu_vertices);
+}
+@ %def forwardRefCacheVertices
 

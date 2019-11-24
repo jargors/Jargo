@@ -119,7 +119,7 @@ private PoolingDriver                   driver;
 \toprule
 \rowcolor{TableTitle}
 Constructor \textcolor{blue}{[[Storage]]}(0) simply initializes the
-prepared statement strings into [[lu_pstr]] by using [[PSInit]](0).\\
+prepared statement strings into [[lu_pstr]] by using [[JargoSetupPreparedStatements]](0).\\
 \midrule
 \textbf{Parameters:} none.\\
 \textbf{Returns:} nothing.\\
@@ -129,67 +129,7 @@ prepared statement strings into [[lu_pstr]] by using [[PSInit]](0).\\
 \end{tabular}
 <<[[Storage]] constructor>>=
 public Storage() {
-  this.PSInit();
+  this.JargoSetupPreparedStatements();
 }
 @
-
-\section{Methods}
-
-\subsection{\texttt{getReferenceVerticesCache}(0)}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[getReferenceVerticesCache]]}(0) returns a read-only
-reference to [[lu_vertices]].\\
-\midrule
-\textbf{Parameters:} none.\\
-\textbf{Returns:} a read-only reference to [[lu_vertices]].\\
-\textbf{Side Effects:} none.\\
-\textbf{Throws:} nothing.\\
-\bottomrule
-\end{tabular}
-<<getReferenceVerticesCache(0)>>=
-final ConcurrentHashMap<Integer, int[]> getReferenceVerticesCache() {
-  return this.lu_vertices;
-}
-@ %def getReferenceVerticesCache
-
-\subsection{\texttt{getReferenceEdgesCache}(0)}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[getReferenceEdgesCache]]}(0) returns a read-only
-reference to [[lu_edges]].\\
-\midrule
-\textbf{Parameters:} none.\\
-\textbf{Returns:} a read-only reference to [[lu_edges]].\\
-\textbf{Side Effects:} none.\\
-\textbf{Throws:} nothing.\\
-\bottomrule
-\end{tabular}
-<<getReferenceEdgesCache(0)>>=
-final ConcurrentHashMap<Integer,
-    ConcurrentHashMap<Integer, int[]>> getReferenceEdgesCache() {
-  return this.lu_edges;
-}
-@ %def getReferenceEdgesCache
-
-\subsection{\texttt{getReferenceUsersCache}(0)}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[getReferenceUsersCache]]}(0) returns a read-only
-reference to [[lu_users]].\\
-\midrule
-\textbf{Parameters:} none.\\
-\textbf{Returns:} a read-only reference to [[lu_users]].\\
-\textbf{Side Effects:} none.\\
-\textbf{Throws:} nothing.\\
-\bottomrule
-\end{tabular}
-<<getReferenceUsersCache(0)>>=
-final ConcurrentHashMap<Integer, int[]> getReferenceUsersCache() {
-  return this.lu_users;
-}
-@ %def getReferenceUsersCache
 

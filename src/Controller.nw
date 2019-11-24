@@ -45,6 +45,7 @@ import com.github.jargors.exceptions.GtreeIllegalTargetException;
 <<Controller.java preamble>>=
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -83,32 +84,37 @@ private Map<Integer, Boolean> lu_seen = new HashMap<Integer, Boolean>();
 
 \hi{Settings.} Settings objects configure various aspects of the simulation.
 <<Settings objects>>=
-private int clockstart =
-    Integer.parseInt(System.getProperty("jargors.controller.clockstart", "0"));
-private int clockend =
-    Integer.parseInt(System.getProperty("jargors.controller.clockend", "1800"));
+private int CLOCK_START =
+    Integer.parseInt(System.getProperty("jargors.controller.clock_start", "0"));
+private int CLOCK_END =
+    Integer.parseInt(System.getProperty("jargors.controller.clock_end", "1800"));
 private int REQUEST_TIMEOUT =
     Integer.parseInt(System.getProperty("jargors.controller.request_timeout", "30"));
 private int QUEUE_TIMEOUT =
     Integer.parseInt(System.getProperty("jargors.controller.queue_timeout", "30"));
+private int REQUEST_COLLECTION_PERIOD =
+    Integer.parseInt(System.getProperty("jargors.controller.request_collection_period", "1"));
+private int REQUEST_HANDLING_PERIOD =
+    Integer.parseInt(System.getProperty("jargors.controller.request_handling_period", "1"));
+private int SERVER_COLLECTION_PERIOD =
+    Integer.parseInt(System.getProperty("jargors.controller.server_collection_period", "1"));
 @
-The simulation world time is stored in [[world_time]] and is upated by the
-clock loop. The time advances in increments of 1 from [[clockstart]]
-to [[clockend]].
+The simulation world time is stored in [[clock_now]] and is upated by the
+clock loop. The time advances in increments of 1 from [[CLOCK_START]]
+to [[CLOCK_END]].
 <<Settings objects>>=
-private int world_time = 0;
+private int clock_now = 0;
 @
 The [[loop_delay]] configures how many seconds to wait until the controller
 loops start. The update periods configure how often particular loops should
 execute, in seconds.
 <<Settings objects>>=
 private int loop_delay = 0;
-private int engine_update_period = 10;
 // private int deviation_rate = 0.02;
 // private int breakdown_rate = 0.005;
 @
 The [[CSHIFT]] setting configures the precision for longitude and latitude
-coordiates (see [[Storage.DBAddNewVertex]](3))\footnote{Beware, if [[CSHIFT]]
+coordiates (see [[Storage.DBInsertVertex]](3))\footnote{Beware, if [[CSHIFT]]
 is changed here, it should also be changed in Tools.}.
 <<Settings objects>>=
 private final double CSHIFT = 10000000.0;
@@ -134,7 +140,6 @@ here, running in parallel. They are executed using Java's
 [[ScheduledExecutorService]] to control timing.
 <<Loop objects>>=
 <<Definition of clock loop>>
-<<Definition of engine loop>>
 <<Definition of request collection loop>>
 <<Definition of request handling loop>>
 <<Definition of server collection loop>>
@@ -150,8 +155,8 @@ about the new time.\\
 \midrule
 \textbf{Parameters:} none.\\
 \textbf{Returns:} nothing.\\
-\textbf{Side Effects:} increments [[world_time]] by 1, may modify
-[[communicator]] by changing [[Communicator.world_time]], may print to
+\textbf{Side Effects:} increments [[clock_now]] by 1, may modify
+[[communicator]] by changing [[Communicator.clock_now]], may print to
 standard error if [[DEBUG]] is [[true]].\\
 \textbf{Throws:} nothing.\\
 \bottomrule
@@ -168,34 +173,11 @@ private Runnable ClockLoop = () -> {
   // add that duration onto the clock. We can output a "clock rate" to show
   // the user the current simulation rate, i.e. clock_rate=1x means real-time,
   // clock_rate=0.5x means 1 simulated second takes 2 real seconds, etc.
-  ++(this.world_time);
+  ++(this.clock_now);
   if (DEBUG) {
     System.err.printf("[t=%d] Controller.ClockLoop says: %s!\n",
-        this.world_time, (this.world_time % 2 == 0 ? "ping" : "pong"));
+        this.clock_now, (this.clock_now % 2 == 0 ? "ping" : "pong"));
   }
-};
-@
-
-\subsection{Engine Loop}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Member \textcolor{blue}{[[EngineLoop]]} is a [[Runnable]] that simulates
-stochastic effects on the ridesharing vehicles.\\
-\midrule
-\textbf{Parameters:} none.\\
-\textbf{Returns:} nothing.\\
-\textbf{Side Effects:} may insert, delete, or update rows in Tables W, CW,
-PD, CPD, and CQ in the database instance underlying [[storage]].\\
-\textbf{Throws:} nothing.\\
-\bottomrule
-\end{tabular}
-<<Definition of engine loop>>=
-private Runnable EngineLoop = () -> {
-  // Idea: what if we apply traffic effects at the time a server route is
-  // submitted? we can do it because we know what the future traffic will
-  // be and we also know where the future location will be of the server.
-  // then, is this loop necessary?
 };
 @
 
@@ -208,7 +190,7 @@ collects requests eligible for assignment at the current world time.  A request
 $r$ is ``eligible'' if it is not assigned at the current world time, and if the
 world time is between the request's early time $r_\texttt{e}$ and
 $(r_\texttt{e}+\texttt{REQUEST\_TIMEOUT})$ (see
-[[Storage.DBQueryQueuedRequests]](1)). If the eligible requests cannot be
+[[Storage.DBQueryRequestsQueued]](1)). If the eligible requests cannot be
 collected, we consider this failure to be fatal and exit immediately. A possible
 reason may be database failure in [[storage]]. \\
 \midrule
@@ -228,10 +210,10 @@ private Runnable RequestCollectionLoop = () -> {
     A0 = System.currentTimeMillis();
   }
   try {
-    int[] output = this.storage.DBQueryQueuedRequests(this.world_time);
+    int[] output = this.storage.DBQueryRequestsQueued(this.clock_now);
     for (int i = 0; i < (output.length - 6); i += 7) {
       if (!this.lu_seen.containsKey(output[i]) || this.lu_seen.get(output[i]) == false) {
-        this.client.collectRequest(new int[] {
+        this.client.addRequest(new int[] {
           output[(i + 0)],
           output[(i + 1)],
           output[(i + 2)],
@@ -284,14 +266,14 @@ private Runnable RequestHandlingLoop = () -> {
     A0 = System.currentTimeMillis();
   }
   try {
-    this.client.notifyNew();
+    this.client.notifyNew();  // blocks this thread until queue is empty
   } catch (ClientException e) {
     System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientException: %s\n",
-        this.world_time, e.toString());
+        this.clock_now, e.toString());
     e.printStackTrace();
   } catch (ClientFatalException e) {
     System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientFatalException: %s\n",
-        this.world_time, e.toString());
+        this.clock_now, e.toString());
     e.printStackTrace();
     System.exit(1);
   }
@@ -312,7 +294,7 @@ is ``active'' if its service has not ended, in other words it has not arrived
 at its own destination.  The ``last-known location'' is the waypoint in the
 server's route $w$ with a time component closest to but not exceeding the given
 time, in other words ${w_{\leq t}}_{|w_{\leq t}|}$ (see
-[[Storage.DBQueryServerLocationsActive]](1)).  If the last-known locations
+[[Storage.DBQueryServersLocationsActive]](1)).  If the last-known locations
 cannot be collected, we consider this failure to be fatal and exit immediately.
 A possible reason may be database failure in [[storage]]. \\
 \midrule
@@ -332,7 +314,7 @@ private Runnable ServerLoop = () -> {
     A0 = System.currentTimeMillis();
   }
   try {
-    int[] output = this.storage.DBQueryServerLocationsActive(this.world_time);
+    int[] output = this.storage.DBQueryServersLocationsActive(this.clock_now);
     this.client.collectServerLocations(output);
   } catch (SQLException e) {
     if (e.getErrorCode() == 40000) {
@@ -372,8 +354,8 @@ memory heap, modifies [[storage]] and [[communicator]].\\
 public Controller() {
   this.storage = new Storage();
   this.communicator = new Communicator();
-  this.communicator.registerStorage(storage);
-  this.communicator.registerController(this);
+  this.communicator.setRefStorage(this.storage);
+  this.communicator.setRefController(this);
 }
 @
 
@@ -400,14 +382,14 @@ final int col6 = (col2 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.ne
 {\small Now we insert the vertices into the database.}
 <<loadRoadNetworkFromFile(1)>>=
 try {
-  this.storage.DBAddNewVertex(col1, col3, col4);
+  this.storage.DBInsertVertex(col1, col3, col4);
 } catch (DuplicateVertexException e) {
   if (DEBUG) {
     // System.err.println("Warning! Duplicate vertex ignored.");
   }
 }
 try {
-  this.storage.DBAddNewVertex(col2, col5, col6);
+  this.storage.DBInsertVertex(col2, col5, col6);
 } catch (DuplicateVertexException e) {
   if (DEBUG) {
     // System.err.println("Warning! Duplicate vertex ignored.");
@@ -431,7 +413,7 @@ final int dist = ((col1 != 0 && col2 != 0)
 road network file instead of hardcoded here.}.}
 <<loadRoadNetworkFromFile(1)>>=
 try {
-  this.storage.DBAddNewEdge(col1, col2, dist, 10);
+  this.storage.DBInsertEdge(col1, col2, dist, 10);
 } catch (DuplicateEdgeException e) {
   if (DEBUG) {
     // System.err.println("Warning! Duplicate edge ignored.");
@@ -441,8 +423,8 @@ try {
 {\small Now we close the [[while]] loop and register the caches to Tools.}
 <<loadRoadNetworkFromFile(1)>>=
   }
-  this.tools.registerVertices(this.storage.getReferenceVerticesCache());
-  this.tools.registerEdges(this.storage.getReferenceEdgesCache());
+  this.tools.setRefCacheVertices(this.storage.getRefCacheVertices());
+  this.tools.setRefCacheEdges(this.storage.getRefCacheEdges());
 }
 @
 
@@ -462,9 +444,9 @@ throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException, SQL
     final int  ul = sc.nextInt();
     final int  ub = this.tools.computeShortestPathDistance(uo, ud);
     if (uq < 0) {
-      this.addNewServer(new int[] { uid, uq, ue, ul, uo, ud, ub });
+      this.insertServer(new int[] { uid, uq, ue, ul, uo, ud, ub });
     } else {
-      this.addNewRequest(new int[] { uid, uq, ue, ul, uo, ud, ub });
+      this.insertRequest(new int[] { uid, uq, ue, ul, uo, ud, ub });
     }
   }
 }
@@ -475,78 +457,13 @@ for (int i = 0; i < 6; i++) {
 }
 @
 
-\subsection{\texttt{registerClient}(1)}
-<<registerClient(1)>>=
-void registerClient(final Client target) {
-  this.client = target;
-  this.client.registerCommunicator(this.communicator);
-}
-@ %def registerClient
-
-<<registerTraffic(1)>>=
-void registerTraffic(final Traffic target) {
-  this.communicator.forwardTraffic(target);
-}
-@ %def registerTraffic
-\subsection{\texttt{setClockStart}(1)}
-<<setClockStart(1)>>=
-void setClockStart(final int t) {
-  this.clockstart = t;
-}
-@ %def setClockStart
-
-\subsection{\texttt{setClockEnd}(1)}
-<<setClockEnd(1)>>=
-void setClockEnd(final int t) {
-  this.clockend = t;
-}
-@ %def setClockEnd
-
-
-\subsection{\texttt{setQueueTimeout}(1)}
-<<setQueueTimeout(1)>>=
-void setQueueTimeout(final int t) {
-  this.QUEUE_TIMEOUT = t;
-}
-@ %def setQueueTimeout
-
-\subsection{\texttt{setEngineUpdatePeriod(1)}}
-<<setEngineUpdatePeriod(1)>>=
-void setEngineUpdatePeriod(final int t) {
-  this.engine_update_period = t;
-}
-@ %def setEngineUpdatePeriod
-
-\subsection{\texttt{getSimulationWorldTime(0)}}
-<<getSimulationWorldTime(0)>>=
-int getSimulationWorldTime() {
-  return this.world_time;
-}
-@ %def getSimulationWorldTime
-
-\subsection{\texttt{retrieveClientApproxQueueSize}(0)}
-<<retrieveClientApproxQueueSize(0)>>=
-int retrieveClientApproxQueueSize() {
-  return this.client.getApproxQueueSize();
-}
-@ %def retrieveClientApproxQueueSize
-
-\subsection{\texttt{returnRequest}(1)}
-<<returnRequest(1)>>=
-void returnRequest(final int[] r) {
-  if (this.world_time - r[2] < this.QUEUE_TIMEOUT) {
-    this.lu_seen.put(r[0], false);
-  }
-}
-@ %def returnRequest
-
 \subsection{\texttt{startRealtime}(1)}
 <<startRealtime(1)>>=
 void startRealtime(final Consumer<Boolean> app_cb) {
   this.storage.setRequestTimeout(REQUEST_TIMEOUT);
-  this.world_time = this.clockstart;
+  this.clock_now = CLOCK_START;
 
-  int simulation_duration = (this.clockend - this.clockstart);
+  int simulation_duration = (CLOCK_END - CLOCK_START);
 
   this.exe = Executors.newScheduledThreadPool(5);
 
@@ -554,19 +471,13 @@ void startRealtime(final Consumer<Boolean> app_cb) {
     this.ClockLoop, 0, 1, TimeUnit.SECONDS);
 
   this.cb2 = exe.scheduleAtFixedRate(
-    this.EngineLoop, this.loop_delay, this.engine_update_period, TimeUnit.SECONDS);
+    this.RequestCollectionLoop, this.loop_delay, REQUEST_COLLECTION_PERIOD, TimeUnit.SECONDS);
 
-  int request_collection_period = this.client.getRequestCollectionPeriod();
   this.cb3 = exe.scheduleAtFixedRate(
-    this.RequestCollectionLoop, this.loop_delay, request_collection_period, TimeUnit.SECONDS);
+    this.RequestHandlingLoop, this.loop_delay, REQUEST_HANDLING_PERIOD, TimeUnit.MILLISECONDS);
 
-  int request_handling_period = this.client.getRequestHandlingPeriod();
   this.cb4 = exe.scheduleAtFixedRate(
-    this.RequestHandlingLoop, this.loop_delay, request_handling_period, TimeUnit.MILLISECONDS);
-
-  int server_collection_period = this.client.getServerLocationCollectionPeriod();
-  this.cb5 = exe.scheduleAtFixedRate(
-    this.ServerLoop, this.loop_delay, server_collection_period, TimeUnit.SECONDS);
+    this.ServerLoop, this.loop_delay, SERVER_COLLECTION_PERIOD, TimeUnit.SECONDS);
 
   this.exe.schedule(() -> {
     this.stop(app_cb);
@@ -578,11 +489,10 @@ void startRealtime(final Consumer<Boolean> app_cb) {
 <<startSequential(1)>>=
 void startSequential(final Consumer<Boolean> app_cb) {
   this.storage.setRequestTimeout(REQUEST_TIMEOUT);
-  this.world_time = this.clockstart;
-  while (!kill && this.world_time < this.clockend) {
+  this.clock_now = CLOCK_START;
+  while (!kill && this.clock_now < CLOCK_END) {
     this.working = true;
-    this.ClockLoop.run();  // this.world_time gets incremented here!
-    this.EngineLoop.run();
+    this.ClockLoop.run();  // this.clock_now gets incremented here!
     this.ServerLoop.run();
     this.RequestCollectionLoop.run();
     this.RequestHandlingLoop.run();
@@ -609,7 +519,6 @@ void stop(final Consumer<Boolean> app_cb) {
     this.cb2.cancel(true);
     this.cb3.cancel(true);
     this.cb4.cancel(true);
-    this.cb5.cancel(true);
     this.exe.shutdown();
   }
   try {
@@ -626,6 +535,15 @@ void stop(final Consumer<Boolean> app_cb) {
 }
 @ %def stop
 
+\subsection{\texttt{returnRequest}(1)}
+<<returnRequest(1)>>=
+void returnRequest(final int[] r) {
+  if (this.clock_now - r[2] < QUEUE_TIMEOUT) {
+    this.lu_seen.put(r[0], false);
+  }
+}
+@ %def returnRequest
+
 \subsection{\texttt{isKilled}(0)}
 <<isKilled(0)>>=
 final boolean isKilled() {
@@ -633,16 +551,3 @@ final boolean isKilled() {
 }
 @ %def isKilled
 
-\subsection{\texttt{internalRefStorage}(0)}
-<<internalRefStorage(0)>>=
-Storage internalRefStorage() {
-  return this.storage;
-}
-@ %def internalRefStorage
-
-\subsection{\texttt{internalRefCommunicator}(0)}
-<<internalRefCommunicator(0)>>=
-Communicator internalRefCommunicator() {
-  return this.communicator;
-}
-@ %def internalRefCommunicator

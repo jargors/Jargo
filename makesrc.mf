@@ -20,10 +20,10 @@ clean :
 ################################################################################
 # Just retangle all the noweb files for any java target
 $(JAVA1) : src/*.nw src/*/*.nw
-	notangle -R$(subst java/,,$@) src/*.nw src/*/*.nw > $@
+	notangle -L'/*line %L "%F"*/%N' -R$(subst java/,,$@) src/*.nw src/*/*.nw > $@
 
 $(JAVA2) : src/*.nw src/*/*.nw
-	notangle -R$(subst java/desktop/,,$@) src/*.nw src/*/*.nw > $@
+	notangle -L'/*line %L "%F"*/%N' -R$(subst java/desktop/,,$@) src/*.nw src/*/*.nw > $@
 
 # Weave the *.nw files in the right order
 TEXSRCS = \

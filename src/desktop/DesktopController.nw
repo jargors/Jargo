@@ -203,7 +203,7 @@ private class MapUpdater implements Runnable {
     this.can_road = can_road;
   }
   public void run() {
-    final int t = this.controller.getSimulationWorldTime();
+    final int t = this.controller.getClockNow();
     Platform.runLater(() -> {
       this.lbl_status.setText("Simulation running (t="+t+")...");
     });
@@ -229,7 +229,7 @@ private class MetricFetcher implements Runnable {
     if (DEBUG) {
       this.A0 = System.currentTimeMillis();
     }
-    final int t = this.controller.getSimulationWorldTime();
+    final int t = this.controller.getClockNow();
     Number val = null;
     try {
       if ("chk_serviceRate".equals(this.id)) {
@@ -512,22 +512,22 @@ this.chk_timeServerHandling.setSelected(false);
 @
 
 <<Retrieve serviceRate>>=
-int[] output = this.controller.queryServiceRate();
+int[] output = this.controller.queryMetricServiceRate();
 val = (output.length > 0 ? (output[0]/100.0) : 0);
 @
 
 <<Retrieve distanceSavings>>=
-int[] output = this.controller.queryServerTravelDistanceTotal();
+int[] output = this.controller.queryMetricServerDistanceTotal();
 final int val1 = (output.length > 0 ? output[0] : 0);
-output = this.controller.queryRequestBaseDistanceUnassigned();
+output = this.controller.queryMetricRequestDistanceBaseUnassignedTotal();
 final int val2 = (output.length > 0 ? output[0] : 0);
-output = this.controller.queryBaseDistanceTotal();
+output = this.controller.queryMetricUserDistanceBaseTotal();
 final int val3 = (output.length > 0 ? output[0] : 0);
 val = (val3 == 0 ? 0 : (100.0*(1 - ((double) (val1 + val2)/val3))));
 @
 
 <<Retrieve serverTravelDistance>>=
-int[] output = this.controller.queryServerTravelDistanceTotal();
+int[] output = this.controller.queryMetricServerDistanceTotal();
 val = (output.length > 0 ? output[0] : 0);
 @
 
@@ -544,7 +544,7 @@ val = (output.length > 0 ? output[0] : 0);
 @
 
 <<Retrieve serverTravelDuration>>=
-int[] output = this.controller.queryServerTravelDurationTotal();
+int[] output = this.controller.queryMetricServerDurationTravelTotal();
 val = (output.length > 0 ? output[0] : 0);
 @
 
@@ -555,22 +555,22 @@ val = (output.length > 0 ? output[0] : 0);
 @
 
 <<Retrieve requestDistanceUnassigned>>=
-int[] output = this.controller.queryRequestBaseDistanceUnassigned();
+int[] output = this.controller.queryMetricRequestDistanceBaseUnassignedTotal();
 val = (output.length > 0 ? output[0] : 0);
 @
 
 <<Retrieve requestTransitDistance>>=
-int[] output = this.controller.queryRequestTransitDistanceTotal();
+int[] output = this.controller.queryMetricRequestDistanceTransitTotal();
 val = (output.length > 0 ? output[0] : 0);
 @
 
 <<Retrieve requestDetourDistance>>=
-int[] output = this.controller.queryRequestDetourDistanceTotal();
+int[] output = this.controller.queryMetricRequestDistanceDetourTotal();
 val = (output.length > 0 ? output[0] : 0);
 @
 
 <<Retrieve requestTransitDuration>>=
-int[] output = this.controller.queryRequestTransitDurationTotal();
+int[] output = this.controller.queryMetricRequestDurationTransitTotal();
 val = (output.length > 0 ? output[0] : 0);
 @
 
@@ -578,17 +578,17 @@ val = (output.length > 0 ? output[0] : 0);
 @
 
 <<Retrieve requestTravelDuration>>=
-int[] output = this.controller.queryRequestTravelDurationTotal();
+int[] output = this.controller.queryMetricRequestDurationTravelTotal();
 val = (output.length > 0 ? output[0] : 0);
 @
 
 <<Retrieve requestPickupDuration>>=
-int[] output = this.controller.queryRequestPickupDurationTotal();
+int[] output = this.controller.queryMetricRequestDurationPickupTotal();
 val = (output.length > 0 ? output[0] : 0);
 @
 
 <<Retrieve countRequestsQueue>>=
-val = this.controller.retrieveClientApproxQueueSize();
+val = this.controller.retrieveQueueSize();
 @
 
 <<Retrieve countRequestsActive>>=
@@ -649,12 +649,12 @@ void actionNew(final ActionEvent e) {
   CompletableFuture.runAsync(() -> {
     this.controller = new Controller();
     try {
-      this.controller.createNewInstance();
+      this.controller.instanceNew();
     } catch (SQLException se) {
       System.err.println("Could not create new instance");
       System.exit(1);
     }
-    this.controller.loadDataModel();
+    this.controller.instanceInitialize();
     this.db = "no-name";
     Platform.runLater(() -> {
       this.btn_road     .setDisable(false);
@@ -689,13 +689,13 @@ void actionLoad(final ActionEvent e) {
     CompletableFuture.runAsync(() -> {
       try {
         this.controller = new Controller();
-        this.controller.loadBackup(this.db);
-        this.controller.loadRoadNetworkFromDB();
-        this.controller.loadUsersFromDB();
-        int nv = this.controller.queryCountVertices()[0];
-        int ne = this.controller.queryCountEdges()[0];
-        int ns = this.controller.queryCountServers()[0];
-        int nr = this.controller.queryCountRequests()[0];
+        this.controller.instanceLoad(this.db);
+        this.controller.cacheRoadNetworkFromDB();
+        this.controller.cacheUsersFromDB();
+        int nv = this.controller.queryVerticesCount()[0];
+        int ne = this.controller.queryEdgesCount()[0];
+        int ns = this.controller.queryServersCount()[0];
+        int nr = this.controller.queryRequestsCount()[0];
         Platform.runLater(() -> {
           this.btn_prob     .setDisable(true);
           this.btn_prob     .setText("*in-instance problem*");
@@ -748,8 +748,8 @@ void actionRoad(final ActionEvent e) {
     CompletableFuture.runAsync(() -> {
       try {
         this.controller.loadRoadNetworkFromFile(this.road);
-        int nv = this.controller.queryCountVertices()[0];
-        int ne = this.controller.queryCountEdges()[0];
+        int nv = this.controller.queryVerticesCount()[0];
+        int ne = this.controller.queryEdgesCount()[0];
         Platform.runLater(() -> {
           this.btn_gtree    .setDisable(state_btn_gtree);
           this.btn_stop     .setDisable(false);
@@ -793,13 +793,13 @@ void actionGtree(final ActionEvent e) {
   File gt = fc.showOpenDialog(this.stage);
   if (gt != null) {
     if (this.gtree != null) {
-      this.controller.closeGtree();
+      this.controller.gtreeClose();
     }
     this.gtree = gt.toString();
     this.lbl_status.setText("Load '"+this.gtree+"'...");
     CompletableFuture.runAsync(() -> {
       try {
-        this.controller.loadGtree(this.gtree);
+        this.controller.gtreeLoad(this.gtree);
         Platform.runLater(() -> {
           this.btn_prob     .setDisable(state_btn_prob);
           this.btn_road     .setDisable(state_btn_road);
@@ -845,8 +845,8 @@ void actionProb(final ActionEvent e) {
     CompletableFuture.runAsync(() -> {
       try {
         this.controller.loadProblem(this.prob);
-        int ns = this.controller.queryCountServers()[0];
-        int nr = this.controller.queryCountRequests()[0];
+        int ns = this.controller.queryServersCount()[0];
+        int nr = this.controller.queryRequestsCount()[0];
         Platform.runLater(() -> {
           this.btn_prob     .setText(pb.getName());
           this.btn_client   .setDisable(false);
@@ -948,11 +948,12 @@ void actionStartSequential(final ActionEvent e) {
     Class<?> tempclass = Class.forName(this.jarclass, true, loader);
     Constructor<?> tempcstor = tempclass.getDeclaredConstructor();
     this.client = (Client) tempcstor.newInstance();
-    this.controller.registerClient(this.client);
-    this.client.registerRoadNetwork();
-    this.client.registerUsers();
+    this.controller.setRefClient(this.client);
+    this.client.forwardRefCacheVertices(this.controller.retrieveRefCacheVertices());
+    this.client.forwardRefCacheEdges(this.controller.retrieveRefCacheEdges());
+    this.client.forwardRefCacheUsers(this.controller.retrieveRefCacheUsers());
     try {
-      this.client.loadGtree(this.gtree);
+      this.client.gtreeLoad(this.gtree);
     } catch (FileNotFoundException fe) {
       System.err.println(e.toString());
       return;
@@ -1011,8 +1012,8 @@ void actionStop(final ActionEvent e) {
             this.lbl_status.setText("Simulation stopped.");
           });
         });
-        this.controller.closeInstance();
-        this.controller.closeGtree();
+        this.controller.instanceClose();
+        this.controller.gtreeClose();
         Platform.runLater(() -> {
           this.btn_new      .setDisable(false);
           this.btn_load     .setDisable(false);
@@ -1098,7 +1099,7 @@ void actionTranslateCanvas(MouseEvent e) {
 <<drawRoadNetwork(0)>>=
 void drawRoadNetwork() {
   try {
-    this.edges    = this.controller.queryAllEdges();
+    this.edges    = this.controller.queryEdges();
     this.mbr      = this.controller.queryMBR();
 
     this.can_road = new Canvas(this.window_width, this.window_height);
