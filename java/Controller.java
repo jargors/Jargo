@@ -97,6 +97,7 @@ private Runnable ClockLoop = () -> {
 /*line 207 "src/Controller.nw"*/
 private Runnable RequestCollectionLoop = () -> {
   long A0 = 0;
+  int  A1 = 0;
   if (DEBUG) {
     A0 = System.currentTimeMillis();
   }
@@ -113,6 +114,9 @@ private Runnable RequestCollectionLoop = () -> {
           output[(i + 5)],
           output[(i + 6)] });
         this.lu_seen.put(output[i], true);
+        if (DEBUG) {
+          A1++;
+        }
       }
     }
   } catch (SQLException e) {
@@ -127,15 +131,17 @@ private Runnable RequestCollectionLoop = () -> {
     }
   }
   if (DEBUG) {
-    System.err.printf("Controller.RequestCollectionLoop completed in %d ms\n",
-        (System.currentTimeMillis() - A0));
+    System.err.printf("Controller.RequestCollectionLoop collected %d requests in %d ms\n",
+        A1, (System.currentTimeMillis() - A0));
   }
 };
-/*line 263 "src/Controller.nw"*/
+/*line 267 "src/Controller.nw"*/
 private Runnable RequestHandlingLoop = () -> {
   long A0 = 0;
+  int  A1 = 0;
   if (DEBUG) {
     A0 = System.currentTimeMillis();
+    A1 = this.client.getQueueSize();
   }
   try {
     this.client.notifyNew();  // blocks this thread until queue is empty
@@ -150,18 +156,22 @@ private Runnable RequestHandlingLoop = () -> {
     System.exit(1);
   }
   if (DEBUG) {
-    System.err.printf("Controller.RequestHandlingLoop completed in %d ms\n",
-        (System.currentTimeMillis() - A0));
+    System.err.printf("Controller.RequestHandlingLoop handled %d requests in %d ms\n",
+        A1, (System.currentTimeMillis() - A0));
   }
 };
-/*line 311 "src/Controller.nw"*/
+/*line 317 "src/Controller.nw"*/
 private Runnable ServerLoop = () -> {
   long A0 = 0;
+  int  A1 = 0;
   if (DEBUG) {
     A0 = System.currentTimeMillis();
   }
   try {
     int[] output = this.storage.DBQueryServersLocationsActive(this.clock_now);
+    if (DEBUG) {
+      A1 = (output.length/3);
+    }
     this.client.collectServerLocations(output);
   } catch (SQLException e) {
     if (e.getErrorCode() == 40000) {
@@ -175,13 +185,13 @@ private Runnable ServerLoop = () -> {
     }
   }
   if (DEBUG) {
-    System.err.printf("Controller.ServerLoop completed in %d ms\n",
-        (System.currentTimeMillis() - A0));
+    System.err.printf("Controller.ServerLoop collected/handled %d in %d ms\n",
+        A1, (System.currentTimeMillis() - A0));
   }
 };
 /*line 8 "src/Controller.nw"*/
   
-/*line 354 "src/Controller.nw"*/
+/*line 364 "src/Controller.nw"*/
 public Controller() {
   this.storage = new Storage();
   this.communicator = new Communicator();
@@ -410,17 +420,17 @@ throws DuplicateUserException, EdgeNotFoundException, SQLException,
 }
 /*line 143 "src/tex/0-Overview.nw"*/
 public 
-/*line 433 "src/Controller.nw"*/
+/*line 443 "src/Controller.nw"*/
 void loadProblem(String p)
 throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException, SQLException,
        GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException {
   Scanner sc = new Scanner(new File(p));
   
-/*line 455 "src/Controller.nw"*/
+/*line 465 "src/Controller.nw"*/
 for (int i = 0; i < 6; i++) {
   sc.nextLine();
 }
-/*line 438 "src/Controller.nw"*/
+/*line 448 "src/Controller.nw"*/
   while (sc.hasNext()) {
     final int uid = sc.nextInt();
     final int  uo = sc.nextInt();
@@ -438,11 +448,11 @@ for (int i = 0; i < 6; i++) {
 }
 /*line 144 "src/tex/0-Overview.nw"*/
 public 
-/*line 366 "src/Controller.nw"*/
+/*line 376 "src/Controller.nw"*/
 void loadRoadNetworkFromFile(final String f_rnet) throws FileNotFoundException, SQLException {
   Scanner sc = new Scanner(new File(f_rnet));
   while (sc.hasNext()) {
-/*line 374 "src/Controller.nw"*/
+/*line 384 "src/Controller.nw"*/
 final int col0 = sc.nextInt();
 final int col1 = sc.nextInt();
 final int col2 = sc.nextInt();
@@ -450,7 +460,7 @@ final int col3 = (col1 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.ne
 final int col4 = (col1 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
 final int col5 = (col2 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
 final int col6 = (col2 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
-/*line 384 "src/Controller.nw"*/
+/*line 394 "src/Controller.nw"*/
 try {
   this.storage.DBInsertVertex(col1, col3, col4);
 } catch (DuplicateVertexException e) {
@@ -465,12 +475,12 @@ try {
     // System.err.println("Warning! Duplicate vertex ignored.");
   }
 }
-/*line 406 "src/Controller.nw"*/
+/*line 416 "src/Controller.nw"*/
 final int dist = ((col1 != 0 && col2 != 0)
   ? this.tools.computeHaversine(
         col3/CSHIFT, col4/CSHIFT,
         col5/CSHIFT, col6/CSHIFT) : 0);
-/*line 415 "src/Controller.nw"*/
+/*line 425 "src/Controller.nw"*/
 try {
   this.storage.DBInsertEdge(col1, col2, dist, 10);
 } catch (DuplicateEdgeException e) {
@@ -478,7 +488,7 @@ try {
     // System.err.println("Warning! Duplicate edge ignored.");
   }
 }
-/*line 425 "src/Controller.nw"*/
+/*line 435 "src/Controller.nw"*/
   }
   this.tools.setRefCacheVertices(this.storage.getRefCacheVertices());
   this.tools.setRefCacheEdges(this.storage.getRefCacheEdges());
@@ -617,13 +627,13 @@ void setRefClient(final Client client) {
 }
 /*line 170 "src/tex/0-Overview.nw"*/
 public 
-/*line 549 "src/Controller.nw"*/
+/*line 559 "src/Controller.nw"*/
 final boolean isKilled() {
   return this.kill;
 }
 /*line 171 "src/tex/0-Overview.nw"*/
 public 
-/*line 540 "src/Controller.nw"*/
+/*line 550 "src/Controller.nw"*/
 void returnRequest(final int[] r) {
   if (this.clock_now - r[2] < QUEUE_TIMEOUT) {
     this.lu_seen.put(r[0], false);
@@ -631,7 +641,7 @@ void returnRequest(final int[] r) {
 }
 /*line 172 "src/tex/0-Overview.nw"*/
 public 
-/*line 462 "src/Controller.nw"*/
+/*line 472 "src/Controller.nw"*/
 void startRealtime(final Consumer<Boolean> app_cb) {
   this.storage.setRequestTimeout(REQUEST_TIMEOUT);
   this.clock_now = CLOCK_START;
@@ -658,7 +668,7 @@ void startRealtime(final Consumer<Boolean> app_cb) {
 }
 /*line 173 "src/tex/0-Overview.nw"*/
 public 
-/*line 490 "src/Controller.nw"*/
+/*line 500 "src/Controller.nw"*/
 void startSequential(final Consumer<Boolean> app_cb) {
   this.storage.setRequestTimeout(REQUEST_TIMEOUT);
   this.clock_now = CLOCK_START;
@@ -674,7 +684,7 @@ void startSequential(final Consumer<Boolean> app_cb) {
 }
 /*line 174 "src/tex/0-Overview.nw"*/
 public 
-/*line 507 "src/Controller.nw"*/
+/*line 517 "src/Controller.nw"*/
 void stop(final Consumer<Boolean> app_cb) {
   if (this.exe == null) {  // sequential mode
     this.kill = true;

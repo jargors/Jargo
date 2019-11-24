@@ -7972,6 +7972,7 @@ failure occurs.\\
 \nwenddocs{}\nwbegincode{33}\sublabel{NW2ZDXo8-10L3rI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-10L3rI-1}}}\moddef{Definition of request collection loop~{\nwtagstyle{}\subpageref{NW2ZDXo8-10L3rI-1}}}\endmoddef\nwused{\\{NW2ZDXo8-2e0Sfa-1}}
 private Runnable RequestCollectionLoop = () -> \{
   long A0 = 0;
+  int  A1 = 0;
   if (DEBUG) \{
     A0 = System.currentTimeMillis();
   \}
@@ -7988,6 +7989,9 @@ private Runnable RequestCollectionLoop = () -> \{
           output[(i + 5)],
           output[(i + 6)] \});
         this.lu_seen.put(output[i], true);
+        if (DEBUG) \{
+          A1++;
+        \}
       \}
     \}
   \} catch (SQLException e) \{
@@ -8002,8 +8006,8 @@ private Runnable RequestCollectionLoop = () -> \{
     \}
   \}
   if (DEBUG) \{
-    System.err.printf("Controller.RequestCollectionLoop completed in %d ms\\n",
-        (System.currentTimeMillis() - A0));
+    System.err.printf("Controller.RequestCollectionLoop collected %d requests in %d ms\\n",
+        A1, (System.currentTimeMillis() - A0));
   \}
 \};
 \nwidentuses{\\{{addRequest}{addRequest}}\\{{DBQueryRequestsQueued}{DBQueryRequestsQueued}}}\nwindexuse{addRequest}{addRequest}{NW2ZDXo8-10L3rI-1}\nwindexuse{DBQueryRequestsQueued}{DBQueryRequestsQueued}{NW2ZDXo8-10L3rI-1}\nwendcode{}\nwbegindocs{34}\nwdocspar
@@ -8028,8 +8032,10 @@ occurs.\\
 \nwenddocs{}\nwbegincode{35}\sublabel{NW2ZDXo8-183plv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-183plv-1}}}\moddef{Definition of request handling loop~{\nwtagstyle{}\subpageref{NW2ZDXo8-183plv-1}}}\endmoddef\nwused{\\{NW2ZDXo8-2e0Sfa-1}}
 private Runnable RequestHandlingLoop = () -> \{
   long A0 = 0;
+  int  A1 = 0;
   if (DEBUG) \{
     A0 = System.currentTimeMillis();
+    A1 = this.client.getQueueSize();
   \}
   try \{
     this.client.notifyNew();  // blocks this thread until queue is empty
@@ -8044,11 +8050,11 @@ private Runnable RequestHandlingLoop = () -> \{
     System.exit(1);
   \}
   if (DEBUG) \{
-    System.err.printf("Controller.RequestHandlingLoop completed in %d ms\\n",
-        (System.currentTimeMillis() - A0));
+    System.err.printf("Controller.RequestHandlingLoop handled %d requests in %d ms\\n",
+        A1, (System.currentTimeMillis() - A0));
   \}
 \};
-\nwidentuses{\\{{notifyNew}{notifyNew}}}\nwindexuse{notifyNew}{notifyNew}{NW2ZDXo8-183plv-1}\nwendcode{}\nwbegindocs{36}\nwdocspar
+\nwidentuses{\\{{getQueueSize}{getQueueSize}}\\{{notifyNew}{notifyNew}}}\nwindexuse{getQueueSize}{getQueueSize}{NW2ZDXo8-183plv-1}\nwindexuse{notifyNew}{notifyNew}{NW2ZDXo8-183plv-1}\nwendcode{}\nwbegindocs{36}\nwdocspar
 
 \subsection{Server Loop}
 \begin{tabular}{p{\textwidth}}
@@ -8076,11 +8082,15 @@ exits the JVM if failure occurs.\\
 \nwenddocs{}\nwbegincode{37}\sublabel{NW2ZDXo8-1I3SnY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-1I3SnY-1}}}\moddef{Definition of server collection loop~{\nwtagstyle{}\subpageref{NW2ZDXo8-1I3SnY-1}}}\endmoddef\nwused{\\{NW2ZDXo8-2e0Sfa-1}}
 private Runnable ServerLoop = () -> \{
   long A0 = 0;
+  int  A1 = 0;
   if (DEBUG) \{
     A0 = System.currentTimeMillis();
   \}
   try \{
     int[] output = this.storage.DBQueryServersLocationsActive(this.clock_now);
+    if (DEBUG) \{
+      A1 = (output.length/3);
+    \}
     this.client.collectServerLocations(output);
   \} catch (SQLException e) \{
     if (e.getErrorCode() == 40000) \{
@@ -8094,8 +8104,8 @@ private Runnable ServerLoop = () -> \{
     \}
   \}
   if (DEBUG) \{
-    System.err.printf("Controller.ServerLoop completed in %d ms\\n",
-        (System.currentTimeMillis() - A0));
+    System.err.printf("Controller.ServerLoop collected/handled %d in %d ms\\n",
+        A1, (System.currentTimeMillis() - A0));
   \}
 \};
 \nwidentuses{\\{{collectServerLocations}{collectServerLocations}}\\{{DBQueryServersLocationsActive}{DBQueryServersLocationsActive}}}\nwindexuse{collectServerLocations}{collectServerLocations}{NW2ZDXo8-1I3SnY-1}\nwindexuse{DBQueryServersLocationsActive}{DBQueryServersLocationsActive}{NW2ZDXo8-1I3SnY-1}\nwendcode{}\nwbegindocs{38}\nwdocspar
