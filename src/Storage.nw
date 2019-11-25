@@ -81,6 +81,7 @@ private ConcurrentHashMap<Integer, int[]> lu_vertices = new ConcurrentHashMap<In
 private ConcurrentHashMap<Integer,
     ConcurrentHashMap<Integer, int[]>>    lu_edges    = new ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>>();
 private ConcurrentHashMap<Integer, int[]> lu_users    = new ConcurrentHashMap<Integer, int[]>();
+private Map<Integer, Integer>             lu_lvt      = new HashMap<Integer, Integer>();
 @
 \end{itemize}
 
@@ -99,6 +100,7 @@ private       String CONNECTIONS_URL        = "jdbc:derby:memory:jargo;create=tr
 private final String CONNECTIONS_DRIVER_URL = "jdbc:apache:commons:dbcp:";
 private final String CONNECTIONS_POOL_NAME  = "jargo";
 private final String CONNECTIONS_POOL_URL   = (CONNECTIONS_DRIVER_URL + CONNECTIONS_POOL_NAME);
+public static final double CSHIFT           = 10000000.0;
 @
 \item The [[connection_factory]] is an object that returns new connections. The
 [[poolableconnection_factory]] registers [[connection_factory]] and then can

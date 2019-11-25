@@ -21,7 +21,7 @@ private ConcurrentHashMap<Integer, int[]> lu_vertices = new ConcurrentHashMap<In
 private ConcurrentHashMap<Integer,
     ConcurrentHashMap<Integer, int[]>>    lu_edges    = new ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>>();
 private ConcurrentHashMap<Integer, int[]> lu_users    = new ConcurrentHashMap<Integer, int[]>();
-private final double CSHIFT = 10000000.0;
+private final double CSHIFT = Storage.CSHIFT;
 private final boolean DEBUG = "true".equals(System.getProperty("jargors.tools.debug"));
 /*line 8 "src/Tools.nw"*/
   
@@ -31,7 +31,7 @@ public Tools() { }
   
 /*line 254 "src/tex/0-Overview.nw"*/
 public 
-/*line 287 "src/tex/2-Reading.nw"*/
+/*line 288 "src/tex/2-Reading.nw"*/
 int[] DBQueryEdge(final int v1, final int v2) throws EdgeNotFoundException {
   if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
     throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
@@ -45,7 +45,8 @@ int[] DBQueryVertex(final int v) throws VertexNotFoundException {
   if (!this.lu_vertices.containsKey(v)) {
     throw new VertexNotFoundException("Vertex "+v+" not found.");
   }
-  return this.lu_vertices.get(v).clone();
+  int[] output = this.lu_vertices.get(v).clone();
+  return new int[] { output[0], output[1], (int) Storage.CSHIFT };
 }
 /*line 262 "src/tex/0-Overview.nw"*/
 public 
@@ -74,19 +75,19 @@ void GTGtreeClose() {
 }
 /*line 264 "src/tex/0-Overview.nw"*/
 public 
-/*line 1138 "src/tex/4-Administration.nw"*/
+/*line 1142 "src/tex/4-Administration.nw"*/
 void setRefCacheEdges(final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> lu_edges) {
   this.lu_edges = lu_edges;
 }
 /*line 265 "src/tex/0-Overview.nw"*/
 public 
-/*line 1145 "src/tex/4-Administration.nw"*/
+/*line 1149 "src/tex/4-Administration.nw"*/
 void setRefCacheUsers(final ConcurrentHashMap<Integer, int[]> lu_users) {
   this.lu_users = lu_users;
 }
 /*line 266 "src/tex/0-Overview.nw"*/
 public 
-/*line 1131 "src/tex/4-Administration.nw"*/
+/*line 1135 "src/tex/4-Administration.nw"*/
 void setRefCacheVertices(final ConcurrentHashMap<Integer, int[]> lu_vertices) {
   this.lu_vertices = lu_vertices;
 }

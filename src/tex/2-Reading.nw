@@ -154,7 +154,8 @@ int[] DBQueryVertex(final int v) throws VertexNotFoundException {
   if (!this.lu_vertices.containsKey(v)) {
     throw new VertexNotFoundException("Vertex "+v+" not found.");
   }
-  return this.lu_vertices.get(v).clone();
+  int[] output = this.lu_vertices.get(v).clone();
+  return new int[] { output[0], output[1], (int) Storage.CSHIFT };
 }
 @ %def DBQueryVertex
 \begin{tabular}{p{\textwidth}}
@@ -1895,7 +1896,7 @@ int[] DBQueryServersLocations(final int t) throws SQLException {
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBQueryServersLocationsActive]]}(1) returns the
+SINGLE-THREAD ONLY. Method \textcolor{blue}{[[DBQueryServersLocationsActive]]}(1) returns the
 last-known locations of all active servers at the given time. A server is
 ``active'' if its service has not ended, in other words it has not arrived
 at its own destination.
@@ -1940,17 +1941,25 @@ int[] DBQueryServersLocationsActive(final int t) throws SQLException {
 servers. Then for each active server, we use either statement [[S135]] or
 [[S147]] to get its last-known location.}
 <<Read: DBQueryServersLocationsActive(1)>>=
+    // Query S134 selects from CW. The query time is not expected to grow
+    // because Table CW does not grow as we pre-load all the servers when we
+    // load the problem instance.
     final int[] temp1 = this.PSQuery(conn, "S134", 2, t, t, t);  // <-- 10 ms/call
     output = new int[(3*(temp1.length/2))];
     for (int i = 0; i < temp1.length - 1; i += 2) {
       final int sid = temp1[(i + 0)];
       final int  te = temp1[(i + 1)];
+      // Queries S135 and S147 select from W. The query time is expected to
+      // grow O(log(|W|)) as we have indexes on the relevant columns and Derby
+      // implements SQL indexes as B+trees (https://db.apache.org/derby/papers/btree_package.html).
+      final int lvt = this.lu_lvt.get(sid);
       final int[] temp2 = (t < te
-        ? this.PSQuery(conn, "S135", 2, sid, sid, t, t)  // <-- 0.07-0.15 ms/call
-        : this.PSQuery(conn, "S147", 2, sid, sid));      // <-- 0.04-0.15 ms/call
+        ? this.PSQuery(conn, "S135", 2, sid, sid, lvt, t, t)  // <-- 0.07-0.15 ms/call (before lvt)
+        : this.PSQuery(conn, "S147", 2, sid, sid));           // <-- 0.04-0.15 ms/call
       output[(j + 0)] = sid;
       output[(j + 1)] = temp2[0];
       output[(j + 2)] = temp2[1];
+      this.lu_lvt.put(sid, temp2[0]);
       j += 3;
     }
   } catch (SQLException e) {

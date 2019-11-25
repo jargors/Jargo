@@ -393,6 +393,7 @@ We start by creating two temporary maps on the heap.}
 <<Admin: JargoCacheUsersFromDB(0)>>=
   ConcurrentHashMap<Integer, int[]> lu1 = new ConcurrentHashMap<Integer, int[]>();
   Map<Integer, Boolean>             lu2 = new HashMap<Integer, Boolean>();
+  Map<Integer, Integer>             lu3 = new HashMap<Integer, Integer>();
 @
 {\small Then we query the users.}
 <<Admin: JargoCacheUsersFromDB(0)>>=
@@ -409,10 +410,12 @@ We start by creating two temporary maps on the heap.}
       lu1.put(uid, new int[] { uid, uq, ue, ul, uo, ud, ub });
 @
 {\small If the user is a request, in other words the user load is positive,
-we query the request's assignment status.}
+we query the request's assignment status. Else, we initialize the last-visitation time.}
 <<Admin: JargoCacheUsersFromDB(0)>>=
       if (uq > 0) {
         lu2.put(uid, (this.DBQueryRequestIsAssigned(uid).length > 0 ? true : false));
+      } else {
+        lu3.put(uid, 0);
       }
     }
   } catch (SQLException e) {
@@ -423,6 +426,7 @@ we query the request's assignment status.}
 <<Admin: JargoCacheUsersFromDB(0)>>=
   this.lu_users   = lu1;
   this.lu_rstatus = lu2;
+  this.lu_lvt     = lu3;
 }
 @
 \noindent\begin{tabular}{p{\textwidth}}
@@ -776,7 +780,7 @@ this.lu_pstr.put("S134", SEL+"sid, te FROM CW WHERE se<=? AND (?<te OR (ve=0 AND
 @ %def S134
 <<S135>>=
 this.lu_pstr.put("S135", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
-    + "SELECT t1 FROM W WHERE sid=? AND t1 <= ? AND ? < t2)");
+    + "SELECT t1 FROM W WHERE sid=? AND ? <= t1 AND t1 <= ? AND ? < t2)");
 @ %def S135
 <<S136>>=
 this.lu_pstr.put("S136", SEL+"* FROM V");

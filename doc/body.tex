@@ -2088,7 +2088,8 @@ int[] DBQueryVertex(final int v) throws VertexNotFoundException \{
   if (!this.lu_vertices.containsKey(v)) \{
     throw new VertexNotFoundException("Vertex "+v+" not found.");
   \}
-  return this.lu_vertices.get(v).clone();
+  int[] output = this.lu_vertices.get(v).clone();
+  return new int[] \{ output[0], output[1], (int) Storage.CSHIFT \};
 \}
 \nwindexdefn{DBQueryVertex}{DBQueryVertex}{NW18ZcDF-48j64d-1}\eatline
 \nwidentdefs{\\{{DBQueryVertex}{DBQueryVertex}}}\nwendcode{}\nwbegindocs{12}\begin{tabular}{p{\textwidth}}
@@ -4579,7 +4580,7 @@ int[] DBQueryServersLocations(final int t) throws SQLException \{
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{{\tt{}\protect\nwindexuse{DBQueryServersLocationsActive}{DBQueryServersLocationsActive}{NW18ZcDF-2tWQc-1}DBQueryServersLocationsActive}}(1) returns the
+SINGLE-THREAD ONLY. Method \textcolor{blue}{{\tt{}\protect\nwindexuse{DBQueryServersLocationsActive}{DBQueryServersLocationsActive}{NW18ZcDF-2tWQc-1}DBQueryServersLocationsActive}}(1) returns the
 last-known locations of all active servers at the given time. A server is
 ``active'' if its service has not ended, in other words it has not arrived
 at its own destination.
@@ -4624,17 +4625,25 @@ int[] DBQueryServersLocationsActive(final int t) throws SQLException \{
 servers. Then for each active server, we use either statement {\tt{}\protect\nwindexuse{S135}{S135}{NWgUSr6-4dp7jX-1}S135} or
 {\tt{}\protect\nwindexuse{S147}{S147}{NWgUSr6-2TcddD-1}S147} to get its last-known location.}
 \nwenddocs{}\nwbegincode{137}\sublabel{NW18ZcDF-2tWQc-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW18ZcDF-2tWQc-2}}}\moddef{Read: DBQueryServersLocationsActive(1)~{\nwtagstyle{}\subpageref{NW18ZcDF-2tWQc-1}}}\plusendmoddef
+    // Query S134 selects from CW. The query time is not expected to grow
+    // because Table CW does not grow as we pre-load all the servers when we
+    // load the problem instance.
     final int[] temp1 = this.PSQuery(conn, "S134", 2, t, t, t);  // <-- 10 ms/call
     output = new int[(3*(temp1.length/2))];
     for (int i = 0; i < temp1.length - 1; i += 2) \{
       final int sid = temp1[(i + 0)];
       final int  te = temp1[(i + 1)];
+      // Queries S135 and S147 select from W. The query time is expected to
+      // grow O(log(|W|)) as we have indexes on the relevant columns and Derby
+      // implements SQL indexes as B+trees (https://db.apache.org/derby/papers/btree_package.html).
+      final int lvt = this.lu_lvt.get(sid);
       final int[] temp2 = (t < te
-        ? this.PSQuery(conn, "S135", 2, sid, sid, t, t)  // <-- 0.07-0.15 ms/call
-        : this.PSQuery(conn, "S147", 2, sid, sid));      // <-- 0.04-0.15 ms/call
+        ? this.PSQuery(conn, "S135", 2, sid, sid, lvt, t, t)  // <-- 0.07-0.15 ms/call (before lvt)
+        : this.PSQuery(conn, "S147", 2, sid, sid));           // <-- 0.04-0.15 ms/call
       output[(j + 0)] = sid;
       output[(j + 1)] = temp2[0];
       output[(j + 2)] = temp2[1];
+      this.lu_lvt.put(sid, temp2[0]);
       j += 3;
     \}
   \} catch (SQLException e) \{
@@ -4642,7 +4651,7 @@ servers. Then for each active server, we use either statement {\tt{}\protect\nwi
   \}
   return output;
 \}
-\nwidentuses{\\{{PSQuery}{PSQuery}}\\{{S134}{S134}}\\{{S135}{S135}}\\{{S147}{S147}}}\nwindexuse{PSQuery}{PSQuery}{NW18ZcDF-2tWQc-2}\nwindexuse{S134}{S134}{NW18ZcDF-2tWQc-2}\nwindexuse{S135}{S135}{NW18ZcDF-2tWQc-2}\nwindexuse{S147}{S147}{NW18ZcDF-2tWQc-2}\nwendcode{}\nwbegindocs{138}\nwdocspar
+\nwidentuses{\\{{PSQuery}{PSQuery}}\\{{query}{query}}\\{{S134}{S134}}\\{{S135}{S135}}\\{{S147}{S147}}}\nwindexuse{PSQuery}{PSQuery}{NW18ZcDF-2tWQc-2}\nwindexuse{query}{query}{NW18ZcDF-2tWQc-2}\nwindexuse{S134}{S134}{NW18ZcDF-2tWQc-2}\nwindexuse{S135}{S135}{NW18ZcDF-2tWQc-2}\nwindexuse{S147}{S147}{NW18ZcDF-2tWQc-2}\nwendcode{}\nwbegindocs{138}\nwdocspar
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -5915,6 +5924,7 @@ throws DuplicateUserException, EdgeNotFoundException, SQLException \{
 {\small In the last step, we put $s$ into {\tt{}lu{\char95}users}.}
 \nwenddocs{}\nwbegincode{65}\sublabel{NW32V2DP-4Dmn3V-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW32V2DP-4Dmn3V-2}}}\moddef{Write: DBInsertServer(2)~{\nwtagstyle{}\subpageref{NW32V2DP-4Dmn3V-1}}}\plusendmoddef
   this.lu_users.put(uid, u.clone());
+  this.lu_lvt.put(uid, 0);
 \}
 \nwendcode{}\nwbegindocs{66}\nwdocspar
 \begin{tabular}{p{\textwidth}}
@@ -6747,6 +6757,7 @@ We start by creating two temporary maps on the heap.}
 \nwenddocs{}\nwbegincode{39}\sublabel{NWgUSr6-3RkokI-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-3RkokI-2}}}\moddef{Admin: JargoCacheUsersFromDB(0)~{\nwtagstyle{}\subpageref{NWgUSr6-3RkokI-1}}}\plusendmoddef
   ConcurrentHashMap<Integer, int[]> lu1 = new ConcurrentHashMap<Integer, int[]>();
   Map<Integer, Boolean>             lu2 = new HashMap<Integer, Boolean>();
+  Map<Integer, Integer>             lu3 = new HashMap<Integer, Integer>();
 \nwendcode{}\nwbegindocs{40}\nwdocspar
 {\small Then we query the users.}
 \nwenddocs{}\nwbegincode{41}\sublabel{NWgUSr6-3RkokI-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-3RkokI-3}}}\moddef{Admin: JargoCacheUsersFromDB(0)~{\nwtagstyle{}\subpageref{NWgUSr6-3RkokI-1}}}\plusendmoddef
@@ -6763,10 +6774,12 @@ We start by creating two temporary maps on the heap.}
       lu1.put(uid, new int[] \{ uid, uq, ue, ul, uo, ud, ub \});
 \nwidentuses{\\{{DBQueryUsers}{DBQueryUsers}}}\nwindexuse{DBQueryUsers}{DBQueryUsers}{NWgUSr6-3RkokI-3}\nwendcode{}\nwbegindocs{42}\nwdocspar
 {\small If the user is a request, in other words the user load is positive,
-we query the request's assignment status.}
+we query the request's assignment status. Else, we initialize the last-visitation time.}
 \nwenddocs{}\nwbegincode{43}\sublabel{NWgUSr6-3RkokI-4}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-3RkokI-4}}}\moddef{Admin: JargoCacheUsersFromDB(0)~{\nwtagstyle{}\subpageref{NWgUSr6-3RkokI-1}}}\plusendmoddef
       if (uq > 0) \{
         lu2.put(uid, (this.DBQueryRequestIsAssigned(uid).length > 0 ? true : false));
+      \} else \{
+        lu3.put(uid, 0);
       \}
     \}
   \} catch (SQLException e) \{
@@ -6777,6 +6790,7 @@ we query the request's assignment status.}
 \nwenddocs{}\nwbegincode{45}\sublabel{NWgUSr6-3RkokI-5}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-3RkokI-5}}}\moddef{Admin: JargoCacheUsersFromDB(0)~{\nwtagstyle{}\subpageref{NWgUSr6-3RkokI-1}}}\plusendmoddef
   this.lu_users   = lu1;
   this.lu_rstatus = lu2;
+  this.lu_lvt     = lu3;
 \}
 \nwendcode{}\nwbegindocs{46}\nwdocspar
 \noindent\begin{tabular}{p{\textwidth}}
@@ -7130,7 +7144,7 @@ this.lu_pstr.put("S134", SEL+"sid, te FROM CW WHERE se<=? AND (?<te OR (ve=0 AND
 \nwindexdefn{S134}{S134}{NWgUSr6-9eEGJ-1}\eatline
 \nwidentdefs{\\{{S134}{S134}}}\nwendcode{}\nwbegincode{131}\sublabel{NWgUSr6-4dp7jX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-4dp7jX-1}}}\moddef{S135~{\nwtagstyle{}\subpageref{NWgUSr6-4dp7jX-1}}}\endmoddef\nwused{\\{NWgUSr6-1dEGs4-1}}
 this.lu_pstr.put("S135", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
-    + "SELECT t1 FROM W WHERE sid=? AND t1 <= ? AND ? < t2)");
+    + "SELECT t1 FROM W WHERE sid=? AND ? <= t1 AND t1 <= ? AND ? < t2)");
 \nwindexdefn{S135}{S135}{NWgUSr6-4dp7jX-1}\eatline
 \nwidentdefs{\\{{S135}{S135}}}\nwendcode{}\nwbegincode{132}\sublabel{NWgUSr6-26ZLfn-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-26ZLfn-1}}}\moddef{S136~{\nwtagstyle{}\subpageref{NWgUSr6-26ZLfn-1}}}\endmoddef\nwused{\\{NWgUSr6-1dEGs4-1}}
 this.lu_pstr.put("S136", SEL+"* FROM V");
@@ -7712,6 +7726,7 @@ private ConcurrentHashMap<Integer, int[]> lu_vertices = new ConcurrentHashMap<In
 private ConcurrentHashMap<Integer,
     ConcurrentHashMap<Integer, int[]>>    lu_edges    = new ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>>();
 private ConcurrentHashMap<Integer, int[]> lu_users    = new ConcurrentHashMap<Integer, int[]>();
+private Map<Integer, Integer>             lu_lvt      = new HashMap<Integer, Integer>();
 \nwendcode{}\nwbegindocs{16}\nwdocspar
 \end{itemize}
 
@@ -7730,6 +7745,7 @@ private       String CONNECTIONS_URL        = "jdbc:derby:memory:jargo;create=tr
 private final String CONNECTIONS_DRIVER_URL = "jdbc:apache:commons:dbcp:";
 private final String CONNECTIONS_POOL_NAME  = "jargo";
 private final String CONNECTIONS_POOL_URL   = (CONNECTIONS_DRIVER_URL + CONNECTIONS_POOL_NAME);
+public static final double CSHIFT           = 10000000.0;
 \nwendcode{}\nwbegindocs{18}\nwdocspar
 \item The {\tt{}connection{\char95}factory} is an object that returns new connections. The
 {\tt{}poolableconnection{\char95}factory} registers {\tt{}connection{\char95}factory} and then can
@@ -7880,10 +7896,9 @@ private int loop_delay = 0;
 // private int breakdown_rate = 0.005;
 \nwendcode{}\nwbegindocs{24}\nwdocspar
 The {\tt{}CSHIFT} setting configures the precision for longitude and latitude
-coordiates (see {\tt{}Storage.\protect\nwindexuse{DBInsertVertex}{DBInsertVertex}{NW32V2DP-3leoJR-1}DBInsertVertex}(3))\footnote{Beware, if {\tt{}CSHIFT}
-is changed here, it should also be changed in Tools.}.
+coordiates (see {\tt{}Storage.\protect\nwindexuse{DBInsertVertex}{DBInsertVertex}{NW32V2DP-3leoJR-1}DBInsertVertex}(3)).
 \nwenddocs{}\nwbegincode{25}\sublabel{NW2ZDXo8-2svhLD-4}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-2svhLD-4}}}\moddef{Settings objects~{\nwtagstyle{}\subpageref{NW2ZDXo8-2svhLD-1}}}\plusendmoddef
-private final double CSHIFT = 10000000.0;
+private final double CSHIFT = Storage.CSHIFT;
 private boolean kill = false;
 private boolean working = false;
 private ScheduledExecutorService exe = null;
@@ -8623,7 +8638,7 @@ private ConcurrentHashMap<Integer, int[]> lu_vertices = new ConcurrentHashMap<In
 private ConcurrentHashMap<Integer,
     ConcurrentHashMap<Integer, int[]>>    lu_edges    = new ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>>();
 private ConcurrentHashMap<Integer, int[]> lu_users    = new ConcurrentHashMap<Integer, int[]>();
-private final double CSHIFT = 10000000.0;
+private final double CSHIFT = Storage.CSHIFT;
 private final boolean DEBUG = "true".equals(System.getProperty("jargors.tools.debug"));
 \nwendcode{}\nwbegindocs{6}\nwdocspar
 
