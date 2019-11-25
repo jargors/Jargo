@@ -39,37 +39,37 @@ int[] queryEdge(final int v1, final int v2) throws EdgeNotFoundException, SQLExc
 }
 /*line 182 "src/tex/0-Overview.nw"*/
 public 
-/*line 1414 "src/tex/2-Reading.nw"*/
+/*line 1402 "src/tex/2-Reading.nw"*/
 int[] queryServerDistanceRemaining(final int sid, final int t) throws SQLException {
   return this.storage.DBQueryServerDistanceRemaining(sid, t);
 }
 /*line 183 "src/tex/0-Overview.nw"*/
 public 
-/*line 1544 "src/tex/2-Reading.nw"*/
+/*line 1532 "src/tex/2-Reading.nw"*/
 int[] queryServerDurationRemaining(final int sid, final int t) throws SQLException {
   return this.storage.DBQueryServerDurationRemaining(sid, t);
 }
 /*line 184 "src/tex/0-Overview.nw"*/
 public 
-/*line 1327 "src/tex/2-Reading.nw"*/
+/*line 1315 "src/tex/2-Reading.nw"*/
 int[] queryServerLoadMax(final int sid, final int t) throws SQLException {
   return this.storage.DBQueryServerLoadMax(sid, t);
 }
 /*line 185 "src/tex/0-Overview.nw"*/
 public 
-/*line 1139 "src/tex/2-Reading.nw"*/
+/*line 1127 "src/tex/2-Reading.nw"*/
 int[] queryServerRouteRemaining(final int sid, final int t) throws SQLException {
   return this.storage.DBQueryServerRouteRemaining(sid, t);
 }
 /*line 186 "src/tex/0-Overview.nw"*/
 public 
-/*line 1277 "src/tex/2-Reading.nw"*/
+/*line 1265 "src/tex/2-Reading.nw"*/
 int[] queryServerScheduleRemaining(final int sid, final int t) throws SQLException {
   return this.storage.DBQueryServerScheduleRemaining(sid, t);
 }
 /*line 187 "src/tex/0-Overview.nw"*/
 public 
-/*line 1978 "src/tex/2-Reading.nw"*/
+/*line 1966 "src/tex/2-Reading.nw"*/
 int[] queryServersLocationsActive(final int t) throws SQLException {
   return this.storage.DBQueryServersLocationsActive(t);
 }

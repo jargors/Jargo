@@ -2939,20 +2939,8 @@ pre-filter number of requests.}
       \}
     \}
 \nwidentuses{\\{{PSQuery}{PSQuery}}\\{{S143}{S143}}}\nwindexuse{PSQuery}{PSQuery}{NW18ZcDF-4AIMTx-2}\nwindexuse{S143}{S143}{NW18ZcDF-4AIMTx-2}\nwendcode{}\nwbegindocs{74}\nwdocspar
-{\small We copy the non-null elements of {\tt{}temp1} into a second array
-{\tt{}temp2} and return {\tt{}temp2}.}
 \nwenddocs{}\nwbegincode{75}\sublabel{NW18ZcDF-4AIMTx-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW18ZcDF-4AIMTx-3}}}\moddef{Read: DBQueryRequestsQueued(1)~{\nwtagstyle{}\subpageref{NW18ZcDF-4AIMTx-1}}}\plusendmoddef
-    int[] temp2 = new int[j];
-    for (int i = 0; i < j; i += 7) \{
-      temp2[(i + 0)] = temp1[(i + 0)];
-      temp2[(i + 1)] = temp1[(i + 1)];
-      temp2[(i + 2)] = temp1[(i + 2)];
-      temp2[(i + 3)] = temp1[(i + 3)];
-      temp2[(i + 4)] = temp1[(i + 4)];
-      temp2[(i + 5)] = temp1[(i + 5)];
-      temp2[(i + 6)] = temp1[(i + 6)];
-    \}
-    return temp2;
+    return Arrays.copyOf(temp1, j);
   \} catch (SQLException e) \{
     throw e;
   \}
@@ -7699,6 +7687,7 @@ import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 \nwendcode{}\nwbegindocs{10}\item standard map classes for caching various items.
 \nwenddocs{}\nwbegincode{11}\sublabel{NW27XAxz-FkGTW-5}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-FkGTW-5}}}\moddef{Storage.java preamble~{\nwtagstyle{}\subpageref{NW27XAxz-FkGTW-1}}}\plusendmoddef
+import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;

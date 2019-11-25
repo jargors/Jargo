@@ -23,22 +23,23 @@ import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 /*line 57 "src/Storage.nw"*/
+import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 /*line 6 "src/Storage.nw"*/
 public class Storage {
   
-/*line 73 "src/Storage.nw"*/
+/*line 74 "src/Storage.nw"*/
 private Map<Integer, Boolean> lu_rstatus = new HashMap<>();  //*
-/*line 79 "src/Storage.nw"*/
+/*line 80 "src/Storage.nw"*/
 private ConcurrentHashMap<String, String> lu_pstr     = new ConcurrentHashMap<String, String>();
 private ConcurrentHashMap<Integer, int[]> lu_vertices = new ConcurrentHashMap<Integer, int[]>();
 private ConcurrentHashMap<Integer,
     ConcurrentHashMap<Integer, int[]>>    lu_edges    = new ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>>();
 private ConcurrentHashMap<Integer, int[]> lu_users    = new ConcurrentHashMap<Integer, int[]>();
 private Map<Integer, Integer>             lu_lvt      = new HashMap<Integer, Integer>();
-/*line 97 "src/Storage.nw"*/
+/*line 98 "src/Storage.nw"*/
 private final int    STATEMENTS_MAX_COUNT   = 20;
 private       int    REQUEST_TIMEOUT        = 30;
 private       String CONNECTIONS_URL        = "jdbc:derby:memory:jargo;create=true";
@@ -46,14 +47,14 @@ private final String CONNECTIONS_DRIVER_URL = "jdbc:apache:commons:dbcp:";
 private final String CONNECTIONS_POOL_NAME  = "jargo";
 private final String CONNECTIONS_POOL_URL   = (CONNECTIONS_DRIVER_URL + CONNECTIONS_POOL_NAME);
 public static final double CSHIFT           = 10000000.0;
-/*line 112 "src/Storage.nw"*/
+/*line 113 "src/Storage.nw"*/
 private ConnectionFactory               connection_factory;
 private PoolableConnectionFactory       poolableconnection_factory;
 private ObjectPool<PoolableConnection>  pool;
 private PoolingDriver                   driver;
 /*line 8 "src/Storage.nw"*/
   
-/*line 133 "src/Storage.nw"*/
+/*line 134 "src/Storage.nw"*/
 public Storage() {
   this.JargoSetupPreparedStatements();
 }
@@ -157,12 +158,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 16 "src/tex/0-Overview.nw"*/
 public 
-/*line 2329 "src/tex/2-Reading.nw"*/
+/*line 2317 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricRequestDistanceBaseTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2330 "src/tex/2-Reading.nw"*/
+/*line 2318 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S111", 1);
   } catch (SQLException e) {
@@ -171,12 +172,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 17 "src/tex/0-Overview.nw"*/
 public 
-/*line 2374 "src/tex/2-Reading.nw"*/
+/*line 2362 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricRequestDistanceBaseUnassignedTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2375 "src/tex/2-Reading.nw"*/
+/*line 2363 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S138", 1);
   } catch (SQLException e) {
@@ -185,12 +186,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 18 "src/tex/0-Overview.nw"*/
 public 
-/*line 2417 "src/tex/2-Reading.nw"*/
+/*line 2405 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricRequestDistanceDetourTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2418 "src/tex/2-Reading.nw"*/
+/*line 2406 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S113", 1);
   } catch (SQLException e) {
@@ -199,12 +200,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 19 "src/tex/0-Overview.nw"*/
 public 
-/*line 2460 "src/tex/2-Reading.nw"*/
+/*line 2448 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricRequestDistanceTransitTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2461 "src/tex/2-Reading.nw"*/
+/*line 2449 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S115", 1);
   } catch (SQLException e) {
@@ -213,12 +214,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 20 "src/tex/0-Overview.nw"*/
 public 
-/*line 2503 "src/tex/2-Reading.nw"*/
+/*line 2491 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricRequestDurationPickupTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2504 "src/tex/2-Reading.nw"*/
+/*line 2492 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S119", 1);
   } catch (SQLException e) {
@@ -227,12 +228,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 21 "src/tex/0-Overview.nw"*/
 public 
-/*line 2546 "src/tex/2-Reading.nw"*/
+/*line 2534 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricRequestDurationTransitTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2547 "src/tex/2-Reading.nw"*/
+/*line 2535 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S121", 1);
   } catch (SQLException e) {
@@ -241,12 +242,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 22 "src/tex/0-Overview.nw"*/
 public 
-/*line 2589 "src/tex/2-Reading.nw"*/
+/*line 2577 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricRequestDurationTravelTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2590 "src/tex/2-Reading.nw"*/
+/*line 2578 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S123", 1);
   } catch (SQLException e) {
@@ -255,12 +256,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 23 "src/tex/0-Overview.nw"*/
 public 
-/*line 2611 "src/tex/2-Reading.nw"*/
+/*line 2599 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricRequestTWViolationsTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2612 "src/tex/2-Reading.nw"*/
+/*line 2600 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S151", 2);
   } catch (SQLException e) {
@@ -269,12 +270,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 24 "src/tex/0-Overview.nw"*/
 public 
-/*line 2141 "src/tex/2-Reading.nw"*/
+/*line 2129 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricServerDistanceBaseTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2142 "src/tex/2-Reading.nw"*/
+/*line 2130 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S110", 1);
   } catch (SQLException e) {
@@ -283,12 +284,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 25 "src/tex/0-Overview.nw"*/
 public 
-/*line 2184 "src/tex/2-Reading.nw"*/
+/*line 2172 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricServerDistanceCruisingTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2185 "src/tex/2-Reading.nw"*/
+/*line 2173 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S107", 1);
   } catch (SQLException e) {
@@ -297,12 +298,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 26 "src/tex/0-Overview.nw"*/
 public 
-/*line 2227 "src/tex/2-Reading.nw"*/
+/*line 2215 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricServerDistanceServiceTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2228 "src/tex/2-Reading.nw"*/
+/*line 2216 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S109", 1);
   } catch (SQLException e) {
@@ -311,12 +312,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 27 "src/tex/0-Overview.nw"*/
 public 
-/*line 2098 "src/tex/2-Reading.nw"*/
+/*line 2086 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricServerDistanceTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2099 "src/tex/2-Reading.nw"*/
+/*line 2087 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S105", 1);
   } catch (SQLException e) {
@@ -325,12 +326,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 28 "src/tex/0-Overview.nw"*/
 public 
-/*line 2270 "src/tex/2-Reading.nw"*/
+/*line 2258 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricServerDurationTravelTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2271 "src/tex/2-Reading.nw"*/
+/*line 2259 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S117", 1);
   } catch (SQLException e) {
@@ -339,12 +340,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 29 "src/tex/0-Overview.nw"*/
 public 
-/*line 2292 "src/tex/2-Reading.nw"*/
+/*line 2280 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricServerTWViolationsTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2293 "src/tex/2-Reading.nw"*/
+/*line 2281 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S150", 2);
   } catch (SQLException e) {
@@ -353,12 +354,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 30 "src/tex/0-Overview.nw"*/
 public 
-/*line 2012 "src/tex/2-Reading.nw"*/
+/*line 2000 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricServiceRate() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2013 "src/tex/2-Reading.nw"*/
+/*line 2001 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S102", 1);
   } catch (SQLException e) {
@@ -367,12 +368,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 31 "src/tex/0-Overview.nw"*/
 public 
-/*line 2055 "src/tex/2-Reading.nw"*/
+/*line 2043 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricUserDistanceBaseTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2056 "src/tex/2-Reading.nw"*/
+/*line 2044 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S103", 1);
   } catch (SQLException e) {
@@ -548,31 +549,21 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
         j += 7;
       }
     }
-/*line 1011 "src/tex/2-Reading.nw"*/
-    int[] temp2 = new int[j];
-    for (int i = 0; i < j; i += 7) {
-      temp2[(i + 0)] = temp1[(i + 0)];
-      temp2[(i + 1)] = temp1[(i + 1)];
-      temp2[(i + 2)] = temp1[(i + 2)];
-      temp2[(i + 3)] = temp1[(i + 3)];
-      temp2[(i + 4)] = temp1[(i + 4)];
-      temp2[(i + 5)] = temp1[(i + 5)];
-      temp2[(i + 6)] = temp1[(i + 6)];
-    }
-    return temp2;
+/*line 1009 "src/tex/2-Reading.nw"*/
+    return Arrays.copyOf(temp1, j);
   } catch (SQLException e) {
     throw e;
   }
 }
 /*line 43 "src/tex/0-Overview.nw"*/
 public 
-/*line 1764 "src/tex/2-Reading.nw"*/
+/*line 1752 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerAssignmentsCompleted(final int sid, final int t)
 throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1766 "src/tex/2-Reading.nw"*/
+/*line 1754 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S101", 1, t, sid);
   } catch (SQLException e) {
@@ -581,13 +572,13 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 44 "src/tex/0-Overview.nw"*/
 public 
-/*line 1720 "src/tex/2-Reading.nw"*/
+/*line 1708 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerAssignmentsPending(final int sid, final int t)
 throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1722 "src/tex/2-Reading.nw"*/
+/*line 1710 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S100", 1, t, sid);
   } catch (SQLException e) {
@@ -596,12 +587,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 45 "src/tex/0-Overview.nw"*/
 public 
-/*line 1360 "src/tex/2-Reading.nw"*/
+/*line 1348 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerDistance(final int sid) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1361 "src/tex/2-Reading.nw"*/
+/*line 1349 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S104", 1, sid);
   } catch (SQLException e) {
@@ -610,12 +601,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 46 "src/tex/0-Overview.nw"*/
 public 
-/*line 1448 "src/tex/2-Reading.nw"*/
+/*line 1436 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerDistanceCruising(final int sid) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1449 "src/tex/2-Reading.nw"*/
+/*line 1437 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S106", 1, sid);
   } catch (SQLException e) {
@@ -624,13 +615,13 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 47 "src/tex/0-Overview.nw"*/
 public 
-/*line 1398 "src/tex/2-Reading.nw"*/
+/*line 1386 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerDistanceRemaining(final int sid, final int t)
 throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1400 "src/tex/2-Reading.nw"*/
+/*line 1388 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S142", 1, sid, t);
   } catch (SQLException e) {
@@ -639,12 +630,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 48 "src/tex/0-Overview.nw"*/
 public 
-/*line 1486 "src/tex/2-Reading.nw"*/
+/*line 1474 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerDistanceService(final int sid) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1487 "src/tex/2-Reading.nw"*/
+/*line 1475 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S108", 1, sid);
   } catch (SQLException e) {
@@ -653,13 +644,13 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 49 "src/tex/0-Overview.nw"*/
 public 
-/*line 1524 "src/tex/2-Reading.nw"*/
+/*line 1512 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerDurationRemaining(final int sid, final int t)
 throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1526 "src/tex/2-Reading.nw"*/
+/*line 1514 "src/tex/2-Reading.nw"*/
                         ) {
     int[] output = PSQuery(conn, "S127", 1, sid, t);
     if (output != null) {
@@ -672,12 +663,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 50 "src/tex/0-Overview.nw"*/
 public 
-/*line 1578 "src/tex/2-Reading.nw"*/
+/*line 1566 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerDurationTravel(final int sid) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1579 "src/tex/2-Reading.nw"*/
+/*line 1567 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S116", 1, sid);
   } catch (SQLException e) {
@@ -686,12 +677,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 51 "src/tex/0-Overview.nw"*/
 public 
-/*line 1312 "src/tex/2-Reading.nw"*/
+/*line 1300 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerLoadMax(final int sid, final int t) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1313 "src/tex/2-Reading.nw"*/
+/*line 1301 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S73", 1, sid, t);
   } catch (SQLException e) {
@@ -700,12 +691,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 52 "src/tex/0-Overview.nw"*/
 public 
-/*line 1071 "src/tex/2-Reading.nw"*/
+/*line 1059 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerRoute(final int sid) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1072 "src/tex/2-Reading.nw"*/
+/*line 1060 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S60", 2, sid);
   } catch (SQLException e) {
@@ -714,12 +705,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 53 "src/tex/0-Overview.nw"*/
 public 
-/*line 1124 "src/tex/2-Reading.nw"*/
+/*line 1112 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerRouteRemaining(final int sid, final int t) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1125 "src/tex/2-Reading.nw"*/
+/*line 1113 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S129", 2, sid, t);
   } catch (SQLException e) {
@@ -728,12 +719,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 54 "src/tex/0-Overview.nw"*/
 public 
-/*line 1185 "src/tex/2-Reading.nw"*/
+/*line 1173 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerSchedule(final int sid) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1186 "src/tex/2-Reading.nw"*/
+/*line 1174 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S61", 4, sid);
   } catch (SQLException e) {
@@ -742,14 +733,14 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 55 "src/tex/0-Overview.nw"*/
 public 
-/*line 1245 "src/tex/2-Reading.nw"*/
+/*line 1233 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerScheduleRemaining(final int sid, final int t)
 throws SQLException {
   int[] output = new int[] { };
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1248 "src/tex/2-Reading.nw"*/
+/*line 1236 "src/tex/2-Reading.nw"*/
                         ) {
     int[] temp = PSQuery(conn, "S144", 3, sid, t);
     output = new int[(4*temp.length/3 + 4)];
@@ -773,12 +764,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 56 "src/tex/0-Overview.nw"*/
 public 
-/*line 1666 "src/tex/2-Reading.nw"*/
+/*line 1654 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerTimeOfArrival(final int sid) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1667 "src/tex/2-Reading.nw"*/
+/*line 1655 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S127", 1, sid);
   } catch (SQLException e) {
@@ -787,12 +778,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 57 "src/tex/0-Overview.nw"*/
 public 
-/*line 1616 "src/tex/2-Reading.nw"*/
+/*line 1604 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerTimeOfDeparture(final int sid) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1617 "src/tex/2-Reading.nw"*/
+/*line 1605 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S125", 1, sid);
   } catch (SQLException e) {
@@ -801,12 +792,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 58 "src/tex/0-Overview.nw"*/
 public 
-/*line 1845 "src/tex/2-Reading.nw"*/
+/*line 1833 "src/tex/2-Reading.nw"*/
 int[] DBQueryServersActive(final int t) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1846 "src/tex/2-Reading.nw"*/
+/*line 1834 "src/tex/2-Reading.nw"*/
                         ) {
     return this.PSQuery(conn, "S134", 1, t, t, t);
   } catch (SQLException e) {
@@ -815,12 +806,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 59 "src/tex/0-Overview.nw"*/
 public 
-/*line 1797 "src/tex/2-Reading.nw"*/
+/*line 1785 "src/tex/2-Reading.nw"*/
 int[] DBQueryServersCount() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1798 "src/tex/2-Reading.nw"*/
+/*line 1786 "src/tex/2-Reading.nw"*/
                         ) {
     return this.PSQuery(conn, "S66", 1);
   } catch (SQLException e) {
@@ -829,12 +820,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 60 "src/tex/0-Overview.nw"*/
 public 
-/*line 1886 "src/tex/2-Reading.nw"*/
+/*line 1874 "src/tex/2-Reading.nw"*/
 int[] DBQueryServersLocations(final int t) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1887 "src/tex/2-Reading.nw"*/
+/*line 1875 "src/tex/2-Reading.nw"*/
                         ) {
     return this.PSQuery(conn, "S59", 3, t, t, t, t);
   } catch (SQLException e) {
@@ -843,16 +834,16 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 61 "src/tex/0-Overview.nw"*/
 public 
-/*line 1935 "src/tex/2-Reading.nw"*/
+/*line 1923 "src/tex/2-Reading.nw"*/
 int[] DBQueryServersLocationsActive(final int t) throws SQLException {
   int[] output = new int[] { };
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1937 "src/tex/2-Reading.nw"*/
+/*line 1925 "src/tex/2-Reading.nw"*/
                         ) {
     int j = 0;
-/*line 1944 "src/tex/2-Reading.nw"*/
+/*line 1932 "src/tex/2-Reading.nw"*/
     // Query S134 selects from CW. The query time is not expected to grow
     // because Table CW does not grow as we pre-load all the servers when we
     // load the problem instance.

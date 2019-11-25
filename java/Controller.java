@@ -238,97 +238,97 @@ int[] queryMBR() throws SQLException {
 }
 /*line 110 "src/tex/0-Overview.nw"*/
 public 
-/*line 2344 "src/tex/2-Reading.nw"*/
+/*line 2332 "src/tex/2-Reading.nw"*/
 int[] queryMetricRequestDistanceBaseTotal() throws SQLException {
   return storage.DBQueryMetricRequestDistanceBaseTotal();
 }
 /*line 111 "src/tex/0-Overview.nw"*/
 public 
-/*line 2389 "src/tex/2-Reading.nw"*/
+/*line 2377 "src/tex/2-Reading.nw"*/
 int[] queryMetricRequestDistanceBaseUnassignedTotal() throws SQLException {
   return storage.DBQueryMetricRequestDistanceBaseUnassignedTotal();
 }
 /*line 112 "src/tex/0-Overview.nw"*/
 public 
-/*line 2432 "src/tex/2-Reading.nw"*/
+/*line 2420 "src/tex/2-Reading.nw"*/
 int[] queryMetricRequestDistanceDetourTotal() throws SQLException {
   return storage.DBQueryMetricRequestDistanceDetourTotal();
 }
 /*line 113 "src/tex/0-Overview.nw"*/
 public 
-/*line 2475 "src/tex/2-Reading.nw"*/
+/*line 2463 "src/tex/2-Reading.nw"*/
 int[] queryMetricRequestDistanceTransitTotal() throws SQLException {
   return storage.DBQueryMetricRequestDistanceTransitTotal();
 }
 /*line 114 "src/tex/0-Overview.nw"*/
 public 
-/*line 2518 "src/tex/2-Reading.nw"*/
+/*line 2506 "src/tex/2-Reading.nw"*/
 int[] queryMetricRequestDurationPickupTotal() throws SQLException {
   return storage.DBQueryMetricRequestDurationPickupTotal();
 }
 /*line 115 "src/tex/0-Overview.nw"*/
 public 
-/*line 2561 "src/tex/2-Reading.nw"*/
+/*line 2549 "src/tex/2-Reading.nw"*/
 int[] queryMetricRequestDurationTransitTotal() throws SQLException {
   return storage.DBQueryMetricRequestDurationTransitTotal();
 }
 /*line 116 "src/tex/0-Overview.nw"*/
 public 
-/*line 2604 "src/tex/2-Reading.nw"*/
+/*line 2592 "src/tex/2-Reading.nw"*/
 int[] queryMetricRequestDurationTravelTotal() throws SQLException {
   return storage.DBQueryMetricRequestDurationTravelTotal();
 }
 /*line 117 "src/tex/0-Overview.nw"*/
 public 
-/*line 2620 "src/tex/2-Reading.nw"*/
+/*line 2608 "src/tex/2-Reading.nw"*/
 int[] queryMetricRequestTWViolationsTotal() throws SQLException {
   return storage.DBQueryMetricRequestTWViolationsTotal();
 }
 /*line 118 "src/tex/0-Overview.nw"*/
 public 
-/*line 2156 "src/tex/2-Reading.nw"*/
+/*line 2144 "src/tex/2-Reading.nw"*/
 int[] queryMetricServerDistanceBaseTotal() throws SQLException {
   return storage.DBQueryMetricServerDistanceBaseTotal();
 }
 /*line 119 "src/tex/0-Overview.nw"*/
 public 
-/*line 2199 "src/tex/2-Reading.nw"*/
+/*line 2187 "src/tex/2-Reading.nw"*/
 int[] queryMetricServerDistanceCruisingTotal() throws SQLException {
   return storage.DBQueryMetricServerDistanceCruisingTotal();
 }
 /*line 120 "src/tex/0-Overview.nw"*/
 public 
-/*line 2242 "src/tex/2-Reading.nw"*/
+/*line 2230 "src/tex/2-Reading.nw"*/
 int[] queryMetricServerDistanceServiceTotal() throws SQLException {
   return storage.DBQueryMetricServerDistanceServiceTotal();
 }
 /*line 121 "src/tex/0-Overview.nw"*/
 public 
-/*line 2113 "src/tex/2-Reading.nw"*/
+/*line 2101 "src/tex/2-Reading.nw"*/
 int[] queryMetricServerDistanceTotal() throws SQLException {
   return storage.DBQueryMetricServerDistanceTotal();
 }
 /*line 122 "src/tex/0-Overview.nw"*/
 public 
-/*line 2285 "src/tex/2-Reading.nw"*/
+/*line 2273 "src/tex/2-Reading.nw"*/
 int[] queryMetricServerDurationTravelTotal() throws SQLException {
   return storage.DBQueryMetricServerDurationTravelTotal();
 }
 /*line 123 "src/tex/0-Overview.nw"*/
 public 
-/*line 2301 "src/tex/2-Reading.nw"*/
+/*line 2289 "src/tex/2-Reading.nw"*/
 int[] queryMetricServerTWViolationsTotal() throws SQLException {
   return storage.DBQueryMetricServerTWViolationsTotal();
 }
 /*line 124 "src/tex/0-Overview.nw"*/
 public 
-/*line 2027 "src/tex/2-Reading.nw"*/
+/*line 2015 "src/tex/2-Reading.nw"*/
 int[] queryMetricServiceRate() throws SQLException {
   return storage.DBQueryMetricServiceRate();
 }
 /*line 125 "src/tex/0-Overview.nw"*/
 public 
-/*line 2070 "src/tex/2-Reading.nw"*/
+/*line 2058 "src/tex/2-Reading.nw"*/
 int[] queryMetricUserDistanceBaseTotal() throws SQLException {
   return storage.DBQueryMetricUserDistanceBaseTotal();
 }
@@ -352,31 +352,31 @@ int[] queryRequestsCount() throws SQLException {
 }
 /*line 129 "src/tex/0-Overview.nw"*/
 public 
-/*line 1034 "src/tex/2-Reading.nw"*/
+/*line 1022 "src/tex/2-Reading.nw"*/
 int[] queryRequestsQueued(final int t) throws SQLException {
   return storage.DBQueryRequestsQueued(t);
 }
 /*line 130 "src/tex/0-Overview.nw"*/
 public 
-/*line 1086 "src/tex/2-Reading.nw"*/
+/*line 1074 "src/tex/2-Reading.nw"*/
 int[] queryServerRoute(final int sid) throws SQLException {
   return storage.DBQueryServerRoute(sid);
 }
 /*line 131 "src/tex/0-Overview.nw"*/
 public 
-/*line 1200 "src/tex/2-Reading.nw"*/
+/*line 1188 "src/tex/2-Reading.nw"*/
 int[] queryServerSchedule(final int sid) throws SQLException {
   return storage.DBQueryServerSchedule(sid);
 }
 /*line 132 "src/tex/0-Overview.nw"*/
 public 
-/*line 1631 "src/tex/2-Reading.nw"*/
+/*line 1619 "src/tex/2-Reading.nw"*/
 int[] queryServerTimeOfDeparture(final int sid) throws SQLException {
   return storage.DBQueryServerTimeOfDeparture(sid);
 }
 /*line 133 "src/tex/0-Overview.nw"*/
 public 
-/*line 1812 "src/tex/2-Reading.nw"*/
+/*line 1800 "src/tex/2-Reading.nw"*/
 int[] queryServersCount() throws SQLException {
   return storage.DBQueryServersCount();
 }
