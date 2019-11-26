@@ -2,6 +2,7 @@
 CLASS1=$(addsuffix .class, $(subst java/,com/github/jargors/,$(basename $(wildcard java/*.java))))
 CLASS2=$(addsuffix .class, $(subst java/desktop/,com/github/jargors/desktop/,$(basename $(wildcard java/desktop/*.java))))
 CLASS3=$(addsuffix .class, $(subst java/exceptions/,com/github/jargors/exceptions/,$(basename $(wildcard java/exceptions/*.java))))
+CLASS4=$(addsuffix .class, $(subst java/jmx/,com/github/jargors/jmx/,$(basename $(wildcard java/jmx/*.java))))
 
 VERSION = 1.0.0
 
@@ -10,7 +11,7 @@ VERSION = 1.0.0
 all : compile jar
 
 # Compile the *.class files from the *.java files
-compile : $(CLASS1) $(CLASS2) $(CLASS3)
+compile : $(CLASS1) $(CLASS2) $(CLASS3) $(CLASS4)
 
 # Zip up *.class files into jar/jargors-$(VERSION).jar
 jar : compile
@@ -30,4 +31,7 @@ com/github/jargors/desktop/%.class : java/desktop/%.java
 	javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:deps:deps/* java/*.java java/*/*.java
 
 com/github/jargors/exceptions/%.class : java/exceptions/%.java
+	javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:deps:deps/* java/*.java java/*/*.java
+
+com/github/jargors/jmx/%.class : java/jmx/%.java
 	javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:deps:deps/* java/*.java java/*/*.java

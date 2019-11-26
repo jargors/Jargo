@@ -29,7 +29,7 @@ private final boolean DEBUG = "true".equals(System.getProperty("jargors.tools.de
 public Tools() { }
 /*line 9 "src/Tools.nw"*/
   
-/*line 254 "src/tex/0-Overview.nw"*/
+/*line 263 "src/tex/0-Overview.nw"*/
 public 
 /*line 291 "src/tex/2-Reading.nw"*/
 int[] DBQueryEdge(final int v1, final int v2) throws EdgeNotFoundException {
@@ -38,7 +38,7 @@ int[] DBQueryEdge(final int v1, final int v2) throws EdgeNotFoundException {
   }
   return this.lu_edges.get(v1).get(v2).clone();
 }
-/*line 255 "src/tex/0-Overview.nw"*/
+/*line 264 "src/tex/0-Overview.nw"*/
 public 
 /*line 156 "src/tex/2-Reading.nw"*/
 int[] DBQueryVertex(final int v) throws VertexNotFoundException {
@@ -48,7 +48,7 @@ int[] DBQueryVertex(final int v) throws VertexNotFoundException {
   int[] output = this.lu_vertices.get(v).clone();
   return new int[] { output[0], output[1], (int) Storage.CSHIFT };
 }
-/*line 262 "src/tex/0-Overview.nw"*/
+/*line 271 "src/tex/0-Overview.nw"*/
 public 
 /*line 10 "src/tex/5-Gtree.nw"*/
 void GTGtreeLoad(final String p) throws FileNotFoundException {
@@ -66,39 +66,39 @@ void GTGtreeLoad(final String p) throws FileNotFoundException {
     throw new FileNotFoundException("Bad path to gtree");
   }
 }
-/*line 263 "src/tex/0-Overview.nw"*/
+/*line 272 "src/tex/0-Overview.nw"*/
 public 
 /*line 40 "src/tex/5-Gtree.nw"*/
 void GTGtreeClose() {
   this.gtree = null;
   this.flag_gtree_loaded = false;
 }
-/*line 264 "src/tex/0-Overview.nw"*/
+/*line 273 "src/tex/0-Overview.nw"*/
 public 
-/*line 1144 "src/tex/4-Administration.nw"*/
+/*line 1207 "src/tex/4-Administration.nw"*/
 void setRefCacheEdges(final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> lu_edges) {
   this.lu_edges = lu_edges;
 }
-/*line 265 "src/tex/0-Overview.nw"*/
+/*line 274 "src/tex/0-Overview.nw"*/
 public 
-/*line 1151 "src/tex/4-Administration.nw"*/
+/*line 1214 "src/tex/4-Administration.nw"*/
 void setRefCacheUsers(final ConcurrentHashMap<Integer, int[]> lu_users) {
   this.lu_users = lu_users;
 }
-/*line 266 "src/tex/0-Overview.nw"*/
+/*line 275 "src/tex/0-Overview.nw"*/
 public 
-/*line 1137 "src/tex/4-Administration.nw"*/
+/*line 1200 "src/tex/4-Administration.nw"*/
 void setRefCacheVertices(final ConcurrentHashMap<Integer, int[]> lu_vertices) {
   this.lu_vertices = lu_vertices;
 }
-/*line 267 "src/tex/0-Overview.nw"*/
+/*line 276 "src/tex/0-Overview.nw"*/
 public 
 /*line 93 "src/Tools.nw"*/
 int computeDuration(final int dd, final int nu) {
   int d = (int) Math.ceil(dd/(float) nu);
   return (d == 0 ? 1 : d);
 }
-/*line 268 "src/tex/0-Overview.nw"*/
+/*line 277 "src/tex/0-Overview.nw"*/
 public 
 /*line 78 "src/Tools.nw"*/
 int computeHaversine(final int u, final int v) throws VertexNotFoundException {
@@ -112,7 +112,7 @@ int computeHaversine(final int u, final int v) throws VertexNotFoundException {
     this.lu_vertices.get(u)[0]/CSHIFT, this.lu_vertices.get(u)[1]/CSHIFT,
     this.lu_vertices.get(v)[0]/CSHIFT, this.lu_vertices.get(v)[1]/CSHIFT);
 }
-/*line 269 "src/tex/0-Overview.nw"*/
+/*line 278 "src/tex/0-Overview.nw"*/
 public 
 /*line 54 "src/Tools.nw"*/
 int computeHaversine(
@@ -133,7 +133,7 @@ if (d == 0 && (lng1 != lng2 || lat1 != lat2)) {
 /*line 65 "src/Tools.nw"*/
   return d;
 }
-/*line 270 "src/tex/0-Overview.nw"*/
+/*line 279 "src/tex/0-Overview.nw"*/
 public 
 /*line 161 "src/Tools.nw"*/
 int[] computeRoute(final int source, final int target, final int starttime)
@@ -165,7 +165,7 @@ throws GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetE
   }
   return output;
 }
-/*line 271 "src/tex/0-Overview.nw"*/
+/*line 280 "src/tex/0-Overview.nw"*/
 public 
 /*line 110 "src/Tools.nw"*/
 int[] computeShortestPath(final int u, final int v)
@@ -191,7 +191,7 @@ throws GtreeNotLoadedException, GtreeIllegalSourceException {
   }
   return output;
 }
-/*line 272 "src/tex/0-Overview.nw"*/
+/*line 281 "src/tex/0-Overview.nw"*/
 public 
 /*line 145 "src/Tools.nw"*/
 int computeShortestPathDistance(final int u, final int v)
@@ -206,7 +206,7 @@ throws GtreeNotLoadedException, GtreeIllegalSourceException {
   }
   return d;
 }
-/*line 273 "src/tex/0-Overview.nw"*/
+/*line 282 "src/tex/0-Overview.nw"*/
 public 
 /*line 220 "src/Tools.nw"*/
 int[] filterByHaversine(final int ro, final int[] locs, final int threshold)
@@ -221,7 +221,7 @@ throws VertexNotFoundException {
   }
   return Arrays.copyOf(temp, i);
 }
-/*line 274 "src/tex/0-Overview.nw"*/
+/*line 283 "src/tex/0-Overview.nw"*/
 public 
 /*line 244 "src/Tools.nw"*/
 void printPath(final int[] p) {
@@ -230,7 +230,7 @@ void printPath(final int[] p) {
   }
   System.out.println();
 }
-/*line 275 "src/tex/0-Overview.nw"*/
+/*line 284 "src/tex/0-Overview.nw"*/
 public 
 /*line 254 "src/Tools.nw"*/
 void printRoute(final int[] w) {
@@ -239,7 +239,7 @@ void printRoute(final int[] w) {
   }
   System.out.println();
 }
-/*line 276 "src/tex/0-Overview.nw"*/
+/*line 285 "src/tex/0-Overview.nw"*/
 public 
 /*line 264 "src/Tools.nw"*/
 void printSchedule(final int[] b) {
@@ -249,26 +249,26 @@ void printSchedule(final int[] b) {
   }
   System.out.println();
 }
-/*line 277 "src/tex/0-Overview.nw"*/
+/*line 286 "src/tex/0-Overview.nw"*/
 public 
 /*line 236 "src/Tools.nw"*/
 void printUser(final int[] u) {
   System.out.println("User {uid="+u[0]+", q="+u[1]+", e="+u[2]+", l="+u[3]
     +", o="+u[4]+", d="+u[5]+", b="+u[6]+"}");
 }
-/*line 278 "src/tex/0-Overview.nw"*/
+/*line 287 "src/tex/0-Overview.nw"*/
 public static 
 /*line 283 "src/Tools.nw"*/
 void Print(final String b) {
   System.out.println(String.format("[*][%s] %s", LocalDateTime.now(), b));
 }
-/*line 279 "src/tex/0-Overview.nw"*/
+/*line 288 "src/tex/0-Overview.nw"*/
 public static 
 /*line 276 "src/Tools.nw"*/
 void Print(final String a, final String b) {
   System.out.println(String.format("[%s][%s] %s", a, LocalDateTime.now(), b));
 }
-/*line 280 "src/tex/0-Overview.nw"*/
+/*line 289 "src/tex/0-Overview.nw"*/
 public static 
 /*line 290 "src/Tools.nw"*/
 void PrintSQLException(SQLException e) {

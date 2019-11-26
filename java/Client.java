@@ -23,61 +23,61 @@ protected final boolean DEBUG =
 public Client() { }
 /*line 9 "src/Client.nw"*/
   
-/*line 219 "src/tex/0-Overview.nw"*/
+/*line 228 "src/tex/0-Overview.nw"*/
 public 
 /*line 33 "src/tex/5-Gtree.nw"*/
 void gtreeLoad(String p) throws FileNotFoundException {
   this.tools.GTGtreeLoad(p);
 }
-/*line 220 "src/tex/0-Overview.nw"*/
+/*line 229 "src/tex/0-Overview.nw"*/
 public 
 /*line 52 "src/tex/5-Gtree.nw"*/
 void gtreeClose() {
   this.tools.GTGtreeClose();
 }
-/*line 221 "src/tex/0-Overview.nw"*/
+/*line 230 "src/tex/0-Overview.nw"*/
 public 
 /*line 1063 "src/tex/4-Administration.nw"*/
 int getQueueSize() {
   return this.queue.size();
 }
-/*line 222 "src/tex/0-Overview.nw"*/
+/*line 231 "src/tex/0-Overview.nw"*/
 public 
-/*line 1209 "src/tex/4-Administration.nw"*/
+/*line 1272 "src/tex/4-Administration.nw"*/
 void forwardRefCacheEdges(final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> lu_edges) {
   this.tools.setRefCacheEdges(lu_edges);
 }
-/*line 223 "src/tex/0-Overview.nw"*/
+/*line 232 "src/tex/0-Overview.nw"*/
 public 
-/*line 1216 "src/tex/4-Administration.nw"*/
+/*line 1279 "src/tex/4-Administration.nw"*/
 void forwardRefCacheUsers(final ConcurrentHashMap<Integer, int[]> lu_users) {
   this.tools.setRefCacheUsers(lu_users);
 }
-/*line 224 "src/tex/0-Overview.nw"*/
+/*line 233 "src/tex/0-Overview.nw"*/
 public 
-/*line 1223 "src/tex/4-Administration.nw"*/
+/*line 1286 "src/tex/4-Administration.nw"*/
 void forwardRefCacheVertices(final ConcurrentHashMap<Integer, int[]> lu_vertices) {
   this.tools.setRefCacheVertices(lu_vertices);
 }
-/*line 225 "src/tex/0-Overview.nw"*/
+/*line 234 "src/tex/0-Overview.nw"*/
 public 
-/*line 1165 "src/tex/4-Administration.nw"*/
+/*line 1228 "src/tex/4-Administration.nw"*/
 void setRefCommunicator(final Communicator communicator) {
   this.communicator = communicator;
 }
-/*line 226 "src/tex/0-Overview.nw"*/
+/*line 235 "src/tex/0-Overview.nw"*/
 public 
 /*line 64 "src/Client.nw"*/
 void addRequest(final int[] r) {
   this.queue.add(r);
 }
-/*line 227 "src/tex/0-Overview.nw"*/
+/*line 236 "src/tex/0-Overview.nw"*/
 public 
 /*line 91 "src/Client.nw"*/
 void collectServerLocations(final int[] src) {
   this.endCollectServerLocations(src.clone());
 }
-/*line 228 "src/tex/0-Overview.nw"*/
+/*line 237 "src/tex/0-Overview.nw"*/
 public 
 /*line 55 "src/Client.nw"*/
 void notifyNew() throws ClientException, ClientFatalException {
@@ -85,11 +85,11 @@ void notifyNew() throws ClientException, ClientFatalException {
     this.handleRequest(this.queue.remove());
   }
 }
-/*line 229 "src/tex/0-Overview.nw"*/
+/*line 238 "src/tex/0-Overview.nw"*/
 protected 
 /*line 112 "src/Client.nw"*/
 void end() { }
-/*line 230 "src/tex/0-Overview.nw"*/
+/*line 239 "src/tex/0-Overview.nw"*/
 protected 
 /*line 99 "src/Client.nw"*/
 void endCollectServerLocations(final int[] locations) {
@@ -101,11 +101,11 @@ void endCollectServerLocations(final int[] locations) {
     });
   }
 }
-/*line 231 "src/tex/0-Overview.nw"*/
+/*line 240 "src/tex/0-Overview.nw"*/
 protected 
 /*line 128 "src/Client.nw"*/
 void handleRequest(final int[] r) throws ClientException, ClientFatalException { }
-/*line 232 "src/tex/0-Overview.nw"*/
+/*line 241 "src/tex/0-Overview.nw"*/
 protected 
 /*line 144 "src/Client.nw"*/
 void handleServerLocation(final int[] loc) { }

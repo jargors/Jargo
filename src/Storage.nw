@@ -58,6 +58,11 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
+@ \item Management classes
+<<Storage.java preamble>>=
+import com.github.jargors.jmx.StorageMonitor;
+import java.lang.management.*;
+import javax.management.*;
 @
 \end{itemize}
 
@@ -115,6 +120,18 @@ private PoolableConnectionFactory       poolableconnection_factory;
 private ObjectPool<PoolableConnection>  pool;
 private PoolingDriver                   driver;
 @
+\item Various statistics
+<<[[Storage]] member variables>>=
+private int stat_count_DBQueryServersLocationsActive = 0;
+private int stat_count_DBQueryServerScheduleRemaining = 0;
+private int stat_count_DBQueryRequestsQueued = 0;
+private long stat_dur_total_DBQueryServersLocationsActive = 0;
+private long stat_dur_total_DBQueryServerScheduleRemaining = 0;
+private long stat_dur_total_DBQueryRequestsQueued = 0;
+private long stat_dur_last_DBQueryServersLocationsActive = 0;
+private long stat_dur_last_DBQueryServerScheduleRemaining = 0;
+private long stat_dur_last_DBQueryRequestsQueued = 0;
+@
 \end{itemize}
 
 \section{Constructor}
@@ -133,6 +150,14 @@ prepared statement strings into [[lu_pstr]] by using [[JargoSetupPreparedStateme
 <<[[Storage]] constructor>>=
 public Storage() {
   this.JargoSetupPreparedStatements();
+  try {
+    MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+    StorageMonitor mon = new StorageMonitor(this);
+    mbs.registerMBean(mon, new ObjectName("com.github.jargors.jmx:type=StorageMonitor"));
+  } catch (Exception e) {
+    System.err.printf("StorageMonitor failed; reason: %s\n", e.toString());
+    System.err.printf("Continuing with monitoring disabled\n");
+  }
 }
 @
 

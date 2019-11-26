@@ -379,13 +379,13 @@ private ConcurrentHashMap<String, ConcurrentHashMap<String, Series<Number, Numbe
     new ConcurrentHashMap<String, ConcurrentHashMap<String, Series<Number, Number>>>();
 /*line 8 "src/desktop/DesktopController.nw"*/
   
-/*line 293 "src/tex/0-Overview.nw"*/
+/*line 302 "src/tex/0-Overview.nw"*/
 public 
 /*line 636 "src/desktop/DesktopController.nw"*/
 void actionAbout(final ActionEvent e) {
   // ...
 }
-/*line 294 "src/tex/0-Overview.nw"*/
+/*line 303 "src/tex/0-Overview.nw"*/
 public 
 /*line 886 "src/desktop/DesktopController.nw"*/
 void actionClient(final ActionEvent e) {
@@ -429,13 +429,13 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
     this.lbl_status   .setText("Loaded "+cj.getName());
   }
 }
-/*line 295 "src/tex/0-Overview.nw"*/
+/*line 304 "src/tex/0-Overview.nw"*/
 public 
 /*line 629 "src/desktop/DesktopController.nw"*/
 void actionGitHub(final ActionEvent e) {
   // ...
 }
-/*line 296 "src/tex/0-Overview.nw"*/
+/*line 305 "src/tex/0-Overview.nw"*/
 public 
 /*line 782 "src/desktop/DesktopController.nw"*/
 void actionGtree(final ActionEvent e) {
@@ -487,7 +487,7 @@ void actionGtree(final ActionEvent e) {
     this.lbl_status   .setText("Cancelled load gtree.");
   }
 }
-/*line 297 "src/tex/0-Overview.nw"*/
+/*line 306 "src/tex/0-Overview.nw"*/
 public 
 /*line 679 "src/desktop/DesktopController.nw"*/
 void actionLoad(final ActionEvent e) {
@@ -539,7 +539,7 @@ void actionLoad(final ActionEvent e) {
     this.btn_stop     .setDisable(false);
   }
 }
-/*line 298 "src/tex/0-Overview.nw"*/
+/*line 307 "src/tex/0-Overview.nw"*/
 public 
 /*line 643 "src/desktop/DesktopController.nw"*/
 void actionNew(final ActionEvent e) {
@@ -574,7 +574,7 @@ void actionNew(final ActionEvent e) {
     });
   });
 }
-/*line 299 "src/tex/0-Overview.nw"*/
+/*line 308 "src/tex/0-Overview.nw"*/
 public 
 /*line 835 "src/desktop/DesktopController.nw"*/
 void actionProb(final ActionEvent e) {
@@ -624,13 +624,13 @@ void actionProb(final ActionEvent e) {
     });
   }
 }
-/*line 300 "src/tex/0-Overview.nw"*/
+/*line 309 "src/tex/0-Overview.nw"*/
 public 
 /*line 622 "src/desktop/DesktopController.nw"*/
 void actionQuit(final ActionEvent e) {
   System.exit(0);
 }
-/*line 301 "src/tex/0-Overview.nw"*/
+/*line 310 "src/tex/0-Overview.nw"*/
 public 
 /*line 1082 "src/desktop/DesktopController.nw"*/
 void actionRecordMousePress(MouseEvent e) {
@@ -638,7 +638,7 @@ void actionRecordMousePress(MouseEvent e) {
   this.mouse_y = e.getY();
   e.consume();
 }
-/*line 302 "src/tex/0-Overview.nw"*/
+/*line 311 "src/tex/0-Overview.nw"*/
 public 
 /*line 732 "src/desktop/DesktopController.nw"*/
 void actionRoad(final ActionEvent e) {
@@ -687,12 +687,12 @@ void actionRoad(final ActionEvent e) {
     });
   }
 }
-/*line 303 "src/tex/0-Overview.nw"*/
+/*line 312 "src/tex/0-Overview.nw"*/
 public 
 /*line 993 "src/desktop/DesktopController.nw"*/
 void actionStartRealtime(final ActionEvent e) {
 }
-/*line 304 "src/tex/0-Overview.nw"*/
+/*line 313 "src/tex/0-Overview.nw"*/
 public 
 /*line 931 "src/desktop/DesktopController.nw"*/
 void actionStartSequential(final ActionEvent e) {
@@ -857,7 +857,7 @@ this.vbox_metrics_times.setDisable(false);
     return;
   }
 }
-/*line 305 "src/tex/0-Overview.nw"*/
+/*line 314 "src/tex/0-Overview.nw"*/
 public 
 /*line 999 "src/desktop/DesktopController.nw"*/
 void actionStop(final ActionEvent e) {
@@ -949,7 +949,7 @@ this.chk_timeServerHandling.setSelected(false);
     this.lbl_status.setText("Ready.");
   }
 }
-/*line 306 "src/tex/0-Overview.nw"*/
+/*line 315 "src/tex/0-Overview.nw"*/
 public 
 /*line 1091 "src/desktop/DesktopController.nw"*/
 void actionTranslateCanvas(MouseEvent e) {
@@ -957,25 +957,25 @@ void actionTranslateCanvas(MouseEvent e) {
   this.can_road.setTranslateY(this.can_road.getTranslateY() + e.getY() - this.mouse_y);
   e.consume();
 }
-/*line 307 "src/tex/0-Overview.nw"*/
+/*line 316 "src/tex/0-Overview.nw"*/
 public 
 /*line 1157 "src/desktop/DesktopController.nw"*/
 void setStage(Stage s) {
   this.stage = s;
 }
-/*line 308 "src/tex/0-Overview.nw"*/
+/*line 317 "src/tex/0-Overview.nw"*/
 public 
 /*line 1150 "src/desktop/DesktopController.nw"*/
 void setWindowHeight(double h) {
   this.window_height = h;
 }
-/*line 309 "src/tex/0-Overview.nw"*/
+/*line 318 "src/tex/0-Overview.nw"*/
 public 
 /*line 1143 "src/desktop/DesktopController.nw"*/
 void setWindowWidth(double w) {
   this.window_width = w;
 }
-/*line 310 "src/tex/0-Overview.nw"*/
+/*line 319 "src/tex/0-Overview.nw"*/
 public 
 /*line 1059 "src/desktop/DesktopController.nw"*/
 void toggleMetric(final ActionEvent e) {
@@ -997,7 +997,7 @@ void toggleMetric(final ActionEvent e) {
     this.cbMetricFetcher.get(id).cancel(true);
   }
 }
-/*line 311 "src/tex/0-Overview.nw"*/
+/*line 320 "src/tex/0-Overview.nw"*/
 private 
 /*line 1100 "src/desktop/DesktopController.nw"*/
 void drawRoadNetwork() {
@@ -1033,7 +1033,7 @@ void drawRoadNetwork() {
     return;
   }
 }
-/*line 312 "src/tex/0-Overview.nw"*/
+/*line 321 "src/tex/0-Overview.nw"*/
 private 
 /*line 1137 "src/desktop/DesktopController.nw"*/
 void drawServersInitial() {

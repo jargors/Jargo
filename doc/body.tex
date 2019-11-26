@@ -122,6 +122,15 @@ public \LA{}Admin: JargoInstanceExport(1)~{\nwtagstyle{}\subpageref{NWgUSr6-4Uss
 public \LA{}Admin: JargoInstanceInitialize(0)~{\nwtagstyle{}\subpageref{NWgUSr6-RmKLy-1}}\RA{}
 public \LA{}Admin: JargoInstanceLoad(1)~{\nwtagstyle{}\subpageref{NWgUSr6-2ccHxN-1}}\RA{}
 public \LA{}Admin: JargoInstanceNew(0)~{\nwtagstyle{}\subpageref{NWgUSr6-2umFNk-1}}\RA{}
+public \LA{}Get: getStatCountDBQueryServersLocationsActive(0)~{\nwtagstyle{}\subpageref{NWgUSr6-4B18Lo-1}}\RA{}
+public \LA{}Get: getStatCountDBQueryServerScheduleRemaining(0)~{\nwtagstyle{}\subpageref{NWgUSr6-2TSTzn-1}}\RA{}
+public \LA{}Get: getStatCountDBQueryRequestsQueued(0)~{\nwtagstyle{}\subpageref{NWgUSr6-qyJ6q-1}}\RA{}
+public \LA{}Get: getStatDurTotalDBQueryServersLocationsActive(0)~{\nwtagstyle{}\subpageref{NWgUSr6-4dWrj6-1}}\RA{}
+public \LA{}Get: getStatDurTotalDBQueryServerScheduleRemaining(0)~{\nwtagstyle{}\subpageref{NWgUSr6-2M0m32-1}}\RA{}
+public \LA{}Get: getStatDurTotalDBQueryRequestsQueued(0)~{\nwtagstyle{}\subpageref{NWgUSr6-3O7Yzr-1}}\RA{}
+public \LA{}Get: getStatDurLastDBQueryServersLocationsActive(0)~{\nwtagstyle{}\subpageref{NWgUSr6-3XisOH-1}}\RA{}
+public \LA{}Get: getStatDurLastDBQueryServerScheduleRemaining(0)~{\nwtagstyle{}\subpageref{NWgUSr6-1nNLK6-1}}\RA{}
+public \LA{}Get: getStatDurLastDBQueryRequestsQueued(0)~{\nwtagstyle{}\subpageref{NWgUSr6-31GWfD-1}}\RA{}
 public \LA{}Get: getRefCacheEdges(0)~{\nwtagstyle{}\subpageref{NWgUSr6-4JnCHJ-1}}\RA{}
 public \LA{}Get: getRefCacheUsers(0)~{\nwtagstyle{}\subpageref{NWgUSr6-2K219H-1}}\RA{}
 public \LA{}Get: getRefCacheVertices(0)~{\nwtagstyle{}\subpageref{NWgUSr6-36IzCR-1}}\RA{}
@@ -2917,6 +2926,8 @@ Integer {\tt{}t} (param. 1):&a time
 \end{tabular}
 \nwenddocs{}\nwbegincode{71}\sublabel{NW18ZcDF-4AIMTx-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW18ZcDF-4AIMTx-1}}}\moddef{Read: DBQueryRequestsQueued(1)~{\nwtagstyle{}\subpageref{NW18ZcDF-4AIMTx-1}}}\endmoddef\nwalsodefined{\\{NW18ZcDF-4AIMTx-2}\\{NW18ZcDF-4AIMTx-3}}\nwused{\\{NW3x1zuR-Oyob-1}}
 int[] DBQueryRequestsQueued(final int t) throws SQLException \{
+  this.stat_count_DBQueryRequestsQueued++;
+  long A0 = System.currentTimeMillis();
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NWgUSr6-JT1v9-1}}\RA{}) \{
 \nosublabel{NW18ZcDF-4AIMTx-1-u1}\nwindexdefn{DBQueryRequestsQueued}{DBQueryRequestsQueued}{NW18ZcDF-4AIMTx-1}\eatline
 \nwidentdefs{\\{{DBQueryRequestsQueued}{DBQueryRequestsQueued}}}\nwendcode{}\nwbegindocs{72}{\small Our approach is to first select all requests where $t$ is between the
@@ -2943,6 +2954,9 @@ pre-filter number of requests.}
     \}
 \nwidentuses{\\{{PSQuery}{PSQuery}}\\{{S143}{S143}}}\nwindexuse{PSQuery}{PSQuery}{NW18ZcDF-4AIMTx-2}\nwindexuse{S143}{S143}{NW18ZcDF-4AIMTx-2}\nwendcode{}\nwbegindocs{74}\nwdocspar
 \nwenddocs{}\nwbegincode{75}\sublabel{NW18ZcDF-4AIMTx-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW18ZcDF-4AIMTx-3}}}\moddef{Read: DBQueryRequestsQueued(1)~{\nwtagstyle{}\subpageref{NW18ZcDF-4AIMTx-1}}}\plusendmoddef
+    this.stat_dur_last_DBQueryRequestsQueued = (System.currentTimeMillis() - A0);
+      this.stat_dur_total_DBQueryRequestsQueued +=
+        this.stat_dur_last_DBQueryRequestsQueued;
     return Arrays.copyOf(temp1, j);
   \} catch (SQLException e) \{
     throw e;
@@ -3169,6 +3183,8 @@ to be in the same order as the actual pick-ups and drop-offs.\\
 \nwenddocs{}\nwbegincode{91}\sublabel{NW18ZcDF-48DsrJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW18ZcDF-48DsrJ-1}}}\moddef{Read: DBQueryServerScheduleRemaining(2)~{\nwtagstyle{}\subpageref{NW18ZcDF-48DsrJ-1}}}\endmoddef\nwused{\\{NW3x1zuR-Oyob-1}}
 int[] DBQueryServerScheduleRemaining(final int sid, final int t)
 throws SQLException \{
+  this.stat_count_DBQueryServerScheduleRemaining++;
+  long A0 = System.currentTimeMillis();
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NWgUSr6-JT1v9-1}}\RA{}) \{
     int[] temp = PSQuery(conn, "S144", 3, sid, t);
@@ -3189,6 +3205,9 @@ throws SQLException \{
   \} catch (SQLException e) \{
     throw e;
   \}
+  this.stat_dur_last_DBQueryServerScheduleRemaining = (System.currentTimeMillis() - A0);
+  this.stat_dur_total_DBQueryServerScheduleRemaining +=
+    this.stat_dur_last_DBQueryServerScheduleRemaining;
   return output;
 \}
 \nwindexdefn{DBQueryServerScheduleRemaining}{DBQueryServerScheduleRemaining}{NW18ZcDF-48DsrJ-1}\eatline
@@ -3791,7 +3810,7 @@ int[] DBQueryServersActive(final int t) throws SQLException \{
 \nwixlogsorted{c}{{\code{}DesktopController\edoc{} member variables}{NWn0bN8-2iHsHO-1}{\nwixu{NWn0bN8-4ScqTl-1}\nwixd{NWn0bN8-2iHsHO-1}\nwixd{NWn0bN8-2iHsHO-2}\nwixd{NWn0bN8-2iHsHO-3}\nwixd{NWn0bN8-2iHsHO-4}\nwixd{NWn0bN8-2iHsHO-5}\nwixd{NWn0bN8-2iHsHO-6}\nwixd{NWn0bN8-2iHsHO-7}\nwixd{NWn0bN8-2iHsHO-8}\nwixd{NWn0bN8-2iHsHO-9}\nwixd{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-2iHsHO-B}}}%
 \nwixlogsorted{c}{{\code{}DesktopController\edoc{} methods}{NW3x1zuR-14uWYi-1}{\nwixd{NW3x1zuR-14uWYi-1}\nwixd{NW3x1zuR-14uWYi-2}\nwixd{NW3x1zuR-14uWYi-3}\nwixu{NWn0bN8-4ScqTl-1}}}%
 \nwixlogsorted{c}{{\code{}Storage\edoc{} constructor}{NW27XAxz-36NvOs-1}{\nwixu{NW27XAxz-203Bbj-1}\nwixd{NW27XAxz-36NvOs-1}}}%
-\nwixlogsorted{c}{{\code{}Storage\edoc{} member variables}{NW27XAxz-17yXws-1}{\nwixu{NW27XAxz-203Bbj-1}\nwixd{NW27XAxz-17yXws-1}\nwixd{NW27XAxz-17yXws-2}\nwixd{NW27XAxz-17yXws-3}\nwixd{NW27XAxz-17yXws-4}}}%
+\nwixlogsorted{c}{{\code{}Storage\edoc{} member variables}{NW27XAxz-17yXws-1}{\nwixu{NW27XAxz-203Bbj-1}\nwixd{NW27XAxz-17yXws-1}\nwixd{NW27XAxz-17yXws-2}\nwixd{NW27XAxz-17yXws-3}\nwixd{NW27XAxz-17yXws-4}\nwixd{NW27XAxz-17yXws-5}}}%
 \nwixlogsorted{c}{{\code{}Storage\edoc{} methods}{NW3x1zuR-Oyob-1}{\nwixd{NW3x1zuR-Oyob-1}\nwixd{NW3x1zuR-Oyob-2}\nwixd{NW3x1zuR-Oyob-3}\nwixu{NW27XAxz-203Bbj-1}}}%
 \nwixlogsorted{c}{{\code{}Tools\edoc{} constructor}{NW3zOIuJ-t47ol-1}{\nwixu{NW3zOIuJ-2Vh5vZ-1}\nwixd{NW3zOIuJ-t47ol-1}}}%
 \nwixlogsorted{c}{{\code{}Tools\edoc{} member variables}{NW3zOIuJ-2Qlw5e-1}{\nwixu{NW3zOIuJ-2Vh5vZ-1}\nwixd{NW3zOIuJ-2Qlw5e-1}}}%
@@ -3919,6 +3938,15 @@ int[] DBQueryServersActive(final int t) throws SQLException \{
 \nwixlogsorted{c}{{Get: getRefCacheVertices(0)}{NWgUSr6-36IzCR-1}{\nwixu{NW3x1zuR-Oyob-3}\nwixd{NWgUSr6-36IzCR-1}}}%
 \nwixlogsorted{c}{{Get: getRefCommunicator(0)}{NWgUSr6-3YpYRT-1}{\nwixu{NW3x1zuR-2u8vSA-3}\nwixd{NWgUSr6-3YpYRT-1}}}%
 \nwixlogsorted{c}{{Get: getRefStorage(0)}{NWgUSr6-vW5JI-1}{\nwixu{NW3x1zuR-2u8vSA-3}\nwixd{NWgUSr6-vW5JI-1}}}%
+\nwixlogsorted{c}{{Get: getStatCountDBQueryRequestsQueued(0)}{NWgUSr6-qyJ6q-1}{\nwixu{NW3x1zuR-Oyob-3}\nwixd{NWgUSr6-qyJ6q-1}}}%
+\nwixlogsorted{c}{{Get: getStatCountDBQueryServerScheduleRemaining(0)}{NWgUSr6-2TSTzn-1}{\nwixu{NW3x1zuR-Oyob-3}\nwixd{NWgUSr6-2TSTzn-1}}}%
+\nwixlogsorted{c}{{Get: getStatCountDBQueryServersLocationsActive(0)}{NWgUSr6-4B18Lo-1}{\nwixu{NW3x1zuR-Oyob-3}\nwixd{NWgUSr6-4B18Lo-1}}}%
+\nwixlogsorted{c}{{Get: getStatDurLastDBQueryRequestsQueued(0)}{NWgUSr6-31GWfD-1}{\nwixu{NW3x1zuR-Oyob-3}\nwixd{NWgUSr6-31GWfD-1}}}%
+\nwixlogsorted{c}{{Get: getStatDurLastDBQueryServerScheduleRemaining(0)}{NWgUSr6-1nNLK6-1}{\nwixu{NW3x1zuR-Oyob-3}\nwixd{NWgUSr6-1nNLK6-1}}}%
+\nwixlogsorted{c}{{Get: getStatDurLastDBQueryServersLocationsActive(0)}{NWgUSr6-3XisOH-1}{\nwixu{NW3x1zuR-Oyob-3}\nwixd{NWgUSr6-3XisOH-1}}}%
+\nwixlogsorted{c}{{Get: getStatDurTotalDBQueryRequestsQueued(0)}{NWgUSr6-3O7Yzr-1}{\nwixu{NW3x1zuR-Oyob-3}\nwixd{NWgUSr6-3O7Yzr-1}}}%
+\nwixlogsorted{c}{{Get: getStatDurTotalDBQueryServerScheduleRemaining(0)}{NWgUSr6-2M0m32-1}{\nwixu{NW3x1zuR-Oyob-3}\nwixd{NWgUSr6-2M0m32-1}}}%
+\nwixlogsorted{c}{{Get: getStatDurTotalDBQueryServersLocationsActive(0)}{NWgUSr6-4dWrj6-1}{\nwixu{NW3x1zuR-Oyob-3}\nwixd{NWgUSr6-4dWrj6-1}}}%
 \nwixlogsorted{c}{{Get: retrieveClockNow(0)}{NWgUSr6-3Seh60-1}{\nwixu{NW3x1zuR-2Rlctf-3}\nwixd{NWgUSr6-3Seh60-1}}}%
 \nwixlogsorted{c}{{Get: retrieveQueueSize(0)}{NWgUSr6-2CdKcD-1}{\nwixu{NW3x1zuR-2u8vSA-3}\nwixd{NWgUSr6-2CdKcD-1}}}%
 \nwixlogsorted{c}{{Get: retrieveRefCacheEdges(0)}{NWgUSr6-2ftMHn-1}{\nwixu{NW3x1zuR-2u8vSA-3}\nwixu{NW3x1zuR-2Rlctf-3}\nwixd{NWgUSr6-2ftMHn-1}}}%
@@ -4205,7 +4233,7 @@ int[] DBQueryServersActive(final int t) throws SQLException \{
 \nwixlogsorted{c}{{startSequential(1)}{NW2ZDXo8-2R9Ikm-1}{\nwixu{NW3x1zuR-2u8vSA-3}\nwixd{NW2ZDXo8-2R9Ikm-1}}}%
 \nwixlogsorted{c}{{stop(1)}{NW2ZDXo8-3APzVY-1}{\nwixu{NW3x1zuR-2u8vSA-3}\nwixd{NW2ZDXo8-3APzVY-1}}}%
 \nwixlogsorted{c}{{Storage.java}{NW27XAxz-203Bbj-1}{\nwixd{NW27XAxz-203Bbj-1}}}%
-\nwixlogsorted{c}{{Storage.java preamble}{NW27XAxz-FkGTW-1}{\nwixu{NW27XAxz-203Bbj-1}\nwixd{NW27XAxz-FkGTW-1}\nwixd{NW27XAxz-FkGTW-2}\nwixd{NW27XAxz-FkGTW-3}\nwixd{NW27XAxz-FkGTW-4}\nwixd{NW27XAxz-FkGTW-5}}}%
+\nwixlogsorted{c}{{Storage.java preamble}{NW27XAxz-FkGTW-1}{\nwixu{NW27XAxz-203Bbj-1}\nwixd{NW27XAxz-FkGTW-1}\nwixd{NW27XAxz-FkGTW-2}\nwixd{NW27XAxz-FkGTW-3}\nwixd{NW27XAxz-FkGTW-4}\nwixd{NW27XAxz-FkGTW-5}\nwixd{NW27XAxz-FkGTW-6}}}%
 \nwixlogsorted{c}{{toggleMetric(1)}{NWn0bN8-dsz3A-1}{\nwixu{NW3x1zuR-14uWYi-3}\nwixd{NWn0bN8-dsz3A-1}}}%
 \nwixlogsorted{c}{{Tools.java}{NW3zOIuJ-2Vh5vZ-1}{\nwixd{NW3zOIuJ-2Vh5vZ-1}}}%
 \nwixlogsorted{c}{{Tools.java preamble}{NW3zOIuJ-1ANZ96-1}{\nwixu{NW3zOIuJ-2Vh5vZ-1}\nwixd{NW3zOIuJ-1ANZ96-1}}}%
@@ -4326,6 +4354,15 @@ int[] DBQueryServersActive(final int t) throws SQLException \{
 \nwixlogsorted{i}{{getRefCacheVertices}{getRefCacheVertices}}%
 \nwixlogsorted{i}{{getRefCommunicator}{getRefCommunicator}}%
 \nwixlogsorted{i}{{getRefStorage}{getRefStorage}}%
+\nwixlogsorted{i}{{getStatCountDBQuerRequestsQueuedy}{getStatCountDBQuerRequestsQueuedy}}%
+\nwixlogsorted{i}{{getStatCountDBQueryServerScheduleRemaining}{getStatCountDBQueryServerScheduleRemaining}}%
+\nwixlogsorted{i}{{getStatCountDBQueryServersLocationsActive}{getStatCountDBQueryServersLocationsActive}}%
+\nwixlogsorted{i}{{getStatDurLastDBQuerRequestsQueuedy}{getStatDurLastDBQuerRequestsQueuedy}}%
+\nwixlogsorted{i}{{getStatDurLastDBQueryServerScheduleRemaining}{getStatDurLastDBQueryServerScheduleRemaining}}%
+\nwixlogsorted{i}{{getStatDurLastDBQueryServersLocationsActive}{getStatDurLastDBQueryServersLocationsActive}}%
+\nwixlogsorted{i}{{getStatDurTotalDBQuerRequestsQueuedy}{getStatDurTotalDBQuerRequestsQueuedy}}%
+\nwixlogsorted{i}{{getStatDurTotalDBQueryServerScheduleRemaining}{getStatDurTotalDBQueryServerScheduleRemaining}}%
+\nwixlogsorted{i}{{getStatDurTotalDBQueryServersLocationsActive}{getStatDurTotalDBQueryServersLocationsActive}}%
 \nwixlogsorted{i}{{GTGtreeClose}{GTGtreeClose}}%
 \nwixlogsorted{i}{{GTGtreeLoad}{GTGtreeLoad}}%
 \nwixlogsorted{i}{{gtreeClose}{gtreeClose}}%
@@ -4608,6 +4645,8 @@ for $t$ given by param. 1.\\
 \end{tabular}
 \nwenddocs{}\nwbegincode{135}\sublabel{NW18ZcDF-2tWQc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW18ZcDF-2tWQc-1}}}\moddef{Read: DBQueryServersLocationsActive(1)~{\nwtagstyle{}\subpageref{NW18ZcDF-2tWQc-1}}}\endmoddef\nwalsodefined{\\{NW18ZcDF-2tWQc-2}}\nwused{\\{NW3x1zuR-Oyob-1}}
 int[] DBQueryServersLocationsActive(final int t) throws SQLException \{
+  this.stat_count_DBQueryServersLocationsActive++;
+  long A0 = System.currentTimeMillis();
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NWgUSr6-JT1v9-1}}\RA{}) \{
     int j = 0;
@@ -4642,6 +4681,9 @@ servers. Then for each active server, we use either statement {\tt{}\protect\nwi
   \} catch (SQLException e) \{
     throw e;
   \}
+  this.stat_dur_last_DBQueryServersLocationsActive = (System.currentTimeMillis() - A0);
+  this.stat_dur_total_DBQueryServersLocationsActive +=
+    this.stat_dur_last_DBQueryServersLocationsActive;
   return output;
 \}
 \nwidentuses{\\{{PSQuery}{PSQuery}}\\{{query}{query}}\\{{S134}{S134}}\\{{S135}{S135}}\\{{S147}{S147}}}\nwindexuse{PSQuery}{PSQuery}{NW18ZcDF-2tWQc-2}\nwindexuse{query}{query}{NW18ZcDF-2tWQc-2}\nwindexuse{S134}{S134}{NW18ZcDF-2tWQc-2}\nwindexuse{S135}{S135}{NW18ZcDF-2tWQc-2}\nwindexuse{S147}{S147}{NW18ZcDF-2tWQc-2}\nwendcode{}\nwbegindocs{138}\nwdocspar
@@ -7422,166 +7464,229 @@ int getQueueSize() \{
 \}
 \nwindexdefn{getQueueSize}{getQueueSize}{NWgUSr6-3tXz0E-1}\eatline
 \nwidentdefs{\\{{getQueueSize}{getQueueSize}}}\nwendcode{}\nwbegindocs{169}\nwdocspar
+\subsection{\texttt{getStatCountDBQueryServersLocationsActive}(0)}
+\nwenddocs{}\nwbegincode{170}\sublabel{NWgUSr6-4B18Lo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-4B18Lo-1}}}\moddef{Get: getStatCountDBQueryServersLocationsActive(0)~{\nwtagstyle{}\subpageref{NWgUSr6-4B18Lo-1}}}\endmoddef\nwused{\\{NW3x1zuR-Oyob-3}}
+int getStatCountDBQueryServersLocationsActive() \{
+  return this.stat_count_DBQueryServersLocationsActive;
+\}
+\nwindexdefn{getStatCountDBQueryServersLocationsActive}{getStatCountDBQueryServersLocationsActive}{NWgUSr6-4B18Lo-1}\eatline
+\nwidentdefs{\\{{getStatCountDBQueryServersLocationsActive}{getStatCountDBQueryServersLocationsActive}}}\nwendcode{}\nwbegindocs{171}\nwdocspar
+\subsection{\texttt{getStatCountDBQueryServerScheduleRemaining}(0)}
+\nwenddocs{}\nwbegincode{172}\sublabel{NWgUSr6-2TSTzn-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-2TSTzn-1}}}\moddef{Get: getStatCountDBQueryServerScheduleRemaining(0)~{\nwtagstyle{}\subpageref{NWgUSr6-2TSTzn-1}}}\endmoddef\nwused{\\{NW3x1zuR-Oyob-3}}
+int getStatCountDBQueryServerScheduleRemaining() \{
+  return this.stat_count_DBQueryServerScheduleRemaining;
+\}
+\nwindexdefn{getStatCountDBQueryServerScheduleRemaining}{getStatCountDBQueryServerScheduleRemaining}{NWgUSr6-2TSTzn-1}\eatline
+\nwidentdefs{\\{{getStatCountDBQueryServerScheduleRemaining}{getStatCountDBQueryServerScheduleRemaining}}}\nwendcode{}\nwbegindocs{173}\nwdocspar
+\subsection{\texttt{getStatCountDBQueryRequestsQueued}(0)}
+\nwenddocs{}\nwbegincode{174}\sublabel{NWgUSr6-qyJ6q-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-qyJ6q-1}}}\moddef{Get: getStatCountDBQueryRequestsQueued(0)~{\nwtagstyle{}\subpageref{NWgUSr6-qyJ6q-1}}}\endmoddef\nwused{\\{NW3x1zuR-Oyob-3}}
+int getStatCountDBQueryRequestsQueued() \{
+  return this.stat_count_DBQueryRequestsQueued;
+\}
+\nwindexdefn{getStatCountDBQuerRequestsQueuedy}{getStatCountDBQuerRequestsQueuedy}{NWgUSr6-qyJ6q-1}\eatline
+\nwidentdefs{\\{{getStatCountDBQuerRequestsQueuedy}{getStatCountDBQuerRequestsQueuedy}}}\nwendcode{}\nwbegindocs{175}\nwdocspar
+\subsection{\texttt{getStatDurTotalDBQueryServersLocationsActive}(0)}
+\nwenddocs{}\nwbegincode{176}\sublabel{NWgUSr6-4dWrj6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-4dWrj6-1}}}\moddef{Get: getStatDurTotalDBQueryServersLocationsActive(0)~{\nwtagstyle{}\subpageref{NWgUSr6-4dWrj6-1}}}\endmoddef\nwused{\\{NW3x1zuR-Oyob-3}}
+long getStatDurTotalDBQueryServersLocationsActive() \{
+  return this.stat_dur_total_DBQueryServersLocationsActive;
+\}
+\nwindexdefn{getStatDurTotalDBQueryServersLocationsActive}{getStatDurTotalDBQueryServersLocationsActive}{NWgUSr6-4dWrj6-1}\eatline
+\nwidentdefs{\\{{getStatDurTotalDBQueryServersLocationsActive}{getStatDurTotalDBQueryServersLocationsActive}}}\nwendcode{}\nwbegindocs{177}\nwdocspar
+\subsection{\texttt{getStatDurTotalDBQueryServerScheduleRemaining}(0)}
+\nwenddocs{}\nwbegincode{178}\sublabel{NWgUSr6-2M0m32-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-2M0m32-1}}}\moddef{Get: getStatDurTotalDBQueryServerScheduleRemaining(0)~{\nwtagstyle{}\subpageref{NWgUSr6-2M0m32-1}}}\endmoddef\nwused{\\{NW3x1zuR-Oyob-3}}
+long getStatDurTotalDBQueryServerScheduleRemaining() \{
+  return this.stat_dur_total_DBQueryServerScheduleRemaining;
+\}
+\nwindexdefn{getStatDurTotalDBQueryServerScheduleRemaining}{getStatDurTotalDBQueryServerScheduleRemaining}{NWgUSr6-2M0m32-1}\eatline
+\nwidentdefs{\\{{getStatDurTotalDBQueryServerScheduleRemaining}{getStatDurTotalDBQueryServerScheduleRemaining}}}\nwendcode{}\nwbegindocs{179}\nwdocspar
+\subsection{\texttt{getStatDurTotalDBQueryRequestsQueued}(0)}
+\nwenddocs{}\nwbegincode{180}\sublabel{NWgUSr6-3O7Yzr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-3O7Yzr-1}}}\moddef{Get: getStatDurTotalDBQueryRequestsQueued(0)~{\nwtagstyle{}\subpageref{NWgUSr6-3O7Yzr-1}}}\endmoddef\nwused{\\{NW3x1zuR-Oyob-3}}
+long getStatDurTotalDBQueryRequestsQueued() \{
+  return this.stat_dur_total_DBQueryRequestsQueued;
+\}
+\nwindexdefn{getStatDurTotalDBQuerRequestsQueuedy}{getStatDurTotalDBQuerRequestsQueuedy}{NWgUSr6-3O7Yzr-1}\eatline
+\nwidentdefs{\\{{getStatDurTotalDBQuerRequestsQueuedy}{getStatDurTotalDBQuerRequestsQueuedy}}}\nwendcode{}\nwbegindocs{181}\nwdocspar
+\subsection{\texttt{getStatDurLastDBQueryServersLocationsActive}(0)}
+\nwenddocs{}\nwbegincode{182}\sublabel{NWgUSr6-3XisOH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-3XisOH-1}}}\moddef{Get: getStatDurLastDBQueryServersLocationsActive(0)~{\nwtagstyle{}\subpageref{NWgUSr6-3XisOH-1}}}\endmoddef\nwused{\\{NW3x1zuR-Oyob-3}}
+long getStatDurLastDBQueryServersLocationsActive() \{
+  return this.stat_dur_last_DBQueryServersLocationsActive;
+\}
+\nwindexdefn{getStatDurLastDBQueryServersLocationsActive}{getStatDurLastDBQueryServersLocationsActive}{NWgUSr6-3XisOH-1}\eatline
+\nwidentdefs{\\{{getStatDurLastDBQueryServersLocationsActive}{getStatDurLastDBQueryServersLocationsActive}}}\nwendcode{}\nwbegindocs{183}\nwdocspar
+\subsection{\texttt{getStatDurLastDBQueryServerScheduleRemaining}(0)}
+\nwenddocs{}\nwbegincode{184}\sublabel{NWgUSr6-1nNLK6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-1nNLK6-1}}}\moddef{Get: getStatDurLastDBQueryServerScheduleRemaining(0)~{\nwtagstyle{}\subpageref{NWgUSr6-1nNLK6-1}}}\endmoddef\nwused{\\{NW3x1zuR-Oyob-3}}
+long getStatDurLastDBQueryServerScheduleRemaining() \{
+  return this.stat_dur_last_DBQueryServerScheduleRemaining;
+\}
+\nwindexdefn{getStatDurLastDBQueryServerScheduleRemaining}{getStatDurLastDBQueryServerScheduleRemaining}{NWgUSr6-1nNLK6-1}\eatline
+\nwidentdefs{\\{{getStatDurLastDBQueryServerScheduleRemaining}{getStatDurLastDBQueryServerScheduleRemaining}}}\nwendcode{}\nwbegindocs{185}\nwdocspar
+\subsection{\texttt{getStatDurLastDBQueryRequestsQueued}(0)}
+\nwenddocs{}\nwbegincode{186}\sublabel{NWgUSr6-31GWfD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-31GWfD-1}}}\moddef{Get: getStatDurLastDBQueryRequestsQueued(0)~{\nwtagstyle{}\subpageref{NWgUSr6-31GWfD-1}}}\endmoddef\nwused{\\{NW3x1zuR-Oyob-3}}
+long getStatDurLastDBQueryRequestsQueued() \{
+  return this.stat_dur_last_DBQueryRequestsQueued;
+\}
+\nwindexdefn{getStatDurLastDBQuerRequestsQueuedy}{getStatDurLastDBQuerRequestsQueuedy}{NWgUSr6-31GWfD-1}\eatline
+\nwidentdefs{\\{{getStatDurLastDBQuerRequestsQueuedy}{getStatDurLastDBQuerRequestsQueuedy}}}\nwendcode{}\nwbegindocs{187}\nwdocspar
 \subsection{\texttt{retrieveQueueSize}(0)}
-\nwenddocs{}\nwbegincode{170}\sublabel{NWgUSr6-2CdKcD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-2CdKcD-1}}}\moddef{Get: retrieveQueueSize(0)~{\nwtagstyle{}\subpageref{NWgUSr6-2CdKcD-1}}}\endmoddef\nwused{\\{NW3x1zuR-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{188}\sublabel{NWgUSr6-2CdKcD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-2CdKcD-1}}}\moddef{Get: retrieveQueueSize(0)~{\nwtagstyle{}\subpageref{NWgUSr6-2CdKcD-1}}}\endmoddef\nwused{\\{NW3x1zuR-2u8vSA-3}}
 int retrieveQueueSize() \{
   return this.client.getQueueSize();
 \}
 \nwindexdefn{retrieveQueueSize}{retrieveQueueSize}{NWgUSr6-2CdKcD-1}\eatline
-\nwidentdefs{\\{{retrieveQueueSize}{retrieveQueueSize}}}\nwidentuses{\\{{getQueueSize}{getQueueSize}}}\nwindexuse{getQueueSize}{getQueueSize}{NWgUSr6-2CdKcD-1}\nwendcode{}\nwbegindocs{171}\nwdocspar
+\nwidentdefs{\\{{retrieveQueueSize}{retrieveQueueSize}}}\nwidentuses{\\{{getQueueSize}{getQueueSize}}}\nwindexuse{getQueueSize}{getQueueSize}{NWgUSr6-2CdKcD-1}\nwendcode{}\nwbegindocs{189}\nwdocspar
 \subsection{\texttt{retrieveClockNow}(0)}
-\nwenddocs{}\nwbegincode{172}\sublabel{NWgUSr6-3Seh60-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-3Seh60-1}}}\moddef{Get: retrieveClockNow(0)~{\nwtagstyle{}\subpageref{NWgUSr6-3Seh60-1}}}\endmoddef\nwused{\\{NW3x1zuR-2Rlctf-3}}
+\nwenddocs{}\nwbegincode{190}\sublabel{NWgUSr6-3Seh60-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-3Seh60-1}}}\moddef{Get: retrieveClockNow(0)~{\nwtagstyle{}\subpageref{NWgUSr6-3Seh60-1}}}\endmoddef\nwused{\\{NW3x1zuR-2Rlctf-3}}
 int retrieveClockNow() \{
   return this.controller.getClockNow();
 \}
 \nwindexdefn{retrieveClockNow}{retrieveClockNow}{NWgUSr6-3Seh60-1}\eatline
-\nwidentdefs{\\{{retrieveClockNow}{retrieveClockNow}}}\nwidentuses{\\{{getClockNow}{getClockNow}}}\nwindexuse{getClockNow}{getClockNow}{NWgUSr6-3Seh60-1}\nwendcode{}\nwbegindocs{173}\nwdocspar
+\nwidentdefs{\\{{retrieveClockNow}{retrieveClockNow}}}\nwidentuses{\\{{getClockNow}{getClockNow}}}\nwindexuse{getClockNow}{getClockNow}{NWgUSr6-3Seh60-1}\nwendcode{}\nwbegindocs{191}\nwdocspar
 \subsection{\texttt{retrieveRefCacheVertices}(0)}
-\nwenddocs{}\nwbegincode{174}\sublabel{NWgUSr6-38KfuO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-38KfuO-1}}}\moddef{Get: retrieveRefCacheVertices(0)~{\nwtagstyle{}\subpageref{NWgUSr6-38KfuO-1}}}\endmoddef\nwused{\\{NW3x1zuR-2u8vSA-3}\\{NW3x1zuR-2Rlctf-3}}
+\nwenddocs{}\nwbegincode{192}\sublabel{NWgUSr6-38KfuO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-38KfuO-1}}}\moddef{Get: retrieveRefCacheVertices(0)~{\nwtagstyle{}\subpageref{NWgUSr6-38KfuO-1}}}\endmoddef\nwused{\\{NW3x1zuR-2u8vSA-3}\\{NW3x1zuR-2Rlctf-3}}
 final ConcurrentHashMap<Integer, int[]> retrieveRefCacheVertices() \{
   return this.storage.getRefCacheVertices();
 \}
 \nwindexdefn{retrieveRefCacheVertices}{retrieveRefCacheVertices}{NWgUSr6-38KfuO-1}\eatline
-\nwidentdefs{\\{{retrieveRefCacheVertices}{retrieveRefCacheVertices}}}\nwidentuses{\\{{getRefCacheVertices}{getRefCacheVertices}}}\nwindexuse{getRefCacheVertices}{getRefCacheVertices}{NWgUSr6-38KfuO-1}\nwendcode{}\nwbegindocs{175}\nwdocspar
+\nwidentdefs{\\{{retrieveRefCacheVertices}{retrieveRefCacheVertices}}}\nwidentuses{\\{{getRefCacheVertices}{getRefCacheVertices}}}\nwindexuse{getRefCacheVertices}{getRefCacheVertices}{NWgUSr6-38KfuO-1}\nwendcode{}\nwbegindocs{193}\nwdocspar
 \subsection{\texttt{retrieveRefCacheEdges}(0)}
-\nwenddocs{}\nwbegincode{176}\sublabel{NWgUSr6-2ftMHn-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-2ftMHn-1}}}\moddef{Get: retrieveRefCacheEdges(0)~{\nwtagstyle{}\subpageref{NWgUSr6-2ftMHn-1}}}\endmoddef\nwused{\\{NW3x1zuR-2u8vSA-3}\\{NW3x1zuR-2Rlctf-3}}
+\nwenddocs{}\nwbegincode{194}\sublabel{NWgUSr6-2ftMHn-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-2ftMHn-1}}}\moddef{Get: retrieveRefCacheEdges(0)~{\nwtagstyle{}\subpageref{NWgUSr6-2ftMHn-1}}}\endmoddef\nwused{\\{NW3x1zuR-2u8vSA-3}\\{NW3x1zuR-2Rlctf-3}}
 final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> retrieveRefCacheEdges() \{
   return this.storage.getRefCacheEdges();
 \}
 \nwindexdefn{retrieveRefCacheEdges}{retrieveRefCacheEdges}{NWgUSr6-2ftMHn-1}\eatline
-\nwidentdefs{\\{{retrieveRefCacheEdges}{retrieveRefCacheEdges}}}\nwidentuses{\\{{getRefCacheEdges}{getRefCacheEdges}}}\nwindexuse{getRefCacheEdges}{getRefCacheEdges}{NWgUSr6-2ftMHn-1}\nwendcode{}\nwbegindocs{177}\nwdocspar
+\nwidentdefs{\\{{retrieveRefCacheEdges}{retrieveRefCacheEdges}}}\nwidentuses{\\{{getRefCacheEdges}{getRefCacheEdges}}}\nwindexuse{getRefCacheEdges}{getRefCacheEdges}{NWgUSr6-2ftMHn-1}\nwendcode{}\nwbegindocs{195}\nwdocspar
 \subsection{\texttt{retrieveRefCacheUsers}(0)}
-\nwenddocs{}\nwbegincode{178}\sublabel{NWgUSr6-842o1-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-842o1-1}}}\moddef{Get: retrieveRefCacheUsers(0)~{\nwtagstyle{}\subpageref{NWgUSr6-842o1-1}}}\endmoddef\nwused{\\{NW3x1zuR-2u8vSA-3}\\{NW3x1zuR-2Rlctf-3}}
+\nwenddocs{}\nwbegincode{196}\sublabel{NWgUSr6-842o1-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-842o1-1}}}\moddef{Get: retrieveRefCacheUsers(0)~{\nwtagstyle{}\subpageref{NWgUSr6-842o1-1}}}\endmoddef\nwused{\\{NW3x1zuR-2u8vSA-3}\\{NW3x1zuR-2Rlctf-3}}
 final ConcurrentHashMap<Integer, int[]> retrieveRefCacheUsers() \{
   return this.storage.getRefCacheUsers();
 \}
 \nwindexdefn{retrieveRefCacheUsers}{retrieveRefCacheUsers}{NWgUSr6-842o1-1}\eatline
-\nwidentdefs{\\{{retrieveRefCacheUsers}{retrieveRefCacheUsers}}}\nwidentuses{\\{{getRefCacheUsers}{getRefCacheUsers}}}\nwindexuse{getRefCacheUsers}{getRefCacheUsers}{NWgUSr6-842o1-1}\nwendcode{}\nwbegindocs{179}\nwdocspar
+\nwidentdefs{\\{{retrieveRefCacheUsers}{retrieveRefCacheUsers}}}\nwidentuses{\\{{getRefCacheUsers}{getRefCacheUsers}}}\nwindexuse{getRefCacheUsers}{getRefCacheUsers}{NWgUSr6-842o1-1}\nwendcode{}\nwbegindocs{197}\nwdocspar
 
 \section{Methods: Setters}
 
 \subsection{\texttt{setClockStart}(1)}
-\nwenddocs{}\nwbegincode{180}\sublabel{NWgUSr6-3EQcO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-3EQcO-1}}}\moddef{Set: setClockStart(1)~{\nwtagstyle{}\subpageref{NWgUSr6-3EQcO-1}}}\endmoddef\nwused{\\{NW3x1zuR-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{198}\sublabel{NWgUSr6-3EQcO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-3EQcO-1}}}\moddef{Set: setClockStart(1)~{\nwtagstyle{}\subpageref{NWgUSr6-3EQcO-1}}}\endmoddef\nwused{\\{NW3x1zuR-2u8vSA-3}}
 void setClockStart(final int clock_start) \{
   this.CLOCK_START = clock_start;
 \}
 \nwindexdefn{setClockStart}{setClockStart}{NWgUSr6-3EQcO-1}\eatline
-\nwidentdefs{\\{{setClockStart}{setClockStart}}}\nwendcode{}\nwbegindocs{181}\nwdocspar
+\nwidentdefs{\\{{setClockStart}{setClockStart}}}\nwendcode{}\nwbegindocs{199}\nwdocspar
 \subsection{\texttt{setClockEnd}(1)}
-\nwenddocs{}\nwbegincode{182}\sublabel{NWgUSr6-1ORCdK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-1ORCdK-1}}}\moddef{Set: setClockEnd(1)~{\nwtagstyle{}\subpageref{NWgUSr6-1ORCdK-1}}}\endmoddef\nwused{\\{NW3x1zuR-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{200}\sublabel{NWgUSr6-1ORCdK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-1ORCdK-1}}}\moddef{Set: setClockEnd(1)~{\nwtagstyle{}\subpageref{NWgUSr6-1ORCdK-1}}}\endmoddef\nwused{\\{NW3x1zuR-2u8vSA-3}}
 void setClockEnd(final int clock_end) \{
   this.CLOCK_END = clock_end;
 \}
 \nwindexdefn{setClockEnd}{setClockEnd}{NWgUSr6-1ORCdK-1}\eatline
-\nwidentdefs{\\{{setClockEnd}{setClockEnd}}}\nwendcode{}\nwbegindocs{183}\nwdocspar
+\nwidentdefs{\\{{setClockEnd}{setClockEnd}}}\nwendcode{}\nwbegindocs{201}\nwdocspar
 \subsection{\texttt{setQueueTimeout}(1)}
-\nwenddocs{}\nwbegincode{184}\sublabel{NWgUSr6-1fyoFF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-1fyoFF-1}}}\moddef{Set: setQueueTimeout(1)~{\nwtagstyle{}\subpageref{NWgUSr6-1fyoFF-1}}}\endmoddef\nwused{\\{NW3x1zuR-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{202}\sublabel{NWgUSr6-1fyoFF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-1fyoFF-1}}}\moddef{Set: setQueueTimeout(1)~{\nwtagstyle{}\subpageref{NWgUSr6-1fyoFF-1}}}\endmoddef\nwused{\\{NW3x1zuR-2u8vSA-3}}
 void setQueueTimeout(final int queue_timeout) \{
   this.QUEUE_TIMEOUT = queue_timeout;
 \}
 \nwindexdefn{setQueueTimeout}{setQueueTimeout}{NWgUSr6-1fyoFF-1}\eatline
-\nwidentdefs{\\{{setQueueTimeout}{setQueueTimeout}}}\nwendcode{}\nwbegindocs{185}\nwdocspar
+\nwidentdefs{\\{{setQueueTimeout}{setQueueTimeout}}}\nwendcode{}\nwbegindocs{203}\nwdocspar
 \subsection{\texttt{setRequestTimeout}(1)}
-\nwenddocs{}\nwbegincode{186}\sublabel{NWgUSr6-380A5h-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-380A5h-1}}}\moddef{Set: setRequestTimeout(1)~{\nwtagstyle{}\subpageref{NWgUSr6-380A5h-1}}}\endmoddef\nwused{\\{NW3x1zuR-Oyob-3}}
+\nwenddocs{}\nwbegincode{204}\sublabel{NWgUSr6-380A5h-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-380A5h-1}}}\moddef{Set: setRequestTimeout(1)~{\nwtagstyle{}\subpageref{NWgUSr6-380A5h-1}}}\endmoddef\nwused{\\{NW3x1zuR-Oyob-3}}
 void setRequestTimeout(final int request_timeout) \{
   this.REQUEST_TIMEOUT = request_timeout;
 \}
 \nwindexdefn{setRequestTimeout}{setRequestTimeout}{NWgUSr6-380A5h-1}\eatline
-\nwidentdefs{\\{{setRequestTimeout}{setRequestTimeout}}}\nwendcode{}\nwbegindocs{187}\nwdocspar
+\nwidentdefs{\\{{setRequestTimeout}{setRequestTimeout}}}\nwendcode{}\nwbegindocs{205}\nwdocspar
 
 \subsection{\texttt{setRefCacheVertices}(1)}
-\nwenddocs{}\nwbegincode{188}\sublabel{NWgUSr6-ybch6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-ybch6-1}}}\moddef{Set: setRefCacheVertices(1)~{\nwtagstyle{}\subpageref{NWgUSr6-ybch6-1}}}\endmoddef\nwused{\\{NW3x1zuR-3QhyAk-3}}
+\nwenddocs{}\nwbegincode{206}\sublabel{NWgUSr6-ybch6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-ybch6-1}}}\moddef{Set: setRefCacheVertices(1)~{\nwtagstyle{}\subpageref{NWgUSr6-ybch6-1}}}\endmoddef\nwused{\\{NW3x1zuR-3QhyAk-3}}
 void setRefCacheVertices(final ConcurrentHashMap<Integer, int[]> lu_vertices) \{
   this.lu_vertices = lu_vertices;
 \}
 \nwindexdefn{setRefCacheVertices}{setRefCacheVertices}{NWgUSr6-ybch6-1}\eatline
-\nwidentdefs{\\{{setRefCacheVertices}{setRefCacheVertices}}}\nwendcode{}\nwbegindocs{189}\nwdocspar
+\nwidentdefs{\\{{setRefCacheVertices}{setRefCacheVertices}}}\nwendcode{}\nwbegindocs{207}\nwdocspar
 \subsection{\texttt{setRefCacheEdges}(1)}
-\nwenddocs{}\nwbegincode{190}\sublabel{NWgUSr6-2Fbhsd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-2Fbhsd-1}}}\moddef{Set: setRefCacheEdges(1)~{\nwtagstyle{}\subpageref{NWgUSr6-2Fbhsd-1}}}\endmoddef\nwused{\\{NW3x1zuR-3QhyAk-3}}
+\nwenddocs{}\nwbegincode{208}\sublabel{NWgUSr6-2Fbhsd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-2Fbhsd-1}}}\moddef{Set: setRefCacheEdges(1)~{\nwtagstyle{}\subpageref{NWgUSr6-2Fbhsd-1}}}\endmoddef\nwused{\\{NW3x1zuR-3QhyAk-3}}
 void setRefCacheEdges(final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> lu_edges) \{
   this.lu_edges = lu_edges;
 \}
 \nwindexdefn{setRefCacheEdges}{setRefCacheEdges}{NWgUSr6-2Fbhsd-1}\eatline
-\nwidentdefs{\\{{setRefCacheEdges}{setRefCacheEdges}}}\nwendcode{}\nwbegindocs{191}\nwdocspar
+\nwidentdefs{\\{{setRefCacheEdges}{setRefCacheEdges}}}\nwendcode{}\nwbegindocs{209}\nwdocspar
 \subsection{\texttt{setRefCacheUsers}(1)}
-\nwenddocs{}\nwbegincode{192}\sublabel{NWgUSr6-4ORm7x-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-4ORm7x-1}}}\moddef{Set: setRefCacheUsers(1)~{\nwtagstyle{}\subpageref{NWgUSr6-4ORm7x-1}}}\endmoddef\nwused{\\{NW3x1zuR-3QhyAk-3}}
+\nwenddocs{}\nwbegincode{210}\sublabel{NWgUSr6-4ORm7x-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-4ORm7x-1}}}\moddef{Set: setRefCacheUsers(1)~{\nwtagstyle{}\subpageref{NWgUSr6-4ORm7x-1}}}\endmoddef\nwused{\\{NW3x1zuR-3QhyAk-3}}
 void setRefCacheUsers(final ConcurrentHashMap<Integer, int[]> lu_users) \{
   this.lu_users = lu_users;
 \}
 \nwindexdefn{setRefCacheUsers}{setRefCacheUsers}{NWgUSr6-4ORm7x-1}\eatline
-\nwidentdefs{\\{{setRefCacheUsers}{setRefCacheUsers}}}\nwendcode{}\nwbegindocs{193}\nwdocspar
+\nwidentdefs{\\{{setRefCacheUsers}{setRefCacheUsers}}}\nwendcode{}\nwbegindocs{211}\nwdocspar
 \subsection{\texttt{setRefClient}(1)}
-\nwenddocs{}\nwbegincode{194}\sublabel{NWgUSr6-2cNpBb-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-2cNpBb-1}}}\moddef{Set: setRefClient(1)~{\nwtagstyle{}\subpageref{NWgUSr6-2cNpBb-1}}}\endmoddef\nwused{\\{NW3x1zuR-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{212}\sublabel{NWgUSr6-2cNpBb-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-2cNpBb-1}}}\moddef{Set: setRefClient(1)~{\nwtagstyle{}\subpageref{NWgUSr6-2cNpBb-1}}}\endmoddef\nwused{\\{NW3x1zuR-2u8vSA-3}}
 void setRefClient(final Client client) \{
   this.client = client;
 \}
 \nwindexdefn{setRefClient}{setRefClient}{NWgUSr6-2cNpBb-1}\eatline
-\nwidentdefs{\\{{setRefClient}{setRefClient}}}\nwendcode{}\nwbegindocs{195}\nwdocspar
+\nwidentdefs{\\{{setRefClient}{setRefClient}}}\nwendcode{}\nwbegindocs{213}\nwdocspar
 \subsection{\texttt{setRefCommunicator}(1)}
-\nwenddocs{}\nwbegincode{196}\sublabel{NWgUSr6-1HvZee-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-1HvZee-1}}}\moddef{Set: setRefCommunicator(1)~{\nwtagstyle{}\subpageref{NWgUSr6-1HvZee-1}}}\endmoddef\nwused{\\{NW3x1zuR-1aFZ2n-3}}
+\nwenddocs{}\nwbegincode{214}\sublabel{NWgUSr6-1HvZee-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-1HvZee-1}}}\moddef{Set: setRefCommunicator(1)~{\nwtagstyle{}\subpageref{NWgUSr6-1HvZee-1}}}\endmoddef\nwused{\\{NW3x1zuR-1aFZ2n-3}}
 void setRefCommunicator(final Communicator communicator) \{
   this.communicator = communicator;
 \}
 \nwindexdefn{setRefCommunicator}{setRefCommunicator}{NWgUSr6-1HvZee-1}\eatline
-\nwidentdefs{\\{{setRefCommunicator}{setRefCommunicator}}}\nwendcode{}\nwbegindocs{197}\nwdocspar
+\nwidentdefs{\\{{setRefCommunicator}{setRefCommunicator}}}\nwendcode{}\nwbegindocs{215}\nwdocspar
 \subsection{\texttt{setRefController}(1)}
-\nwenddocs{}\nwbegincode{198}\sublabel{NWgUSr6-1MHPnS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-1MHPnS-1}}}\moddef{Set: setRefController(1)~{\nwtagstyle{}\subpageref{NWgUSr6-1MHPnS-1}}}\endmoddef\nwused{\\{NW3x1zuR-2Rlctf-3}}
+\nwenddocs{}\nwbegincode{216}\sublabel{NWgUSr6-1MHPnS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-1MHPnS-1}}}\moddef{Set: setRefController(1)~{\nwtagstyle{}\subpageref{NWgUSr6-1MHPnS-1}}}\endmoddef\nwused{\\{NW3x1zuR-2Rlctf-3}}
 void setRefController(final Controller controller) \{
   this.controller = controller;
 \}
 \nwindexdefn{setRefController}{setRefController}{NWgUSr6-1MHPnS-1}\eatline
-\nwidentdefs{\\{{setRefController}{setRefController}}}\nwendcode{}\nwbegindocs{199}\nwdocspar
+\nwidentdefs{\\{{setRefController}{setRefController}}}\nwendcode{}\nwbegindocs{217}\nwdocspar
 \subsection{\texttt{setRefStorage}(1)}
-\nwenddocs{}\nwbegincode{200}\sublabel{NWgUSr6-2JRkX7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-2JRkX7-1}}}\moddef{Set: setRefStorage(1)~{\nwtagstyle{}\subpageref{NWgUSr6-2JRkX7-1}}}\endmoddef\nwused{\\{NW3x1zuR-2Rlctf-3}}
+\nwenddocs{}\nwbegincode{218}\sublabel{NWgUSr6-2JRkX7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-2JRkX7-1}}}\moddef{Set: setRefStorage(1)~{\nwtagstyle{}\subpageref{NWgUSr6-2JRkX7-1}}}\endmoddef\nwused{\\{NW3x1zuR-2Rlctf-3}}
 void setRefStorage(final Storage storage) \{
   this.storage = storage;
 \}
 \nwindexdefn{setRefStorage}{setRefStorage}{NWgUSr6-2JRkX7-1}\eatline
-\nwidentdefs{\\{{setRefStorage}{setRefStorage}}}\nwendcode{}\nwbegindocs{201}\nwdocspar
+\nwidentdefs{\\{{setRefStorage}{setRefStorage}}}\nwendcode{}\nwbegindocs{219}\nwdocspar
 \subsection{\texttt{setRefTraffic}(1)}
-\nwenddocs{}\nwbegincode{202}\sublabel{NWgUSr6-2HuHGR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-2HuHGR-1}}}\moddef{Set: setRefTraffic(1)~{\nwtagstyle{}\subpageref{NWgUSr6-2HuHGR-1}}}\endmoddef\nwused{\\{NW3x1zuR-2Rlctf-3}}
+\nwenddocs{}\nwbegincode{220}\sublabel{NWgUSr6-2HuHGR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-2HuHGR-1}}}\moddef{Set: setRefTraffic(1)~{\nwtagstyle{}\subpageref{NWgUSr6-2HuHGR-1}}}\endmoddef\nwused{\\{NW3x1zuR-2Rlctf-3}}
 void setRefTraffic (final Traffic traffic) \{
   this.traffic = traffic;
   this.traffic.forwardRefCacheVertices(this.storage.getRefCacheVertices());
   this.traffic.forwardRefCacheEdges(this.storage.getRefCacheEdges());
 \}
 \nwindexdefn{setRefTraffic}{setRefTraffic}{NWgUSr6-2HuHGR-1}\eatline
-\nwidentdefs{\\{{setRefTraffic}{setRefTraffic}}}\nwidentuses{\\{{forwardRefCacheEdges}{forwardRefCacheEdges}}\\{{forwardRefCacheVertices}{forwardRefCacheVertices}}\\{{getRefCacheEdges}{getRefCacheEdges}}\\{{getRefCacheVertices}{getRefCacheVertices}}}\nwindexuse{forwardRefCacheEdges}{forwardRefCacheEdges}{NWgUSr6-2HuHGR-1}\nwindexuse{forwardRefCacheVertices}{forwardRefCacheVertices}{NWgUSr6-2HuHGR-1}\nwindexuse{getRefCacheEdges}{getRefCacheEdges}{NWgUSr6-2HuHGR-1}\nwindexuse{getRefCacheVertices}{getRefCacheVertices}{NWgUSr6-2HuHGR-1}\nwendcode{}\nwbegindocs{203}\nwdocspar
+\nwidentdefs{\\{{setRefTraffic}{setRefTraffic}}}\nwidentuses{\\{{forwardRefCacheEdges}{forwardRefCacheEdges}}\\{{forwardRefCacheVertices}{forwardRefCacheVertices}}\\{{getRefCacheEdges}{getRefCacheEdges}}\\{{getRefCacheVertices}{getRefCacheVertices}}}\nwindexuse{forwardRefCacheEdges}{forwardRefCacheEdges}{NWgUSr6-2HuHGR-1}\nwindexuse{forwardRefCacheVertices}{forwardRefCacheVertices}{NWgUSr6-2HuHGR-1}\nwindexuse{getRefCacheEdges}{getRefCacheEdges}{NWgUSr6-2HuHGR-1}\nwindexuse{getRefCacheVertices}{getRefCacheVertices}{NWgUSr6-2HuHGR-1}\nwendcode{}\nwbegindocs{221}\nwdocspar
 \subsection{\texttt{forwardRefTraffic}(1)}
-\nwenddocs{}\nwbegincode{204}\sublabel{NWgUSr6-3K5RXB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-3K5RXB-1}}}\moddef{Set: forwardRefTraffic(1)~{\nwtagstyle{}\subpageref{NWgUSr6-3K5RXB-1}}}\endmoddef\nwused{\\{NW3x1zuR-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{222}\sublabel{NWgUSr6-3K5RXB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-3K5RXB-1}}}\moddef{Set: forwardRefTraffic(1)~{\nwtagstyle{}\subpageref{NWgUSr6-3K5RXB-1}}}\endmoddef\nwused{\\{NW3x1zuR-2u8vSA-3}}
 void forwardRefTraffic(final Traffic traffic) \{
   this.communicator.setRefTraffic(traffic);
 \}
 \nwindexdefn{forwardRefTraffic}{forwardRefTraffic}{NWgUSr6-3K5RXB-1}\eatline
-\nwidentdefs{\\{{forwardRefTraffic}{forwardRefTraffic}}}\nwidentuses{\\{{setRefTraffic}{setRefTraffic}}}\nwindexuse{setRefTraffic}{setRefTraffic}{NWgUSr6-3K5RXB-1}\nwendcode{}\nwbegindocs{205}\nwdocspar
+\nwidentdefs{\\{{forwardRefTraffic}{forwardRefTraffic}}}\nwidentuses{\\{{setRefTraffic}{setRefTraffic}}}\nwindexuse{setRefTraffic}{setRefTraffic}{NWgUSr6-3K5RXB-1}\nwendcode{}\nwbegindocs{223}\nwdocspar
 \subsection{\texttt{forwardRefCommunicator}(1)}
-\nwenddocs{}\nwbegincode{206}\sublabel{NWgUSr6-1z0h0j-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-1z0h0j-1}}}\moddef{Set: forwardRefCommunicator(1)~{\nwtagstyle{}\subpageref{NWgUSr6-1z0h0j-1}}}\endmoddef\nwused{\\{NW3x1zuR-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{224}\sublabel{NWgUSr6-1z0h0j-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-1z0h0j-1}}}\moddef{Set: forwardRefCommunicator(1)~{\nwtagstyle{}\subpageref{NWgUSr6-1z0h0j-1}}}\endmoddef\nwused{\\{NW3x1zuR-2u8vSA-3}}
 void forwardRefCommunicator(final Communicator communicator) \{
   this.client.setRefCommunicator(communicator);
 \}
 \nwindexdefn{forwardRefCommunicator}{forwardRefCommunicator}{NWgUSr6-1z0h0j-1}\eatline
-\nwidentdefs{\\{{forwardRefCommunicator}{forwardRefCommunicator}}}\nwidentuses{\\{{setRefCommunicator}{setRefCommunicator}}}\nwindexuse{setRefCommunicator}{setRefCommunicator}{NWgUSr6-1z0h0j-1}\nwendcode{}\nwbegindocs{207}\nwdocspar
+\nwidentdefs{\\{{forwardRefCommunicator}{forwardRefCommunicator}}}\nwidentuses{\\{{setRefCommunicator}{setRefCommunicator}}}\nwindexuse{setRefCommunicator}{setRefCommunicator}{NWgUSr6-1z0h0j-1}\nwendcode{}\nwbegindocs{225}\nwdocspar
 \subsection{\texttt{forwardRefCacheEdges}(1)}
-\nwenddocs{}\nwbegincode{208}\sublabel{NWgUSr6-2pv9fW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-2pv9fW-1}}}\moddef{Set: forwardRefCacheEdges(1)~{\nwtagstyle{}\subpageref{NWgUSr6-2pv9fW-1}}}\endmoddef\nwused{\\{NW3x1zuR-1aFZ2n-3}\\{NW3x1zuR-1sp72R-3}}
+\nwenddocs{}\nwbegincode{226}\sublabel{NWgUSr6-2pv9fW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-2pv9fW-1}}}\moddef{Set: forwardRefCacheEdges(1)~{\nwtagstyle{}\subpageref{NWgUSr6-2pv9fW-1}}}\endmoddef\nwused{\\{NW3x1zuR-1aFZ2n-3}\\{NW3x1zuR-1sp72R-3}}
 void forwardRefCacheEdges(final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> lu_edges) \{
   this.tools.setRefCacheEdges(lu_edges);
 \}
 \nwindexdefn{forwardRefCacheEdges}{forwardRefCacheEdges}{NWgUSr6-2pv9fW-1}\eatline
-\nwidentdefs{\\{{forwardRefCacheEdges}{forwardRefCacheEdges}}}\nwidentuses{\\{{setRefCacheEdges}{setRefCacheEdges}}}\nwindexuse{setRefCacheEdges}{setRefCacheEdges}{NWgUSr6-2pv9fW-1}\nwendcode{}\nwbegindocs{209}\nwdocspar
+\nwidentdefs{\\{{forwardRefCacheEdges}{forwardRefCacheEdges}}}\nwidentuses{\\{{setRefCacheEdges}{setRefCacheEdges}}}\nwindexuse{setRefCacheEdges}{setRefCacheEdges}{NWgUSr6-2pv9fW-1}\nwendcode{}\nwbegindocs{227}\nwdocspar
 \subsection{\texttt{forwardRefCacheUsers}(1)}
-\nwenddocs{}\nwbegincode{210}\sublabel{NWgUSr6-I6FmK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-I6FmK-1}}}\moddef{Set: forwardRefCacheUsers(1)~{\nwtagstyle{}\subpageref{NWgUSr6-I6FmK-1}}}\endmoddef\nwused{\\{NW3x1zuR-1aFZ2n-3}}
+\nwenddocs{}\nwbegincode{228}\sublabel{NWgUSr6-I6FmK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-I6FmK-1}}}\moddef{Set: forwardRefCacheUsers(1)~{\nwtagstyle{}\subpageref{NWgUSr6-I6FmK-1}}}\endmoddef\nwused{\\{NW3x1zuR-1aFZ2n-3}}
 void forwardRefCacheUsers(final ConcurrentHashMap<Integer, int[]> lu_users) \{
   this.tools.setRefCacheUsers(lu_users);
 \}
 \nwindexdefn{forwardRefCacheUsers}{forwardRefCacheUsers}{NWgUSr6-I6FmK-1}\eatline
-\nwidentdefs{\\{{forwardRefCacheUsers}{forwardRefCacheUsers}}}\nwidentuses{\\{{setRefCacheUsers}{setRefCacheUsers}}}\nwindexuse{setRefCacheUsers}{setRefCacheUsers}{NWgUSr6-I6FmK-1}\nwendcode{}\nwbegindocs{211}\nwdocspar
+\nwidentdefs{\\{{forwardRefCacheUsers}{forwardRefCacheUsers}}}\nwidentuses{\\{{setRefCacheUsers}{setRefCacheUsers}}}\nwindexuse{setRefCacheUsers}{setRefCacheUsers}{NWgUSr6-I6FmK-1}\nwendcode{}\nwbegindocs{229}\nwdocspar
 \subsection{\texttt{forwardRefCacheVertices}(1)}
-\nwenddocs{}\nwbegincode{212}\sublabel{NWgUSr6-4dJ1Eu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-4dJ1Eu-1}}}\moddef{Set: forwardRefCacheVertices(1)~{\nwtagstyle{}\subpageref{NWgUSr6-4dJ1Eu-1}}}\endmoddef\nwused{\\{NW3x1zuR-1aFZ2n-3}\\{NW3x1zuR-1sp72R-3}}
+\nwenddocs{}\nwbegincode{230}\sublabel{NWgUSr6-4dJ1Eu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-4dJ1Eu-1}}}\moddef{Set: forwardRefCacheVertices(1)~{\nwtagstyle{}\subpageref{NWgUSr6-4dJ1Eu-1}}}\endmoddef\nwused{\\{NW3x1zuR-1aFZ2n-3}\\{NW3x1zuR-1sp72R-3}}
 void forwardRefCacheVertices(final ConcurrentHashMap<Integer, int[]> lu_vertices) \{
   this.tools.setRefCacheVertices(lu_vertices);
 \}
 \nwindexdefn{forwardRefCacheVertices}{forwardRefCacheVertices}{NWgUSr6-4dJ1Eu-1}\eatline
-\nwidentdefs{\\{{forwardRefCacheVertices}{forwardRefCacheVertices}}}\nwidentuses{\\{{setRefCacheVertices}{setRefCacheVertices}}}\nwindexuse{setRefCacheVertices}{setRefCacheVertices}{NWgUSr6-4dJ1Eu-1}\nwendcode{}\nwbegindocs{213}\nwdocspar
+\nwidentdefs{\\{{forwardRefCacheVertices}{forwardRefCacheVertices}}}\nwidentuses{\\{{setRefCacheVertices}{setRefCacheVertices}}}\nwindexuse{setRefCacheVertices}{setRefCacheVertices}{NWgUSr6-4dJ1Eu-1}\nwendcode{}\nwbegindocs{231}\nwdocspar
 \nwenddocs{}\nwfilename{src/tex/5-Gtree.nw}\nwbegindocs{0}\chapter{Using G-tree}
 \label{gtree}
 
@@ -7662,7 +7767,7 @@ written in Java so it can communicate with Derby using JDBC. A listing of the
 methods is shown in Figure~\ref{storage:fig:methods}.
 
 \section{Preamble}
-\nwenddocs{}\nwbegincode{3}\sublabel{NW27XAxz-FkGTW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-FkGTW-1}}}\moddef{Storage.java preamble~{\nwtagstyle{}\subpageref{NW27XAxz-FkGTW-1}}}\endmoddef\nwalsodefined{\\{NW27XAxz-FkGTW-2}\\{NW27XAxz-FkGTW-3}\\{NW27XAxz-FkGTW-4}\\{NW27XAxz-FkGTW-5}}\nwused{\\{NW27XAxz-203Bbj-1}}
+\nwenddocs{}\nwbegincode{3}\sublabel{NW27XAxz-FkGTW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-FkGTW-1}}}\moddef{Storage.java preamble~{\nwtagstyle{}\subpageref{NW27XAxz-FkGTW-1}}}\endmoddef\nwalsodefined{\\{NW27XAxz-FkGTW-2}\\{NW27XAxz-FkGTW-3}\\{NW27XAxz-FkGTW-4}\\{NW27XAxz-FkGTW-5}\\{NW27XAxz-FkGTW-6}}\nwused{\\{NW27XAxz-203Bbj-1}}
 package com.github.jargors;
 \nwendcode{}\nwbegindocs{4}\nwdocspar
 We import:
@@ -7698,7 +7803,12 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
-\nwendcode{}\nwbegindocs{12}\nwdocspar
+\nwendcode{}\nwbegindocs{12}\item Management classes
+\nwenddocs{}\nwbegincode{13}\sublabel{NW27XAxz-FkGTW-6}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-FkGTW-6}}}\moddef{Storage.java preamble~{\nwtagstyle{}\subpageref{NW27XAxz-FkGTW-1}}}\plusendmoddef
+import com.github.jargors.jmx.StorageMonitor;
+import java.lang.management.*;
+import javax.management.*;
+\nwendcode{}\nwbegindocs{14}\nwdocspar
 \end{itemize}
 
 \section{Member Variables}
@@ -7710,20 +7820,20 @@ the elements do not change often. Guaranteeing consistency of the map is easy
 because only {\tt{}Storage} can update assignment changes to the database.
 Whenever it successfully does an update, we simply update the map at the same
 time.
-\nwenddocs{}\nwbegincode{13}\sublabel{NW27XAxz-17yXws-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-1}}}\moddef{\code{}Storage\edoc{} member variables~{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-1}}}\endmoddef\nwalsodefined{\\{NW27XAxz-17yXws-2}\\{NW27XAxz-17yXws-3}\\{NW27XAxz-17yXws-4}}\nwused{\\{NW27XAxz-203Bbj-1}}
+\nwenddocs{}\nwbegincode{15}\sublabel{NW27XAxz-17yXws-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-1}}}\moddef{\code{}Storage\edoc{} member variables~{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-1}}}\endmoddef\nwalsodefined{\\{NW27XAxz-17yXws-2}\\{NW27XAxz-17yXws-3}\\{NW27XAxz-17yXws-4}\\{NW27XAxz-17yXws-5}}\nwused{\\{NW27XAxz-203Bbj-1}}
 private Map<Integer, Boolean> lu_rstatus = new HashMap<>();  //*
-\nwendcode{}\nwbegindocs{14}\nwdocspar
+\nwendcode{}\nwbegindocs{16}\nwdocspar
 \item The other maps store static data values. References to these maps may be
 held by other threads. To avoid accidental corruption due to concurrent access,
 we use {\tt{}ConcurrentHashMap}.
-\nwenddocs{}\nwbegincode{15}\sublabel{NW27XAxz-17yXws-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-2}}}\moddef{\code{}Storage\edoc{} member variables~{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{17}\sublabel{NW27XAxz-17yXws-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-2}}}\moddef{\code{}Storage\edoc{} member variables~{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-1}}}\plusendmoddef
 private ConcurrentHashMap<String, String> lu_pstr     = new ConcurrentHashMap<String, String>();
 private ConcurrentHashMap<Integer, int[]> lu_vertices = new ConcurrentHashMap<Integer, int[]>();
 private ConcurrentHashMap<Integer,
     ConcurrentHashMap<Integer, int[]>>    lu_edges    = new ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>>();
 private ConcurrentHashMap<Integer, int[]> lu_users    = new ConcurrentHashMap<Integer, int[]>();
 private Map<Integer, Integer>             lu_lvt      = new HashMap<Integer, Integer>();
-\nwendcode{}\nwbegindocs{16}\nwdocspar
+\nwendcode{}\nwbegindocs{18}\nwdocspar
 \end{itemize}
 
 The storage interface also contains configuration settings and JDBC objects.
@@ -7734,7 +7844,7 @@ statements. Parameter {\tt{}REQUEST{\char95}TIMEOUT} sets how long a client is a
 try to match a request, in other words if request $r$ is not assigned within
 $\pi_\texttt{e}(r)+\texttt{REQUEST\_TIMEOUT}$, then it is not tried again.
 The remaining parameters configure the Derby database connection.
-\nwenddocs{}\nwbegincode{17}\sublabel{NW27XAxz-17yXws-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-3}}}\moddef{\code{}Storage\edoc{} member variables~{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{19}\sublabel{NW27XAxz-17yXws-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-3}}}\moddef{\code{}Storage\edoc{} member variables~{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-1}}}\plusendmoddef
 private final int    STATEMENTS_MAX_COUNT   = 20;
 private       int    REQUEST_TIMEOUT        = 30;
 private       String CONNECTIONS_URL        = "jdbc:derby:memory:jargo;create=true";
@@ -7742,19 +7852,31 @@ private final String CONNECTIONS_DRIVER_URL = "jdbc:apache:commons:dbcp:";
 private final String CONNECTIONS_POOL_NAME  = "jargo";
 private final String CONNECTIONS_POOL_URL   = (CONNECTIONS_DRIVER_URL + CONNECTIONS_POOL_NAME);
 public static final double CSHIFT           = 10000000.0;
-\nwendcode{}\nwbegindocs{18}\nwdocspar
+\nwendcode{}\nwbegindocs{20}\nwdocspar
 \item The {\tt{}connection{\char95}factory} is an object that returns new connections. The
 {\tt{}poolableconnection{\char95}factory} registers {\tt{}connection{\char95}factory} and then can
 return new poolable connections.  The {\tt{}pool} is an object containing the
 available poolable connections, and it is registered by the
 {\tt{}poolableconnection{\char95}factory}. The {\tt{}driver} is the JDBC {\tt{}DriverManager}.
 We get a reference to {\tt{}DriverManager} in order to register the pool.
-\nwenddocs{}\nwbegincode{19}\sublabel{NW27XAxz-17yXws-4}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-4}}}\moddef{\code{}Storage\edoc{} member variables~{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{21}\sublabel{NW27XAxz-17yXws-4}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-4}}}\moddef{\code{}Storage\edoc{} member variables~{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-1}}}\plusendmoddef
 private ConnectionFactory               connection_factory;
 private PoolableConnectionFactory       poolableconnection_factory;
 private ObjectPool<PoolableConnection>  pool;
 private PoolingDriver                   driver;
-\nwendcode{}\nwbegindocs{20}\nwdocspar
+\nwendcode{}\nwbegindocs{22}\nwdocspar
+\item Various statistics
+\nwenddocs{}\nwbegincode{23}\sublabel{NW27XAxz-17yXws-5}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-5}}}\moddef{\code{}Storage\edoc{} member variables~{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-1}}}\plusendmoddef
+private int stat_count_DBQueryServersLocationsActive = 0;
+private int stat_count_DBQueryServerScheduleRemaining = 0;
+private int stat_count_DBQueryRequestsQueued = 0;
+private long stat_dur_total_DBQueryServersLocationsActive = 0;
+private long stat_dur_total_DBQueryServerScheduleRemaining = 0;
+private long stat_dur_total_DBQueryRequestsQueued = 0;
+private long stat_dur_last_DBQueryServersLocationsActive = 0;
+private long stat_dur_last_DBQueryServerScheduleRemaining = 0;
+private long stat_dur_last_DBQueryRequestsQueued = 0;
+\nwendcode{}\nwbegindocs{24}\nwdocspar
 \end{itemize}
 
 \section{Constructor}
@@ -7770,11 +7892,19 @@ prepared statement strings into {\tt{}lu{\char95}pstr} by using {\tt{}\protect\n
 \textbf{Throws:} nothing.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{21}\sublabel{NW27XAxz-36NvOs-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-36NvOs-1}}}\moddef{\code{}Storage\edoc{} constructor~{\nwtagstyle{}\subpageref{NW27XAxz-36NvOs-1}}}\endmoddef\nwused{\\{NW27XAxz-203Bbj-1}}
+\nwenddocs{}\nwbegincode{25}\sublabel{NW27XAxz-36NvOs-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-36NvOs-1}}}\moddef{\code{}Storage\edoc{} constructor~{\nwtagstyle{}\subpageref{NW27XAxz-36NvOs-1}}}\endmoddef\nwused{\\{NW27XAxz-203Bbj-1}}
 public Storage() \{
   this.JargoSetupPreparedStatements();
+  try \{
+    MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+    StorageMonitor mon = new StorageMonitor(this);
+    mbs.registerMBean(mon, new ObjectName("com.github.jargors.jmx:type=StorageMonitor"));
+  \} catch (Exception e) \{
+    System.err.printf("StorageMonitor failed; reason: %s\\n", e.toString());
+    System.err.printf("Continuing with monitoring disabled\\n");
+  \}
 \}
-\nwidentuses{\\{{JargoSetupPreparedStatements}{JargoSetupPreparedStatements}}}\nwindexuse{JargoSetupPreparedStatements}{JargoSetupPreparedStatements}{NW27XAxz-36NvOs-1}\nwendcode{}\nwbegindocs{22}\nwdocspar
+\nwidentuses{\\{{JargoSetupPreparedStatements}{JargoSetupPreparedStatements}}}\nwindexuse{JargoSetupPreparedStatements}{JargoSetupPreparedStatements}{NW27XAxz-36NvOs-1}\nwendcode{}\nwbegindocs{26}\nwdocspar
 
 \nwenddocs{}\nwfilename{src/Controller.nw}\nwbegindocs{0}\chapter{Class: Controller}
 \label{controller}
