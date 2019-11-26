@@ -134,10 +134,12 @@ void JargoInstanceInitialize() {
     stmt.addBatch(<<Create View t\_s\_arrive statement (Eq.~\ref{eq:arrival-time})>>);
     stmt.addBatch(<<Create View violations\_t\_s>>);
     stmt.addBatch(<<Create View violations\_t\_r>>);
+    stmt.addBatch("CREATE INDEX R_re ON R (re)");
     stmt.addBatch("CREATE INDEX W_sid_t1 ON W (sid, t1)");
     stmt.addBatch("CREATE INDEX W_sid_t2 ON W (sid, t2)");
     stmt.addBatch("CREATE INDEX W_sid_v2 ON W (sid, v2)");
     stmt.addBatch("CREATE INDEX W_sid_t1_t2 ON W (sid, t1, t2)");
+    stmt.addBatch("CREATE INDEX CQ_sid_t2_o2 ON CQ (sid, t2, o2)");
     stmt.executeBatch();
     conn.commit();
   } catch (SQLException e) {

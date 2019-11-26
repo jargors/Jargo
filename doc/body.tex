@@ -1941,10 +1941,13 @@ To list time window violations of all requests:
 \nwenddocs{}\nwbegincode{1}\sublabel{NW18ZcDF-3qcw3I-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW18ZcDF-3qcw3I-1}}}\moddef{Flatten results~{\nwtagstyle{}\subpageref{NW18ZcDF-3qcw3I-1}}}\endmoddef\nwused{\\{NW18ZcDF-3OEpPU-1}\\{NWgUSr6-yHOIP-1}}
 output = new int[(ncols*res.getRow())];
 res.first();
+int i = 0;
 do \{
+  final int idx = i*ncols;
   for (int j = 1; j <= ncols; j++) \{
-    output[((res.getRow() - 1)*ncols + (j - 1))] = res.getInt(j);
+    output[(idx + (j - 1))] = res.getInt(j);
   \}
+  i++;
 \} while (res.next());
 \nwendcode{}\nwbegindocs{2}\nwdocspar
 
@@ -4621,13 +4624,15 @@ servers. Then for each active server, we use either statement {\tt{}\protect\nwi
     for (int i = 0; i < temp1.length - 1; i += 2) \{
       final int sid = temp1[(i + 0)];
       final int  te = temp1[(i + 1)];
-      // Queries S135 and S147 select from W. The query time is expected to
-      // grow O(log(|W|)) as we have indexes on the relevant columns and Derby
-      // implements SQL indexes as B+trees (https://db.apache.org/derby/papers/btree_package.html).
+      // Query S135 selects from W. The query time is expected to grow
+      // O(log(|W|)) because we have indexes on the relevant columns,
+      // implemented in Derby as B+trees (https://db.apache.org/derby/papers/btree_package.html).
+      // The subquery in S135 is a range query with a tight range.
+      // Query S147 is a key-lookup and also grows O(log(|W|)).
       final int lvt = this.lu_lvt.get(sid);
       final int[] temp2 = (t < te
-        ? this.PSQuery(conn, "S135", 2, sid, sid, lvt, t, t)  // <-- 0.07-0.15 ms/call (before lvt)
-        : this.PSQuery(conn, "S147", 2, sid, sid));           // <-- 0.04-0.15 ms/call
+        ? this.PSQuery(conn, "S135", 2, sid, sid, lvt, t, t)
+        : this.PSQuery(conn, "S147", 2, sid, sid));
       output[(j + 0)] = sid;
       output[(j + 1)] = temp2[0];
       output[(j + 2)] = temp2[1];
@@ -6486,10 +6491,12 @@ void JargoInstanceInitialize() \{
     stmt.addBatch(\LA{}Create View t\_s\_arrive statement (Eq.~\ref{eq:arrival-time})~{\nwtagstyle{}\subpageref{NW3jn8Pl-3oL4CY-1}}\RA{});
     stmt.addBatch(\LA{}Create View violations\_t\_s~{\nwtagstyle{}\subpageref{NW3jn8Pl-13PgQs-1}}\RA{});
     stmt.addBatch(\LA{}Create View violations\_t\_r~{\nwtagstyle{}\subpageref{NW3jn8Pl-3kJouo-1}}\RA{});
+    stmt.addBatch("CREATE INDEX R_re ON R (re)");
     stmt.addBatch("CREATE INDEX W_sid_t1 ON W (sid, t1)");
     stmt.addBatch("CREATE INDEX W_sid_t2 ON W (sid, t2)");
     stmt.addBatch("CREATE INDEX W_sid_v2 ON W (sid, v2)");
     stmt.addBatch("CREATE INDEX W_sid_t1_t2 ON W (sid, t1, t2)");
+    stmt.addBatch("CREATE INDEX CQ_sid_t2_o2 ON CQ (sid, t2, o2)");
     stmt.executeBatch();
     conn.commit();
   \} catch (SQLException e) \{

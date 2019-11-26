@@ -33,55 +33,55 @@ public Communicator() { }
   
 /*line 181 "src/tex/0-Overview.nw"*/
 public 
-/*line 302 "src/tex/2-Reading.nw"*/
+/*line 305 "src/tex/2-Reading.nw"*/
 int[] queryEdge(final int v1, final int v2) throws EdgeNotFoundException, SQLException {
   return this.storage.DBQueryEdge(v1, v2);
 }
 /*line 182 "src/tex/0-Overview.nw"*/
 public 
-/*line 1402 "src/tex/2-Reading.nw"*/
+/*line 1405 "src/tex/2-Reading.nw"*/
 int[] queryServerDistanceRemaining(final int sid, final int t) throws SQLException {
   return this.storage.DBQueryServerDistanceRemaining(sid, t);
 }
 /*line 183 "src/tex/0-Overview.nw"*/
 public 
-/*line 1532 "src/tex/2-Reading.nw"*/
+/*line 1535 "src/tex/2-Reading.nw"*/
 int[] queryServerDurationRemaining(final int sid, final int t) throws SQLException {
   return this.storage.DBQueryServerDurationRemaining(sid, t);
 }
 /*line 184 "src/tex/0-Overview.nw"*/
 public 
-/*line 1315 "src/tex/2-Reading.nw"*/
+/*line 1318 "src/tex/2-Reading.nw"*/
 int[] queryServerLoadMax(final int sid, final int t) throws SQLException {
   return this.storage.DBQueryServerLoadMax(sid, t);
 }
 /*line 185 "src/tex/0-Overview.nw"*/
 public 
-/*line 1127 "src/tex/2-Reading.nw"*/
+/*line 1130 "src/tex/2-Reading.nw"*/
 int[] queryServerRouteRemaining(final int sid, final int t) throws SQLException {
   return this.storage.DBQueryServerRouteRemaining(sid, t);
 }
 /*line 186 "src/tex/0-Overview.nw"*/
 public 
-/*line 1265 "src/tex/2-Reading.nw"*/
+/*line 1268 "src/tex/2-Reading.nw"*/
 int[] queryServerScheduleRemaining(final int sid, final int t) throws SQLException {
   return this.storage.DBQueryServerScheduleRemaining(sid, t);
 }
 /*line 187 "src/tex/0-Overview.nw"*/
 public 
-/*line 1966 "src/tex/2-Reading.nw"*/
+/*line 1971 "src/tex/2-Reading.nw"*/
 int[] queryServersLocationsActive(final int t) throws SQLException {
   return this.storage.DBQueryServersLocationsActive(t);
 }
 /*line 188 "src/tex/0-Overview.nw"*/
 public 
-/*line 481 "src/tex/2-Reading.nw"*/
+/*line 484 "src/tex/2-Reading.nw"*/
 int[] queryUser(final int rid) throws UserNotFoundException, SQLException {
   return storage.DBQueryUser(rid);
 }
 /*line 189 "src/tex/0-Overview.nw"*/
 public 
-/*line 168 "src/tex/2-Reading.nw"*/
+/*line 171 "src/tex/2-Reading.nw"*/
 int[] queryVertex(final int v) throws VertexNotFoundException, SQLException {
   return this.storage.DBQueryVertex(v);
 }
@@ -258,43 +258,43 @@ if (this.traffic != null) {
 }
 /*line 199 "src/tex/0-Overview.nw"*/
 public 
-/*line 1075 "src/tex/4-Administration.nw"*/
+/*line 1077 "src/tex/4-Administration.nw"*/
 int retrieveClockNow() {
   return this.controller.getClockNow();
 }
 /*line 200 "src/tex/0-Overview.nw"*/
 public 
-/*line 1089 "src/tex/4-Administration.nw"*/
+/*line 1091 "src/tex/4-Administration.nw"*/
 final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> retrieveRefCacheEdges() {
   return this.storage.getRefCacheEdges();
 }
 /*line 201 "src/tex/0-Overview.nw"*/
 public 
-/*line 1096 "src/tex/4-Administration.nw"*/
+/*line 1098 "src/tex/4-Administration.nw"*/
 final ConcurrentHashMap<Integer, int[]> retrieveRefCacheUsers() {
   return this.storage.getRefCacheUsers();
 }
 /*line 202 "src/tex/0-Overview.nw"*/
 public 
-/*line 1082 "src/tex/4-Administration.nw"*/
+/*line 1084 "src/tex/4-Administration.nw"*/
 final ConcurrentHashMap<Integer, int[]> retrieveRefCacheVertices() {
   return this.storage.getRefCacheVertices();
 }
 /*line 203 "src/tex/0-Overview.nw"*/
 public 
-/*line 1170 "src/tex/4-Administration.nw"*/
+/*line 1172 "src/tex/4-Administration.nw"*/
 void setRefController(final Controller controller) {
   this.controller = controller;
 }
 /*line 204 "src/tex/0-Overview.nw"*/
 public 
-/*line 1177 "src/tex/4-Administration.nw"*/
+/*line 1179 "src/tex/4-Administration.nw"*/
 void setRefStorage(final Storage storage) {
   this.storage = storage;
 }
 /*line 205 "src/tex/0-Overview.nw"*/
 public 
-/*line 1184 "src/tex/4-Administration.nw"*/
+/*line 1186 "src/tex/4-Administration.nw"*/
 void setRefTraffic (final Traffic traffic) {
   this.traffic = traffic;
   this.traffic.forwardRefCacheVertices(this.storage.getRefCacheVertices());

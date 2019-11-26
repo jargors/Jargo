@@ -31,7 +31,7 @@ public Tools() { }
   
 /*line 254 "src/tex/0-Overview.nw"*/
 public 
-/*line 288 "src/tex/2-Reading.nw"*/
+/*line 291 "src/tex/2-Reading.nw"*/
 int[] DBQueryEdge(final int v1, final int v2) throws EdgeNotFoundException {
   if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
     throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
@@ -40,7 +40,7 @@ int[] DBQueryEdge(final int v1, final int v2) throws EdgeNotFoundException {
 }
 /*line 255 "src/tex/0-Overview.nw"*/
 public 
-/*line 153 "src/tex/2-Reading.nw"*/
+/*line 156 "src/tex/2-Reading.nw"*/
 int[] DBQueryVertex(final int v) throws VertexNotFoundException {
   if (!this.lu_vertices.containsKey(v)) {
     throw new VertexNotFoundException("Vertex "+v+" not found.");
@@ -75,19 +75,19 @@ void GTGtreeClose() {
 }
 /*line 264 "src/tex/0-Overview.nw"*/
 public 
-/*line 1142 "src/tex/4-Administration.nw"*/
+/*line 1144 "src/tex/4-Administration.nw"*/
 void setRefCacheEdges(final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> lu_edges) {
   this.lu_edges = lu_edges;
 }
 /*line 265 "src/tex/0-Overview.nw"*/
 public 
-/*line 1149 "src/tex/4-Administration.nw"*/
+/*line 1151 "src/tex/4-Administration.nw"*/
 void setRefCacheUsers(final ConcurrentHashMap<Integer, int[]> lu_users) {
   this.lu_users = lu_users;
 }
 /*line 266 "src/tex/0-Overview.nw"*/
 public 
-/*line 1135 "src/tex/4-Administration.nw"*/
+/*line 1137 "src/tex/4-Administration.nw"*/
 void setRefCacheVertices(final ConcurrentHashMap<Integer, int[]> lu_vertices) {
   this.lu_vertices = lu_vertices;
 }

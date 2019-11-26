@@ -202,205 +202,205 @@ public Controller() {
   
 /*line 104 "src/tex/0-Overview.nw"*/
 public 
-/*line 73 "src/tex/2-Reading.nw"*/
+/*line 76 "src/tex/2-Reading.nw"*/
 int[] query(final String sql, final int ncols) throws SQLException {
   return this.storage.DBQuery(sql, ncols);
 }
 /*line 105 "src/tex/0-Overview.nw"*/
 public 
-/*line 302 "src/tex/2-Reading.nw"*/
+/*line 305 "src/tex/2-Reading.nw"*/
 int[] queryEdge(final int v1, final int v2) throws EdgeNotFoundException, SQLException {
   return this.storage.DBQueryEdge(v1, v2);
 }
 /*line 106 "src/tex/0-Overview.nw"*/
 public 
-/*line 572 "src/tex/2-Reading.nw"*/
+/*line 575 "src/tex/2-Reading.nw"*/
 int[] queryEdgeStatistics() throws SQLException {
   return storage.DBQueryEdgeStatistics();
 }
 /*line 107 "src/tex/0-Overview.nw"*/
 public 
-/*line 348 "src/tex/2-Reading.nw"*/
+/*line 351 "src/tex/2-Reading.nw"*/
 int[] queryEdges() throws SQLException {
   return this.storage.DBQueryEdges();
 }
 /*line 108 "src/tex/0-Overview.nw"*/
 public 
-/*line 391 "src/tex/2-Reading.nw"*/
+/*line 394 "src/tex/2-Reading.nw"*/
 int[] queryEdgesCount() throws SQLException {
   return this.storage.DBQueryEdgesCount();
 }
 /*line 109 "src/tex/0-Overview.nw"*/
 public 
-/*line 121 "src/tex/2-Reading.nw"*/
+/*line 124 "src/tex/2-Reading.nw"*/
 int[] queryMBR() throws SQLException {
   return this.storage.DBQueryMBR();
 }
 /*line 110 "src/tex/0-Overview.nw"*/
 public 
-/*line 2332 "src/tex/2-Reading.nw"*/
+/*line 2337 "src/tex/2-Reading.nw"*/
 int[] queryMetricRequestDistanceBaseTotal() throws SQLException {
   return storage.DBQueryMetricRequestDistanceBaseTotal();
 }
 /*line 111 "src/tex/0-Overview.nw"*/
 public 
-/*line 2377 "src/tex/2-Reading.nw"*/
+/*line 2382 "src/tex/2-Reading.nw"*/
 int[] queryMetricRequestDistanceBaseUnassignedTotal() throws SQLException {
   return storage.DBQueryMetricRequestDistanceBaseUnassignedTotal();
 }
 /*line 112 "src/tex/0-Overview.nw"*/
 public 
-/*line 2420 "src/tex/2-Reading.nw"*/
+/*line 2425 "src/tex/2-Reading.nw"*/
 int[] queryMetricRequestDistanceDetourTotal() throws SQLException {
   return storage.DBQueryMetricRequestDistanceDetourTotal();
 }
 /*line 113 "src/tex/0-Overview.nw"*/
 public 
-/*line 2463 "src/tex/2-Reading.nw"*/
+/*line 2468 "src/tex/2-Reading.nw"*/
 int[] queryMetricRequestDistanceTransitTotal() throws SQLException {
   return storage.DBQueryMetricRequestDistanceTransitTotal();
 }
 /*line 114 "src/tex/0-Overview.nw"*/
 public 
-/*line 2506 "src/tex/2-Reading.nw"*/
+/*line 2511 "src/tex/2-Reading.nw"*/
 int[] queryMetricRequestDurationPickupTotal() throws SQLException {
   return storage.DBQueryMetricRequestDurationPickupTotal();
 }
 /*line 115 "src/tex/0-Overview.nw"*/
 public 
-/*line 2549 "src/tex/2-Reading.nw"*/
+/*line 2554 "src/tex/2-Reading.nw"*/
 int[] queryMetricRequestDurationTransitTotal() throws SQLException {
   return storage.DBQueryMetricRequestDurationTransitTotal();
 }
 /*line 116 "src/tex/0-Overview.nw"*/
 public 
-/*line 2592 "src/tex/2-Reading.nw"*/
+/*line 2597 "src/tex/2-Reading.nw"*/
 int[] queryMetricRequestDurationTravelTotal() throws SQLException {
   return storage.DBQueryMetricRequestDurationTravelTotal();
 }
 /*line 117 "src/tex/0-Overview.nw"*/
 public 
-/*line 2608 "src/tex/2-Reading.nw"*/
+/*line 2613 "src/tex/2-Reading.nw"*/
 int[] queryMetricRequestTWViolationsTotal() throws SQLException {
   return storage.DBQueryMetricRequestTWViolationsTotal();
 }
 /*line 118 "src/tex/0-Overview.nw"*/
 public 
-/*line 2144 "src/tex/2-Reading.nw"*/
+/*line 2149 "src/tex/2-Reading.nw"*/
 int[] queryMetricServerDistanceBaseTotal() throws SQLException {
   return storage.DBQueryMetricServerDistanceBaseTotal();
 }
 /*line 119 "src/tex/0-Overview.nw"*/
 public 
-/*line 2187 "src/tex/2-Reading.nw"*/
+/*line 2192 "src/tex/2-Reading.nw"*/
 int[] queryMetricServerDistanceCruisingTotal() throws SQLException {
   return storage.DBQueryMetricServerDistanceCruisingTotal();
 }
 /*line 120 "src/tex/0-Overview.nw"*/
 public 
-/*line 2230 "src/tex/2-Reading.nw"*/
+/*line 2235 "src/tex/2-Reading.nw"*/
 int[] queryMetricServerDistanceServiceTotal() throws SQLException {
   return storage.DBQueryMetricServerDistanceServiceTotal();
 }
 /*line 121 "src/tex/0-Overview.nw"*/
 public 
-/*line 2101 "src/tex/2-Reading.nw"*/
+/*line 2106 "src/tex/2-Reading.nw"*/
 int[] queryMetricServerDistanceTotal() throws SQLException {
   return storage.DBQueryMetricServerDistanceTotal();
 }
 /*line 122 "src/tex/0-Overview.nw"*/
 public 
-/*line 2273 "src/tex/2-Reading.nw"*/
+/*line 2278 "src/tex/2-Reading.nw"*/
 int[] queryMetricServerDurationTravelTotal() throws SQLException {
   return storage.DBQueryMetricServerDurationTravelTotal();
 }
 /*line 123 "src/tex/0-Overview.nw"*/
 public 
-/*line 2289 "src/tex/2-Reading.nw"*/
+/*line 2294 "src/tex/2-Reading.nw"*/
 int[] queryMetricServerTWViolationsTotal() throws SQLException {
   return storage.DBQueryMetricServerTWViolationsTotal();
 }
 /*line 124 "src/tex/0-Overview.nw"*/
 public 
-/*line 2015 "src/tex/2-Reading.nw"*/
+/*line 2020 "src/tex/2-Reading.nw"*/
 int[] queryMetricServiceRate() throws SQLException {
   return storage.DBQueryMetricServiceRate();
 }
 /*line 125 "src/tex/0-Overview.nw"*/
 public 
-/*line 2058 "src/tex/2-Reading.nw"*/
+/*line 2063 "src/tex/2-Reading.nw"*/
 int[] queryMetricUserDistanceBaseTotal() throws SQLException {
   return storage.DBQueryMetricUserDistanceBaseTotal();
 }
 /*line 126 "src/tex/0-Overview.nw"*/
 public 
-/*line 898 "src/tex/2-Reading.nw"*/
+/*line 901 "src/tex/2-Reading.nw"*/
 int[] queryRequestTimeOfArrival(final int rid) throws SQLException {
   return storage.DBQueryRequestTimeOfArrival(rid);
 }
 /*line 127 "src/tex/0-Overview.nw"*/
 public 
-/*line 849 "src/tex/2-Reading.nw"*/
+/*line 852 "src/tex/2-Reading.nw"*/
 int[] queryRequestTimeOfDeparture(final int rid) throws SQLException {
   return storage.DBQueryRequestTimeOfDeparture(rid);
 }
 /*line 128 "src/tex/0-Overview.nw"*/
 public 
-/*line 941 "src/tex/2-Reading.nw"*/
+/*line 944 "src/tex/2-Reading.nw"*/
 int[] queryRequestsCount() throws SQLException {
   return storage.DBQueryRequestsCount();
 }
 /*line 129 "src/tex/0-Overview.nw"*/
 public 
-/*line 1022 "src/tex/2-Reading.nw"*/
+/*line 1025 "src/tex/2-Reading.nw"*/
 int[] queryRequestsQueued(final int t) throws SQLException {
   return storage.DBQueryRequestsQueued(t);
 }
 /*line 130 "src/tex/0-Overview.nw"*/
 public 
-/*line 1074 "src/tex/2-Reading.nw"*/
+/*line 1077 "src/tex/2-Reading.nw"*/
 int[] queryServerRoute(final int sid) throws SQLException {
   return storage.DBQueryServerRoute(sid);
 }
 /*line 131 "src/tex/0-Overview.nw"*/
 public 
-/*line 1188 "src/tex/2-Reading.nw"*/
+/*line 1191 "src/tex/2-Reading.nw"*/
 int[] queryServerSchedule(final int sid) throws SQLException {
   return storage.DBQueryServerSchedule(sid);
 }
 /*line 132 "src/tex/0-Overview.nw"*/
 public 
-/*line 1619 "src/tex/2-Reading.nw"*/
+/*line 1622 "src/tex/2-Reading.nw"*/
 int[] queryServerTimeOfDeparture(final int sid) throws SQLException {
   return storage.DBQueryServerTimeOfDeparture(sid);
 }
 /*line 133 "src/tex/0-Overview.nw"*/
 public 
-/*line 1800 "src/tex/2-Reading.nw"*/
+/*line 1803 "src/tex/2-Reading.nw"*/
 int[] queryServersCount() throws SQLException {
   return storage.DBQueryServersCount();
 }
 /*line 134 "src/tex/0-Overview.nw"*/
 public 
-/*line 481 "src/tex/2-Reading.nw"*/
+/*line 484 "src/tex/2-Reading.nw"*/
 int[] queryUser(final int rid) throws UserNotFoundException, SQLException {
   return storage.DBQueryUser(rid);
 }
 /*line 135 "src/tex/0-Overview.nw"*/
 public 
-/*line 168 "src/tex/2-Reading.nw"*/
+/*line 171 "src/tex/2-Reading.nw"*/
 int[] queryVertex(final int v) throws VertexNotFoundException, SQLException {
   return this.storage.DBQueryVertex(v);
 }
 /*line 136 "src/tex/0-Overview.nw"*/
 public 
-/*line 213 "src/tex/2-Reading.nw"*/
+/*line 216 "src/tex/2-Reading.nw"*/
 int[] queryVertices() throws SQLException {
   return this.storage.DBQueryVertices();
 }
 /*line 137 "src/tex/0-Overview.nw"*/
 public 
-/*line 256 "src/tex/2-Reading.nw"*/
+/*line 259 "src/tex/2-Reading.nw"*/
 int[] queryVerticesCount() throws SQLException {
   return this.storage.DBQueryVerticesCount();
 }
@@ -495,37 +495,37 @@ try {
 }
 /*line 148 "src/tex/0-Overview.nw"*/
 public 
-/*line 365 "src/tex/4-Administration.nw"*/
+/*line 367 "src/tex/4-Administration.nw"*/
 void cacheRoadNetworkFromDB() throws SQLException {
   this.storage.JargoCacheRoadNetworkFromDB();
 }
 /*line 149 "src/tex/0-Overview.nw"*/
 public 
-/*line 439 "src/tex/4-Administration.nw"*/
+/*line 441 "src/tex/4-Administration.nw"*/
 void cacheUsersFromDB() throws SQLException {
   this.storage.JargoCacheUsersFromDB();
 }
 /*line 150 "src/tex/0-Overview.nw"*/
 public 
-/*line 285 "src/tex/4-Administration.nw"*/
+/*line 287 "src/tex/4-Administration.nw"*/
 void instanceClose() throws SQLException {
   this.storage.JargoInstanceClose();
 }
 /*line 151 "src/tex/0-Overview.nw"*/
 public 
-/*line 246 "src/tex/4-Administration.nw"*/
+/*line 248 "src/tex/4-Administration.nw"*/
 void instanceExport(final String p) throws SQLException {
   this.storage.JargoInstanceExport(p);
 }
 /*line 152 "src/tex/0-Overview.nw"*/
 public 
-/*line 162 "src/tex/4-Administration.nw"*/
+/*line 164 "src/tex/4-Administration.nw"*/
 void instanceInitialize() {
   this.storage.JargoInstanceInitialize();
 }
 /*line 153 "src/tex/0-Overview.nw"*/
 public 
-/*line 208 "src/tex/4-Administration.nw"*/
+/*line 210 "src/tex/4-Administration.nw"*/
 void instanceLoad(final String p) throws SQLException {
   this.storage.JargoInstanceLoad(p);
 }
@@ -549,79 +549,79 @@ void gtreeLoad(String p) throws FileNotFoundException {
 }
 /*line 157 "src/tex/0-Overview.nw"*/
 public 
-/*line 1054 "src/tex/4-Administration.nw"*/
+/*line 1056 "src/tex/4-Administration.nw"*/
 int getClockNow() {
   return this.clock_now;
 }
 /*line 158 "src/tex/0-Overview.nw"*/
 public 
-/*line 1040 "src/tex/4-Administration.nw"*/
+/*line 1042 "src/tex/4-Administration.nw"*/
 Communicator getRefCommunicator() {
   return this.communicator;
 }
 /*line 159 "src/tex/0-Overview.nw"*/
 public 
-/*line 1047 "src/tex/4-Administration.nw"*/
+/*line 1049 "src/tex/4-Administration.nw"*/
 Storage getRefStorage() {
   return this.storage;
 }
 /*line 160 "src/tex/0-Overview.nw"*/
 public 
-/*line 1068 "src/tex/4-Administration.nw"*/
+/*line 1070 "src/tex/4-Administration.nw"*/
 int retrieveQueueSize() {
   return this.client.getQueueSize();
 }
 /*line 161 "src/tex/0-Overview.nw"*/
 public 
-/*line 1089 "src/tex/4-Administration.nw"*/
+/*line 1091 "src/tex/4-Administration.nw"*/
 final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> retrieveRefCacheEdges() {
   return this.storage.getRefCacheEdges();
 }
 /*line 162 "src/tex/0-Overview.nw"*/
 public 
-/*line 1096 "src/tex/4-Administration.nw"*/
+/*line 1098 "src/tex/4-Administration.nw"*/
 final ConcurrentHashMap<Integer, int[]> retrieveRefCacheUsers() {
   return this.storage.getRefCacheUsers();
 }
 /*line 163 "src/tex/0-Overview.nw"*/
 public 
-/*line 1082 "src/tex/4-Administration.nw"*/
+/*line 1084 "src/tex/4-Administration.nw"*/
 final ConcurrentHashMap<Integer, int[]> retrieveRefCacheVertices() {
   return this.storage.getRefCacheVertices();
 }
 /*line 164 "src/tex/0-Overview.nw"*/
 public 
-/*line 1200 "src/tex/4-Administration.nw"*/
+/*line 1202 "src/tex/4-Administration.nw"*/
 void forwardRefCommunicator(final Communicator communicator) {
   this.client.setRefCommunicator(communicator);
 }
 /*line 165 "src/tex/0-Overview.nw"*/
 public 
-/*line 1193 "src/tex/4-Administration.nw"*/
+/*line 1195 "src/tex/4-Administration.nw"*/
 void forwardRefTraffic(final Traffic traffic) {
   this.communicator.setRefTraffic(traffic);
 }
 /*line 166 "src/tex/0-Overview.nw"*/
 public 
-/*line 1113 "src/tex/4-Administration.nw"*/
+/*line 1115 "src/tex/4-Administration.nw"*/
 void setClockEnd(final int clock_end) {
   this.CLOCK_END = clock_end;
 }
 /*line 167 "src/tex/0-Overview.nw"*/
 public 
-/*line 1106 "src/tex/4-Administration.nw"*/
+/*line 1108 "src/tex/4-Administration.nw"*/
 void setClockStart(final int clock_start) {
   this.CLOCK_START = clock_start;
 }
 /*line 168 "src/tex/0-Overview.nw"*/
 public 
-/*line 1120 "src/tex/4-Administration.nw"*/
+/*line 1122 "src/tex/4-Administration.nw"*/
 void setQueueTimeout(final int queue_timeout) {
   this.QUEUE_TIMEOUT = queue_timeout;
 }
 /*line 169 "src/tex/0-Overview.nw"*/
 public 
-/*line 1156 "src/tex/4-Administration.nw"*/
+/*line 1158 "src/tex/4-Administration.nw"*/
 void setRefClient(final Client client) {
   this.client = client;
 }

@@ -62,13 +62,13 @@ public Storage() {
   
 /*line 10 "src/tex/0-Overview.nw"*/
 public 
-/*line 50 "src/tex/2-Reading.nw"*/
+/*line 53 "src/tex/2-Reading.nw"*/
 int[] DBQuery(final String sql, final int ncols) throws SQLException {
   int[] output = new int[] { };
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 52 "src/tex/2-Reading.nw"*/
+/*line 55 "src/tex/2-Reading.nw"*/
                         ) {
     Statement stmt = conn.createStatement(
       ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
@@ -78,12 +78,15 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 /*line 8 "src/tex/2-Reading.nw"*/
 output = new int[(ncols*res.getRow())];
 res.first();
+int i = 0;
 do {
+  final int idx = i*ncols;
   for (int j = 1; j <= ncols; j++) {
-    output[((res.getRow() - 1)*ncols + (j - 1))] = res.getInt(j);
+    output[(idx + (j - 1))] = res.getInt(j);
   }
+  i++;
 } while (res.next());
-/*line 58 "src/tex/2-Reading.nw"*/
+/*line 61 "src/tex/2-Reading.nw"*/
     }
     conn.close();
   } catch (SQLException e) {
@@ -93,7 +96,7 @@ do {
 }
 /*line 11 "src/tex/0-Overview.nw"*/
 public 
-/*line 288 "src/tex/2-Reading.nw"*/
+/*line 291 "src/tex/2-Reading.nw"*/
 int[] DBQueryEdge(final int v1, final int v2) throws EdgeNotFoundException {
   if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
     throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
@@ -102,12 +105,12 @@ int[] DBQueryEdge(final int v1, final int v2) throws EdgeNotFoundException {
 }
 /*line 12 "src/tex/0-Overview.nw"*/
 public 
-/*line 423 "src/tex/2-Reading.nw"*/
+/*line 426 "src/tex/2-Reading.nw"*/
 int[] DBQueryEdgeStatistics() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 424 "src/tex/2-Reading.nw"*/
+/*line 427 "src/tex/2-Reading.nw"*/
                         ) {
     return this.PSQuery(conn, "S65", 6);
   } catch (SQLException e) {
@@ -116,12 +119,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 13 "src/tex/0-Overview.nw"*/
 public 
-/*line 333 "src/tex/2-Reading.nw"*/
+/*line 336 "src/tex/2-Reading.nw"*/
 int[] DBQueryEdges() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 334 "src/tex/2-Reading.nw"*/
+/*line 337 "src/tex/2-Reading.nw"*/
                         ) {
     return this.PSQuery(conn, "S137", 4);
   } catch (SQLException e) {
@@ -130,12 +133,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 14 "src/tex/0-Overview.nw"*/
 public 
-/*line 376 "src/tex/2-Reading.nw"*/
+/*line 379 "src/tex/2-Reading.nw"*/
 int[] DBQueryEdgesCount() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 377 "src/tex/2-Reading.nw"*/
+/*line 380 "src/tex/2-Reading.nw"*/
                         ) {
     return this.PSQuery(conn, "S63", 1);
   } catch (SQLException e) {
@@ -144,12 +147,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 15 "src/tex/0-Overview.nw"*/
 public 
-/*line 106 "src/tex/2-Reading.nw"*/
+/*line 109 "src/tex/2-Reading.nw"*/
 int[] DBQueryMBR() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 107 "src/tex/2-Reading.nw"*/
+/*line 110 "src/tex/2-Reading.nw"*/
                         ) {
     return this.PSQuery(conn, "S64", 4);
   } catch (SQLException e) {
@@ -158,12 +161,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 16 "src/tex/0-Overview.nw"*/
 public 
-/*line 2317 "src/tex/2-Reading.nw"*/
+/*line 2322 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricRequestDistanceBaseTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2318 "src/tex/2-Reading.nw"*/
+/*line 2323 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S111", 1);
   } catch (SQLException e) {
@@ -172,12 +175,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 17 "src/tex/0-Overview.nw"*/
 public 
-/*line 2362 "src/tex/2-Reading.nw"*/
+/*line 2367 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricRequestDistanceBaseUnassignedTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2363 "src/tex/2-Reading.nw"*/
+/*line 2368 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S138", 1);
   } catch (SQLException e) {
@@ -186,12 +189,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 18 "src/tex/0-Overview.nw"*/
 public 
-/*line 2405 "src/tex/2-Reading.nw"*/
+/*line 2410 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricRequestDistanceDetourTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2406 "src/tex/2-Reading.nw"*/
+/*line 2411 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S113", 1);
   } catch (SQLException e) {
@@ -200,12 +203,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 19 "src/tex/0-Overview.nw"*/
 public 
-/*line 2448 "src/tex/2-Reading.nw"*/
+/*line 2453 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricRequestDistanceTransitTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2449 "src/tex/2-Reading.nw"*/
+/*line 2454 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S115", 1);
   } catch (SQLException e) {
@@ -214,12 +217,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 20 "src/tex/0-Overview.nw"*/
 public 
-/*line 2491 "src/tex/2-Reading.nw"*/
+/*line 2496 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricRequestDurationPickupTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2492 "src/tex/2-Reading.nw"*/
+/*line 2497 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S119", 1);
   } catch (SQLException e) {
@@ -228,12 +231,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 21 "src/tex/0-Overview.nw"*/
 public 
-/*line 2534 "src/tex/2-Reading.nw"*/
+/*line 2539 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricRequestDurationTransitTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2535 "src/tex/2-Reading.nw"*/
+/*line 2540 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S121", 1);
   } catch (SQLException e) {
@@ -242,12 +245,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 22 "src/tex/0-Overview.nw"*/
 public 
-/*line 2577 "src/tex/2-Reading.nw"*/
+/*line 2582 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricRequestDurationTravelTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2578 "src/tex/2-Reading.nw"*/
+/*line 2583 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S123", 1);
   } catch (SQLException e) {
@@ -256,12 +259,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 23 "src/tex/0-Overview.nw"*/
 public 
-/*line 2599 "src/tex/2-Reading.nw"*/
+/*line 2604 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricRequestTWViolationsTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2600 "src/tex/2-Reading.nw"*/
+/*line 2605 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S151", 2);
   } catch (SQLException e) {
@@ -270,12 +273,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 24 "src/tex/0-Overview.nw"*/
 public 
-/*line 2129 "src/tex/2-Reading.nw"*/
+/*line 2134 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricServerDistanceBaseTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2130 "src/tex/2-Reading.nw"*/
+/*line 2135 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S110", 1);
   } catch (SQLException e) {
@@ -284,12 +287,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 25 "src/tex/0-Overview.nw"*/
 public 
-/*line 2172 "src/tex/2-Reading.nw"*/
+/*line 2177 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricServerDistanceCruisingTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2173 "src/tex/2-Reading.nw"*/
+/*line 2178 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S107", 1);
   } catch (SQLException e) {
@@ -298,12 +301,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 26 "src/tex/0-Overview.nw"*/
 public 
-/*line 2215 "src/tex/2-Reading.nw"*/
+/*line 2220 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricServerDistanceServiceTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2216 "src/tex/2-Reading.nw"*/
+/*line 2221 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S109", 1);
   } catch (SQLException e) {
@@ -312,12 +315,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 27 "src/tex/0-Overview.nw"*/
 public 
-/*line 2086 "src/tex/2-Reading.nw"*/
+/*line 2091 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricServerDistanceTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2087 "src/tex/2-Reading.nw"*/
+/*line 2092 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S105", 1);
   } catch (SQLException e) {
@@ -326,12 +329,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 28 "src/tex/0-Overview.nw"*/
 public 
-/*line 2258 "src/tex/2-Reading.nw"*/
+/*line 2263 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricServerDurationTravelTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2259 "src/tex/2-Reading.nw"*/
+/*line 2264 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S117", 1);
   } catch (SQLException e) {
@@ -340,12 +343,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 29 "src/tex/0-Overview.nw"*/
 public 
-/*line 2280 "src/tex/2-Reading.nw"*/
+/*line 2285 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricServerTWViolationsTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2281 "src/tex/2-Reading.nw"*/
+/*line 2286 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S150", 2);
   } catch (SQLException e) {
@@ -354,12 +357,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 30 "src/tex/0-Overview.nw"*/
 public 
-/*line 2000 "src/tex/2-Reading.nw"*/
+/*line 2005 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricServiceRate() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2001 "src/tex/2-Reading.nw"*/
+/*line 2006 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S102", 1);
   } catch (SQLException e) {
@@ -368,12 +371,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 31 "src/tex/0-Overview.nw"*/
 public 
-/*line 2043 "src/tex/2-Reading.nw"*/
+/*line 2048 "src/tex/2-Reading.nw"*/
 int[] DBQueryMetricUserDistanceBaseTotal() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 2044 "src/tex/2-Reading.nw"*/
+/*line 2049 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S103", 1);
   } catch (SQLException e) {
@@ -382,12 +385,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 32 "src/tex/0-Overview.nw"*/
 public 
-/*line 644 "src/tex/2-Reading.nw"*/
+/*line 647 "src/tex/2-Reading.nw"*/
 int[] DBQueryRequestDistanceDetour(final int rid) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 645 "src/tex/2-Reading.nw"*/
+/*line 648 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S112", 1, rid);
   } catch (SQLException e) {
@@ -396,12 +399,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 33 "src/tex/0-Overview.nw"*/
 public 
-/*line 682 "src/tex/2-Reading.nw"*/
+/*line 685 "src/tex/2-Reading.nw"*/
 int[] DBQueryRequestDistanceTransit(final int rid) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 683 "src/tex/2-Reading.nw"*/
+/*line 686 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S114", 1, rid);
   } catch (SQLException e) {
@@ -410,12 +413,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 34 "src/tex/0-Overview.nw"*/
 public 
-/*line 720 "src/tex/2-Reading.nw"*/
+/*line 723 "src/tex/2-Reading.nw"*/
 int[] DBQueryRequestDurationPickup(final int rid) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 721 "src/tex/2-Reading.nw"*/
+/*line 724 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S118", 1, rid);
   } catch (SQLException e) {
@@ -424,12 +427,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 35 "src/tex/0-Overview.nw"*/
 public 
-/*line 758 "src/tex/2-Reading.nw"*/
+/*line 761 "src/tex/2-Reading.nw"*/
 int[] DBQueryRequestDurationTransit(final int rid) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 759 "src/tex/2-Reading.nw"*/
+/*line 762 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S120", 1, rid);
   } catch (SQLException e) {
@@ -438,12 +441,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 36 "src/tex/0-Overview.nw"*/
 public 
-/*line 796 "src/tex/2-Reading.nw"*/
+/*line 799 "src/tex/2-Reading.nw"*/
 int[] DBQueryRequestDurationTravel(final int rid) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 797 "src/tex/2-Reading.nw"*/
+/*line 800 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S122", 1, rid);
   } catch (SQLException e) {
@@ -452,12 +455,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 37 "src/tex/0-Overview.nw"*/
 public 
-/*line 606 "src/tex/2-Reading.nw"*/
+/*line 609 "src/tex/2-Reading.nw"*/
 int[] DBQueryRequestIsAssigned(final int rid) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 607 "src/tex/2-Reading.nw"*/
+/*line 610 "src/tex/2-Reading.nw"*/
                         ) {
     return this.PSQuery(conn, "S148", 1, rid);
   } catch (SQLException e) {
@@ -466,7 +469,7 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 38 "src/tex/0-Overview.nw"*/
 public 
-/*line 553 "src/tex/2-Reading.nw"*/
+/*line 556 "src/tex/2-Reading.nw"*/
 int[] DBQueryRequestStatus(final int rid, final int t)
 throws UserNotFoundException, SQLException {
   if (!this.lu_users.containsKey(rid)) {
@@ -475,7 +478,7 @@ throws UserNotFoundException, SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 558 "src/tex/2-Reading.nw"*/
+/*line 561 "src/tex/2-Reading.nw"*/
                         ) {
     return this.PSQuery(conn, "S133", 1, rid, t);
   } catch (SQLException e) {
@@ -484,12 +487,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 39 "src/tex/0-Overview.nw"*/
 public 
-/*line 883 "src/tex/2-Reading.nw"*/
+/*line 886 "src/tex/2-Reading.nw"*/
 int[] DBQueryRequestTimeOfArrival(final int rid) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 884 "src/tex/2-Reading.nw"*/
+/*line 887 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S126", 1, rid);
   } catch (SQLException e) {
@@ -498,12 +501,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 40 "src/tex/0-Overview.nw"*/
 public 
-/*line 834 "src/tex/2-Reading.nw"*/
+/*line 837 "src/tex/2-Reading.nw"*/
 int[] DBQueryRequestTimeOfDeparture(final int rid) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 835 "src/tex/2-Reading.nw"*/
+/*line 838 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S124", 1, rid);
   } catch (SQLException e) {
@@ -512,12 +515,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 41 "src/tex/0-Overview.nw"*/
 public 
-/*line 926 "src/tex/2-Reading.nw"*/
+/*line 929 "src/tex/2-Reading.nw"*/
 int[] DBQueryRequestsCount() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 927 "src/tex/2-Reading.nw"*/
+/*line 930 "src/tex/2-Reading.nw"*/
                         ) {
     return this.PSQuery(conn, "S67", 1);
   } catch (SQLException e) {
@@ -526,14 +529,14 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 42 "src/tex/0-Overview.nw"*/
 public 
-/*line 982 "src/tex/2-Reading.nw"*/
+/*line 985 "src/tex/2-Reading.nw"*/
 int[] DBQueryRequestsQueued(final int t) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 983 "src/tex/2-Reading.nw"*/
+/*line 986 "src/tex/2-Reading.nw"*/
                         ) {
-/*line 992 "src/tex/2-Reading.nw"*/
+/*line 995 "src/tex/2-Reading.nw"*/
     final int[] output = this.PSQuery(conn, "S143", 7, t, t, REQUEST_TIMEOUT);
     int[] temp1 = new int[output.length];
     int j = 0;
@@ -549,7 +552,7 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
         j += 7;
       }
     }
-/*line 1009 "src/tex/2-Reading.nw"*/
+/*line 1012 "src/tex/2-Reading.nw"*/
     return Arrays.copyOf(temp1, j);
   } catch (SQLException e) {
     throw e;
@@ -557,13 +560,13 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 43 "src/tex/0-Overview.nw"*/
 public 
-/*line 1752 "src/tex/2-Reading.nw"*/
+/*line 1755 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerAssignmentsCompleted(final int sid, final int t)
 throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1754 "src/tex/2-Reading.nw"*/
+/*line 1757 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S101", 1, t, sid);
   } catch (SQLException e) {
@@ -572,13 +575,13 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 44 "src/tex/0-Overview.nw"*/
 public 
-/*line 1708 "src/tex/2-Reading.nw"*/
+/*line 1711 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerAssignmentsPending(final int sid, final int t)
 throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1710 "src/tex/2-Reading.nw"*/
+/*line 1713 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S100", 1, t, sid);
   } catch (SQLException e) {
@@ -587,12 +590,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 45 "src/tex/0-Overview.nw"*/
 public 
-/*line 1348 "src/tex/2-Reading.nw"*/
+/*line 1351 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerDistance(final int sid) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1349 "src/tex/2-Reading.nw"*/
+/*line 1352 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S104", 1, sid);
   } catch (SQLException e) {
@@ -601,12 +604,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 46 "src/tex/0-Overview.nw"*/
 public 
-/*line 1436 "src/tex/2-Reading.nw"*/
+/*line 1439 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerDistanceCruising(final int sid) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1437 "src/tex/2-Reading.nw"*/
+/*line 1440 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S106", 1, sid);
   } catch (SQLException e) {
@@ -615,13 +618,13 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 47 "src/tex/0-Overview.nw"*/
 public 
-/*line 1386 "src/tex/2-Reading.nw"*/
+/*line 1389 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerDistanceRemaining(final int sid, final int t)
 throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1388 "src/tex/2-Reading.nw"*/
+/*line 1391 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S142", 1, sid, t);
   } catch (SQLException e) {
@@ -630,12 +633,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 48 "src/tex/0-Overview.nw"*/
 public 
-/*line 1474 "src/tex/2-Reading.nw"*/
+/*line 1477 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerDistanceService(final int sid) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1475 "src/tex/2-Reading.nw"*/
+/*line 1478 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S108", 1, sid);
   } catch (SQLException e) {
@@ -644,13 +647,13 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 49 "src/tex/0-Overview.nw"*/
 public 
-/*line 1512 "src/tex/2-Reading.nw"*/
+/*line 1515 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerDurationRemaining(final int sid, final int t)
 throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1514 "src/tex/2-Reading.nw"*/
+/*line 1517 "src/tex/2-Reading.nw"*/
                         ) {
     int[] output = PSQuery(conn, "S127", 1, sid, t);
     if (output != null) {
@@ -663,12 +666,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 50 "src/tex/0-Overview.nw"*/
 public 
-/*line 1566 "src/tex/2-Reading.nw"*/
+/*line 1569 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerDurationTravel(final int sid) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1567 "src/tex/2-Reading.nw"*/
+/*line 1570 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S116", 1, sid);
   } catch (SQLException e) {
@@ -677,12 +680,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 51 "src/tex/0-Overview.nw"*/
 public 
-/*line 1300 "src/tex/2-Reading.nw"*/
+/*line 1303 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerLoadMax(final int sid, final int t) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1301 "src/tex/2-Reading.nw"*/
+/*line 1304 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S73", 1, sid, t);
   } catch (SQLException e) {
@@ -691,12 +694,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 52 "src/tex/0-Overview.nw"*/
 public 
-/*line 1059 "src/tex/2-Reading.nw"*/
+/*line 1062 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerRoute(final int sid) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1060 "src/tex/2-Reading.nw"*/
+/*line 1063 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S60", 2, sid);
   } catch (SQLException e) {
@@ -705,12 +708,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 53 "src/tex/0-Overview.nw"*/
 public 
-/*line 1112 "src/tex/2-Reading.nw"*/
+/*line 1115 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerRouteRemaining(final int sid, final int t) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1113 "src/tex/2-Reading.nw"*/
+/*line 1116 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S129", 2, sid, t);
   } catch (SQLException e) {
@@ -719,12 +722,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 54 "src/tex/0-Overview.nw"*/
 public 
-/*line 1173 "src/tex/2-Reading.nw"*/
+/*line 1176 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerSchedule(final int sid) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1174 "src/tex/2-Reading.nw"*/
+/*line 1177 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S61", 4, sid);
   } catch (SQLException e) {
@@ -733,14 +736,14 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 55 "src/tex/0-Overview.nw"*/
 public 
-/*line 1233 "src/tex/2-Reading.nw"*/
+/*line 1236 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerScheduleRemaining(final int sid, final int t)
 throws SQLException {
   int[] output = new int[] { };
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1236 "src/tex/2-Reading.nw"*/
+/*line 1239 "src/tex/2-Reading.nw"*/
                         ) {
     int[] temp = PSQuery(conn, "S144", 3, sid, t);
     output = new int[(4*temp.length/3 + 4)];
@@ -764,12 +767,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 56 "src/tex/0-Overview.nw"*/
 public 
-/*line 1654 "src/tex/2-Reading.nw"*/
+/*line 1657 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerTimeOfArrival(final int sid) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1655 "src/tex/2-Reading.nw"*/
+/*line 1658 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S127", 1, sid);
   } catch (SQLException e) {
@@ -778,12 +781,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 57 "src/tex/0-Overview.nw"*/
 public 
-/*line 1604 "src/tex/2-Reading.nw"*/
+/*line 1607 "src/tex/2-Reading.nw"*/
 int[] DBQueryServerTimeOfDeparture(final int sid) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1605 "src/tex/2-Reading.nw"*/
+/*line 1608 "src/tex/2-Reading.nw"*/
                         ) {
     return PSQuery(conn, "S125", 1, sid);
   } catch (SQLException e) {
@@ -792,12 +795,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 58 "src/tex/0-Overview.nw"*/
 public 
-/*line 1833 "src/tex/2-Reading.nw"*/
+/*line 1836 "src/tex/2-Reading.nw"*/
 int[] DBQueryServersActive(final int t) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1834 "src/tex/2-Reading.nw"*/
+/*line 1837 "src/tex/2-Reading.nw"*/
                         ) {
     return this.PSQuery(conn, "S134", 1, t, t, t);
   } catch (SQLException e) {
@@ -806,12 +809,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 59 "src/tex/0-Overview.nw"*/
 public 
-/*line 1785 "src/tex/2-Reading.nw"*/
+/*line 1788 "src/tex/2-Reading.nw"*/
 int[] DBQueryServersCount() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1786 "src/tex/2-Reading.nw"*/
+/*line 1789 "src/tex/2-Reading.nw"*/
                         ) {
     return this.PSQuery(conn, "S66", 1);
   } catch (SQLException e) {
@@ -820,12 +823,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 60 "src/tex/0-Overview.nw"*/
 public 
-/*line 1874 "src/tex/2-Reading.nw"*/
+/*line 1877 "src/tex/2-Reading.nw"*/
 int[] DBQueryServersLocations(final int t) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1875 "src/tex/2-Reading.nw"*/
+/*line 1878 "src/tex/2-Reading.nw"*/
                         ) {
     return this.PSQuery(conn, "S59", 3, t, t, t, t);
   } catch (SQLException e) {
@@ -834,16 +837,16 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 61 "src/tex/0-Overview.nw"*/
 public 
-/*line 1923 "src/tex/2-Reading.nw"*/
+/*line 1926 "src/tex/2-Reading.nw"*/
 int[] DBQueryServersLocationsActive(final int t) throws SQLException {
   int[] output = new int[] { };
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 1925 "src/tex/2-Reading.nw"*/
+/*line 1928 "src/tex/2-Reading.nw"*/
                         ) {
     int j = 0;
-/*line 1932 "src/tex/2-Reading.nw"*/
+/*line 1935 "src/tex/2-Reading.nw"*/
     // Query S134 selects from CW. The query time is not expected to grow
     // because Table CW does not grow as we pre-load all the servers when we
     // load the problem instance.
@@ -852,13 +855,15 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
     for (int i = 0; i < temp1.length - 1; i += 2) {
       final int sid = temp1[(i + 0)];
       final int  te = temp1[(i + 1)];
-      // Queries S135 and S147 select from W. The query time is expected to
-      // grow O(log(|W|)) as we have indexes on the relevant columns and Derby
-      // implements SQL indexes as B+trees (https://db.apache.org/derby/papers/btree_package.html).
+      // Query S135 selects from W. The query time is expected to grow
+      // O(log(|W|)) because we have indexes on the relevant columns,
+      // implemented in Derby as B+trees (https://db.apache.org/derby/papers/btree_package.html).
+      // The subquery in S135 is a range query with a tight range.
+      // Query S147 is a key-lookup and also grows O(log(|W|)).
       final int lvt = this.lu_lvt.get(sid);
       final int[] temp2 = (t < te
-        ? this.PSQuery(conn, "S135", 2, sid, sid, lvt, t, t)  // <-- 0.07-0.15 ms/call (before lvt)
-        : this.PSQuery(conn, "S147", 2, sid, sid));           // <-- 0.04-0.15 ms/call
+        ? this.PSQuery(conn, "S135", 2, sid, sid, lvt, t, t)
+        : this.PSQuery(conn, "S147", 2, sid, sid));
       output[(j + 0)] = sid;
       output[(j + 1)] = temp2[0];
       output[(j + 2)] = temp2[1];
@@ -872,7 +877,7 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 62 "src/tex/0-Overview.nw"*/
 public 
-/*line 466 "src/tex/2-Reading.nw"*/
+/*line 469 "src/tex/2-Reading.nw"*/
 int[] DBQueryUser(final int uid)
 throws UserNotFoundException {
   if (!this.lu_users.containsKey(uid)) {
@@ -882,12 +887,12 @@ throws UserNotFoundException {
 }
 /*line 63 "src/tex/0-Overview.nw"*/
 public 
-/*line 515 "src/tex/2-Reading.nw"*/
+/*line 518 "src/tex/2-Reading.nw"*/
 int[] DBQueryUsers() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 516 "src/tex/2-Reading.nw"*/
+/*line 519 "src/tex/2-Reading.nw"*/
                         ) {
     return this.PSQuery(conn, "S141", 7);
   } catch (SQLException e) {
@@ -896,7 +901,7 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 64 "src/tex/0-Overview.nw"*/
 public 
-/*line 153 "src/tex/2-Reading.nw"*/
+/*line 156 "src/tex/2-Reading.nw"*/
 int[] DBQueryVertex(final int v) throws VertexNotFoundException {
   if (!this.lu_vertices.containsKey(v)) {
     throw new VertexNotFoundException("Vertex "+v+" not found.");
@@ -906,12 +911,12 @@ int[] DBQueryVertex(final int v) throws VertexNotFoundException {
 }
 /*line 65 "src/tex/0-Overview.nw"*/
 public 
-/*line 198 "src/tex/2-Reading.nw"*/
+/*line 201 "src/tex/2-Reading.nw"*/
 int[] DBQueryVertices() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 199 "src/tex/2-Reading.nw"*/
+/*line 202 "src/tex/2-Reading.nw"*/
                         ) {
     return this.PSQuery(conn, "S136", 3);
   } catch (SQLException e) {
@@ -920,12 +925,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 66 "src/tex/0-Overview.nw"*/
 public 
-/*line 241 "src/tex/2-Reading.nw"*/
+/*line 244 "src/tex/2-Reading.nw"*/
 int[] DBQueryVerticesCount() throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 242 "src/tex/2-Reading.nw"*/
+/*line 245 "src/tex/2-Reading.nw"*/
                         ) {
     return this.PSQuery(conn, "S62", 1);
   } catch (SQLException e) {
@@ -1577,13 +1582,13 @@ this.PSSubmit(pS14);
 }
 /*line 81 "src/tex/0-Overview.nw"*/
 public 
-/*line 307 "src/tex/4-Administration.nw"*/
+/*line 309 "src/tex/4-Administration.nw"*/
 void JargoCacheRoadNetworkFromDB() throws SQLException {
-/*line 316 "src/tex/4-Administration.nw"*/
+/*line 318 "src/tex/4-Administration.nw"*/
   ConcurrentHashMap<Integer, int[]>    lu1 = new ConcurrentHashMap<Integer, int[]>();
   ConcurrentHashMap<Integer,
     ConcurrentHashMap<Integer, int[]>> lu2 = new ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>>();
-/*line 322 "src/tex/4-Administration.nw"*/
+/*line 324 "src/tex/4-Administration.nw"*/
   try {
     final int[] output = this.DBQueryVertices();
     for (int i = 0; i < (output.length - 2); i += 3) {
@@ -1595,7 +1600,7 @@ void JargoCacheRoadNetworkFromDB() throws SQLException {
   } catch (SQLException e) {
     throw e;
   }
-/*line 336 "src/tex/4-Administration.nw"*/
+/*line 338 "src/tex/4-Administration.nw"*/
   try {
     final int[] output = this.DBQueryEdges();
     for (int i = 0; i < (output.length - 3); i += 4) {
@@ -1611,19 +1616,19 @@ void JargoCacheRoadNetworkFromDB() throws SQLException {
   } catch (SQLException e) {
     throw e;
   }
-/*line 354 "src/tex/4-Administration.nw"*/
+/*line 356 "src/tex/4-Administration.nw"*/
   this.lu_vertices = lu1;
   this.lu_edges    = lu2;
 }
 /*line 82 "src/tex/0-Overview.nw"*/
 public 
-/*line 389 "src/tex/4-Administration.nw"*/
+/*line 391 "src/tex/4-Administration.nw"*/
 void JargoCacheUsersFromDB() throws SQLException {
-/*line 394 "src/tex/4-Administration.nw"*/
+/*line 396 "src/tex/4-Administration.nw"*/
   ConcurrentHashMap<Integer, int[]> lu1 = new ConcurrentHashMap<Integer, int[]>();
   Map<Integer, Boolean>             lu2 = new HashMap<Integer, Boolean>();
   Map<Integer, Integer>             lu3 = new HashMap<Integer, Integer>();
-/*line 400 "src/tex/4-Administration.nw"*/
+/*line 402 "src/tex/4-Administration.nw"*/
   try {
     final int[] output = this.DBQueryUsers();
     for (int i = 0; i < (output.length - 6); i += 7) {
@@ -1635,7 +1640,7 @@ void JargoCacheUsersFromDB() throws SQLException {
       final int  ud = output[(i + 5)];
       final int  ub = output[(i + 6)];
       lu1.put(uid, new int[] { uid, uq, ue, ul, uo, ud, ub });
-/*line 415 "src/tex/4-Administration.nw"*/
+/*line 417 "src/tex/4-Administration.nw"*/
       if (uq > 0) {
         lu2.put(uid, (this.DBQueryRequestIsAssigned(uid).length > 0 ? true : false));
       } else {
@@ -1645,14 +1650,14 @@ void JargoCacheUsersFromDB() throws SQLException {
   } catch (SQLException e) {
     throw e;
   }
-/*line 427 "src/tex/4-Administration.nw"*/
+/*line 429 "src/tex/4-Administration.nw"*/
   this.lu_users   = lu1;
   this.lu_rstatus = lu2;
   this.lu_lvt     = lu3;
 }
 /*line 83 "src/tex/0-Overview.nw"*/
 public 
-/*line 268 "src/tex/4-Administration.nw"*/
+/*line 270 "src/tex/4-Administration.nw"*/
 void JargoInstanceClose() throws SQLException {
   try {
     DriverManager.getConnection("jdbc:derby:memory:jargo;drop=true");
@@ -1664,12 +1669,12 @@ void JargoInstanceClose() throws SQLException {
 }
 /*line 84 "src/tex/0-Overview.nw"*/
 public 
-/*line 230 "src/tex/4-Administration.nw"*/
+/*line 232 "src/tex/4-Administration.nw"*/
 void JargoInstanceExport(final String p) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 231 "src/tex/4-Administration.nw"*/
+/*line 233 "src/tex/4-Administration.nw"*/
                         ) {
     CallableStatement cs = conn.prepareCall("CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE('"+p+"')");
     cs.execute();
@@ -2162,10 +2167,12 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
   + "SELECT rid, td - rl FROM CPD WHERE td - rl > 0"
 /*line 136 "src/tex/4-Administration.nw"*/
                                                   );
+    stmt.addBatch("CREATE INDEX R_re ON R (re)");
     stmt.addBatch("CREATE INDEX W_sid_t1 ON W (sid, t1)");
     stmt.addBatch("CREATE INDEX W_sid_t2 ON W (sid, t2)");
     stmt.addBatch("CREATE INDEX W_sid_v2 ON W (sid, v2)");
     stmt.addBatch("CREATE INDEX W_sid_t1_t2 ON W (sid, t1, t2)");
+    stmt.addBatch("CREATE INDEX CQ_sid_t2_o2 ON CQ (sid, t2, o2)");
     stmt.executeBatch();
     conn.commit();
   } catch (SQLException e) {
@@ -2181,7 +2188,7 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 86 "src/tex/0-Overview.nw"*/
 public 
-/*line 190 "src/tex/4-Administration.nw"*/
+/*line 192 "src/tex/4-Administration.nw"*/
 void JargoInstanceLoad(final String p) throws SQLException {
   this.CONNECTIONS_URL = "jdbc:derby:memory:jargo;createFrom="+p;
   try {
@@ -2208,31 +2215,31 @@ void JargoInstanceNew() throws SQLException {
 }
 /*line 88 "src/tex/0-Overview.nw"*/
 public 
-/*line 994 "src/tex/4-Administration.nw"*/
+/*line 996 "src/tex/4-Administration.nw"*/
 final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> getRefCacheEdges() {
   return this.lu_edges;
 }
 /*line 89 "src/tex/0-Overview.nw"*/
 public 
-/*line 1013 "src/tex/4-Administration.nw"*/
+/*line 1015 "src/tex/4-Administration.nw"*/
 final ConcurrentHashMap<Integer, int[]> getRefCacheUsers() {
   return this.lu_users;
 }
 /*line 90 "src/tex/0-Overview.nw"*/
 public 
-/*line 1033 "src/tex/4-Administration.nw"*/
+/*line 1035 "src/tex/4-Administration.nw"*/
 final ConcurrentHashMap<Integer, int[]> getRefCacheVertices() {
   return this.lu_vertices;
 }
 /*line 91 "src/tex/0-Overview.nw"*/
 public 
-/*line 1127 "src/tex/4-Administration.nw"*/
+/*line 1129 "src/tex/4-Administration.nw"*/
 void setRequestTimeout(final int request_timeout) {
   this.REQUEST_TIMEOUT = request_timeout;
 }
 /*line 92 "src/tex/0-Overview.nw"*/
 private 
-/*line 465 "src/tex/4-Administration.nw"*/
+/*line 467 "src/tex/4-Administration.nw"*/
 void JargoSetupDriver() throws SQLException, ClassNotFoundException {
   connection_factory = new DriverManagerConnectionFactory(CONNECTIONS_URL);
   poolableconnection_factory = new PoolableConnectionFactory(connection_factory, null);
@@ -2251,7 +2258,7 @@ void JargoSetupDriver() throws SQLException, ClassNotFoundException {
 }
 /*line 93 "src/tex/0-Overview.nw"*/
 private 
-/*line 497 "src/tex/4-Administration.nw"*/
+/*line 499 "src/tex/4-Administration.nw"*/
 void JargoSetupPreparedStatements() {
   final String INS = "INSERT INTO ";
   final String UPD = "UPDATE ";
@@ -2266,409 +2273,409 @@ void JargoSetupPreparedStatements() {
   final String q12 = "(?,?,?,?,?,?,?,?,?,?,?,?)";
   final String q14 = "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
   
-/*line 524 "src/tex/4-Administration.nw"*/
+/*line 526 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S0", INS+"V VALUES "+q3);
-/*line 510 "src/tex/4-Administration.nw"*/
+/*line 512 "src/tex/4-Administration.nw"*/
          
-/*line 527 "src/tex/4-Administration.nw"*/
+/*line 529 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S1", INS+"E VALUES "+q4);
-/*line 510 "src/tex/4-Administration.nw"*/
+/*line 512 "src/tex/4-Administration.nw"*/
                 
-/*line 530 "src/tex/4-Administration.nw"*/
+/*line 532 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S2", INS+"UQ VALUES "+q2);
-/*line 510 "src/tex/4-Administration.nw"*/
+/*line 512 "src/tex/4-Administration.nw"*/
                        
-/*line 533 "src/tex/4-Administration.nw"*/
+/*line 535 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S3", INS+"UE VALUES "+q2);
-/*line 510 "src/tex/4-Administration.nw"*/
+/*line 512 "src/tex/4-Administration.nw"*/
                               
-/*line 536 "src/tex/4-Administration.nw"*/
+/*line 538 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S4", INS+"UL VALUES "+q2);
-/*line 510 "src/tex/4-Administration.nw"*/
+/*line 512 "src/tex/4-Administration.nw"*/
                                      
-/*line 539 "src/tex/4-Administration.nw"*/
+/*line 541 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S5", INS+"UO VALUES "+q2);
-/*line 510 "src/tex/4-Administration.nw"*/
+/*line 512 "src/tex/4-Administration.nw"*/
                                             
-/*line 542 "src/tex/4-Administration.nw"*/
+/*line 544 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S6", INS+"UD VALUES "+q2);
-/*line 510 "src/tex/4-Administration.nw"*/
+/*line 512 "src/tex/4-Administration.nw"*/
                                                    
-/*line 545 "src/tex/4-Administration.nw"*/
+/*line 547 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S7", INS+"UB VALUES "+q2);
-/*line 510 "src/tex/4-Administration.nw"*/
+/*line 512 "src/tex/4-Administration.nw"*/
                                                           
-/*line 548 "src/tex/4-Administration.nw"*/
+/*line 550 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S8", INS+"S VALUES "+q7);
-/*line 510 "src/tex/4-Administration.nw"*/
+/*line 512 "src/tex/4-Administration.nw"*/
                                                                  
-/*line 551 "src/tex/4-Administration.nw"*/
+/*line 553 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S9", INS+"R VALUES "+q7);
-/*line 510 "src/tex/4-Administration.nw"*/
+/*line 512 "src/tex/4-Administration.nw"*/
                                                                         
-/*line 554 "src/tex/4-Administration.nw"*/
+/*line 556 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S10", INS+"W VALUES "+q8);
-/*line 511 "src/tex/4-Administration.nw"*/
+/*line 513 "src/tex/4-Administration.nw"*/
   
-/*line 560 "src/tex/4-Administration.nw"*/
+/*line 562 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S11", INS+"CW VALUES "+q9);
-/*line 511 "src/tex/4-Administration.nw"*/
+/*line 513 "src/tex/4-Administration.nw"*/
           
-/*line 563 "src/tex/4-Administration.nw"*/
+/*line 565 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S12", INS+"PD VALUES "+q4);
-/*line 511 "src/tex/4-Administration.nw"*/
+/*line 513 "src/tex/4-Administration.nw"*/
                   
-/*line 566 "src/tex/4-Administration.nw"*/
+/*line 568 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S13", INS+"CPD VALUES "+q12);
-/*line 511 "src/tex/4-Administration.nw"*/
+/*line 513 "src/tex/4-Administration.nw"*/
                           
-/*line 569 "src/tex/4-Administration.nw"*/
+/*line 571 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S14", INS+"CQ VALUES "+q14);
-/*line 511 "src/tex/4-Administration.nw"*/
+/*line 513 "src/tex/4-Administration.nw"*/
                                   
-/*line 572 "src/tex/4-Administration.nw"*/
+/*line 574 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S15", UPD+"E SET nu=? WHERE v1=? AND v2=?");
-/*line 511 "src/tex/4-Administration.nw"*/
+/*line 513 "src/tex/4-Administration.nw"*/
                                           
-/*line 575 "src/tex/4-Administration.nw"*/
+/*line 577 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S131", UPD+"W SET nu=? WHERE v1=? AND v2=?");
-/*line 511 "src/tex/4-Administration.nw"*/
+/*line 513 "src/tex/4-Administration.nw"*/
                                                    
-/*line 578 "src/tex/4-Administration.nw"*/
+/*line 580 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S77", UPD+"CW SET te=?, ve=? WHERE sid=?");
-/*line 511 "src/tex/4-Administration.nw"*/
+/*line 513 "src/tex/4-Administration.nw"*/
                                                            
-/*line 581 "src/tex/4-Administration.nw"*/
+/*line 583 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S84", UPD+"PD SET t2=? WHERE v2=? AND rid=?");
-/*line 511 "src/tex/4-Administration.nw"*/
+/*line 513 "src/tex/4-Administration.nw"*/
                                                                    
-/*line 584 "src/tex/4-Administration.nw"*/
+/*line 586 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S82", UPD+"CPD SET tp=? WHERE vp=? AND rid=?");
-/*line 512 "src/tex/4-Administration.nw"*/
+/*line 514 "src/tex/4-Administration.nw"*/
   
-/*line 587 "src/tex/4-Administration.nw"*/
+/*line 589 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S83", UPD+"CPD SET td=? WHERE vd=? AND rid=?");
-/*line 512 "src/tex/4-Administration.nw"*/
+/*line 514 "src/tex/4-Administration.nw"*/
           
-/*line 590 "src/tex/4-Administration.nw"*/
+/*line 592 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S76", DEL+"W WHERE sid=? AND t2>?");
-/*line 512 "src/tex/4-Administration.nw"*/
+/*line 514 "src/tex/4-Administration.nw"*/
                   
-/*line 593 "src/tex/4-Administration.nw"*/
+/*line 595 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S42", DEL+"PD WHERE rid=?");
-/*line 512 "src/tex/4-Administration.nw"*/
+/*line 514 "src/tex/4-Administration.nw"*/
                           
-/*line 596 "src/tex/4-Administration.nw"*/
+/*line 598 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S43", DEL+"CPD WHERE rid=?");
-/*line 512 "src/tex/4-Administration.nw"*/
+/*line 514 "src/tex/4-Administration.nw"*/
                                   
-/*line 599 "src/tex/4-Administration.nw"*/
+/*line 601 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S80", DEL+"CQ WHERE sid=? AND t2>?");
-/*line 512 "src/tex/4-Administration.nw"*/
+/*line 514 "src/tex/4-Administration.nw"*/
                                           
-/*line 602 "src/tex/4-Administration.nw"*/
+/*line 604 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S62", SEL+"COUNT (*) FROM V WHERE v<>0");
-/*line 512 "src/tex/4-Administration.nw"*/
+/*line 514 "src/tex/4-Administration.nw"*/
                                                   
-/*line 605 "src/tex/4-Administration.nw"*/
+/*line 607 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S64", SEL+"MIN (lng), MAX (lng), MIN (lat), MAX (lat) "
       + "FROM V WHERE v<>0");
-/*line 512 "src/tex/4-Administration.nw"*/
+/*line 514 "src/tex/4-Administration.nw"*/
                                                           
-/*line 609 "src/tex/4-Administration.nw"*/
+/*line 611 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S63", SEL+"COUNT (*) FROM E WHERE v1<>0 AND v2<>0");
-/*line 512 "src/tex/4-Administration.nw"*/
+/*line 514 "src/tex/4-Administration.nw"*/
                                                                   
-/*line 612 "src/tex/4-Administration.nw"*/
+/*line 614 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S65", SEL+"MIN (dd), MAX (dd), SUM (dd) / COUNT (dd), "
       + "MIN (nu), MAX (nu), SUM (nu) / COUNT (nu) "
       + "FROM E WHERE v1<>0 AND v2<>0");
-/*line 513 "src/tex/4-Administration.nw"*/
+/*line 515 "src/tex/4-Administration.nw"*/
   
-/*line 617 "src/tex/4-Administration.nw"*/
+/*line 619 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S46", SEL+"dd, nu FROM E WHERE v1=? AND v2=?");
-/*line 513 "src/tex/4-Administration.nw"*/
+/*line 515 "src/tex/4-Administration.nw"*/
           
-/*line 620 "src/tex/4-Administration.nw"*/
+/*line 622 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S130", SEL+"lng, lat FROM V WHERE v=?");
-/*line 513 "src/tex/4-Administration.nw"*/
+/*line 515 "src/tex/4-Administration.nw"*/
                    
-/*line 557 "src/tex/4-Administration.nw"*/
+/*line 559 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S70", SEL+"sid, sq, se, sl, so, sd, sb FROM S WHERE sid=?");
-/*line 513 "src/tex/4-Administration.nw"*/
+/*line 515 "src/tex/4-Administration.nw"*/
                            
-/*line 623 "src/tex/4-Administration.nw"*/
+/*line 625 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S48", SEL+"sq, se FROM S WHERE sid=?");
-/*line 513 "src/tex/4-Administration.nw"*/
+/*line 515 "src/tex/4-Administration.nw"*/
                                    
-/*line 626 "src/tex/4-Administration.nw"*/
+/*line 628 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S66", SEL+"COUNT (*) FROM S");
-/*line 513 "src/tex/4-Administration.nw"*/
+/*line 515 "src/tex/4-Administration.nw"*/
                                            
-/*line 629 "src/tex/4-Administration.nw"*/
+/*line 631 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S75", SEL+"rid, rq, re, rl, ro, rd, rb FROM R WHERE rid=?");
-/*line 513 "src/tex/4-Administration.nw"*/
+/*line 515 "src/tex/4-Administration.nw"*/
                                                    
-/*line 632 "src/tex/4-Administration.nw"*/
+/*line 634 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S51", SEL+"rq, re, rl, ro, rd FROM R WHERE rid=?");
-/*line 513 "src/tex/4-Administration.nw"*/
+/*line 515 "src/tex/4-Administration.nw"*/
                                                            
-/*line 635 "src/tex/4-Administration.nw"*/
+/*line 637 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S67", SEL+"COUNT (*) FROM R");
-/*line 513 "src/tex/4-Administration.nw"*/
+/*line 515 "src/tex/4-Administration.nw"*/
                                                                    
-/*line 638 "src/tex/4-Administration.nw"*/
+/*line 640 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S59", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
       + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
       + "GROUP BY sid"
       + ") as b ON a.sid=b.sid AND ABS(a.t2-?)=b.tdiff AND a.t2<=?");
-/*line 514 "src/tex/4-Administration.nw"*/
+/*line 516 "src/tex/4-Administration.nw"*/
   
-/*line 644 "src/tex/4-Administration.nw"*/
+/*line 646 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S128", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
       + "SELECT sid FROM CW WHERE te>? OR (ve=0 AND sl>?)"
       + ") as b ON a.sid=b.sid INNER JOIN ("
       + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
       + "GROUP BY sid"
       + ") as c ON a.sid=c.sid AND ABS(a.t2-?)=c.tdiff AND a.t2<=?");
-/*line 514 "src/tex/4-Administration.nw"*/
+/*line 516 "src/tex/4-Administration.nw"*/
            
-/*line 652 "src/tex/4-Administration.nw"*/
+/*line 654 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S60", SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC");
-/*line 514 "src/tex/4-Administration.nw"*/
+/*line 516 "src/tex/4-Administration.nw"*/
                    
-/*line 655 "src/tex/4-Administration.nw"*/
+/*line 657 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S129", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC");
-/*line 514 "src/tex/4-Administration.nw"*/
+/*line 516 "src/tex/4-Administration.nw"*/
                             
-/*line 658 "src/tex/4-Administration.nw"*/
+/*line 660 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
       + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC");
-/*line 514 "src/tex/4-Administration.nw"*/
+/*line 516 "src/tex/4-Administration.nw"*/
                                     
-/*line 664 "src/tex/4-Administration.nw"*/
+/*line 666 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S69", SEL+"t, v, Ls, Lr "
       + "FROM r_server LEFT JOIN CQ ON t=t2 and v=v2 and Lr=rid "
       + "WHERE r_server.sid=?"
       + "   AND (t>? OR v=0)"
       + "   AND (Ls IS NOT NULL OR Lr IS NOT NULL)"
       + "ORDER BY t ASC, o2 ASC");
-/*line 514 "src/tex/4-Administration.nw"*/
+/*line 516 "src/tex/4-Administration.nw"*/
                                             
-/*line 672 "src/tex/4-Administration.nw"*/
+/*line 674 "src/tex/4-Administration.nw"*/
 // A "timeout" of 30 seconds is hard-coded here
 this.lu_pstr.put("S68", SEL+"* FROM R WHERE re<=? AND ?<=re+30 AND rid NOT IN  "
       + "(SELECT rid FROM assignments_r)");
-/*line 514 "src/tex/4-Administration.nw"*/
+/*line 516 "src/tex/4-Administration.nw"*/
                                                     
-/*line 677 "src/tex/4-Administration.nw"*/
+/*line 679 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S85", SEL+"uq FROM UQ WHERE uid=?");
-/*line 514 "src/tex/4-Administration.nw"*/
+/*line 516 "src/tex/4-Administration.nw"*/
                                                             
-/*line 680 "src/tex/4-Administration.nw"*/
+/*line 682 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S86", SEL+"tp, td FROM CPD WHERE rid=?");
-/*line 514 "src/tex/4-Administration.nw"*/
+/*line 516 "src/tex/4-Administration.nw"*/
                                                                     
-/*line 683 "src/tex/4-Administration.nw"*/
+/*line 685 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S73", SEL+"q2 FROM CQ WHERE sid=? AND t2<=? "
       + "ORDER BY t2 DESC, q2 DESC FETCH FIRST ROW ONLY");
-/*line 515 "src/tex/4-Administration.nw"*/
+/*line 517 "src/tex/4-Administration.nw"*/
   
-/*line 687 "src/tex/4-Administration.nw"*/
+/*line 689 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S87", SEL+"t2, q2, o2 FROM CQ WHERE sid=? AND t2<=? "
       + "ORDER BY t2 DESC, o2 DESC FETCH FIRST ROW ONLY");
-/*line 515 "src/tex/4-Administration.nw"*/
+/*line 517 "src/tex/4-Administration.nw"*/
           
-/*line 691 "src/tex/4-Administration.nw"*/
+/*line 693 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S100", SEL+"rid FROM assignments WHERE t>? AND sid=?");
-/*line 515 "src/tex/4-Administration.nw"*/
+/*line 517 "src/tex/4-Administration.nw"*/
                    
-/*line 694 "src/tex/4-Administration.nw"*/
+/*line 696 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S101", SEL+"rid FROM assignments WHERE t<=? AND sid=?");
-/*line 515 "src/tex/4-Administration.nw"*/
+/*line 517 "src/tex/4-Administration.nw"*/
                             
-/*line 697 "src/tex/4-Administration.nw"*/
+/*line 699 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S102", SEL+"* FROM service_rate");
-/*line 515 "src/tex/4-Administration.nw"*/
+/*line 517 "src/tex/4-Administration.nw"*/
                                      
-/*line 700 "src/tex/4-Administration.nw"*/
+/*line 702 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S103", SEL+"* FROM dist_base");
-/*line 515 "src/tex/4-Administration.nw"*/
+/*line 517 "src/tex/4-Administration.nw"*/
                                               
-/*line 703 "src/tex/4-Administration.nw"*/
+/*line 705 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S104", SEL+"val FROM dist_s_travel WHERE sid=?");
-/*line 515 "src/tex/4-Administration.nw"*/
+/*line 517 "src/tex/4-Administration.nw"*/
                                                        
-/*line 706 "src/tex/4-Administration.nw"*/
+/*line 708 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S105", SEL+"SUM (val) FROM dist_s_travel");
-/*line 515 "src/tex/4-Administration.nw"*/
+/*line 517 "src/tex/4-Administration.nw"*/
                                                                 
-/*line 709 "src/tex/4-Administration.nw"*/
+/*line 711 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S106", SEL+"val FROM dist_s_cruising WHERE sid=?");
-/*line 516 "src/tex/4-Administration.nw"*/
+/*line 518 "src/tex/4-Administration.nw"*/
   
-/*line 712 "src/tex/4-Administration.nw"*/
+/*line 714 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S107", SEL+"SUM (val) FROM dist_s_cruising");
-/*line 516 "src/tex/4-Administration.nw"*/
+/*line 518 "src/tex/4-Administration.nw"*/
            
-/*line 715 "src/tex/4-Administration.nw"*/
+/*line 717 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S108", SEL+"val FROM dist_s_service WHERE sid=?");
-/*line 516 "src/tex/4-Administration.nw"*/
+/*line 518 "src/tex/4-Administration.nw"*/
                     
-/*line 718 "src/tex/4-Administration.nw"*/
+/*line 720 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S109", SEL+"SUM (val) FROM dist_s_service");
-/*line 516 "src/tex/4-Administration.nw"*/
+/*line 518 "src/tex/4-Administration.nw"*/
                              
-/*line 721 "src/tex/4-Administration.nw"*/
+/*line 723 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S110", SEL+"val FROM dist_s_base");
-/*line 516 "src/tex/4-Administration.nw"*/
+/*line 518 "src/tex/4-Administration.nw"*/
                                       
-/*line 724 "src/tex/4-Administration.nw"*/
+/*line 726 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S111", SEL+"val FROM dist_r_base");
-/*line 516 "src/tex/4-Administration.nw"*/
+/*line 518 "src/tex/4-Administration.nw"*/
                                                
-/*line 727 "src/tex/4-Administration.nw"*/
+/*line 729 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S112", SEL+"val FROM dist_r_detour WHERE rid=?");
-/*line 516 "src/tex/4-Administration.nw"*/
+/*line 518 "src/tex/4-Administration.nw"*/
                                                         
-/*line 730 "src/tex/4-Administration.nw"*/
+/*line 732 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S113", SEL+"SUM (val) FROM dist_r_detour");
-/*line 516 "src/tex/4-Administration.nw"*/
+/*line 518 "src/tex/4-Administration.nw"*/
                                                                  
-/*line 733 "src/tex/4-Administration.nw"*/
+/*line 735 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S114", SEL+"val FROM dist_r_transit WHERE rid=?");
-/*line 517 "src/tex/4-Administration.nw"*/
+/*line 519 "src/tex/4-Administration.nw"*/
   
-/*line 736 "src/tex/4-Administration.nw"*/
+/*line 738 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S115", SEL+"SUM (val) FROM dist_r_transit");
-/*line 517 "src/tex/4-Administration.nw"*/
+/*line 519 "src/tex/4-Administration.nw"*/
            
-/*line 739 "src/tex/4-Administration.nw"*/
+/*line 741 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S116", SEL+"val FROM dur_s_travel WHERE sid=?");
-/*line 517 "src/tex/4-Administration.nw"*/
+/*line 519 "src/tex/4-Administration.nw"*/
                     
-/*line 742 "src/tex/4-Administration.nw"*/
+/*line 744 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S117", SEL+"SUM (val) FROM dur_s_travel");
-/*line 517 "src/tex/4-Administration.nw"*/
+/*line 519 "src/tex/4-Administration.nw"*/
                              
-/*line 745 "src/tex/4-Administration.nw"*/
+/*line 747 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S118", SEL+"val FROM dur_r_pickup WHERE rid=?");
-/*line 517 "src/tex/4-Administration.nw"*/
+/*line 519 "src/tex/4-Administration.nw"*/
                                       
-/*line 748 "src/tex/4-Administration.nw"*/
+/*line 750 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S119", SEL+"SUM (val) FROM dur_r_pickup");
-/*line 517 "src/tex/4-Administration.nw"*/
+/*line 519 "src/tex/4-Administration.nw"*/
                                                
-/*line 751 "src/tex/4-Administration.nw"*/
+/*line 753 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S120", SEL+"val FROM dur_r_transit WHERE rid=?");
-/*line 517 "src/tex/4-Administration.nw"*/
+/*line 519 "src/tex/4-Administration.nw"*/
                                                         
-/*line 754 "src/tex/4-Administration.nw"*/
+/*line 756 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S121", SEL+"SUM (val) FROM dur_r_transit");
-/*line 517 "src/tex/4-Administration.nw"*/
+/*line 519 "src/tex/4-Administration.nw"*/
                                                                  
-/*line 757 "src/tex/4-Administration.nw"*/
+/*line 759 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S122", SEL+"val FROM dur_r_travel WHERE rid=?");
-/*line 518 "src/tex/4-Administration.nw"*/
+/*line 520 "src/tex/4-Administration.nw"*/
   
-/*line 760 "src/tex/4-Administration.nw"*/
+/*line 762 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S123", SEL+"SUM (val) FROM dur_r_travel");
-/*line 518 "src/tex/4-Administration.nw"*/
+/*line 520 "src/tex/4-Administration.nw"*/
            
-/*line 763 "src/tex/4-Administration.nw"*/
+/*line 765 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S124", SEL+"val FROM t_r_depart WHERE rid=?");
-/*line 518 "src/tex/4-Administration.nw"*/
+/*line 520 "src/tex/4-Administration.nw"*/
                     
-/*line 766 "src/tex/4-Administration.nw"*/
+/*line 768 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S125", SEL+"val FROM t_s_depart WHERE sid=?");
-/*line 518 "src/tex/4-Administration.nw"*/
+/*line 520 "src/tex/4-Administration.nw"*/
                              
-/*line 769 "src/tex/4-Administration.nw"*/
+/*line 771 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S126", SEL+"val FROM t_r_arrive WHERE rid=?");
-/*line 518 "src/tex/4-Administration.nw"*/
+/*line 520 "src/tex/4-Administration.nw"*/
                                       
-/*line 772 "src/tex/4-Administration.nw"*/
+/*line 774 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S127", SEL+"val FROM t_s_arrive WHERE sid=?");
-/*line 518 "src/tex/4-Administration.nw"*/
+/*line 520 "src/tex/4-Administration.nw"*/
                                                
-/*line 775 "src/tex/4-Administration.nw"*/
+/*line 777 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S133", SEL+"val FROM f_status WHERE rid=? AND t<=? "
     + "ORDER BY t DESC FETCH FIRST ROW ONLY");
-/*line 518 "src/tex/4-Administration.nw"*/
+/*line 520 "src/tex/4-Administration.nw"*/
                                                         
-/*line 779 "src/tex/4-Administration.nw"*/
+/*line 781 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S134", SEL+"sid, te FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
-/*line 518 "src/tex/4-Administration.nw"*/
+/*line 520 "src/tex/4-Administration.nw"*/
                                                                  
-/*line 782 "src/tex/4-Administration.nw"*/
+/*line 784 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S135", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
     + "SELECT t1 FROM W WHERE sid=? AND ? <= t1 AND t1 <= ? AND ? < t2)");
-/*line 519 "src/tex/4-Administration.nw"*/
+/*line 521 "src/tex/4-Administration.nw"*/
   
-/*line 786 "src/tex/4-Administration.nw"*/
+/*line 788 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S136", SEL+"* FROM V");
-/*line 519 "src/tex/4-Administration.nw"*/
+/*line 521 "src/tex/4-Administration.nw"*/
            
-/*line 789 "src/tex/4-Administration.nw"*/
+/*line 791 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S137", SEL+"* FROM E");
-/*line 519 "src/tex/4-Administration.nw"*/
+/*line 521 "src/tex/4-Administration.nw"*/
                     
-/*line 792 "src/tex/4-Administration.nw"*/
+/*line 794 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S138", SEL+"val FROM dist_r_unassigned");
-/*line 519 "src/tex/4-Administration.nw"*/
+/*line 521 "src/tex/4-Administration.nw"*/
                              
-/*line 795 "src/tex/4-Administration.nw"*/
+/*line 797 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S139", UPD+"CPD SET te=? WHERE sid=?");
-/*line 519 "src/tex/4-Administration.nw"*/
+/*line 521 "src/tex/4-Administration.nw"*/
                                       
-/*line 798 "src/tex/4-Administration.nw"*/
+/*line 800 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S140", UPD+"CQ SET tp=?, td=? WHERE rid=?");
-/*line 519 "src/tex/4-Administration.nw"*/
+/*line 521 "src/tex/4-Administration.nw"*/
                                                
-/*line 801 "src/tex/4-Administration.nw"*/
+/*line 803 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S141", SEL+"* FROM r_user");
-/*line 519 "src/tex/4-Administration.nw"*/
+/*line 521 "src/tex/4-Administration.nw"*/
                                                         
-/*line 804 "src/tex/4-Administration.nw"*/
+/*line 806 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S142", SEL+"SUM (dd) FROM W WHERE sid=? AND t2>?");
-/*line 519 "src/tex/4-Administration.nw"*/
+/*line 521 "src/tex/4-Administration.nw"*/
                                                                  
-/*line 807 "src/tex/4-Administration.nw"*/
+/*line 809 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S143", SEL+"* FROM R WHERE re<=? AND ?<=re+?");
-/*line 520 "src/tex/4-Administration.nw"*/
+/*line 522 "src/tex/4-Administration.nw"*/
   
-/*line 810 "src/tex/4-Administration.nw"*/
+/*line 812 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S144", SEL+"t2, v2, rid FROM CQ WHERE sid=? AND t2>? ORDER BY o2 ASC");
-/*line 520 "src/tex/4-Administration.nw"*/
+/*line 522 "src/tex/4-Administration.nw"*/
            
-/*line 813 "src/tex/4-Administration.nw"*/
+/*line 815 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S145", SEL+"te, ve FROM CW WHERE sid=?");
-/*line 520 "src/tex/4-Administration.nw"*/
+/*line 522 "src/tex/4-Administration.nw"*/
                     
-/*line 816 "src/tex/4-Administration.nw"*/
+/*line 818 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S147", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
     + "SELECT t1 FROM W WHERE sid=? AND v2=0)");
-/*line 520 "src/tex/4-Administration.nw"*/
+/*line 522 "src/tex/4-Administration.nw"*/
                              
-/*line 820 "src/tex/4-Administration.nw"*/
+/*line 822 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
-/*line 520 "src/tex/4-Administration.nw"*/
+/*line 522 "src/tex/4-Administration.nw"*/
                                       
-/*line 823 "src/tex/4-Administration.nw"*/
+/*line 825 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S149", SEL+"t2, v2 FROM W WHERE sid=? ORDER BY t2 ASC");
-/*line 520 "src/tex/4-Administration.nw"*/
+/*line 522 "src/tex/4-Administration.nw"*/
                                                
-/*line 826 "src/tex/4-Administration.nw"*/
+/*line 828 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S150", SEL+"sid, val FROM violations_t_s");
-/*line 520 "src/tex/4-Administration.nw"*/
+/*line 522 "src/tex/4-Administration.nw"*/
                                                         
-/*line 829 "src/tex/4-Administration.nw"*/
+/*line 831 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S151", SEL+"rid, val FROM violations_t_r");
-/*line 521 "src/tex/4-Administration.nw"*/
+/*line 523 "src/tex/4-Administration.nw"*/
 }
 /*line 94 "src/tex/0-Overview.nw"*/
 private 
-/*line 885 "src/tex/4-Administration.nw"*/
+/*line 887 "src/tex/4-Administration.nw"*/
 void PSAdd(PreparedStatement p, final Integer... values) throws SQLException {
   p.clearParameters();
   
@@ -2680,7 +2687,7 @@ for (int i = 0; i < values.length; i++) {
     p.setInt ((i + 1), values[i]);
   }
 }
-/*line 888 "src/tex/4-Administration.nw"*/
+/*line 890 "src/tex/4-Administration.nw"*/
   try {
     p.addBatch();
   } catch (SQLException e) {
@@ -2689,7 +2696,7 @@ for (int i = 0; i < values.length; i++) {
 }
 /*line 95 "src/tex/0-Overview.nw"*/
 private 
-/*line 852 "src/tex/4-Administration.nw"*/
+/*line 854 "src/tex/4-Administration.nw"*/
 PreparedStatement PSCreate(final Connection conn, final String k) throws SQLException {
   PreparedStatement p = null;
   try {
@@ -2704,7 +2711,7 @@ PreparedStatement PSCreate(final Connection conn, final String k) throws SQLExce
 }
 /*line 96 "src/tex/0-Overview.nw"*/
 private 
-/*line 959 "src/tex/4-Administration.nw"*/
+/*line 961 "src/tex/4-Administration.nw"*/
 int[] PSQuery(final Connection conn, final String k, final int ncols, final Integer... values)
 throws SQLException {
   int[] output = new int[] { };
@@ -2719,19 +2726,22 @@ for (int i = 0; i < values.length; i++) {
     p.setInt ((i + 1), values[i]);
   }
 }
-/*line 965 "src/tex/4-Administration.nw"*/
+/*line 967 "src/tex/4-Administration.nw"*/
     ResultSet res = p.executeQuery();
     if (res.last() == true) {
       
 /*line 8 "src/tex/2-Reading.nw"*/
 output = new int[(ncols*res.getRow())];
 res.first();
+int i = 0;
 do {
+  final int idx = i*ncols;
   for (int j = 1; j <= ncols; j++) {
-    output[((res.getRow() - 1)*ncols + (j - 1))] = res.getInt(j);
+    output[(idx + (j - 1))] = res.getInt(j);
   }
+  i++;
 } while (res.next());
-/*line 968 "src/tex/4-Administration.nw"*/
+/*line 970 "src/tex/4-Administration.nw"*/
     }
     res.close();
     p.close();
@@ -2742,7 +2752,7 @@ do {
 }
 /*line 97 "src/tex/0-Overview.nw"*/
 private 
-/*line 913 "src/tex/4-Administration.nw"*/
+/*line 915 "src/tex/4-Administration.nw"*/
 void PSSubmit(PreparedStatement... statements) throws SQLException {
   try {
     for (PreparedStatement p : statements) {

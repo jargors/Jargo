@@ -7,10 +7,13 @@
 <<Flatten results>>=
 output = new int[(ncols*res.getRow())];
 res.first();
+int i = 0;
 do {
+  final int idx = i*ncols;
   for (int j = 1; j <= ncols; j++) {
-    output[((res.getRow() - 1)*ncols + (j - 1))] = res.getInt(j);
+    output[(idx + (j - 1))] = res.getInt(j);
   }
+  i++;
 } while (res.next());
 @
 
