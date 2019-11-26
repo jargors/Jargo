@@ -33,6 +33,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.io.FileNotFoundException;
 @
+<<Client.java preamble>>=
+import com.github.jargors.jmx.ClientMonitor;
+import java.lang.management.*;
+import javax.management.*;
+@
 
 \section{Member Variables}
 <<[[Client]] member variables>>=
@@ -50,7 +55,16 @@ private long stat_dur_last_handleRequest = 0;
 
 \section{Constructor}
 <<[[Client]] constructor>>=
-public Client() { }
+public Client() {
+  try {
+    MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+    ClientMonitor mon = new ClientMonitor(this);
+    mbs.registerMBean(mon, new ObjectName("com.github.jargors.jmx:type=ClientMonitor"));
+  } catch (Exception e) {
+    System.err.printf("ClientMonitor failed; reason: %s\n", e.toString());
+    System.err.printf("Continuing with monitoring disabled\n");
+  }
+}
 @
 
 \section{Methods}

@@ -3861,7 +3861,7 @@ int[] DBQueryServersActive(final int t) throws SQLException \{
 \nwixlogsorted{c}{{apply(3)}{NW24od5B-14vbUh-1}{\nwixu{NW3x1zuR-1sp72R-3}\nwixd{NW24od5B-14vbUh-1}}}%
 \nwixlogsorted{c}{{Check time window violation}{NW32V2DP-3kBClV-1}{\nwixd{NW32V2DP-3kBClV-1}\nwixu{NW32V2DP-3PimUR-1}\nwixu{NW32V2DP-42pL1g-1}\nwixu{NW32V2DP-3O61Nf-1}}}%
 \nwixlogsorted{c}{{Client.java}{NW2q3QGT-bpC9O-1}{\nwixd{NW2q3QGT-bpC9O-1}}}%
-\nwixlogsorted{c}{{Client.java preamble}{NW2q3QGT-xBgX1-1}{\nwixu{NW2q3QGT-bpC9O-1}\nwixd{NW2q3QGT-xBgX1-1}\nwixd{NW2q3QGT-xBgX1-2}}}%
+\nwixlogsorted{c}{{Client.java preamble}{NW2q3QGT-xBgX1-1}{\nwixu{NW2q3QGT-bpC9O-1}\nwixd{NW2q3QGT-xBgX1-1}\nwixd{NW2q3QGT-xBgX1-2}\nwixd{NW2q3QGT-xBgX1-3}}}%
 \nwixlogsorted{c}{{collectServerLocations(1)}{NW2q3QGT-k7vZ4-1}{\nwixu{NW3x1zuR-1aFZ2n-3}\nwixd{NW2q3QGT-k7vZ4-1}}}%
 \nwixlogsorted{c}{{Communicator.java}{NWvbkzY-1uGZre-1}{\nwixd{NWvbkzY-1uGZre-1}}}%
 \nwixlogsorted{c}{{Communicator.java preamble}{NWvbkzY-3IAuyF-1}{\nwixu{NWvbkzY-1uGZre-1}\nwixd{NWvbkzY-3IAuyF-1}\nwixd{NWvbkzY-3IAuyF-2}}}%
@@ -8583,7 +8583,7 @@ functionality.
 
 \section{Preamble}
 The preamble declares the package and imports dependencies.
-\nwenddocs{}\nwbegincode{3}\sublabel{NW2q3QGT-xBgX1-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-xBgX1-1}}}\moddef{Client.java preamble~{\nwtagstyle{}\subpageref{NW2q3QGT-xBgX1-1}}}\endmoddef\nwalsodefined{\\{NW2q3QGT-xBgX1-2}}\nwused{\\{NW2q3QGT-bpC9O-1}}
+\nwenddocs{}\nwbegincode{3}\sublabel{NW2q3QGT-xBgX1-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-xBgX1-1}}}\moddef{Client.java preamble~{\nwtagstyle{}\subpageref{NW2q3QGT-xBgX1-1}}}\endmoddef\nwalsodefined{\\{NW2q3QGT-xBgX1-2}\\{NW2q3QGT-xBgX1-3}}\nwused{\\{NW2q3QGT-bpC9O-1}}
 package com.github.jargors;
 \nwendcode{}\nwbegindocs{4}\nwdocspar
 We import {\tt{}Communicator} so we can interact with the simulated world,
@@ -8598,30 +8598,44 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.io.FileNotFoundException;
 \nwendcode{}\nwbegindocs{6}\nwdocspar
+\nwenddocs{}\nwbegincode{7}\sublabel{NW2q3QGT-xBgX1-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-xBgX1-3}}}\moddef{Client.java preamble~{\nwtagstyle{}\subpageref{NW2q3QGT-xBgX1-1}}}\plusendmoddef
+import com.github.jargors.jmx.ClientMonitor;
+import java.lang.management.*;
+import javax.management.*;
+\nwendcode{}\nwbegindocs{8}\nwdocspar
 
 \section{Member Variables}
-\nwenddocs{}\nwbegincode{7}\sublabel{NW2q3QGT-3qCSiR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-3qCSiR-1}}}\moddef{\code{}Client\edoc{} member variables~{\nwtagstyle{}\subpageref{NW2q3QGT-3qCSiR-1}}}\endmoddef\nwalsodefined{\\{NW2q3QGT-3qCSiR-2}}\nwused{\\{NW2q3QGT-bpC9O-1}}
+\nwenddocs{}\nwbegincode{9}\sublabel{NW2q3QGT-3qCSiR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-3qCSiR-1}}}\moddef{\code{}Client\edoc{} member variables~{\nwtagstyle{}\subpageref{NW2q3QGT-3qCSiR-1}}}\endmoddef\nwalsodefined{\\{NW2q3QGT-3qCSiR-2}}\nwused{\\{NW2q3QGT-bpC9O-1}}
 protected ConcurrentLinkedQueue<int[]> queue = new ConcurrentLinkedQueue<int[]>();
 protected Communicator communicator;
 protected Tools tools = new Tools();
 protected final boolean DEBUG =
     "true".equals(System.getProperty("jargors.client.debug"));
-\nwendcode{}\nwbegindocs{8}\nwdocspar
-\nwenddocs{}\nwbegincode{9}\sublabel{NW2q3QGT-3qCSiR-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-3qCSiR-2}}}\moddef{\code{}Client\edoc{} member variables~{\nwtagstyle{}\subpageref{NW2q3QGT-3qCSiR-1}}}\plusendmoddef
+\nwendcode{}\nwbegindocs{10}\nwdocspar
+\nwenddocs{}\nwbegincode{11}\sublabel{NW2q3QGT-3qCSiR-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-3qCSiR-2}}}\moddef{\code{}Client\edoc{} member variables~{\nwtagstyle{}\subpageref{NW2q3QGT-3qCSiR-1}}}\plusendmoddef
 private int stat_count_handleRequest = 0;
 private long stat_dur_total_handleRequest = 0;
 private long stat_dur_last_handleRequest = 0;
-\nwendcode{}\nwbegindocs{10}\nwdocspar
+\nwendcode{}\nwbegindocs{12}\nwdocspar
 
 \section{Constructor}
-\nwenddocs{}\nwbegincode{11}\sublabel{NW2q3QGT-2crckK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-2crckK-1}}}\moddef{\code{}Client\edoc{} constructor~{\nwtagstyle{}\subpageref{NW2q3QGT-2crckK-1}}}\endmoddef\nwused{\\{NW2q3QGT-bpC9O-1}}
-public Client() \{ \}
-\nwendcode{}\nwbegindocs{12}\nwdocspar
+\nwenddocs{}\nwbegincode{13}\sublabel{NW2q3QGT-2crckK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-2crckK-1}}}\moddef{\code{}Client\edoc{} constructor~{\nwtagstyle{}\subpageref{NW2q3QGT-2crckK-1}}}\endmoddef\nwused{\\{NW2q3QGT-bpC9O-1}}
+public Client() \{
+  try \{
+    MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+    ClientMonitor mon = new ClientMonitor(this);
+    mbs.registerMBean(mon, new ObjectName("com.github.jargors.jmx:type=ClientMonitor"));
+  \} catch (Exception e) \{
+    System.err.printf("ClientMonitor failed; reason: %s\\n", e.toString());
+    System.err.printf("Continuing with monitoring disabled\\n");
+  \}
+\}
+\nwendcode{}\nwbegindocs{14}\nwdocspar
 
 \section{Methods}
 
 \subsection{\texttt{notifyNew}(0)}
-\nwenddocs{}\nwbegincode{13}\sublabel{NW2q3QGT-1rh8pC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-1rh8pC-1}}}\moddef{notifyNew(0)~{\nwtagstyle{}\subpageref{NW2q3QGT-1rh8pC-1}}}\endmoddef\nwused{\\{NW3x1zuR-1aFZ2n-3}}
+\nwenddocs{}\nwbegincode{15}\sublabel{NW2q3QGT-1rh8pC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-1rh8pC-1}}}\moddef{notifyNew(0)~{\nwtagstyle{}\subpageref{NW2q3QGT-1rh8pC-1}}}\endmoddef\nwused{\\{NW3x1zuR-1aFZ2n-3}}
 void notifyNew() throws ClientException, ClientFatalException \{
   while (!this.queue.isEmpty()) \{
     this.stat_count_handleRequest++;
@@ -8633,14 +8647,14 @@ void notifyNew() throws ClientException, ClientFatalException \{
   \}
 \}
 \nwindexdefn{notifyNew}{notifyNew}{NW2q3QGT-1rh8pC-1}\eatline
-\nwidentdefs{\\{{notifyNew}{notifyNew}}}\nwidentuses{\\{{handleRequest}{handleRequest}}}\nwindexuse{handleRequest}{handleRequest}{NW2q3QGT-1rh8pC-1}\nwendcode{}\nwbegindocs{14}\nwdocspar
+\nwidentdefs{\\{{notifyNew}{notifyNew}}}\nwidentuses{\\{{handleRequest}{handleRequest}}}\nwindexuse{handleRequest}{handleRequest}{NW2q3QGT-1rh8pC-1}\nwendcode{}\nwbegindocs{16}\nwdocspar
 \subsection{\texttt{addRequest}(1)}
-\nwenddocs{}\nwbegincode{15}\sublabel{NW2q3QGT-3oJ3LB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-3oJ3LB-1}}}\moddef{addRequest(1)~{\nwtagstyle{}\subpageref{NW2q3QGT-3oJ3LB-1}}}\endmoddef\nwused{\\{NW3x1zuR-1aFZ2n-3}}
+\nwenddocs{}\nwbegincode{17}\sublabel{NW2q3QGT-3oJ3LB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-3oJ3LB-1}}}\moddef{addRequest(1)~{\nwtagstyle{}\subpageref{NW2q3QGT-3oJ3LB-1}}}\endmoddef\nwused{\\{NW3x1zuR-1aFZ2n-3}}
 void addRequest(final int[] r) \{
   this.queue.add(r);
 \}
 \nwindexdefn{addRequest}{addRequest}{NW2q3QGT-3oJ3LB-1}\eatline
-\nwidentdefs{\\{{addRequest}{addRequest}}}\nwendcode{}\nwbegindocs{16}\nwdocspar
+\nwidentdefs{\\{{addRequest}{addRequest}}}\nwendcode{}\nwbegindocs{18}\nwdocspar
 \subsection{\texttt{collectServerLocations}(1)}
 Array {\tt{}src} =
 
@@ -8662,15 +8676,15 @@ $w_{\leq t'}$ is the server's traveled route.  In other words the last location
 is the waypoint in the server's traveled route that is nearest $t'$.  After
 copying {\tt{}src} into {\tt{}locations}, the {\tt{}\protect\nwindexuse{endCollectServerLocations}{endCollectServerLocations}{NW2q3QGT-hKCVj-1}endCollectServerLocations}(0) method
 is executed.
-\nwenddocs{}\nwbegincode{17}\sublabel{NW2q3QGT-k7vZ4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-k7vZ4-1}}}\moddef{collectServerLocations(1)~{\nwtagstyle{}\subpageref{NW2q3QGT-k7vZ4-1}}}\endmoddef\nwused{\\{NW3x1zuR-1aFZ2n-3}}
+\nwenddocs{}\nwbegincode{19}\sublabel{NW2q3QGT-k7vZ4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-k7vZ4-1}}}\moddef{collectServerLocations(1)~{\nwtagstyle{}\subpageref{NW2q3QGT-k7vZ4-1}}}\endmoddef\nwused{\\{NW3x1zuR-1aFZ2n-3}}
 void collectServerLocations(final int[] src) \{
   this.endCollectServerLocations(src.clone());
 \}
 \nwindexdefn{collectServerLocations}{collectServerLocations}{NW2q3QGT-k7vZ4-1}\eatline
-\nwidentdefs{\\{{collectServerLocations}{collectServerLocations}}}\nwidentuses{\\{{endCollectServerLocations}{endCollectServerLocations}}}\nwindexuse{endCollectServerLocations}{endCollectServerLocations}{NW2q3QGT-k7vZ4-1}\nwendcode{}\nwbegindocs{18}\nwdocspar
+\nwidentdefs{\\{{collectServerLocations}{collectServerLocations}}}\nwidentuses{\\{{endCollectServerLocations}{endCollectServerLocations}}}\nwindexuse{endCollectServerLocations}{endCollectServerLocations}{NW2q3QGT-k7vZ4-1}\nwendcode{}\nwbegindocs{20}\nwdocspar
 
 \subsection{\texttt{endCollectServerLocations}(1)}
-\nwenddocs{}\nwbegincode{19}\sublabel{NW2q3QGT-hKCVj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-hKCVj-1}}}\moddef{endCollectServerLocations(1)~{\nwtagstyle{}\subpageref{NW2q3QGT-hKCVj-1}}}\endmoddef\nwused{\\{NW3x1zuR-1aFZ2n-3}}
+\nwenddocs{}\nwbegincode{21}\sublabel{NW2q3QGT-hKCVj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-hKCVj-1}}}\moddef{endCollectServerLocations(1)~{\nwtagstyle{}\subpageref{NW2q3QGT-hKCVj-1}}}\endmoddef\nwused{\\{NW3x1zuR-1aFZ2n-3}}
 void endCollectServerLocations(final int[] locations) \{
   for (int i = 0; i < (locations.length - 2); i += 3) \{
     this.handleServerLocation(new int[] \{
@@ -8681,12 +8695,12 @@ void endCollectServerLocations(final int[] locations) \{
   \}
 \}
 \nwindexdefn{endCollectServerLocations}{endCollectServerLocations}{NW2q3QGT-hKCVj-1}\eatline
-\nwidentdefs{\\{{endCollectServerLocations}{endCollectServerLocations}}}\nwidentuses{\\{{handleServerLocation}{handleServerLocation}}}\nwindexuse{handleServerLocation}{handleServerLocation}{NW2q3QGT-hKCVj-1}\nwendcode{}\nwbegindocs{20}\nwdocspar
+\nwidentdefs{\\{{endCollectServerLocations}{endCollectServerLocations}}}\nwidentuses{\\{{handleServerLocation}{handleServerLocation}}}\nwindexuse{handleServerLocation}{handleServerLocation}{NW2q3QGT-hKCVj-1}\nwendcode{}\nwbegindocs{22}\nwdocspar
 \subsection{\texttt{end}(0)}
-\nwenddocs{}\nwbegincode{21}\sublabel{NW2q3QGT-XQiXx-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-XQiXx-1}}}\moddef{end(0)~{\nwtagstyle{}\subpageref{NW2q3QGT-XQiXx-1}}}\endmoddef\nwused{\\{NW3x1zuR-1aFZ2n-3}}
+\nwenddocs{}\nwbegincode{23}\sublabel{NW2q3QGT-XQiXx-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-XQiXx-1}}}\moddef{end(0)~{\nwtagstyle{}\subpageref{NW2q3QGT-XQiXx-1}}}\endmoddef\nwused{\\{NW3x1zuR-1aFZ2n-3}}
 void end() \{ \}
 \nwindexdefn{end}{end}{NW2q3QGT-XQiXx-1}\eatline
-\nwidentdefs{\\{{end}{end}}}\nwendcode{}\nwbegindocs{22}\nwdocspar
+\nwidentdefs{\\{{end}{end}}}\nwendcode{}\nwbegindocs{24}\nwdocspar
 \subsection{\texttt{handleRequest}(1)}
 Array {\tt{}r} =
 
@@ -8699,10 +8713,10 @@ Array {\tt{}r} =
 };
 \end{tikzpicture}
 
-\nwenddocs{}\nwbegincode{23}\sublabel{NW2q3QGT-3Ht2mF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-3Ht2mF-1}}}\moddef{handleRequest(1)~{\nwtagstyle{}\subpageref{NW2q3QGT-3Ht2mF-1}}}\endmoddef\nwused{\\{NW3x1zuR-1aFZ2n-3}}
+\nwenddocs{}\nwbegincode{25}\sublabel{NW2q3QGT-3Ht2mF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-3Ht2mF-1}}}\moddef{handleRequest(1)~{\nwtagstyle{}\subpageref{NW2q3QGT-3Ht2mF-1}}}\endmoddef\nwused{\\{NW3x1zuR-1aFZ2n-3}}
 void handleRequest(final int[] r) throws ClientException, ClientFatalException \{ \}
 \nwindexdefn{handleRequest}{handleRequest}{NW2q3QGT-3Ht2mF-1}\eatline
-\nwidentdefs{\\{{handleRequest}{handleRequest}}}\nwendcode{}\nwbegindocs{24}\nwdocspar
+\nwidentdefs{\\{{handleRequest}{handleRequest}}}\nwendcode{}\nwbegindocs{26}\nwdocspar
 \subsection{\texttt{handleServerLocation}(1)}
 Array {\tt{}loc} =
 
@@ -8715,10 +8729,10 @@ Array {\tt{}loc} =
 };
 \end{tikzpicture}
 
-\nwenddocs{}\nwbegincode{25}\sublabel{NW2q3QGT-4Q1Upa-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-4Q1Upa-1}}}\moddef{handleServerLocation(1)~{\nwtagstyle{}\subpageref{NW2q3QGT-4Q1Upa-1}}}\endmoddef\nwused{\\{NW3x1zuR-1aFZ2n-3}}
+\nwenddocs{}\nwbegincode{27}\sublabel{NW2q3QGT-4Q1Upa-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-4Q1Upa-1}}}\moddef{handleServerLocation(1)~{\nwtagstyle{}\subpageref{NW2q3QGT-4Q1Upa-1}}}\endmoddef\nwused{\\{NW3x1zuR-1aFZ2n-3}}
 void handleServerLocation(final int[] loc) \{ \}
 \nwindexdefn{handleServerLocation}{handleServerLocation}{NW2q3QGT-4Q1Upa-1}\eatline
-\nwidentdefs{\\{{handleServerLocation}{handleServerLocation}}}\nwendcode{}\nwbegindocs{26}\nwdocspar
+\nwidentdefs{\\{{handleServerLocation}{handleServerLocation}}}\nwendcode{}\nwbegindocs{28}\nwdocspar
 \nwenddocs{}\nwfilename{src/Traffic.nw}\nwbegindocs{0}\chapter{Class: Traffic}
 \label{traffic}
 
