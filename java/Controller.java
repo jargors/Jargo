@@ -141,7 +141,7 @@ private Runnable RequestHandlingLoop = () -> {
   int  A1 = 0;
   if (DEBUG) {
     A0 = System.currentTimeMillis();
-    A1 = this.client.getQueueSize();
+    A1 = this.client.getStatCountQueueSize();
   }
   try {
     this.client.notifyNew();  // blocks this thread until queue is empty
@@ -567,61 +567,61 @@ Storage getRefStorage() {
 }
 /*line 169 "src/tex/0-Overview.nw"*/
 public 
-/*line 1133 "src/tex/4-Administration.nw"*/
+/*line 1154 "src/tex/4-Administration.nw"*/
 int retrieveQueueSize() {
-  return this.client.getQueueSize();
+  return this.client.getStatCountQueueSize();
 }
 /*line 170 "src/tex/0-Overview.nw"*/
 public 
-/*line 1154 "src/tex/4-Administration.nw"*/
+/*line 1175 "src/tex/4-Administration.nw"*/
 final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> retrieveRefCacheEdges() {
   return this.storage.getRefCacheEdges();
 }
 /*line 171 "src/tex/0-Overview.nw"*/
 public 
-/*line 1161 "src/tex/4-Administration.nw"*/
+/*line 1182 "src/tex/4-Administration.nw"*/
 final ConcurrentHashMap<Integer, int[]> retrieveRefCacheUsers() {
   return this.storage.getRefCacheUsers();
 }
 /*line 172 "src/tex/0-Overview.nw"*/
 public 
-/*line 1147 "src/tex/4-Administration.nw"*/
+/*line 1168 "src/tex/4-Administration.nw"*/
 final ConcurrentHashMap<Integer, int[]> retrieveRefCacheVertices() {
   return this.storage.getRefCacheVertices();
 }
 /*line 173 "src/tex/0-Overview.nw"*/
 public 
-/*line 1265 "src/tex/4-Administration.nw"*/
+/*line 1286 "src/tex/4-Administration.nw"*/
 void forwardRefCommunicator(final Communicator communicator) {
   this.client.setRefCommunicator(communicator);
 }
 /*line 174 "src/tex/0-Overview.nw"*/
 public 
-/*line 1258 "src/tex/4-Administration.nw"*/
+/*line 1279 "src/tex/4-Administration.nw"*/
 void forwardRefTraffic(final Traffic traffic) {
   this.communicator.setRefTraffic(traffic);
 }
 /*line 175 "src/tex/0-Overview.nw"*/
 public 
-/*line 1178 "src/tex/4-Administration.nw"*/
+/*line 1199 "src/tex/4-Administration.nw"*/
 void setClockEnd(final int clock_end) {
   this.CLOCK_END = clock_end;
 }
 /*line 176 "src/tex/0-Overview.nw"*/
 public 
-/*line 1171 "src/tex/4-Administration.nw"*/
+/*line 1192 "src/tex/4-Administration.nw"*/
 void setClockStart(final int clock_start) {
   this.CLOCK_START = clock_start;
 }
 /*line 177 "src/tex/0-Overview.nw"*/
 public 
-/*line 1185 "src/tex/4-Administration.nw"*/
+/*line 1206 "src/tex/4-Administration.nw"*/
 void setQueueTimeout(final int queue_timeout) {
   this.QUEUE_TIMEOUT = queue_timeout;
 }
 /*line 178 "src/tex/0-Overview.nw"*/
 public 
-/*line 1221 "src/tex/4-Administration.nw"*/
+/*line 1242 "src/tex/4-Administration.nw"*/
 void setRefClient(final Client client) {
   this.client = client;
 }

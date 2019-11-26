@@ -16,19 +16,19 @@ private final boolean DEBUG = "true".equals(System.getProperty("jargors.traffic.
 public Traffic() { }
 /*line 9 "src/Traffic.nw"*/
   
-/*line 254 "src/tex/0-Overview.nw"*/
+/*line 257 "src/tex/0-Overview.nw"*/
 public 
-/*line 1272 "src/tex/4-Administration.nw"*/
+/*line 1293 "src/tex/4-Administration.nw"*/
 void forwardRefCacheEdges(final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> lu_edges) {
   this.tools.setRefCacheEdges(lu_edges);
 }
-/*line 255 "src/tex/0-Overview.nw"*/
+/*line 258 "src/tex/0-Overview.nw"*/
 public 
-/*line 1286 "src/tex/4-Administration.nw"*/
+/*line 1307 "src/tex/4-Administration.nw"*/
 void forwardRefCacheVertices(final ConcurrentHashMap<Integer, int[]> lu_vertices) {
   this.tools.setRefCacheVertices(lu_vertices);
 }
-/*line 256 "src/tex/0-Overview.nw"*/
+/*line 259 "src/tex/0-Overview.nw"*/
 public 
 /*line 41 "src/Traffic.nw"*/
 double apply(int v1, int v2, int t) {

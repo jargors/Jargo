@@ -2252,55 +2252,55 @@ void JargoInstanceNew() throws SQLException {
 }
 /*line 88 "src/tex/0-Overview.nw"*/
 public 
-/*line 1070 "src/tex/4-Administration.nw"*/
+/*line 1063 "src/tex/4-Administration.nw"*/
 int getStatCountDBQueryServersLocationsActive() {
   return this.stat_count_DBQueryServersLocationsActive;
 }
 /*line 89 "src/tex/0-Overview.nw"*/
 public 
-/*line 1077 "src/tex/4-Administration.nw"*/
+/*line 1070 "src/tex/4-Administration.nw"*/
 int getStatCountDBQueryServerScheduleRemaining() {
   return this.stat_count_DBQueryServerScheduleRemaining;
 }
 /*line 90 "src/tex/0-Overview.nw"*/
 public 
-/*line 1084 "src/tex/4-Administration.nw"*/
+/*line 1077 "src/tex/4-Administration.nw"*/
 int getStatCountDBQueryRequestsQueued() {
   return this.stat_count_DBQueryRequestsQueued;
 }
 /*line 91 "src/tex/0-Overview.nw"*/
 public 
-/*line 1091 "src/tex/4-Administration.nw"*/
+/*line 1098 "src/tex/4-Administration.nw"*/
 long getStatDurTotalDBQueryServersLocationsActive() {
   return this.stat_dur_total_DBQueryServersLocationsActive;
 }
 /*line 92 "src/tex/0-Overview.nw"*/
 public 
-/*line 1098 "src/tex/4-Administration.nw"*/
+/*line 1105 "src/tex/4-Administration.nw"*/
 long getStatDurTotalDBQueryServerScheduleRemaining() {
   return this.stat_dur_total_DBQueryServerScheduleRemaining;
 }
 /*line 93 "src/tex/0-Overview.nw"*/
 public 
-/*line 1105 "src/tex/4-Administration.nw"*/
+/*line 1112 "src/tex/4-Administration.nw"*/
 long getStatDurTotalDBQueryRequestsQueued() {
   return this.stat_dur_total_DBQueryRequestsQueued;
 }
 /*line 94 "src/tex/0-Overview.nw"*/
 public 
-/*line 1112 "src/tex/4-Administration.nw"*/
+/*line 1126 "src/tex/4-Administration.nw"*/
 long getStatDurLastDBQueryServersLocationsActive() {
   return this.stat_dur_last_DBQueryServersLocationsActive;
 }
 /*line 95 "src/tex/0-Overview.nw"*/
 public 
-/*line 1119 "src/tex/4-Administration.nw"*/
+/*line 1133 "src/tex/4-Administration.nw"*/
 long getStatDurLastDBQueryServerScheduleRemaining() {
   return this.stat_dur_last_DBQueryServerScheduleRemaining;
 }
 /*line 96 "src/tex/0-Overview.nw"*/
 public 
-/*line 1126 "src/tex/4-Administration.nw"*/
+/*line 1140 "src/tex/4-Administration.nw"*/
 long getStatDurLastDBQueryRequestsQueued() {
   return this.stat_dur_last_DBQueryRequestsQueued;
 }
@@ -2324,7 +2324,7 @@ final ConcurrentHashMap<Integer, int[]> getRefCacheVertices() {
 }
 /*line 100 "src/tex/0-Overview.nw"*/
 public 
-/*line 1192 "src/tex/4-Administration.nw"*/
+/*line 1213 "src/tex/4-Administration.nw"*/
 void setRequestTimeout(final int request_timeout) {
   this.REQUEST_TIMEOUT = request_timeout;
 }

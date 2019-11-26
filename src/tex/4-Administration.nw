@@ -1058,13 +1058,6 @@ int getClockNow() {
 }
 @ %def getClockNow
 
-\subsection{\texttt{getQueueSize}(0)}
-<<Get: getQueueSize(0)>>=
-int getQueueSize() {
-  return this.queue.size();
-}
-@ %def getQueueSize
-
 \subsection{\texttt{getStatCountDBQueryServersLocationsActive}(0)}
 <<Get: getStatCountDBQueryServersLocationsActive(0)>>=
 int getStatCountDBQueryServersLocationsActive() {
@@ -1085,6 +1078,20 @@ int getStatCountDBQueryRequestsQueued() {
   return this.stat_count_DBQueryRequestsQueued;
 }
 @ %def getStatCountDBQuerRequestsQueuedy
+
+\subsection{\texttt{getStatCountHandleRequest}(0)}
+<<Get: getStatCountHandleRequest(0)>>=
+int getStatCountHandleRequest() {
+  return this.stat_count_handleRequest;
+}
+@ %def getStatCountHandleRequest
+
+\subsection{\texttt{getStatCountQueueSize}(0)}
+<<Get: getStatCountQueueSize(0)>>=
+int getStatCountQueueSize() {
+  return this.queue.size();
+}
+@ %def getStatCountQueueSize
 
 \subsection{\texttt{getStatDurTotalDBQueryServersLocationsActive}(0)}
 <<Get: getStatDurTotalDBQueryServersLocationsActive(0)>>=
@@ -1107,6 +1114,13 @@ long getStatDurTotalDBQueryRequestsQueued() {
 }
 @ %def getStatDurTotalDBQuerRequestsQueuedy
 
+\subsection{\texttt{getStatDurTotalHandleRequest}(0)}
+<<Get: getStatDurTotalHandleRequest(0)>>=
+long getStatDurTotalHandleRequest() {
+  return this.stat_dur_total_handleRequest;
+}
+@ %def getStatDurTotalHandleRequest
+
 \subsection{\texttt{getStatDurLastDBQueryServersLocationsActive}(0)}
 <<Get: getStatDurLastDBQueryServersLocationsActive(0)>>=
 long getStatDurLastDBQueryServersLocationsActive() {
@@ -1128,10 +1142,17 @@ long getStatDurLastDBQueryRequestsQueued() {
 }
 @ %def getStatDurLastDBQuerRequestsQueuedy
 
+\subsection{\texttt{getStatDurLastHandleRequest}(0)}
+<<Get: getStatDurLastHandleRequest(0)>>=
+long getStatDurLastHandleRequest() {
+  return this.stat_dur_last_handleRequest;
+}
+@ %def getStatDurLastHandleRequest
+
 \subsection{\texttt{retrieveQueueSize}(0)}
 <<Get: retrieveQueueSize(0)>>=
 int retrieveQueueSize() {
-  return this.client.getQueueSize();
+  return this.client.getStatCountQueueSize();
 }
 @ %def retrieveQueueSize
 
