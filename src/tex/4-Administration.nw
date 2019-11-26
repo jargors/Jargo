@@ -140,6 +140,7 @@ void JargoInstanceInitialize() {
     stmt.addBatch("CREATE INDEX W_sid_v2 ON W (sid, v2)");
     stmt.addBatch("CREATE INDEX W_sid_t1_t2 ON W (sid, t1, t2)");
     stmt.addBatch("CREATE INDEX CQ_sid_t2_o2 ON CQ (sid, t2, o2)");
+    stmt.addBatch("CREATE INDEX CQ_sid_t2_q2 ON CQ (sid, t2 DESC, q2 DESC)");
     stmt.executeBatch();
     conn.commit();
   } catch (SQLException e) {
@@ -771,7 +772,7 @@ this.lu_pstr.put("S125", SEL+"val FROM t_s_depart WHERE sid=?");
 this.lu_pstr.put("S126", SEL+"val FROM t_r_arrive WHERE rid=?");
 @ %def S126
 <<S127>>=
-this.lu_pstr.put("S127", SEL+"val FROM t_s_arrive WHERE sid=?");
+this.lu_pstr.put("S127", SEL+"te FROM CW WHERE sid=?");
 @ %def S127
 <<S133>>=
 this.lu_pstr.put("S133", SEL+"val FROM f_status WHERE rid=? AND t<=? "

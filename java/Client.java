@@ -37,31 +37,31 @@ void gtreeClose() {
 }
 /*line 230 "src/tex/0-Overview.nw"*/
 public 
-/*line 1063 "src/tex/4-Administration.nw"*/
+/*line 1064 "src/tex/4-Administration.nw"*/
 int getQueueSize() {
   return this.queue.size();
 }
 /*line 231 "src/tex/0-Overview.nw"*/
 public 
-/*line 1272 "src/tex/4-Administration.nw"*/
+/*line 1273 "src/tex/4-Administration.nw"*/
 void forwardRefCacheEdges(final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> lu_edges) {
   this.tools.setRefCacheEdges(lu_edges);
 }
 /*line 232 "src/tex/0-Overview.nw"*/
 public 
-/*line 1279 "src/tex/4-Administration.nw"*/
+/*line 1280 "src/tex/4-Administration.nw"*/
 void forwardRefCacheUsers(final ConcurrentHashMap<Integer, int[]> lu_users) {
   this.tools.setRefCacheUsers(lu_users);
 }
 /*line 233 "src/tex/0-Overview.nw"*/
 public 
-/*line 1286 "src/tex/4-Administration.nw"*/
+/*line 1287 "src/tex/4-Administration.nw"*/
 void forwardRefCacheVertices(final ConcurrentHashMap<Integer, int[]> lu_vertices) {
   this.tools.setRefCacheVertices(lu_vertices);
 }
 /*line 234 "src/tex/0-Overview.nw"*/
 public 
-/*line 1228 "src/tex/4-Administration.nw"*/
+/*line 1229 "src/tex/4-Administration.nw"*/
 void setRefCommunicator(final Communicator communicator) {
   this.communicator = communicator;
 }

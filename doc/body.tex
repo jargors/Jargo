@@ -6539,6 +6539,7 @@ void JargoInstanceInitialize() \{
     stmt.addBatch("CREATE INDEX W_sid_v2 ON W (sid, v2)");
     stmt.addBatch("CREATE INDEX W_sid_t1_t2 ON W (sid, t1, t2)");
     stmt.addBatch("CREATE INDEX CQ_sid_t2_o2 ON CQ (sid, t2, o2)");
+    stmt.addBatch("CREATE INDEX CQ_sid_t2_q2 ON CQ (sid, t2 DESC, q2 DESC)");
     stmt.executeBatch();
     conn.commit();
   \} catch (SQLException e) \{
@@ -7170,7 +7171,7 @@ this.lu_pstr.put("S125", SEL+"val FROM t_s_depart WHERE sid=?");
 this.lu_pstr.put("S126", SEL+"val FROM t_r_arrive WHERE rid=?");
 \nwindexdefn{S126}{S126}{NWgUSr6-25Tygt-1}\eatline
 \nwidentdefs{\\{{S126}{S126}}}\nwendcode{}\nwbegincode{128}\sublabel{NWgUSr6-2TKHcJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-2TKHcJ-1}}}\moddef{S127~{\nwtagstyle{}\subpageref{NWgUSr6-2TKHcJ-1}}}\endmoddef\nwused{\\{NWgUSr6-1dEGs4-1}}
-this.lu_pstr.put("S127", SEL+"val FROM t_s_arrive WHERE sid=?");
+this.lu_pstr.put("S127", SEL+"te FROM CW WHERE sid=?");
 \nwindexdefn{S127}{S127}{NWgUSr6-2TKHcJ-1}\eatline
 \nwidentdefs{\\{{S127}{S127}}}\nwendcode{}\nwbegincode{129}\sublabel{NWgUSr6-3Q2E0J-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWgUSr6-3Q2E0J-1}}}\moddef{S133~{\nwtagstyle{}\subpageref{NWgUSr6-3Q2E0J-1}}}\endmoddef\nwused{\\{NWgUSr6-1dEGs4-1}}
 this.lu_pstr.put("S133", SEL+"val FROM f_status WHERE rid=? AND t<=? "

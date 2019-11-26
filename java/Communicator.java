@@ -258,43 +258,43 @@ if (this.traffic != null) {
 }
 /*line 208 "src/tex/0-Overview.nw"*/
 public 
-/*line 1140 "src/tex/4-Administration.nw"*/
+/*line 1141 "src/tex/4-Administration.nw"*/
 int retrieveClockNow() {
   return this.controller.getClockNow();
 }
 /*line 209 "src/tex/0-Overview.nw"*/
 public 
-/*line 1154 "src/tex/4-Administration.nw"*/
+/*line 1155 "src/tex/4-Administration.nw"*/
 final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> retrieveRefCacheEdges() {
   return this.storage.getRefCacheEdges();
 }
 /*line 210 "src/tex/0-Overview.nw"*/
 public 
-/*line 1161 "src/tex/4-Administration.nw"*/
+/*line 1162 "src/tex/4-Administration.nw"*/
 final ConcurrentHashMap<Integer, int[]> retrieveRefCacheUsers() {
   return this.storage.getRefCacheUsers();
 }
 /*line 211 "src/tex/0-Overview.nw"*/
 public 
-/*line 1147 "src/tex/4-Administration.nw"*/
+/*line 1148 "src/tex/4-Administration.nw"*/
 final ConcurrentHashMap<Integer, int[]> retrieveRefCacheVertices() {
   return this.storage.getRefCacheVertices();
 }
 /*line 212 "src/tex/0-Overview.nw"*/
 public 
-/*line 1235 "src/tex/4-Administration.nw"*/
+/*line 1236 "src/tex/4-Administration.nw"*/
 void setRefController(final Controller controller) {
   this.controller = controller;
 }
 /*line 213 "src/tex/0-Overview.nw"*/
 public 
-/*line 1242 "src/tex/4-Administration.nw"*/
+/*line 1243 "src/tex/4-Administration.nw"*/
 void setRefStorage(final Storage storage) {
   this.storage = storage;
 }
 /*line 214 "src/tex/0-Overview.nw"*/
 public 
-/*line 1249 "src/tex/4-Administration.nw"*/
+/*line 1250 "src/tex/4-Administration.nw"*/
 void setRefTraffic (final Traffic traffic) {
   this.traffic = traffic;
   this.traffic.forwardRefCacheVertices(this.storage.getRefCacheVertices());

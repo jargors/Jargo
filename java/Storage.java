@@ -1619,13 +1619,13 @@ this.PSSubmit(pS14);
 }
 /*line 81 "src/tex/0-Overview.nw"*/
 public 
-/*line 309 "src/tex/4-Administration.nw"*/
+/*line 310 "src/tex/4-Administration.nw"*/
 void JargoCacheRoadNetworkFromDB() throws SQLException {
-/*line 318 "src/tex/4-Administration.nw"*/
+/*line 319 "src/tex/4-Administration.nw"*/
   ConcurrentHashMap<Integer, int[]>    lu1 = new ConcurrentHashMap<Integer, int[]>();
   ConcurrentHashMap<Integer,
     ConcurrentHashMap<Integer, int[]>> lu2 = new ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>>();
-/*line 324 "src/tex/4-Administration.nw"*/
+/*line 325 "src/tex/4-Administration.nw"*/
   try {
     final int[] output = this.DBQueryVertices();
     for (int i = 0; i < (output.length - 2); i += 3) {
@@ -1637,7 +1637,7 @@ void JargoCacheRoadNetworkFromDB() throws SQLException {
   } catch (SQLException e) {
     throw e;
   }
-/*line 338 "src/tex/4-Administration.nw"*/
+/*line 339 "src/tex/4-Administration.nw"*/
   try {
     final int[] output = this.DBQueryEdges();
     for (int i = 0; i < (output.length - 3); i += 4) {
@@ -1653,19 +1653,19 @@ void JargoCacheRoadNetworkFromDB() throws SQLException {
   } catch (SQLException e) {
     throw e;
   }
-/*line 356 "src/tex/4-Administration.nw"*/
+/*line 357 "src/tex/4-Administration.nw"*/
   this.lu_vertices = lu1;
   this.lu_edges    = lu2;
 }
 /*line 82 "src/tex/0-Overview.nw"*/
 public 
-/*line 391 "src/tex/4-Administration.nw"*/
+/*line 392 "src/tex/4-Administration.nw"*/
 void JargoCacheUsersFromDB() throws SQLException {
-/*line 396 "src/tex/4-Administration.nw"*/
+/*line 397 "src/tex/4-Administration.nw"*/
   ConcurrentHashMap<Integer, int[]> lu1 = new ConcurrentHashMap<Integer, int[]>();
   Map<Integer, Boolean>             lu2 = new HashMap<Integer, Boolean>();
   Map<Integer, Integer>             lu3 = new HashMap<Integer, Integer>();
-/*line 402 "src/tex/4-Administration.nw"*/
+/*line 403 "src/tex/4-Administration.nw"*/
   try {
     final int[] output = this.DBQueryUsers();
     for (int i = 0; i < (output.length - 6); i += 7) {
@@ -1677,7 +1677,7 @@ void JargoCacheUsersFromDB() throws SQLException {
       final int  ud = output[(i + 5)];
       final int  ub = output[(i + 6)];
       lu1.put(uid, new int[] { uid, uq, ue, ul, uo, ud, ub });
-/*line 417 "src/tex/4-Administration.nw"*/
+/*line 418 "src/tex/4-Administration.nw"*/
       if (uq > 0) {
         lu2.put(uid, (this.DBQueryRequestIsAssigned(uid).length > 0 ? true : false));
       } else {
@@ -1687,14 +1687,14 @@ void JargoCacheUsersFromDB() throws SQLException {
   } catch (SQLException e) {
     throw e;
   }
-/*line 429 "src/tex/4-Administration.nw"*/
+/*line 430 "src/tex/4-Administration.nw"*/
   this.lu_users   = lu1;
   this.lu_rstatus = lu2;
   this.lu_lvt     = lu3;
 }
 /*line 83 "src/tex/0-Overview.nw"*/
 public 
-/*line 270 "src/tex/4-Administration.nw"*/
+/*line 271 "src/tex/4-Administration.nw"*/
 void JargoInstanceClose() throws SQLException {
   try {
     DriverManager.getConnection("jdbc:derby:memory:jargo;drop=true");
@@ -1706,12 +1706,12 @@ void JargoInstanceClose() throws SQLException {
 }
 /*line 84 "src/tex/0-Overview.nw"*/
 public 
-/*line 232 "src/tex/4-Administration.nw"*/
+/*line 233 "src/tex/4-Administration.nw"*/
 void JargoInstanceExport(final String p) throws SQLException {
   try (
 /*line 8 "src/tex/4-Administration.nw"*/
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
-/*line 233 "src/tex/4-Administration.nw"*/
+/*line 234 "src/tex/4-Administration.nw"*/
                         ) {
     CallableStatement cs = conn.prepareCall("CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE('"+p+"')");
     cs.execute();
@@ -2210,6 +2210,7 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
     stmt.addBatch("CREATE INDEX W_sid_v2 ON W (sid, v2)");
     stmt.addBatch("CREATE INDEX W_sid_t1_t2 ON W (sid, t1, t2)");
     stmt.addBatch("CREATE INDEX CQ_sid_t2_o2 ON CQ (sid, t2, o2)");
+    stmt.addBatch("CREATE INDEX CQ_sid_t2_q2 ON CQ (sid, t2 DESC, q2 DESC)");
     stmt.executeBatch();
     conn.commit();
   } catch (SQLException e) {
@@ -2225,7 +2226,7 @@ Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 }
 /*line 86 "src/tex/0-Overview.nw"*/
 public 
-/*line 192 "src/tex/4-Administration.nw"*/
+/*line 193 "src/tex/4-Administration.nw"*/
 void JargoInstanceLoad(final String p) throws SQLException {
   this.CONNECTIONS_URL = "jdbc:derby:memory:jargo;createFrom="+p;
   try {
@@ -2252,85 +2253,85 @@ void JargoInstanceNew() throws SQLException {
 }
 /*line 88 "src/tex/0-Overview.nw"*/
 public 
-/*line 1070 "src/tex/4-Administration.nw"*/
+/*line 1071 "src/tex/4-Administration.nw"*/
 int getStatCountDBQueryServersLocationsActive() {
   return this.stat_count_DBQueryServersLocationsActive;
 }
 /*line 89 "src/tex/0-Overview.nw"*/
 public 
-/*line 1077 "src/tex/4-Administration.nw"*/
+/*line 1078 "src/tex/4-Administration.nw"*/
 int getStatCountDBQueryServerScheduleRemaining() {
   return this.stat_count_DBQueryServerScheduleRemaining;
 }
 /*line 90 "src/tex/0-Overview.nw"*/
 public 
-/*line 1084 "src/tex/4-Administration.nw"*/
+/*line 1085 "src/tex/4-Administration.nw"*/
 int getStatCountDBQueryRequestsQueued() {
   return this.stat_count_DBQueryRequestsQueued;
 }
 /*line 91 "src/tex/0-Overview.nw"*/
 public 
-/*line 1091 "src/tex/4-Administration.nw"*/
+/*line 1092 "src/tex/4-Administration.nw"*/
 long getStatDurTotalDBQueryServersLocationsActive() {
   return this.stat_dur_total_DBQueryServersLocationsActive;
 }
 /*line 92 "src/tex/0-Overview.nw"*/
 public 
-/*line 1098 "src/tex/4-Administration.nw"*/
+/*line 1099 "src/tex/4-Administration.nw"*/
 long getStatDurTotalDBQueryServerScheduleRemaining() {
   return this.stat_dur_total_DBQueryServerScheduleRemaining;
 }
 /*line 93 "src/tex/0-Overview.nw"*/
 public 
-/*line 1105 "src/tex/4-Administration.nw"*/
+/*line 1106 "src/tex/4-Administration.nw"*/
 long getStatDurTotalDBQueryRequestsQueued() {
   return this.stat_dur_total_DBQueryRequestsQueued;
 }
 /*line 94 "src/tex/0-Overview.nw"*/
 public 
-/*line 1112 "src/tex/4-Administration.nw"*/
+/*line 1113 "src/tex/4-Administration.nw"*/
 long getStatDurLastDBQueryServersLocationsActive() {
   return this.stat_dur_last_DBQueryServersLocationsActive;
 }
 /*line 95 "src/tex/0-Overview.nw"*/
 public 
-/*line 1119 "src/tex/4-Administration.nw"*/
+/*line 1120 "src/tex/4-Administration.nw"*/
 long getStatDurLastDBQueryServerScheduleRemaining() {
   return this.stat_dur_last_DBQueryServerScheduleRemaining;
 }
 /*line 96 "src/tex/0-Overview.nw"*/
 public 
-/*line 1126 "src/tex/4-Administration.nw"*/
+/*line 1127 "src/tex/4-Administration.nw"*/
 long getStatDurLastDBQueryRequestsQueued() {
   return this.stat_dur_last_DBQueryRequestsQueued;
 }
 /*line 97 "src/tex/0-Overview.nw"*/
 public 
-/*line 996 "src/tex/4-Administration.nw"*/
+/*line 997 "src/tex/4-Administration.nw"*/
 final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> getRefCacheEdges() {
   return this.lu_edges;
 }
 /*line 98 "src/tex/0-Overview.nw"*/
 public 
-/*line 1015 "src/tex/4-Administration.nw"*/
+/*line 1016 "src/tex/4-Administration.nw"*/
 final ConcurrentHashMap<Integer, int[]> getRefCacheUsers() {
   return this.lu_users;
 }
 /*line 99 "src/tex/0-Overview.nw"*/
 public 
-/*line 1035 "src/tex/4-Administration.nw"*/
+/*line 1036 "src/tex/4-Administration.nw"*/
 final ConcurrentHashMap<Integer, int[]> getRefCacheVertices() {
   return this.lu_vertices;
 }
 /*line 100 "src/tex/0-Overview.nw"*/
 public 
-/*line 1192 "src/tex/4-Administration.nw"*/
+/*line 1193 "src/tex/4-Administration.nw"*/
 void setRequestTimeout(final int request_timeout) {
   this.REQUEST_TIMEOUT = request_timeout;
 }
 /*line 101 "src/tex/0-Overview.nw"*/
 private 
-/*line 467 "src/tex/4-Administration.nw"*/
+/*line 468 "src/tex/4-Administration.nw"*/
 void JargoSetupDriver() throws SQLException, ClassNotFoundException {
   connection_factory = new DriverManagerConnectionFactory(CONNECTIONS_URL);
   poolableconnection_factory = new PoolableConnectionFactory(connection_factory, null);
@@ -2349,7 +2350,7 @@ void JargoSetupDriver() throws SQLException, ClassNotFoundException {
 }
 /*line 102 "src/tex/0-Overview.nw"*/
 private 
-/*line 499 "src/tex/4-Administration.nw"*/
+/*line 500 "src/tex/4-Administration.nw"*/
 void JargoSetupPreparedStatements() {
   final String INS = "INSERT INTO ";
   final String UPD = "UPDATE ";
@@ -2364,409 +2365,409 @@ void JargoSetupPreparedStatements() {
   final String q12 = "(?,?,?,?,?,?,?,?,?,?,?,?)";
   final String q14 = "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
   
-/*line 526 "src/tex/4-Administration.nw"*/
+/*line 527 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S0", INS+"V VALUES "+q3);
-/*line 512 "src/tex/4-Administration.nw"*/
+/*line 513 "src/tex/4-Administration.nw"*/
          
-/*line 529 "src/tex/4-Administration.nw"*/
+/*line 530 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S1", INS+"E VALUES "+q4);
-/*line 512 "src/tex/4-Administration.nw"*/
+/*line 513 "src/tex/4-Administration.nw"*/
                 
-/*line 532 "src/tex/4-Administration.nw"*/
+/*line 533 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S2", INS+"UQ VALUES "+q2);
-/*line 512 "src/tex/4-Administration.nw"*/
+/*line 513 "src/tex/4-Administration.nw"*/
                        
-/*line 535 "src/tex/4-Administration.nw"*/
+/*line 536 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S3", INS+"UE VALUES "+q2);
-/*line 512 "src/tex/4-Administration.nw"*/
+/*line 513 "src/tex/4-Administration.nw"*/
                               
-/*line 538 "src/tex/4-Administration.nw"*/
+/*line 539 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S4", INS+"UL VALUES "+q2);
-/*line 512 "src/tex/4-Administration.nw"*/
+/*line 513 "src/tex/4-Administration.nw"*/
                                      
-/*line 541 "src/tex/4-Administration.nw"*/
+/*line 542 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S5", INS+"UO VALUES "+q2);
-/*line 512 "src/tex/4-Administration.nw"*/
+/*line 513 "src/tex/4-Administration.nw"*/
                                             
-/*line 544 "src/tex/4-Administration.nw"*/
+/*line 545 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S6", INS+"UD VALUES "+q2);
-/*line 512 "src/tex/4-Administration.nw"*/
+/*line 513 "src/tex/4-Administration.nw"*/
                                                    
-/*line 547 "src/tex/4-Administration.nw"*/
+/*line 548 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S7", INS+"UB VALUES "+q2);
-/*line 512 "src/tex/4-Administration.nw"*/
+/*line 513 "src/tex/4-Administration.nw"*/
                                                           
-/*line 550 "src/tex/4-Administration.nw"*/
+/*line 551 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S8", INS+"S VALUES "+q7);
-/*line 512 "src/tex/4-Administration.nw"*/
+/*line 513 "src/tex/4-Administration.nw"*/
                                                                  
-/*line 553 "src/tex/4-Administration.nw"*/
+/*line 554 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S9", INS+"R VALUES "+q7);
-/*line 512 "src/tex/4-Administration.nw"*/
+/*line 513 "src/tex/4-Administration.nw"*/
                                                                         
-/*line 556 "src/tex/4-Administration.nw"*/
+/*line 557 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S10", INS+"W VALUES "+q8);
-/*line 513 "src/tex/4-Administration.nw"*/
+/*line 514 "src/tex/4-Administration.nw"*/
   
-/*line 562 "src/tex/4-Administration.nw"*/
+/*line 563 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S11", INS+"CW VALUES "+q9);
-/*line 513 "src/tex/4-Administration.nw"*/
+/*line 514 "src/tex/4-Administration.nw"*/
           
-/*line 565 "src/tex/4-Administration.nw"*/
+/*line 566 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S12", INS+"PD VALUES "+q4);
-/*line 513 "src/tex/4-Administration.nw"*/
+/*line 514 "src/tex/4-Administration.nw"*/
                   
-/*line 568 "src/tex/4-Administration.nw"*/
+/*line 569 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S13", INS+"CPD VALUES "+q12);
-/*line 513 "src/tex/4-Administration.nw"*/
+/*line 514 "src/tex/4-Administration.nw"*/
                           
-/*line 571 "src/tex/4-Administration.nw"*/
+/*line 572 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S14", INS+"CQ VALUES "+q14);
-/*line 513 "src/tex/4-Administration.nw"*/
+/*line 514 "src/tex/4-Administration.nw"*/
                                   
-/*line 574 "src/tex/4-Administration.nw"*/
+/*line 575 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S15", UPD+"E SET nu=? WHERE v1=? AND v2=?");
-/*line 513 "src/tex/4-Administration.nw"*/
+/*line 514 "src/tex/4-Administration.nw"*/
                                           
-/*line 577 "src/tex/4-Administration.nw"*/
+/*line 578 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S131", UPD+"W SET nu=? WHERE v1=? AND v2=?");
-/*line 513 "src/tex/4-Administration.nw"*/
+/*line 514 "src/tex/4-Administration.nw"*/
                                                    
-/*line 580 "src/tex/4-Administration.nw"*/
+/*line 581 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S77", UPD+"CW SET te=?, ve=? WHERE sid=?");
-/*line 513 "src/tex/4-Administration.nw"*/
+/*line 514 "src/tex/4-Administration.nw"*/
                                                            
-/*line 583 "src/tex/4-Administration.nw"*/
+/*line 584 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S84", UPD+"PD SET t2=? WHERE v2=? AND rid=?");
-/*line 513 "src/tex/4-Administration.nw"*/
+/*line 514 "src/tex/4-Administration.nw"*/
                                                                    
-/*line 586 "src/tex/4-Administration.nw"*/
+/*line 587 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S82", UPD+"CPD SET tp=? WHERE vp=? AND rid=?");
-/*line 514 "src/tex/4-Administration.nw"*/
+/*line 515 "src/tex/4-Administration.nw"*/
   
-/*line 589 "src/tex/4-Administration.nw"*/
+/*line 590 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S83", UPD+"CPD SET td=? WHERE vd=? AND rid=?");
-/*line 514 "src/tex/4-Administration.nw"*/
+/*line 515 "src/tex/4-Administration.nw"*/
           
-/*line 592 "src/tex/4-Administration.nw"*/
+/*line 593 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S76", DEL+"W WHERE sid=? AND t2>?");
-/*line 514 "src/tex/4-Administration.nw"*/
+/*line 515 "src/tex/4-Administration.nw"*/
                   
-/*line 595 "src/tex/4-Administration.nw"*/
+/*line 596 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S42", DEL+"PD WHERE rid=?");
-/*line 514 "src/tex/4-Administration.nw"*/
+/*line 515 "src/tex/4-Administration.nw"*/
                           
-/*line 598 "src/tex/4-Administration.nw"*/
+/*line 599 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S43", DEL+"CPD WHERE rid=?");
-/*line 514 "src/tex/4-Administration.nw"*/
+/*line 515 "src/tex/4-Administration.nw"*/
                                   
-/*line 601 "src/tex/4-Administration.nw"*/
+/*line 602 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S80", DEL+"CQ WHERE sid=? AND t2>?");
-/*line 514 "src/tex/4-Administration.nw"*/
+/*line 515 "src/tex/4-Administration.nw"*/
                                           
-/*line 604 "src/tex/4-Administration.nw"*/
+/*line 605 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S62", SEL+"COUNT (*) FROM V WHERE v<>0");
-/*line 514 "src/tex/4-Administration.nw"*/
+/*line 515 "src/tex/4-Administration.nw"*/
                                                   
-/*line 607 "src/tex/4-Administration.nw"*/
+/*line 608 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S64", SEL+"MIN (lng), MAX (lng), MIN (lat), MAX (lat) "
       + "FROM V WHERE v<>0");
-/*line 514 "src/tex/4-Administration.nw"*/
+/*line 515 "src/tex/4-Administration.nw"*/
                                                           
-/*line 611 "src/tex/4-Administration.nw"*/
+/*line 612 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S63", SEL+"COUNT (*) FROM E WHERE v1<>0 AND v2<>0");
-/*line 514 "src/tex/4-Administration.nw"*/
+/*line 515 "src/tex/4-Administration.nw"*/
                                                                   
-/*line 614 "src/tex/4-Administration.nw"*/
+/*line 615 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S65", SEL+"MIN (dd), MAX (dd), SUM (dd) / COUNT (dd), "
       + "MIN (nu), MAX (nu), SUM (nu) / COUNT (nu) "
       + "FROM E WHERE v1<>0 AND v2<>0");
-/*line 515 "src/tex/4-Administration.nw"*/
+/*line 516 "src/tex/4-Administration.nw"*/
   
-/*line 619 "src/tex/4-Administration.nw"*/
+/*line 620 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S46", SEL+"dd, nu FROM E WHERE v1=? AND v2=?");
-/*line 515 "src/tex/4-Administration.nw"*/
+/*line 516 "src/tex/4-Administration.nw"*/
           
-/*line 622 "src/tex/4-Administration.nw"*/
+/*line 623 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S130", SEL+"lng, lat FROM V WHERE v=?");
-/*line 515 "src/tex/4-Administration.nw"*/
+/*line 516 "src/tex/4-Administration.nw"*/
                    
-/*line 559 "src/tex/4-Administration.nw"*/
+/*line 560 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S70", SEL+"sid, sq, se, sl, so, sd, sb FROM S WHERE sid=?");
-/*line 515 "src/tex/4-Administration.nw"*/
+/*line 516 "src/tex/4-Administration.nw"*/
                            
-/*line 625 "src/tex/4-Administration.nw"*/
+/*line 626 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S48", SEL+"sq, se FROM S WHERE sid=?");
-/*line 515 "src/tex/4-Administration.nw"*/
+/*line 516 "src/tex/4-Administration.nw"*/
                                    
-/*line 628 "src/tex/4-Administration.nw"*/
+/*line 629 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S66", SEL+"COUNT (*) FROM S");
-/*line 515 "src/tex/4-Administration.nw"*/
+/*line 516 "src/tex/4-Administration.nw"*/
                                            
-/*line 631 "src/tex/4-Administration.nw"*/
+/*line 632 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S75", SEL+"rid, rq, re, rl, ro, rd, rb FROM R WHERE rid=?");
-/*line 515 "src/tex/4-Administration.nw"*/
+/*line 516 "src/tex/4-Administration.nw"*/
                                                    
-/*line 634 "src/tex/4-Administration.nw"*/
+/*line 635 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S51", SEL+"rq, re, rl, ro, rd FROM R WHERE rid=?");
-/*line 515 "src/tex/4-Administration.nw"*/
+/*line 516 "src/tex/4-Administration.nw"*/
                                                            
-/*line 637 "src/tex/4-Administration.nw"*/
+/*line 638 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S67", SEL+"COUNT (*) FROM R");
-/*line 515 "src/tex/4-Administration.nw"*/
+/*line 516 "src/tex/4-Administration.nw"*/
                                                                    
-/*line 640 "src/tex/4-Administration.nw"*/
+/*line 641 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S59", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
       + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
       + "GROUP BY sid"
       + ") as b ON a.sid=b.sid AND ABS(a.t2-?)=b.tdiff AND a.t2<=?");
-/*line 516 "src/tex/4-Administration.nw"*/
+/*line 517 "src/tex/4-Administration.nw"*/
   
-/*line 646 "src/tex/4-Administration.nw"*/
+/*line 647 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S128", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
       + "SELECT sid FROM CW WHERE te>? OR (ve=0 AND sl>?)"
       + ") as b ON a.sid=b.sid INNER JOIN ("
       + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
       + "GROUP BY sid"
       + ") as c ON a.sid=c.sid AND ABS(a.t2-?)=c.tdiff AND a.t2<=?");
-/*line 516 "src/tex/4-Administration.nw"*/
+/*line 517 "src/tex/4-Administration.nw"*/
            
-/*line 654 "src/tex/4-Administration.nw"*/
+/*line 655 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S60", SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC");
-/*line 516 "src/tex/4-Administration.nw"*/
+/*line 517 "src/tex/4-Administration.nw"*/
                    
-/*line 657 "src/tex/4-Administration.nw"*/
+/*line 658 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S129", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC");
-/*line 516 "src/tex/4-Administration.nw"*/
+/*line 517 "src/tex/4-Administration.nw"*/
                             
-/*line 660 "src/tex/4-Administration.nw"*/
+/*line 661 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
       + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC");
-/*line 516 "src/tex/4-Administration.nw"*/
+/*line 517 "src/tex/4-Administration.nw"*/
                                     
-/*line 666 "src/tex/4-Administration.nw"*/
+/*line 667 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S69", SEL+"t, v, Ls, Lr "
       + "FROM r_server LEFT JOIN CQ ON t=t2 and v=v2 and Lr=rid "
       + "WHERE r_server.sid=?"
       + "   AND (t>? OR v=0)"
       + "   AND (Ls IS NOT NULL OR Lr IS NOT NULL)"
       + "ORDER BY t ASC, o2 ASC");
-/*line 516 "src/tex/4-Administration.nw"*/
+/*line 517 "src/tex/4-Administration.nw"*/
                                             
-/*line 674 "src/tex/4-Administration.nw"*/
+/*line 675 "src/tex/4-Administration.nw"*/
 // A "timeout" of 30 seconds is hard-coded here
 this.lu_pstr.put("S68", SEL+"* FROM R WHERE re<=? AND ?<=re+30 AND rid NOT IN  "
       + "(SELECT rid FROM assignments_r)");
-/*line 516 "src/tex/4-Administration.nw"*/
+/*line 517 "src/tex/4-Administration.nw"*/
                                                     
-/*line 679 "src/tex/4-Administration.nw"*/
+/*line 680 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S85", SEL+"uq FROM UQ WHERE uid=?");
-/*line 516 "src/tex/4-Administration.nw"*/
+/*line 517 "src/tex/4-Administration.nw"*/
                                                             
-/*line 682 "src/tex/4-Administration.nw"*/
+/*line 683 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S86", SEL+"tp, td FROM CPD WHERE rid=?");
-/*line 516 "src/tex/4-Administration.nw"*/
+/*line 517 "src/tex/4-Administration.nw"*/
                                                                     
-/*line 685 "src/tex/4-Administration.nw"*/
+/*line 686 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S73", SEL+"q2 FROM CQ WHERE sid=? AND t2<=? "
       + "ORDER BY t2 DESC, q2 DESC FETCH FIRST ROW ONLY");
-/*line 517 "src/tex/4-Administration.nw"*/
+/*line 518 "src/tex/4-Administration.nw"*/
   
-/*line 689 "src/tex/4-Administration.nw"*/
+/*line 690 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S87", SEL+"t2, q2, o2 FROM CQ WHERE sid=? AND t2<=? "
       + "ORDER BY t2 DESC, o2 DESC FETCH FIRST ROW ONLY");
-/*line 517 "src/tex/4-Administration.nw"*/
+/*line 518 "src/tex/4-Administration.nw"*/
           
-/*line 693 "src/tex/4-Administration.nw"*/
+/*line 694 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S100", SEL+"rid FROM assignments WHERE t>? AND sid=?");
-/*line 517 "src/tex/4-Administration.nw"*/
+/*line 518 "src/tex/4-Administration.nw"*/
                    
-/*line 696 "src/tex/4-Administration.nw"*/
+/*line 697 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S101", SEL+"rid FROM assignments WHERE t<=? AND sid=?");
-/*line 517 "src/tex/4-Administration.nw"*/
+/*line 518 "src/tex/4-Administration.nw"*/
                             
-/*line 699 "src/tex/4-Administration.nw"*/
+/*line 700 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S102", SEL+"* FROM service_rate");
-/*line 517 "src/tex/4-Administration.nw"*/
+/*line 518 "src/tex/4-Administration.nw"*/
                                      
-/*line 702 "src/tex/4-Administration.nw"*/
+/*line 703 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S103", SEL+"* FROM dist_base");
-/*line 517 "src/tex/4-Administration.nw"*/
+/*line 518 "src/tex/4-Administration.nw"*/
                                               
-/*line 705 "src/tex/4-Administration.nw"*/
+/*line 706 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S104", SEL+"val FROM dist_s_travel WHERE sid=?");
-/*line 517 "src/tex/4-Administration.nw"*/
+/*line 518 "src/tex/4-Administration.nw"*/
                                                        
-/*line 708 "src/tex/4-Administration.nw"*/
+/*line 709 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S105", SEL+"SUM (val) FROM dist_s_travel");
-/*line 517 "src/tex/4-Administration.nw"*/
+/*line 518 "src/tex/4-Administration.nw"*/
                                                                 
-/*line 711 "src/tex/4-Administration.nw"*/
+/*line 712 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S106", SEL+"val FROM dist_s_cruising WHERE sid=?");
-/*line 518 "src/tex/4-Administration.nw"*/
+/*line 519 "src/tex/4-Administration.nw"*/
   
-/*line 714 "src/tex/4-Administration.nw"*/
+/*line 715 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S107", SEL+"SUM (val) FROM dist_s_cruising");
-/*line 518 "src/tex/4-Administration.nw"*/
+/*line 519 "src/tex/4-Administration.nw"*/
            
-/*line 717 "src/tex/4-Administration.nw"*/
+/*line 718 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S108", SEL+"val FROM dist_s_service WHERE sid=?");
-/*line 518 "src/tex/4-Administration.nw"*/
+/*line 519 "src/tex/4-Administration.nw"*/
                     
-/*line 720 "src/tex/4-Administration.nw"*/
+/*line 721 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S109", SEL+"SUM (val) FROM dist_s_service");
-/*line 518 "src/tex/4-Administration.nw"*/
+/*line 519 "src/tex/4-Administration.nw"*/
                              
-/*line 723 "src/tex/4-Administration.nw"*/
+/*line 724 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S110", SEL+"val FROM dist_s_base");
-/*line 518 "src/tex/4-Administration.nw"*/
+/*line 519 "src/tex/4-Administration.nw"*/
                                       
-/*line 726 "src/tex/4-Administration.nw"*/
+/*line 727 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S111", SEL+"val FROM dist_r_base");
-/*line 518 "src/tex/4-Administration.nw"*/
+/*line 519 "src/tex/4-Administration.nw"*/
                                                
-/*line 729 "src/tex/4-Administration.nw"*/
+/*line 730 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S112", SEL+"val FROM dist_r_detour WHERE rid=?");
-/*line 518 "src/tex/4-Administration.nw"*/
+/*line 519 "src/tex/4-Administration.nw"*/
                                                         
-/*line 732 "src/tex/4-Administration.nw"*/
+/*line 733 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S113", SEL+"SUM (val) FROM dist_r_detour");
-/*line 518 "src/tex/4-Administration.nw"*/
+/*line 519 "src/tex/4-Administration.nw"*/
                                                                  
-/*line 735 "src/tex/4-Administration.nw"*/
+/*line 736 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S114", SEL+"val FROM dist_r_transit WHERE rid=?");
-/*line 519 "src/tex/4-Administration.nw"*/
+/*line 520 "src/tex/4-Administration.nw"*/
   
-/*line 738 "src/tex/4-Administration.nw"*/
+/*line 739 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S115", SEL+"SUM (val) FROM dist_r_transit");
-/*line 519 "src/tex/4-Administration.nw"*/
+/*line 520 "src/tex/4-Administration.nw"*/
            
-/*line 741 "src/tex/4-Administration.nw"*/
+/*line 742 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S116", SEL+"val FROM dur_s_travel WHERE sid=?");
-/*line 519 "src/tex/4-Administration.nw"*/
+/*line 520 "src/tex/4-Administration.nw"*/
                     
-/*line 744 "src/tex/4-Administration.nw"*/
+/*line 745 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S117", SEL+"SUM (val) FROM dur_s_travel");
-/*line 519 "src/tex/4-Administration.nw"*/
+/*line 520 "src/tex/4-Administration.nw"*/
                              
-/*line 747 "src/tex/4-Administration.nw"*/
+/*line 748 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S118", SEL+"val FROM dur_r_pickup WHERE rid=?");
-/*line 519 "src/tex/4-Administration.nw"*/
+/*line 520 "src/tex/4-Administration.nw"*/
                                       
-/*line 750 "src/tex/4-Administration.nw"*/
+/*line 751 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S119", SEL+"SUM (val) FROM dur_r_pickup");
-/*line 519 "src/tex/4-Administration.nw"*/
+/*line 520 "src/tex/4-Administration.nw"*/
                                                
-/*line 753 "src/tex/4-Administration.nw"*/
+/*line 754 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S120", SEL+"val FROM dur_r_transit WHERE rid=?");
-/*line 519 "src/tex/4-Administration.nw"*/
+/*line 520 "src/tex/4-Administration.nw"*/
                                                         
-/*line 756 "src/tex/4-Administration.nw"*/
+/*line 757 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S121", SEL+"SUM (val) FROM dur_r_transit");
-/*line 519 "src/tex/4-Administration.nw"*/
+/*line 520 "src/tex/4-Administration.nw"*/
                                                                  
-/*line 759 "src/tex/4-Administration.nw"*/
+/*line 760 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S122", SEL+"val FROM dur_r_travel WHERE rid=?");
-/*line 520 "src/tex/4-Administration.nw"*/
+/*line 521 "src/tex/4-Administration.nw"*/
   
-/*line 762 "src/tex/4-Administration.nw"*/
+/*line 763 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S123", SEL+"SUM (val) FROM dur_r_travel");
-/*line 520 "src/tex/4-Administration.nw"*/
+/*line 521 "src/tex/4-Administration.nw"*/
            
-/*line 765 "src/tex/4-Administration.nw"*/
+/*line 766 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S124", SEL+"val FROM t_r_depart WHERE rid=?");
-/*line 520 "src/tex/4-Administration.nw"*/
+/*line 521 "src/tex/4-Administration.nw"*/
                     
-/*line 768 "src/tex/4-Administration.nw"*/
+/*line 769 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S125", SEL+"val FROM t_s_depart WHERE sid=?");
-/*line 520 "src/tex/4-Administration.nw"*/
+/*line 521 "src/tex/4-Administration.nw"*/
                              
-/*line 771 "src/tex/4-Administration.nw"*/
+/*line 772 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S126", SEL+"val FROM t_r_arrive WHERE rid=?");
-/*line 520 "src/tex/4-Administration.nw"*/
+/*line 521 "src/tex/4-Administration.nw"*/
                                       
-/*line 774 "src/tex/4-Administration.nw"*/
-this.lu_pstr.put("S127", SEL+"val FROM t_s_arrive WHERE sid=?");
-/*line 520 "src/tex/4-Administration.nw"*/
+/*line 775 "src/tex/4-Administration.nw"*/
+this.lu_pstr.put("S127", SEL+"te FROM CW WHERE sid=?");
+/*line 521 "src/tex/4-Administration.nw"*/
                                                
-/*line 777 "src/tex/4-Administration.nw"*/
+/*line 778 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S133", SEL+"val FROM f_status WHERE rid=? AND t<=? "
     + "ORDER BY t DESC FETCH FIRST ROW ONLY");
-/*line 520 "src/tex/4-Administration.nw"*/
+/*line 521 "src/tex/4-Administration.nw"*/
                                                         
-/*line 781 "src/tex/4-Administration.nw"*/
+/*line 782 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S134", SEL+"sid, te FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
-/*line 520 "src/tex/4-Administration.nw"*/
+/*line 521 "src/tex/4-Administration.nw"*/
                                                                  
-/*line 784 "src/tex/4-Administration.nw"*/
+/*line 785 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S135", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
     + "SELECT t1 FROM W WHERE sid=? AND ? <= t1 AND t1 <= ? AND ? < t2)");
-/*line 521 "src/tex/4-Administration.nw"*/
+/*line 522 "src/tex/4-Administration.nw"*/
   
-/*line 788 "src/tex/4-Administration.nw"*/
+/*line 789 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S136", SEL+"* FROM V");
-/*line 521 "src/tex/4-Administration.nw"*/
+/*line 522 "src/tex/4-Administration.nw"*/
            
-/*line 791 "src/tex/4-Administration.nw"*/
+/*line 792 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S137", SEL+"* FROM E");
-/*line 521 "src/tex/4-Administration.nw"*/
+/*line 522 "src/tex/4-Administration.nw"*/
                     
-/*line 794 "src/tex/4-Administration.nw"*/
+/*line 795 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S138", SEL+"val FROM dist_r_unassigned");
-/*line 521 "src/tex/4-Administration.nw"*/
+/*line 522 "src/tex/4-Administration.nw"*/
                              
-/*line 797 "src/tex/4-Administration.nw"*/
+/*line 798 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S139", UPD+"CPD SET te=? WHERE sid=?");
-/*line 521 "src/tex/4-Administration.nw"*/
+/*line 522 "src/tex/4-Administration.nw"*/
                                       
-/*line 800 "src/tex/4-Administration.nw"*/
+/*line 801 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S140", UPD+"CQ SET tp=?, td=? WHERE rid=?");
-/*line 521 "src/tex/4-Administration.nw"*/
+/*line 522 "src/tex/4-Administration.nw"*/
                                                
-/*line 803 "src/tex/4-Administration.nw"*/
+/*line 804 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S141", SEL+"* FROM r_user");
-/*line 521 "src/tex/4-Administration.nw"*/
+/*line 522 "src/tex/4-Administration.nw"*/
                                                         
-/*line 806 "src/tex/4-Administration.nw"*/
+/*line 807 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S142", SEL+"SUM (dd) FROM W WHERE sid=? AND t2>?");
-/*line 521 "src/tex/4-Administration.nw"*/
+/*line 522 "src/tex/4-Administration.nw"*/
                                                                  
-/*line 809 "src/tex/4-Administration.nw"*/
+/*line 810 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S143", SEL+"* FROM R WHERE re<=? AND ?<=re+?");
-/*line 522 "src/tex/4-Administration.nw"*/
+/*line 523 "src/tex/4-Administration.nw"*/
   
-/*line 812 "src/tex/4-Administration.nw"*/
+/*line 813 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S144", SEL+"t2, v2, rid FROM CQ WHERE sid=? AND t2>? ORDER BY o2 ASC");
-/*line 522 "src/tex/4-Administration.nw"*/
+/*line 523 "src/tex/4-Administration.nw"*/
            
-/*line 815 "src/tex/4-Administration.nw"*/
+/*line 816 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S145", SEL+"te, ve FROM CW WHERE sid=?");
-/*line 522 "src/tex/4-Administration.nw"*/
+/*line 523 "src/tex/4-Administration.nw"*/
                     
-/*line 818 "src/tex/4-Administration.nw"*/
+/*line 819 "src/tex/4-Administration.nw"*/
 this.lu_pstr.put("S147", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
     + "SELECT t1 FROM W WHERE sid=? AND v2=0)");
-/*line 522 "src/tex/4-Administration.nw"*/
-                             
-/*line 822 "src/tex/4-Administration.nw"*/
-this.lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
-/*line 522 "src/tex/4-Administration.nw"*/
-                                      
-/*line 825 "src/tex/4-Administration.nw"*/
-this.lu_pstr.put("S149", SEL+"t2, v2 FROM W WHERE sid=? ORDER BY t2 ASC");
-/*line 522 "src/tex/4-Administration.nw"*/
-                                               
-/*line 828 "src/tex/4-Administration.nw"*/
-this.lu_pstr.put("S150", SEL+"sid, val FROM violations_t_s");
-/*line 522 "src/tex/4-Administration.nw"*/
-                                                        
-/*line 831 "src/tex/4-Administration.nw"*/
-this.lu_pstr.put("S151", SEL+"rid, val FROM violations_t_r");
 /*line 523 "src/tex/4-Administration.nw"*/
+                             
+/*line 823 "src/tex/4-Administration.nw"*/
+this.lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
+/*line 523 "src/tex/4-Administration.nw"*/
+                                      
+/*line 826 "src/tex/4-Administration.nw"*/
+this.lu_pstr.put("S149", SEL+"t2, v2 FROM W WHERE sid=? ORDER BY t2 ASC");
+/*line 523 "src/tex/4-Administration.nw"*/
+                                               
+/*line 829 "src/tex/4-Administration.nw"*/
+this.lu_pstr.put("S150", SEL+"sid, val FROM violations_t_s");
+/*line 523 "src/tex/4-Administration.nw"*/
+                                                        
+/*line 832 "src/tex/4-Administration.nw"*/
+this.lu_pstr.put("S151", SEL+"rid, val FROM violations_t_r");
+/*line 524 "src/tex/4-Administration.nw"*/
 }
 /*line 103 "src/tex/0-Overview.nw"*/
 private 
-/*line 887 "src/tex/4-Administration.nw"*/
+/*line 888 "src/tex/4-Administration.nw"*/
 void PSAdd(PreparedStatement p, final Integer... values) throws SQLException {
   p.clearParameters();
   
@@ -2778,7 +2779,7 @@ for (int i = 0; i < values.length; i++) {
     p.setInt ((i + 1), values[i]);
   }
 }
-/*line 890 "src/tex/4-Administration.nw"*/
+/*line 891 "src/tex/4-Administration.nw"*/
   try {
     p.addBatch();
   } catch (SQLException e) {
@@ -2787,7 +2788,7 @@ for (int i = 0; i < values.length; i++) {
 }
 /*line 104 "src/tex/0-Overview.nw"*/
 private 
-/*line 854 "src/tex/4-Administration.nw"*/
+/*line 855 "src/tex/4-Administration.nw"*/
 PreparedStatement PSCreate(final Connection conn, final String k) throws SQLException {
   PreparedStatement p = null;
   try {
@@ -2802,7 +2803,7 @@ PreparedStatement PSCreate(final Connection conn, final String k) throws SQLExce
 }
 /*line 105 "src/tex/0-Overview.nw"*/
 private 
-/*line 961 "src/tex/4-Administration.nw"*/
+/*line 962 "src/tex/4-Administration.nw"*/
 int[] PSQuery(final Connection conn, final String k, final int ncols, final Integer... values)
 throws SQLException {
   int[] output = new int[] { };
@@ -2817,7 +2818,7 @@ for (int i = 0; i < values.length; i++) {
     p.setInt ((i + 1), values[i]);
   }
 }
-/*line 967 "src/tex/4-Administration.nw"*/
+/*line 968 "src/tex/4-Administration.nw"*/
     ResultSet res = p.executeQuery();
     if (res.last() == true) {
       
@@ -2832,7 +2833,7 @@ do {
   }
   i++;
 } while (res.next());
-/*line 970 "src/tex/4-Administration.nw"*/
+/*line 971 "src/tex/4-Administration.nw"*/
     }
     res.close();
     p.close();
@@ -2843,7 +2844,7 @@ do {
 }
 /*line 106 "src/tex/0-Overview.nw"*/
 private 
-/*line 915 "src/tex/4-Administration.nw"*/
+/*line 916 "src/tex/4-Administration.nw"*/
 void PSSubmit(PreparedStatement... statements) throws SQLException {
   try {
     for (PreparedStatement p : statements) {
