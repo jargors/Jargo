@@ -48,6 +48,10 @@ public class Controller {
   private int SERVER_COLLECTION_PERIOD =
       Integer.parseInt(System.getProperty("jargors.controller.server_collection_period", "1"));
   private int clock_now = 0;
+  private int clock_reference_day = 1;
+  private int clock_reference_hour = 0;
+  private int clock_reference_minute = 0;
+  private int clock_reference_second = 0;
   private int loop_delay = 0;
   // private int deviation_rate = 0.02;
   // private int breakdown_rate = 0.005;
@@ -73,10 +77,28 @@ public class Controller {
     // add that duration onto the clock. We can output a "clock rate" to show
     // the user the current simulation rate, i.e. clock_rate=1x means real-time,
     // clock_rate=0.5x means 1 simulated second takes 2 real seconds, etc.
-    ++(this.clock_now);
+    this.clock_now++;
+    this.clock_reference_second++;
+    if (this.clock_reference_second > 59) {
+      this.clock_reference_second = 0;
+      this.clock_reference_minute++;
+      if (this.clock_reference_minute > 59) {
+        this.clock_reference_minute = 0;
+        this.clock_reference_hour++;
+        if (this.clock_reference_hour > 23) {
+          this.clock_reference_day++;
+          this.clock_reference_hour = 0;
+        }
+      }
+    }
     if (DEBUG) {
-      System.err.printf("[t=%d] Controller.ClockLoop says: %s!\n",
-          this.clock_now, (this.clock_now % 2 == 0 ? "ping" : "pong"));
+      System.err.printf("[t=%d; Day %d, %02d:%02d:%02d] Controller.ClockLoop says: %s!\n",
+          this.clock_now,
+          this.clock_reference_day,
+          this.clock_reference_hour,
+          this.clock_reference_minute,
+          this.clock_reference_second,
+          (this.clock_now % 2 == 0 ? "ping" : "pong"));
     }
   };
   private Runnable RequestCollectionLoop = () -> {
@@ -404,6 +426,18 @@ public class Controller {
          }
   public void setClockEnd(final int clock_end) {
            this.CLOCK_END = clock_end;
+         }
+  public void setClockReference(final String clock_reference) throws IllegalArgumentException {
+           int hour = Integer.parseInt(clock_reference.substring(0, 2));
+           if (!(0 <= hour && hour <= 23)) {
+             throw new IllegalArgumentException("Invalid clock reference (hour got "+hour+"; must be between [00, 23])");
+           }
+           int minute = Integer.parseInt(clock_reference.substring(2, 4));
+           if (!(0 <= minute && minute <= 59)) {
+             throw new IllegalArgumentException("Invalid clock reference (minute got "+minute+"; must be between [00, 59])");
+           }
+           this.clock_reference_hour = hour;
+           this.clock_reference_minute = minute;
          }
   public void setClockStart(final int clock_start) {
            this.CLOCK_START = clock_start;
