@@ -1230,6 +1230,22 @@ final ConcurrentHashMap<Integer, int[]> retrieveRefCacheUsers() {
 
 \section{Methods: Setters}
 
+\subsection{\texttt{setClockReference}(1)}
+<<Set: setClockReference(1)>>=
+void setClockReference(final String clock_reference) throws IllegalArgumentException {
+  int hour = Integer.parseInt(clock_reference.substring(0, 2));
+  if (!(0 <= hour && hour <= 23)) {
+    throw new IllegalArgumentException("Invalid clock reference (hour got "+hour+"; must be between [00, 23])");
+  }
+  int minute = Integer.parseInt(clock_reference.substring(2, 4));
+  if (!(0 <= minute && minute <= 59)) {
+    throw new IllegalArgumentException("Invalid clock reference (minute got "+minute+"; must be between [00, 59])");
+  }
+  this.clock_reference_hour = hour;
+  this.clock_reference_minute = minute;
+}
+@ %def setClockReference
+
 \subsection{\texttt{setClockStart}(1)}
 <<Set: setClockStart(1)>>=
 void setClockStart(final int clock_start) {
