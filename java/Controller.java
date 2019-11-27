@@ -202,6 +202,18 @@ public class Controller {
   private long   statQueryEdgeDurMin   = Integer.MAX_VALUE;
   private long   statQueryEdgeDurMax   = 0;
   private double statQueryEdgeDurAvg   = 0;
+  private int    statQueryUserCount    = 0;
+  private long   statQueryUserDurLast  = 0;
+  private long   statQueryUserDurTotal = 0;
+  private long   statQueryUserDurMin   = Integer.MAX_VALUE;
+  private long   statQueryUserDurMax   = 0;
+  private double statQueryUserDurAvg   = 0;
+  private int    statQueryVertexCount    = 0;
+  private long   statQueryVertexDurLast  = 0;
+  private long   statQueryVertexDurTotal = 0;
+  private long   statQueryVertexDurMin   = Integer.MAX_VALUE;
+  private long   statQueryVertexDurMax   = 0;
+  private double statQueryVertexDurAvg   = 0;
   public Controller() {
     this.storage = new Storage();
     this.communicator = new Communicator();
@@ -324,10 +336,44 @@ public class Controller {
            return storage.DBQueryServersCount();
          }
   public int[] queryUser(final int rid) throws UserNotFoundException, SQLException {
-           return storage.DBQueryUser(rid);
+           long A0 = System.currentTimeMillis();
+           int[] output = storage.DBQueryUser(rid);
+               this.statQueryUserCount++;
+               this.statQueryUserDurLast = (System.currentTimeMillis() - A0);
+               this.statQueryUserDurTotal +=
+               this.statQueryUserDurLast;
+           if (this.statQueryUserDurLast <
+               this.statQueryUserDurMin) {
+               this.statQueryUserDurMin =
+               this.statQueryUserDurLast;}
+           if (this.statQueryUserDurLast >
+               this.statQueryUserDurMax) {
+               this.statQueryUserDurMax =
+               this.statQueryUserDurLast;}
+               this.statQueryUserDurAvg = (double)
+               this.statQueryUserDurTotal/
+               this.statQueryUserCount;
+           return output;
          }
   public int[] queryVertex(final int v) throws VertexNotFoundException, SQLException {
-           return this.storage.DBQueryVertex(v);
+           long A0 = System.currentTimeMillis();
+           int[] output = this.storage.DBQueryVertex(v);
+               this.statQueryVertexCount++;
+               this.statQueryVertexDurLast = (System.currentTimeMillis() - A0);
+               this.statQueryVertexDurTotal +=
+               this.statQueryVertexDurLast;
+           if (this.statQueryVertexDurLast <
+               this.statQueryVertexDurMin) {
+               this.statQueryVertexDurMin =
+               this.statQueryVertexDurLast;}
+           if (this.statQueryVertexDurLast >
+               this.statQueryVertexDurMax) {
+               this.statQueryVertexDurMax =
+               this.statQueryVertexDurLast;}
+               this.statQueryVertexDurAvg = (double)
+               this.statQueryVertexDurTotal/
+               this.statQueryVertexCount;
+           return output;
          }
   public int[] queryVertices() throws SQLException {
            return this.storage.DBQueryVertices();

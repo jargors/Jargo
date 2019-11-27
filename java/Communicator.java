@@ -108,16 +108,84 @@ public class Communicator {
            return output;
          }
   public int[] queryServerDistanceRemaining(final int sid, final int t) throws SQLException {
-           return this.storage.DBQueryServerDistanceRemaining(sid, t);
+           long A0 = System.currentTimeMillis();
+           int[] output = this.storage.DBQueryServerDistanceRemaining(sid, t);
+               this.statQueryServerDistanceRemainingCount++;
+               this.statQueryServerDistanceRemainingDurLast = (System.currentTimeMillis() - A0);
+               this.statQueryServerDistanceRemainingDurTotal +=
+               this.statQueryServerDistanceRemainingDurLast;
+           if (this.statQueryServerDistanceRemainingDurLast <
+               this.statQueryServerDistanceRemainingDurMin) {
+               this.statQueryServerDistanceRemainingDurMin =
+               this.statQueryServerDistanceRemainingDurLast;}
+           if (this.statQueryServerDistanceRemainingDurLast >
+               this.statQueryServerDistanceRemainingDurMax) {
+               this.statQueryServerDistanceRemainingDurMax =
+               this.statQueryServerDistanceRemainingDurLast;}
+               this.statQueryServerDistanceRemainingDurAvg = (double)
+               this.statQueryServerDistanceRemainingDurTotal/
+               this.statQueryServerDistanceRemainingCount;
+           return output;
          }
   public int[] queryServerDurationRemaining(final int sid, final int t) throws SQLException {
-           return this.storage.DBQueryServerDurationRemaining(sid, t);
+           long A0 = System.currentTimeMillis();
+           int[] output = this.storage.DBQueryServerDurationRemaining(sid, t);
+               this.statQueryServerDurationRemainingCount++;
+               this.statQueryServerDurationRemainingDurLast = (System.currentTimeMillis() - A0);
+               this.statQueryServerDurationRemainingDurTotal +=
+               this.statQueryServerDurationRemainingDurLast;
+           if (this.statQueryServerDurationRemainingDurLast <
+               this.statQueryServerDurationRemainingDurMin) {
+               this.statQueryServerDurationRemainingDurMin =
+               this.statQueryServerDurationRemainingDurLast;}
+           if (this.statQueryServerDurationRemainingDurLast >
+               this.statQueryServerDurationRemainingDurMax) {
+               this.statQueryServerDurationRemainingDurMax =
+               this.statQueryServerDurationRemainingDurLast;}
+               this.statQueryServerDurationRemainingDurAvg = (double)
+               this.statQueryServerDurationRemainingDurTotal/
+               this.statQueryServerDurationRemainingCount;
+           return output;
          }
   public int[] queryServerLoadMax(final int sid, final int t) throws SQLException {
-           return this.storage.DBQueryServerLoadMax(sid, t);
+           long A0 = System.currentTimeMillis();
+           int[] output = this.storage.DBQueryServerLoadMax(sid, t);
+               this.statQueryServerLoadMaxCount++;
+               this.statQueryServerLoadMaxDurLast = (System.currentTimeMillis() - A0);
+               this.statQueryServerLoadMaxDurTotal +=
+               this.statQueryServerLoadMaxDurLast;
+           if (this.statQueryServerLoadMaxDurLast <
+               this.statQueryServerLoadMaxDurMin) {
+               this.statQueryServerLoadMaxDurMin =
+               this.statQueryServerLoadMaxDurLast;}
+           if (this.statQueryServerLoadMaxDurLast >
+               this.statQueryServerLoadMaxDurMax) {
+               this.statQueryServerLoadMaxDurMax =
+               this.statQueryServerLoadMaxDurLast;}
+               this.statQueryServerLoadMaxDurAvg = (double)
+               this.statQueryServerLoadMaxDurTotal/
+               this.statQueryServerLoadMaxCount;
+           return output;
          }
   public int[] queryServerRouteRemaining(final int sid, final int t) throws SQLException {
-           return this.storage.DBQueryServerRouteRemaining(sid, t);
+           long A0 = System.currentTimeMillis();
+           int[] output = this.storage.DBQueryServerRouteRemaining(sid, t);
+               this.statQueryServerRouteRemainingCount++;
+               this.statQueryServerRouteRemainingDurLast = (System.currentTimeMillis() - A0);
+               this.statQueryServerRouteRemainingDurTotal +=
+               this.statQueryServerRouteRemainingDurLast;
+           if (this.statQueryServerRouteRemainingDurLast <
+               this.statQueryServerRouteRemainingDurMin) {
+               this.statQueryServerRouteRemainingDurMin =
+               this.statQueryServerRouteRemainingDurLast;}
+           if (this.statQueryServerRouteRemainingDurLast >
+               this.statQueryServerRouteRemainingDurMax) {
+               this.statQueryServerRouteRemainingDurMax =
+               this.statQueryServerRouteRemainingDurLast;}
+               this.statQueryServerRouteRemainingDurAvg = (double)
+               this.statQueryServerRouteRemainingDurTotal/
+               this.statQueryServerRouteRemainingCount;
+           return output;
          }
   public int[] queryServerScheduleRemaining(final int sid, final int t) throws SQLException {
            long A0 = System.currentTimeMillis();
@@ -140,13 +208,64 @@ public class Communicator {
            return output;
          }
   public int[] queryServersLocationsActive(final int t) throws SQLException {
-           return this.storage.DBQueryServersLocationsActive(t);
+           long A0 = System.currentTimeMillis();
+           int[] output = this.storage.DBQueryServersLocationsActive(t);
+               this.statQueryServersLocationsActiveCount++;
+               this.statQueryServersLocationsActiveDurLast = (System.currentTimeMillis() - A0);
+               this.statQueryServersLocationsActiveDurTotal +=
+               this.statQueryServersLocationsActiveDurLast;
+           if (this.statQueryServersLocationsActiveDurLast <
+               this.statQueryServersLocationsActiveDurMin) {
+               this.statQueryServersLocationsActiveDurMin =
+               this.statQueryServersLocationsActiveDurLast;}
+           if (this.statQueryServersLocationsActiveDurLast >
+               this.statQueryServersLocationsActiveDurMax) {
+               this.statQueryServersLocationsActiveDurMax =
+               this.statQueryServersLocationsActiveDurLast;}
+               this.statQueryServersLocationsActiveDurAvg = (double)
+               this.statQueryServersLocationsActiveDurTotal/
+               this.statQueryServersLocationsActiveCount;
+           return output;
          }
   public int[] queryUser(final int rid) throws UserNotFoundException, SQLException {
-           return storage.DBQueryUser(rid);
+           long A0 = System.currentTimeMillis();
+           int[] output = storage.DBQueryUser(rid);
+               this.statQueryUserCount++;
+               this.statQueryUserDurLast = (System.currentTimeMillis() - A0);
+               this.statQueryUserDurTotal +=
+               this.statQueryUserDurLast;
+           if (this.statQueryUserDurLast <
+               this.statQueryUserDurMin) {
+               this.statQueryUserDurMin =
+               this.statQueryUserDurLast;}
+           if (this.statQueryUserDurLast >
+               this.statQueryUserDurMax) {
+               this.statQueryUserDurMax =
+               this.statQueryUserDurLast;}
+               this.statQueryUserDurAvg = (double)
+               this.statQueryUserDurTotal/
+               this.statQueryUserCount;
+           return output;
          }
   public int[] queryVertex(final int v) throws VertexNotFoundException, SQLException {
-           return this.storage.DBQueryVertex(v);
+           long A0 = System.currentTimeMillis();
+           int[] output = this.storage.DBQueryVertex(v);
+               this.statQueryVertexCount++;
+               this.statQueryVertexDurLast = (System.currentTimeMillis() - A0);
+               this.statQueryVertexDurTotal +=
+               this.statQueryVertexDurLast;
+           if (this.statQueryVertexDurLast <
+               this.statQueryVertexDurMin) {
+               this.statQueryVertexDurMin =
+               this.statQueryVertexDurLast;}
+           if (this.statQueryVertexDurLast >
+               this.statQueryVertexDurMax) {
+               this.statQueryVertexDurMax =
+               this.statQueryVertexDurLast;}
+               this.statQueryVertexDurAvg = (double)
+               this.statQueryVertexDurTotal/
+               this.statQueryVertexCount;
+           return output;
          }
   public void updateServerAddToSchedule(final int sid, final int[] route, final int[] sched, final int[] rid)
          throws RouteIllegalOverwriteException, UserNotFoundException,
