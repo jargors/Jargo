@@ -20,6 +20,12 @@ public class Communicator {
   private Controller controller;
   private Traffic traffic = null;
   private final boolean DEBUG = "true".equals(System.getProperty("jargors.communicator.debug"));
+  private int  statQueryServerScheduleRemainingCount = 0;
+  private long statQueryServerScheduleRemainingDurLast = 0;
+  private long statQueryServerScheduleRemainingDurTotal = 0;
+  private long statQueryServerScheduleRemainingDurMin = Integer.MAX_VALUE;
+  private long statQueryServerScheduleRemainingDurMax = 0;
+  private double statQueryServerScheduleRemainingDurAvg = 0;
   public Communicator() { }
   public int[] queryEdge(final int v1, final int v2) throws EdgeNotFoundException, SQLException {
            return this.storage.DBQueryEdge(v1, v2);
@@ -37,7 +43,20 @@ public class Communicator {
            return this.storage.DBQueryServerRouteRemaining(sid, t);
          }
   public int[] queryServerScheduleRemaining(final int sid, final int t) throws SQLException {
-           return this.storage.DBQueryServerScheduleRemaining(sid, t);
+           long A0 = System.currentTimeMillis();
+           int[] output = this.storage.DBQueryServerScheduleRemaining(sid, t);
+           this.statQueryServerScheduleRemainingCount++;
+           this.statQueryServerScheduleRemainingDurLast = (System.currentTimeMillis() - A0);
+           this.statQueryServerScheduleRemainingDurTotal +=
+             this.statQueryServerScheduleRemainingDurLast;
+           if (this.statQueryServerScheduleRemainingDurLast < this.statQueryServerScheduleRemainingDurMin) {
+            this.statQueryServerScheduleRemainingDurMin = this.statQueryServerScheduleRemainingDurLast;
+           }
+           if (this.statQueryServerScheduleRemainingDurLast > this.statQueryServerScheduleRemainingDurMax) {
+            this.statQueryServerScheduleRemainingDurMax = this.statQueryServerScheduleRemainingDurLast;
+           }
+           this.statQueryServerScheduleRemainingDurAvg = (double) this.statQueryServerScheduleRemainingDurTotal/this.statQueryServerScheduleRemainingCount;
+           return output;
          }
   public int[] queryServersLocationsActive(final int t) throws SQLException {
            return this.storage.DBQueryServersLocationsActive(t);
@@ -203,6 +222,24 @@ public class Communicator {
          }
   public final ConcurrentHashMap<Integer, int[]> retrieveRefCacheVertices() {
            return this.storage.getRefCacheVertices();
+         }
+  public int getStatQueryServerScheduleRemainingCount() {
+           return this.statQueryServerScheduleRemainingCount;
+         }
+  public double getStatQueryServerScheduleRemainingDurAvg() {
+           return this.statQueryServerScheduleRemainingDurAvg;
+         }
+  public long getStatQueryServerScheduleRemainingDurLast() {
+           return this.statQueryServerScheduleRemainingDurLast;
+         }
+  public long getStatQueryServerScheduleRemainingDurMax() {
+           return this.statQueryServerScheduleRemainingDurMax;
+         }
+  public long getStatQueryServerScheduleRemainingDurMin() {
+           return this.statQueryServerScheduleRemainingDurMin;
+         }
+  public long getStatQueryServerScheduleRemainingDurTotal() {
+           return this.statQueryServerScheduleRemainingDurTotal;
          }
   public void setRefController(final Controller controller) {
            this.controller = controller;

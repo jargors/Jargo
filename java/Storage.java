@@ -44,15 +44,6 @@ public class Storage {
   private PoolableConnectionFactory       poolableconnection_factory;
   private ObjectPool<PoolableConnection>  pool;
   private PoolingDriver                   driver;
-  private int stat_count_DBQueryServersLocationsActive = 0;
-  private int stat_count_DBQueryServerScheduleRemaining = 0;
-  private int stat_count_DBQueryRequestsQueued = 0;
-  private long stat_dur_total_DBQueryServersLocationsActive = 0;
-  private long stat_dur_total_DBQueryServerScheduleRemaining = 0;
-  private long stat_dur_total_DBQueryRequestsQueued = 0;
-  private long stat_dur_last_DBQueryServersLocationsActive = 0;
-  private long stat_dur_last_DBQueryServerScheduleRemaining = 0;
-  private long stat_dur_last_DBQueryRequestsQueued = 0;
   public Storage() {
     this.JargoSetupPreparedStatements();
     try {
@@ -309,8 +300,6 @@ public class Storage {
            }
          }
   public int[] DBQueryRequestsQueued(final int t) throws SQLException {
-           this.stat_count_DBQueryRequestsQueued++;
-           long A0 = System.currentTimeMillis();
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
              final int[] output = this.PSQuery(conn, "S143", 7, t, t, REQUEST_TIMEOUT);
              int[] temp1 = new int[output.length];
@@ -327,9 +316,6 @@ public class Storage {
                  j += 7;
                }
              }
-             this.stat_dur_last_DBQueryRequestsQueued = (System.currentTimeMillis() - A0);
-               this.stat_dur_total_DBQueryRequestsQueued +=
-                 this.stat_dur_last_DBQueryRequestsQueued;
              return Arrays.copyOf(temp1, j);
            } catch (SQLException e) {
              throw e;
@@ -429,8 +415,6 @@ public class Storage {
          }
   public int[] DBQueryServerScheduleRemaining(final int sid, final int t)
          throws SQLException {
-           this.stat_count_DBQueryServerScheduleRemaining++;
-           long A0 = System.currentTimeMillis();
            int[] output = new int[] { };
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
              int[] temp = PSQuery(conn, "S144", 3, sid, t);
@@ -451,9 +435,6 @@ public class Storage {
            } catch (SQLException e) {
              throw e;
            }
-           this.stat_dur_last_DBQueryServerScheduleRemaining = (System.currentTimeMillis() - A0);
-           this.stat_dur_total_DBQueryServerScheduleRemaining +=
-             this.stat_dur_last_DBQueryServerScheduleRemaining;
            return output;
          }
   public int[] DBQueryServerTimeOfArrival(final int sid) throws SQLException {
@@ -492,8 +473,6 @@ public class Storage {
            }
          }
   public int[] DBQueryServersLocationsActive(final int t) throws SQLException {
-           this.stat_count_DBQueryServersLocationsActive++;
-           long A0 = System.currentTimeMillis();
            int[] output = new int[] { };
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
              int j = 0;
@@ -523,9 +502,6 @@ public class Storage {
            } catch (SQLException e) {
              throw e;
            }
-           this.stat_dur_last_DBQueryServersLocationsActive = (System.currentTimeMillis() - A0);
-           this.stat_dur_total_DBQueryServersLocationsActive +=
-             this.stat_dur_last_DBQueryServersLocationsActive;
            return output;
          }
   public int[] DBQueryUser(final int uid)
@@ -1511,33 +1487,6 @@ public class Storage {
              e.printStackTrace();
              System.exit(1);
            }
-         }
-  public int getStatCountDBQueryServersLocationsActive() {
-           return this.stat_count_DBQueryServersLocationsActive;
-         }
-  public int getStatCountDBQueryServerScheduleRemaining() {
-           return this.stat_count_DBQueryServerScheduleRemaining;
-         }
-  public int getStatCountDBQueryRequestsQueued() {
-           return this.stat_count_DBQueryRequestsQueued;
-         }
-  public long getStatDurTotalDBQueryServersLocationsActive() {
-           return this.stat_dur_total_DBQueryServersLocationsActive;
-         }
-  public long getStatDurTotalDBQueryServerScheduleRemaining() {
-           return this.stat_dur_total_DBQueryServerScheduleRemaining;
-         }
-  public long getStatDurTotalDBQueryRequestsQueued() {
-           return this.stat_dur_total_DBQueryRequestsQueued;
-         }
-  public long getStatDurLastDBQueryServersLocationsActive() {
-           return this.stat_dur_last_DBQueryServersLocationsActive;
-         }
-  public long getStatDurLastDBQueryServerScheduleRemaining() {
-           return this.stat_dur_last_DBQueryServerScheduleRemaining;
-         }
-  public long getStatDurLastDBQueryRequestsQueued() {
-           return this.stat_dur_last_DBQueryRequestsQueued;
          }
   public final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> getRefCacheEdges() {
            return this.lu_edges;

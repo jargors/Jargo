@@ -17,6 +17,21 @@ do {
 } while (res.next());
 @
 
+\subsection{Stats: queryServerScheduleRemaining}
+<<Stats: queryServerScheduleRemaining>>=
+this.statQueryServerScheduleRemainingCount++;
+this.statQueryServerScheduleRemainingDurLast = (System.currentTimeMillis() - A0);
+this.statQueryServerScheduleRemainingDurTotal +=
+  this.statQueryServerScheduleRemainingDurLast;
+if (this.statQueryServerScheduleRemainingDurLast < this.statQueryServerScheduleRemainingDurMin) {
+ this.statQueryServerScheduleRemainingDurMin = this.statQueryServerScheduleRemainingDurLast;
+}
+if (this.statQueryServerScheduleRemainingDurLast > this.statQueryServerScheduleRemainingDurMax) {
+ this.statQueryServerScheduleRemainingDurMax = this.statQueryServerScheduleRemainingDurLast;
+}
+this.statQueryServerScheduleRemainingDurAvg = (double) this.statQueryServerScheduleRemainingDurTotal/this.statQueryServerScheduleRemainingCount;
+@
+
 \section{Methods: General}
 
 \subsection{\texttt{DBQuery}(2)}
@@ -983,8 +998,6 @@ Integer [[t]] (param. 1):&a time
 \end{tabular}
 <<Read: DBQueryRequestsQueued(1)>>=
 int[] DBQueryRequestsQueued(final int t) throws SQLException {
-  this.stat_count_DBQueryRequestsQueued++;
-  long A0 = System.currentTimeMillis();
   try (<<Open [[conn]]>>) {
 @ %def DBQueryRequestsQueued
 {\small Our approach is to first select all requests where $t$ is between the
@@ -1011,9 +1024,6 @@ pre-filter number of requests.}
     }
 @
 <<Read: DBQueryRequestsQueued(1)>>=
-    this.stat_dur_last_DBQueryRequestsQueued = (System.currentTimeMillis() - A0);
-      this.stat_dur_total_DBQueryRequestsQueued +=
-        this.stat_dur_last_DBQueryRequestsQueued;
     return Arrays.copyOf(temp1, j);
   } catch (SQLException e) {
     throw e;
@@ -1240,8 +1250,6 @@ to be in the same order as the actual pick-ups and drop-offs.\\
 <<Read: DBQueryServerScheduleRemaining(2)>>=
 int[] DBQueryServerScheduleRemaining(final int sid, final int t)
 throws SQLException {
-  this.stat_count_DBQueryServerScheduleRemaining++;
-  long A0 = System.currentTimeMillis();
   int[] output = new int[] { };
   try (<<Open [[conn]]>>) {
     int[] temp = PSQuery(conn, "S144", 3, sid, t);
@@ -1262,9 +1270,6 @@ throws SQLException {
   } catch (SQLException e) {
     throw e;
   }
-  this.stat_dur_last_DBQueryServerScheduleRemaining = (System.currentTimeMillis() - A0);
-  this.stat_dur_total_DBQueryServerScheduleRemaining +=
-    this.stat_dur_last_DBQueryServerScheduleRemaining;
   return output;
 }
 @ %def DBQueryServerScheduleRemaining
@@ -1276,7 +1281,10 @@ Method \textcolor{blue}{[[queryServerScheduleRemaining]]}(2) wraps [[DBQueryServ
 \end{tabular}
 <<Read: queryServerScheduleRemaining(2)>>=
 int[] queryServerScheduleRemaining(final int sid, final int t) throws SQLException {
-  return this.storage.DBQueryServerScheduleRemaining(sid, t);
+  long A0 = System.currentTimeMillis();
+  int[] output = this.storage.DBQueryServerScheduleRemaining(sid, t);
+  <<Stats: queryServerScheduleRemaining>>
+  return output;
 }
 @ %def queryServerScheduleRemaining
 
@@ -1934,8 +1942,6 @@ for $t$ given by param. 1.\\
 \end{tabular}
 <<Read: DBQueryServersLocationsActive(1)>>=
 int[] DBQueryServersLocationsActive(final int t) throws SQLException {
-  this.stat_count_DBQueryServersLocationsActive++;
-  long A0 = System.currentTimeMillis();
   int[] output = new int[] { };
   try (<<Open [[conn]]>>) {
     int j = 0;
@@ -1970,9 +1976,6 @@ servers. Then for each active server, we use either statement [[S135]] or
   } catch (SQLException e) {
     throw e;
   }
-  this.stat_dur_last_DBQueryServersLocationsActive = (System.currentTimeMillis() - A0);
-  this.stat_dur_total_DBQueryServersLocationsActive +=
-    this.stat_dur_last_DBQueryServersLocationsActive;
   return output;
 }
 @
