@@ -40,6 +40,7 @@ import com.github.jargors.exceptions.TimeWindowException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.sql.SQLException;
+<<Import JMX dependences>>
 @
 
 \section{Member Variables}
@@ -50,18 +51,11 @@ private Traffic traffic = null;
 private final boolean DEBUG = "true".equals(System.getProperty("jargors.communicator.debug"));
 @
 
-<<[[Communicator]] member variables>>=
-private int  statQueryServerScheduleRemainingCount = 0;
-private long statQueryServerScheduleRemainingDurLast = 0;
-private long statQueryServerScheduleRemainingDurTotal = 0;
-private long statQueryServerScheduleRemainingDurMin = Integer.MAX_VALUE;
-private long statQueryServerScheduleRemainingDurMax = 0;
-private double statQueryServerScheduleRemainingDurAvg = 0;
-@
-
 \section{Constructor}
 <<[[Communicator]] constructor>>=
-public Communicator() { }
+public Communicator() {
+  <<[[Communicator]] register JMX monitor>>
+}
 @
 
 \section{Methods}

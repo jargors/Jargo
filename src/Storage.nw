@@ -120,9 +120,6 @@ private PoolableConnectionFactory       poolableconnection_factory;
 private ObjectPool<PoolableConnection>  pool;
 private PoolingDriver                   driver;
 @
-\item Various statistics
-<<[[Storage]] member variables>>=
-@
 \end{itemize}
 
 \section{Constructor}
@@ -141,14 +138,7 @@ prepared statement strings into [[lu_pstr]] by using [[JargoSetupPreparedStateme
 <<[[Storage]] constructor>>=
 public Storage() {
   this.JargoSetupPreparedStatements();
-  try {
-    MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-    StorageMonitor mon = new StorageMonitor(this);
-    mbs.registerMBean(mon, new ObjectName("com.github.jargors.jmx:type=StorageMonitor"));
-  } catch (Exception e) {
-    System.err.printf("StorageMonitor failed; reason: %s\n", e.toString());
-    System.err.printf("Continuing with monitoring disabled\n");
-  }
+  <<[[Storage]] register JMX monitor>>
 }
 @
 

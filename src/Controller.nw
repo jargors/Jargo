@@ -41,6 +41,7 @@ import com.github.jargors.exceptions.VertexNotFoundException;
 import com.github.jargors.exceptions.GtreeNotLoadedException;
 import com.github.jargors.exceptions.GtreeIllegalSourceException;
 import com.github.jargors.exceptions.GtreeIllegalTargetException;
+<<Import JMX dependences>>
 @ \item standard utilities for concurrent execution;
 <<Controller.java preamble>>=
 import java.util.concurrent.CompletableFuture;
@@ -290,7 +291,7 @@ private Runnable RequestHandlingLoop = () -> {
   int  A1 = 0;
   if (DEBUG) {
     A0 = System.currentTimeMillis();
-    A1 = this.client.getStatCountQueueSize();
+    A1 = this.client.getStatClientQueueSize();
   }
   try {
     this.client.notifyNew();  // blocks this thread until queue is empty
@@ -387,6 +388,7 @@ public Controller() {
   this.communicator = new Communicator();
   this.communicator.setRefStorage(this.storage);
   this.communicator.setRefController(this);
+  <<[[Controller]] register JMX monitor>>
 }
 @
 

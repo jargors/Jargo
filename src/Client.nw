@@ -47,23 +47,10 @@ protected Tools tools = new Tools();
 protected final boolean DEBUG =
     "true".equals(System.getProperty("jargors.client.debug"));
 @
-<<[[Client]] member variables>>=
-private int stat_count_handleRequest = 0;
-private long stat_dur_total_handleRequest = 0;
-private long stat_dur_last_handleRequest = 0;
-@
-
 \section{Constructor}
 <<[[Client]] constructor>>=
 public Client() {
-  try {
-    MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-    ClientMonitor mon = new ClientMonitor(this);
-    mbs.registerMBean(mon, new ObjectName("com.github.jargors.jmx:type=ClientMonitor"));
-  } catch (Exception e) {
-    System.err.printf("ClientMonitor failed; reason: %s\n", e.toString());
-    System.err.printf("Continuing with monitoring disabled\n");
-  }
+  <<[[Client]] register JMX monitor>>
 }
 @
 
@@ -73,12 +60,7 @@ public Client() {
 <<notifyNew(0)>>=
 void notifyNew() throws ClientException, ClientFatalException {
   while (!this.queue.isEmpty()) {
-    this.stat_count_handleRequest++;
-    long A0 = System.currentTimeMillis();
     this.handleRequest(this.queue.remove());
-    this.stat_dur_last_handleRequest = (System.currentTimeMillis() - A0);
-    this.stat_dur_total_handleRequest +=
-      this.stat_dur_last_handleRequest;
   }
 }
 @ %def notifyNew

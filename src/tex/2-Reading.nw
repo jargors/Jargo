@@ -17,21 +17,6 @@ do {
 } while (res.next());
 @
 
-\subsection{Stats: queryServerScheduleRemaining}
-<<Stats: queryServerScheduleRemaining>>=
-this.statQueryServerScheduleRemainingCount++;
-this.statQueryServerScheduleRemainingDurLast = (System.currentTimeMillis() - A0);
-this.statQueryServerScheduleRemainingDurTotal +=
-  this.statQueryServerScheduleRemainingDurLast;
-if (this.statQueryServerScheduleRemainingDurLast < this.statQueryServerScheduleRemainingDurMin) {
- this.statQueryServerScheduleRemainingDurMin = this.statQueryServerScheduleRemainingDurLast;
-}
-if (this.statQueryServerScheduleRemainingDurLast > this.statQueryServerScheduleRemainingDurMax) {
- this.statQueryServerScheduleRemainingDurMax = this.statQueryServerScheduleRemainingDurLast;
-}
-this.statQueryServerScheduleRemainingDurAvg = (double) this.statQueryServerScheduleRemainingDurTotal/this.statQueryServerScheduleRemainingCount;
-@
-
 \section{Methods: General}
 
 \subsection{\texttt{DBQuery}(2)}
@@ -318,7 +303,10 @@ Method \textcolor{blue}{[[queryEdge]]}(2) wraps [[DBQueryEdge]](2).\\
 \end{tabular}
 <<Read: queryEdge(2)>>=
 int[] queryEdge(final int v1, final int v2) throws EdgeNotFoundException, SQLException {
-  return this.storage.DBQueryEdge(v1, v2);
+  long A0 = System.currentTimeMillis();
+  int[] output = this.storage.DBQueryEdge(v1, v2);
+  <<Stats: queryEdge>>
+  return output;
 }
 @ %def queryEdge
 
