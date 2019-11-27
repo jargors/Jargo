@@ -50,11 +50,6 @@ public class Controller {
       Integer.parseInt(System.getProperty("jargors.controller.request_handling_period", "1"));
   private int SERVER_COLLECTION_PERIOD =
       Integer.parseInt(System.getProperty("jargors.controller.server_collection_period", "1"));
-  private int clock_now = 0;
-  private int clock_reference_day = 1;
-  private int clock_reference_hour = 0;
-  private int clock_reference_minute = 0;
-  private int clock_reference_second = 0;
   private int loop_delay = 0;
   // private int deviation_rate = 0.02;
   // private int breakdown_rate = 0.005;
@@ -80,38 +75,26 @@ public class Controller {
     // add that duration onto the clock. We can output a "clock rate" to show
     // the user the current simulation rate, i.e. clock_rate=1x means real-time,
     // clock_rate=0.5x means 1 simulated second takes 2 real seconds, etc.
-    this.clock_now++;
-    this.clock_reference_second++;
-    if (this.clock_reference_second > 59) {
-      this.clock_reference_second = 0;
-      this.clock_reference_minute++;
-      if (this.clock_reference_minute > 59) {
-        this.clock_reference_minute = 0;
-        this.clock_reference_hour++;
-        if (this.clock_reference_hour > 23) {
-          this.clock_reference_day++;
-          this.clock_reference_hour = 0;
+    this.statControllerClockNow++;
+    this.statControllerClockReferenceSecond++;
+    if (this.statControllerClockReferenceSecond > 59) {
+      this.statControllerClockReferenceSecond = 0;
+      this.statControllerClockReferenceMinute++;
+      if (this.statControllerClockReferenceMinute > 59) {
+        this.statControllerClockReferenceMinute = 0;
+        this.statControllerClockReferenceHour++;
+        if (this.statControllerClockReferenceHour > 23) {
+          this.statControllerClockReferenceHour = 0;
+          this.statControllerClockReferenceDay++;
         }
       }
     }
-    if (DEBUG) {
-      System.err.printf("[t=%d; Day %d, %02d:%02d:%02d] Controller.ClockLoop says: %s!\n",
-          this.clock_now,
-          this.clock_reference_day,
-          this.clock_reference_hour,
-          this.clock_reference_minute,
-          this.clock_reference_second,
-          (this.clock_now % 2 == 0 ? "ping" : "pong"));
-    }
   };
   private Runnable RequestCollectionLoop = () -> {
-    long A0 = 0;
+    long A0 = System.currentTimeMillis();
     int  A1 = 0;
-    if (DEBUG) {
-      A0 = System.currentTimeMillis();
-    }
     try {
-      int[] output = this.storage.DBQueryRequestsQueued(this.clock_now);
+      int[] output = this.storage.DBQueryRequestsQueued(this.statControllerClockNow);
       for (int i = 0; i < (output.length - 6); i += 7) {
         if (!this.lu_seen.containsKey(output[i]) || this.lu_seen.get(output[i]) == false) {
           this.client.addRequest(new int[] {
@@ -123,9 +106,7 @@ public class Controller {
             output[(i + 5)],
             output[(i + 6)] });
           this.lu_seen.put(output[i], true);
-          if (DEBUG) {
-            A1++;
-          }
+          A1++;
         }
       }
     } catch (SQLException e) {
@@ -139,46 +120,53 @@ public class Controller {
         System.exit(1);
       }
     }
-    if (DEBUG) {
-      System.err.printf("Controller.RequestCollectionLoop collected %d requests in %d ms\n",
-          A1, (System.currentTimeMillis() - A0));
-    }
+        this.statControllerRequestCollectionCount++;
+        this.statControllerRequestCollectionSizeLast = A1;
+        this.statControllerRequestCollectionSizeTotal +=
+        this.statControllerRequestCollectionSizeLast;
+    if (this.statControllerRequestCollectionSizeLast <
+        this.statControllerRequestCollectionSizeMin) {
+        this.statControllerRequestCollectionSizeMin =
+        this.statControllerRequestCollectionSizeLast;}
+    if (this.statControllerRequestCollectionSizeLast >
+        this.statControllerRequestCollectionSizeMax) {
+        this.statControllerRequestCollectionSizeMax =
+        this.statControllerRequestCollectionSizeLast;}
+        this.statControllerRequestCollectionSizeAvg = (double)
+        this.statControllerRequestCollectionSizeTotal/
+        this.statControllerRequestCollectionCount;
+        this.statControllerRequestCollectionDurLast = (System.currentTimeMillis() - A0);
+        this.statControllerRequestCollectionDurTotal +=
+        this.statControllerRequestCollectionDurLast;
+    if (this.statControllerRequestCollectionDurLast <
+        this.statControllerRequestCollectionDurMin) {
+        this.statControllerRequestCollectionDurMin =
+        this.statControllerRequestCollectionDurLast;}
+    if (this.statControllerRequestCollectionDurLast >
+        this.statControllerRequestCollectionDurMax) {
+        this.statControllerRequestCollectionDurMax =
+        this.statControllerRequestCollectionDurLast;}
+        this.statControllerRequestCollectionDurAvg = (double)
+        this.statControllerRequestCollectionDurTotal/
+        this.statControllerRequestCollectionCount;
   };
   private Runnable RequestHandlingLoop = () -> {
-    long A0 = 0;
-    int  A1 = 0;
-    if (DEBUG) {
-      A0 = System.currentTimeMillis();
-      A1 = this.client.getStatClientQueueSize();
-    }
     try {
       this.client.notifyNew();  // blocks this thread until queue is empty
     } catch (ClientException e) {
       System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientException: %s\n",
-          this.clock_now, e.toString());
+          this.statControllerClockNow, e.toString());
       e.printStackTrace();
     } catch (ClientFatalException e) {
       System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientFatalException: %s\n",
-          this.clock_now, e.toString());
+          this.statControllerClockNow, e.toString());
       e.printStackTrace();
       System.exit(1);
     }
-    if (DEBUG) {
-      System.err.printf("Controller.RequestHandlingLoop handled %d requests in %d ms\n",
-          A1, (System.currentTimeMillis() - A0));
-    }
   };
   private Runnable ServerLoop = () -> {
-    long A0 = 0;
-    int  A1 = 0;
-    if (DEBUG) {
-      A0 = System.currentTimeMillis();
-    }
     try {
-      int[] output = this.storage.DBQueryServersLocationsActive(this.clock_now);
-      if (DEBUG) {
-        A1 = (output.length/3);
-      }
+      int[] output = this.storage.DBQueryServersLocationsActive(this.statControllerClockNow);
       this.client.collectServerLocations(output);
     } catch (SQLException e) {
       if (e.getErrorCode() == 40000) {
@@ -191,11 +179,23 @@ public class Controller {
         System.exit(1);
       }
     }
-    if (DEBUG) {
-      System.err.printf("Controller.ServerLoop collected/handled %d in %d ms\n",
-          A1, (System.currentTimeMillis() - A0));
-    }
   };
+  private int    statControllerClockNow;
+  private int    statControllerClockReferenceDay;
+  private int    statControllerClockReferenceHour;
+  private int    statControllerClockReferenceMinute;
+  private int    statControllerClockReferenceSecond;
+  private int    statControllerRequestCollectionCount = 0;
+  private int    statControllerRequestCollectionSizeTotal = 0;
+  private int    statControllerRequestCollectionSizeLast = 0;
+  private int    statControllerRequestCollectionSizeMin = Integer.MAX_VALUE;
+  private int    statControllerRequestCollectionSizeMax = 0;
+  private double statControllerRequestCollectionSizeAvg = 0;
+  private long   statControllerRequestCollectionDurLast = 0;
+  private long   statControllerRequestCollectionDurMin = Integer.MAX_VALUE;
+  private long   statControllerRequestCollectionDurMax = 0;
+  private long   statControllerRequestCollectionDurTotal = 0;
+  private double statControllerRequestCollectionDurAvg = 0;
   private int    statQueryEdgeCount    = 0;
   private long   statQueryEdgeDurLast  = 0;
   private long   statQueryEdgeDurTotal = 0;
@@ -478,7 +478,7 @@ public class Controller {
            this.tools.GTGtreeLoad(p);
          }
   public int getClockNow() {
-           return this.clock_now;
+           return this.statControllerClockNow;
          }
   public Communicator getRefCommunicator() {
            return this.communicator;
@@ -516,8 +516,8 @@ public class Controller {
            if (!(0 <= minute && minute <= 59)) {
              throw new IllegalArgumentException("Invalid clock reference (minute got "+minute+"; must be between [00, 59])");
            }
-           this.clock_reference_hour = hour;
-           this.clock_reference_minute = minute;
+           this.statControllerClockReferenceHour= hour;
+           this.statControllerClockReferenceMinute = minute;
          }
   public void setClockStart(final int clock_start) {
            this.CLOCK_START = clock_start;
@@ -532,13 +532,13 @@ public class Controller {
            return this.kill;
          }
   public void returnRequest(final int[] r) {
-           if (this.clock_now - r[2] < QUEUE_TIMEOUT) {
+           if (this.statControllerClockNow - r[2] < QUEUE_TIMEOUT) {
              this.lu_seen.put(r[0], false);
            }
          }
   public void startRealtime(final Consumer<Boolean> app_cb) {
            this.storage.setRequestTimeout(REQUEST_TIMEOUT);
-           this.clock_now = CLOCK_START;
+           this.statControllerClockNow = CLOCK_START;
 
            int simulation_duration = (CLOCK_END - CLOCK_START);
 
@@ -562,10 +562,10 @@ public class Controller {
          }
   public void startSequential(final Consumer<Boolean> app_cb) {
            this.storage.setRequestTimeout(REQUEST_TIMEOUT);
-           this.clock_now = CLOCK_START;
-           while (!kill && this.clock_now < CLOCK_END) {
+           this.statControllerClockNow = CLOCK_START;
+           while (!kill && this.statControllerClockNow < CLOCK_END) {
              this.working = true;
-             this.ClockLoop.run();  // this.clock_now gets incremented here!
+             this.ClockLoop.run();  // this.statControllerClockNow gets incremented here!
              this.ServerLoop.run();
              this.RequestCollectionLoop.run();
              this.RequestHandlingLoop.run();
@@ -602,6 +602,45 @@ public class Controller {
              return;
            }
          }
+  public int    getControllerClockNow() {
+           return this.statControllerClockNow;
+         }
+  public int    getControllerClockReferenceDay() {
+           return this.statControllerClockReferenceDay;
+         }
+  public int    getControllerClockReferenceHour() {
+           return this.statControllerClockReferenceHour;
+         }
+  public int    getControllerClockReferenceMinute() {
+           return this.statControllerClockReferenceMinute;
+         }
+  public int    getControllerClockReferenceSecond() {
+           return this.statControllerClockReferenceSecond;
+         }
+  public int    getControllerRequestCollectionSizeLast() {
+           return this.statControllerRequestCollectionSizeLast;
+         }
+  public int    getControllerRequestCollectionSizeMin() {
+           return this.statControllerRequestCollectionSizeMin;
+         }
+  public int    getControllerRequestCollectionSizeMax() {
+           return this.statControllerRequestCollectionSizeMax;
+         }
+  public double getControllerRequestCollectionSizeAvg() {
+           return this.statControllerRequestCollectionSizeAvg;
+         }
+  public long   getControllerRequestCollectionDurLast() {
+           return this.statControllerRequestCollectionDurLast;
+         }
+  public long   getControllerRequestCollectionDurMin() {
+           return this.statControllerRequestCollectionDurMin;
+         }
+  public long   getControllerRequestCollectionDurMax() {
+           return this.statControllerRequestCollectionDurMax;
+         }
+  public double getControllerRequestCollectionDurAvg() {
+           return this.statControllerRequestCollectionDurAvg;
+         }
   public int    getStatQueryEdgeCount() {
            return this.statQueryEdgeCount;
          }
@@ -619,5 +658,41 @@ public class Controller {
          }
   public double getStatQueryEdgeDurAvg() {
            return this.statQueryEdgeDurAvg;
+         }
+  public int    getStatQueryUserCount() {
+           return this.statQueryUserCount;
+         }
+  public long   getStatQueryUserDurLast() {
+           return this.statQueryUserDurLast;
+         }
+  public long   getStatQueryUserDurTotal() {
+           return this.statQueryUserDurTotal;
+         }
+  public long   getStatQueryUserDurMin() {
+           return this.statQueryUserDurMin;
+         }
+  public long   getStatQueryUserDurMax() {
+           return this.statQueryUserDurMax;
+         }
+  public double getStatQueryUserDurAvg() {
+           return this.statQueryUserDurAvg;
+         }
+  public int    getStatQueryVertexCount() {
+           return this.statQueryVertexCount;
+         }
+  public long   getStatQueryVertexDurLast() {
+           return this.statQueryVertexDurLast;
+         }
+  public long   getStatQueryVertexDurTotal() {
+           return this.statQueryVertexDurTotal;
+         }
+  public long   getStatQueryVertexDurMin() {
+           return this.statQueryVertexDurMin;
+         }
+  public long   getStatQueryVertexDurMax() {
+           return this.statQueryVertexDurMax;
+         }
+  public double getStatQueryVertexDurAvg() {
+           return this.statQueryVertexDurAvg;
          }
 }

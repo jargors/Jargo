@@ -4,6 +4,9 @@
 \section{Class Members}
 \subsection{Controller}
 <<[[Controller]] member variables>>=
+<<Stats members: controllerClock>>
+<<Stats members: controllerClockReference>>
+<<Stats members: controllerRequestCollection>>
 <<Stats members: queryEdge>>
 <<Stats members: queryUser>>
 <<Stats members: queryVertex>>
@@ -78,12 +81,37 @@ try {
 \section{Class Methods}
 \subsection{Controller}
 <<[[Controller]] methods>>=
+public <<Get: getControllerClockNow(0)>>
+public <<Get: getControllerClockReferenceDay(0)>>
+public <<Get: getControllerClockReferenceHour(0)>>
+public <<Get: getControllerClockReferenceMinute(0)>>
+public <<Get: getControllerClockReferenceSecond(0)>>
+public <<Get: getControllerRequestCollectionSizeLast(0)>>
+public <<Get: getControllerRequestCollectionSizeMin(0)>>
+public <<Get: getControllerRequestCollectionSizeMax(0)>>
+public <<Get: getControllerRequestCollectionSizeAvg(0)>>
+public <<Get: getControllerRequestCollectionDurLast(0)>>
+public <<Get: getControllerRequestCollectionDurMin(0)>>
+public <<Get: getControllerRequestCollectionDurMax(0)>>
+public <<Get: getControllerRequestCollectionDurAvg(0)>>
 public <<Get: getStatQueryEdgeCount(0)>>
 public <<Get: getStatQueryEdgeDurLast(0)>>
 public <<Get: getStatQueryEdgeDurTotal(0)>>
 public <<Get: getStatQueryEdgeDurMin(0)>>
 public <<Get: getStatQueryEdgeDurMax(0)>>
 public <<Get: getStatQueryEdgeDurAvg(0)>>
+public <<Get: getStatQueryUserCount(0)>>
+public <<Get: getStatQueryUserDurLast(0)>>
+public <<Get: getStatQueryUserDurTotal(0)>>
+public <<Get: getStatQueryUserDurMin(0)>>
+public <<Get: getStatQueryUserDurMax(0)>>
+public <<Get: getStatQueryUserDurAvg(0)>>
+public <<Get: getStatQueryVertexCount(0)>>
+public <<Get: getStatQueryVertexDurLast(0)>>
+public <<Get: getStatQueryVertexDurTotal(0)>>
+public <<Get: getStatQueryVertexDurMin(0)>>
+public <<Get: getStatQueryVertexDurMax(0)>>
+public <<Get: getStatQueryVertexDurAvg(0)>>
 @
 
 \subsection{Communicator}
@@ -155,6 +183,34 @@ public <<Get: getStatClientQueueSize(0)>>
 import com.github.jargors.jmx.*;
 import java.lang.management.*;
 import javax.management.*;
+@
+
+\subsection{Stats members: controllerClock}
+<<Stats members: controllerClock>>=
+private int    statControllerClockNow;
+@
+
+\subsection{Stats members: controllerClockReference}
+<<Stats members: controllerClockReference>>=
+private int    statControllerClockReferenceDay;
+private int    statControllerClockReferenceHour;
+private int    statControllerClockReferenceMinute;
+private int    statControllerClockReferenceSecond;
+@
+
+\subsection{Stats members: controllerRequestCollection}
+<<Stats members: controllerRequestCollection>>=
+private int    statControllerRequestCollectionCount = 0;
+private int    statControllerRequestCollectionSizeTotal = 0;
+private int    statControllerRequestCollectionSizeLast = 0;
+private int    statControllerRequestCollectionSizeMin = Integer.MAX_VALUE;
+private int    statControllerRequestCollectionSizeMax = 0;
+private double statControllerRequestCollectionSizeAvg = 0;
+private long   statControllerRequestCollectionDurLast = 0;
+private long   statControllerRequestCollectionDurMin = Integer.MAX_VALUE;
+private long   statControllerRequestCollectionDurMax = 0;
+private long   statControllerRequestCollectionDurTotal = 0;
+private double statControllerRequestCollectionDurAvg = 0;
 @
 
 \subsection{Stats members: queryEdge}
@@ -245,6 +301,38 @@ private long   statQueryVertexDurTotal = 0;
 private long   statQueryVertexDurMin   = Integer.MAX_VALUE;
 private long   statQueryVertexDurMax   = 0;
 private double statQueryVertexDurAvg   = 0;
+@
+
+<<Stats: controllerRequestCollection>>=
+    this.statControllerRequestCollectionCount++;
+    this.statControllerRequestCollectionSizeLast = A1;
+    this.statControllerRequestCollectionSizeTotal +=
+    this.statControllerRequestCollectionSizeLast;
+if (this.statControllerRequestCollectionSizeLast <
+    this.statControllerRequestCollectionSizeMin) {
+    this.statControllerRequestCollectionSizeMin =
+    this.statControllerRequestCollectionSizeLast;}
+if (this.statControllerRequestCollectionSizeLast >
+    this.statControllerRequestCollectionSizeMax) {
+    this.statControllerRequestCollectionSizeMax =
+    this.statControllerRequestCollectionSizeLast;}
+    this.statControllerRequestCollectionSizeAvg = (double)
+    this.statControllerRequestCollectionSizeTotal/
+    this.statControllerRequestCollectionCount;
+    this.statControllerRequestCollectionDurLast = (System.currentTimeMillis() - A0);
+    this.statControllerRequestCollectionDurTotal +=
+    this.statControllerRequestCollectionDurLast;
+if (this.statControllerRequestCollectionDurLast <
+    this.statControllerRequestCollectionDurMin) {
+    this.statControllerRequestCollectionDurMin =
+    this.statControllerRequestCollectionDurLast;}
+if (this.statControllerRequestCollectionDurLast >
+    this.statControllerRequestCollectionDurMax) {
+    this.statControllerRequestCollectionDurMax =
+    this.statControllerRequestCollectionDurLast;}
+    this.statControllerRequestCollectionDurAvg = (double)
+    this.statControllerRequestCollectionDurTotal/
+    this.statControllerRequestCollectionCount;
 @
 
 \subsection{Stats: queryEdge}
@@ -419,6 +507,98 @@ if (this.statQueryVertexDurLast >
 @
 
 \section{Methods}
+
+\subsection{\texttt{getControllerClockNow}(0)}
+<<Get: getControllerClockNow(0)>>=
+int    getControllerClockNow() {
+  return this.statControllerClockNow;
+}
+@ %def getControllerClockNow
+
+\subsection{\texttt{getControllerClockReferenceDay}(0)}
+<<Get: getControllerClockReferenceDay(0)>>=
+int    getControllerClockReferenceDay() {
+  return this.statControllerClockReferenceDay;
+}
+@ %def getControllerClockReferenceDay
+
+\subsection{\texttt{getControllerClockReferenceHour}(0)}
+<<Get: getControllerClockReferenceHour(0)>>=
+int    getControllerClockReferenceHour() {
+  return this.statControllerClockReferenceHour;
+}
+@ %def getControllerClockReferenceHour
+
+\subsection{\texttt{getControllerClockReferenceMinute}(0)}
+<<Get: getControllerClockReferenceMinute(0)>>=
+int    getControllerClockReferenceMinute() {
+  return this.statControllerClockReferenceMinute;
+}
+@ %def getControllerClockReferenceMinute
+
+\subsection{\texttt{getControllerClockReferenceSecond}(0)}
+<<Get: getControllerClockReferenceSecond(0)>>=
+int    getControllerClockReferenceSecond() {
+  return this.statControllerClockReferenceSecond;
+}
+@ %def getControllerClockReferenceSecond
+
+\subsection{\texttt{getControllerRequestCollectionSizeLast}(0)}
+<<Get: getControllerRequestCollectionSizeLast(0)>>=
+int    getControllerRequestCollectionSizeLast() {
+  return this.statControllerRequestCollectionSizeLast;
+}
+@ %def getControllerRequestCollectionSizeLast
+
+\subsection{\texttt{getControllerRequestCollectionSizeMin}(0)}
+<<Get: getControllerRequestCollectionSizeMin(0)>>=
+int    getControllerRequestCollectionSizeMin() {
+  return this.statControllerRequestCollectionSizeMin;
+}
+@ %def getControllerRequestCollectionSizeMin
+
+\subsection{\texttt{getControllerRequestCollectionSizeMax}(0)}
+<<Get: getControllerRequestCollectionSizeMax(0)>>=
+int    getControllerRequestCollectionSizeMax() {
+  return this.statControllerRequestCollectionSizeMax;
+}
+@ %def getControllerRequestCollectionSizeMax
+
+\subsection{\texttt{getControllerRequestCollectionSizeAvg}(0)}
+<<Get: getControllerRequestCollectionSizeAvg(0)>>=
+double getControllerRequestCollectionSizeAvg() {
+  return this.statControllerRequestCollectionSizeAvg;
+}
+@ %def getControllerRequestCollectionSizeAvg
+
+\subsection{\texttt{getControllerRequestCollectionDurLast}(0)}
+<<Get: getControllerRequestCollectionDurLast(0)>>=
+long   getControllerRequestCollectionDurLast() {
+  return this.statControllerRequestCollectionDurLast;
+}
+@ %def getControllerRequestCollectionDurLast
+
+\subsection{\texttt{getControllerRequestCollectionDurMin}(0)}
+<<Get: getControllerRequestCollectionDurMin(0)>>=
+long   getControllerRequestCollectionDurMin() {
+  return this.statControllerRequestCollectionDurMin;
+}
+@ %def getControllerRequestCollectionDurMin
+
+\subsection{\texttt{getControllerRequestCollectionDurMax}(0)}
+<<Get: getControllerRequestCollectionDurMax(0)>>=
+long   getControllerRequestCollectionDurMax() {
+  return this.statControllerRequestCollectionDurMax;
+}
+@ %def getControllerRequestCollectionDurMax
+
+\subsection{\texttt{getControllerRequestCollectionDurAvg}(0)}
+<<Get: getControllerRequestCollectionDurAvg(0)>>=
+double getControllerRequestCollectionDurAvg() {
+  return this.statControllerRequestCollectionDurAvg;
+}
+@ %def getControllerRequestCollectionDurAvg
+
 \subsection{\texttt{getStatClientQueueSize}(0)}
 <<Get: getStatClientQueueSize(0)>>=
 int getStatClientQueueSize() {

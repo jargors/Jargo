@@ -100,16 +100,6 @@ private int REQUEST_HANDLING_PERIOD =
 private int SERVER_COLLECTION_PERIOD =
     Integer.parseInt(System.getProperty("jargors.controller.server_collection_period", "1"));
 @
-The simulation world time is stored in [[clock_now]] and is upated by the
-clock loop. The time advances in increments of 1 from [[CLOCK_START]]
-to [[CLOCK_END]].
-<<Settings objects>>=
-private int clock_now = 0;
-private int clock_reference_day = 1;
-private int clock_reference_hour = 0;
-private int clock_reference_minute = 0;
-private int clock_reference_second = 0;
-@
 The [[loop_delay]] configures how many seconds to wait until the controller
 loops start. The update periods configure how often particular loops should
 execute, in seconds.
@@ -159,8 +149,8 @@ about the new time.\\
 \midrule
 \textbf{Parameters:} none.\\
 \textbf{Returns:} nothing.\\
-\textbf{Side Effects:} increments [[clock_now]] by 1, may modify
-[[communicator]] by changing [[Communicator.clock_now]], may print to
+\textbf{Side Effects:} increments [[statControllerClockNow]] by 1, may modify
+[[communicator]] by changing [[Communicator.statControllerClockNow]], may print to
 standard error if [[DEBUG]] is [[true]].\\
 \textbf{Throws:} nothing.\\
 \bottomrule
@@ -177,28 +167,19 @@ private Runnable ClockLoop = () -> {
   // add that duration onto the clock. We can output a "clock rate" to show
   // the user the current simulation rate, i.e. clock_rate=1x means real-time,
   // clock_rate=0.5x means 1 simulated second takes 2 real seconds, etc.
-  this.clock_now++;
-  this.clock_reference_second++;
-  if (this.clock_reference_second > 59) {
-    this.clock_reference_second = 0;
-    this.clock_reference_minute++;
-    if (this.clock_reference_minute > 59) {
-      this.clock_reference_minute = 0;
-      this.clock_reference_hour++;
-      if (this.clock_reference_hour > 23) {
-        this.clock_reference_day++;
-        this.clock_reference_hour = 0;
+  this.statControllerClockNow++;
+  this.statControllerClockReferenceSecond++;
+  if (this.statControllerClockReferenceSecond > 59) {
+    this.statControllerClockReferenceSecond = 0;
+    this.statControllerClockReferenceMinute++;
+    if (this.statControllerClockReferenceMinute > 59) {
+      this.statControllerClockReferenceMinute = 0;
+      this.statControllerClockReferenceHour++;
+      if (this.statControllerClockReferenceHour > 23) {
+        this.statControllerClockReferenceHour = 0;
+        this.statControllerClockReferenceDay++;
       }
     }
-  }
-  if (DEBUG) {
-    System.err.printf("[t=%d; Day %d, %02d:%02d:%02d] Controller.ClockLoop says: %s!\n",
-        this.clock_now,
-        this.clock_reference_day,
-        this.clock_reference_hour,
-        this.clock_reference_minute,
-        this.clock_reference_second,
-        (this.clock_now % 2 == 0 ? "ping" : "pong"));
   }
 };
 @
@@ -227,13 +208,10 @@ failure occurs.\\
 \end{tabular}
 <<Definition of request collection loop>>=
 private Runnable RequestCollectionLoop = () -> {
-  long A0 = 0;
+  long A0 = System.currentTimeMillis();
   int  A1 = 0;
-  if (DEBUG) {
-    A0 = System.currentTimeMillis();
-  }
   try {
-    int[] output = this.storage.DBQueryRequestsQueued(this.clock_now);
+    int[] output = this.storage.DBQueryRequestsQueued(this.statControllerClockNow);
     for (int i = 0; i < (output.length - 6); i += 7) {
       if (!this.lu_seen.containsKey(output[i]) || this.lu_seen.get(output[i]) == false) {
         this.client.addRequest(new int[] {
@@ -245,9 +223,7 @@ private Runnable RequestCollectionLoop = () -> {
           output[(i + 5)],
           output[(i + 6)] });
         this.lu_seen.put(output[i], true);
-        if (DEBUG) {
-          A1++;
-        }
+        A1++;
       }
     }
   } catch (SQLException e) {
@@ -261,10 +237,7 @@ private Runnable RequestCollectionLoop = () -> {
       System.exit(1);
     }
   }
-  if (DEBUG) {
-    System.err.printf("Controller.RequestCollectionLoop collected %d requests in %d ms\n",
-        A1, (System.currentTimeMillis() - A0));
-  }
+  <<Stats: controllerRequestCollection>>
 };
 @
 
@@ -287,27 +260,17 @@ occurs.\\
 \end{tabular}
 <<Definition of request handling loop>>=
 private Runnable RequestHandlingLoop = () -> {
-  long A0 = 0;
-  int  A1 = 0;
-  if (DEBUG) {
-    A0 = System.currentTimeMillis();
-    A1 = this.client.getStatClientQueueSize();
-  }
   try {
     this.client.notifyNew();  // blocks this thread until queue is empty
   } catch (ClientException e) {
     System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientException: %s\n",
-        this.clock_now, e.toString());
+        this.statControllerClockNow, e.toString());
     e.printStackTrace();
   } catch (ClientFatalException e) {
     System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientFatalException: %s\n",
-        this.clock_now, e.toString());
+        this.statControllerClockNow, e.toString());
     e.printStackTrace();
     System.exit(1);
-  }
-  if (DEBUG) {
-    System.err.printf("Controller.RequestHandlingLoop handled %d requests in %d ms\n",
-        A1, (System.currentTimeMillis() - A0));
   }
 };
 @
@@ -337,16 +300,8 @@ exits the JVM if failure occurs.\\
 \end{tabular}
 <<Definition of server collection loop>>=
 private Runnable ServerLoop = () -> {
-  long A0 = 0;
-  int  A1 = 0;
-  if (DEBUG) {
-    A0 = System.currentTimeMillis();
-  }
   try {
-    int[] output = this.storage.DBQueryServersLocationsActive(this.clock_now);
-    if (DEBUG) {
-      A1 = (output.length/3);
-    }
+    int[] output = this.storage.DBQueryServersLocationsActive(this.statControllerClockNow);
     this.client.collectServerLocations(output);
   } catch (SQLException e) {
     if (e.getErrorCode() == 40000) {
@@ -358,10 +313,6 @@ private Runnable ServerLoop = () -> {
       e.printStackTrace();
       System.exit(1);
     }
-  }
-  if (DEBUG) {
-    System.err.printf("Controller.ServerLoop collected/handled %d in %d ms\n",
-        A1, (System.currentTimeMillis() - A0));
   }
 };
 @
@@ -494,7 +445,7 @@ for (int i = 0; i < 6; i++) {
 <<startRealtime(1)>>=
 void startRealtime(final Consumer<Boolean> app_cb) {
   this.storage.setRequestTimeout(REQUEST_TIMEOUT);
-  this.clock_now = CLOCK_START;
+  this.statControllerClockNow = CLOCK_START;
 
   int simulation_duration = (CLOCK_END - CLOCK_START);
 
@@ -522,10 +473,10 @@ void startRealtime(final Consumer<Boolean> app_cb) {
 <<startSequential(1)>>=
 void startSequential(final Consumer<Boolean> app_cb) {
   this.storage.setRequestTimeout(REQUEST_TIMEOUT);
-  this.clock_now = CLOCK_START;
-  while (!kill && this.clock_now < CLOCK_END) {
+  this.statControllerClockNow = CLOCK_START;
+  while (!kill && this.statControllerClockNow < CLOCK_END) {
     this.working = true;
-    this.ClockLoop.run();  // this.clock_now gets incremented here!
+    this.ClockLoop.run();  // this.statControllerClockNow gets incremented here!
     this.ServerLoop.run();
     this.RequestCollectionLoop.run();
     this.RequestHandlingLoop.run();
@@ -571,7 +522,7 @@ void stop(final Consumer<Boolean> app_cb) {
 \subsection{\texttt{returnRequest}(1)}
 <<returnRequest(1)>>=
 void returnRequest(final int[] r) {
-  if (this.clock_now - r[2] < QUEUE_TIMEOUT) {
+  if (this.statControllerClockNow - r[2] < QUEUE_TIMEOUT) {
     this.lu_seen.put(r[0], false);
   }
 }
