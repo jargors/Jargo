@@ -27,6 +27,7 @@
 
 \subsection{Client}
 <<[[Client]] member variables>>=
+<<Stats members: clientHandleRequest>>
 @
 
 \section{Class Registers}
@@ -175,6 +176,10 @@ public <<Get: getStatQueryVertexDurAvg(0)>>
 \subsection{Client}
 <<[[Client]] methods>>=
 public <<Get: getStatClientQueueSize(0)>>
+public <<Get: getClientHandleRequestDurLast(0)>>
+public <<Get: getClientHandleRequestDurMin(0)>>
+public <<Get: getClientHandleRequestDurMax(0)>>
+public <<Get: getClientHandleRequestDurAvg(0)>>
 @
 
 \section{Chunks}
@@ -211,6 +216,16 @@ private long   statControllerRequestCollectionDurMin = Integer.MAX_VALUE;
 private long   statControllerRequestCollectionDurMax = 0;
 private long   statControllerRequestCollectionDurTotal = 0;
 private double statControllerRequestCollectionDurAvg = 0;
+@
+
+\subsection{Stats members: clientHandleRequest}
+<<Stats members: clientHandleRequest>>=
+private int    statClientHandleRequestCount = 0;
+private long   statClientHandleRequestDurLast = 0;
+private long   statClientHandleRequestDurMin = Integer.MAX_VALUE;
+private long   statClientHandleRequestDurMax = 0;
+private long   statClientHandleRequestDurTotal = 0;
+private double statClientHandleRequestDurAvg = 0;
 @
 
 \subsection{Stats members: queryEdge}
@@ -303,6 +318,7 @@ private long   statQueryVertexDurMax   = 0;
 private double statQueryVertexDurAvg   = 0;
 @
 
+\subsection{Stats: controllerRequestCollection}
 <<Stats: controllerRequestCollection>>=
     this.statControllerRequestCollectionCount++;
     this.statControllerRequestCollectionSizeLast = A1;
@@ -333,6 +349,25 @@ if (this.statControllerRequestCollectionDurLast >
     this.statControllerRequestCollectionDurAvg = (double)
     this.statControllerRequestCollectionDurTotal/
     this.statControllerRequestCollectionCount;
+@
+
+\subsection{Stats: clientHandleRequest}
+<<Stats: clientHandleRequest>>=
+    this.statClientHandleRequestCount++;
+    this.statClientHandleRequestDurLast = (System.currentTimeMillis() - A0);
+    this.statClientHandleRequestDurTotal +=
+    this.statClientHandleRequestDurLast;
+if (this.statClientHandleRequestDurLast <
+    this.statClientHandleRequestDurMin) {
+    this.statClientHandleRequestDurMin =
+    this.statClientHandleRequestDurLast;}
+if (this.statClientHandleRequestDurLast >
+    this.statClientHandleRequestDurMax) {
+    this.statClientHandleRequestDurMax =
+    this.statClientHandleRequestDurLast;}
+    this.statClientHandleRequestDurAvg = (double)
+    this.statClientHandleRequestDurTotal/
+    this.statClientHandleRequestCount;
 @
 
 \subsection{Stats: queryEdge}
@@ -605,6 +640,34 @@ int getStatClientQueueSize() {
   return this.queue.size();
 }
 @ %def getStatClientQueueSize
+
+\subsection{\texttt{getClientHandleRequestDurLast}(0)}
+<<Get: getClientHandleRequestDurLast(0)>>=
+long getClientHandleRequestDurLast() {
+  return this.statClientHandleRequestDurLast;
+}
+@ %def getClientHandleRequestDurLast
+
+\subsection{\texttt{getClientHandleRequestDurMin}(0)}
+<<Get: getClientHandleRequestDurMin(0)>>=
+long getClientHandleRequestDurMin() {
+  return this.statClientHandleRequestDurMin;
+}
+@ %def getClientHandleRequestDurMin
+
+\subsection{\texttt{getClientHandleRequestDurMax}(0)}
+<<Get: getClientHandleRequestDurMax(0)>>=
+long getClientHandleRequestDurMax() {
+  return this.statClientHandleRequestDurMax;
+}
+@ %def getClientHandleRequestDurMax
+
+\subsection{\texttt{getClientHandleRequestDurAvg}(0)}
+<<Get: getClientHandleRequestDurAvg(0)>>=
+double getClientHandleRequestDurAvg() {
+  return this.statClientHandleRequestDurAvg;
+}
+@ %def getClientHandleRequestDurAvg
 
 \subsection{\texttt{getStatQueryEdgeCount}(0)}
 <<Get: getStatQueryEdgeCount(0)>>=

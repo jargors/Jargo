@@ -60,7 +60,9 @@ public Client() {
 <<notifyNew(0)>>=
 void notifyNew() throws ClientException, ClientFatalException {
   while (!this.queue.isEmpty()) {
+    long A0 = System.currentTimeMillis();
     this.handleRequest(this.queue.remove());
+    <<Stats: clientHandleRequest>>
   }
 }
 @ %def notifyNew
