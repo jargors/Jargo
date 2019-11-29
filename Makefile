@@ -11,10 +11,10 @@ all : src jar pdf
 src :
 	make -f makesrc.mf
 
-jar :
+jar : src
 	make -f makejar.mf
 
-pdf :
+pdf : src
 	make -f makepdf.mf
 
 purge :

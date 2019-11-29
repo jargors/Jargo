@@ -67,6 +67,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
@@ -85,6 +86,8 @@ private final boolean DEBUG =
 <<[[DesktopController]] member variables>>=
 private Stage stage;
 private Canvas can_road;
+private Canvas can_servers;
+private Pane container_canvas_container;
 @
 
 <<[[DesktopController]] member variables>>=
@@ -162,6 +165,7 @@ private String jarclass = null;
 \subsection{Workspace}
 <<[[DesktopController]] member variables>>=
 private GraphicsContext gc = null;
+private MapUnitsFetcher muf = null;
 private double window_height = 0;
 private double window_width = 0;
 private double mouse_x = 0;
@@ -170,14 +174,19 @@ private int[] edges = null;
 private int[] mbr = null;
 private double xunit = 0;
 private double yunit = 0;
+private double unit = 0;
 private int t0 = 0;
 private int t1 = 0;
+private int server_width = 100;
+private int server_height = 200;
+private Color server_fill = Color.BLUE;
 @
 
 \subsection{Background Processes}
 <<[[DesktopController]] member variables>>=
 private AnimationTimer timer = new MyTimer();
 private ScheduledExecutorService exe = null;
+private ScheduledFuture<?> cbSimRunner = null;
 private ScheduledFuture<?> cbMapUpdater = null;
 private Map<String, ScheduledFuture<?>> cbMetricFetcher = new HashMap<String, ScheduledFuture<?>>();
 @
@@ -190,21 +199,81 @@ private class MyTimer extends AnimationTimer {
 }
 @
 <<[[DesktopController]] member variables>>=
+private class MapUnitsFetcher {
+  private double unit = 0;
+  private int lng_min = 0;
+  private int lat_min = 0;
+  public MapUnitsFetcher() { }
+  public double getUnit() {
+    return this.unit;
+  }
+  public int getLngMin() {
+    return this.lng_min;
+  }
+  public int getLatMin() {
+    return this.lat_min;
+  }
+  public void setUnit(double unit) {
+    this.unit = unit;
+  }
+  public void setLngMin(int lng_min) {
+    this.lng_min = lng_min;
+  }
+  public void setLatMin(int lat_min) {
+    this.lat_min = lat_min;
+  }
+}
+@
+<<[[DesktopController]] member variables>>=
 private class MapUpdater implements Runnable {
   private Controller controller = null;
   private Label lbl_status = null;
-  private Canvas can_road = null;
+  private Canvas can_servers = null;
+  private GraphicsContext gc = null;
+  private MapUnitsFetcher muf = null;
+  private Map<Integer, double[]> lu_locs = new HashMap<Integer, double[]>();
   public MapUpdater(
       final Controller controller,
       final Label lbl_status,
-      final Canvas can_road) {
+      final Canvas can_servers,
+      final MapUnitsFetcher muf) {
     this.controller = controller;
     this.lbl_status = lbl_status;
-    this.can_road = can_road;
+    this.can_servers = can_servers;
+    this.muf = muf;
+    this.gc = can_servers.getGraphicsContext2D();
   }
   public void run() {
     final int t = this.controller.getClockNow();
     Platform.runLater(() -> {
+      long A0 = System.currentTimeMillis();
+      try {
+        int[] locations = this.controller.queryServersLocationsActive(t);
+        for (int i = 0; i < (locations.length - 2); i += 3) {
+          final int sid = locations[i];
+          final int loc = locations[(i + 2)];
+          final int[] coordinates = this.controller.queryVertex(loc);
+          double x = this.muf.getUnit()*(coordinates[0] - this.muf.getLngMin());
+          double y = this.muf.getUnit()*(coordinates[1] - this.muf.getLatMin());
+          // Canvas is lagging during pan. I guess it's due to one-shot update
+          // of all the servers, so I have put each update into its own runLater.
+          // Unfortunately, doesn't seem to work. Still laggy.
+          Platform.runLater(() -> {
+            if (this.lu_locs.containsKey(sid)) {
+              final double[] old = this.lu_locs.get(sid);
+              this.gc.clearRect(old[0], old[1], 5, 10);
+            }
+            this.lu_locs.put(sid, new double[] { x, y });
+            this.gc.fillRect(x, y, 5, 10);
+          });
+        }
+      } catch (SQLException se) {
+        System.err.println("Warning: MapUpdater failed to get locations");
+        System.err.println(se.toString());
+      } catch (VertexNotFoundException ve) {
+        System.err.println("Warning: MapUpdater got unknown location!");
+        System.err.println(ve.toString());
+      }
       this.lbl_status.setText("Simulation running (t="+t+")...");
     });
   };
@@ -363,6 +432,25 @@ private ConcurrentHashMap<String, ConcurrentHashMap<String, Series<Number, Numbe
 @
 
 \section{Chunks}
+
+\subsection{Initialize server rectangles}
+<<Initialize server rectangles>>=
+// try {
+//   int[] locations = this.controller.queryServersLocationsActive(this.t0);
+//   for (int i = 0; i < (locations.length - 2); i += 3) {
+//     final int sid = locations[i];
+//     if (locations[(i + 2)] != 0) {
+//       this.servers.put(sid, new Rectangle(server_width, server_height, server_fill));
+//     }
+//   }
+// } catch (SQLException se) {
+//   System.err.println("Warning: failed to get server locations!");
+//   System.err.println(se.toString());
+// }
+@
+
+
+\subsection{Initialize chart settings}
 <<Initialize chart settings>>=
 this.lc_rates.setCreateSymbols(false);
 this.lc_rates.setAnimated(false);
@@ -401,6 +489,7 @@ this.times_x.setAutoRanging(true);
 this.times_y.setAutoRanging(true);
 @
 
+\subsection{Initialize chart series}
 <<Initialize chart series>>=
 for (String metric : this.metric_rates) {
   this.lc_rates_series.put(metric, new Series<Number, Number>());
@@ -429,6 +518,7 @@ for (String metric : this.metric_times) {
 }
 @
 
+\subsection{Set default t0, t1}
 <<Set default t0, t1>>=
 if ("".equals(this.tf_t0.getText())) {
   this.tf_t0.setText("0");
@@ -438,6 +528,7 @@ if ("".equals(this.tf_t1.getText())) {
 }
 @
 
+\subsection{Add charts to chart containers}
 <<Add charts to chart containers>>=
 <<Initialize chart settings>>
 <<Initialize chart series>>
@@ -468,6 +559,7 @@ this.container_lc_times.setBottomAnchor(this.lc_times, 0.0);
 this.container_lc_times.getChildren().add(this.lc_times);
 @
 
+\subsection{Enable metrics checkbox containers}
 <<Enable metrics checkbox containers>>=
 this.vbox_metrics_rates.setDisable(false);
 this.vbox_metrics_distances.setDisable(false);
@@ -476,6 +568,7 @@ this.vbox_metrics_counts.setDisable(false);
 this.vbox_metrics_times.setDisable(false);
 @
 
+\subsection{Disable metrics checkbox containers}
 <<Disable metrics checkbox containers>>=
 this.vbox_metrics_rates.setDisable(true);
 this.vbox_metrics_distances.setDisable(true);
@@ -484,6 +577,7 @@ this.vbox_metrics_counts.setDisable(true);
 this.vbox_metrics_times.setDisable(true);
 @
 
+\subsection{Deselect metrics checkboxes}
 <<Deselect metrics checkboxes>>=
 this.chk_serviceRate.setSelected(false);
 this.chk_distanceSavings.setSelected(false);
@@ -511,11 +605,13 @@ this.chk_timeRequestHandling.setSelected(false);
 this.chk_timeServerHandling.setSelected(false);
 @
 
+\subsection{Retrieve serviceRate}
 <<Retrieve serviceRate>>=
 int[] output = this.controller.queryMetricServiceRate();
 val = (output.length > 0 ? (output[0]/100.0) : 0);
 @
 
+\subsection{Retrieve distanceSavings}
 <<Retrieve distanceSavings>>=
 int[] output = this.controller.queryMetricServerDistanceTotal();
 final int val1 = (output.length > 0 ? output[0] : 0);
@@ -526,92 +622,114 @@ final int val3 = (output.length > 0 ? output[0] : 0);
 val = (val3 == 0 ? 0 : (100.0*(1 - ((double) (val1 + val2)/val3))));
 @
 
+\subsection{Retrieve serverTravelDistance}
 <<Retrieve serverTravelDistance>>=
 int[] output = this.controller.queryMetricServerDistanceTotal();
 val = (output.length > 0 ? output[0] : 0);
 @
 
+\subsection{Retrieve serverServiceDistance}
 <<Retrieve serverServiceDistance>>=
 // VERY SLOW AND BAD
 // int[] output = this.controller.queryServerServiceDistanceTotal();
 // val = (output.length > 0 ? output[0] : 0);
 @
 
+\subsection{Retrieve serverCruisingDistance}
 <<Retrieve serverCruisingDistance>>=
 // VERY SLOW AND BAD
 // int[] output = this.controller.queryServerCruisingDistanceTotal();
 // val = (output.length > 0 ? output[0] : 0);
 @
 
+\subsection{Retrieve serverTravelDuration}
 <<Retrieve serverTravelDuration>>=
 int[] output = this.controller.queryMetricServerDurationTravelTotal();
 val = (output.length > 0 ? output[0] : 0);
 @
 
+\subsection{Retrieve serverServiceDuration}
 <<Retrieve serverServiceDuration>>=
 @
 
+\subsection{Retrieve serverCruisingDuration}
 <<Retrieve serverCruisingDuration>>=
 @
 
+\subsection{Retrieve requestDistanceUnassigned}
 <<Retrieve requestDistanceUnassigned>>=
 int[] output = this.controller.queryMetricRequestDistanceBaseUnassignedTotal();
 val = (output.length > 0 ? output[0] : 0);
 @
 
+\subsection{Retrieve requestTransitDistance}
 <<Retrieve requestTransitDistance>>=
 int[] output = this.controller.queryMetricRequestDistanceTransitTotal();
 val = (output.length > 0 ? output[0] : 0);
 @
 
+\subsection{Retrieve requestDetourDistance}
 <<Retrieve requestDetourDistance>>=
 int[] output = this.controller.queryMetricRequestDistanceDetourTotal();
 val = (output.length > 0 ? output[0] : 0);
 @
 
+\subsection{Retrieve requestTransitDuration}
 <<Retrieve requestTransitDuration>>=
 int[] output = this.controller.queryMetricRequestDurationTransitTotal();
 val = (output.length > 0 ? output[0] : 0);
 @
 
+\subsection{Retrieve requestDetourDuration}
 <<Retrieve requestDetourDuration>>=
 @
 
+\subsection{Retrieve requestTravelDuration}
 <<Retrieve requestTravelDuration>>=
 int[] output = this.controller.queryMetricRequestDurationTravelTotal();
 val = (output.length > 0 ? output[0] : 0);
 @
 
+\subsection{Retrieve requestPickupDuration}
 <<Retrieve requestPickupDuration>>=
 int[] output = this.controller.queryMetricRequestDurationPickupTotal();
 val = (output.length > 0 ? output[0] : 0);
 @
 
+\subsection{Retrieve countRequestsQueue}
 <<Retrieve countRequestsQueue>>=
 val = this.controller.retrieveQueueSize();
 @
 
+\subsection{Retrieve countRequestsActive}
 <<Retrieve countRequestsActive>>=
 @
 
+\subsection{Retrieve countRequestsCompleted}
 <<Retrieve countRequestsCompleted>>=
 @
 
+\subsection{Retrieve countRequestsFailed}
 <<Retrieve countRequestsFailed>>=
 @
 
+\subsection{Retrieve countServersActive}
 <<Retrieve countServersActive>>=
 @
 
+\subsection{Retrieve countRequestsViolations}
 <<Retrieve countRequestsViolations>>=
 @
 
+\subsection{Retrieve countServersViolations}
 <<Retrieve countServersViolations>>=
 @
 
+\subsection{Retrieve timeRequestHandling}
 <<Retrieve timeRequestHandling>>=
 @
 
+\subsection{Retrieve timeServerHandling}
 <<Retrieve timeServerHandling>>=
 @
 
@@ -949,6 +1067,7 @@ void actionStartSequential(final ActionEvent e) {
     Constructor<?> tempcstor = tempclass.getDeclaredConstructor();
     this.client = (Client) tempcstor.newInstance();
     this.controller.setRefClient(this.client);
+    this.controller.forwardRefCommunicator(this.controller.getRefCommunicator());
     this.client.forwardRefCacheVertices(this.controller.retrieveRefCacheVertices());
     this.client.forwardRefCacheEdges(this.controller.retrieveRefCacheEdges());
     this.client.forwardRefCacheUsers(this.controller.retrieveRefCacheUsers());
@@ -960,22 +1079,33 @@ void actionStartSequential(final ActionEvent e) {
     }
     this.t0 = Integer.parseInt(this.tf_t0.getText());
     this.t1 = Integer.parseInt(this.tf_t1.getText());
-    this.controller.setClockStart(t0);
-    this.controller.setClockEnd(t1);
-    this.timer.start();
+    this.controller.setClockStart(this.t0);
+    this.controller.setClockEnd(this.t1);
+    <<Initialize server rectangles>>
     <<Add charts to chart containers>>
     <<Enable metrics checkbox containers>>
+    this.timer.start();
     this.circ_status  .setFill(C_SUCCESS);
     this.lbl_status   .setText("Simulation started.");
-    CompletableFuture.runAsync(() -> {
-      this.controller.startSequential((status) -> {
-        Platform.runLater(() -> {
-          this.lbl_status.setText("Simulation "+(status ? "ended." : "failed."));
+    this.muf = new MapUnitsFetcher();
+    this.muf.setUnit(this.unit);
+    this.muf.setLngMin(this.mbr[0]);
+    this.muf.setLatMin(this.mbr[2]);
+    this.exe = Executors.newScheduledThreadPool(2);
+    this.cbSimRunner = this.exe.schedule(() -> {
+      try {
+        this.controller.startSequential((status) -> {
+          Platform.runLater(() -> {
+            this.lbl_status.setText("Simulation "+(status ? "ended." : "failed."));
+          });
         });
-      });
-    });
-    this.exe = Executors.newScheduledThreadPool(1);
-    this.cbMapUpdater = this.exe.scheduleAtFixedRate(new MapUpdater(this.controller, this.lbl_status, this.can_road), 0, 1, TimeUnit.SECONDS);
+      } catch (Exception ee) {
+        System.err.println("Unexepected error in startSequential");
+        ee.printStackTrace();
+        System.exit(1);
+      }
+    }, 0, TimeUnit.SECONDS);
+    this.cbMapUpdater = this.exe.scheduleAtFixedRate(new MapUpdater(this.controller, this.lbl_status, this.can_servers, this.muf), 0, 1, TimeUnit.SECONDS);
   } catch (MalformedURLException
       | ClassNotFoundException
       | NoSuchMethodException
@@ -1002,7 +1132,9 @@ void actionStop(final ActionEvent e) {
     <<Disable metrics checkbox containers>>
     <<Deselect metrics checkboxes>>
     this.timer.stop();
-    this.exe.shutdown();
+    if (this.exe != null) {
+      this.exe.shutdown();
+    }
     this.circ_status.setFill(C_WARN);
     this.lbl_status.setText("Close '"+this.db+"'...");
     CompletableFuture.runAsync(() -> {
@@ -1091,6 +1223,8 @@ void actionRecordMousePress(MouseEvent e) {
 void actionTranslateCanvas(MouseEvent e) {
   this.can_road.setTranslateX(this.can_road.getTranslateX() + e.getX() - this.mouse_x);
   this.can_road.setTranslateY(this.can_road.getTranslateY() + e.getY() - this.mouse_y);
+  this.can_servers.setTranslateX(this.can_servers.getTranslateX() + e.getX() - this.mouse_x);
+  this.can_servers.setTranslateY(this.can_servers.getTranslateY() + e.getY() - this.mouse_y);
   e.consume();
 }
 @ %def actionTranslateCanvas
@@ -1102,10 +1236,11 @@ void drawRoadNetwork() {
     this.edges    = this.controller.queryEdges();
     this.mbr      = this.controller.queryMBR();
 
-    this.can_road = new Canvas(this.window_width, this.window_height);
+    this.can_road    = new Canvas(this.window_width, this.window_height);
+    this.can_servers = new Canvas(this.window_width, this.window_height);
     this.xunit    = this.can_road.getWidth() /(double) (this.mbr[1] - this.mbr[0]);
     this.yunit    = this.can_road.getHeight()/(double) (this.mbr[3] - this.mbr[2]);
-    double unit   = Math.min(xunit, yunit);
+    this.unit     = Math.min(this.xunit, this.yunit);
 
     this.gc = this.can_road.getGraphicsContext2D();
     this.gc.setLineWidth(0.1);
@@ -1114,13 +1249,15 @@ void drawRoadNetwork() {
       if (this.edges[(i + 0)] != 0 && this.edges[(i + 1)] != 0) {
         int[] v1 = this.controller.queryVertex(this.edges[(i + 0)]);
         int[] v2 = this.controller.queryVertex(this.edges[(i + 1)]);
-        this.gc.strokeLine(unit*(v1[0] - this.mbr[0]), unit*(v1[1] - this.mbr[2]),
-                           unit*(v2[0] - this.mbr[0]), unit*(v2[1] - this.mbr[2]));
+        this.gc.strokeLine(this.unit*(v1[0] - this.mbr[0]), this.unit*(v1[1] - this.mbr[2]),
+                           this.unit*(v2[0] - this.mbr[0]), this.unit*(v2[1] - this.mbr[2]));
       }
     }
-    this.container_canvas.setContent(this.can_road);
-    this.can_road.setOnMousePressed((e) -> { actionRecordMousePress(e); });
-    this.can_road.setOnMouseDragged((e) -> { actionTranslateCanvas(e); });
+    this.container_canvas_container = new Pane(this.can_road, this.can_servers);
+    this.container_canvas.setContent(this.container_canvas_container);
+    // Canvas can_servers is on top so it will trap all mouse events
+    this.can_servers.setOnMousePressed((e) -> { actionRecordMousePress(e); });
+    this.can_servers.setOnMouseDragged((e) -> { actionTranslateCanvas(e); });
   } catch (SQLException se) {
     System.err.println("Failed with SQLException");
     Tools.PrintSQLException(se);

@@ -202,6 +202,12 @@ public class Controller {
   private long   statQueryEdgeDurMin   = Integer.MAX_VALUE;
   private long   statQueryEdgeDurMax   = 0;
   private double statQueryEdgeDurAvg   = 0;
+  private int    statQueryServersLocationsActiveCount    = 0;
+  private long   statQueryServersLocationsActiveDurLast  = 0;
+  private long   statQueryServersLocationsActiveDurTotal = 0;
+  private long   statQueryServersLocationsActiveDurMin   = Integer.MAX_VALUE;
+  private long   statQueryServersLocationsActiveDurMax   = 0;
+  private double statQueryServersLocationsActiveDurAvg   = 0;
   private int    statQueryUserCount    = 0;
   private long   statQueryUserDurLast  = 0;
   private long   statQueryUserDurTotal = 0;
@@ -334,6 +340,26 @@ public class Controller {
          }
   public int[] queryServersCount() throws SQLException {
            return storage.DBQueryServersCount();
+         }
+  public int[] queryServersLocationsActive(final int t) throws SQLException {
+           long A0 = System.currentTimeMillis();
+           int[] output = this.storage.DBQueryServersLocationsActive(t);
+               this.statQueryServersLocationsActiveCount++;
+               this.statQueryServersLocationsActiveDurLast = (System.currentTimeMillis() - A0);
+               this.statQueryServersLocationsActiveDurTotal +=
+               this.statQueryServersLocationsActiveDurLast;
+           if (this.statQueryServersLocationsActiveDurLast <
+               this.statQueryServersLocationsActiveDurMin) {
+               this.statQueryServersLocationsActiveDurMin =
+               this.statQueryServersLocationsActiveDurLast;}
+           if (this.statQueryServersLocationsActiveDurLast >
+               this.statQueryServersLocationsActiveDurMax) {
+               this.statQueryServersLocationsActiveDurMax =
+               this.statQueryServersLocationsActiveDurLast;}
+               this.statQueryServersLocationsActiveDurAvg = (double)
+               this.statQueryServersLocationsActiveDurTotal/
+               this.statQueryServersLocationsActiveCount;
+           return output;
          }
   public int[] queryUser(final int rid) throws UserNotFoundException, SQLException {
            long A0 = System.currentTimeMillis();
@@ -560,7 +586,7 @@ public class Controller {
              this.stop(app_cb);
            }, simulation_duration, TimeUnit.SECONDS);
          }
-  public void startSequential(final Consumer<Boolean> app_cb) {
+  public void startSequential(final Consumer<Boolean> app_cb) throws Exception {
            this.storage.setRequestTimeout(REQUEST_TIMEOUT);
            this.statControllerClockNow = CLOCK_START;
            while (!kill && this.statControllerClockNow < CLOCK_END) {
@@ -658,6 +684,24 @@ public class Controller {
          }
   public double getStatQueryEdgeDurAvg() {
            return this.statQueryEdgeDurAvg;
+         }
+  public int    getStatQueryServersLocationsActiveCount() {
+           return this.statQueryServersLocationsActiveCount;
+         }
+  public long   getStatQueryServersLocationsActiveDurLast() {
+           return this.statQueryServersLocationsActiveDurLast;
+         }
+  public long   getStatQueryServersLocationsActiveDurTotal() {
+           return this.statQueryServersLocationsActiveDurTotal;
+         }
+  public long   getStatQueryServersLocationsActiveDurMin() {
+           return this.statQueryServersLocationsActiveDurMin;
+         }
+  public long   getStatQueryServersLocationsActiveDurMax() {
+           return this.statQueryServersLocationsActiveDurMax;
+         }
+  public double getStatQueryServersLocationsActiveDurAvg() {
+           return this.statQueryServersLocationsActiveDurAvg;
          }
   public int    getStatQueryUserCount() {
            return this.statQueryUserCount;

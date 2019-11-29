@@ -6,7 +6,6 @@ public class ControllerMonitor implements ControllerMonitorMBean {
   public ControllerMonitor(final Controller controller) {
     this.controller = controller;
   }
-
   public int    getControllerClockNow() {
     return this.controller.getControllerClockNow();
   }
@@ -63,6 +62,24 @@ public class ControllerMonitor implements ControllerMonitorMBean {
   }
   public double getStatQueryEdgeDurAvg() {
     return this.controller.getStatQueryEdgeDurAvg();
+  }
+  public int    getStatQueryServersLocationsActiveCount() {
+    return this.controller.getStatQueryServersLocationsActiveCount();
+  }
+  public long   getStatQueryServersLocationsActiveDurLast() {
+    return this.controller.getStatQueryServersLocationsActiveDurLast();
+  }
+  public long   getStatQueryServersLocationsActiveDurTotal() {
+    return this.controller.getStatQueryServersLocationsActiveDurTotal();
+  }
+  public long   getStatQueryServersLocationsActiveDurMin() {
+    return this.controller.getStatQueryServersLocationsActiveDurMin();
+  }
+  public long   getStatQueryServersLocationsActiveDurMax() {
+    return this.controller.getStatQueryServersLocationsActiveDurMax();
+  }
+  public double getStatQueryServersLocationsActiveDurAvg() {
+    return this.controller.getStatQueryServersLocationsActiveDurAvg();
   }
   public int    getStatQueryUserCount() {
     return this.controller.getStatQueryUserCount();

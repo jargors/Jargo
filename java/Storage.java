@@ -494,13 +494,25 @@ public class Storage {
                  ? this.PSQuery(conn, "S135", 2, sid, sid, lvt, t, t)
                  : this.PSQuery(conn, "S147", 2, sid, sid));
                output[(j + 0)] = sid;
-               output[(j + 1)] = temp2[0];
-               output[(j + 2)] = temp2[1];
-               this.lu_lvt.put(sid, temp2[0]);
+               if (temp2.length == 0) {
+                 // Means server hasn't left origin yet, we just get se, so
+                 int[] temp3 = DBQueryUser(sid);
+                 output[(j + 1)] = temp3[2];
+                 output[(j + 2)] = temp3[4];
+                 this.lu_lvt.put(sid, t);
+               } else {
+                 output[(j + 1)] = temp2[0];
+                 output[(j + 2)] = temp2[1];
+                 this.lu_lvt.put(sid, temp2[0]);
+               }
                j += 3;
              }
            } catch (SQLException e) {
              throw e;
+           } catch (UserNotFoundException e) {
+             // Should never happen
+             System.err.println("Fatal error: "+e.toString());
+             System.exit(1);
            }
            return output;
          }
@@ -1483,7 +1495,7 @@ public class Storage {
            } catch (SQLException e) {
              throw e;
            } catch (ClassNotFoundException e) {
-             System.err.println("Fatail exception");
+             System.err.println("Fatal exception");
              e.printStackTrace();
              System.exit(1);
            }

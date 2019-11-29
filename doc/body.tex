@@ -168,6 +168,7 @@ public \LA{}Read: queryServerRoute(1)~{\nwtagstyle{}\subpageref{NW18ZcDF-3INKD2-
 public \LA{}Read: queryServerSchedule(1)~{\nwtagstyle{}\subpageref{NW18ZcDF-2vGK9z-1}}\RA{}
 public \LA{}Read: queryServerTimeOfDeparture(1)~{\nwtagstyle{}\subpageref{NW18ZcDF-3fOzh2-1}}\RA{}
 public \LA{}Read: queryServersCount(0)~{\nwtagstyle{}\subpageref{NW18ZcDF-3YlcHc-1}}\RA{}
+public \LA{}Read: queryServersLocationsActive(1)~{\nwtagstyle{}\subpageref{NW18ZcDF-t5O2a-1}}\RA{}
 public \LA{}Read: queryUser(1)~{\nwtagstyle{}\subpageref{NW18ZcDF-SBVOE-1}}\RA{}
 public \LA{}Read: queryVertex(1)~{\nwtagstyle{}\subpageref{NW18ZcDF-oIN5n-1}}\RA{}
 public \LA{}Read: queryVertices(0)~{\nwtagstyle{}\subpageref{NW18ZcDF-435mrM-1}}\RA{}
@@ -3799,7 +3800,94 @@ int[] DBQueryServersActive(final int t) throws SQLException \{
   \}
 \}
 \nwindexdefn{DBQueryServersActive}{DBQueryServersActive}{NW18ZcDF-3NWzRo-1}\eatline
-\nwidentdefs{\\{{DBQueryServersActive}{DBQueryServersActive}}}\nwidentuses{\\{{PSQuery}{PSQuery}}\\{{S134}{S134}}}\nwindexuse{PSQuery}{PSQuery}{NW18ZcDF-3NWzRo-1}\nwindexuse{S134}{S134}{NW18ZcDF-3NWzRo-1}\nwendcode{}
+\nwidentdefs{\\{{DBQueryServersActive}{DBQueryServersActive}}}\nwidentuses{\\{{PSQuery}{PSQuery}}\\{{S134}{S134}}}\nwindexuse{PSQuery}{PSQuery}{NW18ZcDF-3NWzRo-1}\nwindexuse{S134}{S134}{NW18ZcDF-3NWzRo-1}\nwendcode{}\nwbegindocs{132}\nwdocspar
+\subsection{\texttt{DBQueryServersLocations}(1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{{\tt{}\protect\nwindexuse{DBQueryServersLocations}{DBQueryServersLocations}{NW18ZcDF-1zUdrf-1}DBQueryServersLocations}}(1) returns the
+last-known locations of all servers (including inactive servers) at the given
+time. The ``last-known location'' is the waypoint in the server's route $w$
+with a time component closest to but not exceeding the given time, in other
+words ${w_{\leq t}}_{|w_{\leq t}|}$.
+A {\tt{}SQLException} is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer {\tt{}t} (param. 1):&a time
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+{\tt{}null} if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{a server identifier}$};
+ &\node {$1:\textrm{time of last-known location}$};
+ &\node {$2:\textrm{vertex of last-known location}$};
+ &\node {...};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} {\tt{}SQLException} if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+\nwenddocs{}\nwbegincode{133}\sublabel{NW18ZcDF-1zUdrf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW18ZcDF-1zUdrf-1}}}\moddef{Read: DBQueryServersLocations(1)~{\nwtagstyle{}\subpageref{NW18ZcDF-1zUdrf-1}}}\endmoddef\nwused{\\{NW3x1zuR-Oyob-1}}
+int[] DBQueryServersLocations(final int t) throws SQLException \{
+  try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NWgUSr6-JT1v9-1}}\RA{}) \{
+    return this.PSQuery(conn, "S59", 3, t, t, t, t);
+  \} catch (SQLException e) \{
+    throw e;
+  \}
+\}
+\nwindexdefn{DBQueryServersLocations}{DBQueryServersLocations}{NW18ZcDF-1zUdrf-1}\eatline
+\nwidentdefs{\\{{DBQueryServersLocations}{DBQueryServersLocations}}}\nwidentuses{\\{{PSQuery}{PSQuery}}\\{{S59}{S59}}}\nwindexuse{PSQuery}{PSQuery}{NW18ZcDF-1zUdrf-1}\nwindexuse{S59}{S59}{NW18ZcDF-1zUdrf-1}\nwendcode{}\nwbegindocs{134}\nwdocspar
+\subsection{\texttt{DBQueryServersLocationsActive}(1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+SINGLE-THREAD ONLY. Method \textcolor{blue}{{\tt{}\protect\nwindexuse{DBQueryServersLocationsActive}{DBQueryServersLocationsActive}{NW18ZcDF-2tWQc-1}DBQueryServersLocationsActive}}(1) returns the
+last-known locations of all active servers at the given time. A server is
+``active'' if its service has not ended, in other words it has not arrived
+at its own destination.
+The ``last-known location'' is the waypoint in the server's route $w$
+with a time component closest to but not exceeding the given time, in other
+words ${w_{\leq t}}_{|w_{\leq t}|}$.
+A {\tt{}SQLException} is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer {\tt{}t} (param. 1):&a time
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+{\tt{}null} if no results.
+
+\begin{tikzpicture}
+\scriptsize
+\matrix[nodes={minimum size=6mm}] {
+  \node {...};
+ &\node[draw] {$3(i-1):\textrm{identifier for server $s_i$}$};
+ &\node[draw] {$3(i-1)+1:\pi_\texttt{t}\textrm{ of last-known location of $s_i$}$};
+ &\node[draw] {$3(i-1)+2:\pi_\texttt{v}\textrm{ of last-known location of $s_i$}$};
+ &\node {...};\\
+};
+\end{tikzpicture}\\
+
+where $1\leq i\leq |\mathcal{S}^\textrm{active}|$,
+$s_i\in \mathcal{S}^\textrm{active}$, and
+$\mathcal{S}^\textrm{active}= \{s\in\mathcal{S}\mid t^\textrm{arrive}(\mathcal{X},s)>t\}|$
+for $t$ given by param. 1.\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} {\tt{}SQLException} if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+\nwenddocs{}\nwbegincode{135}\sublabel{NW18ZcDF-2tWQc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW18ZcDF-2tWQc-1}}}\moddef{Read: DBQueryServersLocationsActive(1)~{\nwtagstyle{}\subpageref{NW18ZcDF-2tWQc-1}}}\endmoddef\nwalsodefined{\\{NW18ZcDF-2tWQc-2}}\nwused{\\{NW3x1zuR-Oyob-1}}
+int[] DBQueryServersLocationsActive(final int t) throws SQLException \{
+  int[] output = new int[] \{ \};
+  try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NWgUSr6-JT1v9-1}}\RA{}) \{
+    int j = 0;
+\nosublabel{NW18ZcDF-2tWQc-1-u1}\nwindexdefn{DBQueryServersLocationsActive}{DBQueryServersLocationsActive}{NW18ZcDF-2tWQc-1}\eatline
+\nwidentdefs{\\{{DBQueryServersLocationsActive}{DBQueryServersLocationsActive}}}\nwendcode{}
 
 \nwixlogsorted{c}{{..round to nearest meter}{NW3zOIuJ-1p0YRJ-1}{\nwixu{NW3zOIuJ-4DIogh-1}\nwixd{NW3zOIuJ-1p0YRJ-1}}}%
 \nwixlogsorted{c}{{..skip header rows}{NW2ZDXo8-4FZ4vu-1}{\nwixu{NW2ZDXo8-1LrOKh-1}\nwixd{NW2ZDXo8-4FZ4vu-1}}}%
@@ -3815,7 +3903,7 @@ int[] DBQueryServersActive(final int t) throws SQLException \{
 \nwixlogsorted{c}{{\code{}Controller\edoc{} member variables}{NW1n2CZQ-3yXfwG-1}{\nwixd{NW1n2CZQ-3yXfwG-1}\nwixu{NW2ZDXo8-34QoYM-1}\nwixd{NW2ZDXo8-3yXfwG-2}}}%
 \nwixlogsorted{c}{{\code{}Controller\edoc{} methods}{NW3x1zuR-2u8vSA-1}{\nwixd{NW3x1zuR-2u8vSA-1}\nwixd{NW3x1zuR-2u8vSA-2}\nwixd{NW3x1zuR-2u8vSA-3}\nwixd{NW1n2CZQ-2u8vSA-4}\nwixu{NW2ZDXo8-34QoYM-1}}}%
 \nwixlogsorted{c}{{\code{}Controller\edoc{} register JMX monitor}{NW1n2CZQ-3vTTnp-1}{\nwixd{NW1n2CZQ-3vTTnp-1}\nwixu{NW2ZDXo8-3AyyZG-1}}}%
-\nwixlogsorted{c}{{\code{}DesktopController\edoc{} member variables}{NWn0bN8-2iHsHO-1}{\nwixu{NWn0bN8-4ScqTl-1}\nwixd{NWn0bN8-2iHsHO-1}\nwixd{NWn0bN8-2iHsHO-2}\nwixd{NWn0bN8-2iHsHO-3}\nwixd{NWn0bN8-2iHsHO-4}\nwixd{NWn0bN8-2iHsHO-5}\nwixd{NWn0bN8-2iHsHO-6}\nwixd{NWn0bN8-2iHsHO-7}\nwixd{NWn0bN8-2iHsHO-8}\nwixd{NWn0bN8-2iHsHO-9}\nwixd{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-2iHsHO-B}}}%
+\nwixlogsorted{c}{{\code{}DesktopController\edoc{} member variables}{NWn0bN8-2iHsHO-1}{\nwixu{NWn0bN8-4ScqTl-1}\nwixd{NWn0bN8-2iHsHO-1}\nwixd{NWn0bN8-2iHsHO-2}\nwixd{NWn0bN8-2iHsHO-3}\nwixd{NWn0bN8-2iHsHO-4}\nwixd{NWn0bN8-2iHsHO-5}\nwixd{NWn0bN8-2iHsHO-6}\nwixd{NWn0bN8-2iHsHO-7}\nwixd{NWn0bN8-2iHsHO-8}\nwixd{NWn0bN8-2iHsHO-9}\nwixd{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-2iHsHO-B}\nwixd{NWn0bN8-2iHsHO-C}}}%
 \nwixlogsorted{c}{{\code{}DesktopController\edoc{} methods}{NW3x1zuR-14uWYi-1}{\nwixd{NW3x1zuR-14uWYi-1}\nwixd{NW3x1zuR-14uWYi-2}\nwixd{NW3x1zuR-14uWYi-3}\nwixu{NWn0bN8-4ScqTl-1}}}%
 \nwixlogsorted{c}{{\code{}Storage\edoc{} constructor}{NW27XAxz-36NvOs-1}{\nwixu{NW27XAxz-203Bbj-1}\nwixd{NW27XAxz-36NvOs-1}}}%
 \nwixlogsorted{c}{{\code{}Storage\edoc{} member variables}{NW27XAxz-17yXws-1}{\nwixu{NW27XAxz-203Bbj-1}\nwixd{NW27XAxz-17yXws-1}\nwixd{NW27XAxz-17yXws-2}\nwixd{NW27XAxz-17yXws-3}\nwixd{NW27XAxz-17yXws-4}}}%
@@ -4000,12 +4088,12 @@ int[] DBQueryServersActive(final int t) throws SQLException \{
 \nwixlogsorted{c}{{Get: getStatQueryServerScheduleRemainingDurMax(0)}{NW1n2CZQ-2tKFey-1}{\nwixu{NW1n2CZQ-2Rlctf-4}\nwixd{NW1n2CZQ-2tKFey-1}}}%
 \nwixlogsorted{c}{{Get: getStatQueryServerScheduleRemainingDurMin(0)}{NW1n2CZQ-3cEFCy-1}{\nwixu{NW1n2CZQ-2Rlctf-4}\nwixd{NW1n2CZQ-3cEFCy-1}}}%
 \nwixlogsorted{c}{{Get: getStatQueryServerScheduleRemainingDurTotal(0)}{NW1n2CZQ-pwAqn-1}{\nwixu{NW1n2CZQ-2Rlctf-4}\nwixd{NW1n2CZQ-pwAqn-1}}}%
-\nwixlogsorted{c}{{Get: getStatQueryServersLocationsActiveCount(0)}{NW1n2CZQ-a9Te8-1}{\nwixu{NW1n2CZQ-2Rlctf-4}\nwixd{NW1n2CZQ-a9Te8-1}}}%
-\nwixlogsorted{c}{{Get: getStatQueryServersLocationsActiveDurAvg(0)}{NW1n2CZQ-4Dkkxa-1}{\nwixu{NW1n2CZQ-2Rlctf-4}\nwixd{NW1n2CZQ-4Dkkxa-1}}}%
-\nwixlogsorted{c}{{Get: getStatQueryServersLocationsActiveDurLast(0)}{NW1n2CZQ-362tC8-1}{\nwixu{NW1n2CZQ-2Rlctf-4}\nwixd{NW1n2CZQ-362tC8-1}}}%
-\nwixlogsorted{c}{{Get: getStatQueryServersLocationsActiveDurMax(0)}{NW1n2CZQ-tf00B-1}{\nwixu{NW1n2CZQ-2Rlctf-4}\nwixd{NW1n2CZQ-tf00B-1}}}%
-\nwixlogsorted{c}{{Get: getStatQueryServersLocationsActiveDurMin(0)}{NW1n2CZQ-1vpNU3-1}{\nwixu{NW1n2CZQ-2Rlctf-4}\nwixd{NW1n2CZQ-1vpNU3-1}}}%
-\nwixlogsorted{c}{{Get: getStatQueryServersLocationsActiveDurTotal(0)}{NW1n2CZQ-6g9Yq-1}{\nwixu{NW1n2CZQ-2Rlctf-4}\nwixd{NW1n2CZQ-6g9Yq-1}}}%
+\nwixlogsorted{c}{{Get: getStatQueryServersLocationsActiveCount(0)}{NW1n2CZQ-a9Te8-1}{\nwixu{NW1n2CZQ-2u8vSA-4}\nwixu{NW1n2CZQ-2Rlctf-4}\nwixd{NW1n2CZQ-a9Te8-1}}}%
+\nwixlogsorted{c}{{Get: getStatQueryServersLocationsActiveDurAvg(0)}{NW1n2CZQ-4Dkkxa-1}{\nwixu{NW1n2CZQ-2u8vSA-4}\nwixu{NW1n2CZQ-2Rlctf-4}\nwixd{NW1n2CZQ-4Dkkxa-1}}}%
+\nwixlogsorted{c}{{Get: getStatQueryServersLocationsActiveDurLast(0)}{NW1n2CZQ-362tC8-1}{\nwixu{NW1n2CZQ-2u8vSA-4}\nwixu{NW1n2CZQ-2Rlctf-4}\nwixd{NW1n2CZQ-362tC8-1}}}%
+\nwixlogsorted{c}{{Get: getStatQueryServersLocationsActiveDurMax(0)}{NW1n2CZQ-tf00B-1}{\nwixu{NW1n2CZQ-2u8vSA-4}\nwixu{NW1n2CZQ-2Rlctf-4}\nwixd{NW1n2CZQ-tf00B-1}}}%
+\nwixlogsorted{c}{{Get: getStatQueryServersLocationsActiveDurMin(0)}{NW1n2CZQ-1vpNU3-1}{\nwixu{NW1n2CZQ-2u8vSA-4}\nwixu{NW1n2CZQ-2Rlctf-4}\nwixd{NW1n2CZQ-1vpNU3-1}}}%
+\nwixlogsorted{c}{{Get: getStatQueryServersLocationsActiveDurTotal(0)}{NW1n2CZQ-6g9Yq-1}{\nwixu{NW1n2CZQ-2u8vSA-4}\nwixu{NW1n2CZQ-2Rlctf-4}\nwixd{NW1n2CZQ-6g9Yq-1}}}%
 \nwixlogsorted{c}{{Get: getStatQueryUserCount(0)}{NW1n2CZQ-2G4I8r-1}{\nwixu{NW1n2CZQ-2u8vSA-4}\nwixu{NW1n2CZQ-2Rlctf-4}\nwixd{NW1n2CZQ-2G4I8r-1}}}%
 \nwixlogsorted{c}{{Get: getStatQueryUserDurAvg(0)}{NW1n2CZQ-CNBvN-1}{\nwixu{NW1n2CZQ-2u8vSA-4}\nwixu{NW1n2CZQ-2Rlctf-4}\nwixd{NW1n2CZQ-CNBvN-1}}}%
 \nwixlogsorted{c}{{Get: getStatQueryUserDurLast(0)}{NW1n2CZQ-CSOOc-1}{\nwixu{NW1n2CZQ-2u8vSA-4}\nwixu{NW1n2CZQ-2Rlctf-4}\nwixd{NW1n2CZQ-CSOOc-1}}}%
@@ -4032,6 +4120,7 @@ int[] DBQueryServersActive(final int t) throws SQLException \{
 \nwixlogsorted{c}{{Import JMX dependences}{NW1n2CZQ-16TjcT-1}{\nwixd{NW1n2CZQ-16TjcT-1}\nwixu{NW2ZDXo8-m6OHq-2}\nwixu{NWvbkzY-3IAuyF-2}}}%
 \nwixlogsorted{c}{{Initialize chart series}{NWn0bN8-2jgBHG-1}{\nwixd{NWn0bN8-2jgBHG-1}\nwixu{NWn0bN8-35Xz53-1}}}%
 \nwixlogsorted{c}{{Initialize chart settings}{NWn0bN8-2Khh2C-1}{\nwixd{NWn0bN8-2Khh2C-1}\nwixu{NWn0bN8-35Xz53-1}}}%
+\nwixlogsorted{c}{{Initialize server rectangles}{NWn0bN8-2qVBpg-1}{\nwixd{NWn0bN8-2qVBpg-1}\nwixu{NWn0bN8-2DyoOl-1}}}%
 \nwixlogsorted{c}{{Insert into CQ new remaining schedule}{NW32V2DP-4P25Zx-1}{\nwixd{NW32V2DP-4P25Zx-1}\nwixu{NW32V2DP-2g0LzJ-1}\nwixu{NW32V2DP-4JHoKM-1}}}%
 \nwixlogsorted{c}{{Insert into CQ new server}{NW32V2DP-2lqIec-1}{\nwixd{NW32V2DP-2lqIec-1}\nwixu{NW32V2DP-4Dmn3V-1}}}%
 \nwixlogsorted{c}{{Insert into CW new server route}{NW32V2DP-20MWZq-1}{\nwixd{NW32V2DP-20MWZq-1}\nwixu{NW32V2DP-4Dmn3V-1}}}%
@@ -4151,37 +4240,37 @@ int[] DBQueryServersActive(final int t) throws SQLException \{
 \nwixlogsorted{c}{{Read: queryServerSchedule(1)}{NW18ZcDF-2vGK9z-1}{\nwixu{NW3x1zuR-2u8vSA-1}\nwixd{NW18ZcDF-2vGK9z-1}}}%
 \nwixlogsorted{c}{{Read: queryServerScheduleRemaining(2)}{NW18ZcDF-2iMTVQ-1}{\nwixu{NW3x1zuR-2Rlctf-1}\nwixd{NW18ZcDF-2iMTVQ-1}}}%
 \nwixlogsorted{c}{{Read: queryServersCount(0)}{NW18ZcDF-3YlcHc-1}{\nwixu{NW3x1zuR-2u8vSA-1}\nwixd{NW18ZcDF-3YlcHc-1}}}%
-\nwixlogsorted{c}{{Read: queryServersLocationsActive(1)}{NW18ZcDF-t5O2a-1}{\nwixu{NW3x1zuR-2Rlctf-1}\nwixd{NW18ZcDF-t5O2a-1}}}%
+\nwixlogsorted{c}{{Read: queryServersLocationsActive(1)}{NW18ZcDF-t5O2a-1}{\nwixu{NW3x1zuR-2u8vSA-1}\nwixu{NW3x1zuR-2Rlctf-1}\nwixd{NW18ZcDF-t5O2a-1}}}%
 \nwixlogsorted{c}{{Read: queryServerTimeOfArrival(1)}{NW18ZcDF-3Rabqu-1}{\nwixd{NW18ZcDF-3Rabqu-1}}}%
 \nwixlogsorted{c}{{Read: queryServerTimeOfDeparture(1)}{NW18ZcDF-3fOzh2-1}{\nwixu{NW3x1zuR-2u8vSA-1}\nwixd{NW18ZcDF-3fOzh2-1}}}%
 \nwixlogsorted{c}{{Read: queryUser(1)}{NW18ZcDF-SBVOE-1}{\nwixu{NW3x1zuR-2u8vSA-1}\nwixu{NW3x1zuR-2Rlctf-1}\nwixd{NW18ZcDF-SBVOE-1}}}%
 \nwixlogsorted{c}{{Read: queryVertex(1)}{NW18ZcDF-oIN5n-1}{\nwixu{NW3x1zuR-2u8vSA-1}\nwixu{NW3x1zuR-2Rlctf-1}\nwixd{NW18ZcDF-oIN5n-1}}}%
 \nwixlogsorted{c}{{Read: queryVertices(0)}{NW18ZcDF-435mrM-1}{\nwixu{NW3x1zuR-2u8vSA-1}\nwixd{NW18ZcDF-435mrM-1}}}%
 \nwixlogsorted{c}{{Read: queryVerticesCount(0)}{NW18ZcDF-EkhgX-1}{\nwixu{NW3x1zuR-2u8vSA-1}\nwixd{NW18ZcDF-EkhgX-1}}}%
-\nwixlogsorted{c}{{Retrieve countRequestsActive}{NWn0bN8-3cIbwq-1}{\nwixu{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-3cIbwq-1}}}%
-\nwixlogsorted{c}{{Retrieve countRequestsCompleted}{NWn0bN8-3Gfa93-1}{\nwixu{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-3Gfa93-1}}}%
-\nwixlogsorted{c}{{Retrieve countRequestsFailed}{NWn0bN8-1a4eLj-1}{\nwixu{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-1a4eLj-1}}}%
-\nwixlogsorted{c}{{Retrieve countRequestsQueue}{NWn0bN8-2M0IDQ-1}{\nwixu{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-2M0IDQ-1}}}%
-\nwixlogsorted{c}{{Retrieve countRequestsViolations}{NWn0bN8-1qBKS6-1}{\nwixu{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-1qBKS6-1}}}%
-\nwixlogsorted{c}{{Retrieve countServersActive}{NWn0bN8-md0F8-1}{\nwixu{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-md0F8-1}}}%
-\nwixlogsorted{c}{{Retrieve countServersViolations}{NWn0bN8-40qlxP-1}{\nwixu{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-40qlxP-1}}}%
-\nwixlogsorted{c}{{Retrieve distanceSavings}{NWn0bN8-291XnK-1}{\nwixu{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-291XnK-1}}}%
-\nwixlogsorted{c}{{Retrieve requestDetourDistance}{NWn0bN8-1gub9i-1}{\nwixu{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-1gub9i-1}}}%
-\nwixlogsorted{c}{{Retrieve requestDetourDuration}{NWn0bN8-8tg1w-1}{\nwixu{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-8tg1w-1}}}%
-\nwixlogsorted{c}{{Retrieve requestDistanceUnassigned}{NWn0bN8-330MzF-1}{\nwixu{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-330MzF-1}}}%
-\nwixlogsorted{c}{{Retrieve requestPickupDuration}{NWn0bN8-4by79p-1}{\nwixu{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-4by79p-1}}}%
-\nwixlogsorted{c}{{Retrieve requestTransitDistance}{NWn0bN8-3cTfr4-1}{\nwixu{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-3cTfr4-1}}}%
-\nwixlogsorted{c}{{Retrieve requestTransitDuration}{NWn0bN8-2tPgJc-1}{\nwixu{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-2tPgJc-1}}}%
-\nwixlogsorted{c}{{Retrieve requestTravelDuration}{NWn0bN8-1aBbYv-1}{\nwixu{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-1aBbYv-1}}}%
-\nwixlogsorted{c}{{Retrieve serverCruisingDistance}{NWn0bN8-4HFFxW-1}{\nwixu{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-4HFFxW-1}}}%
-\nwixlogsorted{c}{{Retrieve serverCruisingDuration}{NWn0bN8-3GIbUG-1}{\nwixu{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-3GIbUG-1}}}%
-\nwixlogsorted{c}{{Retrieve serverServiceDistance}{NWn0bN8-2HdZms-1}{\nwixu{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-2HdZms-1}}}%
-\nwixlogsorted{c}{{Retrieve serverServiceDuration}{NWn0bN8-iLjau-1}{\nwixu{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-iLjau-1}}}%
-\nwixlogsorted{c}{{Retrieve serverTravelDistance}{NWn0bN8-2om2Zr-1}{\nwixu{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-2om2Zr-1}}}%
-\nwixlogsorted{c}{{Retrieve serverTravelDuration}{NWn0bN8-3YgpXN-1}{\nwixu{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-3YgpXN-1}}}%
-\nwixlogsorted{c}{{Retrieve serviceRate}{NWn0bN8-1Zm9TM-1}{\nwixu{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-1Zm9TM-1}}}%
-\nwixlogsorted{c}{{Retrieve timeRequestHandling}{NWn0bN8-2L8WYA-1}{\nwixu{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-2L8WYA-1}}}%
-\nwixlogsorted{c}{{Retrieve timeServerHandling}{NWn0bN8-2BeaZo-1}{\nwixu{NWn0bN8-2iHsHO-A}\nwixd{NWn0bN8-2BeaZo-1}}}%
+\nwixlogsorted{c}{{Retrieve countRequestsActive}{NWn0bN8-3cIbwq-1}{\nwixu{NWn0bN8-2iHsHO-B}\nwixd{NWn0bN8-3cIbwq-1}}}%
+\nwixlogsorted{c}{{Retrieve countRequestsCompleted}{NWn0bN8-3Gfa93-1}{\nwixu{NWn0bN8-2iHsHO-B}\nwixd{NWn0bN8-3Gfa93-1}}}%
+\nwixlogsorted{c}{{Retrieve countRequestsFailed}{NWn0bN8-1a4eLj-1}{\nwixu{NWn0bN8-2iHsHO-B}\nwixd{NWn0bN8-1a4eLj-1}}}%
+\nwixlogsorted{c}{{Retrieve countRequestsQueue}{NWn0bN8-2M0IDQ-1}{\nwixu{NWn0bN8-2iHsHO-B}\nwixd{NWn0bN8-2M0IDQ-1}}}%
+\nwixlogsorted{c}{{Retrieve countRequestsViolations}{NWn0bN8-1qBKS6-1}{\nwixu{NWn0bN8-2iHsHO-B}\nwixd{NWn0bN8-1qBKS6-1}}}%
+\nwixlogsorted{c}{{Retrieve countServersActive}{NWn0bN8-md0F8-1}{\nwixu{NWn0bN8-2iHsHO-B}\nwixd{NWn0bN8-md0F8-1}}}%
+\nwixlogsorted{c}{{Retrieve countServersViolations}{NWn0bN8-40qlxP-1}{\nwixu{NWn0bN8-2iHsHO-B}\nwixd{NWn0bN8-40qlxP-1}}}%
+\nwixlogsorted{c}{{Retrieve distanceSavings}{NWn0bN8-291XnK-1}{\nwixu{NWn0bN8-2iHsHO-B}\nwixd{NWn0bN8-291XnK-1}}}%
+\nwixlogsorted{c}{{Retrieve requestDetourDistance}{NWn0bN8-1gub9i-1}{\nwixu{NWn0bN8-2iHsHO-B}\nwixd{NWn0bN8-1gub9i-1}}}%
+\nwixlogsorted{c}{{Retrieve requestDetourDuration}{NWn0bN8-8tg1w-1}{\nwixu{NWn0bN8-2iHsHO-B}\nwixd{NWn0bN8-8tg1w-1}}}%
+\nwixlogsorted{c}{{Retrieve requestDistanceUnassigned}{NWn0bN8-330MzF-1}{\nwixu{NWn0bN8-2iHsHO-B}\nwixd{NWn0bN8-330MzF-1}}}%
+\nwixlogsorted{c}{{Retrieve requestPickupDuration}{NWn0bN8-4by79p-1}{\nwixu{NWn0bN8-2iHsHO-B}\nwixd{NWn0bN8-4by79p-1}}}%
+\nwixlogsorted{c}{{Retrieve requestTransitDistance}{NWn0bN8-3cTfr4-1}{\nwixu{NWn0bN8-2iHsHO-B}\nwixd{NWn0bN8-3cTfr4-1}}}%
+\nwixlogsorted{c}{{Retrieve requestTransitDuration}{NWn0bN8-2tPgJc-1}{\nwixu{NWn0bN8-2iHsHO-B}\nwixd{NWn0bN8-2tPgJc-1}}}%
+\nwixlogsorted{c}{{Retrieve requestTravelDuration}{NWn0bN8-1aBbYv-1}{\nwixu{NWn0bN8-2iHsHO-B}\nwixd{NWn0bN8-1aBbYv-1}}}%
+\nwixlogsorted{c}{{Retrieve serverCruisingDistance}{NWn0bN8-4HFFxW-1}{\nwixu{NWn0bN8-2iHsHO-B}\nwixd{NWn0bN8-4HFFxW-1}}}%
+\nwixlogsorted{c}{{Retrieve serverCruisingDuration}{NWn0bN8-3GIbUG-1}{\nwixu{NWn0bN8-2iHsHO-B}\nwixd{NWn0bN8-3GIbUG-1}}}%
+\nwixlogsorted{c}{{Retrieve serverServiceDistance}{NWn0bN8-2HdZms-1}{\nwixu{NWn0bN8-2iHsHO-B}\nwixd{NWn0bN8-2HdZms-1}}}%
+\nwixlogsorted{c}{{Retrieve serverServiceDuration}{NWn0bN8-iLjau-1}{\nwixu{NWn0bN8-2iHsHO-B}\nwixd{NWn0bN8-iLjau-1}}}%
+\nwixlogsorted{c}{{Retrieve serverTravelDistance}{NWn0bN8-2om2Zr-1}{\nwixu{NWn0bN8-2iHsHO-B}\nwixd{NWn0bN8-2om2Zr-1}}}%
+\nwixlogsorted{c}{{Retrieve serverTravelDuration}{NWn0bN8-3YgpXN-1}{\nwixu{NWn0bN8-2iHsHO-B}\nwixd{NWn0bN8-3YgpXN-1}}}%
+\nwixlogsorted{c}{{Retrieve serviceRate}{NWn0bN8-1Zm9TM-1}{\nwixu{NWn0bN8-2iHsHO-B}\nwixd{NWn0bN8-1Zm9TM-1}}}%
+\nwixlogsorted{c}{{Retrieve timeRequestHandling}{NWn0bN8-2L8WYA-1}{\nwixu{NWn0bN8-2iHsHO-B}\nwixd{NWn0bN8-2L8WYA-1}}}%
+\nwixlogsorted{c}{{Retrieve timeServerHandling}{NWn0bN8-2BeaZo-1}{\nwixu{NWn0bN8-2iHsHO-B}\nwixd{NWn0bN8-2BeaZo-1}}}%
 \nwixlogsorted{c}{{returnRequest(1)}{NW2ZDXo8-23SuC3-1}{\nwixu{NW3x1zuR-2u8vSA-3}\nwixd{NW2ZDXo8-23SuC3-1}}}%
 \nwixlogsorted{c}{{S0}{NWgUSr6-9czRY-1}{\nwixu{NWgUSr6-1dEGs4-1}\nwixd{NWgUSr6-9czRY-1}}}%
 \nwixlogsorted{c}{{S1}{NWgUSr6-4dnsum-1}{\nwixu{NWgUSr6-1dEGs4-1}\nwixd{NWgUSr6-4dnsum-1}}}%
@@ -4314,7 +4403,7 @@ int[] DBQueryServersActive(final int t) throws SQLException \{
 \nwixlogsorted{c}{{Stats members: queryServerLoadMax}{NW1n2CZQ-4cpLxP-1}{\nwixu{NW1n2CZQ-18oERh-1}\nwixd{NW1n2CZQ-4cpLxP-1}}}%
 \nwixlogsorted{c}{{Stats members: queryServerRouteRemaining}{NW1n2CZQ-3avBxH-1}{\nwixu{NW1n2CZQ-18oERh-1}\nwixd{NW1n2CZQ-3avBxH-1}}}%
 \nwixlogsorted{c}{{Stats members: queryServerScheduleRemaining}{NW1n2CZQ-3tv6vN-1}{\nwixu{NW1n2CZQ-18oERh-1}\nwixd{NW1n2CZQ-3tv6vN-1}}}%
-\nwixlogsorted{c}{{Stats members: queryServersLocationsActive}{NW1n2CZQ-38BNP4-1}{\nwixu{NW1n2CZQ-18oERh-1}\nwixd{NW1n2CZQ-38BNP4-1}}}%
+\nwixlogsorted{c}{{Stats members: queryServersLocationsActive}{NW1n2CZQ-38BNP4-1}{\nwixu{NW1n2CZQ-3yXfwG-1}\nwixu{NW1n2CZQ-18oERh-1}\nwixd{NW1n2CZQ-38BNP4-1}}}%
 \nwixlogsorted{c}{{Stats members: queryUser}{NW1n2CZQ-V47Hc-1}{\nwixu{NW1n2CZQ-3yXfwG-1}\nwixu{NW1n2CZQ-18oERh-1}\nwixd{NW1n2CZQ-V47Hc-1}}}%
 \nwixlogsorted{c}{{Stats members: queryVertex}{NW1n2CZQ-2Ulgvj-1}{\nwixu{NW1n2CZQ-3yXfwG-1}\nwixu{NW1n2CZQ-18oERh-1}\nwixd{NW1n2CZQ-2Ulgvj-1}}}%
 \nwixlogsorted{c}{{Stats: clientHandleRequest}{NW1n2CZQ-30b7Xg-1}{\nwixd{NW1n2CZQ-30b7Xg-1}\nwixu{NW2q3QGT-1rh8pC-1}}}%
@@ -4722,94 +4811,7 @@ int[] DBQueryServersActive(final int t) throws SQLException \{
 \nwixlogsorted{i}{{updateServerAddToSchedule}{updateServerAddToSchedule}}%
 \nwixlogsorted{i}{{updateServerRemoveFromSchedule}{updateServerRemoveFromSchedule}}%
 \nwixlogsorted{i}{{updateServerRoute}{updateServerRoute}}%
-\nwbegindocs{132}\nwdocspar
-\subsection{\texttt{DBQueryServersLocations}(1)}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{{\tt{}\protect\nwindexuse{DBQueryServersLocations}{DBQueryServersLocations}{NW18ZcDF-1zUdrf-1}DBQueryServersLocations}}(1) returns the
-last-known locations of all servers (including inactive servers) at the given
-time. The ``last-known location'' is the waypoint in the server's route $w$
-with a time component closest to but not exceeding the given time, in other
-words ${w_{\leq t}}_{|w_{\leq t}|}$.
-A {\tt{}SQLException} is thrown in case of database failure.\\
-\midrule
-\textbf{Parameters:} \\
-\begin{tabular}{lp{116mm}}
-Integer {\tt{}t} (param. 1):&a time
-\end{tabular}\\
-\textbf{Returns:} results of the query flattened into an integer array, or
-{\tt{}null} if no results.
-
-\begin{tikzpicture}
-\small
-\matrix[nodes={draw,minimum size=6mm}] {
-  \node {$0:\textrm{a server identifier}$};
- &\node {$1:\textrm{time of last-known location}$};
- &\node {$2:\textrm{vertex of last-known location}$};
- &\node {...};\\
-};
-\end{tikzpicture}\\
-\textbf{Side Effects:} none.\\
-\textbf{Throws:} {\tt{}SQLException} if database failure is encountered.\\
-\bottomrule
-\end{tabular}
-\nwenddocs{}\nwbegincode{133}\sublabel{NW18ZcDF-1zUdrf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW18ZcDF-1zUdrf-1}}}\moddef{Read: DBQueryServersLocations(1)~{\nwtagstyle{}\subpageref{NW18ZcDF-1zUdrf-1}}}\endmoddef\nwused{\\{NW3x1zuR-Oyob-1}}
-int[] DBQueryServersLocations(final int t) throws SQLException \{
-  try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NWgUSr6-JT1v9-1}}\RA{}) \{
-    return this.PSQuery(conn, "S59", 3, t, t, t, t);
-  \} catch (SQLException e) \{
-    throw e;
-  \}
-\}
-\nwindexdefn{DBQueryServersLocations}{DBQueryServersLocations}{NW18ZcDF-1zUdrf-1}\eatline
-\nwidentdefs{\\{{DBQueryServersLocations}{DBQueryServersLocations}}}\nwidentuses{\\{{PSQuery}{PSQuery}}\\{{S59}{S59}}}\nwindexuse{PSQuery}{PSQuery}{NW18ZcDF-1zUdrf-1}\nwindexuse{S59}{S59}{NW18ZcDF-1zUdrf-1}\nwendcode{}\nwbegindocs{134}\nwdocspar
-\subsection{\texttt{DBQueryServersLocationsActive}(1)}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-SINGLE-THREAD ONLY. Method \textcolor{blue}{{\tt{}\protect\nwindexuse{DBQueryServersLocationsActive}{DBQueryServersLocationsActive}{NW18ZcDF-2tWQc-1}DBQueryServersLocationsActive}}(1) returns the
-last-known locations of all active servers at the given time. A server is
-``active'' if its service has not ended, in other words it has not arrived
-at its own destination.
-The ``last-known location'' is the waypoint in the server's route $w$
-with a time component closest to but not exceeding the given time, in other
-words ${w_{\leq t}}_{|w_{\leq t}|}$.
-A {\tt{}SQLException} is thrown in case of database failure.\\
-\midrule
-\textbf{Parameters:} \\
-\begin{tabular}{lp{116mm}}
-Integer {\tt{}t} (param. 1):&a time
-\end{tabular}\\
-\textbf{Returns:} results of the query flattened into an integer array, or
-{\tt{}null} if no results.
-
-\begin{tikzpicture}
-\scriptsize
-\matrix[nodes={minimum size=6mm}] {
-  \node {...};
- &\node[draw] {$3(i-1):\textrm{identifier for server $s_i$}$};
- &\node[draw] {$3(i-1)+1:\pi_\texttt{t}\textrm{ of last-known location of $s_i$}$};
- &\node[draw] {$3(i-1)+2:\pi_\texttt{v}\textrm{ of last-known location of $s_i$}$};
- &\node {...};\\
-};
-\end{tikzpicture}\\
-
-where $1\leq i\leq |\mathcal{S}^\textrm{active}|$,
-$s_i\in \mathcal{S}^\textrm{active}$, and
-$\mathcal{S}^\textrm{active}= \{s\in\mathcal{S}\mid t^\textrm{arrive}(\mathcal{X},s)>t\}|$
-for $t$ given by param. 1.\\
-\textbf{Side Effects:} none.\\
-\textbf{Throws:} {\tt{}SQLException} if database failure is encountered.\\
-\bottomrule
-\end{tabular}
-\nwenddocs{}\nwbegincode{135}\sublabel{NW18ZcDF-2tWQc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW18ZcDF-2tWQc-1}}}\moddef{Read: DBQueryServersLocationsActive(1)~{\nwtagstyle{}\subpageref{NW18ZcDF-2tWQc-1}}}\endmoddef\nwalsodefined{\\{NW18ZcDF-2tWQc-2}}\nwused{\\{NW3x1zuR-Oyob-1}}
-int[] DBQueryServersLocationsActive(final int t) throws SQLException \{
-  int[] output = new int[] \{ \};
-  try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NWgUSr6-JT1v9-1}}\RA{}) \{
-    int j = 0;
-\nosublabel{NW18ZcDF-2tWQc-1-u1}\nwindexdefn{DBQueryServersLocationsActive}{DBQueryServersLocationsActive}{NW18ZcDF-2tWQc-1}\eatline
-\nwidentdefs{\\{{DBQueryServersLocationsActive}{DBQueryServersLocationsActive}}}\nwendcode{}\nwbegindocs{136}{\small Our approach is to first use statement {\tt{}\protect\nwindexuse{S134}{S134}{NWgUSr6-9eEGJ-1}S134} to get the active
+\nwbegindocs{136}{\small Our approach is to first use statement {\tt{}\protect\nwindexuse{S134}{S134}{NWgUSr6-9eEGJ-1}S134} to get the active
 servers. Then for each active server, we use either statement {\tt{}\protect\nwindexuse{S135}{S135}{NWgUSr6-4dp7jX-1}S135} or
 {\tt{}\protect\nwindexuse{S147}{S147}{NWgUSr6-2TcddD-1}S147} to get its last-known location.}
 \nwenddocs{}\nwbegincode{137}\sublabel{NW18ZcDF-2tWQc-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW18ZcDF-2tWQc-2}}}\moddef{Read: DBQueryServersLocationsActive(1)~{\nwtagstyle{}\subpageref{NW18ZcDF-2tWQc-1}}}\plusendmoddef
@@ -4831,24 +4833,36 @@ servers. Then for each active server, we use either statement {\tt{}\protect\nwi
         ? this.PSQuery(conn, "S135", 2, sid, sid, lvt, t, t)
         : this.PSQuery(conn, "S147", 2, sid, sid));
       output[(j + 0)] = sid;
-      output[(j + 1)] = temp2[0];
-      output[(j + 2)] = temp2[1];
-      this.lu_lvt.put(sid, temp2[0]);
+      if (temp2.length == 0) \{
+        // Means server hasn't left origin yet, we just get se, so
+        int[] temp3 = DBQueryUser(sid);
+        output[(j + 1)] = temp3[2];
+        output[(j + 2)] = temp3[4];
+        this.lu_lvt.put(sid, t);
+      \} else \{
+        output[(j + 1)] = temp2[0];
+        output[(j + 2)] = temp2[1];
+        this.lu_lvt.put(sid, temp2[0]);
+      \}
       j += 3;
     \}
   \} catch (SQLException e) \{
     throw e;
+  \} catch (UserNotFoundException e) \{
+    // Should never happen
+    System.err.println("Fatal error: "+e.toString());
+    System.exit(1);
   \}
   return output;
 \}
-\nwidentuses{\\{{PSQuery}{PSQuery}}\\{{query}{query}}\\{{S134}{S134}}\\{{S135}{S135}}\\{{S147}{S147}}}\nwindexuse{PSQuery}{PSQuery}{NW18ZcDF-2tWQc-2}\nwindexuse{query}{query}{NW18ZcDF-2tWQc-2}\nwindexuse{S134}{S134}{NW18ZcDF-2tWQc-2}\nwindexuse{S135}{S135}{NW18ZcDF-2tWQc-2}\nwindexuse{S147}{S147}{NW18ZcDF-2tWQc-2}\nwendcode{}\nwbegindocs{138}\nwdocspar
+\nwidentuses{\\{{DBQueryUser}{DBQueryUser}}\\{{PSQuery}{PSQuery}}\\{{query}{query}}\\{{S134}{S134}}\\{{S135}{S135}}\\{{S147}{S147}}}\nwindexuse{DBQueryUser}{DBQueryUser}{NW18ZcDF-2tWQc-2}\nwindexuse{PSQuery}{PSQuery}{NW18ZcDF-2tWQc-2}\nwindexuse{query}{query}{NW18ZcDF-2tWQc-2}\nwindexuse{S134}{S134}{NW18ZcDF-2tWQc-2}\nwindexuse{S135}{S135}{NW18ZcDF-2tWQc-2}\nwindexuse{S147}{S147}{NW18ZcDF-2tWQc-2}\nwendcode{}\nwbegindocs{138}\nwdocspar
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\tt{}\protect\nwindexuse{queryServersLocationsActive}{queryServersLocationsActive}{NW18ZcDF-t5O2a-1}queryServersLocationsActive}}(1) wraps {\tt{}\protect\nwindexuse{DBQueryServersLocationsActive}{DBQueryServersLocationsActive}{NW18ZcDF-2tWQc-1}DBQueryServersLocationsActive}(1).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{139}\sublabel{NW18ZcDF-t5O2a-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW18ZcDF-t5O2a-1}}}\moddef{Read: queryServersLocationsActive(1)~{\nwtagstyle{}\subpageref{NW18ZcDF-t5O2a-1}}}\endmoddef\nwused{\\{NW3x1zuR-2Rlctf-1}}
+\nwenddocs{}\nwbegincode{139}\sublabel{NW18ZcDF-t5O2a-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW18ZcDF-t5O2a-1}}}\moddef{Read: queryServersLocationsActive(1)~{\nwtagstyle{}\subpageref{NW18ZcDF-t5O2a-1}}}\endmoddef\nwused{\\{NW3x1zuR-2u8vSA-1}\\{NW3x1zuR-2Rlctf-1}}
 int[] queryServersLocationsActive(final int t) throws SQLException \{
   long A0 = System.currentTimeMillis();
   int[] output = this.storage.DBQueryServersLocationsActive(t);
@@ -6606,7 +6620,7 @@ void JargoInstanceNew() throws SQLException \{
   \} catch (SQLException e) \{
     throw e;
   \} catch (ClassNotFoundException e) \{
-    System.err.println("Fatail exception");
+    System.err.println("Fatal exception");
     e.printStackTrace();
     System.exit(1);
   \}
@@ -7858,6 +7872,7 @@ void gtreeClose() \{
 \LA{}Stats members: controllerClockReference~{\nwtagstyle{}\subpageref{NW1n2CZQ-abjTc-1}}\RA{}
 \LA{}Stats members: controllerRequestCollection~{\nwtagstyle{}\subpageref{NW1n2CZQ-3OFUn0-1}}\RA{}
 \LA{}Stats members: queryEdge~{\nwtagstyle{}\subpageref{NW1n2CZQ-37FBap-1}}\RA{}
+\LA{}Stats members: queryServersLocationsActive~{\nwtagstyle{}\subpageref{NW1n2CZQ-38BNP4-1}}\RA{}
 \LA{}Stats members: queryUser~{\nwtagstyle{}\subpageref{NW1n2CZQ-V47Hc-1}}\RA{}
 \LA{}Stats members: queryVertex~{\nwtagstyle{}\subpageref{NW1n2CZQ-2Ulgvj-1}}\RA{}
 \nwendcode{}\nwbegindocs{2}\nwdocspar
@@ -7951,6 +7966,12 @@ public \LA{}Get: getStatQueryEdgeDurTotal(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-
 public \LA{}Get: getStatQueryEdgeDurMin(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-8nNz2-1}}\RA{}
 public \LA{}Get: getStatQueryEdgeDurMax(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-1k5cXc-1}}\RA{}
 public \LA{}Get: getStatQueryEdgeDurAvg(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-2VGSeH-1}}\RA{}
+public \LA{}Get: getStatQueryServersLocationsActiveCount(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-a9Te8-1}}\RA{}
+public \LA{}Get: getStatQueryServersLocationsActiveDurLast(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-362tC8-1}}\RA{}
+public \LA{}Get: getStatQueryServersLocationsActiveDurTotal(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-6g9Yq-1}}\RA{}
+public \LA{}Get: getStatQueryServersLocationsActiveDurMin(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-1vpNU3-1}}\RA{}
+public \LA{}Get: getStatQueryServersLocationsActiveDurMax(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-tf00B-1}}\RA{}
+public \LA{}Get: getStatQueryServersLocationsActiveDurAvg(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-4Dkkxa-1}}\RA{}
 public \LA{}Get: getStatQueryUserCount(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-2G4I8r-1}}\RA{}
 public \LA{}Get: getStatQueryUserDurLast(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-CSOOc-1}}\RA{}
 public \LA{}Get: getStatQueryUserDurTotal(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-1lcOaG-1}}\RA{}
@@ -8139,7 +8160,7 @@ private double statQueryServerScheduleRemainingDurAvg   = 0;
 \nwendcode{}\nwbegindocs{42}\nwdocspar
 
 \subsection{Stats members: queryServersLocationsActive}
-\nwenddocs{}\nwbegincode{43}\sublabel{NW1n2CZQ-38BNP4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1n2CZQ-38BNP4-1}}}\moddef{Stats members: queryServersLocationsActive~{\nwtagstyle{}\subpageref{NW1n2CZQ-38BNP4-1}}}\endmoddef\nwused{\\{NW1n2CZQ-18oERh-1}}
+\nwenddocs{}\nwbegincode{43}\sublabel{NW1n2CZQ-38BNP4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1n2CZQ-38BNP4-1}}}\moddef{Stats members: queryServersLocationsActive~{\nwtagstyle{}\subpageref{NW1n2CZQ-38BNP4-1}}}\endmoddef\nwused{\\{NW1n2CZQ-3yXfwG-1}\\{NW1n2CZQ-18oERh-1}}
 private int    statQueryServersLocationsActiveCount    = 0;
 private long   statQueryServersLocationsActiveDurLast  = 0;
 private long   statQueryServersLocationsActiveDurTotal = 0;
@@ -8609,9 +8630,7 @@ int    getStatQueryServerDurationRemainingCount() \{
   return this.statQueryServerDurationRemainingCount;
 \}
 \nwindexdefn{getStatQueryServerDurationRemainingCount}{getStatQueryServerDurationRemainingCount}{NW1n2CZQ-36xtC3-1}\eatline
-\nwidentdefs{\\{{getStatQueryServerDurationRemainingCount}{getStatQueryServerDurationRemainingCount}}}\nwendcode{}
-
-\nwbegindocs{132}\nwdocspar
+\nwidentdefs{\\{{getStatQueryServerDurationRemainingCount}{getStatQueryServerDurationRemainingCount}}}\nwendcode{}\nwbegindocs{132}\nwdocspar
 \subsection{\texttt{getStatQueryServerDurationRemainingDurLast}(0)}
 \nwenddocs{}\nwbegincode{133}\sublabel{NW1n2CZQ-2JtqMy-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1n2CZQ-2JtqMy-1}}}\moddef{Get: getStatQueryServerDurationRemainingDurLast(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-2JtqMy-1}}}\endmoddef\nwused{\\{NW1n2CZQ-2Rlctf-4}}
 long   getStatQueryServerDurationRemainingDurLast() \{
@@ -8625,7 +8644,9 @@ long   getStatQueryServerDurationRemainingDurTotal() \{
   return this.statQueryServerDurationRemainingDurTotal;
 \}
 \nwindexdefn{getStatQueryServerDurationRemainingDurTotal}{getStatQueryServerDurationRemainingDurTotal}{NW1n2CZQ-1AVpRk-1}\eatline
-\nwidentdefs{\\{{getStatQueryServerDurationRemainingDurTotal}{getStatQueryServerDurationRemainingDurTotal}}}\nwendcode{}\nwbegindocs{136}\nwdocspar
+\nwidentdefs{\\{{getStatQueryServerDurationRemainingDurTotal}{getStatQueryServerDurationRemainingDurTotal}}}\nwendcode{}
+
+\nwbegindocs{136}\nwdocspar
 \subsection{\texttt{getStatQueryServerDurationRemainingDurMin}(0)}
 \nwenddocs{}\nwbegincode{137}\sublabel{NW1n2CZQ-4a05TS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1n2CZQ-4a05TS-1}}}\moddef{Get: getStatQueryServerDurationRemainingDurMin(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-4a05TS-1}}}\endmoddef\nwused{\\{NW1n2CZQ-2Rlctf-4}}
 long   getStatQueryServerDurationRemainingDurMin() \{
@@ -8774,42 +8795,42 @@ double getStatQueryServerScheduleRemainingDurAvg() \{
 \nwindexdefn{getStatQueryServerScheduleRemainingDurAvg}{getStatQueryServerScheduleRemainingDurAvg}{NW1n2CZQ-1MZNXB-1}\eatline
 \nwidentdefs{\\{{getStatQueryServerScheduleRemainingDurAvg}{getStatQueryServerScheduleRemainingDurAvg}}}\nwendcode{}\nwbegindocs{178}\nwdocspar
 \subsection{\texttt{getStatQueryServersLocationsActiveCount}(0)}
-\nwenddocs{}\nwbegincode{179}\sublabel{NW1n2CZQ-a9Te8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1n2CZQ-a9Te8-1}}}\moddef{Get: getStatQueryServersLocationsActiveCount(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-a9Te8-1}}}\endmoddef\nwused{\\{NW1n2CZQ-2Rlctf-4}}
+\nwenddocs{}\nwbegincode{179}\sublabel{NW1n2CZQ-a9Te8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1n2CZQ-a9Te8-1}}}\moddef{Get: getStatQueryServersLocationsActiveCount(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-a9Te8-1}}}\endmoddef\nwused{\\{NW1n2CZQ-2u8vSA-4}\\{NW1n2CZQ-2Rlctf-4}}
 int    getStatQueryServersLocationsActiveCount() \{
   return this.statQueryServersLocationsActiveCount;
 \}
 \nwindexdefn{getStatQueryServersLocationsActiveCount}{getStatQueryServersLocationsActiveCount}{NW1n2CZQ-a9Te8-1}\eatline
 \nwidentdefs{\\{{getStatQueryServersLocationsActiveCount}{getStatQueryServersLocationsActiveCount}}}\nwendcode{}\nwbegindocs{180}\nwdocspar
 \subsection{\texttt{getStatQueryServersLocationsActiveDurLast}(0)}
-\nwenddocs{}\nwbegincode{181}\sublabel{NW1n2CZQ-362tC8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1n2CZQ-362tC8-1}}}\moddef{Get: getStatQueryServersLocationsActiveDurLast(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-362tC8-1}}}\endmoddef\nwused{\\{NW1n2CZQ-2Rlctf-4}}
+\nwenddocs{}\nwbegincode{181}\sublabel{NW1n2CZQ-362tC8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1n2CZQ-362tC8-1}}}\moddef{Get: getStatQueryServersLocationsActiveDurLast(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-362tC8-1}}}\endmoddef\nwused{\\{NW1n2CZQ-2u8vSA-4}\\{NW1n2CZQ-2Rlctf-4}}
 long   getStatQueryServersLocationsActiveDurLast() \{
   return this.statQueryServersLocationsActiveDurLast;
 \}
 \nwindexdefn{getStatQueryServersLocationsActiveDurLast}{getStatQueryServersLocationsActiveDurLast}{NW1n2CZQ-362tC8-1}\eatline
 \nwidentdefs{\\{{getStatQueryServersLocationsActiveDurLast}{getStatQueryServersLocationsActiveDurLast}}}\nwendcode{}\nwbegindocs{182}\nwdocspar
 \subsection{\texttt{getStatQueryServersLocationsActiveDurTotal}(0)}
-\nwenddocs{}\nwbegincode{183}\sublabel{NW1n2CZQ-6g9Yq-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1n2CZQ-6g9Yq-1}}}\moddef{Get: getStatQueryServersLocationsActiveDurTotal(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-6g9Yq-1}}}\endmoddef\nwused{\\{NW1n2CZQ-2Rlctf-4}}
+\nwenddocs{}\nwbegincode{183}\sublabel{NW1n2CZQ-6g9Yq-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1n2CZQ-6g9Yq-1}}}\moddef{Get: getStatQueryServersLocationsActiveDurTotal(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-6g9Yq-1}}}\endmoddef\nwused{\\{NW1n2CZQ-2u8vSA-4}\\{NW1n2CZQ-2Rlctf-4}}
 long   getStatQueryServersLocationsActiveDurTotal() \{
   return this.statQueryServersLocationsActiveDurTotal;
 \}
 \nwindexdefn{getStatQueryServersLocationsActiveDurTotal}{getStatQueryServersLocationsActiveDurTotal}{NW1n2CZQ-6g9Yq-1}\eatline
 \nwidentdefs{\\{{getStatQueryServersLocationsActiveDurTotal}{getStatQueryServersLocationsActiveDurTotal}}}\nwendcode{}\nwbegindocs{184}\nwdocspar
 \subsection{\texttt{getStatQueryServersLocationsActiveDurMin}(0)}
-\nwenddocs{}\nwbegincode{185}\sublabel{NW1n2CZQ-1vpNU3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1n2CZQ-1vpNU3-1}}}\moddef{Get: getStatQueryServersLocationsActiveDurMin(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-1vpNU3-1}}}\endmoddef\nwused{\\{NW1n2CZQ-2Rlctf-4}}
+\nwenddocs{}\nwbegincode{185}\sublabel{NW1n2CZQ-1vpNU3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1n2CZQ-1vpNU3-1}}}\moddef{Get: getStatQueryServersLocationsActiveDurMin(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-1vpNU3-1}}}\endmoddef\nwused{\\{NW1n2CZQ-2u8vSA-4}\\{NW1n2CZQ-2Rlctf-4}}
 long   getStatQueryServersLocationsActiveDurMin() \{
   return this.statQueryServersLocationsActiveDurMin;
 \}
 \nwindexdefn{getStatQueryServersLocationsActiveDurMin}{getStatQueryServersLocationsActiveDurMin}{NW1n2CZQ-1vpNU3-1}\eatline
 \nwidentdefs{\\{{getStatQueryServersLocationsActiveDurMin}{getStatQueryServersLocationsActiveDurMin}}}\nwendcode{}\nwbegindocs{186}\nwdocspar
 \subsection{\texttt{getStatQueryServersLocationsActiveDurMax}(0)}
-\nwenddocs{}\nwbegincode{187}\sublabel{NW1n2CZQ-tf00B-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1n2CZQ-tf00B-1}}}\moddef{Get: getStatQueryServersLocationsActiveDurMax(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-tf00B-1}}}\endmoddef\nwused{\\{NW1n2CZQ-2Rlctf-4}}
+\nwenddocs{}\nwbegincode{187}\sublabel{NW1n2CZQ-tf00B-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1n2CZQ-tf00B-1}}}\moddef{Get: getStatQueryServersLocationsActiveDurMax(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-tf00B-1}}}\endmoddef\nwused{\\{NW1n2CZQ-2u8vSA-4}\\{NW1n2CZQ-2Rlctf-4}}
 long   getStatQueryServersLocationsActiveDurMax() \{
   return this.statQueryServersLocationsActiveDurMax;
 \}
 \nwindexdefn{getStatQueryServersLocationsActiveDurMax}{getStatQueryServersLocationsActiveDurMax}{NW1n2CZQ-tf00B-1}\eatline
 \nwidentdefs{\\{{getStatQueryServersLocationsActiveDurMax}{getStatQueryServersLocationsActiveDurMax}}}\nwendcode{}\nwbegindocs{188}\nwdocspar
 \subsection{\texttt{getStatQueryServersLocationsActiveDurAvg}(0)}
-\nwenddocs{}\nwbegincode{189}\sublabel{NW1n2CZQ-4Dkkxa-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1n2CZQ-4Dkkxa-1}}}\moddef{Get: getStatQueryServersLocationsActiveDurAvg(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-4Dkkxa-1}}}\endmoddef\nwused{\\{NW1n2CZQ-2Rlctf-4}}
+\nwenddocs{}\nwbegincode{189}\sublabel{NW1n2CZQ-4Dkkxa-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1n2CZQ-4Dkkxa-1}}}\moddef{Get: getStatQueryServersLocationsActiveDurAvg(0)~{\nwtagstyle{}\subpageref{NW1n2CZQ-4Dkkxa-1}}}\endmoddef\nwused{\\{NW1n2CZQ-2u8vSA-4}\\{NW1n2CZQ-2Rlctf-4}}
 double getStatQueryServersLocationsActiveDurAvg() \{
   return this.statQueryServersLocationsActiveDurAvg;
 \}
@@ -9516,7 +9537,7 @@ void startRealtime(final Consumer<Boolean> app_cb) \{
 \nwidentdefs{\\{{startRealtime}{startRealtime}}}\nwidentuses{\\{{setRequestTimeout}{setRequestTimeout}}\\{{stop}{stop}}}\nwindexuse{setRequestTimeout}{setRequestTimeout}{NW2ZDXo8-1dNtp8-1}\nwindexuse{stop}{stop}{NW2ZDXo8-1dNtp8-1}\nwendcode{}\nwbegindocs{55}\nwdocspar
 \subsection{\texttt{startSequential}(1)}
 \nwenddocs{}\nwbegincode{56}\sublabel{NW2ZDXo8-2R9Ikm-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2ZDXo8-2R9Ikm-1}}}\moddef{startSequential(1)~{\nwtagstyle{}\subpageref{NW2ZDXo8-2R9Ikm-1}}}\endmoddef\nwused{\\{NW3x1zuR-2u8vSA-3}}
-void startSequential(final Consumer<Boolean> app_cb) \{
+void startSequential(final Consumer<Boolean> app_cb) throws Exception \{
   this.storage.setRequestTimeout(REQUEST_TIMEOUT);
   this.statControllerClockNow = CLOCK_START;
   while (!kill && this.statControllerClockNow < CLOCK_END) \{
@@ -10217,6 +10238,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
@@ -10226,7 +10248,7 @@ import javafx.fxml.FXMLLoader;
 \nwendcode{}\nwbegindocs{8}\nwdocspar
 
 \section{Member Variables}
-\nwenddocs{}\nwbegincode{9}\sublabel{NWn0bN8-2iHsHO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-1}}}\moddef{\code{}DesktopController\edoc{} member variables~{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-1}}}\endmoddef\nwalsodefined{\\{NWn0bN8-2iHsHO-2}\\{NWn0bN8-2iHsHO-3}\\{NWn0bN8-2iHsHO-4}\\{NWn0bN8-2iHsHO-5}\\{NWn0bN8-2iHsHO-6}\\{NWn0bN8-2iHsHO-7}\\{NWn0bN8-2iHsHO-8}\\{NWn0bN8-2iHsHO-9}\\{NWn0bN8-2iHsHO-A}\\{NWn0bN8-2iHsHO-B}}\nwused{\\{NWn0bN8-4ScqTl-1}}
+\nwenddocs{}\nwbegincode{9}\sublabel{NWn0bN8-2iHsHO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-1}}}\moddef{\code{}DesktopController\edoc{} member variables~{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-1}}}\endmoddef\nwalsodefined{\\{NWn0bN8-2iHsHO-2}\\{NWn0bN8-2iHsHO-3}\\{NWn0bN8-2iHsHO-4}\\{NWn0bN8-2iHsHO-5}\\{NWn0bN8-2iHsHO-6}\\{NWn0bN8-2iHsHO-7}\\{NWn0bN8-2iHsHO-8}\\{NWn0bN8-2iHsHO-9}\\{NWn0bN8-2iHsHO-A}\\{NWn0bN8-2iHsHO-B}\\{NWn0bN8-2iHsHO-C}}\nwused{\\{NWn0bN8-4ScqTl-1}}
 private final boolean DEBUG =
     "true".equals(System.getProperty("jargors.desktop.debug"));
 \nwendcode{}\nwbegindocs{10}\nwdocspar
@@ -10235,6 +10257,8 @@ private final boolean DEBUG =
 \nwenddocs{}\nwbegincode{11}\sublabel{NWn0bN8-2iHsHO-2}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-2}}}\moddef{\code{}DesktopController\edoc{} member variables~{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-1}}}\plusendmoddef
 private Stage stage;
 private Canvas can_road;
+private Canvas can_servers;
+private Pane container_canvas_container;
 \nwendcode{}\nwbegindocs{12}\nwdocspar
 
 \nwenddocs{}\nwbegincode{13}\sublabel{NWn0bN8-2iHsHO-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-3}}}\moddef{\code{}DesktopController\edoc{} member variables~{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-1}}}\plusendmoddef
@@ -10312,6 +10336,7 @@ private String jarclass = null;
 \subsection{Workspace}
 \nwenddocs{}\nwbegincode{19}\sublabel{NWn0bN8-2iHsHO-6}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-6}}}\moddef{\code{}DesktopController\edoc{} member variables~{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-1}}}\plusendmoddef
 private GraphicsContext gc = null;
+private MapUnitsFetcher muf = null;
 private double window_height = 0;
 private double window_width = 0;
 private double mouse_x = 0;
@@ -10320,14 +10345,19 @@ private int[] edges = null;
 private int[] mbr = null;
 private double xunit = 0;
 private double yunit = 0;
+private double unit = 0;
 private int t0 = 0;
 private int t1 = 0;
+private int server_width = 100;
+private int server_height = 200;
+private Color server_fill = Color.BLUE;
 \nwendcode{}\nwbegindocs{20}\nwdocspar
 
 \subsection{Background Processes}
 \nwenddocs{}\nwbegincode{21}\sublabel{NWn0bN8-2iHsHO-7}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-7}}}\moddef{\code{}DesktopController\edoc{} member variables~{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-1}}}\plusendmoddef
 private AnimationTimer timer = new MyTimer();
 private ScheduledExecutorService exe = null;
+private ScheduledFuture<?> cbSimRunner = null;
 private ScheduledFuture<?> cbMapUpdater = null;
 private Map<String, ScheduledFuture<?>> cbMetricFetcher = new HashMap<String, ScheduledFuture<?>>();
 \nwendcode{}\nwbegindocs{22}\nwdocspar
@@ -10340,28 +10370,88 @@ private class MyTimer extends AnimationTimer \{
 \}
 \nwendcode{}\nwbegindocs{24}\nwdocspar
 \nwenddocs{}\nwbegincode{25}\sublabel{NWn0bN8-2iHsHO-9}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-9}}}\moddef{\code{}DesktopController\edoc{} member variables~{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-1}}}\plusendmoddef
+private class MapUnitsFetcher \{
+  private double unit = 0;
+  private int lng_min = 0;
+  private int lat_min = 0;
+  public MapUnitsFetcher() \{ \}
+  public double getUnit() \{
+    return this.unit;
+  \}
+  public int getLngMin() \{
+    return this.lng_min;
+  \}
+  public int getLatMin() \{
+    return this.lat_min;
+  \}
+  public void setUnit(double unit) \{
+    this.unit = unit;
+  \}
+  public void setLngMin(int lng_min) \{
+    this.lng_min = lng_min;
+  \}
+  public void setLatMin(int lat_min) \{
+    this.lat_min = lat_min;
+  \}
+\}
+\nwendcode{}\nwbegindocs{26}\nwdocspar
+\nwenddocs{}\nwbegincode{27}\sublabel{NWn0bN8-2iHsHO-A}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-A}}}\moddef{\code{}DesktopController\edoc{} member variables~{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-1}}}\plusendmoddef
 private class MapUpdater implements Runnable \{
   private Controller controller = null;
   private Label lbl_status = null;
-  private Canvas can_road = null;
+  private Canvas can_servers = null;
+  private GraphicsContext gc = null;
+  private MapUnitsFetcher muf = null;
+  private Map<Integer, double[]> lu_locs = new HashMap<Integer, double[]>();
   public MapUpdater(
       final Controller controller,
       final Label lbl_status,
-      final Canvas can_road) \{
+      final Canvas can_servers,
+      final MapUnitsFetcher muf) \{
     this.controller = controller;
     this.lbl_status = lbl_status;
-    this.can_road = can_road;
+    this.can_servers = can_servers;
+    this.muf = muf;
+    this.gc = can_servers.getGraphicsContext2D();
   \}
   public void run() \{
     final int t = this.controller.getClockNow();
     Platform.runLater(() -> \{
+      long A0 = System.currentTimeMillis();
+      try \{
+        int[] locations = this.controller.queryServersLocationsActive(t);
+        for (int i = 0; i < (locations.length - 2); i += 3) \{
+          final int sid = locations[i];
+          final int loc = locations[(i + 2)];
+          final int[] coordinates = this.controller.queryVertex(loc);
+          double x = this.muf.getUnit()*(coordinates[0] - this.muf.getLngMin());
+          double y = this.muf.getUnit()*(coordinates[1] - this.muf.getLatMin());
+          // Canvas is lagging during pan. I guess it's due to one-shot update
+          // of all the servers, so I have put each update into its own runLater.
+          // Unfortunately, doesn't seem to work. Still laggy.
+          Platform.runLater(() -> \{
+            if (this.lu_locs.containsKey(sid)) \{
+              final double[] old = this.lu_locs.get(sid);
+              this.gc.clearRect(old[0], old[1], 5, 10);
+            \}
+            this.lu_locs.put(sid, new double[] \{ x, y \});
+            this.gc.fillRect(x, y, 5, 10);
+          \});
+        \}
+      \} catch (SQLException se) \{
+        System.err.println("Warning: MapUpdater failed to get locations");
+        System.err.println(se.toString());
+      \} catch (VertexNotFoundException ve) \{
+        System.err.println("Warning: MapUpdater got unknown location!");
+        System.err.println(ve.toString());
+      \}
       this.lbl_status.setText("Simulation running (t="+t+")...");
     \});
   \};
 \}
-\nwidentuses{\\{{getClockNow}{getClockNow}}}\nwindexuse{getClockNow}{getClockNow}{NWn0bN8-2iHsHO-9}\nwendcode{}\nwbegindocs{26}\nwdocspar
+\nwidentuses{\\{{getClockNow}{getClockNow}}\\{{queryServersLocationsActive}{queryServersLocationsActive}}\\{{queryVertex}{queryVertex}}}\nwindexuse{getClockNow}{getClockNow}{NWn0bN8-2iHsHO-A}\nwindexuse{queryServersLocationsActive}{queryServersLocationsActive}{NWn0bN8-2iHsHO-A}\nwindexuse{queryVertex}{queryVertex}{NWn0bN8-2iHsHO-A}\nwendcode{}\nwbegindocs{28}\nwdocspar
 
-\nwenddocs{}\nwbegincode{27}\sublabel{NWn0bN8-2iHsHO-A}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-A}}}\moddef{\code{}DesktopController\edoc{} member variables~{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{29}\sublabel{NWn0bN8-2iHsHO-B}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-B}}}\moddef{\code{}DesktopController\edoc{} member variables~{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-1}}}\plusendmoddef
 private class MetricFetcher implements Runnable \{
   private Controller controller = null;
   private ConcurrentHashMap<String, Series<Number, Number>> series = null;
@@ -10445,10 +10535,10 @@ private class MetricFetcher implements Runnable \{
     \}
   \}
 \}
-\nwidentuses{\\{{getClockNow}{getClockNow}}}\nwindexuse{getClockNow}{getClockNow}{NWn0bN8-2iHsHO-A}\nwendcode{}\nwbegindocs{28}\nwdocspar
+\nwidentuses{\\{{getClockNow}{getClockNow}}}\nwindexuse{getClockNow}{getClockNow}{NWn0bN8-2iHsHO-B}\nwendcode{}\nwbegindocs{30}\nwdocspar
 
 \subsection{Charts}
-\nwenddocs{}\nwbegincode{29}\sublabel{NWn0bN8-2iHsHO-B}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-B}}}\moddef{\code{}DesktopController\edoc{} member variables~{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{31}\sublabel{NWn0bN8-2iHsHO-C}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-C}}}\moddef{\code{}DesktopController\edoc{} member variables~{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-1}}}\plusendmoddef
 private NumberAxis rates_x = new NumberAxis();
 private NumberAxis rates_y = new NumberAxis();
 private NumberAxis distances_x = new NumberAxis();
@@ -10510,10 +10600,29 @@ private String[] metric_times = new String[] \{
     \};
 private ConcurrentHashMap<String, ConcurrentHashMap<String, Series<Number, Number>>> lu_series =
     new ConcurrentHashMap<String, ConcurrentHashMap<String, Series<Number, Number>>>();
-\nwendcode{}\nwbegindocs{30}\nwdocspar
+\nwendcode{}\nwbegindocs{32}\nwdocspar
 
 \section{Chunks}
-\nwenddocs{}\nwbegincode{31}\sublabel{NWn0bN8-2Khh2C-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2Khh2C-1}}}\moddef{Initialize chart settings~{\nwtagstyle{}\subpageref{NWn0bN8-2Khh2C-1}}}\endmoddef\nwused{\\{NWn0bN8-35Xz53-1}}
+
+\subsection{Initialize server rectangles}
+\nwenddocs{}\nwbegincode{33}\sublabel{NWn0bN8-2qVBpg-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2qVBpg-1}}}\moddef{Initialize server rectangles~{\nwtagstyle{}\subpageref{NWn0bN8-2qVBpg-1}}}\endmoddef\nwused{\\{NWn0bN8-2DyoOl-1}}
+// try \{
+//   int[] locations = this.controller.queryServersLocationsActive(this.t0);
+//   for (int i = 0; i < (locations.length - 2); i += 3) \{
+//     final int sid = locations[i];
+//     if (locations[(i + 2)] != 0) \{
+//       this.servers.put(sid, new Rectangle(server_width, server_height, server_fill));
+//     \}
+//   \}
+// \} catch (SQLException se) \{
+//   System.err.println("Warning: failed to get server locations!");
+//   System.err.println(se.toString());
+// \}
+\nwidentuses{\\{{queryServersLocationsActive}{queryServersLocationsActive}}}\nwindexuse{queryServersLocationsActive}{queryServersLocationsActive}{NWn0bN8-2qVBpg-1}\nwendcode{}\nwbegindocs{34}\nwdocspar
+
+
+\subsection{Initialize chart settings}
+\nwenddocs{}\nwbegincode{35}\sublabel{NWn0bN8-2Khh2C-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2Khh2C-1}}}\moddef{Initialize chart settings~{\nwtagstyle{}\subpageref{NWn0bN8-2Khh2C-1}}}\endmoddef\nwused{\\{NWn0bN8-35Xz53-1}}
 this.lc_rates.setCreateSymbols(false);
 this.lc_rates.setAnimated(false);
 this.lc_rates.setLegendVisible(false);
@@ -10549,9 +10658,10 @@ this.times_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 
 this.times_y = new NumberAxis("Value (milliseconds)", 0, 100, 10);
 this.times_x.setAutoRanging(true);
 this.times_y.setAutoRanging(true);
-\nwendcode{}\nwbegindocs{32}\nwdocspar
+\nwendcode{}\nwbegindocs{36}\nwdocspar
 
-\nwenddocs{}\nwbegincode{33}\sublabel{NWn0bN8-2jgBHG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2jgBHG-1}}}\moddef{Initialize chart series~{\nwtagstyle{}\subpageref{NWn0bN8-2jgBHG-1}}}\endmoddef\nwused{\\{NWn0bN8-35Xz53-1}}
+\subsection{Initialize chart series}
+\nwenddocs{}\nwbegincode{37}\sublabel{NWn0bN8-2jgBHG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2jgBHG-1}}}\moddef{Initialize chart series~{\nwtagstyle{}\subpageref{NWn0bN8-2jgBHG-1}}}\endmoddef\nwused{\\{NWn0bN8-35Xz53-1}}
 for (String metric : this.metric_rates) \{
   this.lc_rates_series.put(metric, new Series<Number, Number>());
   this.lc_rates.getData().add(this.lc_rates_series.get(metric));
@@ -10577,18 +10687,20 @@ for (String metric : this.metric_times) \{
   this.lc_times.getData().add(this.lc_times_series.get(metric));
   this.lu_series.put(metric, this.lc_times_series);
 \}
-\nwendcode{}\nwbegindocs{34}\nwdocspar
+\nwendcode{}\nwbegindocs{38}\nwdocspar
 
-\nwenddocs{}\nwbegincode{35}\sublabel{NWn0bN8-TFk9A-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-TFk9A-1}}}\moddef{Set default t0, t1~{\nwtagstyle{}\subpageref{NWn0bN8-TFk9A-1}}}\endmoddef\nwused{\\{NWn0bN8-2DyoOl-1}}
+\subsection{Set default t0, t1}
+\nwenddocs{}\nwbegincode{39}\sublabel{NWn0bN8-TFk9A-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-TFk9A-1}}}\moddef{Set default t0, t1~{\nwtagstyle{}\subpageref{NWn0bN8-TFk9A-1}}}\endmoddef\nwused{\\{NWn0bN8-2DyoOl-1}}
 if ("".equals(this.tf_t0.getText())) \{
   this.tf_t0.setText("0");
 \}
 if ("".equals(this.tf_t1.getText())) \{
   this.tf_t1.setText("1800");
 \}
-\nwendcode{}\nwbegindocs{36}\nwdocspar
+\nwendcode{}\nwbegindocs{40}\nwdocspar
 
-\nwenddocs{}\nwbegincode{37}\sublabel{NWn0bN8-35Xz53-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-35Xz53-1}}}\moddef{Add charts to chart containers~{\nwtagstyle{}\subpageref{NWn0bN8-35Xz53-1}}}\endmoddef\nwused{\\{NWn0bN8-2DyoOl-1}}
+\subsection{Add charts to chart containers}
+\nwenddocs{}\nwbegincode{41}\sublabel{NWn0bN8-35Xz53-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-35Xz53-1}}}\moddef{Add charts to chart containers~{\nwtagstyle{}\subpageref{NWn0bN8-35Xz53-1}}}\endmoddef\nwused{\\{NWn0bN8-2DyoOl-1}}
 \LA{}Initialize chart settings~{\nwtagstyle{}\subpageref{NWn0bN8-2Khh2C-1}}\RA{}
 \LA{}Initialize chart series~{\nwtagstyle{}\subpageref{NWn0bN8-2jgBHG-1}}\RA{}
 this.container_lc_rates.setTopAnchor(this.lc_rates, 0.0);
@@ -10616,25 +10728,28 @@ this.container_lc_times.setLeftAnchor(this.lc_times, 0.0);
 this.container_lc_times.setRightAnchor(this.lc_times, 0.0);
 this.container_lc_times.setBottomAnchor(this.lc_times, 0.0);
 this.container_lc_times.getChildren().add(this.lc_times);
-\nwendcode{}\nwbegindocs{38}\nwdocspar
+\nwendcode{}\nwbegindocs{42}\nwdocspar
 
-\nwenddocs{}\nwbegincode{39}\sublabel{NWn0bN8-1VIplt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1VIplt-1}}}\moddef{Enable metrics checkbox containers~{\nwtagstyle{}\subpageref{NWn0bN8-1VIplt-1}}}\endmoddef\nwused{\\{NWn0bN8-2DyoOl-1}}
+\subsection{Enable metrics checkbox containers}
+\nwenddocs{}\nwbegincode{43}\sublabel{NWn0bN8-1VIplt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1VIplt-1}}}\moddef{Enable metrics checkbox containers~{\nwtagstyle{}\subpageref{NWn0bN8-1VIplt-1}}}\endmoddef\nwused{\\{NWn0bN8-2DyoOl-1}}
 this.vbox_metrics_rates.setDisable(false);
 this.vbox_metrics_distances.setDisable(false);
 this.vbox_metrics_durations.setDisable(false);
 this.vbox_metrics_counts.setDisable(false);
 this.vbox_metrics_times.setDisable(false);
-\nwendcode{}\nwbegindocs{40}\nwdocspar
+\nwendcode{}\nwbegindocs{44}\nwdocspar
 
-\nwenddocs{}\nwbegincode{41}\sublabel{NWn0bN8-1tcU0w-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1tcU0w-1}}}\moddef{Disable metrics checkbox containers~{\nwtagstyle{}\subpageref{NWn0bN8-1tcU0w-1}}}\endmoddef\nwused{\\{NWn0bN8-27hSI5-1}}
+\subsection{Disable metrics checkbox containers}
+\nwenddocs{}\nwbegincode{45}\sublabel{NWn0bN8-1tcU0w-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1tcU0w-1}}}\moddef{Disable metrics checkbox containers~{\nwtagstyle{}\subpageref{NWn0bN8-1tcU0w-1}}}\endmoddef\nwused{\\{NWn0bN8-27hSI5-1}}
 this.vbox_metrics_rates.setDisable(true);
 this.vbox_metrics_distances.setDisable(true);
 this.vbox_metrics_durations.setDisable(true);
 this.vbox_metrics_counts.setDisable(true);
 this.vbox_metrics_times.setDisable(true);
-\nwendcode{}\nwbegindocs{42}\nwdocspar
+\nwendcode{}\nwbegindocs{46}\nwdocspar
 
-\nwenddocs{}\nwbegincode{43}\sublabel{NWn0bN8-MvQLz-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-MvQLz-1}}}\moddef{Deselect metrics checkboxes~{\nwtagstyle{}\subpageref{NWn0bN8-MvQLz-1}}}\endmoddef\nwused{\\{NWn0bN8-27hSI5-1}}
+\subsection{Deselect metrics checkboxes}
+\nwenddocs{}\nwbegincode{47}\sublabel{NWn0bN8-MvQLz-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-MvQLz-1}}}\moddef{Deselect metrics checkboxes~{\nwtagstyle{}\subpageref{NWn0bN8-MvQLz-1}}}\endmoddef\nwused{\\{NWn0bN8-27hSI5-1}}
 this.chk_serviceRate.setSelected(false);
 this.chk_distanceSavings.setSelected(false);
 this.chk_serverTravelDistance.setSelected(false);
@@ -10659,14 +10774,16 @@ this.chk_countRequestsViolations.setSelected(false);
 this.chk_countServersViolations.setSelected(false);
 this.chk_timeRequestHandling.setSelected(false);
 this.chk_timeServerHandling.setSelected(false);
-\nwendcode{}\nwbegindocs{44}\nwdocspar
+\nwendcode{}\nwbegindocs{48}\nwdocspar
 
-\nwenddocs{}\nwbegincode{45}\sublabel{NWn0bN8-1Zm9TM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1Zm9TM-1}}}\moddef{Retrieve serviceRate~{\nwtagstyle{}\subpageref{NWn0bN8-1Zm9TM-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
+\subsection{Retrieve serviceRate}
+\nwenddocs{}\nwbegincode{49}\sublabel{NWn0bN8-1Zm9TM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1Zm9TM-1}}}\moddef{Retrieve serviceRate~{\nwtagstyle{}\subpageref{NWn0bN8-1Zm9TM-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-B}}
 int[] output = this.controller.queryMetricServiceRate();
 val = (output.length > 0 ? (output[0]/100.0) : 0);
-\nwidentuses{\\{{queryMetricServiceRate}{queryMetricServiceRate}}}\nwindexuse{queryMetricServiceRate}{queryMetricServiceRate}{NWn0bN8-1Zm9TM-1}\nwendcode{}\nwbegindocs{46}\nwdocspar
+\nwidentuses{\\{{queryMetricServiceRate}{queryMetricServiceRate}}}\nwindexuse{queryMetricServiceRate}{queryMetricServiceRate}{NWn0bN8-1Zm9TM-1}\nwendcode{}\nwbegindocs{50}\nwdocspar
 
-\nwenddocs{}\nwbegincode{47}\sublabel{NWn0bN8-291XnK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-291XnK-1}}}\moddef{Retrieve distanceSavings~{\nwtagstyle{}\subpageref{NWn0bN8-291XnK-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
+\subsection{Retrieve distanceSavings}
+\nwenddocs{}\nwbegincode{51}\sublabel{NWn0bN8-291XnK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-291XnK-1}}}\moddef{Retrieve distanceSavings~{\nwtagstyle{}\subpageref{NWn0bN8-291XnK-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-B}}
 int[] output = this.controller.queryMetricServerDistanceTotal();
 final int val1 = (output.length > 0 ? output[0] : 0);
 output = this.controller.queryMetricRequestDistanceBaseUnassignedTotal();
@@ -10674,122 +10791,144 @@ final int val2 = (output.length > 0 ? output[0] : 0);
 output = this.controller.queryMetricUserDistanceBaseTotal();
 final int val3 = (output.length > 0 ? output[0] : 0);
 val = (val3 == 0 ? 0 : (100.0*(1 - ((double) (val1 + val2)/val3))));
-\nwidentuses{\\{{queryMetricRequestDistanceBaseUnassignedTotal}{queryMetricRequestDistanceBaseUnassignedTotal}}\\{{queryMetricServerDistanceTotal}{queryMetricServerDistanceTotal}}\\{{queryMetricUserDistanceBaseTotal}{queryMetricUserDistanceBaseTotal}}}\nwindexuse{queryMetricRequestDistanceBaseUnassignedTotal}{queryMetricRequestDistanceBaseUnassignedTotal}{NWn0bN8-291XnK-1}\nwindexuse{queryMetricServerDistanceTotal}{queryMetricServerDistanceTotal}{NWn0bN8-291XnK-1}\nwindexuse{queryMetricUserDistanceBaseTotal}{queryMetricUserDistanceBaseTotal}{NWn0bN8-291XnK-1}\nwendcode{}\nwbegindocs{48}\nwdocspar
+\nwidentuses{\\{{queryMetricRequestDistanceBaseUnassignedTotal}{queryMetricRequestDistanceBaseUnassignedTotal}}\\{{queryMetricServerDistanceTotal}{queryMetricServerDistanceTotal}}\\{{queryMetricUserDistanceBaseTotal}{queryMetricUserDistanceBaseTotal}}}\nwindexuse{queryMetricRequestDistanceBaseUnassignedTotal}{queryMetricRequestDistanceBaseUnassignedTotal}{NWn0bN8-291XnK-1}\nwindexuse{queryMetricServerDistanceTotal}{queryMetricServerDistanceTotal}{NWn0bN8-291XnK-1}\nwindexuse{queryMetricUserDistanceBaseTotal}{queryMetricUserDistanceBaseTotal}{NWn0bN8-291XnK-1}\nwendcode{}\nwbegindocs{52}\nwdocspar
 
-\nwenddocs{}\nwbegincode{49}\sublabel{NWn0bN8-2om2Zr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2om2Zr-1}}}\moddef{Retrieve serverTravelDistance~{\nwtagstyle{}\subpageref{NWn0bN8-2om2Zr-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
+\subsection{Retrieve serverTravelDistance}
+\nwenddocs{}\nwbegincode{53}\sublabel{NWn0bN8-2om2Zr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2om2Zr-1}}}\moddef{Retrieve serverTravelDistance~{\nwtagstyle{}\subpageref{NWn0bN8-2om2Zr-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-B}}
 int[] output = this.controller.queryMetricServerDistanceTotal();
 val = (output.length > 0 ? output[0] : 0);
-\nwidentuses{\\{{queryMetricServerDistanceTotal}{queryMetricServerDistanceTotal}}}\nwindexuse{queryMetricServerDistanceTotal}{queryMetricServerDistanceTotal}{NWn0bN8-2om2Zr-1}\nwendcode{}\nwbegindocs{50}\nwdocspar
+\nwidentuses{\\{{queryMetricServerDistanceTotal}{queryMetricServerDistanceTotal}}}\nwindexuse{queryMetricServerDistanceTotal}{queryMetricServerDistanceTotal}{NWn0bN8-2om2Zr-1}\nwendcode{}\nwbegindocs{54}\nwdocspar
 
-\nwenddocs{}\nwbegincode{51}\sublabel{NWn0bN8-2HdZms-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2HdZms-1}}}\moddef{Retrieve serverServiceDistance~{\nwtagstyle{}\subpageref{NWn0bN8-2HdZms-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
+\subsection{Retrieve serverServiceDistance}
+\nwenddocs{}\nwbegincode{55}\sublabel{NWn0bN8-2HdZms-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2HdZms-1}}}\moddef{Retrieve serverServiceDistance~{\nwtagstyle{}\subpageref{NWn0bN8-2HdZms-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-B}}
 // VERY SLOW AND BAD
 // int[] output = this.controller.queryServerServiceDistanceTotal();
 // val = (output.length > 0 ? output[0] : 0);
-\nwendcode{}\nwbegindocs{52}\nwdocspar
+\nwendcode{}\nwbegindocs{56}\nwdocspar
 
-\nwenddocs{}\nwbegincode{53}\sublabel{NWn0bN8-4HFFxW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-4HFFxW-1}}}\moddef{Retrieve serverCruisingDistance~{\nwtagstyle{}\subpageref{NWn0bN8-4HFFxW-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
+\subsection{Retrieve serverCruisingDistance}
+\nwenddocs{}\nwbegincode{57}\sublabel{NWn0bN8-4HFFxW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-4HFFxW-1}}}\moddef{Retrieve serverCruisingDistance~{\nwtagstyle{}\subpageref{NWn0bN8-4HFFxW-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-B}}
 // VERY SLOW AND BAD
 // int[] output = this.controller.queryServerCruisingDistanceTotal();
 // val = (output.length > 0 ? output[0] : 0);
-\nwendcode{}\nwbegindocs{54}\nwdocspar
-
-\nwenddocs{}\nwbegincode{55}\sublabel{NWn0bN8-3YgpXN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3YgpXN-1}}}\moddef{Retrieve serverTravelDuration~{\nwtagstyle{}\subpageref{NWn0bN8-3YgpXN-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
-int[] output = this.controller.queryMetricServerDurationTravelTotal();
-val = (output.length > 0 ? output[0] : 0);
-\nwidentuses{\\{{queryMetricServerDurationTravelTotal}{queryMetricServerDurationTravelTotal}}}\nwindexuse{queryMetricServerDurationTravelTotal}{queryMetricServerDurationTravelTotal}{NWn0bN8-3YgpXN-1}\nwendcode{}\nwbegindocs{56}\nwdocspar
-
-\nwenddocs{}\nwbegincode{57}\sublabel{NWn0bN8-iLjau-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-iLjau-1}}}\moddef{Retrieve serverServiceDuration~{\nwtagstyle{}\subpageref{NWn0bN8-iLjau-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
 \nwendcode{}\nwbegindocs{58}\nwdocspar
 
-\nwenddocs{}\nwbegincode{59}\sublabel{NWn0bN8-3GIbUG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3GIbUG-1}}}\moddef{Retrieve serverCruisingDuration~{\nwtagstyle{}\subpageref{NWn0bN8-3GIbUG-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
-\nwendcode{}\nwbegindocs{60}\nwdocspar
+\subsection{Retrieve serverTravelDuration}
+\nwenddocs{}\nwbegincode{59}\sublabel{NWn0bN8-3YgpXN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3YgpXN-1}}}\moddef{Retrieve serverTravelDuration~{\nwtagstyle{}\subpageref{NWn0bN8-3YgpXN-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-B}}
+int[] output = this.controller.queryMetricServerDurationTravelTotal();
+val = (output.length > 0 ? output[0] : 0);
+\nwidentuses{\\{{queryMetricServerDurationTravelTotal}{queryMetricServerDurationTravelTotal}}}\nwindexuse{queryMetricServerDurationTravelTotal}{queryMetricServerDurationTravelTotal}{NWn0bN8-3YgpXN-1}\nwendcode{}\nwbegindocs{60}\nwdocspar
 
-\nwenddocs{}\nwbegincode{61}\sublabel{NWn0bN8-330MzF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-330MzF-1}}}\moddef{Retrieve requestDistanceUnassigned~{\nwtagstyle{}\subpageref{NWn0bN8-330MzF-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
+\subsection{Retrieve serverServiceDuration}
+\nwenddocs{}\nwbegincode{61}\sublabel{NWn0bN8-iLjau-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-iLjau-1}}}\moddef{Retrieve serverServiceDuration~{\nwtagstyle{}\subpageref{NWn0bN8-iLjau-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-B}}
+\nwendcode{}\nwbegindocs{62}\nwdocspar
+
+\subsection{Retrieve serverCruisingDuration}
+\nwenddocs{}\nwbegincode{63}\sublabel{NWn0bN8-3GIbUG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3GIbUG-1}}}\moddef{Retrieve serverCruisingDuration~{\nwtagstyle{}\subpageref{NWn0bN8-3GIbUG-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-B}}
+\nwendcode{}\nwbegindocs{64}\nwdocspar
+
+\subsection{Retrieve requestDistanceUnassigned}
+\nwenddocs{}\nwbegincode{65}\sublabel{NWn0bN8-330MzF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-330MzF-1}}}\moddef{Retrieve requestDistanceUnassigned~{\nwtagstyle{}\subpageref{NWn0bN8-330MzF-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-B}}
 int[] output = this.controller.queryMetricRequestDistanceBaseUnassignedTotal();
 val = (output.length > 0 ? output[0] : 0);
-\nwidentuses{\\{{queryMetricRequestDistanceBaseUnassignedTotal}{queryMetricRequestDistanceBaseUnassignedTotal}}}\nwindexuse{queryMetricRequestDistanceBaseUnassignedTotal}{queryMetricRequestDistanceBaseUnassignedTotal}{NWn0bN8-330MzF-1}\nwendcode{}\nwbegindocs{62}\nwdocspar
+\nwidentuses{\\{{queryMetricRequestDistanceBaseUnassignedTotal}{queryMetricRequestDistanceBaseUnassignedTotal}}}\nwindexuse{queryMetricRequestDistanceBaseUnassignedTotal}{queryMetricRequestDistanceBaseUnassignedTotal}{NWn0bN8-330MzF-1}\nwendcode{}\nwbegindocs{66}\nwdocspar
 
-\nwenddocs{}\nwbegincode{63}\sublabel{NWn0bN8-3cTfr4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3cTfr4-1}}}\moddef{Retrieve requestTransitDistance~{\nwtagstyle{}\subpageref{NWn0bN8-3cTfr4-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
+\subsection{Retrieve requestTransitDistance}
+\nwenddocs{}\nwbegincode{67}\sublabel{NWn0bN8-3cTfr4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3cTfr4-1}}}\moddef{Retrieve requestTransitDistance~{\nwtagstyle{}\subpageref{NWn0bN8-3cTfr4-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-B}}
 int[] output = this.controller.queryMetricRequestDistanceTransitTotal();
 val = (output.length > 0 ? output[0] : 0);
-\nwidentuses{\\{{queryMetricRequestDistanceTransitTotal}{queryMetricRequestDistanceTransitTotal}}}\nwindexuse{queryMetricRequestDistanceTransitTotal}{queryMetricRequestDistanceTransitTotal}{NWn0bN8-3cTfr4-1}\nwendcode{}\nwbegindocs{64}\nwdocspar
+\nwidentuses{\\{{queryMetricRequestDistanceTransitTotal}{queryMetricRequestDistanceTransitTotal}}}\nwindexuse{queryMetricRequestDistanceTransitTotal}{queryMetricRequestDistanceTransitTotal}{NWn0bN8-3cTfr4-1}\nwendcode{}\nwbegindocs{68}\nwdocspar
 
-\nwenddocs{}\nwbegincode{65}\sublabel{NWn0bN8-1gub9i-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1gub9i-1}}}\moddef{Retrieve requestDetourDistance~{\nwtagstyle{}\subpageref{NWn0bN8-1gub9i-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
+\subsection{Retrieve requestDetourDistance}
+\nwenddocs{}\nwbegincode{69}\sublabel{NWn0bN8-1gub9i-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1gub9i-1}}}\moddef{Retrieve requestDetourDistance~{\nwtagstyle{}\subpageref{NWn0bN8-1gub9i-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-B}}
 int[] output = this.controller.queryMetricRequestDistanceDetourTotal();
 val = (output.length > 0 ? output[0] : 0);
-\nwidentuses{\\{{queryMetricRequestDistanceDetourTotal}{queryMetricRequestDistanceDetourTotal}}}\nwindexuse{queryMetricRequestDistanceDetourTotal}{queryMetricRequestDistanceDetourTotal}{NWn0bN8-1gub9i-1}\nwendcode{}\nwbegindocs{66}\nwdocspar
+\nwidentuses{\\{{queryMetricRequestDistanceDetourTotal}{queryMetricRequestDistanceDetourTotal}}}\nwindexuse{queryMetricRequestDistanceDetourTotal}{queryMetricRequestDistanceDetourTotal}{NWn0bN8-1gub9i-1}\nwendcode{}\nwbegindocs{70}\nwdocspar
 
-\nwenddocs{}\nwbegincode{67}\sublabel{NWn0bN8-2tPgJc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2tPgJc-1}}}\moddef{Retrieve requestTransitDuration~{\nwtagstyle{}\subpageref{NWn0bN8-2tPgJc-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
+\subsection{Retrieve requestTransitDuration}
+\nwenddocs{}\nwbegincode{71}\sublabel{NWn0bN8-2tPgJc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2tPgJc-1}}}\moddef{Retrieve requestTransitDuration~{\nwtagstyle{}\subpageref{NWn0bN8-2tPgJc-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-B}}
 int[] output = this.controller.queryMetricRequestDurationTransitTotal();
 val = (output.length > 0 ? output[0] : 0);
-\nwidentuses{\\{{queryMetricRequestDurationTransitTotal}{queryMetricRequestDurationTransitTotal}}}\nwindexuse{queryMetricRequestDurationTransitTotal}{queryMetricRequestDurationTransitTotal}{NWn0bN8-2tPgJc-1}\nwendcode{}\nwbegindocs{68}\nwdocspar
+\nwidentuses{\\{{queryMetricRequestDurationTransitTotal}{queryMetricRequestDurationTransitTotal}}}\nwindexuse{queryMetricRequestDurationTransitTotal}{queryMetricRequestDurationTransitTotal}{NWn0bN8-2tPgJc-1}\nwendcode{}\nwbegindocs{72}\nwdocspar
 
-\nwenddocs{}\nwbegincode{69}\sublabel{NWn0bN8-8tg1w-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-8tg1w-1}}}\moddef{Retrieve requestDetourDuration~{\nwtagstyle{}\subpageref{NWn0bN8-8tg1w-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
-\nwendcode{}\nwbegindocs{70}\nwdocspar
+\subsection{Retrieve requestDetourDuration}
+\nwenddocs{}\nwbegincode{73}\sublabel{NWn0bN8-8tg1w-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-8tg1w-1}}}\moddef{Retrieve requestDetourDuration~{\nwtagstyle{}\subpageref{NWn0bN8-8tg1w-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-B}}
+\nwendcode{}\nwbegindocs{74}\nwdocspar
 
-\nwenddocs{}\nwbegincode{71}\sublabel{NWn0bN8-1aBbYv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1aBbYv-1}}}\moddef{Retrieve requestTravelDuration~{\nwtagstyle{}\subpageref{NWn0bN8-1aBbYv-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
+\subsection{Retrieve requestTravelDuration}
+\nwenddocs{}\nwbegincode{75}\sublabel{NWn0bN8-1aBbYv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1aBbYv-1}}}\moddef{Retrieve requestTravelDuration~{\nwtagstyle{}\subpageref{NWn0bN8-1aBbYv-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-B}}
 int[] output = this.controller.queryMetricRequestDurationTravelTotal();
 val = (output.length > 0 ? output[0] : 0);
-\nwidentuses{\\{{queryMetricRequestDurationTravelTotal}{queryMetricRequestDurationTravelTotal}}}\nwindexuse{queryMetricRequestDurationTravelTotal}{queryMetricRequestDurationTravelTotal}{NWn0bN8-1aBbYv-1}\nwendcode{}\nwbegindocs{72}\nwdocspar
+\nwidentuses{\\{{queryMetricRequestDurationTravelTotal}{queryMetricRequestDurationTravelTotal}}}\nwindexuse{queryMetricRequestDurationTravelTotal}{queryMetricRequestDurationTravelTotal}{NWn0bN8-1aBbYv-1}\nwendcode{}\nwbegindocs{76}\nwdocspar
 
-\nwenddocs{}\nwbegincode{73}\sublabel{NWn0bN8-4by79p-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-4by79p-1}}}\moddef{Retrieve requestPickupDuration~{\nwtagstyle{}\subpageref{NWn0bN8-4by79p-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
+\subsection{Retrieve requestPickupDuration}
+\nwenddocs{}\nwbegincode{77}\sublabel{NWn0bN8-4by79p-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-4by79p-1}}}\moddef{Retrieve requestPickupDuration~{\nwtagstyle{}\subpageref{NWn0bN8-4by79p-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-B}}
 int[] output = this.controller.queryMetricRequestDurationPickupTotal();
 val = (output.length > 0 ? output[0] : 0);
-\nwidentuses{\\{{queryMetricRequestDurationPickupTotal}{queryMetricRequestDurationPickupTotal}}}\nwindexuse{queryMetricRequestDurationPickupTotal}{queryMetricRequestDurationPickupTotal}{NWn0bN8-4by79p-1}\nwendcode{}\nwbegindocs{74}\nwdocspar
+\nwidentuses{\\{{queryMetricRequestDurationPickupTotal}{queryMetricRequestDurationPickupTotal}}}\nwindexuse{queryMetricRequestDurationPickupTotal}{queryMetricRequestDurationPickupTotal}{NWn0bN8-4by79p-1}\nwendcode{}\nwbegindocs{78}\nwdocspar
 
-\nwenddocs{}\nwbegincode{75}\sublabel{NWn0bN8-2M0IDQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2M0IDQ-1}}}\moddef{Retrieve countRequestsQueue~{\nwtagstyle{}\subpageref{NWn0bN8-2M0IDQ-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
+\subsection{Retrieve countRequestsQueue}
+\nwenddocs{}\nwbegincode{79}\sublabel{NWn0bN8-2M0IDQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2M0IDQ-1}}}\moddef{Retrieve countRequestsQueue~{\nwtagstyle{}\subpageref{NWn0bN8-2M0IDQ-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-B}}
 val = this.controller.retrieveQueueSize();
-\nwidentuses{\\{{retrieveQueueSize}{retrieveQueueSize}}}\nwindexuse{retrieveQueueSize}{retrieveQueueSize}{NWn0bN8-2M0IDQ-1}\nwendcode{}\nwbegindocs{76}\nwdocspar
+\nwidentuses{\\{{retrieveQueueSize}{retrieveQueueSize}}}\nwindexuse{retrieveQueueSize}{retrieveQueueSize}{NWn0bN8-2M0IDQ-1}\nwendcode{}\nwbegindocs{80}\nwdocspar
 
-\nwenddocs{}\nwbegincode{77}\sublabel{NWn0bN8-3cIbwq-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3cIbwq-1}}}\moddef{Retrieve countRequestsActive~{\nwtagstyle{}\subpageref{NWn0bN8-3cIbwq-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
-\nwendcode{}\nwbegindocs{78}\nwdocspar
-
-\nwenddocs{}\nwbegincode{79}\sublabel{NWn0bN8-3Gfa93-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3Gfa93-1}}}\moddef{Retrieve countRequestsCompleted~{\nwtagstyle{}\subpageref{NWn0bN8-3Gfa93-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
-\nwendcode{}\nwbegindocs{80}\nwdocspar
-
-\nwenddocs{}\nwbegincode{81}\sublabel{NWn0bN8-1a4eLj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1a4eLj-1}}}\moddef{Retrieve countRequestsFailed~{\nwtagstyle{}\subpageref{NWn0bN8-1a4eLj-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
+\subsection{Retrieve countRequestsActive}
+\nwenddocs{}\nwbegincode{81}\sublabel{NWn0bN8-3cIbwq-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3cIbwq-1}}}\moddef{Retrieve countRequestsActive~{\nwtagstyle{}\subpageref{NWn0bN8-3cIbwq-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-B}}
 \nwendcode{}\nwbegindocs{82}\nwdocspar
 
-\nwenddocs{}\nwbegincode{83}\sublabel{NWn0bN8-md0F8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-md0F8-1}}}\moddef{Retrieve countServersActive~{\nwtagstyle{}\subpageref{NWn0bN8-md0F8-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
+\subsection{Retrieve countRequestsCompleted}
+\nwenddocs{}\nwbegincode{83}\sublabel{NWn0bN8-3Gfa93-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3Gfa93-1}}}\moddef{Retrieve countRequestsCompleted~{\nwtagstyle{}\subpageref{NWn0bN8-3Gfa93-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-B}}
 \nwendcode{}\nwbegindocs{84}\nwdocspar
 
-\nwenddocs{}\nwbegincode{85}\sublabel{NWn0bN8-1qBKS6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1qBKS6-1}}}\moddef{Retrieve countRequestsViolations~{\nwtagstyle{}\subpageref{NWn0bN8-1qBKS6-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
+\subsection{Retrieve countRequestsFailed}
+\nwenddocs{}\nwbegincode{85}\sublabel{NWn0bN8-1a4eLj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1a4eLj-1}}}\moddef{Retrieve countRequestsFailed~{\nwtagstyle{}\subpageref{NWn0bN8-1a4eLj-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-B}}
 \nwendcode{}\nwbegindocs{86}\nwdocspar
 
-\nwenddocs{}\nwbegincode{87}\sublabel{NWn0bN8-40qlxP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-40qlxP-1}}}\moddef{Retrieve countServersViolations~{\nwtagstyle{}\subpageref{NWn0bN8-40qlxP-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
+\subsection{Retrieve countServersActive}
+\nwenddocs{}\nwbegincode{87}\sublabel{NWn0bN8-md0F8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-md0F8-1}}}\moddef{Retrieve countServersActive~{\nwtagstyle{}\subpageref{NWn0bN8-md0F8-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-B}}
 \nwendcode{}\nwbegindocs{88}\nwdocspar
 
-\nwenddocs{}\nwbegincode{89}\sublabel{NWn0bN8-2L8WYA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2L8WYA-1}}}\moddef{Retrieve timeRequestHandling~{\nwtagstyle{}\subpageref{NWn0bN8-2L8WYA-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
+\subsection{Retrieve countRequestsViolations}
+\nwenddocs{}\nwbegincode{89}\sublabel{NWn0bN8-1qBKS6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1qBKS6-1}}}\moddef{Retrieve countRequestsViolations~{\nwtagstyle{}\subpageref{NWn0bN8-1qBKS6-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-B}}
 \nwendcode{}\nwbegindocs{90}\nwdocspar
 
-\nwenddocs{}\nwbegincode{91}\sublabel{NWn0bN8-2BeaZo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2BeaZo-1}}}\moddef{Retrieve timeServerHandling~{\nwtagstyle{}\subpageref{NWn0bN8-2BeaZo-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
+\subsection{Retrieve countServersViolations}
+\nwenddocs{}\nwbegincode{91}\sublabel{NWn0bN8-40qlxP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-40qlxP-1}}}\moddef{Retrieve countServersViolations~{\nwtagstyle{}\subpageref{NWn0bN8-40qlxP-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-B}}
 \nwendcode{}\nwbegindocs{92}\nwdocspar
+
+\subsection{Retrieve timeRequestHandling}
+\nwenddocs{}\nwbegincode{93}\sublabel{NWn0bN8-2L8WYA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2L8WYA-1}}}\moddef{Retrieve timeRequestHandling~{\nwtagstyle{}\subpageref{NWn0bN8-2L8WYA-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-B}}
+\nwendcode{}\nwbegindocs{94}\nwdocspar
+
+\subsection{Retrieve timeServerHandling}
+\nwenddocs{}\nwbegincode{95}\sublabel{NWn0bN8-2BeaZo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2BeaZo-1}}}\moddef{Retrieve timeServerHandling~{\nwtagstyle{}\subpageref{NWn0bN8-2BeaZo-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-B}}
+\nwendcode{}\nwbegindocs{96}\nwdocspar
 
 \section{Methods}
 
 \subsection{\texttt{actionQuit}(1)}
-\nwenddocs{}\nwbegincode{93}\sublabel{NWn0bN8-2vzGSf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2vzGSf-1}}}\moddef{actionQuit(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2vzGSf-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
+\nwenddocs{}\nwbegincode{97}\sublabel{NWn0bN8-2vzGSf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2vzGSf-1}}}\moddef{actionQuit(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2vzGSf-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
 void actionQuit(final ActionEvent e) \{
   System.exit(0);
 \}
 \nwindexdefn{actionQuit}{actionQuit}{NWn0bN8-2vzGSf-1}\eatline
-\nwidentdefs{\\{{actionQuit}{actionQuit}}}\nwendcode{}\nwbegindocs{94}\nwdocspar
+\nwidentdefs{\\{{actionQuit}{actionQuit}}}\nwendcode{}\nwbegindocs{98}\nwdocspar
 \subsection{\texttt{actionGitHub}(1)}
-\nwenddocs{}\nwbegincode{95}\sublabel{NWn0bN8-1K1K6E-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1K1K6E-1}}}\moddef{actionGitHub(1)~{\nwtagstyle{}\subpageref{NWn0bN8-1K1K6E-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
+\nwenddocs{}\nwbegincode{99}\sublabel{NWn0bN8-1K1K6E-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1K1K6E-1}}}\moddef{actionGitHub(1)~{\nwtagstyle{}\subpageref{NWn0bN8-1K1K6E-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
 void actionGitHub(final ActionEvent e) \{
   // ...
 \}
 \nwindexdefn{actionGitHub}{actionGitHub}{NWn0bN8-1K1K6E-1}\eatline
-\nwidentdefs{\\{{actionGitHub}{actionGitHub}}}\nwendcode{}\nwbegindocs{96}\nwdocspar
+\nwidentdefs{\\{{actionGitHub}{actionGitHub}}}\nwendcode{}\nwbegindocs{100}\nwdocspar
 \subsection{\texttt{actionAbout}(1)}
-\nwenddocs{}\nwbegincode{97}\sublabel{NWn0bN8-3NAmly-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3NAmly-1}}}\moddef{actionAbout(1)~{\nwtagstyle{}\subpageref{NWn0bN8-3NAmly-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
+\nwenddocs{}\nwbegincode{101}\sublabel{NWn0bN8-3NAmly-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3NAmly-1}}}\moddef{actionAbout(1)~{\nwtagstyle{}\subpageref{NWn0bN8-3NAmly-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
 void actionAbout(final ActionEvent e) \{
   // ...
 \}
 \nwindexdefn{actionAbout}{actionAbout}{NWn0bN8-3NAmly-1}\eatline
-\nwidentdefs{\\{{actionAbout}{actionAbout}}}\nwendcode{}\nwbegindocs{98}\nwdocspar
+\nwidentdefs{\\{{actionAbout}{actionAbout}}}\nwendcode{}\nwbegindocs{102}\nwdocspar
 \subsection{\texttt{actionNew}(1)}
-\nwenddocs{}\nwbegincode{99}\sublabel{NWn0bN8-T7Xhs-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-T7Xhs-1}}}\moddef{actionNew(1)~{\nwtagstyle{}\subpageref{NWn0bN8-T7Xhs-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
+\nwenddocs{}\nwbegincode{103}\sublabel{NWn0bN8-T7Xhs-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-T7Xhs-1}}}\moddef{actionNew(1)~{\nwtagstyle{}\subpageref{NWn0bN8-T7Xhs-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
 void actionNew(final ActionEvent e) \{
   this.btn_new      .setDisable(true);
   this.btn_load     .setDisable(true);
@@ -10823,9 +10962,9 @@ void actionNew(final ActionEvent e) \{
   \});
 \}
 \nwindexdefn{actionNew}{actionNew}{NWn0bN8-T7Xhs-1}\eatline
-\nwidentdefs{\\{{actionNew}{actionNew}}}\nwidentuses{\\{{instanceInitialize}{instanceInitialize}}\\{{instanceNew}{instanceNew}}}\nwindexuse{instanceInitialize}{instanceInitialize}{NWn0bN8-T7Xhs-1}\nwindexuse{instanceNew}{instanceNew}{NWn0bN8-T7Xhs-1}\nwendcode{}\nwbegindocs{100}\nwdocspar
+\nwidentdefs{\\{{actionNew}{actionNew}}}\nwidentuses{\\{{instanceInitialize}{instanceInitialize}}\\{{instanceNew}{instanceNew}}}\nwindexuse{instanceInitialize}{instanceInitialize}{NWn0bN8-T7Xhs-1}\nwindexuse{instanceNew}{instanceNew}{NWn0bN8-T7Xhs-1}\nwendcode{}\nwbegindocs{104}\nwdocspar
 \subsection{\texttt{actionLoad}(1)}
-\nwenddocs{}\nwbegincode{101}\sublabel{NWn0bN8-2dDAtx-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2dDAtx-1}}}\moddef{actionLoad(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2dDAtx-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
+\nwenddocs{}\nwbegincode{105}\sublabel{NWn0bN8-2dDAtx-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2dDAtx-1}}}\moddef{actionLoad(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2dDAtx-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
 void actionLoad(final ActionEvent e) \{
   this.btn_new      .setDisable(true);
   this.btn_load     .setDisable(true);
@@ -10876,9 +11015,9 @@ void actionLoad(final ActionEvent e) \{
   \}
 \}
 \nwindexdefn{actionLoad}{actionLoad}{NWn0bN8-2dDAtx-1}\eatline
-\nwidentdefs{\\{{actionLoad}{actionLoad}}}\nwidentuses{\\{{cacheRoadNetworkFromDB}{cacheRoadNetworkFromDB}}\\{{cacheUsersFromDB}{cacheUsersFromDB}}\\{{drawRoadNetwork}{drawRoadNetwork}}\\{{instanceLoad}{instanceLoad}}\\{{PrintSQLException}{PrintSQLException}}\\{{queryEdgesCount}{queryEdgesCount}}\\{{queryRequestsCount}{queryRequestsCount}}\\{{queryServersCount}{queryServersCount}}\\{{queryVerticesCount}{queryVerticesCount}}}\nwindexuse{cacheRoadNetworkFromDB}{cacheRoadNetworkFromDB}{NWn0bN8-2dDAtx-1}\nwindexuse{cacheUsersFromDB}{cacheUsersFromDB}{NWn0bN8-2dDAtx-1}\nwindexuse{drawRoadNetwork}{drawRoadNetwork}{NWn0bN8-2dDAtx-1}\nwindexuse{instanceLoad}{instanceLoad}{NWn0bN8-2dDAtx-1}\nwindexuse{PrintSQLException}{PrintSQLException}{NWn0bN8-2dDAtx-1}\nwindexuse{queryEdgesCount}{queryEdgesCount}{NWn0bN8-2dDAtx-1}\nwindexuse{queryRequestsCount}{queryRequestsCount}{NWn0bN8-2dDAtx-1}\nwindexuse{queryServersCount}{queryServersCount}{NWn0bN8-2dDAtx-1}\nwindexuse{queryVerticesCount}{queryVerticesCount}{NWn0bN8-2dDAtx-1}\nwendcode{}\nwbegindocs{102}\nwdocspar
+\nwidentdefs{\\{{actionLoad}{actionLoad}}}\nwidentuses{\\{{cacheRoadNetworkFromDB}{cacheRoadNetworkFromDB}}\\{{cacheUsersFromDB}{cacheUsersFromDB}}\\{{drawRoadNetwork}{drawRoadNetwork}}\\{{instanceLoad}{instanceLoad}}\\{{PrintSQLException}{PrintSQLException}}\\{{queryEdgesCount}{queryEdgesCount}}\\{{queryRequestsCount}{queryRequestsCount}}\\{{queryServersCount}{queryServersCount}}\\{{queryVerticesCount}{queryVerticesCount}}}\nwindexuse{cacheRoadNetworkFromDB}{cacheRoadNetworkFromDB}{NWn0bN8-2dDAtx-1}\nwindexuse{cacheUsersFromDB}{cacheUsersFromDB}{NWn0bN8-2dDAtx-1}\nwindexuse{drawRoadNetwork}{drawRoadNetwork}{NWn0bN8-2dDAtx-1}\nwindexuse{instanceLoad}{instanceLoad}{NWn0bN8-2dDAtx-1}\nwindexuse{PrintSQLException}{PrintSQLException}{NWn0bN8-2dDAtx-1}\nwindexuse{queryEdgesCount}{queryEdgesCount}{NWn0bN8-2dDAtx-1}\nwindexuse{queryRequestsCount}{queryRequestsCount}{NWn0bN8-2dDAtx-1}\nwindexuse{queryServersCount}{queryServersCount}{NWn0bN8-2dDAtx-1}\nwindexuse{queryVerticesCount}{queryVerticesCount}{NWn0bN8-2dDAtx-1}\nwendcode{}\nwbegindocs{106}\nwdocspar
 \subsection{\texttt{actionRoad(1)}}
-\nwenddocs{}\nwbegincode{103}\sublabel{NWn0bN8-2qwznl-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2qwznl-1}}}\moddef{actionRoad(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2qwznl-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
+\nwenddocs{}\nwbegincode{107}\sublabel{NWn0bN8-2qwznl-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2qwznl-1}}}\moddef{actionRoad(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2qwznl-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
 void actionRoad(final ActionEvent e) \{
   boolean state_btn_gtree = this.btn_gtree.isDisabled();
   this.btn_road     .setDisable(true);
@@ -10925,10 +11064,10 @@ void actionRoad(final ActionEvent e) \{
     \});
   \}
 \}
-\nwidentuses{\\{{drawRoadNetwork}{drawRoadNetwork}}\\{{loadRoadNetworkFromFile}{loadRoadNetworkFromFile}}\\{{PrintSQLException}{PrintSQLException}}\\{{queryEdgesCount}{queryEdgesCount}}\\{{queryVerticesCount}{queryVerticesCount}}}\nwindexuse{drawRoadNetwork}{drawRoadNetwork}{NWn0bN8-2qwznl-1}\nwindexuse{loadRoadNetworkFromFile}{loadRoadNetworkFromFile}{NWn0bN8-2qwznl-1}\nwindexuse{PrintSQLException}{PrintSQLException}{NWn0bN8-2qwznl-1}\nwindexuse{queryEdgesCount}{queryEdgesCount}{NWn0bN8-2qwznl-1}\nwindexuse{queryVerticesCount}{queryVerticesCount}{NWn0bN8-2qwznl-1}\nwendcode{}\nwbegindocs{104}\nwdocspar
+\nwidentuses{\\{{drawRoadNetwork}{drawRoadNetwork}}\\{{loadRoadNetworkFromFile}{loadRoadNetworkFromFile}}\\{{PrintSQLException}{PrintSQLException}}\\{{queryEdgesCount}{queryEdgesCount}}\\{{queryVerticesCount}{queryVerticesCount}}}\nwindexuse{drawRoadNetwork}{drawRoadNetwork}{NWn0bN8-2qwznl-1}\nwindexuse{loadRoadNetworkFromFile}{loadRoadNetworkFromFile}{NWn0bN8-2qwznl-1}\nwindexuse{PrintSQLException}{PrintSQLException}{NWn0bN8-2qwznl-1}\nwindexuse{queryEdgesCount}{queryEdgesCount}{NWn0bN8-2qwznl-1}\nwindexuse{queryVerticesCount}{queryVerticesCount}{NWn0bN8-2qwznl-1}\nwendcode{}\nwbegindocs{108}\nwdocspar
 
 \subsection{\texttt{actionGtree(1)}}
-\nwenddocs{}\nwbegincode{105}\sublabel{NWn0bN8-18974H-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-18974H-1}}}\moddef{actionGtree(1)~{\nwtagstyle{}\subpageref{NWn0bN8-18974H-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
+\nwenddocs{}\nwbegincode{109}\sublabel{NWn0bN8-18974H-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-18974H-1}}}\moddef{actionGtree(1)~{\nwtagstyle{}\subpageref{NWn0bN8-18974H-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
 void actionGtree(final ActionEvent e) \{
   boolean state_btn_prob = this.btn_prob.isDisabled();
   boolean state_btn_road = this.btn_road.isDisabled();
@@ -10978,10 +11117,10 @@ void actionGtree(final ActionEvent e) \{
     this.lbl_status   .setText("Cancelled load gtree.");
   \}
 \}
-\nwidentuses{\\{{gtreeClose}{gtreeClose}}\\{{gtreeLoad}{gtreeLoad}}}\nwindexuse{gtreeClose}{gtreeClose}{NWn0bN8-18974H-1}\nwindexuse{gtreeLoad}{gtreeLoad}{NWn0bN8-18974H-1}\nwendcode{}\nwbegindocs{106}\nwdocspar
+\nwidentuses{\\{{gtreeClose}{gtreeClose}}\\{{gtreeLoad}{gtreeLoad}}}\nwindexuse{gtreeClose}{gtreeClose}{NWn0bN8-18974H-1}\nwindexuse{gtreeLoad}{gtreeLoad}{NWn0bN8-18974H-1}\nwendcode{}\nwbegindocs{110}\nwdocspar
 
 \subsection{\texttt{actionProb}(1)}
-\nwenddocs{}\nwbegincode{107}\sublabel{NWn0bN8-ZrzWj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-ZrzWj-1}}}\moddef{actionProb(1)~{\nwtagstyle{}\subpageref{NWn0bN8-ZrzWj-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
+\nwenddocs{}\nwbegincode{111}\sublabel{NWn0bN8-ZrzWj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-ZrzWj-1}}}\moddef{actionProb(1)~{\nwtagstyle{}\subpageref{NWn0bN8-ZrzWj-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
 void actionProb(final ActionEvent e) \{
   this.btn_prob     .setDisable(true);
   this.circ_status  .setFill(C_WARN);
@@ -11029,10 +11168,10 @@ void actionProb(final ActionEvent e) \{
     \});
   \}
 \}
-\nwidentuses{\\{{loadProblem}{loadProblem}}\\{{PrintSQLException}{PrintSQLException}}\\{{queryRequestsCount}{queryRequestsCount}}\\{{queryServersCount}{queryServersCount}}}\nwindexuse{loadProblem}{loadProblem}{NWn0bN8-ZrzWj-1}\nwindexuse{PrintSQLException}{PrintSQLException}{NWn0bN8-ZrzWj-1}\nwindexuse{queryRequestsCount}{queryRequestsCount}{NWn0bN8-ZrzWj-1}\nwindexuse{queryServersCount}{queryServersCount}{NWn0bN8-ZrzWj-1}\nwendcode{}\nwbegindocs{108}\nwdocspar
+\nwidentuses{\\{{loadProblem}{loadProblem}}\\{{PrintSQLException}{PrintSQLException}}\\{{queryRequestsCount}{queryRequestsCount}}\\{{queryServersCount}{queryServersCount}}}\nwindexuse{loadProblem}{loadProblem}{NWn0bN8-ZrzWj-1}\nwindexuse{PrintSQLException}{PrintSQLException}{NWn0bN8-ZrzWj-1}\nwindexuse{queryRequestsCount}{queryRequestsCount}{NWn0bN8-ZrzWj-1}\nwindexuse{queryServersCount}{queryServersCount}{NWn0bN8-ZrzWj-1}\nwendcode{}\nwbegindocs{112}\nwdocspar
 
 \subsection{\texttt{actionClient}(1)}
-\nwenddocs{}\nwbegincode{109}\sublabel{NWn0bN8-4G0CtX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-4G0CtX-1}}}\moddef{actionClient(1)~{\nwtagstyle{}\subpageref{NWn0bN8-4G0CtX-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
+\nwenddocs{}\nwbegincode{113}\sublabel{NWn0bN8-4G0CtX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-4G0CtX-1}}}\moddef{actionClient(1)~{\nwtagstyle{}\subpageref{NWn0bN8-4G0CtX-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
 void actionClient(final ActionEvent e) \{
   this.btn_client   .setDisable(true);
   this.circ_status  .setFill(C_WARN);
@@ -11074,10 +11213,10 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
     this.lbl_status   .setText("Loaded "+cj.getName());
   \}
 \}
-\nwendcode{}\nwbegindocs{110}\nwdocspar
+\nwendcode{}\nwbegindocs{114}\nwdocspar
 
 \subsection{\texttt{actionStartSequential}(1)}
-\nwenddocs{}\nwbegincode{111}\sublabel{NWn0bN8-2DyoOl-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2DyoOl-1}}}\moddef{actionStartSequential(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2DyoOl-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
+\nwenddocs{}\nwbegincode{115}\sublabel{NWn0bN8-2DyoOl-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2DyoOl-1}}}\moddef{actionStartSequential(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2DyoOl-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
 void actionStartSequential(final ActionEvent e) \{
   this.jarclass = this.tf_client.getText();
   if ("".equals(this.jarclass)) \{
@@ -11099,6 +11238,7 @@ void actionStartSequential(final ActionEvent e) \{
     Constructor<?> tempcstor = tempclass.getDeclaredConstructor();
     this.client = (Client) tempcstor.newInstance();
     this.controller.setRefClient(this.client);
+    this.controller.forwardRefCommunicator(this.controller.getRefCommunicator());
     this.client.forwardRefCacheVertices(this.controller.retrieveRefCacheVertices());
     this.client.forwardRefCacheEdges(this.controller.retrieveRefCacheEdges());
     this.client.forwardRefCacheUsers(this.controller.retrieveRefCacheUsers());
@@ -11110,22 +11250,33 @@ void actionStartSequential(final ActionEvent e) \{
     \}
     this.t0 = Integer.parseInt(this.tf_t0.getText());
     this.t1 = Integer.parseInt(this.tf_t1.getText());
-    this.controller.setClockStart(t0);
-    this.controller.setClockEnd(t1);
-    this.timer.start();
+    this.controller.setClockStart(this.t0);
+    this.controller.setClockEnd(this.t1);
+    \LA{}Initialize server rectangles~{\nwtagstyle{}\subpageref{NWn0bN8-2qVBpg-1}}\RA{}
     \LA{}Add charts to chart containers~{\nwtagstyle{}\subpageref{NWn0bN8-35Xz53-1}}\RA{}
     \LA{}Enable metrics checkbox containers~{\nwtagstyle{}\subpageref{NWn0bN8-1VIplt-1}}\RA{}
+    this.timer.start();
     this.circ_status  .setFill(C_SUCCESS);
     this.lbl_status   .setText("Simulation started.");
-    CompletableFuture.runAsync(() -> \{
-      this.controller.startSequential((status) -> \{
-        Platform.runLater(() -> \{
-          this.lbl_status.setText("Simulation "+(status ? "ended." : "failed."));
+    this.muf = new MapUnitsFetcher();
+    this.muf.setUnit(this.unit);
+    this.muf.setLngMin(this.mbr[0]);
+    this.muf.setLatMin(this.mbr[2]);
+    this.exe = Executors.newScheduledThreadPool(2);
+    this.cbSimRunner = this.exe.schedule(() -> \{
+      try \{
+        this.controller.startSequential((status) -> \{
+          Platform.runLater(() -> \{
+            this.lbl_status.setText("Simulation "+(status ? "ended." : "failed."));
+          \});
         \});
-      \});
-    \});
-    this.exe = Executors.newScheduledThreadPool(1);
-    this.cbMapUpdater = this.exe.scheduleAtFixedRate(new MapUpdater(this.controller, this.lbl_status, this.can_road), 0, 1, TimeUnit.SECONDS);
+      \} catch (Exception ee) \{
+        System.err.println("Unexepected error in startSequential");
+        ee.printStackTrace();
+        System.exit(1);
+      \}
+    \}, 0, TimeUnit.SECONDS);
+    this.cbMapUpdater = this.exe.scheduleAtFixedRate(new MapUpdater(this.controller, this.lbl_status, this.can_servers, this.muf), 0, 1, TimeUnit.SECONDS);
   \} catch (MalformedURLException
       | ClassNotFoundException
       | NoSuchMethodException
@@ -11137,22 +11288,24 @@ void actionStartSequential(final ActionEvent e) \{
   \}
 \}
 \nwindexdefn{actionStartSequential}{actionStartSequential}{NWn0bN8-2DyoOl-1}\eatline
-\nwidentdefs{\\{{actionStartSequential}{actionStartSequential}}}\nwidentuses{\\{{forwardRefCacheEdges}{forwardRefCacheEdges}}\\{{forwardRefCacheUsers}{forwardRefCacheUsers}}\\{{forwardRefCacheVertices}{forwardRefCacheVertices}}\\{{gtreeLoad}{gtreeLoad}}\\{{retrieveRefCacheEdges}{retrieveRefCacheEdges}}\\{{retrieveRefCacheUsers}{retrieveRefCacheUsers}}\\{{retrieveRefCacheVertices}{retrieveRefCacheVertices}}\\{{setClockEnd}{setClockEnd}}\\{{setClockStart}{setClockStart}}\\{{setRefClient}{setRefClient}}\\{{startSequential}{startSequential}}}\nwindexuse{forwardRefCacheEdges}{forwardRefCacheEdges}{NWn0bN8-2DyoOl-1}\nwindexuse{forwardRefCacheUsers}{forwardRefCacheUsers}{NWn0bN8-2DyoOl-1}\nwindexuse{forwardRefCacheVertices}{forwardRefCacheVertices}{NWn0bN8-2DyoOl-1}\nwindexuse{gtreeLoad}{gtreeLoad}{NWn0bN8-2DyoOl-1}\nwindexuse{retrieveRefCacheEdges}{retrieveRefCacheEdges}{NWn0bN8-2DyoOl-1}\nwindexuse{retrieveRefCacheUsers}{retrieveRefCacheUsers}{NWn0bN8-2DyoOl-1}\nwindexuse{retrieveRefCacheVertices}{retrieveRefCacheVertices}{NWn0bN8-2DyoOl-1}\nwindexuse{setClockEnd}{setClockEnd}{NWn0bN8-2DyoOl-1}\nwindexuse{setClockStart}{setClockStart}{NWn0bN8-2DyoOl-1}\nwindexuse{setRefClient}{setRefClient}{NWn0bN8-2DyoOl-1}\nwindexuse{startSequential}{startSequential}{NWn0bN8-2DyoOl-1}\nwendcode{}\nwbegindocs{112}\nwdocspar
+\nwidentdefs{\\{{actionStartSequential}{actionStartSequential}}}\nwidentuses{\\{{forwardRefCacheEdges}{forwardRefCacheEdges}}\\{{forwardRefCacheUsers}{forwardRefCacheUsers}}\\{{forwardRefCacheVertices}{forwardRefCacheVertices}}\\{{forwardRefCommunicator}{forwardRefCommunicator}}\\{{getRefCommunicator}{getRefCommunicator}}\\{{gtreeLoad}{gtreeLoad}}\\{{retrieveRefCacheEdges}{retrieveRefCacheEdges}}\\{{retrieveRefCacheUsers}{retrieveRefCacheUsers}}\\{{retrieveRefCacheVertices}{retrieveRefCacheVertices}}\\{{setClockEnd}{setClockEnd}}\\{{setClockStart}{setClockStart}}\\{{setRefClient}{setRefClient}}\\{{startSequential}{startSequential}}}\nwindexuse{forwardRefCacheEdges}{forwardRefCacheEdges}{NWn0bN8-2DyoOl-1}\nwindexuse{forwardRefCacheUsers}{forwardRefCacheUsers}{NWn0bN8-2DyoOl-1}\nwindexuse{forwardRefCacheVertices}{forwardRefCacheVertices}{NWn0bN8-2DyoOl-1}\nwindexuse{forwardRefCommunicator}{forwardRefCommunicator}{NWn0bN8-2DyoOl-1}\nwindexuse{getRefCommunicator}{getRefCommunicator}{NWn0bN8-2DyoOl-1}\nwindexuse{gtreeLoad}{gtreeLoad}{NWn0bN8-2DyoOl-1}\nwindexuse{retrieveRefCacheEdges}{retrieveRefCacheEdges}{NWn0bN8-2DyoOl-1}\nwindexuse{retrieveRefCacheUsers}{retrieveRefCacheUsers}{NWn0bN8-2DyoOl-1}\nwindexuse{retrieveRefCacheVertices}{retrieveRefCacheVertices}{NWn0bN8-2DyoOl-1}\nwindexuse{setClockEnd}{setClockEnd}{NWn0bN8-2DyoOl-1}\nwindexuse{setClockStart}{setClockStart}{NWn0bN8-2DyoOl-1}\nwindexuse{setRefClient}{setRefClient}{NWn0bN8-2DyoOl-1}\nwindexuse{startSequential}{startSequential}{NWn0bN8-2DyoOl-1}\nwendcode{}\nwbegindocs{116}\nwdocspar
 \subsection{\texttt{actionStartRealtime}(1)}
-\nwenddocs{}\nwbegincode{113}\sublabel{NWn0bN8-1u3CLd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1u3CLd-1}}}\moddef{actionStartRealtime(1)~{\nwtagstyle{}\subpageref{NWn0bN8-1u3CLd-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
+\nwenddocs{}\nwbegincode{117}\sublabel{NWn0bN8-1u3CLd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1u3CLd-1}}}\moddef{actionStartRealtime(1)~{\nwtagstyle{}\subpageref{NWn0bN8-1u3CLd-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
 void actionStartRealtime(final ActionEvent e) \{
 \}
 \nwindexdefn{actionStartRealtime}{actionStartRealtime}{NWn0bN8-1u3CLd-1}\eatline
-\nwidentdefs{\\{{actionStartRealtime}{actionStartRealtime}}}\nwendcode{}\nwbegindocs{114}\nwdocspar
+\nwidentdefs{\\{{actionStartRealtime}{actionStartRealtime}}}\nwendcode{}\nwbegindocs{118}\nwdocspar
 \subsection{\texttt{actionStop}(1)}
-\nwenddocs{}\nwbegincode{115}\sublabel{NWn0bN8-27hSI5-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-27hSI5-1}}}\moddef{actionStop(1)~{\nwtagstyle{}\subpageref{NWn0bN8-27hSI5-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
+\nwenddocs{}\nwbegincode{119}\sublabel{NWn0bN8-27hSI5-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-27hSI5-1}}}\moddef{actionStop(1)~{\nwtagstyle{}\subpageref{NWn0bN8-27hSI5-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
 void actionStop(final ActionEvent e) \{
   if (this.controller != null) \{
     this.btn_stop     .setDisable(true);
     \LA{}Disable metrics checkbox containers~{\nwtagstyle{}\subpageref{NWn0bN8-1tcU0w-1}}\RA{}
     \LA{}Deselect metrics checkboxes~{\nwtagstyle{}\subpageref{NWn0bN8-MvQLz-1}}\RA{}
     this.timer.stop();
-    this.exe.shutdown();
+    if (this.exe != null) \{
+      this.exe.shutdown();
+    \}
     this.circ_status.setFill(C_WARN);
     this.lbl_status.setText("Close '"+this.db+"'...");
     CompletableFuture.runAsync(() -> \{
@@ -11203,9 +11356,9 @@ void actionStop(final ActionEvent e) \{
   \}
 \}
 \nwindexdefn{actionStop}{actionStop}{NWn0bN8-27hSI5-1}\eatline
-\nwidentdefs{\\{{actionStop}{actionStop}}}\nwidentuses{\\{{gtreeClose}{gtreeClose}}\\{{instanceClose}{instanceClose}}\\{{stop}{stop}}}\nwindexuse{gtreeClose}{gtreeClose}{NWn0bN8-27hSI5-1}\nwindexuse{instanceClose}{instanceClose}{NWn0bN8-27hSI5-1}\nwindexuse{stop}{stop}{NWn0bN8-27hSI5-1}\nwendcode{}\nwbegindocs{116}\nwdocspar
+\nwidentdefs{\\{{actionStop}{actionStop}}}\nwidentuses{\\{{gtreeClose}{gtreeClose}}\\{{instanceClose}{instanceClose}}\\{{stop}{stop}}}\nwindexuse{gtreeClose}{gtreeClose}{NWn0bN8-27hSI5-1}\nwindexuse{instanceClose}{instanceClose}{NWn0bN8-27hSI5-1}\nwindexuse{stop}{stop}{NWn0bN8-27hSI5-1}\nwendcode{}\nwbegindocs{120}\nwdocspar
 \subsection{\texttt{toggleMetric}(1)}
-\nwenddocs{}\nwbegincode{117}\sublabel{NWn0bN8-dsz3A-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-dsz3A-1}}}\moddef{toggleMetric(1)~{\nwtagstyle{}\subpageref{NWn0bN8-dsz3A-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
+\nwenddocs{}\nwbegincode{121}\sublabel{NWn0bN8-dsz3A-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-dsz3A-1}}}\moddef{toggleMetric(1)~{\nwtagstyle{}\subpageref{NWn0bN8-dsz3A-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
 void toggleMetric(final ActionEvent e) \{
   CheckBox source = (CheckBox) e.getSource();
   final String id = source.getId();
@@ -11226,36 +11379,39 @@ void toggleMetric(final ActionEvent e) \{
   \}
 \}
 \nwindexdefn{toggleMetric}{toggleMetric}{NWn0bN8-dsz3A-1}\eatline
-\nwidentdefs{\\{{toggleMetric}{toggleMetric}}}\nwendcode{}\nwbegindocs{118}\nwdocspar
+\nwidentdefs{\\{{toggleMetric}{toggleMetric}}}\nwendcode{}\nwbegindocs{122}\nwdocspar
 \subsection{\texttt{actionRecordMousePress}(1)}
-\nwenddocs{}\nwbegincode{119}\sublabel{NWn0bN8-3GqJTd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3GqJTd-1}}}\moddef{actionRecordMousePress(1)~{\nwtagstyle{}\subpageref{NWn0bN8-3GqJTd-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
+\nwenddocs{}\nwbegincode{123}\sublabel{NWn0bN8-3GqJTd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3GqJTd-1}}}\moddef{actionRecordMousePress(1)~{\nwtagstyle{}\subpageref{NWn0bN8-3GqJTd-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
 void actionRecordMousePress(MouseEvent e) \{
   this.mouse_x = e.getX();
   this.mouse_y = e.getY();
   e.consume();
 \}
 \nwindexdefn{actionRecordMousePress}{actionRecordMousePress}{NWn0bN8-3GqJTd-1}\eatline
-\nwidentdefs{\\{{actionRecordMousePress}{actionRecordMousePress}}}\nwendcode{}\nwbegindocs{120}\nwdocspar
+\nwidentdefs{\\{{actionRecordMousePress}{actionRecordMousePress}}}\nwendcode{}\nwbegindocs{124}\nwdocspar
 \subsection{\texttt{actionTranslateCanvas}(1)}
-\nwenddocs{}\nwbegincode{121}\sublabel{NWn0bN8-10utze-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-10utze-1}}}\moddef{actionTranslateCanvas(1)~{\nwtagstyle{}\subpageref{NWn0bN8-10utze-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
+\nwenddocs{}\nwbegincode{125}\sublabel{NWn0bN8-10utze-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-10utze-1}}}\moddef{actionTranslateCanvas(1)~{\nwtagstyle{}\subpageref{NWn0bN8-10utze-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
 void actionTranslateCanvas(MouseEvent e) \{
   this.can_road.setTranslateX(this.can_road.getTranslateX() + e.getX() - this.mouse_x);
   this.can_road.setTranslateY(this.can_road.getTranslateY() + e.getY() - this.mouse_y);
+  this.can_servers.setTranslateX(this.can_servers.getTranslateX() + e.getX() - this.mouse_x);
+  this.can_servers.setTranslateY(this.can_servers.getTranslateY() + e.getY() - this.mouse_y);
   e.consume();
 \}
 \nwindexdefn{actionTranslateCanvas}{actionTranslateCanvas}{NWn0bN8-10utze-1}\eatline
-\nwidentdefs{\\{{actionTranslateCanvas}{actionTranslateCanvas}}}\nwendcode{}\nwbegindocs{122}\nwdocspar
+\nwidentdefs{\\{{actionTranslateCanvas}{actionTranslateCanvas}}}\nwendcode{}\nwbegindocs{126}\nwdocspar
 \subsection{\texttt{drawRoadNetwork}(0)}
-\nwenddocs{}\nwbegincode{123}\sublabel{NWn0bN8-2vxdQO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2vxdQO-1}}}\moddef{drawRoadNetwork(0)~{\nwtagstyle{}\subpageref{NWn0bN8-2vxdQO-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
+\nwenddocs{}\nwbegincode{127}\sublabel{NWn0bN8-2vxdQO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2vxdQO-1}}}\moddef{drawRoadNetwork(0)~{\nwtagstyle{}\subpageref{NWn0bN8-2vxdQO-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
 void drawRoadNetwork() \{
   try \{
     this.edges    = this.controller.queryEdges();
     this.mbr      = this.controller.queryMBR();
 
-    this.can_road = new Canvas(this.window_width, this.window_height);
+    this.can_road    = new Canvas(this.window_width, this.window_height);
+    this.can_servers = new Canvas(this.window_width, this.window_height);
     this.xunit    = this.can_road.getWidth() /(double) (this.mbr[1] - this.mbr[0]);
     this.yunit    = this.can_road.getHeight()/(double) (this.mbr[3] - this.mbr[2]);
-    double unit   = Math.min(xunit, yunit);
+    this.unit     = Math.min(this.xunit, this.yunit);
 
     this.gc = this.can_road.getGraphicsContext2D();
     this.gc.setLineWidth(0.1);
@@ -11264,11 +11420,12 @@ void drawRoadNetwork() \{
       if (this.edges[(i + 0)] != 0 && this.edges[(i + 1)] != 0) \{
         int[] v1 = this.controller.queryVertex(this.edges[(i + 0)]);
         int[] v2 = this.controller.queryVertex(this.edges[(i + 1)]);
-        this.gc.strokeLine(unit*(v1[0] - this.mbr[0]), unit*(v1[1] - this.mbr[2]),
-                           unit*(v2[0] - this.mbr[0]), unit*(v2[1] - this.mbr[2]));
+        this.gc.strokeLine(this.unit*(v1[0] - this.mbr[0]), this.unit*(v1[1] - this.mbr[2]),
+                           this.unit*(v2[0] - this.mbr[0]), this.unit*(v2[1] - this.mbr[2]));
       \}
     \}
-    this.container_canvas.setContent(this.can_road);
+    this.container_canvas_container = new Pane(this.can_road, this.can_servers);
+    this.container_canvas.setContent(this.container_canvas_container);
     this.can_road.setOnMousePressed((e) -> \{ actionRecordMousePress(e); \});
     this.can_road.setOnMouseDragged((e) -> \{ actionTranslateCanvas(e); \});
   \} catch (SQLException se) \{
@@ -11281,34 +11438,34 @@ void drawRoadNetwork() \{
   \}
 \}
 \nwindexdefn{drawRoadNetwork}{drawRoadNetwork}{NWn0bN8-2vxdQO-1}\eatline
-\nwidentdefs{\\{{drawRoadNetwork}{drawRoadNetwork}}}\nwidentuses{\\{{actionRecordMousePress}{actionRecordMousePress}}\\{{actionTranslateCanvas}{actionTranslateCanvas}}\\{{PrintSQLException}{PrintSQLException}}\\{{queryEdges}{queryEdges}}\\{{queryMBR}{queryMBR}}\\{{queryVertex}{queryVertex}}}\nwindexuse{actionRecordMousePress}{actionRecordMousePress}{NWn0bN8-2vxdQO-1}\nwindexuse{actionTranslateCanvas}{actionTranslateCanvas}{NWn0bN8-2vxdQO-1}\nwindexuse{PrintSQLException}{PrintSQLException}{NWn0bN8-2vxdQO-1}\nwindexuse{queryEdges}{queryEdges}{NWn0bN8-2vxdQO-1}\nwindexuse{queryMBR}{queryMBR}{NWn0bN8-2vxdQO-1}\nwindexuse{queryVertex}{queryVertex}{NWn0bN8-2vxdQO-1}\nwendcode{}\nwbegindocs{124}\nwdocspar
+\nwidentdefs{\\{{drawRoadNetwork}{drawRoadNetwork}}}\nwidentuses{\\{{actionRecordMousePress}{actionRecordMousePress}}\\{{actionTranslateCanvas}{actionTranslateCanvas}}\\{{PrintSQLException}{PrintSQLException}}\\{{queryEdges}{queryEdges}}\\{{queryMBR}{queryMBR}}\\{{queryVertex}{queryVertex}}}\nwindexuse{actionRecordMousePress}{actionRecordMousePress}{NWn0bN8-2vxdQO-1}\nwindexuse{actionTranslateCanvas}{actionTranslateCanvas}{NWn0bN8-2vxdQO-1}\nwindexuse{PrintSQLException}{PrintSQLException}{NWn0bN8-2vxdQO-1}\nwindexuse{queryEdges}{queryEdges}{NWn0bN8-2vxdQO-1}\nwindexuse{queryMBR}{queryMBR}{NWn0bN8-2vxdQO-1}\nwindexuse{queryVertex}{queryVertex}{NWn0bN8-2vxdQO-1}\nwendcode{}\nwbegindocs{128}\nwdocspar
 \subsection{\texttt{drawServersInitial}(0)}
-\nwenddocs{}\nwbegincode{125}\sublabel{NWn0bN8-1MaShB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1MaShB-1}}}\moddef{drawServersInitial(0)~{\nwtagstyle{}\subpageref{NWn0bN8-1MaShB-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
+\nwenddocs{}\nwbegincode{129}\sublabel{NWn0bN8-1MaShB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1MaShB-1}}}\moddef{drawServersInitial(0)~{\nwtagstyle{}\subpageref{NWn0bN8-1MaShB-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
 void drawServersInitial() \{
 \}
-\nwendcode{}\nwbegindocs{126}\nwdocspar
+\nwendcode{}\nwbegindocs{130}\nwdocspar
 
 \subsection{\texttt{setWindowWidth}(1)}
-\nwenddocs{}\nwbegincode{127}\sublabel{NWn0bN8-3x7jy7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3x7jy7-1}}}\moddef{setWindowWidth(1)~{\nwtagstyle{}\subpageref{NWn0bN8-3x7jy7-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
+\nwenddocs{}\nwbegincode{131}\sublabel{NWn0bN8-3x7jy7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3x7jy7-1}}}\moddef{setWindowWidth(1)~{\nwtagstyle{}\subpageref{NWn0bN8-3x7jy7-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
 void setWindowWidth(double w) \{
   this.window_width = w;
 \}
 \nwindexdefn{setWindowWidth}{setWindowWidth}{NWn0bN8-3x7jy7-1}\eatline
-\nwidentdefs{\\{{setWindowWidth}{setWindowWidth}}}\nwendcode{}\nwbegindocs{128}\nwdocspar
+\nwidentdefs{\\{{setWindowWidth}{setWindowWidth}}}\nwendcode{}\nwbegindocs{132}\nwdocspar
 \subsection{\texttt{setWindowHeight}(1)}
-\nwenddocs{}\nwbegincode{129}\sublabel{NWn0bN8-13qzEo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-13qzEo-1}}}\moddef{setWindowHeight(1)~{\nwtagstyle{}\subpageref{NWn0bN8-13qzEo-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
+\nwenddocs{}\nwbegincode{133}\sublabel{NWn0bN8-13qzEo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-13qzEo-1}}}\moddef{setWindowHeight(1)~{\nwtagstyle{}\subpageref{NWn0bN8-13qzEo-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
 void setWindowHeight(double h) \{
   this.window_height = h;
 \}
 \nwindexdefn{setWindowHeight}{setWindowHeight}{NWn0bN8-13qzEo-1}\eatline
-\nwidentdefs{\\{{setWindowHeight}{setWindowHeight}}}\nwendcode{}\nwbegindocs{130}\nwdocspar
+\nwidentdefs{\\{{setWindowHeight}{setWindowHeight}}}\nwendcode{}\nwbegindocs{134}\nwdocspar
 \subsection{\texttt{setStage}(1)}
-\nwenddocs{}\nwbegincode{131}\sublabel{NWn0bN8-4RWb4b-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-4RWb4b-1}}}\moddef{setStage(1)~{\nwtagstyle{}\subpageref{NWn0bN8-4RWb4b-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
+\nwenddocs{}\nwbegincode{135}\sublabel{NWn0bN8-4RWb4b-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-4RWb4b-1}}}\moddef{setStage(1)~{\nwtagstyle{}\subpageref{NWn0bN8-4RWb4b-1}}}\endmoddef\nwused{\\{NW3x1zuR-14uWYi-3}}
 void setStage(Stage s) \{
   this.stage = s;
 \}
 \nwindexdefn{setStage}{setStage}{NWn0bN8-4RWb4b-1}\eatline
 \nwidentdefs{\\{{setStage}{setStage}}}\nwendcode{}
 
-\nwbegindocs{132}\nwdocspar
+\nwbegindocs{136}\nwdocspar
 \nwenddocs{}

@@ -47,6 +47,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
@@ -58,6 +59,8 @@ public class DesktopController {
       "true".equals(System.getProperty("jargors.desktop.debug"));
   private Stage stage;
   private Canvas can_road;
+  private Canvas can_servers;
+  private Pane container_canvas_container;
   @FXML private Button btn_new;
   @FXML private Button btn_load;
   @FXML private Button btn_prob;
@@ -121,6 +124,7 @@ public class DesktopController {
   private String jar = null;
   private String jarclass = null;
   private GraphicsContext gc = null;
+  private MapUnitsFetcher muf = null;
   private double window_height = 0;
   private double window_width = 0;
   private double mouse_x = 0;
@@ -129,10 +133,15 @@ public class DesktopController {
   private int[] mbr = null;
   private double xunit = 0;
   private double yunit = 0;
+  private double unit = 0;
   private int t0 = 0;
   private int t1 = 0;
+  private int server_width = 100;
+  private int server_height = 200;
+  private Color server_fill = Color.BLUE;
   private AnimationTimer timer = new MyTimer();
   private ScheduledExecutorService exe = null;
+  private ScheduledFuture<?> cbSimRunner = null;
   private ScheduledFuture<?> cbMapUpdater = null;
   private Map<String, ScheduledFuture<?>> cbMetricFetcher = new HashMap<String, ScheduledFuture<?>>();
   private class MyTimer extends AnimationTimer {
@@ -140,21 +149,79 @@ public class DesktopController {
       // System.out.println(now);
     }
   }
+  private class MapUnitsFetcher {
+    private double unit = 0;
+    private int lng_min = 0;
+    private int lat_min = 0;
+    public MapUnitsFetcher() { }
+    public double getUnit() {
+      return this.unit;
+    }
+    public int getLngMin() {
+      return this.lng_min;
+    }
+    public int getLatMin() {
+      return this.lat_min;
+    }
+    public void setUnit(double unit) {
+      this.unit = unit;
+    }
+    public void setLngMin(int lng_min) {
+      this.lng_min = lng_min;
+    }
+    public void setLatMin(int lat_min) {
+      this.lat_min = lat_min;
+    }
+  }
   private class MapUpdater implements Runnable {
     private Controller controller = null;
     private Label lbl_status = null;
-    private Canvas can_road = null;
+    private Canvas can_servers = null;
+    private GraphicsContext gc = null;
+    private MapUnitsFetcher muf = null;
+    private Map<Integer, double[]> lu_locs = new HashMap<Integer, double[]>();
     public MapUpdater(
         final Controller controller,
         final Label lbl_status,
-        final Canvas can_road) {
+        final Canvas can_servers,
+        final MapUnitsFetcher muf) {
       this.controller = controller;
       this.lbl_status = lbl_status;
-      this.can_road = can_road;
+      this.can_servers = can_servers;
+      this.muf = muf;
+      this.gc = can_servers.getGraphicsContext2D();
     }
     public void run() {
       final int t = this.controller.getClockNow();
       Platform.runLater(() -> {
+        long A0 = System.currentTimeMillis();
+        try {
+          int[] locations = this.controller.queryServersLocationsActive(t);
+          for (int i = 0; i < (locations.length - 2); i += 3) {
+            final int sid = locations[i];
+            final int loc = locations[(i + 2)];
+            final int[] coordinates = this.controller.queryVertex(loc);
+            double x = this.muf.getUnit()*(coordinates[0] - this.muf.getLngMin());
+            double y = this.muf.getUnit()*(coordinates[1] - this.muf.getLatMin());
+            // Canvas is lagging during pan. I guess it's due to one-shot update
+            // of all the servers, so I have put each update into its own runLater.
+            // Unfortunately, doesn't seem to work. Still laggy.
+            Platform.runLater(() -> {
+              if (this.lu_locs.containsKey(sid)) {
+                final double[] old = this.lu_locs.get(sid);
+                this.gc.clearRect(old[0], old[1], 5, 10);
+              }
+              this.lu_locs.put(sid, new double[] { x, y });
+              this.gc.fillRect(x, y, 5, 10);
+            });
+          }
+        } catch (SQLException se) {
+          System.err.println("Warning: MapUpdater failed to get locations");
+          System.err.println(se.toString());
+        } catch (VertexNotFoundException ve) {
+          System.err.println("Warning: MapUpdater got unknown location!");
+          System.err.println(ve.toString());
+        }
         this.lbl_status.setText("Simulation running (t="+t+")...");
       });
     };
@@ -628,6 +695,7 @@ public class DesktopController {
              Constructor<?> tempcstor = tempclass.getDeclaredConstructor();
              this.client = (Client) tempcstor.newInstance();
              this.controller.setRefClient(this.client);
+             this.controller.forwardRefCommunicator(this.controller.getRefCommunicator());
              this.client.forwardRefCacheVertices(this.controller.retrieveRefCacheVertices());
              this.client.forwardRefCacheEdges(this.controller.retrieveRefCacheEdges());
              this.client.forwardRefCacheUsers(this.controller.retrieveRefCacheUsers());
@@ -639,9 +707,20 @@ public class DesktopController {
              }
              this.t0 = Integer.parseInt(this.tf_t0.getText());
              this.t1 = Integer.parseInt(this.tf_t1.getText());
-             this.controller.setClockStart(t0);
-             this.controller.setClockEnd(t1);
-             this.timer.start();
+             this.controller.setClockStart(this.t0);
+             this.controller.setClockEnd(this.t1);
+             // try {
+             //   int[] locations = this.controller.queryServersLocationsActive(this.t0);
+             //   for (int i = 0; i < (locations.length - 2); i += 3) {
+             //     final int sid = locations[i];
+             //     if (locations[(i + 2)] != 0) {
+             //       this.servers.put(sid, new Rectangle(server_width, server_height, server_fill));
+             //     }
+             //   }
+             // } catch (SQLException se) {
+             //   System.err.println("Warning: failed to get server locations!");
+             //   System.err.println(se.toString());
+             // }
              this.lc_rates.setCreateSymbols(false);
              this.lc_rates.setAnimated(false);
              this.lc_rates.setLegendVisible(false);
@@ -732,17 +811,28 @@ public class DesktopController {
              this.vbox_metrics_durations.setDisable(false);
              this.vbox_metrics_counts.setDisable(false);
              this.vbox_metrics_times.setDisable(false);
+             this.timer.start();
              this.circ_status  .setFill(C_SUCCESS);
              this.lbl_status   .setText("Simulation started.");
-             CompletableFuture.runAsync(() -> {
-               this.controller.startSequential((status) -> {
-                 Platform.runLater(() -> {
-                   this.lbl_status.setText("Simulation "+(status ? "ended." : "failed."));
+             this.muf = new MapUnitsFetcher();
+             this.muf.setUnit(this.unit);
+             this.muf.setLngMin(this.mbr[0]);
+             this.muf.setLatMin(this.mbr[2]);
+             this.exe = Executors.newScheduledThreadPool(2);
+             this.cbSimRunner = this.exe.schedule(() -> {
+               try {
+                 this.controller.startSequential((status) -> {
+                   Platform.runLater(() -> {
+                     this.lbl_status.setText("Simulation "+(status ? "ended." : "failed."));
+                   });
                  });
-               });
-             });
-             this.exe = Executors.newScheduledThreadPool(1);
-             this.cbMapUpdater = this.exe.scheduleAtFixedRate(new MapUpdater(this.controller, this.lbl_status, this.can_road), 0, 1, TimeUnit.SECONDS);
+               } catch (Exception ee) {
+                 System.err.println("Unexepected error in startSequential");
+                 ee.printStackTrace();
+                 System.exit(1);
+               }
+             }, 0, TimeUnit.SECONDS);
+             this.cbMapUpdater = this.exe.scheduleAtFixedRate(new MapUpdater(this.controller, this.lbl_status, this.can_servers, this.muf), 0, 1, TimeUnit.SECONDS);
            } catch (MalformedURLException
                | ClassNotFoundException
                | NoSuchMethodException
@@ -786,7 +876,9 @@ public class DesktopController {
              this.chk_timeRequestHandling.setSelected(false);
              this.chk_timeServerHandling.setSelected(false);
              this.timer.stop();
-             this.exe.shutdown();
+             if (this.exe != null) {
+               this.exe.shutdown();
+             }
              this.circ_status.setFill(C_WARN);
              this.lbl_status.setText("Close '"+this.db+"'...");
              CompletableFuture.runAsync(() -> {
@@ -839,6 +931,8 @@ public class DesktopController {
   public void actionTranslateCanvas(MouseEvent e) {
            this.can_road.setTranslateX(this.can_road.getTranslateX() + e.getX() - this.mouse_x);
            this.can_road.setTranslateY(this.can_road.getTranslateY() + e.getY() - this.mouse_y);
+           this.can_servers.setTranslateX(this.can_servers.getTranslateX() + e.getX() - this.mouse_x);
+           this.can_servers.setTranslateY(this.can_servers.getTranslateY() + e.getY() - this.mouse_y);
            e.consume();
          }
   public void setStage(Stage s) {
@@ -874,10 +968,11 @@ public class DesktopController {
               this.edges    = this.controller.queryEdges();
               this.mbr      = this.controller.queryMBR();
 
-              this.can_road = new Canvas(this.window_width, this.window_height);
+              this.can_road    = new Canvas(this.window_width, this.window_height);
+              this.can_servers = new Canvas(this.window_width, this.window_height);
               this.xunit    = this.can_road.getWidth() /(double) (this.mbr[1] - this.mbr[0]);
               this.yunit    = this.can_road.getHeight()/(double) (this.mbr[3] - this.mbr[2]);
-              double unit   = Math.min(xunit, yunit);
+              this.unit     = Math.min(this.xunit, this.yunit);
 
               this.gc = this.can_road.getGraphicsContext2D();
               this.gc.setLineWidth(0.1);
@@ -886,11 +981,12 @@ public class DesktopController {
                 if (this.edges[(i + 0)] != 0 && this.edges[(i + 1)] != 0) {
                   int[] v1 = this.controller.queryVertex(this.edges[(i + 0)]);
                   int[] v2 = this.controller.queryVertex(this.edges[(i + 1)]);
-                  this.gc.strokeLine(unit*(v1[0] - this.mbr[0]), unit*(v1[1] - this.mbr[2]),
-                                     unit*(v2[0] - this.mbr[0]), unit*(v2[1] - this.mbr[2]));
+                  this.gc.strokeLine(this.unit*(v1[0] - this.mbr[0]), this.unit*(v1[1] - this.mbr[2]),
+                                     this.unit*(v2[0] - this.mbr[0]), this.unit*(v2[1] - this.mbr[2]));
                 }
               }
-              this.container_canvas.setContent(this.can_road);
+              this.container_canvas_container = new Pane(this.can_road, this.can_servers);
+              this.container_canvas.setContent(this.container_canvas_container);
               this.can_road.setOnMousePressed((e) -> { actionRecordMousePress(e); });
               this.can_road.setOnMouseDragged((e) -> { actionTranslateCanvas(e); });
             } catch (SQLException se) {
