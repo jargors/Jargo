@@ -520,7 +520,7 @@ void JargoSetupPreparedStatements() {
   <<S115>> <<S116>> <<S117>> <<S118>> <<S119>> <<S120>> <<S121>> <<S122>>
   <<S123>> <<S124>> <<S125>> <<S126>> <<S127>> <<S133>> <<S134>> <<S135>>
   <<S136>> <<S137>> <<S138>> <<S139>> <<S140>> <<S141>> <<S142>> <<S143>>
-  <<S144>> <<S145>> <<S147>> <<S148>> <<S149>> <<S150>> <<S151>>
+  <<S144>> <<S145>> <<S147>> <<S148>> <<S149>> <<S150>> <<S151>> <<S152>>
 }
 @ %def JargoSetupPreparedStatements
 <<S0>>=
@@ -657,6 +657,9 @@ this.lu_pstr.put("S60", SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC");
 <<S129>>=
 this.lu_pstr.put("S129", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC");
 @ %def S129
+<<S152>>=
+this.lu_pstr.put("S152", SEL+"t, v FROM r_server WHERE sid=? AND t<=? ORDER BY t DESC FETCH FIRST ? ROWS ONLY");
+@ %def S152
 <<S61>>=
 this.lu_pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
       + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC");

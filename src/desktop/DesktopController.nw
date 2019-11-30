@@ -15,6 +15,7 @@ public class DesktopController {
 package com.github.jargors.desktop;
 import com.github.jargors.Controller;
 import com.github.jargors.Client;
+import com.github.jargors.Traffic;
 import com.github.jargors.Tools;
 import com.github.jargors.exceptions.*;
 @
@@ -57,6 +58,7 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart.Series;
@@ -67,11 +69,17 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.image.Image;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 @
@@ -88,6 +96,7 @@ private Stage stage;
 private Canvas can_road;
 private Canvas can_servers;
 private Pane container_canvas_container;
+private Label lbl_fps;
 @
 
 <<[[DesktopController]] member variables>>=
@@ -97,11 +106,13 @@ private Pane container_canvas_container;
 @FXML private Button btn_road;
 @FXML private Button btn_gtree;
 @FXML private Button btn_client;
+@FXML private Button btn_traffic;
 @FXML private Button btn_startseq;
 @FXML private Button btn_startreal;
 @FXML private Button btn_pause;
 @FXML private Button btn_stop;
 @FXML private TextField tf_client;
+@FXML private TextField tf_traffic;
 @FXML private TextField tf_t0;
 @FXML private TextField tf_t1;
 @FXML private Label lbl_status;
@@ -154,12 +165,15 @@ private final String TITLE_STRING = "Jargo Desktop";
 <<[[DesktopController]] member variables>>=
 private Controller controller = null;
 private Client client = null;
+private Traffic traffic = null;
 private String db = null;
 private String gtree = null;
 private String prob = null;
 private String road = null;
-private String jar = null;
-private String jarclass = null;
+private String clientjar = null;
+private String clientclass = null;
+private String trafficjar = null;
+private String trafficclass = null;
 @
 
 \subsection{Workspace}
@@ -177,27 +191,144 @@ private double yunit = 0;
 private double unit = 0;
 private int t0 = 0;
 private int t1 = 0;
-private int server_width = 100;
-private int server_height = 200;
-private Color server_fill = Color.BLUE;
+private int zoom = 1;
+private ConcurrentHashMap<Integer, double[]> lu_position = new ConcurrentHashMap<Integer, double[]>();
 @
 
 \subsection{Background Processes}
 <<[[DesktopController]] member variables>>=
-private AnimationTimer timer = new MyTimer();
+private ServersRenderer ren_servers = null;
+private RoadRenderer ren_road = null;
 private ScheduledExecutorService exe = null;
 private ScheduledFuture<?> cbSimRunner = null;
-private ScheduledFuture<?> cbMapUpdater = null;
+private ScheduledFuture<?> cbServerLocationsFetcher = null;
 private Map<String, ScheduledFuture<?>> cbMetricFetcher = new HashMap<String, ScheduledFuture<?>>();
 @
 
 <<[[DesktopController]] member variables>>=
-private class MyTimer extends AnimationTimer {
+private class ServersRenderer extends AnimationTimer {
+  private long prev = 0;
+  private int framecount = 0;
+  private Image server_img = null;
+  private int server_width = 4;
+  private Color server_fill = Color.web("0x555555");
+  private GraphicsContext gc = null;
+  private Canvas can_servers = null;
+  private ConcurrentHashMap<Integer, double[]> lu_position = null;
+  private Label lbl_fps = null;
+  public ServersRenderer(
+      final GraphicsContext gc,
+      final ConcurrentHashMap<Integer, double[]> lu_position,
+      final Label lbl_fps) {
+    super();
+    this.gc = gc;
+    this.lu_position = lu_position;
+    this.can_servers = gc.getCanvas();
+    this.lbl_fps = lbl_fps;
+    // Initialize the server image
+    Rectangle rect = new Rectangle(this.server_width, this.server_width);
+    rect.setFill(this.server_fill);
+    WritableImage wi = new WritableImage(this.server_width, this.server_width);
+    SnapshotParameters parameters = new SnapshotParameters();
+    rect.snapshot(parameters, wi);
+    this.server_img = wi;
+  }
   public void handle(long now) {
-    // System.out.println(now);
+    // Count FPS
+    if (now - prev > 1000000000) {
+      this.lbl_fps.setText(String.format("%d",this.framecount));
+      prev = now;
+      framecount = 0;
+    } else {
+      framecount++;
+    }
+    // Draw servers
+    this.gc.clearRect(0, 0, this.can_servers.getWidth(), this.can_servers.getHeight());
+    for (final Map.Entry<Integer, double[]> kv : this.lu_position.entrySet()) {
+      final int      sid = kv.getKey();
+      final double[] pos = kv.getValue();
+      final double     x = pos[0];
+      final double     y = pos[1];
+      this.gc.drawImage(this.server_img, x, y);
+    }
   }
 }
 @
+
+<<[[DesktopController]] member variables>>=
+private class RoadRenderer extends AnimationTimer {
+  private long prev = 0;
+  private GraphicsContext gc = null;
+  private Canvas can_road = null;
+  private Controller controller = null;
+  private MapUnitsFetcher muf = null;
+  private Traffic traffic = null;
+  private int[] edges = null;
+  private final Color DEFAULT = Color.BLUE;
+  private final Color SLOW = Color.web("0xFF0000");
+  private final Color MED = Color.web("0xFFD700");
+  private final Color FAST = Color.web("0x5FD870");
+  public RoadRenderer(
+      final GraphicsContext gc,
+      final Controller controller,
+      final MapUnitsFetcher muf) {
+    super();
+    this.gc = gc;
+    this.can_road = gc.getCanvas();
+    this.controller = controller;
+    try {
+      this.edges = this.controller.queryEdges();
+    } catch (SQLException se) {
+      System.err.println("Couldn't get edges for road renderer");
+      System.err.println(se.getMessage());
+      se.printStackTrace();
+    }
+    this.muf = muf;
+    // Set edge default color
+    this.gc.setLineWidth(0.3);
+    this.gc.setStroke(DEFAULT);
+  }
+  public void setTraffic(final Traffic traffic) {
+    this.traffic = traffic;
+  }
+  public void handle(long now) {
+    if (now - prev > 10*1000000000) {  // only draw every 10 seconds
+      prev = now;
+      // Draw edges
+      this.gc.clearRect(0, 0, this.can_road.getWidth(), this.can_road.getHeight());
+      for (int i = 0; i < (this.edges.length - 3); i += 4) {
+        if (this.edges[(i + 0)] != 0 && this.edges[(i + 1)] != 0) {
+          try {
+            int[] v1 = this.controller.queryVertex(this.edges[(i + 0)]);
+            int[] v2 = this.controller.queryVertex(this.edges[(i + 1)]);
+            if (this.traffic != null) {
+              double x = this.traffic.apply(this.edges[i], this.edges[(i + 1)], this.controller.getClockNow());
+              if (0.0 <= x && x <= 0.33) {
+                this.gc.setStroke(SLOW);
+              } else if (0.33 < x && x <= 0.66) {
+                this.gc.setStroke(MED);
+              } else if (0.66 < x && x <= 1.0) {
+                this.gc.setStroke(FAST);
+              }
+            }
+            this.gc.strokeLine(this.muf.getUnit()*(v1[0] - this.muf.getLngMin()), this.muf.getUnit()*(v1[1] - this.muf.getLatMin()),
+                               this.muf.getUnit()*(v2[0] - this.muf.getLngMin()), this.muf.getUnit()*(v2[1] - this.muf.getLatMin()));
+          } catch (VertexNotFoundException ve) {
+            System.err.println("Warning: "+ve.toString());
+          } catch (SQLException se) {
+            System.err.println("Warning: ServerLocationsFetcher failed to get locations");
+            System.err.println(se.toString());
+            se.printStackTrace();
+          } catch (Exception ee) {
+            ee.printStackTrace();
+          }
+        }
+      }
+    }
+  }
+}
+@
+
 <<[[DesktopController]] member variables>>=
 private class MapUnitsFetcher {
   private double unit = 0;
@@ -225,56 +356,46 @@ private class MapUnitsFetcher {
 }
 @
 <<[[DesktopController]] member variables>>=
-private class MapUpdater implements Runnable {
+private class ServerLocationsFetcher implements Runnable {
   private Controller controller = null;
   private Label lbl_status = null;
-  private Canvas can_servers = null;
-  private GraphicsContext gc = null;
   private MapUnitsFetcher muf = null;
-  private Map<Integer, double[]> lu_locs = new HashMap<Integer, double[]>();
-  public MapUpdater(
+  private ConcurrentHashMap<Integer, double[]> lu_position = null;
+  public ServerLocationsFetcher(
       final Controller controller,
       final Label lbl_status,
-      final Canvas can_servers,
-      final MapUnitsFetcher muf) {
+      final MapUnitsFetcher muf,
+      final ConcurrentHashMap<Integer, double[]> lu_position) {
     this.controller = controller;
     this.lbl_status = lbl_status;
-    this.can_servers = can_servers;
     this.muf = muf;
-    this.gc = can_servers.getGraphicsContext2D();
+    this.lu_position = lu_position;
   }
   public void run() {
     final int t = this.controller.getClockNow();
-    Platform.runLater(() -> {
-      long A0 = System.currentTimeMillis();
-      try {
-        int[] locations = this.controller.queryServersLocationsActive(t);
-        for (int i = 0; i < (locations.length - 2); i += 3) {
-          final int sid = locations[i];
-          final int loc = locations[(i + 2)];
-          final int[] coordinates = this.controller.queryVertex(loc);
-          double x = this.muf.getUnit()*(coordinates[0] - this.muf.getLngMin());
-          double y = this.muf.getUnit()*(coordinates[1] - this.muf.getLatMin());
-          // Canvas is lagging during pan. I guess it's due to one-shot update
-          // of all the servers, so I have put each update into its own runLater.
-          // Unfortunately, doesn't seem to work. Still laggy.
-          Platform.runLater(() -> {
-            if (this.lu_locs.containsKey(sid)) {
-              final double[] old = this.lu_locs.get(sid);
-              this.gc.clearRect(old[0], old[1], 5, 10);
-            }
-            this.lu_locs.put(sid, new double[] { x, y });
-            this.gc.fillRect(x, y, 5, 10);
-          });
-        }
-      } catch (SQLException se) {
-        System.err.println("Warning: MapUpdater failed to get locations");
-        System.err.println(se.toString());
-      } catch (VertexNotFoundException ve) {
-        System.err.println("Warning: MapUpdater got unknown location!");
-        System.err.println(ve.toString());
+    try {
+      int[] locations = this.controller.queryServersLocationsActive(t);
+      for (int i = 0; i < (locations.length - 2); i += 3) {
+        final int sid = locations[(i + 0)];
+        final int   v = locations[(i + 2)];
+        int[] coordinates = this.controller.queryVertex(v);
+        double x = this.muf.getUnit()*(coordinates[0] - this.muf.getLngMin());
+        double y = this.muf.getUnit()*(coordinates[1] - this.muf.getLatMin());
+        this.lu_position.put(sid, new double[] { x, y });
       }
-      this.lbl_status.setText("Simulation running (t="+t+")...");
+    } catch (SQLException se) {
+      System.err.println("Warning: ServerLocationsFetcher failed to get locations");
+      System.err.println(se.toString());
+      se.printStackTrace();
+    } catch (VertexNotFoundException ve) {
+      System.err.println("Warning: ServerLocationsFetcher got unknown location!");
+      System.err.println(ve.toString());
+      ve.printStackTrace();
+    } catch (Exception ee) {
+      ee.printStackTrace();
+    }
+    Platform.runLater(() -> {
+      this.lbl_status.setText("Refresh server locations (t="+t+")");
     });
   };
 }
@@ -432,23 +553,6 @@ private ConcurrentHashMap<String, ConcurrentHashMap<String, Series<Number, Numbe
 @
 
 \section{Chunks}
-
-\subsection{Initialize server rectangles}
-<<Initialize server rectangles>>=
-// try {
-//   int[] locations = this.controller.queryServersLocationsActive(this.t0);
-//   for (int i = 0; i < (locations.length - 2); i += 3) {
-//     final int sid = locations[i];
-//     if (locations[(i + 2)] != 0) {
-//       this.servers.put(sid, new Rectangle(server_width, server_height, server_fill));
-//     }
-//   }
-// } catch (SQLException se) {
-//   System.err.println("Warning: failed to get server locations!");
-//   System.err.println(se.toString());
-// }
-@
-
 
 \subsection{Initialize chart settings}
 <<Initialize chart settings>>=
@@ -829,7 +933,7 @@ void actionLoad(final ActionEvent e) {
           this.container_lc_rates.getChildren().clear();
           this.container_lc_distances.getChildren().clear();
           this.container_lc_durations.getChildren().clear();
-          this.drawRoadNetwork();
+          this.initializeCanvas();
         });
       } catch (SQLException se) {
         System.err.println("Failed");
@@ -880,7 +984,9 @@ void actionRoad(final ActionEvent e) {
           this.tf_t1        .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
           this.lbl_status   .setText("Loaded "+road.getName()+" (#vertices="+nv+"; #edges="+ne+")");
-          this.drawRoadNetwork();
+          this.initializeCanvas();
+          this.ren_road = new RoadRenderer(this.can_road.getGraphicsContext2D(), this.controller, this.muf);
+          this.ren_road.start();
         });
       } catch (FileNotFoundException fe) {
         System.err.println("Failed: "+fe.toString());
@@ -927,6 +1033,7 @@ void actionGtree(final ActionEvent e) {
           }
           if (this.road != null && this.prob != null) {
             this.btn_client .setDisable(false);
+            this.btn_traffic.setDisable(false);
           }
           this.btn_gtree    .setText(gt.getName());
           this.circ_status  .setFill(C_SUCCESS);
@@ -968,6 +1075,7 @@ void actionProb(final ActionEvent e) {
         Platform.runLater(() -> {
           this.btn_prob     .setText(pb.getName());
           this.btn_client   .setDisable(false);
+          this.btn_traffic  .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
           this.lbl_status   .setText("Loaded "+pb.getName()+"(#servers="+ns+"; #requests="+nr+")");
         });
@@ -1009,12 +1117,12 @@ void actionClient(final ActionEvent e) {
   fc.getExtensionFilters().addAll(new ExtensionFilter("Client *.jar", "*.jar"));
   File cj = fc.showOpenDialog(this.stage);
   if (cj != null) {
-    this.jar = cj.toString();
+    this.clientjar = cj.toString();
 
     try {
 /*https://stackoverflow.com/questions/15720822/how-to-get-names-of-classes-inside-a-jar-file*/
 List<String> classNames = new ArrayList<String>();
-ZipInputStream zip = new ZipInputStream(new FileInputStream(this.jar));
+ZipInputStream zip = new ZipInputStream(new FileInputStream(this.clientjar));
 for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
   if (!entry.isDirectory() && entry.getName().endsWith(".class")) {
     String className = entry.getName().replace('/', '.');
@@ -1026,12 +1134,12 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
         System.err.println("Bad jar?");
         return;
       }
-      this.jarclass = classNames.get(0);
+      this.clientclass = classNames.get(0);
     } catch (IOException ie) {
       System.err.println(ie.toString());
       return;
     }
-    this.tf_client.setText(this.jarclass);
+    this.tf_client.setText(this.clientclass);
     this.btn_client   .setText(cj.getName());
     this.tf_client     .setDisable(false);
     this.tf_t0        .setDisable(false);
@@ -1044,14 +1152,56 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
 }
 @
 
+\subsection{\texttt{actionTraffic}(1)}
+<<actionTraffic(1)>>=
+void actionTraffic(final ActionEvent e) {
+  this.btn_traffic  .setDisable(true);
+  this.circ_status  .setFill(C_WARN);
+  this.lbl_status   .setText("Select *.jar...");
+  FileChooser fc = new FileChooser();
+  fc.getExtensionFilters().addAll(new ExtensionFilter("Traffic *.jar", "*.jar"));
+  File cj = fc.showOpenDialog(this.stage);
+  if (cj != null) {
+    this.trafficjar = cj.toString();
+
+    try {
+/*https://stackoverflow.com/questions/15720822/how-to-get-names-of-classes-inside-a-jar-file*/
+List<String> classNames = new ArrayList<String>();
+ZipInputStream zip = new ZipInputStream(new FileInputStream(this.trafficjar));
+for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
+  if (!entry.isDirectory() && entry.getName().endsWith(".class")) {
+    String className = entry.getName().replace('/', '.');
+    classNames.add(className.substring(0, className.length() - ".class".length()));
+  }
+}
+/******/
+      if (classNames.size() == 0) {
+        System.err.println("Bad jar?");
+        return;
+      }
+      this.trafficclass = classNames.get(0);
+    } catch (IOException ie) {
+      System.err.println(ie.toString());
+      return;
+    }
+    this.tf_traffic   .setText(this.trafficclass);
+    this.btn_traffic  .setText(cj.getName());
+    this.tf_traffic   .setDisable(false);
+    this.circ_status  .setFill(C_SUCCESS);
+    this.lbl_status   .setText("Loaded "+cj.getName());
+  }
+}
+@
+
 \subsection{\texttt{actionStartSequential}(1)}
 <<actionStartSequential(1)>>=
 void actionStartSequential(final ActionEvent e) {
-  this.jarclass = this.tf_client.getText();
-  if ("".equals(this.jarclass)) {
+  this.clientclass = this.tf_client.getText();
+  if ("".equals(this.clientclass)) {
     System.err.println("Class empty!");
     return;
   }
+  this.trafficclass = this.tf_traffic.getText();
   <<Set default t0, t1>>
   this.btn_startseq .setDisable(true);
   this.btn_startreal.setDisable(true);
@@ -1059,11 +1209,11 @@ void actionStartSequential(final ActionEvent e) {
   this.tf_t0        .setDisable(true);
   this.tf_t1        .setDisable(true);
   this.circ_status  .setFill(C_WARN);
-  this.lbl_status   .setText("Loading '"+this.jarclass+"'...");
+  this.lbl_status   .setText("Loading '"+this.clientclass+"'...");
   try {
-    URLClassLoader loader = new URLClassLoader(new URL[] {new URL("file://"+this.jar)},
+    URLClassLoader loader = new URLClassLoader(new URL[] {new URL("file://"+this.clientjar)},
         this.getClass().getClassLoader());
-    Class<?> tempclass = Class.forName(this.jarclass, true, loader);
+    Class<?> tempclass = Class.forName(this.clientclass, true, loader);
     Constructor<?> tempcstor = tempclass.getDeclaredConstructor();
     this.client = (Client) tempcstor.newInstance();
     this.controller.setRefClient(this.client);
@@ -1071,6 +1221,17 @@ void actionStartSequential(final ActionEvent e) {
     this.client.forwardRefCacheVertices(this.controller.retrieveRefCacheVertices());
     this.client.forwardRefCacheEdges(this.controller.retrieveRefCacheEdges());
     this.client.forwardRefCacheUsers(this.controller.retrieveRefCacheUsers());
+    if (this.trafficclass.length() > 0) {
+      URLClassLoader loader2 = new URLClassLoader(new URL[] {new URL("file://"+this.trafficjar)},
+          this.getClass().getClassLoader());
+      Class<?> tempclass2 = Class.forName(this.trafficclass, true, loader2);
+      Constructor<?> tempcstor2 = tempclass2.getDeclaredConstructor();
+      this.traffic = (Traffic) tempcstor2.newInstance();
+      this.traffic.forwardRefCacheEdges(controller.retrieveRefCacheEdges());
+      this.traffic.forwardRefCacheVertices(controller.retrieveRefCacheVertices());
+      this.controller.forwardRefTraffic(this.traffic);
+      this.ren_road.setTraffic(this.traffic);
+    }
     try {
       this.client.gtreeLoad(this.gtree);
     } catch (FileNotFoundException fe) {
@@ -1081,16 +1242,12 @@ void actionStartSequential(final ActionEvent e) {
     this.t1 = Integer.parseInt(this.tf_t1.getText());
     this.controller.setClockStart(this.t0);
     this.controller.setClockEnd(this.t1);
-    <<Initialize server rectangles>>
     <<Add charts to chart containers>>
     <<Enable metrics checkbox containers>>
-    this.timer.start();
+    this.ren_servers = new ServersRenderer(this.can_servers.getGraphicsContext2D(), this.lu_position, this.lbl_fps);
+    this.ren_servers.start();
     this.circ_status  .setFill(C_SUCCESS);
     this.lbl_status   .setText("Simulation started.");
-    this.muf = new MapUnitsFetcher();
-    this.muf.setUnit(this.unit);
-    this.muf.setLngMin(this.mbr[0]);
-    this.muf.setLatMin(this.mbr[2]);
     this.exe = Executors.newScheduledThreadPool(2);
     this.cbSimRunner = this.exe.schedule(() -> {
       try {
@@ -1105,7 +1262,8 @@ void actionStartSequential(final ActionEvent e) {
         System.exit(1);
       }
     }, 0, TimeUnit.SECONDS);
-    this.cbMapUpdater = this.exe.scheduleAtFixedRate(new MapUpdater(this.controller, this.lbl_status, this.can_servers, this.muf), 0, 1, TimeUnit.SECONDS);
+    this.cbServerLocationsFetcher = this.exe.scheduleAtFixedRate(
+        new ServerLocationsFetcher(this.controller, this.lbl_status, this.muf, this.lu_position), 0, 1, TimeUnit.SECONDS);
   } catch (MalformedURLException
       | ClassNotFoundException
       | NoSuchMethodException
@@ -1113,6 +1271,7 @@ void actionStartSequential(final ActionEvent e) {
       | IllegalAccessException
       | InvocationTargetException me) {
     System.err.println(me.toString());
+    me.printStackTrace();
     return;
   }
 }
@@ -1131,7 +1290,8 @@ void actionStop(final ActionEvent e) {
     this.btn_stop     .setDisable(true);
     <<Disable metrics checkbox containers>>
     <<Deselect metrics checkboxes>>
-    this.timer.stop();
+    this.ren_road.stop();
+    this.ren_servers.stop();
     if (this.exe != null) {
       this.exe.shutdown();
     }
@@ -1160,11 +1320,18 @@ void actionStop(final ActionEvent e) {
           this.gtree = null;
           this.btn_client   .setDisable(true);
           this.btn_client   .setText("(empty client)");
+          this.btn_traffic  .setDisable(true);
+          this.btn_traffic  .setText("(empty traffic)");
           this.client = null;
-          this.jar = null;
-          this.jarclass = null;
-          this.tf_client     .setDisable(true);
-          this.tf_client     .setText("");
+          this.clientjar = null;
+          this.clientclass = null;
+          this.traffic = null;
+          this.trafficjar = null;
+          this.trafficclass = null;
+          this.tf_client    .setDisable(true);
+          this.tf_client    .setText("");
+          this.tf_traffic   .setDisable(true);
+          this.tf_traffic   .setText("");
           this.tf_t0        .setDisable(true);
           this.tf_t0        .setText("");
           this.tf_t1        .setDisable(true);
@@ -1229,51 +1396,58 @@ void actionTranslateCanvas(MouseEvent e) {
 }
 @ %def actionTranslateCanvas
 
-\subsection{\texttt{drawRoadNetwork}(0)}
-<<drawRoadNetwork(0)>>=
-void drawRoadNetwork() {
-  try {
-    this.edges    = this.controller.queryEdges();
-    this.mbr      = this.controller.queryMBR();
+\subsection{\texttt{actionZoomCanvas}(1)}
+<<actionZoomCanvas(1)>>=
+void actionZoomCanvas(ScrollEvent e) {
+  if (e.getDeltaY() > 0) {
+    this.zoom += 1
+  }
+  if (e.getDeltaY() < 0) {
+    this.zoom -= 1
+  }
+  this.zoom = Math.max(this.zoom, 1);
+  this.zoom = Math.min(this.zoom, 12);
+  System.out.println(this.zoom);
+  this.can_road.setScaleX(this.zoom);
+  this.can_road.setScaleY(this.zoom);
+  this.can_servers.setScaleX(this.zoom);
+  this.can_servers.setScaleY(this.zoom);
+  e.consume();
+}
+@ %def actionZoomCanvas
 
+\subsection{\texttt{initializeCanvas}(0)}
+<<initializeCanvas(0)>>=
+void initializeCanvas() {
+  try {
     this.can_road    = new Canvas(this.window_width, this.window_height);
     this.can_servers = new Canvas(this.window_width, this.window_height);
-    this.xunit    = this.can_road.getWidth() /(double) (this.mbr[1] - this.mbr[0]);
-    this.yunit    = this.can_road.getHeight()/(double) (this.mbr[3] - this.mbr[2]);
-    this.unit     = Math.min(this.xunit, this.yunit);
-
-    this.gc = this.can_road.getGraphicsContext2D();
-    this.gc.setLineWidth(0.1);
-    this.gc.setStroke(Color.BLUE);
-    for (int i = 0; i < (this.edges.length - 3); i += 4) {
-      if (this.edges[(i + 0)] != 0 && this.edges[(i + 1)] != 0) {
-        int[] v1 = this.controller.queryVertex(this.edges[(i + 0)]);
-        int[] v2 = this.controller.queryVertex(this.edges[(i + 1)]);
-        this.gc.strokeLine(this.unit*(v1[0] - this.mbr[0]), this.unit*(v1[1] - this.mbr[2]),
-                           this.unit*(v2[0] - this.mbr[0]), this.unit*(v2[1] - this.mbr[2]));
-      }
-    }
-    this.container_canvas_container = new Pane(this.can_road, this.can_servers);
+    this.lbl_fps     = new Label("FPS");
+    // Determine pixels-per-coordinate
+    this.mbr   = this.controller.queryMBR();
+    this.xunit = this.can_road.getWidth() /(double) (this.mbr[1] - this.mbr[0]);
+    this.yunit = this.can_road.getHeight()/(double) (this.mbr[3] - this.mbr[2]);
+    this.unit  = Math.min(this.xunit, this.yunit);
+    // Set map units
+    this.muf = new MapUnitsFetcher();
+    this.muf.setUnit(this.unit);
+    this.muf.setLngMin(this.mbr[0]);
+    this.muf.setLatMin(this.mbr[2]);
+    // Add canvas to pane
+    this.container_canvas_container = new Pane(this.can_road, this.can_servers, this.lbl_fps);
     this.container_canvas.setContent(this.container_canvas_container);
-    // Canvas can_servers is on top so it will trap all mouse events
+    // Register mouse event handlers
+    // (can_servers is on top so it will trap all mouse events)
     this.can_servers.setOnMousePressed((e) -> { actionRecordMousePress(e); });
     this.can_servers.setOnMouseDragged((e) -> { actionTranslateCanvas(e); });
+    this.can_servers.setOnScroll((e) -> { actionZoomCanvas(e); });
   } catch (SQLException se) {
     System.err.println("Failed with SQLException");
     Tools.PrintSQLException(se);
     return;
-  } catch (VertexNotFoundException ve) {
-    System.err.println(ve.toString());
-    return;
   }
 }
-@ %def drawRoadNetwork
-
-\subsection{\texttt{drawServersInitial}(0)}
-<<drawServersInitial(0)>>=
-void drawServersInitial() {
-}
-@
+@ %def initializeCanvas
 
 \subsection{\texttt{setWindowWidth}(1)}
 <<setWindowWidth(1)>>=

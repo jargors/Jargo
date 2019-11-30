@@ -202,6 +202,12 @@ public class Controller {
   private long   statQueryEdgeDurMin   = Integer.MAX_VALUE;
   private long   statQueryEdgeDurMax   = 0;
   private double statQueryEdgeDurAvg   = 0;
+  private int    statQueryServerRouteRemainingCount    = 0;
+  private long   statQueryServerRouteRemainingDurLast  = 0;
+  private long   statQueryServerRouteRemainingDurTotal = 0;
+  private long   statQueryServerRouteRemainingDurMin   = Integer.MAX_VALUE;
+  private long   statQueryServerRouteRemainingDurMax   = 0;
+  private double statQueryServerRouteRemainingDurAvg   = 0;
   private int    statQueryServersLocationsActiveCount    = 0;
   private long   statQueryServersLocationsActiveDurLast  = 0;
   private long   statQueryServersLocationsActiveDurTotal = 0;
@@ -331,6 +337,31 @@ public class Controller {
          }
   public int[] queryServerRoute(final int sid) throws SQLException {
            return storage.DBQueryServerRoute(sid);
+         }
+  public int[] queryServerRouteRemaining(final int sid, final int t) throws SQLException {
+           long A0 = System.currentTimeMillis();
+           int[] output = this.storage.DBQueryServerRouteRemaining(sid, t);
+               this.statQueryServerRouteRemainingCount++;
+               this.statQueryServerRouteRemainingDurLast = (System.currentTimeMillis() - A0);
+               this.statQueryServerRouteRemainingDurTotal +=
+               this.statQueryServerRouteRemainingDurLast;
+           if (this.statQueryServerRouteRemainingDurLast <
+               this.statQueryServerRouteRemainingDurMin) {
+               this.statQueryServerRouteRemainingDurMin =
+               this.statQueryServerRouteRemainingDurLast;}
+           if (this.statQueryServerRouteRemainingDurLast >
+               this.statQueryServerRouteRemainingDurMax) {
+               this.statQueryServerRouteRemainingDurMax =
+               this.statQueryServerRouteRemainingDurLast;}
+               this.statQueryServerRouteRemainingDurAvg = (double)
+               this.statQueryServerRouteRemainingDurTotal/
+               this.statQueryServerRouteRemainingCount;
+           return output;
+         }
+  public int[] queryServerRouteTraveled(final int sid, final int t, final int n) throws SQLException {
+           long A0 = System.currentTimeMillis();
+           int[] output = this.storage.DBQueryServerRouteTraveled(sid, t, n);
+           return output;
          }
   public int[] queryServerSchedule(final int sid) throws SQLException {
            return storage.DBQueryServerSchedule(sid);
@@ -684,6 +715,24 @@ public class Controller {
          }
   public double getStatQueryEdgeDurAvg() {
            return this.statQueryEdgeDurAvg;
+         }
+  public int    getStatQueryServerRouteRemainingCount() {
+           return this.statQueryServerRouteRemainingCount;
+         }
+  public long   getStatQueryServerRouteRemainingDurLast() {
+           return this.statQueryServerRouteRemainingDurLast;
+         }
+  public long   getStatQueryServerRouteRemainingDurTotal() {
+           return this.statQueryServerRouteRemainingDurTotal;
+         }
+  public long   getStatQueryServerRouteRemainingDurMin() {
+           return this.statQueryServerRouteRemainingDurMin;
+         }
+  public long   getStatQueryServerRouteRemainingDurMax() {
+           return this.statQueryServerRouteRemainingDurMax;
+         }
+  public double getStatQueryServerRouteRemainingDurAvg() {
+           return this.statQueryServerRouteRemainingDurAvg;
          }
   public int    getStatQueryServersLocationsActiveCount() {
            return this.statQueryServersLocationsActiveCount;

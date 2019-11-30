@@ -21,6 +21,9 @@ public class Tools {
   private final boolean DEBUG = "true".equals(System.getProperty("jargors.tools.debug"));
   public Tools() { }
   public int[] DBQueryEdge(final int v1, final int v2) throws EdgeNotFoundException {
+           if (v1 == v2) {
+             return new int[] { 0, -1 };  // 0 distance, -1 speed
+           }
            if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
              throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
            }

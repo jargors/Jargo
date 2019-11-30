@@ -80,6 +80,9 @@ public class Storage {
            return output;
          }
   public int[] DBQueryEdge(final int v1, final int v2) throws EdgeNotFoundException {
+           if (v1 == v2) {
+             return new int[] { 0, -1 };  // 0 distance, -1 speed
+           }
            if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
              throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
            }
@@ -402,6 +405,13 @@ public class Storage {
   public int[] DBQueryServerRouteRemaining(final int sid, final int t) throws SQLException {
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
              return PSQuery(conn, "S129", 2, sid, t);
+           } catch (SQLException e) {
+             throw e;
+           }
+         }
+  public int[] DBQueryServerRouteTraveled(final int sid, final int t, final int n) throws SQLException {
+           try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+             return PSQuery(conn, "S152", 2, sid, t, n);
            } catch (SQLException e) {
              throw e;
            }
@@ -1575,7 +1585,7 @@ public class Storage {
                                                                                + "SELECT t1 FROM W WHERE sid=? AND ? <= t1 AND t1 <= ? AND ? < t2)");
             this.lu_pstr.put("S136", SEL+"* FROM V"); this.lu_pstr.put("S137", SEL+"* FROM E"); this.lu_pstr.put("S138", SEL+"val FROM dist_r_unassigned"); this.lu_pstr.put("S139", UPD+"CPD SET te=? WHERE sid=?"); this.lu_pstr.put("S140", UPD+"CQ SET tp=?, td=? WHERE rid=?"); this.lu_pstr.put("S141", SEL+"* FROM r_user"); this.lu_pstr.put("S142", SEL+"SUM (dd) FROM W WHERE sid=? AND t2>?"); this.lu_pstr.put("S143", SEL+"* FROM R WHERE re<=? AND ?<=re+?");
             this.lu_pstr.put("S144", SEL+"t2, v2, rid FROM CQ WHERE sid=? AND t2>? ORDER BY o2 ASC"); this.lu_pstr.put("S145", SEL+"te, ve FROM CW WHERE sid=?"); this.lu_pstr.put("S147", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
-                                  + "SELECT t1 FROM W WHERE sid=? AND v2=0)"); this.lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?"); this.lu_pstr.put("S149", SEL+"t2, v2 FROM W WHERE sid=? ORDER BY t2 ASC"); this.lu_pstr.put("S150", SEL+"sid, val FROM violations_t_s"); this.lu_pstr.put("S151", SEL+"rid, val FROM violations_t_r");
+                                  + "SELECT t1 FROM W WHERE sid=? AND v2=0)"); this.lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?"); this.lu_pstr.put("S149", SEL+"t2, v2 FROM W WHERE sid=? ORDER BY t2 ASC"); this.lu_pstr.put("S150", SEL+"sid, val FROM violations_t_s"); this.lu_pstr.put("S151", SEL+"rid, val FROM violations_t_r"); this.lu_pstr.put("S152", SEL+"t, v FROM r_server WHERE sid=? AND t<=? ORDER BY t DESC FETCH FIRST ? ROWS ONLY");
           }
   private void PSAdd(PreparedStatement p, final Integer... values) throws SQLException {
             p.clearParameters();

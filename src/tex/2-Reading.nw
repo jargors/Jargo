@@ -292,6 +292,9 @@ Integer [[v2]] (param. 2):&target vertex identifier $v_2$
 \end{tabular}
 <<Read: DBQueryEdge(2)>>=
 int[] DBQueryEdge(final int v1, final int v2) throws EdgeNotFoundException {
+  if (v1 == v2) {
+    return new int[] { 0, -1 };  // 0 distance, -1 speed
+  }
   if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
     throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
   }
@@ -1143,6 +1146,24 @@ int[] queryServerRouteRemaining(final int sid, final int t) throws SQLException 
   return output;
 }
 @ %def queryServerRouteRemaining
+
+\subsection{\texttt{DBQueryServerRouteTraveled}(3)}
+<<Read: DBQueryServerRouteTraveled(3)>>=
+int[] DBQueryServerRouteTraveled(final int sid, final int t, final int n) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return PSQuery(conn, "S152", 2, sid, t, n);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryServerRouteTraveled
+<<Read: queryServerRouteTraveled(3)>>=
+int[] queryServerRouteTraveled(final int sid, final int t, final int n) throws SQLException {
+  long A0 = System.currentTimeMillis();
+  int[] output = this.storage.DBQueryServerRouteTraveled(sid, t, n);
+  return output;
+}
+@ %def queryServerRouteTraveled
 
 \subsection{\texttt{DBQueryServerSchedule}(1)}
 \begin{tabular}{p{\textwidth}}
