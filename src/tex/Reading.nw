@@ -1147,23 +1147,26 @@ int[] queryServerRouteRemaining(final int sid, final int t) throws SQLException 
 }
 @ %def queryServerRouteRemaining
 
-\subsection{\texttt{DBQueryServerRouteTraveled}(3)}
-<<Read: DBQueryServerRouteTraveled(3)>>=
-int[] DBQueryServerRouteTraveled(final int sid, final int t, final int n) throws SQLException {
+
+\subsection{\texttt{DBQueryServerRouteActive}(1)}
+Gets the ``active'' route, used for Desktop interpolation. The active route
+includes the last-visited vertex, the ``active'' vertex that the server is
+currently traveling to, and the next vertex after the active vertex.
+<<Read: DBQueryServerRouteActive(1)>>=
+int[] DBQueryServerRouteActive(final int sid) throws SQLException {
   try (<<Open [[conn]]>>) {
-    return PSQuery(conn, "S152", 2, sid, t, n);
+    return PSQuery(conn, "S152", 2, sid, this.lu_lvt.get(sid), 3);
   } catch (SQLException e) {
     throw e;
   }
 }
-@ %def DBQueryServerRouteTraveled
-<<Read: queryServerRouteTraveled(3)>>=
-int[] queryServerRouteTraveled(final int sid, final int t, final int n) throws SQLException {
-  long A0 = System.currentTimeMillis();
-  int[] output = this.storage.DBQueryServerRouteTraveled(sid, t, n);
+@ %def DBQueryServerRouteActive
+<<Read: queryServerRouteActive(1)>>=
+int[] queryServerRouteActive(final int sid) throws SQLException {
+  int[] output = this.storage.DBQueryServerRouteActive(sid);
   return output;
 }
-@ %def queryServerRouteTraveled
+@ %def queryServerRouteActive
 
 \subsection{\texttt{DBQueryServerSchedule}(1)}
 \begin{tabular}{p{\textwidth}}
@@ -1886,6 +1889,12 @@ int[] DBQueryServersActive(final int t) throws SQLException {
   }
 }
 @ %def DBQueryServersActive
+<<Read: queryServersActive(1)>>=
+int[] queryServersActive(final int t) throws SQLException {
+  int[] output = this.storage.DBQueryServersActive(t);
+  return output;
+}
+@ %def queryServersActive
 
 \subsection{\texttt{DBQueryServersLocations}(1)}
 \begin{tabular}{p{\textwidth}}

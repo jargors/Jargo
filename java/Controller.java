@@ -467,6 +467,10 @@ public class Controller {
   public int[] queryServerRoute(final int sid) throws SQLException {
            return storage.DBQueryServerRoute(sid);
          }
+  public int[] queryServerRouteActive(final int sid) throws SQLException {
+           int[] output = this.storage.DBQueryServerRouteActive(sid);
+           return output;
+         }
   public int[] queryServerRouteRemaining(final int sid, final int t) throws SQLException {
            long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryServerRouteRemaining(sid, t);
@@ -487,16 +491,15 @@ public class Controller {
                this.statQueryServerRouteRemainingCount;
            return output;
          }
-  public int[] queryServerRouteTraveled(final int sid, final int t, final int n) throws SQLException {
-           long A0 = System.currentTimeMillis();
-           int[] output = this.storage.DBQueryServerRouteTraveled(sid, t, n);
-           return output;
-         }
   public int[] queryServerSchedule(final int sid) throws SQLException {
            return storage.DBQueryServerSchedule(sid);
          }
   public int[] queryServerTimeOfDeparture(final int sid) throws SQLException {
            return storage.DBQueryServerTimeOfDeparture(sid);
+         }
+  public int[] queryServersActive(final int t) throws SQLException {
+           int[] output = this.storage.DBQueryServersActive(t);
+           return output;
          }
   public int[] queryServersCount() throws SQLException {
            return storage.DBQueryServersCount();

@@ -151,32 +151,37 @@ public class DesktopController {
   private int t0 = 0;
   private int t1 = 0;
   private int zoom = 1;
-  private ConcurrentHashMap<Integer, double[]> lu_position = new ConcurrentHashMap<Integer, double[]>();
   private ServersRenderer ren_servers = null;
   private RoadRenderer ren_road = null;
   private ScheduledExecutorService exe = null;
   private ScheduledFuture<?> cbSimRunner = null;
   private ScheduledFuture<?> cbServerLocationsFetcher = null;
   private Map<String, ScheduledFuture<?>> cbMetricFetcher = new HashMap<String, ScheduledFuture<?>>();
+  private boolean isRealtime = false;
   private class ServersRenderer extends AnimationTimer {
+    private long now = 0;
     private long prev = 0;
     private int framecount = 0;
     private Image server_img = null;
+    private Image server_img2 = null;
     private int SERVER_WIDTH = 3;
     private Color SERVER_FILL = Color.web("0x555555");
+    private Color SERVER_FILL2 = Color.web("0xFF0000");
     private GraphicsContext gc = null;
     private Canvas can_servers = null;
-    private ConcurrentHashMap<Integer, double[]> lu_position = null;
+    private ConcurrentHashMap<Integer, double[]> buffer = new ConcurrentHashMap<Integer, double[]>();
+    private ConcurrentHashMap<Integer, Integer> bufidx = new ConcurrentHashMap<Integer, Integer>();
     private Label lbl_fps = null;
+    private boolean isRealtime = false;
     public ServersRenderer(
         final GraphicsContext gc,
-        final ConcurrentHashMap<Integer, double[]> lu_position,
-        final Label lbl_fps) {
+        final Label lbl_fps,
+        final boolean isRealtime) {
       super();
       this.gc = gc;
-      this.lu_position = lu_position;
       this.can_servers = gc.getCanvas();
       this.lbl_fps = lbl_fps;
+      this.isRealtime = isRealtime;
       // Initialize the server image
       Rectangle rect = new Rectangle(this.SERVER_WIDTH, this.SERVER_WIDTH);
       rect.setFill(this.SERVER_FILL);
@@ -184,10 +189,35 @@ public class DesktopController {
       SnapshotParameters parameters = new SnapshotParameters();
       rect.snapshot(parameters, wi);
       this.server_img = wi;
+      rect.setFill(this.SERVER_FILL2);
+      wi = new WritableImage(this.SERVER_WIDTH, this.SERVER_WIDTH);
+      parameters = new SnapshotParameters();
+      rect.snapshot(parameters, wi);
+      this.server_img2 = wi;
     }
-    public void handle(long now) {
+    public void fillBuffer(final int sid, final double[] buffer) {
+      if (!this.bufidx.containsKey(sid)) {
+        this.bufidx.put(sid, 0);
+        this.buffer.put(sid, new double[] { 0,0,0, 0,0,0, 0,0,0 });
+      }
+      double[] ref = this.buffer.get(sid);
+      int i = this.bufidx.get(sid);
+      ref[(i + 0)] = this.now;
+      ref[(i + 1)] = buffer[1];
+      ref[(i + 2)] = buffer[2];
+      i = (i + 3) % 9;
+      ref[(i + 0)] = (this.now + (buffer[3] - buffer[0])*1_000_000_000);
+      ref[(i + 1)] = buffer[4];
+      ref[(i + 2)] = buffer[5];
+      i = (i + 3) % 9;
+      ref[(i + 0)] = (this.now + (buffer[6] - buffer[0])*1_000_000_000);
+      ref[(i + 1)] = buffer[7];
+      ref[(i + 2)] = buffer[8];
+    }
+    public void handle(final long now) {
+      this.now = now;
       // Count FPS
-      if (now - prev > 1000_000_000) {
+      if (now - prev > 1_000_000_000) {
         this.lbl_fps.setText(String.format("%d",this.framecount));
         prev = now;
         framecount = 0;
@@ -196,12 +226,30 @@ public class DesktopController {
       }
       // Draw servers
       this.gc.clearRect(0, 0, this.can_servers.getWidth(), this.can_servers.getHeight());
-      for (final Map.Entry<Integer, double[]> kv : this.lu_position.entrySet()) {
-        final int      sid = kv.getKey();
-        final double[] pos = kv.getValue();
-        final double     x = pos[0];
-        final double     y = pos[1];
-        this.gc.drawImage(this.server_img, x, y);
+      for (final Map.Entry<Integer, Integer> kv : this.bufidx.entrySet()) {
+        final int sid = kv.getKey();
+        final int i = kv.getValue();
+        final double[] buffer = this.buffer.get(sid);
+        final double t1 = buffer[((i + 0) % 9)];
+        final double x1 = buffer[((i + 1) % 9)];
+        final double y1 = buffer[((i + 2) % 9)];
+        final double t2 = buffer[((i + 3) % 9)];
+        final double x2 = buffer[((i + 4) % 9)];
+        final double y2 = buffer[((i + 5) % 9)];
+        if (this.isRealtime) {
+          double delta = ((double) (now - t1)/(t2 - t1));
+          if (delta >= 1) {
+            this.bufidx.put(sid, (i + 3) % 9);
+            delta = 1;
+          }
+          final double x = (x1 + delta*(x2 - x1)) - (float) SERVER_WIDTH/2;
+          final double y = (y1 + delta*(y2 - y1)) - (float) SERVER_WIDTH/2;
+          this.gc.drawImage(this.server_img, x, y);
+        } else {
+          final double x = x1 - (float) SERVER_WIDTH/2;
+          final double y = y1 - (float) SERVER_WIDTH/2;
+          this.gc.drawImage(this.server_img, x, y);
+        }
       }
     }
   }
@@ -318,28 +366,47 @@ public class DesktopController {
     private Controller controller = null;
     private Label lbl_status = null;
     private MapUnitsFetcher muf = null;
-    private ConcurrentHashMap<Integer, double[]> lu_position = null;
+    private Map<Integer, double[]> buffer = new HashMap<Integer, double[]>();
+    private ServersRenderer renderer = null;
     public ServerLocationsFetcher(
         final Controller controller,
         final Label lbl_status,
         final MapUnitsFetcher muf,
-        final ConcurrentHashMap<Integer, double[]> lu_position) {
+        final ServersRenderer renderer) {
       this.controller = controller;
       this.lbl_status = lbl_status;
       this.muf = muf;
-      this.lu_position = lu_position;
+      this.renderer = renderer;
     }
     public void run() {
       final int t = this.controller.getClockNow();
       try {
-        int[] locations = this.controller.queryServersLocationsActive(t);
-        for (int i = 0; i < (locations.length - 2); i += 3) {
-          final int sid = locations[(i + 0)];
-          final int   v = locations[(i + 2)];
-          int[] coordinates = this.controller.queryVertex(v);
-          double x = this.muf.getUnit()*(coordinates[0] - this.muf.getLngMin());
-          double y = this.muf.getUnit()*(coordinates[1] - this.muf.getLatMin());
-          this.lu_position.put(sid, new double[] { x, y });
+        int[] active = this.controller.queryServersActive(t);
+        for (int i = 0; i < active.length; i++) {
+          final int sid = active[i];
+          if ((!this.buffer.containsKey(sid)) || (this.buffer.get(sid)[3] <= t)) {
+            int[] route = this.controller.queryServerRouteActive(sid);
+            if (route.length == 6) {  // ...
+              final int t1 = route[0];
+              final int v1 = route[1];
+              final int t2 = route[2];
+              final int v2 = route[3];
+              final int t3 = route[4];
+              final int v3 = route[5];
+              int[] coordinates = this.controller.queryVertex(v1);
+              final double x1 = this.muf.getUnit()*(coordinates[0] - this.muf.getLngMin());
+              final double y1 = this.muf.getUnit()*(coordinates[1] - this.muf.getLatMin());
+              coordinates = this.controller.queryVertex(v2);
+              final double x2 = this.muf.getUnit()*(coordinates[0] - this.muf.getLngMin());
+              final double y2 = this.muf.getUnit()*(coordinates[1] - this.muf.getLatMin());
+              coordinates = this.controller.queryVertex(v3);
+              final double x3 = this.muf.getUnit()*(coordinates[0] - this.muf.getLngMin());
+              final double y3 = this.muf.getUnit()*(coordinates[1] - this.muf.getLatMin());
+              double[] newbuf = new double[] { t1, x1, y1, t2, x2, y2, t3, x3, y3 };
+              this.buffer.put(sid, newbuf);
+              this.renderer.fillBuffer(sid, newbuf);
+            }
+          }
         }
       } catch (SQLException se) {
         System.err.println("Warning: ServerLocationsFetcher failed to get locations");
@@ -803,14 +870,33 @@ public class DesktopController {
            }
          }
   public void actionStartRealtime(final ActionEvent e) {
-         }
-  public void actionStartSequential(final ActionEvent e) {
+           this.isRealtime = true;
            this.clientclass = this.tf_client.getText();
            if ("".equals(this.clientclass)) {
              System.err.println("Class empty!");
              return;
            }
-           this.trafficclass = this.tf_traffic.getText();
+           try {
+             URLClassLoader loader = new URLClassLoader(new URL[] {new URL("file://"+this.clientjar)},
+                 this.getClass().getClassLoader());
+             Class<?> tempclass = Class.forName(this.clientclass, true, loader);
+             Constructor<?> tempcstor = tempclass.getDeclaredConstructor();
+             this.client = (Client) tempcstor.newInstance();
+             this.controller.setRefClient(this.client);
+             this.controller.forwardRefCommunicator(this.controller.getRefCommunicator());
+             this.client.forwardRefCacheVertices(this.controller.retrieveRefCacheVertices());
+             this.client.forwardRefCacheEdges(this.controller.retrieveRefCacheEdges());
+             this.client.forwardRefCacheUsers(this.controller.retrieveRefCacheUsers());
+           } catch (MalformedURLException
+               | ClassNotFoundException
+               | NoSuchMethodException
+               | InstantiationException
+               | IllegalAccessException
+               | InvocationTargetException me) {
+             System.err.println(me.toString());
+             me.printStackTrace();
+             return;
+           }
            if ("".equals(this.tf_t0.getText())) {
              this.tf_t0.setText("0");
            }
@@ -824,17 +910,8 @@ public class DesktopController {
            this.tf_t1        .setDisable(true);
            this.circ_status  .setFill(C_WARN);
            this.lbl_status   .setText("Loading '"+this.clientclass+"'...");
+           this.trafficclass = this.tf_traffic.getText();
            try {
-             URLClassLoader loader = new URLClassLoader(new URL[] {new URL("file://"+this.clientjar)},
-                 this.getClass().getClassLoader());
-             Class<?> tempclass = Class.forName(this.clientclass, true, loader);
-             Constructor<?> tempcstor = tempclass.getDeclaredConstructor();
-             this.client = (Client) tempcstor.newInstance();
-             this.controller.setRefClient(this.client);
-             this.controller.forwardRefCommunicator(this.controller.getRefCommunicator());
-             this.client.forwardRefCacheVertices(this.controller.retrieveRefCacheVertices());
-             this.client.forwardRefCacheEdges(this.controller.retrieveRefCacheEdges());
-             this.client.forwardRefCacheUsers(this.controller.retrieveRefCacheUsers());
              if (this.trafficclass.length() > 0) {
                URLClassLoader loader2 = new URLClassLoader(new URL[] {new URL("file://"+this.trafficjar)},
                    this.getClass().getClassLoader());
@@ -846,126 +923,6 @@ public class DesktopController {
                this.controller.forwardRefTraffic(this.traffic);
                this.ren_road.setTraffic(this.traffic);
              }
-             try {
-               this.client.gtreeLoad(this.gtree);
-             } catch (FileNotFoundException fe) {
-               System.err.println(e.toString());
-               return;
-             }
-             this.t0 = Integer.parseInt(this.tf_t0.getText());
-             this.t1 = Integer.parseInt(this.tf_t1.getText());
-             this.controller.setClockStart(this.t0);
-             this.controller.setClockEnd(this.t1);
-             this.lc_rates.setCreateSymbols(false);
-             this.lc_rates.setAnimated(false);
-             this.lc_rates.setLegendVisible(false);
-             this.lc_distances.setCreateSymbols(false);
-             this.lc_distances.setAnimated(false);
-             this.lc_distances.setLegendVisible(false);
-             this.lc_durations.setCreateSymbols(false);
-             this.lc_durations.setAnimated(false);
-             this.lc_durations.setLegendVisible(false);
-             this.lc_counts.setCreateSymbols(false);
-             this.lc_counts.setAnimated(false);
-             this.lc_counts.setLegendVisible(false);
-             this.lc_times.setCreateSymbols(false);
-             this.lc_times.setAnimated(false);
-             this.lc_times.setLegendVisible(false);
-             this.rates_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
-             this.rates_y = new NumberAxis("Value (%)", 0, 100, 10);
-             this.rates_x.setAutoRanging(true);
-             this.rates_y.setAutoRanging(true);
-             this.distances_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
-             this.distances_y = new NumberAxis("Value (meters)", 0, 100, 10);
-             this.distances_x.setAutoRanging(true);
-             this.distances_y.setAutoRanging(true);
-             this.durations_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
-             this.durations_y = new NumberAxis("Value (seconds)", 0, 100, 10);
-             this.durations_x.setAutoRanging(true);
-             this.durations_y.setAutoRanging(true);
-             this.counts_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
-             this.counts_y = new NumberAxis("Value (count)", 0, 100, 10);
-             this.counts_x.setAutoRanging(true);
-             this.counts_y.setAutoRanging(true);
-             this.times_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
-             this.times_y = new NumberAxis("Value (milliseconds)", 0, 100, 10);
-             this.times_x.setAutoRanging(true);
-             this.times_y.setAutoRanging(true);
-             for (String metric : this.metric_rates) {
-               this.lc_rates_series.put(metric, new Series<Number, Number>());
-               this.lc_rates.getData().add(this.lc_rates_series.get(metric));
-               this.lu_series.put(metric, this.lc_rates_series);
-             }
-             for (String metric : this.metric_distances) {
-               this.lc_distances_series.put(metric, new Series<Number, Number>());
-               this.lc_distances.getData().add(this.lc_distances_series.get(metric));
-               this.lu_series.put(metric, this.lc_distances_series);
-             }
-             for (String metric : this.metric_durations) {
-               this.lc_durations_series.put(metric, new Series<Number, Number>());
-               this.lc_durations.getData().add(this.lc_durations_series.get(metric));
-               this.lu_series.put(metric, this.lc_durations_series);
-             }
-             for (String metric : this.metric_counts) {
-               this.lc_counts_series.put(metric, new Series<Number, Number>());
-               this.lc_counts.getData().add(this.lc_counts_series.get(metric));
-               this.lu_series.put(metric, this.lc_counts_series);
-             }
-             for (String metric : this.metric_times) {
-               this.lc_times_series.put(metric, new Series<Number, Number>());
-               this.lc_times.getData().add(this.lc_times_series.get(metric));
-               this.lu_series.put(metric, this.lc_times_series);
-             }
-             this.container_lc_rates.setTopAnchor(this.lc_rates, 0.0);
-             this.container_lc_rates.setLeftAnchor(this.lc_rates, 0.0);
-             this.container_lc_rates.setRightAnchor(this.lc_rates, 0.0);
-             this.container_lc_rates.setBottomAnchor(this.lc_rates, 0.0);
-             this.container_lc_rates.getChildren().add(this.lc_rates);
-             this.container_lc_distances.setTopAnchor(this.lc_distances, 0.0);
-             this.container_lc_distances.setLeftAnchor(this.lc_distances, 0.0);
-             this.container_lc_distances.setRightAnchor(this.lc_distances, 0.0);
-             this.container_lc_distances.setBottomAnchor(this.lc_distances, 0.0);
-             this.container_lc_distances.getChildren().add(this.lc_distances);
-             this.container_lc_durations.setTopAnchor(this.lc_durations, 0.0);
-             this.container_lc_durations.setLeftAnchor(this.lc_durations, 0.0);
-             this.container_lc_durations.setRightAnchor(this.lc_durations, 0.0);
-             this.container_lc_durations.setBottomAnchor(this.lc_durations, 0.0);
-             this.container_lc_durations.getChildren().add(this.lc_durations);
-             this.container_lc_counts.setTopAnchor(this.lc_counts, 0.0);
-             this.container_lc_counts.setLeftAnchor(this.lc_counts, 0.0);
-             this.container_lc_counts.setRightAnchor(this.lc_counts, 0.0);
-             this.container_lc_counts.setBottomAnchor(this.lc_counts, 0.0);
-             this.container_lc_counts.getChildren().add(this.lc_counts);
-             this.container_lc_times.setTopAnchor(this.lc_times, 0.0);
-             this.container_lc_times.setLeftAnchor(this.lc_times, 0.0);
-             this.container_lc_times.setRightAnchor(this.lc_times, 0.0);
-             this.container_lc_times.setBottomAnchor(this.lc_times, 0.0);
-             this.container_lc_times.getChildren().add(this.lc_times);
-             this.vbox_metrics_rates.setDisable(false);
-             this.vbox_metrics_distances.setDisable(false);
-             this.vbox_metrics_durations.setDisable(false);
-             this.vbox_metrics_counts.setDisable(false);
-             this.vbox_metrics_times.setDisable(false);
-             this.ren_servers = new ServersRenderer(this.can_servers.getGraphicsContext2D(), this.lu_position, this.lbl_fps);
-             this.ren_servers.start();
-             this.circ_status  .setFill(C_SUCCESS);
-             this.lbl_status   .setText("Simulation started.");
-             this.exe = Executors.newScheduledThreadPool(2);
-             this.cbSimRunner = this.exe.schedule(() -> {
-               try {
-                 this.controller.startSequential((status) -> {
-                   Platform.runLater(() -> {
-                     this.lbl_status.setText("Simulation "+(status ? "ended." : "failed."));
-                   });
-                 });
-               } catch (Exception ee) {
-                 System.err.println("Unexepected error in startSequential");
-                 ee.printStackTrace();
-                 System.exit(1);
-               }
-             }, 0, TimeUnit.SECONDS);
-             this.cbServerLocationsFetcher = this.exe.scheduleAtFixedRate(
-                 new ServerLocationsFetcher(this.controller, this.lbl_status, this.muf, this.lu_position), 0, 1, TimeUnit.SECONDS);
            } catch (MalformedURLException
                | ClassNotFoundException
                | NoSuchMethodException
@@ -976,6 +933,313 @@ public class DesktopController {
              me.printStackTrace();
              return;
            }
+           try {
+             this.client.gtreeLoad(this.gtree);
+           } catch (FileNotFoundException fe) {
+             System.err.println(e.toString());
+             return;
+           }
+           this.t0 = Integer.parseInt(this.tf_t0.getText());
+           this.t1 = Integer.parseInt(this.tf_t1.getText());
+           this.controller.setClockStart(this.t0);
+           this.controller.setClockEnd(this.t1);
+           this.lc_rates.setCreateSymbols(false);
+           this.lc_rates.setAnimated(false);
+           this.lc_rates.setLegendVisible(false);
+           this.lc_distances.setCreateSymbols(false);
+           this.lc_distances.setAnimated(false);
+           this.lc_distances.setLegendVisible(false);
+           this.lc_durations.setCreateSymbols(false);
+           this.lc_durations.setAnimated(false);
+           this.lc_durations.setLegendVisible(false);
+           this.lc_counts.setCreateSymbols(false);
+           this.lc_counts.setAnimated(false);
+           this.lc_counts.setLegendVisible(false);
+           this.lc_times.setCreateSymbols(false);
+           this.lc_times.setAnimated(false);
+           this.lc_times.setLegendVisible(false);
+           this.rates_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
+           this.rates_y = new NumberAxis("Value (%)", 0, 100, 10);
+           this.rates_x.setAutoRanging(true);
+           this.rates_y.setAutoRanging(true);
+           this.distances_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
+           this.distances_y = new NumberAxis("Value (meters)", 0, 100, 10);
+           this.distances_x.setAutoRanging(true);
+           this.distances_y.setAutoRanging(true);
+           this.durations_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
+           this.durations_y = new NumberAxis("Value (seconds)", 0, 100, 10);
+           this.durations_x.setAutoRanging(true);
+           this.durations_y.setAutoRanging(true);
+           this.counts_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
+           this.counts_y = new NumberAxis("Value (count)", 0, 100, 10);
+           this.counts_x.setAutoRanging(true);
+           this.counts_y.setAutoRanging(true);
+           this.times_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
+           this.times_y = new NumberAxis("Value (milliseconds)", 0, 100, 10);
+           this.times_x.setAutoRanging(true);
+           this.times_y.setAutoRanging(true);
+           for (String metric : this.metric_rates) {
+             this.lc_rates_series.put(metric, new Series<Number, Number>());
+             this.lc_rates.getData().add(this.lc_rates_series.get(metric));
+             this.lu_series.put(metric, this.lc_rates_series);
+           }
+           for (String metric : this.metric_distances) {
+             this.lc_distances_series.put(metric, new Series<Number, Number>());
+             this.lc_distances.getData().add(this.lc_distances_series.get(metric));
+             this.lu_series.put(metric, this.lc_distances_series);
+           }
+           for (String metric : this.metric_durations) {
+             this.lc_durations_series.put(metric, new Series<Number, Number>());
+             this.lc_durations.getData().add(this.lc_durations_series.get(metric));
+             this.lu_series.put(metric, this.lc_durations_series);
+           }
+           for (String metric : this.metric_counts) {
+             this.lc_counts_series.put(metric, new Series<Number, Number>());
+             this.lc_counts.getData().add(this.lc_counts_series.get(metric));
+             this.lu_series.put(metric, this.lc_counts_series);
+           }
+           for (String metric : this.metric_times) {
+             this.lc_times_series.put(metric, new Series<Number, Number>());
+             this.lc_times.getData().add(this.lc_times_series.get(metric));
+             this.lu_series.put(metric, this.lc_times_series);
+           }
+           this.container_lc_rates.setTopAnchor(this.lc_rates, 0.0);
+           this.container_lc_rates.setLeftAnchor(this.lc_rates, 0.0);
+           this.container_lc_rates.setRightAnchor(this.lc_rates, 0.0);
+           this.container_lc_rates.setBottomAnchor(this.lc_rates, 0.0);
+           this.container_lc_rates.getChildren().add(this.lc_rates);
+           this.container_lc_distances.setTopAnchor(this.lc_distances, 0.0);
+           this.container_lc_distances.setLeftAnchor(this.lc_distances, 0.0);
+           this.container_lc_distances.setRightAnchor(this.lc_distances, 0.0);
+           this.container_lc_distances.setBottomAnchor(this.lc_distances, 0.0);
+           this.container_lc_distances.getChildren().add(this.lc_distances);
+           this.container_lc_durations.setTopAnchor(this.lc_durations, 0.0);
+           this.container_lc_durations.setLeftAnchor(this.lc_durations, 0.0);
+           this.container_lc_durations.setRightAnchor(this.lc_durations, 0.0);
+           this.container_lc_durations.setBottomAnchor(this.lc_durations, 0.0);
+           this.container_lc_durations.getChildren().add(this.lc_durations);
+           this.container_lc_counts.setTopAnchor(this.lc_counts, 0.0);
+           this.container_lc_counts.setLeftAnchor(this.lc_counts, 0.0);
+           this.container_lc_counts.setRightAnchor(this.lc_counts, 0.0);
+           this.container_lc_counts.setBottomAnchor(this.lc_counts, 0.0);
+           this.container_lc_counts.getChildren().add(this.lc_counts);
+           this.container_lc_times.setTopAnchor(this.lc_times, 0.0);
+           this.container_lc_times.setLeftAnchor(this.lc_times, 0.0);
+           this.container_lc_times.setRightAnchor(this.lc_times, 0.0);
+           this.container_lc_times.setBottomAnchor(this.lc_times, 0.0);
+           this.container_lc_times.getChildren().add(this.lc_times);
+           this.vbox_metrics_rates.setDisable(false);
+           this.vbox_metrics_distances.setDisable(false);
+           this.vbox_metrics_durations.setDisable(false);
+           this.vbox_metrics_counts.setDisable(false);
+           this.vbox_metrics_times.setDisable(false);
+           this.ren_servers = new ServersRenderer(this.can_servers.getGraphicsContext2D(), this.lbl_fps, this.isRealtime);
+           this.ren_servers.start();
+           this.circ_status  .setFill(C_SUCCESS);
+           this.lbl_status   .setText("Simulation started.");
+           this.exe = Executors.newScheduledThreadPool(2);
+           this.cbSimRunner = this.exe.schedule(() -> {
+             try {
+               this.controller.startRealtime((status) -> {
+                 Platform.runLater(() -> {
+                   this.lbl_status.setText("Simulation "+(status ? "ended." : "failed."));
+                 });
+               });
+             } catch (Exception ee) {
+               System.err.println("Unexepected error in startRealtime");
+               ee.printStackTrace();
+               System.exit(1);
+             }
+           }, 0, TimeUnit.SECONDS);
+           this.cbServerLocationsFetcher = this.exe.scheduleAtFixedRate(
+               new ServerLocationsFetcher(
+                 this.controller, this.lbl_status, this.muf, this.ren_servers), 0, 1, TimeUnit.SECONDS);
+         }
+  public void actionStartSequential(final ActionEvent e) {
+           this.isRealtime = false;
+           this.clientclass = this.tf_client.getText();
+           if ("".equals(this.clientclass)) {
+             System.err.println("Class empty!");
+             return;
+           }
+           try {
+             URLClassLoader loader = new URLClassLoader(new URL[] {new URL("file://"+this.clientjar)},
+                 this.getClass().getClassLoader());
+             Class<?> tempclass = Class.forName(this.clientclass, true, loader);
+             Constructor<?> tempcstor = tempclass.getDeclaredConstructor();
+             this.client = (Client) tempcstor.newInstance();
+             this.controller.setRefClient(this.client);
+             this.controller.forwardRefCommunicator(this.controller.getRefCommunicator());
+             this.client.forwardRefCacheVertices(this.controller.retrieveRefCacheVertices());
+             this.client.forwardRefCacheEdges(this.controller.retrieveRefCacheEdges());
+             this.client.forwardRefCacheUsers(this.controller.retrieveRefCacheUsers());
+           } catch (MalformedURLException
+               | ClassNotFoundException
+               | NoSuchMethodException
+               | InstantiationException
+               | IllegalAccessException
+               | InvocationTargetException me) {
+             System.err.println(me.toString());
+             me.printStackTrace();
+             return;
+           }
+           if ("".equals(this.tf_t0.getText())) {
+             this.tf_t0.setText("0");
+           }
+           if ("".equals(this.tf_t1.getText())) {
+             this.tf_t1.setText("1800");
+           }
+           this.btn_startseq .setDisable(true);
+           this.btn_startreal.setDisable(true);
+           this.tf_client     .setDisable(true);
+           this.tf_t0        .setDisable(true);
+           this.tf_t1        .setDisable(true);
+           this.circ_status  .setFill(C_WARN);
+           this.lbl_status   .setText("Loading '"+this.clientclass+"'...");
+           this.trafficclass = this.tf_traffic.getText();
+           try {
+             if (this.trafficclass.length() > 0) {
+               URLClassLoader loader2 = new URLClassLoader(new URL[] {new URL("file://"+this.trafficjar)},
+                   this.getClass().getClassLoader());
+               Class<?> tempclass2 = Class.forName(this.trafficclass, true, loader2);
+               Constructor<?> tempcstor2 = tempclass2.getDeclaredConstructor();
+               this.traffic = (Traffic) tempcstor2.newInstance();
+               this.traffic.forwardRefCacheEdges(controller.retrieveRefCacheEdges());
+               this.traffic.forwardRefCacheVertices(controller.retrieveRefCacheVertices());
+               this.controller.forwardRefTraffic(this.traffic);
+               this.ren_road.setTraffic(this.traffic);
+             }
+           } catch (MalformedURLException
+               | ClassNotFoundException
+               | NoSuchMethodException
+               | InstantiationException
+               | IllegalAccessException
+               | InvocationTargetException me) {
+             System.err.println(me.toString());
+             me.printStackTrace();
+             return;
+           }
+           try {
+             this.client.gtreeLoad(this.gtree);
+           } catch (FileNotFoundException fe) {
+             System.err.println(e.toString());
+             return;
+           }
+           this.t0 = Integer.parseInt(this.tf_t0.getText());
+           this.t1 = Integer.parseInt(this.tf_t1.getText());
+           this.controller.setClockStart(this.t0);
+           this.controller.setClockEnd(this.t1);
+           this.lc_rates.setCreateSymbols(false);
+           this.lc_rates.setAnimated(false);
+           this.lc_rates.setLegendVisible(false);
+           this.lc_distances.setCreateSymbols(false);
+           this.lc_distances.setAnimated(false);
+           this.lc_distances.setLegendVisible(false);
+           this.lc_durations.setCreateSymbols(false);
+           this.lc_durations.setAnimated(false);
+           this.lc_durations.setLegendVisible(false);
+           this.lc_counts.setCreateSymbols(false);
+           this.lc_counts.setAnimated(false);
+           this.lc_counts.setLegendVisible(false);
+           this.lc_times.setCreateSymbols(false);
+           this.lc_times.setAnimated(false);
+           this.lc_times.setLegendVisible(false);
+           this.rates_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
+           this.rates_y = new NumberAxis("Value (%)", 0, 100, 10);
+           this.rates_x.setAutoRanging(true);
+           this.rates_y.setAutoRanging(true);
+           this.distances_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
+           this.distances_y = new NumberAxis("Value (meters)", 0, 100, 10);
+           this.distances_x.setAutoRanging(true);
+           this.distances_y.setAutoRanging(true);
+           this.durations_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
+           this.durations_y = new NumberAxis("Value (seconds)", 0, 100, 10);
+           this.durations_x.setAutoRanging(true);
+           this.durations_y.setAutoRanging(true);
+           this.counts_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
+           this.counts_y = new NumberAxis("Value (count)", 0, 100, 10);
+           this.counts_x.setAutoRanging(true);
+           this.counts_y.setAutoRanging(true);
+           this.times_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
+           this.times_y = new NumberAxis("Value (milliseconds)", 0, 100, 10);
+           this.times_x.setAutoRanging(true);
+           this.times_y.setAutoRanging(true);
+           for (String metric : this.metric_rates) {
+             this.lc_rates_series.put(metric, new Series<Number, Number>());
+             this.lc_rates.getData().add(this.lc_rates_series.get(metric));
+             this.lu_series.put(metric, this.lc_rates_series);
+           }
+           for (String metric : this.metric_distances) {
+             this.lc_distances_series.put(metric, new Series<Number, Number>());
+             this.lc_distances.getData().add(this.lc_distances_series.get(metric));
+             this.lu_series.put(metric, this.lc_distances_series);
+           }
+           for (String metric : this.metric_durations) {
+             this.lc_durations_series.put(metric, new Series<Number, Number>());
+             this.lc_durations.getData().add(this.lc_durations_series.get(metric));
+             this.lu_series.put(metric, this.lc_durations_series);
+           }
+           for (String metric : this.metric_counts) {
+             this.lc_counts_series.put(metric, new Series<Number, Number>());
+             this.lc_counts.getData().add(this.lc_counts_series.get(metric));
+             this.lu_series.put(metric, this.lc_counts_series);
+           }
+           for (String metric : this.metric_times) {
+             this.lc_times_series.put(metric, new Series<Number, Number>());
+             this.lc_times.getData().add(this.lc_times_series.get(metric));
+             this.lu_series.put(metric, this.lc_times_series);
+           }
+           this.container_lc_rates.setTopAnchor(this.lc_rates, 0.0);
+           this.container_lc_rates.setLeftAnchor(this.lc_rates, 0.0);
+           this.container_lc_rates.setRightAnchor(this.lc_rates, 0.0);
+           this.container_lc_rates.setBottomAnchor(this.lc_rates, 0.0);
+           this.container_lc_rates.getChildren().add(this.lc_rates);
+           this.container_lc_distances.setTopAnchor(this.lc_distances, 0.0);
+           this.container_lc_distances.setLeftAnchor(this.lc_distances, 0.0);
+           this.container_lc_distances.setRightAnchor(this.lc_distances, 0.0);
+           this.container_lc_distances.setBottomAnchor(this.lc_distances, 0.0);
+           this.container_lc_distances.getChildren().add(this.lc_distances);
+           this.container_lc_durations.setTopAnchor(this.lc_durations, 0.0);
+           this.container_lc_durations.setLeftAnchor(this.lc_durations, 0.0);
+           this.container_lc_durations.setRightAnchor(this.lc_durations, 0.0);
+           this.container_lc_durations.setBottomAnchor(this.lc_durations, 0.0);
+           this.container_lc_durations.getChildren().add(this.lc_durations);
+           this.container_lc_counts.setTopAnchor(this.lc_counts, 0.0);
+           this.container_lc_counts.setLeftAnchor(this.lc_counts, 0.0);
+           this.container_lc_counts.setRightAnchor(this.lc_counts, 0.0);
+           this.container_lc_counts.setBottomAnchor(this.lc_counts, 0.0);
+           this.container_lc_counts.getChildren().add(this.lc_counts);
+           this.container_lc_times.setTopAnchor(this.lc_times, 0.0);
+           this.container_lc_times.setLeftAnchor(this.lc_times, 0.0);
+           this.container_lc_times.setRightAnchor(this.lc_times, 0.0);
+           this.container_lc_times.setBottomAnchor(this.lc_times, 0.0);
+           this.container_lc_times.getChildren().add(this.lc_times);
+           this.vbox_metrics_rates.setDisable(false);
+           this.vbox_metrics_distances.setDisable(false);
+           this.vbox_metrics_durations.setDisable(false);
+           this.vbox_metrics_counts.setDisable(false);
+           this.vbox_metrics_times.setDisable(false);
+           this.ren_servers = new ServersRenderer(this.can_servers.getGraphicsContext2D(), this.lbl_fps, this.isRealtime);
+           this.ren_servers.start();
+           this.circ_status  .setFill(C_SUCCESS);
+           this.lbl_status   .setText("Simulation started.");
+           this.exe = Executors.newScheduledThreadPool(2);
+           this.cbSimRunner = this.exe.schedule(() -> {
+             try {
+               this.controller.startSequential((status) -> {
+                 Platform.runLater(() -> {
+                   this.lbl_status.setText("Simulation "+(status ? "ended." : "failed."));
+                 });
+               });
+             } catch (Exception ee) {
+               System.err.println("Unexepected error in startSequential");
+               ee.printStackTrace();
+               System.exit(1);
+             }
+           }, 0, TimeUnit.SECONDS);
+           this.cbServerLocationsFetcher = this.exe.scheduleAtFixedRate(
+               new ServerLocationsFetcher(
+                 this.controller, this.lbl_status, this.muf, this.ren_servers), 0, 1, TimeUnit.SECONDS);
          }
   public void actionStop(final ActionEvent e) {
            if (this.controller != null) {
