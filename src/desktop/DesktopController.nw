@@ -205,8 +205,8 @@ private class ServersRenderer extends AnimationTimer {
   private long prev = 0;
   private int framecount = 0;
   private Image server_img = null;
-  private int server_width = 4;
-  private Color server_fill = Color.web("0x555555");
+  private int SERVER_WIDTH = 3;
+  private Color SERVER_FILL = Color.web("0x555555");
   private GraphicsContext gc = null;
   private Canvas can_servers = null;
   private ConcurrentHashMap<Integer, double[]> lu_position = null;
@@ -221,16 +221,16 @@ private class ServersRenderer extends AnimationTimer {
     this.can_servers = gc.getCanvas();
     this.lbl_fps = lbl_fps;
     // Initialize the server image
-    Rectangle rect = new Rectangle(this.server_width, this.server_width);
-    rect.setFill(this.server_fill);
-    WritableImage wi = new WritableImage(this.server_width, this.server_width);
+    Rectangle rect = new Rectangle(this.SERVER_WIDTH, this.SERVER_WIDTH);
+    rect.setFill(this.SERVER_FILL);
+    WritableImage wi = new WritableImage(this.SERVER_WIDTH, this.SERVER_WIDTH);
     SnapshotParameters parameters = new SnapshotParameters();
     rect.snapshot(parameters, wi);
     this.server_img = wi;
   }
   public void handle(long now) {
     // Count FPS
-    if (now - prev > 1000000000) {
+    if (now - prev > 1000_000_000) {
       this.lbl_fps.setText(String.format("%d",this.framecount));
       prev = now;
       framecount = 0;
