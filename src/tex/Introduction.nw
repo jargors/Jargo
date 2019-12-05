@@ -1,3 +1,4 @@
+\part{User Manual}
 \chapter{Introduction}
 \label{intro}
 
@@ -6,50 +7,44 @@
 
 Ridesharing can be formulated as a decision problem where the objective is to
 determine the optimal customer-to-vehicle assignments. Optimizing a single
-assignment produces a \emph{local optima} whereas optimizing the aggregated
+assignment produces a local optima whereas optimizing the aggregated
 objective over all assigments in the span of a ridesharing scenario produces
-the \emph{global optima}. The global optima answers questions that are of
+the global optima. The global optima answers questions that are of
 interest to various stakeholders, such as what is the minimum fleet size needed
 for an $n$\% assignment rate or what is the maximum profit achievable in a day.
 
-To evaluate the \emph{quality} of a ridesharing algorithm (some might say the
-\emph{quality of the solution} produced by the algorithm) is to measure the
+To evaluate the quality of a ridesharing algorithm is to measure the
 value of the objective that the algorithm can achieve over the ridesharing
 scenario. A high-quality algorithm achieves near the global optima whereas a
 low-quality algorithm does not. Quality of a ridesharing algorithm is difficult
-to evaluate for three reasons.
+to evaluate for three reasons:
 \begin{enumerate}
-\item \hi{Assignment Dependence.} Assignments are not independent of each
-other. If a vehicle is initially assigned to a particular customer, it may be
-ineligible for some future customer due to capacity and time window
-constraints. This dependence means that assignments cannot be evaluated
-sequentially in isolation but must be evaluated as part of a broader system.
-\item \hi{Stochastic Processes.} Stochastic processes become important over the
-span of a scenario.  Travel times in the road network are uncertain due to
-traffic and vehicle breakdowns. Travel routes are also uncertain, if the
-vehicles are non-autonomous, because human drivers can make mistakes.  If a
-vehicle is initially assigned to a customer in an area that is susceptible to
-traffic or difficult to navigate, it may be ineligible for some future customer
-due to time window constraints. These processes cannot be ignored because they
-can affect the downstream assignments.
-\item \hi{Real-Time Requests.} A ridesharing algorithm's processing time
-affects downstream assignments due to the real-time nature of ridesharing
-requests. As a simple example, consider an algorithm that processes requests at
-a rate slower than they appear. Over time, later requests may never get
-processed even if valid assignments exist for them.
+\item \hi{Output Dependence.}
+Customers and vehicles are not static inputs for an algorithm but depend on the
+algorithm's computed assignments. For example, a vehicle assigned to
+customer~A at time $t_1$ may be ineligible for customer~B at time $t_2$ due to
+seating and timing restrictions.
+\item \hi{Stochastic Effects.}
+An algorithm's computed spatio-temporal vehicle motions may not reflect actual
+motion of vehicles because travel time within a road network is uncertain due
+to traffic. Thus, the objective values on the algorithm outputs may differ from the
+objective values on the true motions.
+\item \hi{Throughput Effects.} If $m$ new customers appear on the road network
+per second, an algorithm can process $n$ customers per second, and $n<m$, then
+later customers may never get processed even if assignments exist. The effect
+of the algorithm's throughput cannot be predetermined because both $n$ and $m$
+are usually non-constant over time (\textit{i.e.} some customers can be harder
+to process due to more candidate vehicles, and customer appearance rate can
+fluctuate throughout the day).
 \end{enumerate}
 
-The above items are all features of ridesharing in the real world.  Thus to
-evaluate quality, ridesharing algorithms can be tested on actual vehicles and
-customers (Figure~\ref{fig:physical}), but this method is expensive, slow to
-deploy, and out of reach for most researchers. Controlled studies to determine
-the effect of certain parameters, such as presence and absence of traffic, on
-algorithm quality are also difficult or impossible to perform. In contrast,
-testing algorithms on a simulated environment is inexpensive, fast to deploy,
-readily accessible, and controllable. The challenge then becomes to design an
-environment that can faithfully reproduce these real-world features. As there
-is no ``lag'' in the real world, the environment must also be highly
-responsive.
+The naive evaluation procedure of giving predefined static inputs to a
+ridesharing algorithm and then examining the outputs thus may not accurately
+measure quality. On the other hand evaluating a ridesharing algorithm on
+physical customers and vehicles may be expensive and inaccessible to most
+researchers (Figure~\ref{fig:physical}).  An alternative that can be accurate,
+inexpensive, accessible, and most importantly controllable may be to use
+software simulation.
 
 \begin{figure}[h]
 \centering
@@ -61,11 +56,7 @@ of reach for most researchers.}
 \end{figure}
 
 Jargo is the name of our environment for evaluating the quality of ridesharing
-algorithms (Figure~\ref{fig:architecture}). It captures assignment dependence
-by simulating real-time motion of vehicles and capacity, and it simulates
-stochastic processes by perturbing route segment durations and locations. To
-simulate real-time, it executes a ridesharing algorithm in parallel alongside
-new requests so that an algorithm can be running while requests are arriving.
+algorithms (Figure~\ref{fig:architecture}).
 This chapter explains how Jargo's simulation data is organized, beginning with
 a description of physical ridesharing (\S\ref{ch:1:sec:ridesharing-systems}),
 then the mathematical model to describe physical ridesharing
@@ -76,9 +67,8 @@ the state data (\S\ref{ch:1:sec:ridesharing-data-model}).
 \centering
 \includegraphics[width=120mm]{fig/architecture}
 \caption{Alternatively, ridesharing algorithms can be evaluated on a software
-simulator such as Jargo. The architecture and Jargo's ridesharing data model
-are designed to protect simulation integrity and to provide analysis
-capabilities.}
+simulator such as Jargo. Two key objectives of Jargo's ridesharing data model
+are to protect simulation integrity and to provide analysis capabilities.}
 \label{fig:architecture}
 \end{figure}
 
@@ -86,12 +76,84 @@ capabilities.}
 \label{ch:1:sec:ridesharing-systems}
 To determine the best way to organize the state data, we first start with
 examining real-world ridesharing systems.  Ridesharing involves the
-\emph{users} and the \emph{rules} governing their behavior. The users can be
+users and the rules governing their behavior. The users can be
 classified into four types, shown in Table~\ref{tab:user-types}.  We use the
 term \emph{customer} to refer to both Type 1 and Type 2 users, and the term
 \emph{vehicle} to refer to both Type 3 and Type 4 users.  Physical users have
 the properties in Table~\ref{tab:user-properties} and obey the rules in
 Table~\ref{tab:user-rules}.
+
+\section{Ridesharing Formulation}
+\label{ch:1:sec:ridesharing-formulation}
+Users can naturally be described by a set of values for their P1--P3
+properties. Each vehicle can also be associated with a sequence of values
+describing its past and future motion (P4); a set of values indicating when and
+where pick-ups and drop-offs have occurred (P5); and a value to indicate the
+number of available seats at any given time (P6). Each customer can be
+associated with a value indicating its state (P7). Moreover, the ridesharing
+setting, namely the road network, can be described using sets of values
+indicating coordinates and distances in the network.
+
+We can try to organize these state values into algebraic variables and write
+equations to explain the relationships. If we organize the data into
+relations, we can use selection and projection when we write the
+equations. These operations will turn out to be useful for formalizing certain
+concepts such as pick-up and drop-off times for a customer or the cruising and
+service distance for a vehicle.
+
+\begin{mdframed}
+\small
+\subsubsection*{Brief Primer on Relations}
+The following briefly overviews the concept of relations and introduces some
+notation.  Relations can be defined in terms of sequences and tuples.  A
+sequence is an ordered list of elements.  We will write the integer sequence
+from $i$ to $j$ as $i..j$. We will write the sequence $$(a_i)_{i\in
+1..n}=a_1,a_2,...,a_{n-1},a_n$$ as $a_1..a_n$ or simply $a$ (without any
+subscript). The number of elements in $a$ is called the length of $a$ and is
+expressed as $|a|$.  A copy $b$ of sequence $a$ but with some elements removed
+is called a subsequence.  Sequence $b$ is called a substring of $a$ only if
+some $k$ exists such that $$b=a_{1+k}..a_{|b|+k},$$ in other words the elements
+in $b$ form a contiguous subsequence of $a$.  We call sequence $a$ a tuple if
+each element of $a$ is labeled. A labeled element is called a component.  A
+function mapping an element based on its position in the tuple to a label is
+called a labeling scheme.  Each component has a domain from which the component
+takes its value, for example the set of real numbers.  A tuple of length $m$ is
+called an $m$-tuple. A 2-tuple is called a pair.  A tuple definition will be
+written as its labels surrounded by parentheses with the domains given. Label
+names will be written in \texttt{typewriter} script to avoid confusion with
+positional indices.
+
+\begin{example}
+\label{ex:tuple}
+The sequence $a=a_\texttt{x},a_\texttt{y}$
+is a 2-tuple with components named \texttt{x} and \texttt{y}.
+The labeling
+scheme for $a$ maps $1\rightarrow \texttt{x}$ and $2\rightarrow \texttt{y}$, with the
+integers $1$ and $2$ referring to the position of the elements. A possible definition for
+$a$ could be $a:=(\texttt{x},\texttt{y}),
+a_\texttt{x}\in\mathbb{R}, a_\texttt{y}\in\{\textrm{pi},\textrm{Euler}\},$ and
+a possible value for $a$ could be $$a=3.14,\textrm{pi}.$$
+\end{example}
+
+A set of unique $m$-tuples with the same labeling scheme is called an $m$-ary
+relation, or simply relation.  Two operators can be applied onto
+relations\footnote{Our model is not concerned with joins.}.  The selection
+operator $\sigma_P(R)$ is a function that returns a subset $R'\subseteq R$ such
+that predicate $P(R'_i)$ is true for each tuple $R'_i\in R'$.  The projection
+operator $\pi_L(R)$ is a function that returns a copy $R'$ of $R$ such that
+each tuple $R'_i\in R'$ is distinct, and only components with a label in set
+$L$ are included.
+
+Observe that an $m$-tuple is an $m$-ary relation with one element.
+The projection operator thus naturally applies to tuples. For instance, see that for
+$R=R_\texttt{x},R_\texttt{y}:=(\texttt{x},\texttt{y}),$
+the $\texttt{x}$ component is extracted with
+$R_\texttt{x}=\pi_\texttt{x}(R)$
+and the $\texttt{y}$ component is extracted with
+$R_\texttt{y}=\pi_\texttt{y}(R)$.
+
+\end{mdframed}
+
 \begin{table}[h]
 \centering
 \small
@@ -120,27 +182,27 @@ Type 4 & Taxi-like vehicle continually serving customers without an
 \hline
 Label & Description \\
 \hline
-P1 & \hi{Load.} Each user has a non-zero \emph{load}, indicating a
+P1 & \hi{Load.} Each user has a non-zero load, indicating a
 number of needed seats. For Type 1 users the load is 1, indicating they only
 need a single seat. For Type 2 users the load exceeds 1. For Type 3 and Type 4
 users the load is negative, indicating they have an availability of seats. \\
 \hline
-P2 & \hi{Origin and Destination.} Each user has an \emph{origin} and a
-\emph{destination}, except for Type 4 users that only have an origin.  For Type
+P2 & \hi{Origin and Destination.} Each user has an origin and a
+destination, except for Type 4 users that only have an origin.  For Type
 1 and Type 2, the origin indicates the initial location of the customer
 and the destination indicates the desired final location.  For Type 3, the
 origin and destination indicate where the vehicle's ridesharing service begins
 and ends.\\
 \hline
-P3 & \hi{Time Window.} Each user has an \emph{early time} and a
-\emph{late time}, together forming the user's \emph{time window}. For a Type 1
+P3 & \hi{Time Window.} Each user has an early time and a
+late time, together forming the user's time window. For a Type 1
 or Type 2 customer, the time window gives the desired departure time from the
 origin and the desired arrival time at the destination.  For a Type 3 or Type 4
 vehicle, the time window gives the time when service begins and the latest time
 that service can end. The early time precedes the late time.\\
 \hline
 \end{tabular}
-\caption{Rules bounding user behavior.}
+\caption{Rules governing user behavior.}
 \label{tab:user-rules}
 \begin{tabular}{|c|p{140mm}|}
 \hline
@@ -155,9 +217,7 @@ P5 & \hi{Pick-ups and Drop-offs.} For a vehicle to service a customer, it
 must first travel to the customer's origin to pick up the customer, and then to
 the customer's destination to drop off the customer, in that order. The
 customer enters the vehicle during the pick-up and exits the vehicle during the
-drop-off. These visits must occur within the customer's time window\footnote{We
-limit our scope to the typical case where a customer is served by only one
-vehicle (no transfers).}.\\
+drop-off. These visits must occur within the customer's time window.\\
 \hline
 P6 & \hi{Vehicle Seats.} When a customer enters a vehicle, the customer
 occupies a number of seats equal to the customer's load. When it exits the
@@ -165,100 +225,23 @@ vehicle, it relinquishes the seats. At no time can the number of occupied seats
 exceed the number of available seats in a vehicle.\\
 \hline
 P7 & \hi{User States.} A customer can be in one of three states at any
-time: \emph{waiting} for pick-up; \emph{in-transit} following a pick-up but
-before the drop-off; or \emph{arrived} at destination. A vehicle can be either
-\emph{in-service} or \emph{out-of-service}.\\
+time: waiting for pick-up; in-transit following a pick-up but
+before the drop-off; or arrived at destination. A vehicle can be either
+in-service or out-of-service.\\
 \hline
 \end{tabular}
 \end{table}
 
-\section{Ridesharing Formulation}
-\label{ch:1:sec:ridesharing-formulation}
-We can now try to mathematically describe the system.  Users can naturally be
-described by a set of values for their P1--P3 properties.  Each vehicle can
-also be associated with a sequence of values describing its past and future
-motion (P4); a set of values indicating when and where pick-ups and drop-offs
-have occurred (P5); and a value to indicate the number of available seats at
-any given time (P6). Each customer can be associated with a value indicating
-its state (P7). Moreover, the ridesharing setting, namely the road network, can
-be described using sets of values indicating coordinates and distances in the
-network.
-
-Now that we know what values we have, we can try to organize the data into variables
-and constants and write equations to explain the relationships. If we
-organize the data into \emph{relations}, we can use selection and projection
-when we write the equations. These operations will turn out to be useful for
-formalizing certain concepts such as pick-up and drop-off times for a customer
-or the cruising and service distance for a vehicle.
-
-\subsection*{Relations}
-The following briefly overviews the concept of relations and introduces some
-notation.
-Relations can be defined in terms of \emph{sequences} and \emph{tuples}.
-A sequence is an ordered list of elements.
-We will write the integer sequence from $i$ to
-$j$ as $i..j$. The sequence
-$$(a_i)_{i\in 1..n}=a_1,a_2,...,a_{n-1},a_n$$
-will be written $a_1..a_n$ or simply $a$ (without any subscript).
-The number of elements in $a$ is called the \emph{length}
-of $a$ and is expressed as $|a|$.
-A copy $b$ of sequence $a$ but with some elements removed is called
-a \emph{subsequence}.
-Sequence $b$ is called a \emph{substring} of $a$
-only if some $k$ exists such that $$b=a_{1+k}..a_{|b|+k},$$
-in other words the elements in $b$ form a contiguous subsequence of $a$.
-We call
-sequence $a$ a \emph{tuple} if each element of $a$ is labeled. A
-labeled element is called a \emph{component}.
-A function mapping an element based on its position in the tuple to a label
-is called a \emph{labeling scheme}.
-Each component also has a \emph{domain} from which the component takes its value,
-for example the set of real numbers.
-A tuple of length $m$ is called an $m$-tuple. A 2-tuple is called a
-\emph{pair}.
-A tuple definition will be written as its labels surrounded by parentheses with the
-domains given. Label names will be written in \texttt{typewriter} script
-to avoid confusion with positional indices.
-
-\begin{example}
-\label{ex:tuple}
-The sequence $a=a_\texttt{x},a_\texttt{y}$
-is a 2-tuple with components named \texttt{x} and \texttt{y}.
-The labeling
-scheme for $a$ maps $1\rightarrow \texttt{x}$ and $2\rightarrow \texttt{y}$, with the
-integers $1$ and $2$ referring to the position of the elements. A possible definition for
-$a$ could be $a:=(\texttt{x},\texttt{y}),
-a_\texttt{x}\in\mathbb{R}, a_\texttt{y}\in\{\textrm{cat},\textrm{dog}\}.$
-\end{example}
-
-A set of unique $m$-tuples with the same labeling scheme is called
-an \emph{$m$-ary relation}, or simply relation.
-Two operators can be applied onto relations\footnote{Our model is not concerned with joins.}.
-The \emph{selection operator} $\sigma_P(R)$ is a function that returns a subset
-$R'\subseteq R$ such that predicate $P(R'_i)$ is true for each tuple $R'_i\in R'$.
-The \emph{projection} operator $\pi_L(R)$ is a function that returns a copy
-$R'$ of $R$ such that each tuple $R'_i\in R'$ is distinct, and only components
-with a label in set $L$ are included.
-
-Observe that an $m$-tuple is an $m$-ary relation with one element.
-The projection operator thus naturally applies to tuples. For instance, see that for
-$R=R_\texttt{x},R_\texttt{y}:=(\texttt{x},\texttt{y}),$
-the $\texttt{x}$ component is extracted with
-$R_\texttt{x}=\pi_\texttt{x}(R)$
-and the $\texttt{y}$ component is extracted with
-$R_\texttt{y}=\pi_\texttt{y}(R)$.
-
 \subsection{Setting}
 \label{ch:1:sec:setting}
-Now we begin to assign variables and constants to the ridesharing
-system, starting with the setting.
+Now we begin to assign variables to the ridesharing system.
 
 \hi{Time.} Time is considered to be a positive integer $1\leq t\leq H$.  A
-\emph{time horizon} $H$ is introduced to bound the system.
+time horizon $H$ is introduced to bound the system.
 
 Time will occasionally need to be operated on.  Times cannot be added, and only
 a later (greater) time can subtract an earlier (lesser) time.  The difference
-is called a \emph{duration}, represented by the symbol $\delta$.  Durations can
+is called a duration, represented by the symbol $\delta$.  Durations can
 add and subtract each other to get new durations, and times can also add and
 subtract durations to get new times.
 
@@ -291,9 +274,9 @@ A path $p=(p_i)_{i\in 1..n}=p_1..p_n$ is a sequence of $n$ vertices
 such that any two adjacent vertices are an edge, or $(p_i,p_{i+1})\in \mathcal{E}$ for
 $i\in 1..(n-1)$.
 A vertex or edge can appear multiple times in a path.
-The \emph{path distance} is
+The path distance is
 $$\sum_{i=1}^{n-1} d(p_i, p_{i+1}).$$
-Path $p$ is a \emph{shortest path} only if it minimizes the distance out of all
+Path $p$ is a shortest path only if it minimizes the distance out of all
 possible paths from $p_1$ to $p_n$.
 Multiple shortest paths are possible.
 
@@ -312,11 +295,11 @@ $t_1..t_n$ is strictly increasing and $v_1..v_n$ is a path.
 %In other words it is a binary relation on time and $\mathcal{V}$.
 In the spatial dimension, function
 $$D(w)=\sum_{i=1}^{n-1}d(\pi_\texttt{v}(w_i),\pi_\texttt{v}(w_{i+1}))$$
-gives the \emph{route distance}, analogous to path distance.
+gives the route distance, analogous to path distance.
 % Abandoned: wordy. Projection $\pi_\texttt{v}(w_i)$ returns the vertex component of waypoint $w_i$.
 In the time dimension, function
 $$\delta(w)=\pi_\texttt{t}(w_n)-\pi_\texttt{t}(w_1)$$
-gives the \emph{route duration}.
+gives the route duration.
 %The \emph{distance} of $w$ is $D(\pi_\texttt{v}(w))$.
 %The \emph{duration} of $w$ is $t_n$.
 Given a time $t$,
@@ -324,8 +307,8 @@ Given a time $t$,
 w_{\leq t}=\textrm{sort}(\sigma_{\texttt{t}\leq t}(w))\quad\textrm{and}\quad
 w_{>t}=\textrm{sort}(\sigma_{\texttt{t}>t}(w))
 \end{align*}
-give the \emph{traveled route} denoted $w_{\leq t}$, and the \emph{remaining
-route} denoted $w_{>t}$. As the selection operator imposes no ordering on the resulting
+give the traveled route denoted $w_{\leq t}$, and the remaining
+route denoted $w_{>t}$. As the selection operator imposes no ordering on the resulting
 set, a $\textrm{sort}(...)$ function is introduced to
 sort a set of waypoints by time in ascending order, returning a sequence.
 % From now on, any selection or projection on time is assumed to be sorted
@@ -333,7 +316,7 @@ sort a set of waypoints by time in ascending order, returning a sequence.
 For two adjacent waypoints $w_i$ and~$w_{i+1}$, function
 $$\nu(w_i,w_{i+1})=\frac{d(\pi_\texttt{v}(w_i),\pi_\texttt{v}(w_{i+1}))}
 {\pi_\texttt{t}(w_{i+1})-\pi_\texttt{t}(w_i)}$$ gives the
-\emph{waypoint rate}, or more intuitively the \emph{speed}.
+waypoint rate, or more intuitively the speed.
 % The unit of speed depends on the units of $d$ and time and do not have to be
 % a physical velocity, such as meters per second.
 As $d$ only applies to edges, $\nu$ only applies to adjacent waypoints.
@@ -347,11 +330,11 @@ for example to describe road speed limits.
 \subsection{Requests and Servers}
 \label{ch:1:sec:requests-and-servers}
 Now we define the requests and servers.
-The basic entity representing a ridesharing participant is the \emph{user}.  A
+The basic entity representing a ridesharing participant is the user.  A
 user is classified as a \emph{request} if it represents a Type~1 or Type~2
 customer, or classified as a \emph{server} if it represents a Type~3 or Type~4
 vehicle. As only vehicles can move about (P4), only servers are associated with
-routes in order to describe the motions. Later, \emph{schedules} describing
+routes in order to describe the motions. Later, schedules describing
 pick-up and drop-off events will be defined on the routes.
 
 \hi{User Relation}
@@ -368,7 +351,7 @@ For a Type 4 vehicle, the destination can be set to a dummy vertex with edge
 weight equal to 0 to every other vertex in the road network.
 
 The set of all users forms the 5-ary relation $\mathcal{U}$, called
-the \emph{user relation}.
+the user relation.
 The set
 $\mathcal{U}_\texttt{o}=\pi_\texttt{o}(\mathcal{U})$ contains all origins and
 $\mathcal{U}_\texttt{d}=\pi_\texttt{d}(\mathcal{U})$ contains all destinations.
@@ -445,8 +428,8 @@ In other words, each entry or exit must occur at a customer origin or destinatio
 
 A schedule formalizes the notion of shared travel with other users, as
 multiple entries and exits can overlap within the same server route.
-At time $t$, the \emph{traveled schedule} denoted $b_{\leq t}$ encodes the past entries and exits and is given by
-$\sigma_{\texttt{t}\leq t}(b)$. Likewise, the \emph{remaining schedule} denoted
+At time $t$, the traveled schedule denoted $b_{\leq t}$ encodes the past entries and exits and is given by
+$\sigma_{\texttt{t}\leq t}(b)$. Likewise, the remaining schedule denoted
 $b_{>t}$ encodes the future entries and exits and is given by $\sigma_{\texttt{t}>t}(b)$.
 
 \hi{Schedule Labels.}
@@ -489,7 +472,7 @@ helps to define later concepts.
 By combining the routes, schedules, and labels into
 a set of $(\texttt{s},\texttt{t},\texttt{v},\texttt{L})$ tuples, a
 4-ary relation $\mathcal{X}$ can be formed. This relation is called the
-\emph{server relation} and as will be shown soon, it is the basis for computing many common ridesharing metrics.
+server relation and as will be shown soon, it is the basis for computing many common ridesharing metrics.
 Each tuple associates the waypoint in the \texttt{t} and \texttt{v} components with the server
 in the \texttt{s} component, along with the labels in the \texttt{L} component.
 % The domain of $\texttt{s}$ is $\mathcal{S}$; the domain of $\texttt{t}$ is
@@ -526,7 +509,7 @@ $$\mathcal{Q}(\mathcal{X},s,t)=\{r\in\mathcal{R}\mid\textrm{status}(\mathcal{X},
 \land\pi_\texttt{s}(\sigma_{r\in\texttt{L}}(\mathcal{X}))=s\}.$$
 
 \hi{Load Burden.}
-The \emph{load burden} on $s$ can be computed using the in-transit requests by
+The load burden on $s$ can be computed using the in-transit requests by
 \begin{equation}
 \label{eq:load}
 Q(\mathcal{X},s,t)=\sum_{r\in\mathcal{Q}(\mathcal{X},s,t)}r_\texttt{q}.
@@ -538,15 +521,15 @@ From P6, server routes are subject to the additional rule:
 
 \subsection{Ridesharing Metrics}
 \label{ch:1:sec:ridesharing-metrics}
-As a benefit from using relations, a variety of metrics can now be measured by
-simple operations on $\mathcal{U}$ and $\mathcal{X}$.  The following lists
-common metrics found in existing ridesharing studies, but others may be possible.
+A variety of metrics can now be measured by simple operations on $\mathcal{U}$
+and $\mathcal{X}$.  The following lists common metrics found in existing
+ridesharing studies, but others may be possible.
 
 \hi{Assignments.}
-Server $s$ is said to be \emph{assigned to} request $r$ at time $t$ only if
+Server $s$ is said to be assigned to request $r$ at time $t$ only if
 $\textrm{status}(\mathcal{X},r,t)=2$. That is, the request's status is arrived at time $t$.
 The set of $(s,r)$ pairs
-where this property is true is called the set of \emph{assignments}, formally
+where this property is true is called the set of assignments, formally
 \begin{equation}
 \label{eq:assignments}
 \textit{assignments }A(\mathcal{X},t)=
@@ -571,26 +554,26 @@ R(\mathcal{X},s,t)=\{r\in\mathcal{R}\mid\textrm{status}(\mathcal{X},r,t)=2\}.
 \end{equation}
 
 \hi{Service rate.}
-The \emph{service rate} is the number of assigned requests over the number of all requests, or
+The service rate is the number of assigned requests over the number of all requests, or
 \begin{equation}
 \label{eq:service-rate}
 \textit{service rate }\mu(\mathcal{X},t)=\frac{|R^\textrm{ok}(\mathcal{X},t)|}{|\mathcal{R}|}.
 \end{equation}
 
 \hi{Distances.}
-The \emph{base distance} is the sum of the shortest-path distances for all users, or
+The base distance is the sum of the shortest-path distances for all users, or
 \begin{equation}
 \label{eq:base-distance}
 \textit{base distance }D^\textrm{base}(\mathcal{U})=\sum_{u\in U}d_u.
 \end{equation}
-The \emph{travel distance} for one server $s$ is the distance of its route,
+The travel distance for one server $s$ is the distance of its route,
 $D(W(\mathcal{X},s))$,
-and the \emph{travel duration} can be found with
+and the travel duration can be found with
 $\delta(W(\mathcal{X},s))$.
 
 For a server with route $w$, travel distance $D(w)$ can be partitioned into
-\emph{cruising distance} $D_0(w)$ and
-\emph{service distance} $D_1(w)$.
+cruising distance $D_0(w)$ and
+service distance $D_1(w)$.
 The cruising distance sums the distance along portions where the load burden is zero.
 The service distance sums the distance along portions of $w$ where the
 load burden is non-zero.
@@ -621,7 +604,7 @@ These distances are written as
 \end{align}
 
 \hi{Detours and Delays.}
-In physical terms, the \emph{detour route} for a customer is the portion of a vehicle's
+In physical terms, the detour route for a customer is the portion of a vehicle's
 route between when it visits the customer's origin and destination. Formally, let
 %\item $d_r$ be the distance of the shortest path from $r_\texttt{o}$ to $r_\texttt{d}$;
 $w=W(\mathcal{X},S(\mathcal{X},r,H))$ be the route of the server assigned to $r$.
@@ -653,7 +636,7 @@ any user,
 \textit{arrival time }t^\textrm{arrive}(\mathcal{X},u)&=\pi_\texttt{t}(\textrm{dropoff}(\mathcal{X},u)).
 \end{align}
 In the real world, the time until a vehicle picks up a customer can be of interest.
-This \emph{pick-up delay} can be found with
+This pick-up delay can be found with
 \begin{equation}
 \label{eq:pick-up delay}
 \textit{pick-up delay }\delta^\textrm{pickup}(\mathcal{X},r)=\pi_\texttt{t}(\textrm{pickup}(\mathcal{X},r))-r_\texttt{e}.
@@ -661,21 +644,21 @@ This \emph{pick-up delay} can be found with
 
 The detour route $\Delta W(\mathcal{X},r)$ can only apply to assigned requests. If
 a detour route exists, then
-the \emph{transit} distance and duration are
+the transit distance and duration are
 \begin{align}
 \label{eq:transit-distance}
 \textit{transit distance }D^\textrm{transit}(\mathcal{X},r)&=D(\Delta W(\mathcal{X},r))\textrm{, and}\\
 \label{eq:transit-duration}
 \textit{transit duration }\delta^\textrm{transit}(\mathcal{X},r)&=\delta(\Delta W(\mathcal{X},r)).
 \end{align}
-Similarly, the \emph{detour} distance and duration are
+Similarly, the detour distance and duration are
 \begin{align}
 \label{eq:detour-distance}
 \textit{detour distance }D^\textrm{detour}(\mathcal{X},r)&=D^\textrm{transit}(\mathcal{X},r)-d_r\textrm{, and}\\
 \label{eq:detour-duration}
 \textit{detour duration }\delta^\textrm{detour}(\mathcal{X},r)&=\delta^\textrm{transit}(\mathcal{X},r)-\delta_r.
 \end{align}
-Finally, the \emph{travel duration} is the sum of the pick-up and transit durations,
+Finally, the travel duration is the sum of the pick-up and transit durations,
 \begin{equation}
 \label{eq:travel-duration}
 \textit{travel duration }\delta^\textrm{travel}(\mathcal{X},r)=\delta^\textrm{pickup}(\mathcal{X},r)+\delta^\textrm{transit}(\mathcal{X},r)
@@ -711,7 +694,7 @@ The following schema can be implemented entirely in standard SQL without any
 code extensions while staying faithful to the model.  In this schema,
 \textit{tables} capture the descriptive elements of the model and
 \textit{views} express the analytical measures.  Tables are further organized
-into \emph{property}, \emph{solution}, and \emph{constraint} tables.  Property
+into property, solution, and constraint tables.  Property
 tables store the road network $\mathcal{G}$ (\S\ref{ch:1:sec:setting}) and the user
 relation $\mathcal{U}$ (\S\ref{ch:1:sec:requests-and-servers}).  Solution tables
 store the server relation $\mathcal{X}$ (\S\ref{ch:1:sec:requests-and-servers}).
@@ -727,7 +710,7 @@ key of the parent table. Many of the table diagrams contain duplicate columns
 (for example, \textsf{sid} shows up three times in Table W).  These duplicates
 are included for illustrating the foreign key relationships, but in practice
 the duplicates are implemented as single columns participating in multiple
-foreign keys.
+foreign keys. See Chapter~\ref{tables} for details.
 
 \subsection{Table V and E (Road Network Tables)}
 Each vertex $v\in\mathcal{V}$ is stored in Table V along with its coordinates
@@ -776,36 +759,9 @@ Column & Parent & Description\\
 \hline
 \end{tabular}
 \end{table}
-<<Create Table V statement>>=
-"CREATE TABLE V ("
-  + "v   int  CONSTRAINT P1 PRIMARY KEY,"
-  + "lng int  CONSTRAINT C1 NOT NULL,"
-  + "lat int  CONSTRAINT C2 NOT NULL,"
-  + "CONSTRAINT C3 CHECK (lng BETWEEN -1800000000 AND 1800000000),"
-  + "CONSTRAINT C4 CHECK (lat BETWEEN  -900000000 AND  900000000)"
-  + ")"
-@ We consider vertex 0 to be a dummy vertex where any edged formed by 0 has no
+We consider vertex 0 to be a dummy vertex where any edged formed by 0 has no
 weight. To implement the dummy vertex, we add a constraint ([[C11]]) that
 \textsf{dd} must be 0 if either \textsf{v1} or \textsf{v2} is 0.
-<<Create Table E statement>>=
-"CREATE TABLE E ("
-  + "v1  int  CONSTRAINT C5 NOT NULL,"
-  + "v2  int  CONSTRAINT C6 NOT NULL,"
-  + "dd  int  CONSTRAINT C7 NOT NULL,"
-  + "nu  int  CONSTRAINT C8 NOT NULL,"
-  + "CONSTRAINT F1 FOREIGN KEY (v1) REFERENCES V (v),"
-  + "CONSTRAINT F2 FOREIGN KEY (v2) REFERENCES V (v),"
-  + "CONSTRAINT P2 PRIMARY KEY (v1, v2, dd, nu),"
-  + "CONSTRAINT C9 CHECK (nu >= 0),"
-  + "CONSTRAINT C10 CHECK (v1 <> v2),"
-  + "CONSTRAINT C11 CHECK ("
-  + "  CASE WHEN v1 = 0 OR v2 = 0"
-  + "    THEN dd = 0"
-  + "    ELSE dd > 0"
-  + "  END"
-  + ")"
-  + ")"
-@
 
 \subsection{Table UQ, UE, UL, UO, UD, and UB (User Tables)}
 To allow other tables to reference specific user components, the user relation
@@ -837,60 +793,6 @@ UB & \textit{uid}, \textit{val} & User base cost $d_u$ \\
 \hline
 \end{tabular}
 \end{table}
-<<Create Table UQ statement>>=
-"CREATE TABLE UQ ("
-  + "uid int  CONSTRAINT C12 NOT NULL,"
-  + "uq  int  CONSTRAINT C13 NOT NULL,"
-  + "CONSTRAINT C14 UNIQUE (uid),"
-  + "CONSTRAINT C15 CHECK (uq != 0),"
-  + "CONSTRAINT P3 PRIMARY KEY (uid, uq)"
-  + ")"
-@
-<<Create Table UE statement>>=
-"CREATE TABLE UE ("
-  + "uid int  CONSTRAINT C16 NOT NULL,"
-  + "ue  int  CONSTRAINT C17 NOT NULL,"
-  + "CONSTRAINT C18 CHECK (ue BETWEEN 0 AND 86400000),"
-  + "CONSTRAINT C19 UNIQUE (uid),"
-  + "CONSTRAINT P4 PRIMARY KEY (uid, ue)"
-  + ")"
-@
-<<Create Table UL statement>>=
-"CREATE TABLE UL ("
-  + "uid int  CONSTRAINT C20 NOT NULL,"
-  + "ul  int  CONSTRAINT C21 NOT NULL,"
-  + "CONSTRAINT C22 UNIQUE (uid),"
-  + "CONSTRAINT C23 CHECK (ul BETWEEN 0 AND 86400000),"
-  + "CONSTRAINT P5 PRIMARY KEY (uid, ul)"
-  + ")"
-@
-<<Create Table UO statement>>=
-"CREATE TABLE UO ("
-  + "uid int  CONSTRAINT C24 NOT NULL,"
-  + "uo  int  CONSTRAINT C25 NOT NULL,"
-  + "CONSTRAINT F3 FOREIGN KEY (uo) REFERENCES V (v),"
-  + "CONSTRAINT C26 UNIQUE (uid),"
-  + "CONSTRAINT P6 PRIMARY KEY (uid, uo)"
-  + ")"
-@
-<<Create Table UD statement>>=
-"CREATE TABLE UD ("
-  + "uid int  CONSTRAINT C27 NOT NULL,"
-  + "ud  int  CONSTRAINT C28 NOT NULL,"
-  + "CONSTRAINT F4 FOREIGN KEY (ud) REFERENCES V (v),"
-  + "CONSTRAINT C29 UNIQUE (uid),"
-  + "CONSTRAINT P7 PRIMARY KEY (uid, ud)"
-  + ")"
-@
-<<Create Table UB statement>>=
-"CREATE TABLE UB ("
-  + "uid int  CONSTRAINT C30 NOT NULL,"
-  + "ub  int  CONSTRAINT C31 NOT NULL,"
-  + "CONSTRAINT C32 CHECK (ub >= 0),"
-  + "CONSTRAINT C33 UNIQUE (uid),"
-  + "CONSTRAINT P8 PRIMARY KEY (uid, ub)"
-  + ")"
-@
 
 \subsection{Table W (Routes Table)}
 Table W has eight columns, \textsf{sid}, \textsf{se}, \textsf{t1}, \textsf{v1},
@@ -899,7 +801,7 @@ Table W has eight columns, \textsf{sid}, \textsf{se}, \textsf{t1}, \textsf{v1},
 (\textsf{sid}, \textsf{t2}, \textsf{v2}) columns.  By definition, the sequence
 of vertices in a route must form a path and the speed of adjacent waypoints
 cannot exceed the limit $\nu^\textrm{max}$.  To enforce these rules, the
-\emph{predecessor} waypoint is stored in the (\textsf{sid}, \textsf{t1},
+predecessor waypoint is stored in the (\textsf{sid}, \textsf{t1},
 \textsf{v1}) columns.  The (\textsf{v1}, \textsf{v2}) columns can thus identify
 an edge. Columns \textsf{dd} and \textsf{nu} are added to store the weight and
 speed limit on the edge, and (\textsf{v1}, \textsf{v2}, \textsf{dd},
@@ -959,31 +861,6 @@ and \textsf{nu} are allowed to be null.  From rule R1, the first waypoint is
 detected by checking if \textsf{t2} is equal to the server's early time, stored
 in column \textsf{se}. The (\textsf{sid}, \textsf{se}) columns are referenced
 to UE to validate the early time ([[F18]]).
-<<Create Table W statement>>=
-"CREATE TABLE W ("
-  + "sid int  CONSTRAINT C50 NOT NULL,"
-  + "se  int  CONSTRAINT C51 NOT NULL,"
-  + "t1  int  ,"
-  + "v1  int  ,"
-  + "t2  int  CONSTRAINT C52 NOT NULL,"
-  + "v2  int  CONSTRAINT C53 NOT NULL,"
-  + "dd  int ,"
-  + "nu  int ,"
-  + "CONSTRAINT P11 PRIMARY KEY (sid, t2, v2),"
-  + "CONSTRAINT F17 FOREIGN KEY (sid) REFERENCES S,"
-  + "CONSTRAINT F18 FOREIGN KEY (sid, se) REFERENCES UE (uid, ue),"
-  + "CONSTRAINT F19 FOREIGN KEY (v1, v2, dd, nu) REFERENCES E INITIALLY DEFERRED,"
-  + "CONSTRAINT F20 FOREIGN KEY (sid, t1, v1) REFERENCES W (sid, t2, v2) INITIALLY DEFERRED,"
-  + "CONSTRAINT C54 UNIQUE (sid, t1),"
-  + "CONSTRAINT C55 UNIQUE (sid, t2),"
-  + "CONSTRAINT C56 CHECK ("
-  + "  CASE WHEN t1 IS NULL"
-  + "    THEN t2 = se AND v1 IS NULL AND dd IS NULL AND nu IS NULL"
-  + "    ELSE dd/(t2-t1) <= nu AND t1 < t2"
-  + "  END"
-  + ") INITIALLY DEFERRED"
-  + ")"
-@
 
 \subsection{Table PD (Labels Table)}
 Table PD (for ``pick-ups and drop-offs'') contains four columns, \textsf{sid},
@@ -1012,18 +889,6 @@ Col. & Parent & Description \\
 \hline
 \end{tabular}
 \end{table}
-<<Create Table PD statement>>=
-"CREATE TABLE PD ("
-  + "sid int  CONSTRAINT C57 NOT NULL,"
-  + "t2  int  CONSTRAINT C58 NOT NULL,"
-  + "v2  int  CONSTRAINT C59 NOT NULL,"
-  + "rid int  CONSTRAINT C60 NOT NULL,"
-  + "CONSTRAINT P12 PRIMARY KEY (sid, t2, v2, rid),"
-  + "CONSTRAINT F21 FOREIGN KEY (sid) REFERENCES S,"
-  + "CONSTRAINT F22 FOREIGN KEY (rid) REFERENCES R,"
-  + "CONSTRAINT F23 FOREIGN KEY (sid, t2, v2) REFERENCES W INITIALLY DEFERRED"
-  + ")"
-@
 
 \subsection{Table S and R (User Constraint Tables)}
 Table S and Table R enforce the remaining user constraints.  Both tables have
@@ -1060,44 +925,6 @@ Table R & \textit{rid}, rq, re, rl, ro, rd, rb \\
 \hline
 \end{tabular}
 \end{table}
-<<Create Table S statement>>=
-"CREATE TABLE S ("
-  + "sid int  CONSTRAINT P9 PRIMARY KEY,"
-  + "sq  int  CONSTRAINT C34 NOT NULL,"
-  + "se  int  CONSTRAINT C35 NOT NULL,"
-  + "sl  int  CONSTRAINT C36 NOT NULL,"
-  + "so  int  CONSTRAINT C37 NOT NULL,"
-  + "sd  int  CONSTRAINT C38 NOT NULL,"
-  + "sb  int  CONSTRAINT C39 NOT NULL,"
-  + "CONSTRAINT C40 CHECK (sq < 0),"
-  + "CONSTRAINT F5 FOREIGN KEY (sid, sq) REFERENCES UQ (uid, uq),"
-  + "CONSTRAINT F6 FOREIGN KEY (sid, se) REFERENCES UE (uid, ue),"
-  + "CONSTRAINT F7 FOREIGN KEY (sid, sl) REFERENCES UL (uid, ul),"
-  + "CONSTRAINT F8 FOREIGN KEY (sid, so) REFERENCES UO (uid, uo),"
-  + "CONSTRAINT F9 FOREIGN KEY (sid, sd) REFERENCES UD (uid, ud),"
-  + "CONSTRAINT F10 FOREIGN KEY (sid, sb) REFERENCES UB (uid, ub),"
-  + "CONSTRAINT C41 CHECK (se < sl)"
-  + ")"
-@
-<<Create Table R statement>>=
-"CREATE TABLE R ("
-  + "rid int  CONSTRAINT P10 PRIMARY KEY,"
-  + "rq  int  CONSTRAINT C42 NOT NULL,"
-  + "re  int  CONSTRAINT C43 NOT NULL,"
-  + "rl  int  CONSTRAINT C44 NOT NULL,"
-  + "ro  int  CONSTRAINT C45 NOT NULL,"
-  + "rd  int  CONSTRAINT C46 NOT NULL,"
-  + "rb  int  CONSTRAINT C47 NOT NULL,"
-  + "CONSTRAINT C48 CHECK (rq > 0),"
-  + "CONSTRAINT F11 FOREIGN KEY (rid, rq) REFERENCES UQ (uid, uq),"
-  + "CONSTRAINT F12 FOREIGN KEY (rid, re) REFERENCES UE (uid, ue),"
-  + "CONSTRAINT F13 FOREIGN KEY (rid, rl) REFERENCES UL (uid, ul),"
-  + "CONSTRAINT F14 FOREIGN KEY (rid, ro) REFERENCES UO (uid, uo),"
-  + "CONSTRAINT F15 FOREIGN KEY (rid, rd) REFERENCES UD (uid, ud),"
-  + "CONSTRAINT F16 FOREIGN KEY (rid, rb) REFERENCES UB (uid, ub),"
-  + "CONSTRAINT C49 CHECK (re < rl)"
-  + ")"
-@
 
 \subsection{Table CW (Route Endpoint Constraints Table)}
 Table CW stores the start and end waypoints of each server route.  The table
@@ -1152,33 +979,6 @@ ve & & \\
 \hline
 \end{tabular}
 \end{table}
-<<Create Table CW statement>>=
-"CREATE TABLE CW ("
-  + "sid int  CONSTRAINT C61 NOT NULL,"
-  + "se  int  CONSTRAINT C62 NOT NULL,"
-  + "sl  int  CONSTRAINT C63 NOT NULL,"
-  + "so  int  CONSTRAINT C64 NOT NULL,"
-  + "sd  int  CONSTRAINT C65 NOT NULL,"
-  + "ts  int  CONSTRAINT C66 NOT NULL,"
-  + "vs  int  CONSTRAINT C67 NOT NULL,"
-  + "te  int  CONSTRAINT C68 NOT NULL,"
-  + "ve  int  CONSTRAINT C69 NOT NULL,"
-  + "CONSTRAINT C70 UNIQUE (sid),"
-  + "CONSTRAINT P13 PRIMARY KEY (sid, ts, te),"
-  + "CONSTRAINT F24 FOREIGN KEY (sid) REFERENCES S,"
-  + "CONSTRAINT F25 FOREIGN KEY (sid, se) REFERENCES UE (uid, ue),"
-  + "CONSTRAINT F26 FOREIGN KEY (sid, sl) REFERENCES UL (uid, ul),"
-  + "CONSTRAINT F27 FOREIGN KEY (sid, so) REFERENCES UO (uid, uo),"
-  + "CONSTRAINT F28 FOREIGN KEY (sid, sd) REFERENCES UD (uid, ud),"
-  + "CONSTRAINT F29 FOREIGN KEY (sid, ts, vs) REFERENCES W (sid, t2, v2) INITIALLY DEFERRED,"
-  + "CONSTRAINT F30 FOREIGN KEY (sid, te, ve) REFERENCES W (sid, t2, v2) INITIALLY DEFERRED,"
-  + "CONSTRAINT C71 CHECK (ts = se),"
-  + "CONSTRAINT C72 CHECK (vs = so),"
-//+ "CONSTRAINT C73 CHECK (te <= sl),"
-  + "CONSTRAINT C74 CHECK (ve = sd),"
-  + "CONSTRAINT C75 CHECK (ts < te)"
-  + ")"
-@
 
 \subsection{Table CPD (Label Constraints Table)}
 Table CPD enforces the pick-up and drop-off rules R5--R9. It contains twelve
@@ -1246,42 +1046,6 @@ rd & & \\
 \hline
 \end{tabular}
 \end{table}
-<<Create Table CPD statement>>=
-"CREATE TABLE CPD ("
-  + "sid int  CONSTRAINT C76 NOT NULL,"
-  + "ts  int  CONSTRAINT C77 NOT NULL,"
-  + "te  int  CONSTRAINT C78 NOT NULL,"
-  + "tp  int  CONSTRAINT C79 NOT NULL,"
-  + "vp  int  CONSTRAINT C80 NOT NULL,"
-  + "td  int  CONSTRAINT C81 NOT NULL,"
-  + "vd  int  CONSTRAINT C82 NOT NULL,"
-  + "rid int  CONSTRAINT C83 NOT NULL,"
-  + "re  int  CONSTRAINT C84 NOT NULL,"
-  + "rl  int  CONSTRAINT C85 NOT NULL,"
-  + "ro  int  CONSTRAINT C86 NOT NULL,"
-  + "rd  int  CONSTRAINT C87 NOT NULL,"
-  + "CONSTRAINT C88 UNIQUE (rid),"
-  + "CONSTRAINT P14 PRIMARY KEY (sid, tp, td, rid),"
-  + "CONSTRAINT F31 FOREIGN KEY (sid) REFERENCES S,"
-  + "CONSTRAINT F32 FOREIGN KEY (rid) REFERENCES R,"
-  + "CONSTRAINT F33 FOREIGN KEY (sid, ts, te) REFERENCES CW (sid, ts, te) "
-  + "  INITIALLY DEFERRED,"
-  + "CONSTRAINT F34 FOREIGN KEY (sid, tp, vp, rid) REFERENCES PD (sid, t2, v2, rid) "
-  + "  INITIALLY DEFERRED,"
-  + "CONSTRAINT F35 FOREIGN KEY (sid, td, vd, rid) REFERENCES PD (sid, t2, v2, rid) "
-  + "  INITIALLY DEFERRED,"
-  + "CONSTRAINT F36 FOREIGN KEY (rid, re) REFERENCES UE (uid, ue),"
-  + "CONSTRAINT F37 FOREIGN KEY (rid, rl) REFERENCES UL (uid, ul),"
-  + "CONSTRAINT F38 FOREIGN KEY (rid, ro) REFERENCES UO (uid, uo),"
-  + "CONSTRAINT F39 FOREIGN KEY (rid, rd) REFERENCES UD (uid, ud),"
-  + "CONSTRAINT C89 CHECK (tp BETWEEN ts AND td) INITIALLY DEFERRED,"
-  + "CONSTRAINT C90 CHECK (td BETWEEN tp AND te) INITIALLY DEFERRED,"
-  + "CONSTRAINT C91 CHECK (tp >= re) INITIALLY DEFERRED,"
-  + "CONSTRAINT C92 CHECK (vp  = ro) INITIALLY DEFERRED,"
-//+ "CONSTRAINT C93 CHECK (td <= rl) INITIALLY DEFERRED",
-  + "CONSTRAINT C94 CHECK (vd  = rd) INITIALLY DEFERRED"
-  + ")"
-@
 
 \subsection{Table CQ (Load Constraints Table)}
 Table CQ enforces the load rule R11. It has fourteen columns, \textsf{sid},
@@ -1301,7 +1065,7 @@ represents a drop-off. The load of the server and request are stored in
 ([[F44]], [[F45]]).
 
 To validate if the load burden is always within a server's capacity, CQ must
-keep track of every load change. It does so by storing the \emph{predecessor}
+keep track of every load change. It does so by storing the predecessor
 load in columns (\textsf{sid}, \textsf{t1}, \textsf{q1}, \textsf{o1}) next to
 the current load in columns (\textsf{sid}, \textsf{t2}, \textsf{q2},
 \textsf{o2}).  If the waypoint in the row is a pick-up, CQ validates that
@@ -1309,7 +1073,7 @@ $\textsf{q1}+\textsf{rq}=\textsf{q2}$, otherwise that
 $\textsf{q1}-\textsf{rq}=\textsf{q2}$ ([[C98]]). As repetitive load changes can
 occur at a single waypoint due to multiple pick-ups and drop-offs, the
 \textsf{o1} and \textsf{o2} columns are introduced to store a unique
-\emph{order number}. This number increments by 1 for each pick-up or drop-off
+order number. This number increments by 1 for each pick-up or drop-off
 per server and can be handled by the application. Similar rules for
 establishing predecessor waypoints in Table W can be used to establish
 predecessor loads in CQ.  Subsequently, (\textsf{sid}, \textsf{t2},
@@ -1360,224 +1124,8 @@ rq & & \\
 \hline
 \end{tabular}
 \end{table}
-<<Create Table CQ statement>>=
-"CREATE TABLE CQ ("
-  + "sid int  CONSTRAINT C95 NOT NULL,"
-  + "sq  int  CONSTRAINT C96 NOT NULL,"
-  + "se  int  CONSTRAINT C97 NOT NULL,"
-  + "t1  int  ,"
-  + "t2  int  CONSTRAINT C98 NOT NULL,"
-  + "v2  int  ,"
-  + "q1  int  ,"
-  + "q2  int  CONSTRAINT C99 NOT NULL,"
-  + "rid int  ,"
-  + "rq  int  ,"
-  + "tp  int  ,"
-  + "td  int  ,"
-  + "o1  int  ,"
-  + "o2  int  CONSTRAINT C100 NOT NULL,"
-  + "CONSTRAINT C101 CHECK (o2 > 0),"
-  + "CONSTRAINT P15 PRIMARY KEY (sid, t2, q2, o2),"
-  + "CONSTRAINT F40 FOREIGN KEY (sid) REFERENCES S,"
-  + "CONSTRAINT F41 FOREIGN KEY (rid) REFERENCES R,"
-  + "CONSTRAINT F42 FOREIGN KEY (sid, t1, q1, o1) REFERENCES CQ (sid, t2, q2, o2)"
-  + "  INITIALLY DEFERRED,"
-  + "CONSTRAINT F43 FOREIGN KEY (sid, se) REFERENCES UE (uid, ue),"
-  + "CONSTRAINT F44 FOREIGN KEY (sid, sq) REFERENCES UQ (uid, uq),"
-  + "CONSTRAINT F45 FOREIGN KEY (rid, rq) REFERENCES UQ (uid, uq),"
-  + "CONSTRAINT F46 FOREIGN KEY (sid, t2, v2, rid) REFERENCES PD INITIALLY DEFERRED,"
-  + "CONSTRAINT F47 FOREIGN KEY (sid, tp, td, rid) REFERENCES CPD INITIALLY DEFERRED,"
-  + "CONSTRAINT C102 CHECK ("
-  + "  CASE WHEN t1 IS NULL"
-  + "    THEN t2 = se AND q1 IS NULL AND q2 = sq AND o1 IS NULL AND o2 = 1"
-  + "        AND rid IS NULL AND rq IS NULL AND tp IS NULL AND td IS NULL"
-  + "    ELSE q2 <= 0 AND o2 = o1 + 1"
-  + "  END"
-  + ") INITIALLY DEFERRED,"
-  + "CONSTRAINT C103 CHECK (CASE WHEN t2 = tp THEN q2 = q1 + rq END) INITIALLY DEFERRED,"
-  + "CONSTRAINT C104 CHECK (CASE WHEN t2 = td THEN q2 = q1 - rq END) INITIALLY DEFERRED,"
-  + "CONSTRAINT C105 UNIQUE (t2, v2, rid)"
-  + ")"
-@
-
-\subsection{View r\_user (User Relation)}
-The user relation $\mathcal{U}$ can be formed by a union of Table S and R.
-<<Create View r\_user statement>>=
-"CREATE VIEW r_user (uid, uq, ue, ul, uo, ud, ub) AS "
-  + "SELECT * from S UNION SELECT * from R"
-@
-
-\subsection{View r\_server (Server Relation)}
-The server relation $\mathcal{X}$ can be constructed by joining the routes in
-Table W with the labels in CW and PD.
-<<Create View r\_server statement>>=
-"CREATE VIEW r_server (sid, t, v, Ls, Lr) AS "
-  + "SELECT W.sid, W.t2, W.v2, CW.sid, PD.rid "
-  + "FROM W LEFT OUTER JOIN CW ON W.sid = CW.sid AND (W.t2 = CW.ts OR W.t2 = CW.te) "
-  + "  LEFT OUTER JOIN PD ON W.sid = PD.sid AND W.t2 = PD.t2"
-@
-
-\subsection{View f\_distance\_blocks (Distance Partitions)}
-The cruising and service distances $D^\textrm{cruise}$ and $D^\textrm{service}$
-require an auxilliary view. This view joins Table W with
-CQ in such a way that the distances in column \textsf{dd} of W
-can be aggregated based on whether there is load burden at the time of the
-waypoint.
-<<Create View f\_distance\_blocks statement>>=
-"CREATE VIEW f_distance_blocks (sid, val, dtype) AS "
-  + "SELECT d.sid, SUM (d.dd), d.dtype FROM ("
-  + "  SELECT c.sid, c.dd, c.q2=c.sq as dtype FROM ("
-  + "    SELECT b.sid, b.dd, b.q2, b.sq FROM ("
-  + "      SELECT W.sid, W.t2, COALESCE (W.dd, 0) as dd, CQ.q2, CQ.sq, CQ.o2 "
-  + "      FROM W LEFT OUTER JOIN CQ ON W.sid = CQ.sid AND W.t2 > CQ.t2"
-  + "    ) AS b JOIN ("
-  + "      SELECT W.sid, W.t2, MAX (CQ.o2) AS oprev "
-  + "      FROM W LEFT OUTER JOIN CQ ON W.sid = CQ.sid AND W.t2 > CQ.t2 "
-  + "      GROUP BY W.sid, W.t2"
-  + "    ) AS a "
-  + "    ON b.sid = a.sid AND b.t2 = a.t2 AND b.o2 = a.oprev"
-  + "  ) AS c"
-  + ") AS d "
-  + "GROUP BY d.sid, d.dtype"
-@ Cruising and service distances are obtained by querying
-f\_distance\_blocks where \textsf{dtype} is true or false, respectively.
-
-\subsection{View f\_status (Request Status)}
-Request status can also be obtained using an auxilliary view.  This view lists
-the count of occurrences of a request in column \textsf{rid} of CQ,
-corresponding to the request status.  Table CQ is used to get the counts over
-time.  If the count is 0, it will not appear in the aggregation and the status
-for the request is ``waiting''.
-<<Create View f\_status statement (Eq.~\ref{eq:status})>>=
-"CREATE VIEW f_status (t, sid, rid, val) AS "
-  + "SELECT a.t2, a.sid, a.rid, COUNT (b.rid) "
-  + "FROM CQ AS a INNER JOIN CQ AS b ON a.t2 >= b.t2 "
-  + "WHERE a.rid IS NOT NULL AND b.rid IS NOT NULL AND a.rid = b.rid "
-  + "GROUP BY a.t2, a.sid, a.rid"
-@
 
 \subsection{Analytical Views}
-Most of the analytical measures in \S\ref{sec:ridesharing-metrics} can
-be expressed using simple statements.
+Most of the analytical measures in \S\ref{ch:1:sec:ridesharing-metrics} can
+be expressed using simple statements. See Chapter~\ref{views} for details.
 
-To list all assignments $\mathcal{A}$:
-<<Create View assignments statement (Eq.~\ref{eq:assignments})>>=
-"CREATE VIEW assignments (t, sid, rid) AS "
-  + "SELECT t, sid, rid FROM f_status WHERE val = 2 ORDER BY t ASC"
-@
-To list assigned requests $\mathcal{R^\textrm{ok}}$:
-<<Create View assignments\_r statement (Eq.~\ref{eq:assigned-requests})>>=
-"CREATE VIEW assignments_r (t, rid) AS "
-  + "SELECT t, rid FROM assignments"
-@
-To list service rate $\mu$:
-<<Create View service\_rate statement (Eq.~\ref{eq:service-rate})>>=
-"CREATE VIEW service_rate (val) AS "
-  + "SELECT CAST(CAST(A.NUM AS FLOAT) / CAST(A.DENOM AS FLOAT) * 10000 as INT)"
-  + "FROM ( "
-  + "SELECT (SELECT COUNT(*) FROM assignments_r) AS NUM, "
-  + "       (SELECT COUNT(*) FROM R) AS DENOM "
-  + "       FROM assignments_r FETCH FIRST ROW ONLY "
-  + ") A"
-@
-To list base distance $D^\textrm{base}$:
-<<Create View dist\_base statement (Eq.~\ref{eq:base-distance})>>=
-"CREATE VIEW dist_base (val) AS "
-  + "SELECT SUM (ub) FROM UB"
-@
-To list travel distances $D$ of all servers:
-<<Create View dist\_s\_travel statement>>=
-"CREATE VIEW dist_s_travel (sid, val) AS "
-  + "SELECT W.sid, SUM (COALESCE (dd, 0)) "
-  + "FROM W JOIN CW ON w.sid = cw.sid AND (t2 BETWEEN ts AND te) "
-  + "GROUP BY W.sid"
-@
-To list cruising distances $D^\textrm{cruise}$ of all servers:
-<<Create View dist\_s\_cruising statement (Eq.~\ref{eq:cruising-distance})>>=
-"CREATE VIEW dist_s_cruising (sid, val) AS "
-  + "SELECT sid, val FROM f_distance_blocks WHERE dtype = true"
-@
-To list service distances $D^\textrm{service}$ of all servers:
-<<Create View dist\_s\_service statement (Eq.~\ref{eq:service-distance})>>=
-"CREATE VIEW dist_s_service (sid, val) AS "
-  + "SELECT sid, val FROM f_distance_blocks WHERE dtype = false"
-@
-To list base distances $d$ of all servers:
-<<Create View dist\_s\_base statement>>=
-"CREATE VIEW dist_s_base (val) AS "
-  + "SELECT SUM (sb) FROM S"
-@
-To list base distances $d$ of all requests:
-<<Create View dist\_r\_base statement>>=
-"CREATE VIEW dist_r_base (val) AS "
-  + "SELECT SUM (rb) FROM R"
-@
-To list base distances $d$ of all unassigned requests:
-<<Create View dist\_r\_unassigned statement>>=
-"CREATE VIEW dist_r_unassigned (val) AS "
-  + "SELECT SUM (rb) FROM R LEFT JOIN assignments_r "
-  + "  ON R.rid = assignments_r.rid "
-  + "WHERE assignments_r.rid IS NULL"
-@
-To list detour distances $D^\textrm{detour}$ of all requests:
-<<Create View dist\_r\_detour statement (Eq.~\ref{eq:detour-distance})>>=
-"CREATE VIEW dist_r_detour (rid, val) AS "
-  + "SELECT rid, val-ub FROM UB JOIN dist_r_transit ON uid = rid"
-@
-To list transit distances $D^\textrm{transit}$ of all requests:
-<<Create View dist\_r\_transit statement (Eq.~\ref{eq:transit-distance})>>=
-"CREATE VIEW dist_r_transit (rid, val) AS "
-  + "SELECT rid, SUM (COALESCE (dd, 0)) "
-  + "FROM CPD JOIN W ON CPD.sid = W.sid AND CPD.tp < W.t2 AND W.t2 <= CPD.td "
-  + "GROUP BY rid"
-@
-To list travel duration $\delta$ of all servers:
-<<Create View dur\_s\_travel statement>>=
-"CREATE VIEW dur_s_travel (sid, val) AS "
-  + "SELECT sid, te - ts FROM CW"
-@
-To list pick-up delay $\delta^\textrm{pickup}$ of all requests:
-<<Create View dur\_r\_pickup statement (Eq.~\ref{eq:pick-up delay})>>=
-"CREATE VIEW dur_r_pickup (rid, val) AS "
-  + "SELECT rid, tp - re FROM CPD"
-@
-To list transit durations $\delta^\textrm{transit}$ of all requests:
-<<Create View dur\_r\_transit statement (Eq.~\ref{eq:transit-duration})>>=
-"CREATE VIEW dur_r_transit (rid, val) AS "
-  + "SELECT rid, td - tp FROM CPD"
-@
-To list travel durations $\delta^\textrm{travel}$ of all requests:
-<<Create View dur\_r\_travel statement (Eq.~\ref{eq:travel-duration})>>=
-"CREATE VIEW dur_r_travel (rid, val) AS "
-  + "SELECT rid, td - re FROM CPD"
-@
-To list departure times $t^\textrm{depart}$ of all requests:
-<<Create View t\_r\_depart statement (Eq.~\ref{eq:departure-time})>>=
-"CREATE VIEW t_r_depart (rid, val) AS "
-  + "SELECT rid, tp FROM CPD"
-@
-To list departure times $t^\textrm{depart}$ of all servers:
-<<Create View t\_s\_depart statement (Eq.~\ref{eq:departure-time})>>=
-"CREATE VIEW t_s_depart (sid, val) AS "
-  + "SELECT sid, ts FROM CW"
-@
-To list arrival times $t^\textrm{arrive}$ of all requests:
-<<Create View t\_r\_arrive statement (Eq.~\ref{eq:arrival-time})>>=
-"CREATE VIEW t_r_arrive (rid, val) AS "
-  + "SELECT rid, td FROM CPD"
-@
-To list arrival times $t^\textrm{arrive}$ of all servers:
-<<Create View t\_s\_arrive statement (Eq.~\ref{eq:arrival-time})>>=
-"CREATE VIEW t_s_arrive (sid, val) AS "
-  + "SELECT sid, te FROM CW"
-@
-To list time window violations of all servers:
-<<Create View violations\_t\_s>>=
-"CREATE VIEW violations_t_s (sid, val) AS "
-  + "SELECT sid, te - sl FROM CW WHERE te - sl > 0"
-@
-To list time window violations of all requests:
-<<Create View violations\_t\_r>>=
-"CREATE VIEW violations_t_r (rid, val) AS "
-  + "SELECT rid, td - rl FROM CPD WHERE td - rl > 0"
-@

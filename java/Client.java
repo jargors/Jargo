@@ -31,6 +31,21 @@ public abstract class Client {
       System.err.printf("Continuing with monitoring disabled\n");
     }
   }
+  public int getStatClientQueueSize() {
+           return this.queue.size();
+         }
+  public long getClientHandleRequestDurLast() {
+           return this.statClientHandleRequestDurLast;
+         }
+  public long getClientHandleRequestDurMin() {
+           return this.statClientHandleRequestDurMin;
+         }
+  public long getClientHandleRequestDurMax() {
+           return this.statClientHandleRequestDurMax;
+         }
+  public double getClientHandleRequestDurAvg() {
+           return this.statClientHandleRequestDurAvg;
+         }
   public final void gtreeLoad(String p) throws FileNotFoundException {
                  this.tools.GTGtreeLoad(p);
                }
@@ -88,19 +103,4 @@ public abstract class Client {
             }
   protected void handleRequest(final int[] r) throws ClientException, ClientFatalException { }
   protected void handleServerLocation(final int[] loc) { }
-  public int getStatClientQueueSize() {
-           return this.queue.size();
-         }
-  public long getClientHandleRequestDurLast() {
-           return this.statClientHandleRequestDurLast;
-         }
-  public long getClientHandleRequestDurMin() {
-           return this.statClientHandleRequestDurMin;
-         }
-  public long getClientHandleRequestDurMax() {
-           return this.statClientHandleRequestDurMax;
-         }
-  public double getClientHandleRequestDurAvg() {
-           return this.statClientHandleRequestDurAvg;
-         }
 }

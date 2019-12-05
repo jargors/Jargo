@@ -1,0 +1,100 @@
+\chapter{Getting Started}
+
+\section{Setting Up the Runtime Environment}
+
+To run Jargo (and any other Java) programs, the JVM needs to know where to look
+for the relevant class files and native libraries. Usually these directory
+locations are passed to the JVM at runtime, as options to the \texttt{java}
+command. All programs that import from Jargo will need to use the dependencies
+listed in Table~\ref{tab:prereqs} in addition to the following dependencies:
+\begin{itemize}
+\item Apache Commons Logging package, needed by DBCP and obtainable from
+\url{http://commons.apache.org/proper/commons-logging/}.
+\item Apache Derby 10.15.1.3 or above, obtainable from
+\url{https://db.apache.org/derby/}.
+\end{itemize}
+
+\begin{table}
+\small
+\centering
+\caption{Additional prerequisites for running Jargo programs.}
+\label{tab:runtime}
+\begin{tabular}{|p{.8\textwidth}|}
+\hline
+\begin{itemize}
+\item jargors-1.0.0.jar
+\item commons-logging-1.2.jar
+\item \textit{\texttt{derbyclient.jar}}
+\item \textit{\texttt{derby.jar}}
+\item \textit{\texttt{derbyLocale\_cs.jar}}
+\item \textit{\texttt{derbyLocale\_de\_DE.jar}}
+\item \textit{\texttt{derbyLocale\_es.jar}}
+\item \textit{\texttt{derbyLocale\_fr.jar}}
+\item \textit{\texttt{derbyLocale\_hu.jar}}
+\item \textit{\texttt{derbyLocale\_it.jar}}
+\item \textit{\texttt{derbyLocale\_ja\_JP.jar}}
+\item \textit{\texttt{derbyLocale\_ko\_KR.jar}}
+\item \textit{\texttt{derbyLocale\_pl.jar}}
+\item \textit{\texttt{derbyLocale\_pt\_BR.jar}}
+\item \textit{\texttt{derbyLocale\_ru.jar}}
+\item \textit{\texttt{derbyLocale\_zh\_CN.jar}}
+\item \textit{\texttt{derbyLocale\_zh\_TW.jar}}
+\item \textit{\texttt{derbynet.jar}}
+\item \textit{\texttt{derbyoptionaltools.jar}}
+\item \textit{\texttt{derbyrun.jar}}
+\item \textit{\texttt{derbyshared.jar}}
+\item \textit{\texttt{derbytools.jar}}
+\item \textit{\texttt{derby.war}}
+\end{itemize}\\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Running a Sample Program}
+
+\begin{table}
+\small
+\centering
+\caption{Sample Jargo program.}
+\label{tab:sample}
+\begin{tabular}{|p{0.8\textwidth}|}
+\hline
+\begin{verbatim}
+import com.github.jargors.Controller;
+public class HelloJargo {
+  public static void main(String[] args) throws Exception {
+    Controller controller = new Controller();
+    controller.instanceNew();
+    controller.instanceInitialize();
+  }
+}
+\end{verbatim}\\
+\hline
+\end{tabular}
+\end{table}
+
+To test the runtime environment, follow these steps to compile and run a small
+sample program.
+\begin{enumerate}
+\item Verify that some directory (\textit{e.g.} \texttt{deps/}) (or combination
+of directories) on your machine contains the prerequisites listed in
+Tables~\ref{tab:prereqs}~and~\ref{tab:runtime}.  The \texttt{jargors-1.0.0.jar}
+package can be obtained by following the instructions in
+Chapter~\ref{ch:building} to build the package from source, or from the GitHub
+releases.  The items in \textit{italics} in Table~\ref{tab:prereqs} are
+obtainable from the JavaFX SDK for your platform. The items in italics in
+Table~\ref{tab:runtime} are obtainable from the Apache Derby binary
+distribution. See \S\ref{sec:prereqs} for where to obtain the other
+prerequisites.
+\item Copy and paste the sample program in Table~\ref{tab:sample} to a new file
+and name it \texttt{HelloJargo.java}.
+\item Launch a terminal (or command-line prompt if on Windows) and type
+\texttt{javac -cp .:\$DIR/* HelloJargo.java} to produce the Java bytecode
+\texttt{HelloJargo.class}. Replace \texttt{\$DIR} with the location of the
+directory referred to in step 1. If the prerequisites are split into
+multiple directories, use \texttt{-cp .:\$DIR1/*:\$DIR2/*:\$DIR3/*} and so on.
+\item To execute the program, type
+\texttt{java -Djava.library.path=\$LIBDIR -cp .:\$DIR HelloJargo}. Replace
+\texttt{\$LIBDIR} with the directory location of \texttt{libgtree.so}.
+Replace \texttt{\$DIR} with the location(s) used in step 2.
+\end{enumerate}

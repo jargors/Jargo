@@ -240,6 +240,135 @@ public class Controller {
       System.err.printf("Continuing with monitoring disabled\n");
     }
   }
+  public int    getControllerClockNow() {
+           return this.statControllerClockNow;
+         }
+  public int    getControllerClockReferenceDay() {
+           return this.statControllerClockReferenceDay;
+         }
+  public int    getControllerClockReferenceHour() {
+           return this.statControllerClockReferenceHour;
+         }
+  public int    getControllerClockReferenceMinute() {
+           return this.statControllerClockReferenceMinute;
+         }
+  public int    getControllerClockReferenceSecond() {
+           return this.statControllerClockReferenceSecond;
+         }
+  public int    getControllerRequestCollectionSizeLast() {
+           return this.statControllerRequestCollectionSizeLast;
+         }
+  public int    getControllerRequestCollectionSizeMin() {
+           return this.statControllerRequestCollectionSizeMin;
+         }
+  public int    getControllerRequestCollectionSizeMax() {
+           return this.statControllerRequestCollectionSizeMax;
+         }
+  public double getControllerRequestCollectionSizeAvg() {
+           return this.statControllerRequestCollectionSizeAvg;
+         }
+  public long   getControllerRequestCollectionDurLast() {
+           return this.statControllerRequestCollectionDurLast;
+         }
+  public long   getControllerRequestCollectionDurMin() {
+           return this.statControllerRequestCollectionDurMin;
+         }
+  public long   getControllerRequestCollectionDurMax() {
+           return this.statControllerRequestCollectionDurMax;
+         }
+  public double getControllerRequestCollectionDurAvg() {
+           return this.statControllerRequestCollectionDurAvg;
+         }
+  public int    getStatQueryEdgeCount() {
+           return this.statQueryEdgeCount;
+         }
+  public long   getStatQueryEdgeDurLast() {
+           return this.statQueryEdgeDurLast;
+         }
+  public long   getStatQueryEdgeDurTotal() {
+           return this.statQueryEdgeDurTotal;
+         }
+  public long   getStatQueryEdgeDurMin() {
+           return this.statQueryEdgeDurMin;
+         }
+  public long   getStatQueryEdgeDurMax() {
+           return this.statQueryEdgeDurMax;
+         }
+  public double getStatQueryEdgeDurAvg() {
+           return this.statQueryEdgeDurAvg;
+         }
+  public int    getStatQueryServerRouteRemainingCount() {
+           return this.statQueryServerRouteRemainingCount;
+         }
+  public long   getStatQueryServerRouteRemainingDurLast() {
+           return this.statQueryServerRouteRemainingDurLast;
+         }
+  public long   getStatQueryServerRouteRemainingDurTotal() {
+           return this.statQueryServerRouteRemainingDurTotal;
+         }
+  public long   getStatQueryServerRouteRemainingDurMin() {
+           return this.statQueryServerRouteRemainingDurMin;
+         }
+  public long   getStatQueryServerRouteRemainingDurMax() {
+           return this.statQueryServerRouteRemainingDurMax;
+         }
+  public double getStatQueryServerRouteRemainingDurAvg() {
+           return this.statQueryServerRouteRemainingDurAvg;
+         }
+  public int    getStatQueryServersLocationsActiveCount() {
+           return this.statQueryServersLocationsActiveCount;
+         }
+  public long   getStatQueryServersLocationsActiveDurLast() {
+           return this.statQueryServersLocationsActiveDurLast;
+         }
+  public long   getStatQueryServersLocationsActiveDurTotal() {
+           return this.statQueryServersLocationsActiveDurTotal;
+         }
+  public long   getStatQueryServersLocationsActiveDurMin() {
+           return this.statQueryServersLocationsActiveDurMin;
+         }
+  public long   getStatQueryServersLocationsActiveDurMax() {
+           return this.statQueryServersLocationsActiveDurMax;
+         }
+  public double getStatQueryServersLocationsActiveDurAvg() {
+           return this.statQueryServersLocationsActiveDurAvg;
+         }
+  public int    getStatQueryUserCount() {
+           return this.statQueryUserCount;
+         }
+  public long   getStatQueryUserDurLast() {
+           return this.statQueryUserDurLast;
+         }
+  public long   getStatQueryUserDurTotal() {
+           return this.statQueryUserDurTotal;
+         }
+  public long   getStatQueryUserDurMin() {
+           return this.statQueryUserDurMin;
+         }
+  public long   getStatQueryUserDurMax() {
+           return this.statQueryUserDurMax;
+         }
+  public double getStatQueryUserDurAvg() {
+           return this.statQueryUserDurAvg;
+         }
+  public int    getStatQueryVertexCount() {
+           return this.statQueryVertexCount;
+         }
+  public long   getStatQueryVertexDurLast() {
+           return this.statQueryVertexDurLast;
+         }
+  public long   getStatQueryVertexDurTotal() {
+           return this.statQueryVertexDurTotal;
+         }
+  public long   getStatQueryVertexDurMin() {
+           return this.statQueryVertexDurMin;
+         }
+  public long   getStatQueryVertexDurMax() {
+           return this.statQueryVertexDurMax;
+         }
+  public double getStatQueryVertexDurAvg() {
+           return this.statQueryVertexDurAvg;
+         }
   public int[] query(final String sql, final int ncols) throws SQLException {
            return this.storage.DBQuery(sql, ncols);
          }
@@ -658,134 +787,5 @@ public class Controller {
              e.printStackTrace();
              return;
            }
-         }
-  public int    getControllerClockNow() {
-           return this.statControllerClockNow;
-         }
-  public int    getControllerClockReferenceDay() {
-           return this.statControllerClockReferenceDay;
-         }
-  public int    getControllerClockReferenceHour() {
-           return this.statControllerClockReferenceHour;
-         }
-  public int    getControllerClockReferenceMinute() {
-           return this.statControllerClockReferenceMinute;
-         }
-  public int    getControllerClockReferenceSecond() {
-           return this.statControllerClockReferenceSecond;
-         }
-  public int    getControllerRequestCollectionSizeLast() {
-           return this.statControllerRequestCollectionSizeLast;
-         }
-  public int    getControllerRequestCollectionSizeMin() {
-           return this.statControllerRequestCollectionSizeMin;
-         }
-  public int    getControllerRequestCollectionSizeMax() {
-           return this.statControllerRequestCollectionSizeMax;
-         }
-  public double getControllerRequestCollectionSizeAvg() {
-           return this.statControllerRequestCollectionSizeAvg;
-         }
-  public long   getControllerRequestCollectionDurLast() {
-           return this.statControllerRequestCollectionDurLast;
-         }
-  public long   getControllerRequestCollectionDurMin() {
-           return this.statControllerRequestCollectionDurMin;
-         }
-  public long   getControllerRequestCollectionDurMax() {
-           return this.statControllerRequestCollectionDurMax;
-         }
-  public double getControllerRequestCollectionDurAvg() {
-           return this.statControllerRequestCollectionDurAvg;
-         }
-  public int    getStatQueryEdgeCount() {
-           return this.statQueryEdgeCount;
-         }
-  public long   getStatQueryEdgeDurLast() {
-           return this.statQueryEdgeDurLast;
-         }
-  public long   getStatQueryEdgeDurTotal() {
-           return this.statQueryEdgeDurTotal;
-         }
-  public long   getStatQueryEdgeDurMin() {
-           return this.statQueryEdgeDurMin;
-         }
-  public long   getStatQueryEdgeDurMax() {
-           return this.statQueryEdgeDurMax;
-         }
-  public double getStatQueryEdgeDurAvg() {
-           return this.statQueryEdgeDurAvg;
-         }
-  public int    getStatQueryServerRouteRemainingCount() {
-           return this.statQueryServerRouteRemainingCount;
-         }
-  public long   getStatQueryServerRouteRemainingDurLast() {
-           return this.statQueryServerRouteRemainingDurLast;
-         }
-  public long   getStatQueryServerRouteRemainingDurTotal() {
-           return this.statQueryServerRouteRemainingDurTotal;
-         }
-  public long   getStatQueryServerRouteRemainingDurMin() {
-           return this.statQueryServerRouteRemainingDurMin;
-         }
-  public long   getStatQueryServerRouteRemainingDurMax() {
-           return this.statQueryServerRouteRemainingDurMax;
-         }
-  public double getStatQueryServerRouteRemainingDurAvg() {
-           return this.statQueryServerRouteRemainingDurAvg;
-         }
-  public int    getStatQueryServersLocationsActiveCount() {
-           return this.statQueryServersLocationsActiveCount;
-         }
-  public long   getStatQueryServersLocationsActiveDurLast() {
-           return this.statQueryServersLocationsActiveDurLast;
-         }
-  public long   getStatQueryServersLocationsActiveDurTotal() {
-           return this.statQueryServersLocationsActiveDurTotal;
-         }
-  public long   getStatQueryServersLocationsActiveDurMin() {
-           return this.statQueryServersLocationsActiveDurMin;
-         }
-  public long   getStatQueryServersLocationsActiveDurMax() {
-           return this.statQueryServersLocationsActiveDurMax;
-         }
-  public double getStatQueryServersLocationsActiveDurAvg() {
-           return this.statQueryServersLocationsActiveDurAvg;
-         }
-  public int    getStatQueryUserCount() {
-           return this.statQueryUserCount;
-         }
-  public long   getStatQueryUserDurLast() {
-           return this.statQueryUserDurLast;
-         }
-  public long   getStatQueryUserDurTotal() {
-           return this.statQueryUserDurTotal;
-         }
-  public long   getStatQueryUserDurMin() {
-           return this.statQueryUserDurMin;
-         }
-  public long   getStatQueryUserDurMax() {
-           return this.statQueryUserDurMax;
-         }
-  public double getStatQueryUserDurAvg() {
-           return this.statQueryUserDurAvg;
-         }
-  public int    getStatQueryVertexCount() {
-           return this.statQueryVertexCount;
-         }
-  public long   getStatQueryVertexDurLast() {
-           return this.statQueryVertexDurLast;
-         }
-  public long   getStatQueryVertexDurTotal() {
-           return this.statQueryVertexDurTotal;
-         }
-  public long   getStatQueryVertexDurMin() {
-           return this.statQueryVertexDurMin;
-         }
-  public long   getStatQueryVertexDurMax() {
-           return this.statQueryVertexDurMax;
-         }
-  public double getStatQueryVertexDurAvg() {
-           return this.statQueryVertexDurAvg;
          }
 }

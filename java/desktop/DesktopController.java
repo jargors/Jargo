@@ -201,7 +201,9 @@ public class DesktopController {
         final double[] pos = kv.getValue();
         final double     x = pos[0];
         final double     y = pos[1];
-        this.gc.drawImage(this.server_img, x, y);
+        Platform.runLater(() -> {
+          this.gc.drawImage(this.server_img, x, y);
+        });
       }
     }
   }
@@ -214,8 +216,9 @@ public class DesktopController {
     private Traffic traffic = null;
     private int[] edges = null;
     private final Color DEFAULT = Color.BLUE;
+    private final Color BG   = Color.web("0xD7FFFF");
     private final Color SLOW = Color.web("0xFF0000");
-    private final Color MED = Color.web("0xFFD700");
+    private final Color MED  = Color.web("0xFFD700");
     private final Color FAST = Color.web("0x5FD870");
     public RoadRenderer(
         final GraphicsContext gc,
@@ -244,24 +247,34 @@ public class DesktopController {
       if (now - prev > 10*1000000000) {  // only draw every 10 seconds
         prev = now;
         // Draw edges
-        this.gc.clearRect(0, 0, this.can_road.getWidth(), this.can_road.getHeight());
+        // this.gc.clearRect(0, 0, this.can_road.getWidth(), this.can_road.getHeight());
         for (int i = 0; i < (this.edges.length - 3); i += 4) {
+          Color color = DEFAULT;
           if (this.edges[(i + 0)] != 0 && this.edges[(i + 1)] != 0) {
             try {
-              int[] v1 = this.controller.queryVertex(this.edges[(i + 0)]);
-              int[] v2 = this.controller.queryVertex(this.edges[(i + 1)]);
+              final int[] v1 = this.controller.queryVertex(this.edges[(i + 0)]);
+              final int[] v2 = this.controller.queryVertex(this.edges[(i + 1)]);
               if (this.traffic != null) {
-                double x = this.traffic.apply(this.edges[i], this.edges[(i + 1)], this.controller.getClockNow());
+                final double x = this.traffic.apply(this.edges[i], this.edges[(i + 1)], this.controller.getClockNow());
                 if (0.0 <= x && x <= 0.33) {
-                  this.gc.setStroke(SLOW);
+                  color = SLOW;
                 } else if (0.33 < x && x <= 0.66) {
-                  this.gc.setStroke(MED);
+                  color = MED;
                 } else if (0.66 < x && x <= 1.0) {
-                  this.gc.setStroke(FAST);
+                  color = FAST;
                 }
               }
-              this.gc.strokeLine(this.muf.getUnit()*(v1[0] - this.muf.getLngMin()), this.muf.getUnit()*(v1[1] - this.muf.getLatMin()),
-                                 this.muf.getUnit()*(v2[0] - this.muf.getLngMin()), this.muf.getUnit()*(v2[1] - this.muf.getLatMin()));
+              final Color finalColor = color;
+              final double x1 = this.muf.getUnit()*(v1[0] - this.muf.getLngMin());
+              final double x2 = this.muf.getUnit()*(v2[0] - this.muf.getLngMin());
+              final double y1 = this.muf.getUnit()*(v1[1] - this.muf.getLatMin());
+              final double y2 = this.muf.getUnit()*(v2[1] - this.muf.getLatMin());
+              Platform.runLater(() -> {
+                this.gc.setStroke(BG);
+                this.gc.strokeLine(x1, y1, x2, y2);
+                this.gc.setStroke(finalColor);
+                this.gc.strokeLine(x1, y1, x2, y2);
+              });
             } catch (VertexNotFoundException ve) {
               System.err.println("Warning: "+ve.toString());
             } catch (SQLException se) {
@@ -1101,7 +1114,12 @@ public class DesktopController {
            e.consume();
          }
   public void actionZoomCanvas(ScrollEvent e) {
-           this.zoom += (e.getDeltaY() > 0 ? 1 : -1);
+           if (e.getDeltaY() > 0) {
+             this.zoom += 1;
+           }
+           if (e.getDeltaY() < 0) {
+             this.zoom -= 1;
+           }
            this.zoom = Math.max(this.zoom, 1);
            this.zoom = Math.min(this.zoom, 12);
            System.out.println(this.zoom);

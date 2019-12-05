@@ -29,21 +29,24 @@ $(JAVA2) : src/*.nw src/*/*.nw
 
 # Weave the *.nw files in the right order
 TEXSRCS = \
-	src/tex/0-Preface.nw \
-	src/tex/0-Overview.nw \
-	src/tex/1-Introduction.nw \
-	src/tex/2-Reading.nw \
-	src/tex/3-Writing.nw \
-	src/tex/4-Administration.nw \
-	src/tex/5-Gtree.nw \
-	src/tex/6-JMX.nw \
+	src/tex/Preface.nw \
+	src/tex/Introduction.nw \
+	src/tex/Building.nw \
+	src/tex/GettingStarted.nw \
+	src/tex/Overview.nw \
+	src/tex/Reading.nw \
+	src/tex/Writing.nw \
+	src/tex/Administration.nw \
+	src/tex/Gtree.nw \
 	src/Storage.nw \
 	src/Controller.nw \
 	src/Communicator.nw \
 	src/Client.nw \
 	src/Traffic.nw \
 	src/Tools.nw \
-	src/desktop/DesktopController.nw
+	src/desktop/DesktopController.nw \
+	src/tex/JMX.nw \
+	src/tex/DataDefinition.nw
 
 doc/body.tex : src/*.nw src/*/*.nw
 	noweave -delay -index $(TEXSRCS) > doc/body.tex

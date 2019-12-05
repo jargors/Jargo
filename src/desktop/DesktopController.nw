@@ -97,9 +97,6 @@ private Canvas can_road;
 private Canvas can_servers;
 private Pane container_canvas_container;
 private Label lbl_fps;
-@
-
-<<[[DesktopController]] member variables>>=
 @FXML private Button btn_new;
 @FXML private Button btn_load;
 @FXML private Button btn_prob;
@@ -154,6 +151,7 @@ private Label lbl_fps;
 @FXML private CheckBox chk_timeServerHandling;
 @
 
+\subsection{Constants}
 <<[[DesktopController]] member variables>>=
 private final Color C_SUCCESS = Color.GREEN;
 private final Color C_WARN = Color.YELLOW;
@@ -193,10 +191,6 @@ private int t0 = 0;
 private int t1 = 0;
 private int zoom = 1;
 private ConcurrentHashMap<Integer, double[]> lu_position = new ConcurrentHashMap<Integer, double[]>();
-@
-
-\subsection{Background Processes}
-<<[[DesktopController]] member variables>>=
 private ServersRenderer ren_servers = null;
 private RoadRenderer ren_road = null;
 private ScheduledExecutorService exe = null;
@@ -205,6 +199,7 @@ private ScheduledFuture<?> cbServerLocationsFetcher = null;
 private Map<String, ScheduledFuture<?>> cbMetricFetcher = new HashMap<String, ScheduledFuture<?>>();
 @
 
+\subsection{ServersRenderer}
 <<[[DesktopController]] member variables>>=
 private class ServersRenderer extends AnimationTimer {
   private long prev = 0;
@@ -249,12 +244,15 @@ private class ServersRenderer extends AnimationTimer {
       final double[] pos = kv.getValue();
       final double     x = pos[0];
       final double     y = pos[1];
-      this.gc.drawImage(this.server_img, x, y);
+      Platform.runLater(() -> {
+        this.gc.drawImage(this.server_img, x, y);
+      });
     }
   }
 }
 @
 
+\subsection{RoadRenderer}
 <<[[DesktopController]] member variables>>=
 private class RoadRenderer extends AnimationTimer {
   private long prev = 0;
@@ -265,8 +263,9 @@ private class RoadRenderer extends AnimationTimer {
   private Traffic traffic = null;
   private int[] edges = null;
   private final Color DEFAULT = Color.BLUE;
+  private final Color BG   = Color.web("0xD7FFFF");
   private final Color SLOW = Color.web("0xFF0000");
-  private final Color MED = Color.web("0xFFD700");
+  private final Color MED  = Color.web("0xFFD700");
   private final Color FAST = Color.web("0x5FD870");
   public RoadRenderer(
       final GraphicsContext gc,
@@ -295,24 +294,34 @@ private class RoadRenderer extends AnimationTimer {
     if (now - prev > 10*1000000000) {  // only draw every 10 seconds
       prev = now;
       // Draw edges
-      this.gc.clearRect(0, 0, this.can_road.getWidth(), this.can_road.getHeight());
+      // this.gc.clearRect(0, 0, this.can_road.getWidth(), this.can_road.getHeight());
       for (int i = 0; i < (this.edges.length - 3); i += 4) {
+        Color color = DEFAULT;
         if (this.edges[(i + 0)] != 0 && this.edges[(i + 1)] != 0) {
           try {
-            int[] v1 = this.controller.queryVertex(this.edges[(i + 0)]);
-            int[] v2 = this.controller.queryVertex(this.edges[(i + 1)]);
+            final int[] v1 = this.controller.queryVertex(this.edges[(i + 0)]);
+            final int[] v2 = this.controller.queryVertex(this.edges[(i + 1)]);
             if (this.traffic != null) {
-              double x = this.traffic.apply(this.edges[i], this.edges[(i + 1)], this.controller.getClockNow());
+              final double x = this.traffic.apply(this.edges[i], this.edges[(i + 1)], this.controller.getClockNow());
               if (0.0 <= x && x <= 0.33) {
-                this.gc.setStroke(SLOW);
+                color = SLOW;
               } else if (0.33 < x && x <= 0.66) {
-                this.gc.setStroke(MED);
+                color = MED;
               } else if (0.66 < x && x <= 1.0) {
-                this.gc.setStroke(FAST);
+                color = FAST;
               }
             }
-            this.gc.strokeLine(this.muf.getUnit()*(v1[0] - this.muf.getLngMin()), this.muf.getUnit()*(v1[1] - this.muf.getLatMin()),
-                               this.muf.getUnit()*(v2[0] - this.muf.getLngMin()), this.muf.getUnit()*(v2[1] - this.muf.getLatMin()));
+            final Color finalColor = color;
+            final double x1 = this.muf.getUnit()*(v1[0] - this.muf.getLngMin());
+            final double x2 = this.muf.getUnit()*(v2[0] - this.muf.getLngMin());
+            final double y1 = this.muf.getUnit()*(v1[1] - this.muf.getLatMin());
+            final double y2 = this.muf.getUnit()*(v2[1] - this.muf.getLatMin());
+            Platform.runLater(() -> {
+              this.gc.setStroke(BG);
+              this.gc.strokeLine(x1, y1, x2, y2);
+              this.gc.setStroke(finalColor);
+              this.gc.strokeLine(x1, y1, x2, y2);
+            });
           } catch (VertexNotFoundException ve) {
             System.err.println("Warning: "+ve.toString());
           } catch (SQLException se) {
@@ -329,6 +338,7 @@ private class RoadRenderer extends AnimationTimer {
 }
 @
 
+\subsection{MapUnitsFetcher}
 <<[[DesktopController]] member variables>>=
 private class MapUnitsFetcher {
   private double unit = 0;
@@ -355,6 +365,8 @@ private class MapUnitsFetcher {
   }
 }
 @
+
+\subsection{ServerLocationsFetcher}
 <<[[DesktopController]] member variables>>=
 private class ServerLocationsFetcher implements Runnable {
   private Controller controller = null;
@@ -401,6 +413,7 @@ private class ServerLocationsFetcher implements Runnable {
 }
 @
 
+\subsection{MetricFetcher}
 <<[[DesktopController]] member variables>>=
 private class MetricFetcher implements Runnable {
   private Controller controller = null;
@@ -553,7 +566,6 @@ private ConcurrentHashMap<String, ConcurrentHashMap<String, Series<Number, Numbe
 @
 
 \section{Chunks}
-
 \subsection{Initialize chart settings}
 <<Initialize chart settings>>=
 this.lc_rates.setCreateSymbols(false);
@@ -1400,10 +1412,10 @@ void actionTranslateCanvas(MouseEvent e) {
 <<actionZoomCanvas(1)>>=
 void actionZoomCanvas(ScrollEvent e) {
   if (e.getDeltaY() > 0) {
-    this.zoom += 1
+    this.zoom += 1;
   }
   if (e.getDeltaY() < 0) {
-    this.zoom -= 1
+    this.zoom -= 1;
   }
   this.zoom = Math.max(this.zoom, 1);
   this.zoom = Math.min(this.zoom, 12);

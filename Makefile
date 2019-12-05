@@ -9,13 +9,13 @@ VERSION=1.0.0
 all : src jar pdf
 
 src :
-	make -f makesrc.mf
+	make -f makesrc.mk
 
 jar : src
-	make -f makejar.mf
+	make -f makejar.mk
 
 pdf : src
-	make -f makepdf.mf
+	make -f makepdf.mk
 
 purge :
 	rm -f jargo.pdf jar/jargors-$(VERSION).jar
