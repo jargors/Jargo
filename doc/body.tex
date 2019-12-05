@@ -9180,9 +9180,7 @@ private class ServersRenderer extends AnimationTimer \{
       final double[] pos = kv.getValue();
       final double     x = pos[0];
       final double     y = pos[1];
-      Platform.runLater(() -> \{
-        this.gc.drawImage(this.server_img, x, y);
-      \});
+      this.gc.drawImage(this.server_img, x, y);
     \}
   \}
 \}
@@ -9199,10 +9197,12 @@ private class RoadRenderer extends AnimationTimer \{
   private Traffic traffic = null;
   private int[] edges = null;
   private final Color DEFAULT = Color.BLUE;
-  private final Color BG   = Color.web("0xD7FFFF");
+  private final Color BG = Color.web("0xD7FFFF");
   private final Color SLOW = Color.web("0xFF0000");
-  private final Color MED  = Color.web("0xFFD700");
+  private final Color MED = Color.web("0xFFD700");
   private final Color FAST = Color.web("0x5FD870");
+  private final double LINEWIDTH = 0.3;
+  private final long PERIOD = 10000_000_000L;  // 10 seconds
   public RoadRenderer(
       final GraphicsContext gc,
       final Controller controller,
@@ -9219,45 +9219,46 @@ private class RoadRenderer extends AnimationTimer \{
       se.printStackTrace();
     \}
     this.muf = muf;
-    // Set edge default color
-    this.gc.setLineWidth(0.3);
-    this.gc.setStroke(DEFAULT);
+    this.gc.setLineWidth(LINEWIDTH);
   \}
   public void setTraffic(final Traffic traffic) \{
     this.traffic = traffic;
   \}
   public void handle(long now) \{
-    if (now - prev > 10*1000000000) \{  // only draw every 10 seconds
-      prev = now;
-      // Draw edges
-      // this.gc.clearRect(0, 0, this.can_road.getWidth(), this.can_road.getHeight());
+    if ((now - this.prev) > PERIOD) \{
+      this.prev = now;
+      // It is WAY faster to loop through and draw all the edges inside
+      // handle(1) instead of drawing a single edge at a time inside handle(1).
+      // My guess is because with the loop method, the internal graphics buffer
+      // needs to be rendered to the screen only once for all edges but with
+      // the single-edge method, it needs to be rendered once for each edge.
+      this.gc.clearRect(0, 0, this.can_road.getWidth(), this.can_road.getHeight());
       for (int i = 0; i < (this.edges.length - 3); i += 4) \{
-        Color color = DEFAULT;
         if (this.edges[(i + 0)] != 0 && this.edges[(i + 1)] != 0) \{
           try \{
             final int[] v1 = this.controller.queryVertex(this.edges[(i + 0)]);
             final int[] v2 = this.controller.queryVertex(this.edges[(i + 1)]);
-            if (this.traffic != null) \{
-              final double x = this.traffic.apply(this.edges[i], this.edges[(i + 1)], this.controller.getClockNow());
-              if (0.0 <= x && x <= 0.33) \{
-                color = SLOW;
-              \} else if (0.33 < x && x <= 0.66) \{
-                color = MED;
-              \} else if (0.66 < x && x <= 1.0) \{
-                color = FAST;
-              \}
-            \}
-            final Color finalColor = color;
             final double x1 = this.muf.getUnit()*(v1[0] - this.muf.getLngMin());
             final double x2 = this.muf.getUnit()*(v2[0] - this.muf.getLngMin());
             final double y1 = this.muf.getUnit()*(v1[1] - this.muf.getLatMin());
             final double y2 = this.muf.getUnit()*(v2[1] - this.muf.getLatMin());
-            Platform.runLater(() -> \{
-              this.gc.setStroke(BG);
-              this.gc.strokeLine(x1, y1, x2, y2);
-              this.gc.setStroke(finalColor);
-              this.gc.strokeLine(x1, y1, x2, y2);
-            \});
+            this.gc.setStroke(DEFAULT);
+            if (this.traffic != null) \{
+              double x = this.traffic.apply(this.edges[i], this.edges[(i + 1)], this.controller.getClockNow());
+              if (0.0 <= x && x <= 0.33) \{
+                this.gc.setStroke(SLOW);
+              \} else if (0.33 < x && x <= 0.66) \{
+                this.gc.setStroke(MED);
+              \} else if (0.66 < x && x <= 1.0) \{
+                this.gc.setStroke(FAST);
+              \}
+            \}
+            // It seems to be less laggy if we call strokeLine(4) right here
+            // compared to using Platform.runLater(1). Not sure if
+            // strokePolyline(3) would be even faster, but we can't use
+            // strokePolyline(3) anyway because each of our lines might be a
+            // different color depending on traffic.
+            this.gc.strokeLine(x1, y1, x2, y2);
           \} catch (VertexNotFoundException ve) \{
             System.err.println("Warning: "+ve.toString());
           \} catch (SQLException se) \{
