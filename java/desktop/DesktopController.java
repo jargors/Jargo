@@ -163,16 +163,15 @@ public class DesktopController {
     private long prev = 0;
     private int framecount = 0;
     private Image server_img = null;
-    private Image server_img2 = null;
     private int SERVER_WIDTH = 3;
     private Color SERVER_FILL = Color.web("0x555555");
-    private Color SERVER_FILL2 = Color.web("0xFF0000");
     private GraphicsContext gc = null;
     private Canvas can_servers = null;
     private ConcurrentHashMap<Integer, double[]> buffer = new ConcurrentHashMap<Integer, double[]>();
     private ConcurrentHashMap<Integer, Integer> bufidx = new ConcurrentHashMap<Integer, Integer>();
     private Label lbl_fps = null;
     private boolean isRealtime = false;
+    private int zoom = 1;
     public ServersRenderer(
         final GraphicsContext gc,
         final Label lbl_fps,
@@ -182,18 +181,16 @@ public class DesktopController {
       this.can_servers = gc.getCanvas();
       this.lbl_fps = lbl_fps;
       this.isRealtime = isRealtime;
-      // Initialize the server image
-      Rectangle rect = new Rectangle(this.SERVER_WIDTH, this.SERVER_WIDTH);
+      this.setZoom(1);
+    }
+    public void setZoom(final int zoom) {
+      this.zoom = zoom;
+      Rectangle rect = new Rectangle(this.SERVER_WIDTH*zoom, this.SERVER_WIDTH*zoom);
       rect.setFill(this.SERVER_FILL);
-      WritableImage wi = new WritableImage(this.SERVER_WIDTH, this.SERVER_WIDTH);
+      WritableImage wi = new WritableImage(this.SERVER_WIDTH*zoom, this.SERVER_WIDTH*zoom);
       SnapshotParameters parameters = new SnapshotParameters();
       rect.snapshot(parameters, wi);
       this.server_img = wi;
-      rect.setFill(this.SERVER_FILL2);
-      wi = new WritableImage(this.SERVER_WIDTH, this.SERVER_WIDTH);
-      parameters = new SnapshotParameters();
-      rect.snapshot(parameters, wi);
-      this.server_img2 = wi;
     }
     public void fillBuffer(final int sid, final double[] buffer) {
       if (!this.bufidx.containsKey(sid)) {
@@ -230,6 +227,9 @@ public class DesktopController {
         final int sid = kv.getKey();
         final int i = kv.getValue();
         final double[] buffer = this.buffer.get(sid);
+        if (buffer == null) {
+          continue;
+        }
         final double t1 = buffer[((i + 0) % 9)];
         final double x1 = buffer[((i + 1) % 9)];
         final double y1 = buffer[((i + 2) % 9)];
@@ -242,12 +242,12 @@ public class DesktopController {
             this.bufidx.put(sid, (i + 3) % 9);
             delta = 1;
           }
-          final double x = (x1 + delta*(x2 - x1)) - (float) SERVER_WIDTH/2;
-          final double y = (y1 + delta*(y2 - y1)) - (float) SERVER_WIDTH/2;
+          final double x = (x1 + delta*(x2 - x1)) - (float) SERVER_WIDTH*this.zoom/2;
+          final double y = (y1 + delta*(y2 - y1)) - (float) SERVER_WIDTH*this.zoom/2;
           this.gc.drawImage(this.server_img, x, y);
         } else {
-          final double x = x1 - (float) SERVER_WIDTH/2;
-          final double y = y1 - (float) SERVER_WIDTH/2;
+          final double x = x1 - (float) SERVER_WIDTH*this.zoom/2;
+          final double y = y1 - (float) SERVER_WIDTH*this.zoom/2;
           this.gc.drawImage(this.server_img, x, y);
         }
       }
@@ -288,6 +288,9 @@ public class DesktopController {
     }
     public void setTraffic(final Traffic traffic) {
       this.traffic = traffic;
+    }
+    public void forceRender() {
+      this.prev = 0;
     }
     public void handle(long now) {
       if ((now - this.prev) > PERIOD) {
@@ -817,9 +820,9 @@ public class DesktopController {
            System.exit(0);
          }
   public void actionRecordMousePress(MouseEvent e) {
-           this.mouse_x = e.getX();
-           this.mouse_y = e.getY();
-           e.consume();
+           // this.mouse_x = e.getX();
+           // this.mouse_y = e.getY();
+           // e.consume();
          }
   public void actionRoad(final ActionEvent e) {
            boolean state_btn_gtree = this.btn_gtree.isDisabled();
@@ -1372,11 +1375,11 @@ public class DesktopController {
            }
          }
   public void actionTranslateCanvas(MouseEvent e) {
-           this.can_road.setTranslateX(this.can_road.getTranslateX() + e.getX() - this.mouse_x);
-           this.can_road.setTranslateY(this.can_road.getTranslateY() + e.getY() - this.mouse_y);
-           this.can_servers.setTranslateX(this.can_servers.getTranslateX() + e.getX() - this.mouse_x);
-           this.can_servers.setTranslateY(this.can_servers.getTranslateY() + e.getY() - this.mouse_y);
-           e.consume();
+           // this.can_road.setTranslateX(this.can_road.getTranslateX() + e.getX() - this.mouse_x);
+           // this.can_road.setTranslateY(this.can_road.getTranslateY() + e.getY() - this.mouse_y);
+           // this.can_servers.setTranslateX(this.can_servers.getTranslateX() + e.getX() - this.mouse_x);
+           // this.can_servers.setTranslateY(this.can_servers.getTranslateY() + e.getY() - this.mouse_y);
+           // e.consume();
          }
   public void actionZoomCanvas(ScrollEvent e) {
            if (e.getDeltaY() > 0) {
@@ -1386,12 +1389,23 @@ public class DesktopController {
              this.zoom -= 1;
            }
            this.zoom = Math.max(this.zoom, 1);
-           this.zoom = Math.min(this.zoom, 12);
+           this.zoom = Math.min(this.zoom, 5);
            System.out.println(this.zoom);
-           this.can_road.setScaleX(this.zoom);
-           this.can_road.setScaleY(this.zoom);
-           this.can_servers.setScaleX(this.zoom);
-           this.can_servers.setScaleY(this.zoom);
+           //this.can_road.setScaleX(this.zoom);
+           //this.can_road.setScaleY(this.zoom);
+           //this.can_servers.setScaleX(this.zoom);
+           //this.can_servers.setScaleY(this.zoom);
+           this.muf.setUnit(this.unit*this.zoom);
+           this.can_road.setWidth(this.window_width*this.zoom);
+           this.can_road.setHeight(this.window_height*this.zoom);
+           this.can_servers.setWidth(this.window_width*this.zoom);
+           this.can_servers.setHeight(this.window_height*this.zoom);
+           if (this.ren_road != null) {
+             this.ren_road.forceRender();
+           }
+           if (this.ren_servers != null) {
+             this.ren_servers.setZoom(this.zoom);
+           }
            e.consume();
          }
   public void setStage(Stage s) {
@@ -1442,8 +1456,8 @@ public class DesktopController {
               this.container_canvas.setContent(this.container_canvas_container);
               // Register mouse event handlers
               // (can_servers is on top so it will trap all mouse events)
-              this.can_servers.setOnMousePressed((e) -> { actionRecordMousePress(e); });
-              this.can_servers.setOnMouseDragged((e) -> { actionTranslateCanvas(e); });
+              // this.can_servers.setOnMousePressed((e) -> { actionRecordMousePress(e); });
+              // this.can_servers.setOnMouseDragged((e) -> { actionTranslateCanvas(e); });
               this.can_servers.setOnScroll((e) -> { actionZoomCanvas(e); });
             } catch (SQLException se) {
               System.err.println("Failed with SQLException");
