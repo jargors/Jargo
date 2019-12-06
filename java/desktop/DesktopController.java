@@ -932,7 +932,7 @@ public class DesktopController {
                    if (this.gtree != null) {
                      this.btn_prob   .setDisable(false);
                    }
-                   this.tf_client     .setDisable(false);
+                   this.tf_client    .setDisable(false);
                    this.tf_t0        .setDisable(false);
                    this.tf_t1        .setDisable(false);
                    this.tabpane      .setDisable(false);
@@ -945,11 +945,9 @@ public class DesktopController {
                  });
                } catch (FileNotFoundException fe) {
                  System.err.println("Failed: "+fe.toString());
-                 return;
                } catch (SQLException se) {
                  System.err.println("SQL error:");
                  Tools.PrintSQLException(se);
-                 return;
                }
              });
            }
