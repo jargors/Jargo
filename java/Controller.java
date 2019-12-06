@@ -120,35 +120,8 @@ public class Controller {
         System.exit(1);
       }
     }
-        this.statControllerRequestCollectionCount++;
-        this.statControllerRequestCollectionSizeLast = A1;
-        this.statControllerRequestCollectionSizeTotal +=
-        this.statControllerRequestCollectionSizeLast;
-    if (this.statControllerRequestCollectionSizeLast <
-        this.statControllerRequestCollectionSizeMin) {
-        this.statControllerRequestCollectionSizeMin =
-        this.statControllerRequestCollectionSizeLast;}
-    if (this.statControllerRequestCollectionSizeLast >
-        this.statControllerRequestCollectionSizeMax) {
-        this.statControllerRequestCollectionSizeMax =
-        this.statControllerRequestCollectionSizeLast;}
-        this.statControllerRequestCollectionSizeAvg = (double)
-        this.statControllerRequestCollectionSizeTotal/
-        this.statControllerRequestCollectionCount;
-        this.statControllerRequestCollectionDurLast = (System.currentTimeMillis() - A0);
-        this.statControllerRequestCollectionDurTotal +=
-        this.statControllerRequestCollectionDurLast;
-    if (this.statControllerRequestCollectionDurLast <
-        this.statControllerRequestCollectionDurMin) {
-        this.statControllerRequestCollectionDurMin =
-        this.statControllerRequestCollectionDurLast;}
-    if (this.statControllerRequestCollectionDurLast >
-        this.statControllerRequestCollectionDurMax) {
-        this.statControllerRequestCollectionDurMax =
-        this.statControllerRequestCollectionDurLast;}
-        this.statControllerRequestCollectionDurAvg = (double)
-        this.statControllerRequestCollectionDurTotal/
-        this.statControllerRequestCollectionCount;
+    this.statControllerRequestCollectionSizeLast = A1;
+    this.statControllerRequestCollectionDurLast = (System.currentTimeMillis() - A0);
   };
   private Runnable RequestHandlingLoop = () -> {
     try {
@@ -185,47 +158,13 @@ public class Controller {
   private int    statControllerClockReferenceHour;
   private int    statControllerClockReferenceMinute;
   private int    statControllerClockReferenceSecond;
-  private int    statControllerRequestCollectionCount = 0;
-  private int    statControllerRequestCollectionSizeTotal = 0;
   private int    statControllerRequestCollectionSizeLast = 0;
-  private int    statControllerRequestCollectionSizeMin = Integer.MAX_VALUE;
-  private int    statControllerRequestCollectionSizeMax = 0;
-  private double statControllerRequestCollectionSizeAvg = 0;
   private long   statControllerRequestCollectionDurLast = 0;
-  private long   statControllerRequestCollectionDurMin = Integer.MAX_VALUE;
-  private long   statControllerRequestCollectionDurMax = 0;
-  private long   statControllerRequestCollectionDurTotal = 0;
-  private double statControllerRequestCollectionDurAvg = 0;
-  private int    statQueryEdgeCount    = 0;
   private long   statQueryEdgeDurLast  = 0;
-  private long   statQueryEdgeDurTotal = 0;
-  private long   statQueryEdgeDurMin   = Integer.MAX_VALUE;
-  private long   statQueryEdgeDurMax   = 0;
-  private double statQueryEdgeDurAvg   = 0;
-  private int    statQueryServerRouteRemainingCount    = 0;
   private long   statQueryServerRouteRemainingDurLast  = 0;
-  private long   statQueryServerRouteRemainingDurTotal = 0;
-  private long   statQueryServerRouteRemainingDurMin   = Integer.MAX_VALUE;
-  private long   statQueryServerRouteRemainingDurMax   = 0;
-  private double statQueryServerRouteRemainingDurAvg   = 0;
-  private int    statQueryServersLocationsActiveCount    = 0;
   private long   statQueryServersLocationsActiveDurLast  = 0;
-  private long   statQueryServersLocationsActiveDurTotal = 0;
-  private long   statQueryServersLocationsActiveDurMin   = Integer.MAX_VALUE;
-  private long   statQueryServersLocationsActiveDurMax   = 0;
-  private double statQueryServersLocationsActiveDurAvg   = 0;
-  private int    statQueryUserCount    = 0;
   private long   statQueryUserDurLast  = 0;
-  private long   statQueryUserDurTotal = 0;
-  private long   statQueryUserDurMin   = Integer.MAX_VALUE;
-  private long   statQueryUserDurMax   = 0;
-  private double statQueryUserDurAvg   = 0;
-  private int    statQueryVertexCount    = 0;
   private long   statQueryVertexDurLast  = 0;
-  private long   statQueryVertexDurTotal = 0;
-  private long   statQueryVertexDurMin   = Integer.MAX_VALUE;
-  private long   statQueryVertexDurMax   = 0;
-  private double statQueryVertexDurAvg   = 0;
   public Controller() {
     this.storage = new Storage();
     this.communicator = new Communicator();
@@ -260,116 +199,23 @@ public class Controller {
   public int    getControllerRequestCollectionSizeLast() {
            return this.statControllerRequestCollectionSizeLast;
          }
-  public int    getControllerRequestCollectionSizeMin() {
-           return this.statControllerRequestCollectionSizeMin;
-         }
-  public int    getControllerRequestCollectionSizeMax() {
-           return this.statControllerRequestCollectionSizeMax;
-         }
-  public double getControllerRequestCollectionSizeAvg() {
-           return this.statControllerRequestCollectionSizeAvg;
-         }
   public long   getControllerRequestCollectionDurLast() {
            return this.statControllerRequestCollectionDurLast;
-         }
-  public long   getControllerRequestCollectionDurMin() {
-           return this.statControllerRequestCollectionDurMin;
-         }
-  public long   getControllerRequestCollectionDurMax() {
-           return this.statControllerRequestCollectionDurMax;
-         }
-  public double getControllerRequestCollectionDurAvg() {
-           return this.statControllerRequestCollectionDurAvg;
-         }
-  public int    getStatQueryEdgeCount() {
-           return this.statQueryEdgeCount;
          }
   public long   getStatQueryEdgeDurLast() {
            return this.statQueryEdgeDurLast;
          }
-  public long   getStatQueryEdgeDurTotal() {
-           return this.statQueryEdgeDurTotal;
-         }
-  public long   getStatQueryEdgeDurMin() {
-           return this.statQueryEdgeDurMin;
-         }
-  public long   getStatQueryEdgeDurMax() {
-           return this.statQueryEdgeDurMax;
-         }
-  public double getStatQueryEdgeDurAvg() {
-           return this.statQueryEdgeDurAvg;
-         }
-  public int    getStatQueryServerRouteRemainingCount() {
-           return this.statQueryServerRouteRemainingCount;
-         }
   public long   getStatQueryServerRouteRemainingDurLast() {
            return this.statQueryServerRouteRemainingDurLast;
-         }
-  public long   getStatQueryServerRouteRemainingDurTotal() {
-           return this.statQueryServerRouteRemainingDurTotal;
-         }
-  public long   getStatQueryServerRouteRemainingDurMin() {
-           return this.statQueryServerRouteRemainingDurMin;
-         }
-  public long   getStatQueryServerRouteRemainingDurMax() {
-           return this.statQueryServerRouteRemainingDurMax;
-         }
-  public double getStatQueryServerRouteRemainingDurAvg() {
-           return this.statQueryServerRouteRemainingDurAvg;
-         }
-  public int    getStatQueryServersLocationsActiveCount() {
-           return this.statQueryServersLocationsActiveCount;
          }
   public long   getStatQueryServersLocationsActiveDurLast() {
            return this.statQueryServersLocationsActiveDurLast;
          }
-  public long   getStatQueryServersLocationsActiveDurTotal() {
-           return this.statQueryServersLocationsActiveDurTotal;
-         }
-  public long   getStatQueryServersLocationsActiveDurMin() {
-           return this.statQueryServersLocationsActiveDurMin;
-         }
-  public long   getStatQueryServersLocationsActiveDurMax() {
-           return this.statQueryServersLocationsActiveDurMax;
-         }
-  public double getStatQueryServersLocationsActiveDurAvg() {
-           return this.statQueryServersLocationsActiveDurAvg;
-         }
-  public int    getStatQueryUserCount() {
-           return this.statQueryUserCount;
-         }
   public long   getStatQueryUserDurLast() {
            return this.statQueryUserDurLast;
          }
-  public long   getStatQueryUserDurTotal() {
-           return this.statQueryUserDurTotal;
-         }
-  public long   getStatQueryUserDurMin() {
-           return this.statQueryUserDurMin;
-         }
-  public long   getStatQueryUserDurMax() {
-           return this.statQueryUserDurMax;
-         }
-  public double getStatQueryUserDurAvg() {
-           return this.statQueryUserDurAvg;
-         }
-  public int    getStatQueryVertexCount() {
-           return this.statQueryVertexCount;
-         }
   public long   getStatQueryVertexDurLast() {
            return this.statQueryVertexDurLast;
-         }
-  public long   getStatQueryVertexDurTotal() {
-           return this.statQueryVertexDurTotal;
-         }
-  public long   getStatQueryVertexDurMin() {
-           return this.statQueryVertexDurMin;
-         }
-  public long   getStatQueryVertexDurMax() {
-           return this.statQueryVertexDurMax;
-         }
-  public double getStatQueryVertexDurAvg() {
-           return this.statQueryVertexDurAvg;
          }
   public int[] query(final String sql, final int ncols) throws SQLException {
            return this.storage.DBQuery(sql, ncols);
@@ -377,21 +223,7 @@ public class Controller {
   public int[] queryEdge(final int v1, final int v2) throws EdgeNotFoundException, SQLException {
            long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryEdge(v1, v2);
-               this.statQueryEdgeCount++;
-               this.statQueryEdgeDurLast = (System.currentTimeMillis() - A0);
-               this.statQueryEdgeDurTotal +=
-               this.statQueryEdgeDurLast;
-           if (this.statQueryEdgeDurLast <
-               this.statQueryEdgeDurMin) {
-               this.statQueryEdgeDurMin =
-               this.statQueryEdgeDurLast;}
-           if (this.statQueryEdgeDurLast >
-               this.statQueryEdgeDurMax) {
-               this.statQueryEdgeDurMax =
-               this.statQueryEdgeDurLast;}
-               this.statQueryEdgeDurAvg = (double)
-               this.statQueryEdgeDurTotal/
-               this.statQueryEdgeCount;
+           this.statQueryEdgeDurLast = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryEdgeStatistics() throws SQLException {
@@ -476,21 +308,7 @@ public class Controller {
   public int[] queryServerRouteRemaining(final int sid, final int t) throws SQLException {
            long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryServerRouteRemaining(sid, t);
-               this.statQueryServerRouteRemainingCount++;
-               this.statQueryServerRouteRemainingDurLast = (System.currentTimeMillis() - A0);
-               this.statQueryServerRouteRemainingDurTotal +=
-               this.statQueryServerRouteRemainingDurLast;
-           if (this.statQueryServerRouteRemainingDurLast <
-               this.statQueryServerRouteRemainingDurMin) {
-               this.statQueryServerRouteRemainingDurMin =
-               this.statQueryServerRouteRemainingDurLast;}
-           if (this.statQueryServerRouteRemainingDurLast >
-               this.statQueryServerRouteRemainingDurMax) {
-               this.statQueryServerRouteRemainingDurMax =
-               this.statQueryServerRouteRemainingDurLast;}
-               this.statQueryServerRouteRemainingDurAvg = (double)
-               this.statQueryServerRouteRemainingDurTotal/
-               this.statQueryServerRouteRemainingCount;
+           this.statQueryServerRouteRemainingDurLast = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryServerSchedule(final int sid) throws SQLException {
@@ -509,61 +327,19 @@ public class Controller {
   public int[] queryServersLocationsActive(final int t) throws SQLException {
            long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryServersLocationsActive(t);
-               this.statQueryServersLocationsActiveCount++;
-               this.statQueryServersLocationsActiveDurLast = (System.currentTimeMillis() - A0);
-               this.statQueryServersLocationsActiveDurTotal +=
-               this.statQueryServersLocationsActiveDurLast;
-           if (this.statQueryServersLocationsActiveDurLast <
-               this.statQueryServersLocationsActiveDurMin) {
-               this.statQueryServersLocationsActiveDurMin =
-               this.statQueryServersLocationsActiveDurLast;}
-           if (this.statQueryServersLocationsActiveDurLast >
-               this.statQueryServersLocationsActiveDurMax) {
-               this.statQueryServersLocationsActiveDurMax =
-               this.statQueryServersLocationsActiveDurLast;}
-               this.statQueryServersLocationsActiveDurAvg = (double)
-               this.statQueryServersLocationsActiveDurTotal/
-               this.statQueryServersLocationsActiveCount;
+           this.statQueryServersLocationsActiveDurLast = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryUser(final int rid) throws UserNotFoundException, SQLException {
            long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryUser(rid);
-               this.statQueryUserCount++;
-               this.statQueryUserDurLast = (System.currentTimeMillis() - A0);
-               this.statQueryUserDurTotal +=
-               this.statQueryUserDurLast;
-           if (this.statQueryUserDurLast <
-               this.statQueryUserDurMin) {
-               this.statQueryUserDurMin =
-               this.statQueryUserDurLast;}
-           if (this.statQueryUserDurLast >
-               this.statQueryUserDurMax) {
-               this.statQueryUserDurMax =
-               this.statQueryUserDurLast;}
-               this.statQueryUserDurAvg = (double)
-               this.statQueryUserDurTotal/
-               this.statQueryUserCount;
+           this.statQueryUserDurLast = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryVertex(final int v) throws VertexNotFoundException, SQLException {
            long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryVertex(v);
-               this.statQueryVertexCount++;
-               this.statQueryVertexDurLast = (System.currentTimeMillis() - A0);
-               this.statQueryVertexDurTotal +=
-               this.statQueryVertexDurLast;
-           if (this.statQueryVertexDurLast <
-               this.statQueryVertexDurMin) {
-               this.statQueryVertexDurMin =
-               this.statQueryVertexDurLast;}
-           if (this.statQueryVertexDurLast >
-               this.statQueryVertexDurMax) {
-               this.statQueryVertexDurMax =
-               this.statQueryVertexDurLast;}
-               this.statQueryVertexDurAvg = (double)
-               this.statQueryVertexDurTotal/
-               this.statQueryVertexCount;
+           this.statQueryVertexDurLast = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryVertices() throws SQLException {

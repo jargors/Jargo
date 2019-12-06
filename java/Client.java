@@ -15,12 +15,7 @@ public abstract class Client {
   protected Tools tools = new Tools();
   protected final boolean DEBUG =
       "true".equals(System.getProperty("jargors.client.debug"));
-  private int    statClientHandleRequestCount = 0;
   private long   statClientHandleRequestDurLast = 0;
-  private long   statClientHandleRequestDurMin = Integer.MAX_VALUE;
-  private long   statClientHandleRequestDurMax = 0;
-  private long   statClientHandleRequestDurTotal = 0;
-  private double statClientHandleRequestDurAvg = 0;
   public Client() {
     try {
       MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
@@ -38,15 +33,6 @@ public abstract class Client {
          }
   public long getClientHandleRequestDurLast() {
            return this.statClientHandleRequestDurLast;
-         }
-  public long getClientHandleRequestDurMin() {
-           return this.statClientHandleRequestDurMin;
-         }
-  public long getClientHandleRequestDurMax() {
-           return this.statClientHandleRequestDurMax;
-         }
-  public double getClientHandleRequestDurAvg() {
-           return this.statClientHandleRequestDurAvg;
          }
   public final void gtreeLoad(String p) throws FileNotFoundException {
                  this.tools.GTGtreeLoad(p);
@@ -76,21 +62,7 @@ public abstract class Client {
                  while (!this.queue.isEmpty()) {
                    long A0 = System.currentTimeMillis();
                    this.handleRequest(this.queue.remove());
-                       this.statClientHandleRequestCount++;
-                       this.statClientHandleRequestDurLast = (System.currentTimeMillis() - A0);
-                       this.statClientHandleRequestDurTotal +=
-                       this.statClientHandleRequestDurLast;
-                   if (this.statClientHandleRequestDurLast <
-                       this.statClientHandleRequestDurMin) {
-                       this.statClientHandleRequestDurMin =
-                       this.statClientHandleRequestDurLast;}
-                   if (this.statClientHandleRequestDurLast >
-                       this.statClientHandleRequestDurMax) {
-                       this.statClientHandleRequestDurMax =
-                       this.statClientHandleRequestDurLast;}
-                       this.statClientHandleRequestDurAvg = (double)
-                       this.statClientHandleRequestDurTotal/
-                       this.statClientHandleRequestCount;
+                   this.statClientHandleRequestDurLast = (System.currentTimeMillis() - A0);
                  }
                }
   protected void end() { }
