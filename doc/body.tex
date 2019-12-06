@@ -6871,6 +6871,7 @@ void JargoSetupDriver() throws SQLException, ClassNotFoundException \{
   poolableconnection_factory.setPoolStatements(true);
   poolableconnection_factory.setDefaultAutoCommit(false);
   poolableconnection_factory.setMaxOpenPreparedStatements(STATEMENTS_MAX_COUNT);
+  poolableconnection_factory.setDefaultTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
   GenericObjectPoolConfig<PoolableConnection> cfg = new GenericObjectPoolConfig<PoolableConnection>();
   cfg.setMinIdle(100000);
   cfg.setMaxIdle(100000);
@@ -10133,7 +10134,7 @@ void actionRoad(final ActionEvent e) \{
           if (this.gtree != null) \{
             this.btn_prob   .setDisable(false);
           \}
-          this.tf_client     .setDisable(false);
+          this.tf_client    .setDisable(false);
           this.tf_t0        .setDisable(false);
           this.tf_t1        .setDisable(false);
           this.tabpane      .setDisable(false);
@@ -10146,11 +10147,9 @@ void actionRoad(final ActionEvent e) \{
         \});
       \} catch (FileNotFoundException fe) \{
         System.err.println("Failed: "+fe.toString());
-        return;
       \} catch (SQLException se) \{
         System.err.println("SQL error:");
         Tools.PrintSQLException(se);
-        return;
       \}
     \});
   \}

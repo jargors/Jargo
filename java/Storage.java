@@ -1530,6 +1530,7 @@ public class Storage {
             poolableconnection_factory.setPoolStatements(true);
             poolableconnection_factory.setDefaultAutoCommit(false);
             poolableconnection_factory.setMaxOpenPreparedStatements(STATEMENTS_MAX_COUNT);
+            poolableconnection_factory.setDefaultTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             GenericObjectPoolConfig<PoolableConnection> cfg = new GenericObjectPoolConfig<PoolableConnection>();
             cfg.setMinIdle(100000);
             cfg.setMaxIdle(100000);
