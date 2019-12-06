@@ -47,6 +47,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
@@ -60,137 +62,143 @@ import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.transform.Rotate;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 public class DesktopController {
+  private final Color C_ERROR   = Color.RED;
+  private final Color C_SUCCESS = Color.GREEN;
+  private final Color C_WARN    = Color.YELLOW;
+  private final String TITLE_STRING = "Jargo Desktop";
   private final boolean DEBUG =
       "true".equals(System.getProperty("jargors.desktop.debug"));
-  private Stage stage;
-  private Canvas can_road;
-  private Canvas can_servers;
-  private Pane container_canvas_container;
-  private Label lbl_fps;
-  @FXML private Button btn_new;
-  @FXML private Button btn_load;
-  @FXML private Button btn_prob;
-  @FXML private Button btn_road;
-  @FXML private Button btn_gtree;
-  @FXML private Button btn_client;
-  @FXML private Button btn_traffic;
-  @FXML private Button btn_startseq;
-  @FXML private Button btn_startreal;
-  @FXML private Button btn_pause;
-  @FXML private Button btn_stop;
-  @FXML private TextField tf_client;
-  @FXML private TextField tf_traffic;
-  @FXML private TextField tf_t0;
-  @FXML private TextField tf_t1;
-  @FXML private Label lbl_status;
-  @FXML private Circle circ_status;
-  @FXML private ScrollPane container_canvas;
-  @FXML private AnchorPane container_lc_rates;
+  @FXML private AnchorPane container_lc_counts;
   @FXML private AnchorPane container_lc_distances;
   @FXML private AnchorPane container_lc_durations;
-  @FXML private AnchorPane container_lc_counts;
+  @FXML private AnchorPane container_lc_rates;
   @FXML private AnchorPane container_lc_times;
-  @FXML private VBox vbox_metrics_rates;
-  @FXML private VBox vbox_metrics_distances;
-  @FXML private VBox vbox_metrics_durations;
-  @FXML private VBox vbox_metrics_counts;
-  @FXML private VBox vbox_metrics_times;
-  @FXML private CheckBox chk_serviceRate;
-  @FXML private CheckBox chk_distanceSavings;
-  @FXML private CheckBox chk_serverTravelDistance;
-  @FXML private CheckBox chk_serverServiceDistance;
-  @FXML private CheckBox chk_serverCruisingDistance;
-  @FXML private CheckBox chk_serverTravelDuration;
-  @FXML private CheckBox chk_serverServiceDuration;
-  @FXML private CheckBox chk_serverCruisingDuration;
-  @FXML private CheckBox chk_requestDistanceUnassigned;
-  @FXML private CheckBox chk_requestTransitDistance;
-  @FXML private CheckBox chk_requestDetourDistance;
-  @FXML private CheckBox chk_requestTransitDuration;
-  @FXML private CheckBox chk_requestDetourDuration;
-  @FXML private CheckBox chk_requestTravelDuration;
-  @FXML private CheckBox chk_requestPickupDuration;
-  @FXML private CheckBox chk_countRequestsQueue;
+  @FXML private Button btn_client;
+  @FXML private Button btn_gtree;
+  @FXML private Button btn_load;
+  @FXML private Button btn_new;
+  @FXML private Button btn_pause;
+  @FXML private Button btn_prob;
+  @FXML private Button btn_road;
+  @FXML private Button btn_startreal;
+  @FXML private Button btn_startseq;
+  @FXML private Button btn_stop;
+  @FXML private Button btn_traffic;
   @FXML private CheckBox chk_countRequestsActive;
   @FXML private CheckBox chk_countRequestsCompleted;
   @FXML private CheckBox chk_countRequestsFailed;
-  @FXML private CheckBox chk_countServersActive;
+  @FXML private CheckBox chk_countRequestsQueue;
   @FXML private CheckBox chk_countRequestsViolations;
+  @FXML private CheckBox chk_countServersActive;
   @FXML private CheckBox chk_countServersViolations;
+  @FXML private CheckBox chk_distanceSavings;
+  @FXML private CheckBox chk_requestDetourDistance;
+  @FXML private CheckBox chk_requestDetourDuration;
+  @FXML private CheckBox chk_requestDistanceUnassigned;
+  @FXML private CheckBox chk_requestPickupDuration;
+  @FXML private CheckBox chk_requestTransitDistance;
+  @FXML private CheckBox chk_requestTransitDuration;
+  @FXML private CheckBox chk_requestTravelDuration;
+  @FXML private CheckBox chk_serverCruisingDistance;
+  @FXML private CheckBox chk_serverCruisingDuration;
+  @FXML private CheckBox chk_serverServiceDistance;
+  @FXML private CheckBox chk_serverServiceDuration;
+  @FXML private CheckBox chk_serverTravelDistance;
+  @FXML private CheckBox chk_serverTravelDuration;
+  @FXML private CheckBox chk_serviceRate;
   @FXML private CheckBox chk_timeRequestHandling;
   @FXML private CheckBox chk_timeServerHandling;
-  private final Color C_SUCCESS = Color.GREEN;
-  private final Color C_WARN = Color.YELLOW;
-  private final Color C_ERROR = Color.RED;
-  private final String TITLE_STRING = "Jargo Desktop";
-  private Controller controller = null;
+  @FXML private Circle circ_status;
+  @FXML private Label lbl_status;
+  @FXML private ScrollPane container_canvas;
+  @FXML private Tab tab_map;
+  @FXML private Tab tab_metrics;
+  @FXML private TabPane tabpane;
+  @FXML private TextField tf_client;
+  @FXML private TextField tf_t0;
+  @FXML private TextField tf_t1;
+  @FXML private TextField tf_traffic;
+  @FXML private VBox vbox_metrics_counts;
+  @FXML private VBox vbox_metrics_distances;
+  @FXML private VBox vbox_metrics_durations;
+  @FXML private VBox vbox_metrics_rates;
+  @FXML private VBox vbox_metrics_times;
+  private Canvas can_road;
+  private Canvas can_servers;
   private Client client = null;
-  private Traffic traffic = null;
+  private Controller controller = null;
+  private Label lbl_fps;
+  private Pane container_canvas_container;
+  private Stage stage;
+  private String clientclass = null;
+  private String clientjar = null;
   private String db = null;
   private String gtree = null;
   private String prob = null;
   private String road = null;
-  private String clientjar = null;
-  private String clientclass = null;
-  private String trafficjar = null;
   private String trafficclass = null;
+  private String trafficjar = null;
+  private Traffic traffic = null;
+  private FetcherOfMapUnits muf = null;
   private GraphicsContext gc = null;
-  private MapUnitsFetcher muf = null;
+  private Map<String, ScheduledFuture<?>> cbFetcherOfMetrics = null;
+  private RendererOfRoads ren_road = null;
+  private RendererOfServers ren_servers = null;
+  private ScheduledExecutorService exe = null;
+  private ScheduledFuture<?> cbFetcherOfLocations = null;
+  private ScheduledFuture<?> cbSimulation = null;
+  private double unit = 0;
   private double window_height = 0;
   private double window_width = 0;
-  private double mouse_x = 0;
-  private double mouse_y = 0;
-  private int[] edges = null;
-  private int[] mbr = null;
   private double xunit = 0;
   private double yunit = 0;
-  private double unit = 0;
   private int t0 = 0;
   private int t1 = 0;
   private int zoom = 1;
-  private ServersRenderer ren_servers = null;
-  private RoadRenderer ren_road = null;
-  private ScheduledExecutorService exe = null;
-  private ScheduledFuture<?> cbSimRunner = null;
-  private ScheduledFuture<?> cbServerLocationsFetcher = null;
-  private Map<String, ScheduledFuture<?>> cbMetricFetcher = new HashMap<String, ScheduledFuture<?>>();
-  private boolean isRealtime = false;
-  private class ServersRenderer extends AnimationTimer {
-    private long now = 0;
-    private long prev = 0;
-    private int framecount = 0;
-    private Image server_img = null;
-    private int SERVER_WIDTH = 3;
-    private Color SERVER_FILL = Color.web("0x555555");
+  private int[] edges = null;
+  private int[] mbr = null;
+  private class RendererOfServers extends AnimationTimer {
+    private final Color BG = Color.web("0xD7FFFF");
+    private final Color SERVER_FILL = Color.web("0x555555");
+    private final int SERVER_WIDTH = 5;
+    private final int SERVER_HEIGHT = 3;
+    private Canvas canvas = null;
+    private ConcurrentHashMap<Integer, Integer>  bufidx =
+        new ConcurrentHashMap<Integer, Integer>();
+    private ConcurrentHashMap<Integer, double[]> buffer =
+        new ConcurrentHashMap<Integer, double[]>();
+    private FetcherOfMapUnits muf = null;
     private GraphicsContext gc = null;
-    private Canvas can_servers = null;
-    private ConcurrentHashMap<Integer, double[]> buffer = new ConcurrentHashMap<Integer, double[]>();
-    private ConcurrentHashMap<Integer, Integer> bufidx = new ConcurrentHashMap<Integer, Integer>();
+    private Image image = null;
     private Label lbl_fps = null;
     private boolean isRealtime = false;
+    private int framecount = 0;
     private int zoom = 1;
-    public ServersRenderer(
-        final GraphicsContext gc,
-        final Label lbl_fps,
-        final boolean isRealtime) {
+    private long now = 0;
+    private long prev = 0;
+    public RendererOfServers(
+        final GraphicsContext gc, final Label lbl_fps, final boolean isRealtime,
+        final FetcherOfMapUnits muf) {
       super();
+      this.canvas = gc.getCanvas();
       this.gc = gc;
-      this.can_servers = gc.getCanvas();
-      this.lbl_fps = lbl_fps;
       this.isRealtime = isRealtime;
+      this.lbl_fps = lbl_fps;
+      this.muf = muf;
       this.setZoom(1);
     }
     public void setZoom(final int zoom) {
       this.zoom = zoom;
-      Rectangle rect = new Rectangle(this.SERVER_WIDTH*zoom, this.SERVER_WIDTH*zoom);
-      rect.setFill(this.SERVER_FILL);
-      WritableImage wi = new WritableImage(this.SERVER_WIDTH*zoom, this.SERVER_WIDTH*zoom);
+      Rectangle shape = new Rectangle(this.SERVER_WIDTH*zoom, this.SERVER_HEIGHT*zoom);
+      shape.setFill(this.SERVER_FILL);
+      WritableImage wi = new WritableImage(this.SERVER_WIDTH*zoom, this.SERVER_HEIGHT*zoom);
       SnapshotParameters parameters = new SnapshotParameters();
-      rect.snapshot(parameters, wi);
-      this.server_img = wi;
+      shape.snapshot(parameters, wi);
+      this.image = wi;
     }
     public void fillBuffer(final int sid, final double[] buffer) {
       if (!this.bufidx.containsKey(sid)) {
@@ -212,6 +220,9 @@ public class DesktopController {
       ref[(i + 2)] = buffer[8];
     }
     public void handle(final long now) {
+      if (!this.muf.getMapVisible()) {
+        return;
+      }
       this.now = now;
       // Count FPS
       if (now - prev > 1_000_000_000) {
@@ -222,7 +233,7 @@ public class DesktopController {
         framecount++;
       }
       // Draw servers
-      this.gc.clearRect(0, 0, this.can_servers.getWidth(), this.can_servers.getHeight());
+      this.gc.clearRect(0, 0, this.canvas.getWidth(), this.canvas.getHeight());
       for (final Map.Entry<Integer, Integer> kv : this.bufidx.entrySet()) {
         final int sid = kv.getKey();
         final int i = kv.getValue();
@@ -236,29 +247,39 @@ public class DesktopController {
         final double t2 = buffer[((i + 3) % 9)];
         final double x2 = buffer[((i + 4) % 9)];
         final double y2 = buffer[((i + 5) % 9)];
+        double x = 0;
+        double y = 0;
         if (this.isRealtime) {
           double delta = ((double) (now - t1)/(t2 - t1));
           if (delta >= 1) {
             this.bufidx.put(sid, (i + 3) % 9);
             delta = 1;
           }
-          final double x = (x1 + delta*(x2 - x1)) - (float) SERVER_WIDTH*this.zoom/2;
-          final double y = (y1 + delta*(y2 - y1)) - (float) SERVER_WIDTH*this.zoom/2;
-          this.gc.drawImage(this.server_img, x, y);
+          // x = (x1 + delta*(x2 - x1)) - (float) SERVER_WIDTH*this.zoom/2;
+          // y = (y1 + delta*(y2 - y1)) - (float) SERVER_HEIGHT*this.zoom/2;
+          x = this.muf.getUnit()*(x1 + delta*(x2 - x1));
+          y = this.muf.getUnit()*(y1 + delta*(y2 - y1));
         } else {
-          final double x = x1 - (float) SERVER_WIDTH*this.zoom/2;
-          final double y = y1 - (float) SERVER_WIDTH*this.zoom/2;
-          this.gc.drawImage(this.server_img, x, y);
+          // x = x1 - (float) SERVER_WIDTH*this.zoom/2;
+          // y = y1 - (float) SERVER_HEIGHT*this.zoom/2;
+          x = this.muf.getUnit()*x1;
+          y = this.muf.getUnit()*y1;
         }
+        this.gc.save();
+        double angle = Math.toDegrees(Math.atan2((y2 - y1), (x2 - x1)));
+        Rotate r = new Rotate(angle, x, y);
+        this.gc.setTransform(r.getMxx(), r.getMyx(), r.getMxy(), r.getMyy(), r.getTx(), r.getTy());
+        this.gc.drawImage(this.image, x, y);
+        this.gc.restore();
       }
     }
   }
-  private class RoadRenderer extends AnimationTimer {
+  private class RendererOfRoads extends AnimationTimer {
     private long prev = 0;
     private GraphicsContext gc = null;
     private Canvas can_road = null;
     private Controller controller = null;
-    private MapUnitsFetcher muf = null;
+    private FetcherOfMapUnits muf = null;
     private Traffic traffic = null;
     private int[] edges = null;
     private final Color DEFAULT = Color.BLUE;
@@ -268,10 +289,10 @@ public class DesktopController {
     private final Color FAST = Color.web("0x5FD870");
     private final double LINEWIDTH = 0.3;
     private final long PERIOD = 10000_000_000L;  // 10 seconds
-    public RoadRenderer(
+    public RendererOfRoads(
         final GraphicsContext gc,
         final Controller controller,
-        final MapUnitsFetcher muf) {
+        final FetcherOfMapUnits muf) {
       super();
       this.gc = gc;
       this.can_road = gc.getCanvas();
@@ -293,6 +314,9 @@ public class DesktopController {
       this.prev = 0;
     }
     public void handle(long now) {
+      if (!this.muf.getMapVisible()) {
+        return;
+      }
       if ((now - this.prev) > PERIOD) {
         this.prev = now;
         // It is WAY faster to loop through and draw all the edges inside
@@ -330,7 +354,7 @@ public class DesktopController {
             } catch (VertexNotFoundException ve) {
               System.err.println("Warning: "+ve.toString());
             } catch (SQLException se) {
-              System.err.println("Warning: ServerLocationsFetcher failed to get locations");
+              System.err.println("Warning: FetcherOfLocations failed to get locations");
               System.err.println(se.toString());
               se.printStackTrace();
             } catch (Exception ee) {
@@ -341,11 +365,12 @@ public class DesktopController {
       }
     }
   }
-  private class MapUnitsFetcher {
+  private class FetcherOfMapUnits {
     private double unit = 0;
     private int lng_min = 0;
     private int lat_min = 0;
-    public MapUnitsFetcher() { }
+    private boolean mapVisible = true;
+    public FetcherOfMapUnits() { }
     public double getUnit() {
       return this.unit;
     }
@@ -355,33 +380,43 @@ public class DesktopController {
     public int getLatMin() {
       return this.lat_min;
     }
-    public void setUnit(double unit) {
+    public boolean getMapVisible() {
+      return this.mapVisible;
+    }
+    public void setUnit(final double unit) {
       this.unit = unit;
     }
-    public void setLngMin(int lng_min) {
+    public void setLngMin(final int lng_min) {
       this.lng_min = lng_min;
     }
-    public void setLatMin(int lat_min) {
+    public void setLatMin(final int lat_min) {
       this.lat_min = lat_min;
     }
+    public void setMapVisible(final boolean flag) {
+      System.out.println("Set mapVisible="+flag);
+      this.mapVisible = flag;
+    }
   }
-  private class ServerLocationsFetcher implements Runnable {
+  private class FetcherOfLocations implements Runnable {
     private Controller controller = null;
     private Label lbl_status = null;
-    private MapUnitsFetcher muf = null;
+    private FetcherOfMapUnits muf = null;
     private Map<Integer, double[]> buffer = new HashMap<Integer, double[]>();
-    private ServersRenderer renderer = null;
-    public ServerLocationsFetcher(
+    private RendererOfServers renderer = null;
+    public FetcherOfLocations(
         final Controller controller,
         final Label lbl_status,
-        final MapUnitsFetcher muf,
-        final ServersRenderer renderer) {
+        final FetcherOfMapUnits muf,
+        final RendererOfServers renderer) {
       this.controller = controller;
       this.lbl_status = lbl_status;
       this.muf = muf;
       this.renderer = renderer;
     }
     public void run() {
+      if (!this.muf.getMapVisible()) {
+        return;
+      }
       final int t = this.controller.getClockNow();
       try {
         int[] active = this.controller.queryServersActive(t);
@@ -397,14 +432,14 @@ public class DesktopController {
               final int t3 = route[4];
               final int v3 = route[5];
               int[] coordinates = this.controller.queryVertex(v1);
-              final double x1 = this.muf.getUnit()*(coordinates[0] - this.muf.getLngMin());
-              final double y1 = this.muf.getUnit()*(coordinates[1] - this.muf.getLatMin());
+              final double x1 = (coordinates[0] - this.muf.getLngMin());
+              final double y1 = (coordinates[1] - this.muf.getLatMin());
               coordinates = this.controller.queryVertex(v2);
-              final double x2 = this.muf.getUnit()*(coordinates[0] - this.muf.getLngMin());
-              final double y2 = this.muf.getUnit()*(coordinates[1] - this.muf.getLatMin());
+              final double x2 = (coordinates[0] - this.muf.getLngMin());
+              final double y2 = (coordinates[1] - this.muf.getLatMin());
               coordinates = this.controller.queryVertex(v3);
-              final double x3 = this.muf.getUnit()*(coordinates[0] - this.muf.getLngMin());
-              final double y3 = this.muf.getUnit()*(coordinates[1] - this.muf.getLatMin());
+              final double x3 = (coordinates[0] - this.muf.getLngMin());
+              final double y3 = (coordinates[1] - this.muf.getLatMin());
               double[] newbuf = new double[] { t1, x1, y1, t2, x2, y2, t3, x3, y3 };
               this.buffer.put(sid, newbuf);
               this.renderer.fillBuffer(sid, newbuf);
@@ -412,11 +447,11 @@ public class DesktopController {
           }
         }
       } catch (SQLException se) {
-        System.err.println("Warning: ServerLocationsFetcher failed to get locations");
+        System.err.println("Warning: FetcherOfLocations failed to get locations");
         System.err.println(se.toString());
         se.printStackTrace();
       } catch (VertexNotFoundException ve) {
-        System.err.println("Warning: ServerLocationsFetcher got unknown location!");
+        System.err.println("Warning: FetcherOfLocations got unknown location!");
         System.err.println(ve.toString());
         ve.printStackTrace();
       } catch (Exception ee) {
@@ -427,12 +462,12 @@ public class DesktopController {
       });
     };
   }
-  private class MetricFetcher implements Runnable {
+  private class FetcherOfMetrics implements Runnable {
     private Controller controller = null;
     private ConcurrentHashMap<String, Series<Number, Number>> series = null;
     private String id = "";
     private long A0 = 0;
-    public MetricFetcher(
+    public FetcherOfMetrics(
         final Controller controller,
         final ConcurrentHashMap<String, Series<Number, Number>> series,
         final String id) {
@@ -819,11 +854,6 @@ public class DesktopController {
   public void actionQuit(final ActionEvent e) {
            System.exit(0);
          }
-  public void actionRecordMousePress(MouseEvent e) {
-           // this.mouse_x = e.getX();
-           // this.mouse_y = e.getY();
-           // e.consume();
-         }
   public void actionRoad(final ActionEvent e) {
            boolean state_btn_gtree = this.btn_gtree.isDisabled();
            this.btn_road     .setDisable(true);
@@ -858,7 +888,7 @@ public class DesktopController {
                    this.circ_status  .setFill(C_SUCCESS);
                    this.lbl_status   .setText("Loaded "+road.getName()+" (#vertices="+nv+"; #edges="+ne+")");
                    this.initializeCanvas();
-                   this.ren_road = new RoadRenderer(this.can_road.getGraphicsContext2D(), this.controller, this.muf);
+                   this.ren_road = new RendererOfRoads(this.can_road.getGraphicsContext2D(), this.controller, this.muf);
                    this.ren_road.start();
                  });
                } catch (FileNotFoundException fe) {
@@ -873,7 +903,6 @@ public class DesktopController {
            }
          }
   public void actionStartRealtime(final ActionEvent e) {
-           this.isRealtime = true;
            this.clientclass = this.tf_client.getText();
            if ("".equals(this.clientclass)) {
              System.err.println("Class empty!");
@@ -1036,12 +1065,12 @@ public class DesktopController {
            this.vbox_metrics_durations.setDisable(false);
            this.vbox_metrics_counts.setDisable(false);
            this.vbox_metrics_times.setDisable(false);
-           this.ren_servers = new ServersRenderer(this.can_servers.getGraphicsContext2D(), this.lbl_fps, this.isRealtime);
+           this.ren_servers = new RendererOfServers(this.can_servers.getGraphicsContext2D(), this.lbl_fps, true, this.muf);
            this.ren_servers.start();
            this.circ_status  .setFill(C_SUCCESS);
            this.lbl_status   .setText("Simulation started.");
            this.exe = Executors.newScheduledThreadPool(2);
-           this.cbSimRunner = this.exe.schedule(() -> {
+           this.cbSimulation = this.exe.schedule(() -> {
              try {
                this.controller.startRealtime((status) -> {
                  Platform.runLater(() -> {
@@ -1054,12 +1083,11 @@ public class DesktopController {
                System.exit(1);
              }
            }, 0, TimeUnit.SECONDS);
-           this.cbServerLocationsFetcher = this.exe.scheduleAtFixedRate(
-               new ServerLocationsFetcher(
+           this.cbFetcherOfLocations = this.exe.scheduleAtFixedRate(
+               new FetcherOfLocations(
                  this.controller, this.lbl_status, this.muf, this.ren_servers), 0, 1, TimeUnit.SECONDS);
          }
   public void actionStartSequential(final ActionEvent e) {
-           this.isRealtime = false;
            this.clientclass = this.tf_client.getText();
            if ("".equals(this.clientclass)) {
              System.err.println("Class empty!");
@@ -1222,12 +1250,12 @@ public class DesktopController {
            this.vbox_metrics_durations.setDisable(false);
            this.vbox_metrics_counts.setDisable(false);
            this.vbox_metrics_times.setDisable(false);
-           this.ren_servers = new ServersRenderer(this.can_servers.getGraphicsContext2D(), this.lbl_fps, this.isRealtime);
+           this.ren_servers = new RendererOfServers(this.can_servers.getGraphicsContext2D(), this.lbl_fps, false, this.muf);
            this.ren_servers.start();
            this.circ_status  .setFill(C_SUCCESS);
            this.lbl_status   .setText("Simulation started.");
            this.exe = Executors.newScheduledThreadPool(2);
-           this.cbSimRunner = this.exe.schedule(() -> {
+           this.cbSimulation = this.exe.schedule(() -> {
              try {
                this.controller.startSequential((status) -> {
                  Platform.runLater(() -> {
@@ -1240,8 +1268,8 @@ public class DesktopController {
                System.exit(1);
              }
            }, 0, TimeUnit.SECONDS);
-           this.cbServerLocationsFetcher = this.exe.scheduleAtFixedRate(
-               new ServerLocationsFetcher(
+           this.cbFetcherOfLocations = this.exe.scheduleAtFixedRate(
+               new FetcherOfLocations(
                  this.controller, this.lbl_status, this.muf, this.ren_servers), 0, 1, TimeUnit.SECONDS);
          }
   public void actionStop(final ActionEvent e) {
@@ -1374,13 +1402,6 @@ public class DesktopController {
              this.lbl_status   .setText("Loaded "+cj.getName());
            }
          }
-  public void actionTranslateCanvas(MouseEvent e) {
-           // this.can_road.setTranslateX(this.can_road.getTranslateX() + e.getX() - this.mouse_x);
-           // this.can_road.setTranslateY(this.can_road.getTranslateY() + e.getY() - this.mouse_y);
-           // this.can_servers.setTranslateX(this.can_servers.getTranslateX() + e.getX() - this.mouse_x);
-           // this.can_servers.setTranslateY(this.can_servers.getTranslateY() + e.getY() - this.mouse_y);
-           // e.consume();
-         }
   public void actionZoomCanvas(ScrollEvent e) {
            if (e.getDeltaY() > 0) {
              this.zoom += 1;
@@ -1424,16 +1445,16 @@ public class DesktopController {
              System.err.printf("Toggle CheckBox(id=%s)\n", id);
            }
            if (source.isSelected()) {
-             this.cbMetricFetcher.put(id, this.exe.scheduleAtFixedRate(
-                 new MetricFetcher(this.controller, this.lu_series.get(id), id), 0, 1, TimeUnit.SECONDS));
+             this.cbFetcherOfMetrics.put(id, this.exe.scheduleAtFixedRate(
+                 new FetcherOfMetrics(this.controller, this.lu_series.get(id), id), 0, 1, TimeUnit.SECONDS));
              if (DEBUG) {
-               System.err.printf("Schedule MetricFetcher(%s)\n", id);
+               System.err.printf("Schedule FetcherOfMetrics(%s)\n", id);
              }
            } else {
              if (DEBUG) {
-               System.err.printf("Cancel MetricFetcher(%s)", id);
+               System.err.printf("Cancel FetcherOfMetrics(%s)", id);
              }
-             this.cbMetricFetcher.get(id).cancel(true);
+             this.cbFetcherOfMetrics.get(id).cancel(true);
            }
          }
   private void initializeCanvas() {
@@ -1447,7 +1468,7 @@ public class DesktopController {
               this.yunit = this.can_road.getHeight()/(double) (this.mbr[3] - this.mbr[2]);
               this.unit  = Math.min(this.xunit, this.yunit);
               // Set map units
-              this.muf = new MapUnitsFetcher();
+              this.muf = new FetcherOfMapUnits();
               this.muf.setUnit(this.unit);
               this.muf.setLngMin(this.mbr[0]);
               this.muf.setLatMin(this.mbr[2]);
@@ -1456,8 +1477,6 @@ public class DesktopController {
               this.container_canvas.setContent(this.container_canvas_container);
               // Register mouse event handlers
               // (can_servers is on top so it will trap all mouse events)
-              // this.can_servers.setOnMousePressed((e) -> { actionRecordMousePress(e); });
-              // this.can_servers.setOnMouseDragged((e) -> { actionTranslateCanvas(e); });
               this.can_servers.setOnScroll((e) -> { actionZoomCanvas(e); });
             } catch (SQLException se) {
               System.err.println("Failed with SQLException");
@@ -1465,5 +1484,11 @@ public class DesktopController {
               return;
             }
           }
-  public void initialize() { }
+  public void initialize() {
+    this.tabpane.getSelectionModel().selectedIndexProperty().addListener(
+        (ov, oldTab, newTab) -> {
+      this.muf.setMapVisible((newTab.intValue() == 0 ? true : false));
+    });
+    this.cbFetcherOfMetrics = new HashMap<String, ScheduledFuture<?>>();
+  }
 }

@@ -70,164 +70,176 @@
             <Button fx:id="btn_stop" layoutX="945.0" layoutY="11.0" mnemonicParsing="false" onAction="#actionStop" text="Stop &amp; Reset" />
          </items>
       </ToolBar>
-      <SplitPane dividerPositions="0.5, 0.5" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" VBox.vgrow="ALWAYS">
-        <items>
-            <ScrollPane fx:id="container_canvas" hbarPolicy="ALWAYS" prefHeight="200.0" prefWidth="200.0" vbarPolicy="ALWAYS" pannable="true" />
-            <TabPane minHeight="40.0" prefHeight="100.0" tabClosingPolicy="UNAVAILABLE">
-              <tabs>
-                <Tab text="Rates">
-                  <content>
-                        <HBox>
-                           <children>
-                              <ScrollPane hbarPolicy="NEVER" prefHeight="324.0" prefWidth="294.0" vbarPolicy="ALWAYS" HBox.hgrow="NEVER">
+      <TabPane fx:id="tabpane" VBox.vgrow="ALWAYS">
+         <tabs>
+            <Tab fx:id="tab_map" closable="false" text="Live Map">
+               <content>
+                  <ScrollPane fx:id="container_canvas" hbarPolicy="ALWAYS" pannable="true" prefHeight="200.0" prefWidth="200.0" vbarPolicy="ALWAYS" />
+               </content>
+            </Tab>
+            <Tab fx:id="tab_metrics" closable="false" text="Metrics">
+               <content>
+                  <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+                     <items>
+                        <TabPane minHeight="40.0" prefHeight="100.0" tabClosingPolicy="UNAVAILABLE">
+                           <tabs>
+                              <Tab text="Rates">
                                  <content>
-                                    <VBox fx:id="vbox_metrics_rates" disable="true" prefHeight="200.0" prefWidth="100.0" spacing="12.0">
+                                    <HBox>
                                        <children>
-                                          <CheckBox fx:id="chk_serviceRate" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="172.0" text="Overall Service Rate" />
-                                          <CheckBox fx:id="chk_distanceSavings" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="151.0" text="Distance Savings" />
+                                          <ScrollPane hbarPolicy="NEVER" prefHeight="324.0" prefWidth="294.0" vbarPolicy="ALWAYS" HBox.hgrow="NEVER">
+                                             <content>
+                                                <VBox fx:id="vbox_metrics_rates" disable="true" prefHeight="200.0" prefWidth="100.0" spacing="12.0">
+                                                   <children>
+                                                      <CheckBox fx:id="chk_serviceRate" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="172.0" text="Overall Service Rate" />
+                                                      <CheckBox fx:id="chk_distanceSavings" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="151.0" text="Distance Savings" />
+                                                   </children>
+                                                   <padding>
+                                                      <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+                                                   </padding>
+                                                </VBox>
+                                             </content>
+                                          </ScrollPane>
+                                          <AnchorPane fx:id="container_lc_rates" minHeight="0.0" minWidth="0.0" HBox.hgrow="ALWAYS" />
                                        </children>
-                                       <padding>
-                                          <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
-                                       </padding>
-                                    </VBox>
+                                    </HBox>
                                  </content>
-                              </ScrollPane>
-                          <AnchorPane fx:id="container_lc_rates" minHeight="0.0" minWidth="0.0" HBox.hgrow="ALWAYS" />
-                           </children>
-                        </HBox>
-                  </content>
-                </Tab>
-                <Tab text="Distances">
-                     <content>
-                        <HBox>
-                           <children>
-                              <ScrollPane hbarPolicy="NEVER" prefHeight="324.0" prefWidth="294.0" vbarPolicy="ALWAYS" HBox.hgrow="NEVER">
+                              </Tab>
+                              <Tab text="Distances">
                                  <content>
-                                    <VBox fx:id="vbox_metrics_distances" disable="true" prefHeight="200.0" prefWidth="100.0" spacing="12.0">
+                                    <HBox>
                                        <children>
-                                          <CheckBox fx:id="chk_serverTravelDistance" layoutX="22.0" layoutY="22.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="182.0" text="Server Travel Distance" />
-                                          <CheckBox fx:id="chk_serverServiceDistance" layoutX="22.0" layoutY="52.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="182.0" text="Server Service Distance" />
-                                          <CheckBox fx:id="chk_serverCruisingDistance" layoutX="22.0" layoutY="82.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="207.0" text="Server Cruising Distance" />
-                                          <CheckBox fx:id="chk_requestDistanceUnassigned" layoutX="22.0" layoutY="202.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="253.0" text="Request Distance of Unassigned" />
-                                          <CheckBox fx:id="chk_requestTransitDistance" layoutX="22.0" layoutY="262.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="253.0" text="Request Transit Distance" />
-                                          <CheckBox fx:id="chk_requestDetourDistance" layoutX="22.0" layoutY="232.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="253.0" text="Request Detour Distance" />
+                                          <ScrollPane hbarPolicy="NEVER" prefHeight="324.0" prefWidth="294.0" vbarPolicy="ALWAYS" HBox.hgrow="NEVER">
+                                             <content>
+                                                <VBox fx:id="vbox_metrics_distances" disable="true" prefHeight="200.0" prefWidth="100.0" spacing="12.0">
+                                                   <children>
+                                                      <CheckBox fx:id="chk_serverTravelDistance" layoutX="22.0" layoutY="22.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="182.0" text="Server Travel Distance" />
+                                                      <CheckBox fx:id="chk_serverServiceDistance" layoutX="22.0" layoutY="52.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="182.0" text="Server Service Distance" />
+                                                      <CheckBox fx:id="chk_serverCruisingDistance" layoutX="22.0" layoutY="82.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="207.0" text="Server Cruising Distance" />
+                                                      <CheckBox fx:id="chk_requestDistanceUnassigned" layoutX="22.0" layoutY="202.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="253.0" text="Request Distance of Unassigned" />
+                                                      <CheckBox fx:id="chk_requestTransitDistance" layoutX="22.0" layoutY="262.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="253.0" text="Request Transit Distance" />
+                                                      <CheckBox fx:id="chk_requestDetourDistance" layoutX="22.0" layoutY="232.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="253.0" text="Request Detour Distance" />
+                                                   </children>
+                                                   <padding>
+                                                      <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+                                                   </padding>
+                                                </VBox>
+                                             </content>
+                                          </ScrollPane>
+                                          <AnchorPane fx:id="container_lc_distances" minHeight="0.0" minWidth="0.0" HBox.hgrow="ALWAYS" />
                                        </children>
-                                       <padding>
-                                          <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
-                                       </padding>
-                                    </VBox>
+                                    </HBox>
                                  </content>
-                              </ScrollPane>
-                              <AnchorPane fx:id="container_lc_distances" minHeight="0.0" minWidth="0.0" HBox.hgrow="ALWAYS" />
-                           </children>
-                        </HBox>
-                     </content>
-                </Tab>
-                  <Tab text="Durations">
-                     <content>
-                        <HBox>
-                           <children>
-                              <ScrollPane hbarPolicy="NEVER" prefHeight="324.0" prefWidth="294.0" vbarPolicy="ALWAYS" HBox.hgrow="NEVER">
+                              </Tab>
+                              <Tab text="Durations">
                                  <content>
-                                    <VBox fx:id="vbox_metrics_durations" disable="true" prefHeight="200.0" prefWidth="100.0" spacing="12.0">
+                                    <HBox>
                                        <children>
-                                          <CheckBox fx:id="chk_serverTravelDuration" layoutX="22.0" layoutY="112.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="207.0" text="Server Travel Duration" />
-                                          <CheckBox fx:id="chk_serverServiceDuration" layoutX="22.0" layoutY="142.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="207.0" text="Server Service Duration" />
-                                          <CheckBox fx:id="chk_serverCruisingDuration" layoutX="22.0" layoutY="172.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="207.0" text="Server Cruising Duration" />
-                                          <CheckBox fx:id="chk_requestTransitDuration" layoutX="22.0" layoutY="292.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="253.0" text="Request Transit Duration" />
-                                          <CheckBox fx:id="chk_requestDetourDuration" layoutX="22.0" layoutY="322.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="253.0" text="Request Detour Duration" />
-                                          <CheckBox fx:id="chk_requestTravelDuration" layoutX="22.0" layoutY="352.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="253.0" text="Request Travel Duration" />
-                                          <CheckBox fx:id="chk_requestPickupDuration" layoutX="22.0" layoutY="382.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="253.0" text="Request Pickup Duration" />
+                                          <ScrollPane hbarPolicy="NEVER" prefHeight="324.0" prefWidth="294.0" vbarPolicy="ALWAYS" HBox.hgrow="NEVER">
+                                             <content>
+                                                <VBox fx:id="vbox_metrics_durations" disable="true" prefHeight="200.0" prefWidth="100.0" spacing="12.0">
+                                                   <children>
+                                                      <CheckBox fx:id="chk_serverTravelDuration" layoutX="22.0" layoutY="112.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="207.0" text="Server Travel Duration" />
+                                                      <CheckBox fx:id="chk_serverServiceDuration" layoutX="22.0" layoutY="142.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="207.0" text="Server Service Duration" />
+                                                      <CheckBox fx:id="chk_serverCruisingDuration" layoutX="22.0" layoutY="172.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="207.0" text="Server Cruising Duration" />
+                                                      <CheckBox fx:id="chk_requestTransitDuration" layoutX="22.0" layoutY="292.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="253.0" text="Request Transit Duration" />
+                                                      <CheckBox fx:id="chk_requestDetourDuration" layoutX="22.0" layoutY="322.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="253.0" text="Request Detour Duration" />
+                                                      <CheckBox fx:id="chk_requestTravelDuration" layoutX="22.0" layoutY="352.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="253.0" text="Request Travel Duration" />
+                                                      <CheckBox fx:id="chk_requestPickupDuration" layoutX="22.0" layoutY="382.0" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="253.0" text="Request Pickup Duration" />
+                                                   </children>
+                                                   <padding>
+                                                      <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+                                                   </padding>
+                                                </VBox>
+                                             </content>
+                                          </ScrollPane>
+                                          <AnchorPane fx:id="container_lc_durations" minHeight="0.0" minWidth="0.0" HBox.hgrow="ALWAYS" />
                                        </children>
-                                       <padding>
-                                          <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
-                                       </padding>
-                                    </VBox>
+                                    </HBox>
                                  </content>
-                              </ScrollPane>
-                              <AnchorPane fx:id="container_lc_durations" minHeight="0.0" minWidth="0.0" HBox.hgrow="ALWAYS" />
-                           </children>
-                        </HBox>
-                     </content>
-                  </Tab>
-                  <Tab text="Custom Queries...">
-                    <content>
-                        <VBox>
-                           <children>
-                              <ToolBar prefHeight="40.0" prefWidth="200.0">
-                                <items>
-                                    <ChoiceBox prefWidth="150.0" />
-                                  <Button mnemonicParsing="false" text="Submit" />
-                                    <CheckBox mnemonicParsing="false" text="Continuous" />
-                                </items>
-                              </ToolBar>
-                              <SplitPane dividerPositions="0.29797979797979796" prefHeight="160.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
-                                <items>
-                                    <TextArea prefHeight="200.0" prefWidth="200.0" promptText="Custom query..." />
-                                    <TextArea disable="true" layoutX="10.0" layoutY="10.0" prefHeight="200.0" prefWidth="200.0" />
-                                </items>
-                              </SplitPane>
-                           </children>
-                        </VBox>
-                    </content>
-                  </Tab>
-              </tabs>
-            </TabPane>
-            <TabPane minHeight="40.0" prefHeight="100.0" tabClosingPolicy="UNAVAILABLE">
-              <tabs>
-                <Tab text="Counts">
-                  <content>
-                        <HBox minHeight="40.0" prefHeight="100.0">
-                           <children>
-                              <ScrollPane hbarPolicy="NEVER" prefHeight="200.0" prefWidth="294.0" vbarPolicy="ALWAYS">
+                              </Tab>
+                              <Tab text="Custom Queries...">
                                  <content>
-                                    <VBox fx:id="vbox_metrics_counts" disable="true" prefHeight="200.0" prefWidth="267.0" spacing="12.0">
-                                       <padding>
-                                          <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
-                                       </padding>
+                                    <VBox>
                                        <children>
-                                          <CheckBox fx:id="chk_countRequestsQueue" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="227.0" text="Requests: Waiting in Queue" />
-                                          <CheckBox fx:id="chk_countRequestsActive" layoutX="22.0" layoutY="22.0" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="227.0" text="Requests: Active" />
-                                          <CheckBox fx:id="chk_countRequestsCompleted" layoutX="22.0" layoutY="52.0" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="227.0" text="Requests: Completed" />
-                                          <CheckBox fx:id="chk_countRequestsFailed" layoutX="22.0" layoutY="82.0" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="227.0" text="Requests: Failed" />
-                                          <CheckBox fx:id="chk_countServersActive" layoutX="22.0" layoutY="112.0" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="227.0" text="Servers: Active" />
-                                          <CheckBox fx:id="chk_countRequestsViolations" layoutX="22.0" layoutY="142.0" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="227.0" text="TWViolations: Requests" />
-                                          <CheckBox fx:id="chk_countServersViolations" layoutX="22.0" layoutY="172.0" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="227.0" text="TWViolations: Servers" />
+                                          <ToolBar prefHeight="40.0" prefWidth="200.0">
+                                             <items>
+                                                <ChoiceBox prefWidth="150.0" />
+                                                <Button mnemonicParsing="false" text="Submit" />
+                                                <CheckBox mnemonicParsing="false" text="Continuous" />
+                                             </items>
+                                          </ToolBar>
+                                          <SplitPane dividerPositions="0.29797979797979796" prefHeight="160.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+                                             <items>
+                                                <TextArea prefHeight="200.0" prefWidth="200.0" promptText="Custom query..." />
+                                                <TextArea disable="true" layoutX="10.0" layoutY="10.0" prefHeight="200.0" prefWidth="200.0" />
+                                             </items>
+                                          </SplitPane>
                                        </children>
                                     </VBox>
                                  </content>
-                              </ScrollPane>
-                          <AnchorPane fx:id="container_lc_counts" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
-                           </children>
-                        </HBox>
-                  </content>
-                </Tab>
-                <Tab text="Execution Times">
-                  <content>
-                        <HBox>
-                           <children>
-                              <ScrollPane hbarPolicy="NEVER" prefWidth="294.0" vbarPolicy="ALWAYS">
+                              </Tab>
+                           </tabs>
+                        </TabPane>
+                        <TabPane minHeight="40.0" prefHeight="100.0" tabClosingPolicy="UNAVAILABLE">
+                           <tabs>
+                              <Tab text="Counts">
                                  <content>
-                                    <VBox fx:id="vbox_metrics_times" disable="true" prefHeight="200.0" prefWidth="272.0" spacing="12.0">
+                                    <HBox minHeight="40.0" prefHeight="100.0">
                                        <children>
-                                          <CheckBox fx:id="chk_timeRequestHandling" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="252.0" text="Request Handling Time" />
-                                          <CheckBox fx:id="chk_timeServerHandling" layoutX="22.0" layoutY="22.0" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="252.0" text="Server Handling Time" />
+                                          <ScrollPane hbarPolicy="NEVER" prefHeight="200.0" prefWidth="294.0" vbarPolicy="ALWAYS">
+                                             <content>
+                                                <VBox fx:id="vbox_metrics_counts" disable="true" prefHeight="200.0" prefWidth="267.0" spacing="12.0">
+                                                   <padding>
+                                                      <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+                                                   </padding>
+                                                   <children>
+                                                      <CheckBox fx:id="chk_countRequestsQueue" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="227.0" text="Requests: Waiting in Queue" />
+                                                      <CheckBox fx:id="chk_countRequestsActive" layoutX="22.0" layoutY="22.0" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="227.0" text="Requests: Active" />
+                                                      <CheckBox fx:id="chk_countRequestsCompleted" layoutX="22.0" layoutY="52.0" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="227.0" text="Requests: Completed" />
+                                                      <CheckBox fx:id="chk_countRequestsFailed" layoutX="22.0" layoutY="82.0" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="227.0" text="Requests: Failed" />
+                                                      <CheckBox fx:id="chk_countServersActive" layoutX="22.0" layoutY="112.0" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="227.0" text="Servers: Active" />
+                                                      <CheckBox fx:id="chk_countRequestsViolations" layoutX="22.0" layoutY="142.0" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="227.0" text="TWViolations: Requests" />
+                                                      <CheckBox fx:id="chk_countServersViolations" layoutX="22.0" layoutY="172.0" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="227.0" text="TWViolations: Servers" />
+                                                   </children>
+                                                </VBox>
+                                             </content>
+                                          </ScrollPane>
+                                          <AnchorPane fx:id="container_lc_counts" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
                                        </children>
-                                       <padding>
-                                          <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
-                                       </padding>
-                                    </VBox>
+                                    </HBox>
                                  </content>
-                              </ScrollPane>
-                          <AnchorPane fx:id="container_lc_times" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
-                           </children>
-                        </HBox>
-                  </content>
-                </Tab>
-              </tabs>
-            </TabPane>
-        </items>
-      </SplitPane>
+                              </Tab>
+                              <Tab text="Execution Times">
+                                 <content>
+                                    <HBox>
+                                       <children>
+                                          <ScrollPane hbarPolicy="NEVER" prefWidth="294.0" vbarPolicy="ALWAYS">
+                                             <content>
+                                                <VBox fx:id="vbox_metrics_times" disable="true" prefHeight="200.0" prefWidth="272.0" spacing="12.0">
+                                                   <children>
+                                                      <CheckBox fx:id="chk_timeRequestHandling" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="252.0" text="Request Handling Time" />
+                                                      <CheckBox fx:id="chk_timeServerHandling" layoutX="22.0" layoutY="22.0" mnemonicParsing="false" onAction="#toggleMetric" prefHeight="18.0" prefWidth="252.0" text="Server Handling Time" />
+                                                   </children>
+                                                   <padding>
+                                                      <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+                                                   </padding>
+                                                </VBox>
+                                             </content>
+                                          </ScrollPane>
+                                          <AnchorPane fx:id="container_lc_times" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+                                       </children>
+                                    </HBox>
+                                 </content>
+                              </Tab>
+                           </tabs>
+                        </TabPane>
+                     </items>
+                  </SplitPane>
+               </content>
+            </Tab>
+         </tabs>
+      </TabPane>
       <HBox alignment="CENTER_LEFT" spacing="6.0" VBox.vgrow="NEVER">
          <children>
             <Circle fx:id="circ_status" fill="GREEN" radius="6.0" stroke="BLACK" strokeType="INSIDE" />
