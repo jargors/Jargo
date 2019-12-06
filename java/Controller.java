@@ -235,6 +235,8 @@ public class Controller {
       MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
       ControllerMonitor mon = new ControllerMonitor(this);
       mbs.registerMBean(mon, new ObjectName("com.github.jargors.jmx:type=ControllerMonitor"));
+    } catch (InstanceAlreadyExistsException e) {
+      // ...
     } catch (Exception e) {
       System.err.printf("ControllerMonitor failed; reason: %s\n", e.toString());
       System.err.printf("Continuing with monitoring disabled\n");

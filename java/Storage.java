@@ -50,6 +50,8 @@ public class Storage {
       MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
       StorageMonitor mon = new StorageMonitor(this);
       mbs.registerMBean(mon, new ObjectName("com.github.jargors.jmx:type=StorageMonitor"));
+    } catch (InstanceAlreadyExistsException e) {
+      // ...
     } catch (Exception e) {
       System.err.printf("StorageMonitor failed; reason: %s\n", e.toString());
       System.err.printf("Continuing with monitoring disabled\n");

@@ -82,6 +82,8 @@ public class Communicator {
       MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
       CommunicatorMonitor mon = new CommunicatorMonitor(this);
       mbs.registerMBean(mon, new ObjectName("com.github.jargors.jmx:type=CommunicatorMonitor"));
+    } catch (InstanceAlreadyExistsException e) {
+      // ...
     } catch (Exception e) {
       System.err.printf("CommunicatorMonitor failed; reason: %s\n", e.toString());
       System.err.printf("Continuing with monitoring disabled\n");

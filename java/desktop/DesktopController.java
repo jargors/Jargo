@@ -35,14 +35,17 @@ import javafx.stage.Stage;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.chart.XYChart.Data;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -255,13 +258,9 @@ public class DesktopController {
             this.bufidx.put(sid, (i + 3) % 9);
             delta = 1;
           }
-          // x = (x1 + delta*(x2 - x1)) - (float) SERVER_WIDTH*this.zoom/2;
-          // y = (y1 + delta*(y2 - y1)) - (float) SERVER_HEIGHT*this.zoom/2;
           x = this.muf.getUnit()*(x1 + delta*(x2 - x1));
           y = this.muf.getUnit()*(y1 + delta*(y2 - y1));
         } else {
-          // x = x1 - (float) SERVER_WIDTH*this.zoom/2;
-          // y = y1 - (float) SERVER_HEIGHT*this.zoom/2;
           x = this.muf.getUnit()*x1;
           y = this.muf.getUnit()*y1;
         }
@@ -393,7 +392,6 @@ public class DesktopController {
       this.lat_min = lat_min;
     }
     public void setMapVisible(final boolean flag) {
-      System.out.println("Set mapVisible="+flag);
       this.mapVisible = flag;
     }
   }
@@ -630,12 +628,16 @@ public class DesktopController {
          }
   public void actionClient(final ActionEvent e) {
            this.btn_client   .setDisable(true);
+           this.tabpane      .setDisable(true);
            this.circ_status  .setFill(C_WARN);
            this.lbl_status   .setText("Select *.jar...");
            FileChooser fc = new FileChooser();
            fc.getExtensionFilters().addAll(new ExtensionFilter("Client *.jar", "*.jar"));
            File cj = fc.showOpenDialog(this.stage);
            if (cj != null) {
+             Platform.runLater(() -> {
+               this.stage.getScene().setCursor(Cursor.WAIT);
+             });
              this.clientjar = cj.toString();
 
              try {
@@ -650,11 +652,17 @@ public class DesktopController {
          }
          /******/
                if (classNames.size() == 0) {
+                 Platform.runLater(() -> {
+                   this.stage.getScene().setCursor(Cursor.DEFAULT);
+                 });
                  System.err.println("Bad jar?");
                  return;
                }
                this.clientclass = classNames.get(0);
              } catch (IOException ie) {
+               Platform.runLater(() -> {
+                 this.stage.getScene().setCursor(Cursor.DEFAULT);
+               });
                System.err.println(ie.toString());
                return;
              }
@@ -665,8 +673,12 @@ public class DesktopController {
              this.tf_t1        .setDisable(false);
              this.btn_startseq .setDisable(false);
              this.btn_startreal.setDisable(false);
+             this.tabpane      .setDisable(false);
              this.circ_status  .setFill(C_SUCCESS);
              this.lbl_status   .setText("Loaded "+cj.getName());
+             Platform.runLater(() -> {
+               this.stage.getScene().setCursor(Cursor.DEFAULT);
+             });
            }
          }
   public void actionGitHub(final ActionEvent e) {
@@ -679,12 +691,16 @@ public class DesktopController {
            this.btn_road     .setDisable(true);
            this.btn_stop     .setDisable(true);
            this.btn_gtree    .setDisable(true);
+           this.tabpane      .setDisable(true);
            this.circ_status  .setFill(C_WARN);
            this.lbl_status   .setText("Select *.gtree...");
            FileChooser fc = new FileChooser();
            fc.getExtensionFilters().addAll(new ExtensionFilter("G-tree *.gtree", "*.gtree"));
            File gt = fc.showOpenDialog(this.stage);
            if (gt != null) {
+             Platform.runLater(() -> {
+               this.stage.getScene().setCursor(Cursor.WAIT);
+             });
              if (this.gtree != null) {
                this.controller.gtreeClose();
              }
@@ -704,9 +720,11 @@ public class DesktopController {
                      this.btn_client .setDisable(false);
                      this.btn_traffic.setDisable(false);
                    }
+                   this.tabpane      .setDisable(false);
                    this.btn_gtree    .setText(gt.getName());
                    this.circ_status  .setFill(C_SUCCESS);
                    this.lbl_status   .setText("Loaded "+gt.getName());
+                   this.stage.getScene().setCursor(Cursor.DEFAULT);
                  });
                } catch (FileNotFoundException fe) {
                  System.err.println("Failed: "+fe.toString());
@@ -718,6 +736,7 @@ public class DesktopController {
              this.btn_road     .setDisable(state_btn_road);
              this.btn_stop     .setDisable(false);
              this.btn_gtree    .setDisable(false);
+             this.tabpane      .setDisable(false);
              this.circ_status  .setFill(C_SUCCESS);
              this.lbl_status   .setText("Cancelled load gtree.");
            }
@@ -726,9 +745,13 @@ public class DesktopController {
            this.btn_new      .setDisable(true);
            this.btn_load     .setDisable(true);
            this.btn_stop     .setDisable(true);
+           this.tabpane      .setDisable(true);
            DirectoryChooser dc = new DirectoryChooser();
            File db = dc.showDialog(this.stage);
            if (db != null) {
+             Platform.runLater(() -> {
+               this.stage.getScene().setCursor(Cursor.WAIT);
+             });
              this.db = db.toString();
              this.circ_status.setFill(C_WARN);
              this.lbl_status.setText("Load '"+this.db+"'...");
@@ -753,28 +776,43 @@ public class DesktopController {
                    this.btn_stop     .setDisable(false);
                    this.circ_status  .setFill(C_SUCCESS);
                    this.lbl_status   .setText("Loaded Jargo instance (#vertices="+nv+"; #edges="+ne+") (#servers="+ns+"; #requests="+nr+")");
+                   this.tabpane      .setDisable(false);
                    this.container_canvas.setContent(null);
                    this.container_lc_rates.getChildren().clear();
                    this.container_lc_distances.getChildren().clear();
                    this.container_lc_durations.getChildren().clear();
                    this.initializeCanvas();
+                   this.stage.getScene().setCursor(Cursor.DEFAULT);
                  });
                } catch (SQLException se) {
-                 System.err.println("Failed");
-                 Tools.PrintSQLException(se);
-                 return;
+                 Platform.runLater(() -> {
+                   this.stage.getScene().setCursor(Cursor.DEFAULT);
+                   this.circ_status  .setFill(C_ERROR);
+                   this.lbl_status   .setText("Failed to load snapshot!");
+                   Alert alert = new Alert(AlertType.ERROR, "Couldn't load snapshot! (Not a valid Jargo instance?)");
+                   alert.showAndWait();
+                   this.circ_status  .setFill(C_SUCCESS);
+                   this.lbl_status   .setText("Ready.");
+                 });
+                 if (DEBUG) {
+                   Tools.PrintSQLException(se);
+                 }
                }
              });
-           } else {
-             this.btn_new      .setDisable(false);
-             this.btn_load     .setDisable(false);
-             this.btn_stop     .setDisable(false);
            }
+           this.btn_new      .setDisable(false);
+           this.btn_load     .setDisable(false);
+           this.btn_stop     .setDisable(false);
+           this.tabpane      .setDisable(false);
          }
   public void actionNew(final ActionEvent e) {
+           Platform.runLater(() -> {
+             this.stage.getScene().setCursor(Cursor.WAIT);
+           });
            this.btn_new      .setDisable(true);
            this.btn_load     .setDisable(true);
            this.btn_stop     .setDisable(true);
+           this.tabpane      .setDisable(true);
            this.circ_status.setFill(C_WARN);
            this.lbl_status.setText("Create new Jargo instance...");
            CompletableFuture.runAsync(() -> {
@@ -791,26 +829,32 @@ public class DesktopController {
                this.btn_road     .setDisable(false);
                this.btn_gtree    .setDisable(false);
                this.btn_stop     .setDisable(false);
-               this.tf_client     .setDisable(false);
+               this.tf_client    .setDisable(false);
                this.tf_t0        .setDisable(false);
                this.tf_t1        .setDisable(false);
+               this.tabpane      .setDisable(false);
                this.container_canvas.setContent(null);
                this.container_lc_rates.getChildren().clear();
                this.container_lc_distances.getChildren().clear();
                this.container_lc_durations.getChildren().clear();
                this.circ_status.setFill(C_SUCCESS);
                this.lbl_status.setText("Created new Jargo instance.");
+               this.stage.getScene().setCursor(Cursor.DEFAULT);
              });
            });
          }
   public void actionProb(final ActionEvent e) {
            this.btn_prob     .setDisable(true);
+           this.tabpane      .setDisable(true);
            this.circ_status  .setFill(C_WARN);
            this.lbl_status   .setText("Select *.instance...");
            FileChooser fc = new FileChooser();
            fc.getExtensionFilters().addAll(new ExtensionFilter("Problem Instance *.instance", "*.instance"));
            File pb = fc.showOpenDialog(this.stage);
            if (pb != null) {
+             Platform.runLater(() -> {
+               this.stage.getScene().setCursor(Cursor.WAIT);
+             });
              this.prob = pb.toString();
              this.lbl_status.setText("Load '"+this.prob+"'...");
              CompletableFuture.runAsync(() -> {
@@ -822,8 +866,10 @@ public class DesktopController {
                    this.btn_prob     .setText(pb.getName());
                    this.btn_client   .setDisable(false);
                    this.btn_traffic  .setDisable(false);
+                   this.tabpane      .setDisable(false);
                    this.circ_status  .setFill(C_SUCCESS);
                    this.lbl_status   .setText("Loaded "+pb.getName()+"(#servers="+ns+"; #requests="+nr+")");
+                   this.stage.getScene().setCursor(Cursor.DEFAULT);
                  });
                } catch (FileNotFoundException fe) {
                  System.err.println("File not found: "+fe.toString());
@@ -859,15 +905,19 @@ public class DesktopController {
            this.btn_road     .setDisable(true);
            this.btn_gtree    .setDisable(true);
            this.btn_stop     .setDisable(true);
-           this.tf_client     .setDisable(true);
+           this.tf_client    .setDisable(true);
            this.tf_t0        .setDisable(true);
            this.tf_t1        .setDisable(true);
+           this.tabpane      .setDisable(true);
            this.circ_status  .setFill(C_WARN);
            this.lbl_status   .setText("Select *.rnet...");
            FileChooser fc = new FileChooser();
            fc.getExtensionFilters().addAll(new ExtensionFilter("Road network *.rnet", "*.rnet"));
            File road = fc.showOpenDialog(this.stage);
            if (road != null) {
+             Platform.runLater(() -> {
+               this.stage.getScene().setCursor(Cursor.WAIT);
+             });
              this.road = road.toString();
              this.lbl_status.setText("Load '"+this.road+"'...");
              CompletableFuture.runAsync(() -> {
@@ -885,9 +935,11 @@ public class DesktopController {
                    this.tf_client     .setDisable(false);
                    this.tf_t0        .setDisable(false);
                    this.tf_t1        .setDisable(false);
+                   this.tabpane      .setDisable(false);
                    this.circ_status  .setFill(C_SUCCESS);
                    this.lbl_status   .setText("Loaded "+road.getName()+" (#vertices="+nv+"; #edges="+ne+")");
                    this.initializeCanvas();
+                   this.stage.getScene().setCursor(Cursor.DEFAULT);
                    this.ren_road = new RendererOfRoads(this.can_road.getGraphicsContext2D(), this.controller, this.muf);
                    this.ren_road.start();
                  });
@@ -1367,12 +1419,16 @@ public class DesktopController {
          }
   public void actionTraffic(final ActionEvent e) {
            this.btn_traffic  .setDisable(true);
+           this.tabpane      .setDisable(true);
            this.circ_status  .setFill(C_WARN);
            this.lbl_status   .setText("Select *.jar...");
            FileChooser fc = new FileChooser();
            fc.getExtensionFilters().addAll(new ExtensionFilter("Traffic *.jar", "*.jar"));
            File cj = fc.showOpenDialog(this.stage);
            if (cj != null) {
+             Platform.runLater(() -> {
+               this.stage.getScene().setCursor(Cursor.WAIT);
+             });
              this.trafficjar = cj.toString();
 
              try {
@@ -1387,19 +1443,29 @@ public class DesktopController {
          }
          /******/
                if (classNames.size() == 0) {
+                 Platform.runLater(() -> {
+                   this.stage.getScene().setCursor(Cursor.DEFAULT);
+                 });
                  System.err.println("Bad jar?");
                  return;
                }
                this.trafficclass = classNames.get(0);
              } catch (IOException ie) {
+               Platform.runLater(() -> {
+                 this.stage.getScene().setCursor(Cursor.DEFAULT);
+               });
                System.err.println(ie.toString());
                return;
              }
              this.tf_traffic   .setText(this.trafficclass);
              this.btn_traffic  .setText(cj.getName());
              this.tf_traffic   .setDisable(false);
+             this.tabpane      .setDisable(false);
              this.circ_status  .setFill(C_SUCCESS);
              this.lbl_status   .setText("Loaded "+cj.getName());
+             Platform.runLater(() -> {
+               this.stage.getScene().setCursor(Cursor.DEFAULT);
+             });
            }
          }
   public void actionZoomCanvas(ScrollEvent e) {
@@ -1487,7 +1553,9 @@ public class DesktopController {
   public void initialize() {
     this.tabpane.getSelectionModel().selectedIndexProperty().addListener(
         (ov, oldTab, newTab) -> {
-      this.muf.setMapVisible((newTab.intValue() == 0 ? true : false));
+      if (this.muf != null) {
+        this.muf.setMapVisible((newTab.intValue() == 0 ? true : false));
+      }
     });
     this.cbFetcherOfMetrics = new HashMap<String, ScheduledFuture<?>>();
   }

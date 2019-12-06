@@ -26,6 +26,8 @@ public abstract class Client {
       MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
       ClientMonitor mon = new ClientMonitor(this);
       mbs.registerMBean(mon, new ObjectName("com.github.jargors.jmx:type=ClientMonitor"));
+    } catch (InstanceAlreadyExistsException e) {
+      // ...
     } catch (Exception e) {
       System.err.printf("ClientMonitor failed; reason: %s\n", e.toString());
       System.err.printf("Continuing with monitoring disabled\n");

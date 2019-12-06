@@ -39,6 +39,8 @@ try {
   MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
   StorageMonitor mon = new StorageMonitor(this);
   mbs.registerMBean(mon, new ObjectName("com.github.jargors.jmx:type=StorageMonitor"));
+} catch (InstanceAlreadyExistsException e) {
+  // ...
 } catch (Exception e) {
   System.err.printf("StorageMonitor failed; reason: %s\n", e.toString());
   System.err.printf("Continuing with monitoring disabled\n");
@@ -51,6 +53,8 @@ try {
   MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
   ControllerMonitor mon = new ControllerMonitor(this);
   mbs.registerMBean(mon, new ObjectName("com.github.jargors.jmx:type=ControllerMonitor"));
+} catch (InstanceAlreadyExistsException e) {
+  // ...
 } catch (Exception e) {
   System.err.printf("ControllerMonitor failed; reason: %s\n", e.toString());
   System.err.printf("Continuing with monitoring disabled\n");
@@ -63,6 +67,8 @@ try {
   MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
   CommunicatorMonitor mon = new CommunicatorMonitor(this);
   mbs.registerMBean(mon, new ObjectName("com.github.jargors.jmx:type=CommunicatorMonitor"));
+} catch (InstanceAlreadyExistsException e) {
+  // ...
 } catch (Exception e) {
   System.err.printf("CommunicatorMonitor failed; reason: %s\n", e.toString());
   System.err.printf("Continuing with monitoring disabled\n");
@@ -75,6 +81,8 @@ try {
   MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
   ClientMonitor mon = new ClientMonitor(this);
   mbs.registerMBean(mon, new ObjectName("com.github.jargors.jmx:type=ClientMonitor"));
+} catch (InstanceAlreadyExistsException e) {
+  // ...
 } catch (Exception e) {
   System.err.printf("ClientMonitor failed; reason: %s\n", e.toString());
   System.err.printf("Continuing with monitoring disabled\n");
