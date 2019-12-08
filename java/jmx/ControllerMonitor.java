@@ -6,38 +6,38 @@ public class ControllerMonitor implements ControllerMonitorMBean {
   public ControllerMonitor(final Controller controller) {
     this.controller = controller;
   }
-  public int    getControllerClockNow() {
-    return this.controller.getControllerClockNow();
+  public int    getStatControllerClock() {
+    return this.controller.getStatControllerClock();
   }
-  public int    getControllerClockReferenceDay() {
-    return this.controller.getControllerClockReferenceDay();
+  public int    getStatControllerClockReferenceDay() {
+    return this.controller.getStatControllerClockReferenceDay();
   }
-  public int    getControllerClockReferenceHour() {
-    return this.controller.getControllerClockReferenceHour();
+  public int    getStatControllerClockReferenceHour() {
+    return this.controller.getStatControllerClockReferenceHour();
   }
-  public int    getControllerClockReferenceMinute() {
-    return this.controller.getControllerClockReferenceMinute();
+  public int    getStatControllerClockReferenceMinute() {
+    return this.controller.getStatControllerClockReferenceMinute();
   }
-  public int    getControllerClockReferenceSecond() {
-    return this.controller.getControllerClockReferenceSecond();
+  public int    getStatControllerClockReferenceSecond() {
+    return this.controller.getStatControllerClockReferenceSecond();
   }
-  public int    getControllerRequestCollectionSizeLast() {
-    return this.controller.getControllerRequestCollectionSizeLast();
+  public int    getStatControllerRequestCollectionSize() {
+    return this.controller.getStatControllerRequestCollectionSize();
   }
-  public long   getControllerRequestCollectionDurLast() {
-    return this.controller.getControllerRequestCollectionDurLast();
+  public long   getStatControllerRequestCollectionDur() {
+    return this.controller.getStatControllerRequestCollectionDur();
   }
-  public long   getStatQueryEdgeDurLast() {
-    return this.controller.getStatQueryEdgeDurLast();
+  public long   getStatQueryEdgeDur() {
+    return this.controller.getStatQueryEdgeDur();
   }
-  public long   getStatQueryServersLocationsActiveDurLast() {
-    return this.controller.getStatQueryServersLocationsActiveDurLast();
+  public long   getStatQueryServersLocationsActiveDur() {
+    return this.controller.getStatQueryServersLocationsActiveDur();
   }
-  public long   getStatQueryUserDurLast() {
-    return this.controller.getStatQueryUserDurLast();
+  public long   getStatQueryUserDur() {
+    return this.controller.getStatQueryUserDur();
   }
-  public long   getStatQueryVertexDurLast() {
-    return this.controller.getStatQueryVertexDurLast();
+  public long   getStatQueryVertexDur() {
+    return this.controller.getStatQueryVertexDur();
   }
 }
 

@@ -75,7 +75,7 @@ public class Controller {
     // add that duration onto the clock. We can output a "clock rate" to show
     // the user the current simulation rate, i.e. clock_rate=1x means real-time,
     // clock_rate=0.5x means 1 simulated second takes 2 real seconds, etc.
-    this.statControllerClockNow++;
+    this.statControllerClock++;
     this.statControllerClockReferenceSecond++;
     if (this.statControllerClockReferenceSecond > 59) {
       this.statControllerClockReferenceSecond = 0;
@@ -94,7 +94,7 @@ public class Controller {
     long A0 = System.currentTimeMillis();
     int  A1 = 0;
     try {
-      int[] output = this.storage.DBQueryRequestsQueued(this.statControllerClockNow);
+      int[] output = this.storage.DBQueryRequestsQueued(this.statControllerClock);
       for (int i = 0; i < (output.length - 6); i += 7) {
         if (!this.lu_seen.containsKey(output[i]) || this.lu_seen.get(output[i]) == false) {
           this.client.addRequest(new int[] {
@@ -120,26 +120,26 @@ public class Controller {
         System.exit(1);
       }
     }
-    this.statControllerRequestCollectionSizeLast = A1;
-    this.statControllerRequestCollectionDurLast = (System.currentTimeMillis() - A0);
+    this.statControllerRequestCollectionSize = A1;
+    this.statControllerRequestCollectionDur = (System.currentTimeMillis() - A0);
   };
   private Runnable RequestHandlingLoop = () -> {
     try {
       this.client.notifyNew();  // blocks this thread until queue is empty
     } catch (ClientException e) {
       System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientException: %s\n",
-          this.statControllerClockNow, e.toString());
+          this.statControllerClock, e.toString());
       e.printStackTrace();
     } catch (ClientFatalException e) {
       System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientFatalException: %s\n",
-          this.statControllerClockNow, e.toString());
+          this.statControllerClock, e.toString());
       e.printStackTrace();
       System.exit(1);
     }
   };
   private Runnable ServerLoop = () -> {
     try {
-      int[] output = this.storage.DBQueryServersLocationsActive(this.statControllerClockNow);
+      int[] output = this.storage.DBQueryServersLocationsActive(this.statControllerClock);
       this.client.collectServerLocations(output);
     } catch (SQLException e) {
       if (e.getErrorCode() == 40000) {
@@ -153,18 +153,51 @@ public class Controller {
       }
     }
   };
-  private int    statControllerClockNow;
+  private int    statControllerClock;
   private int    statControllerClockReferenceDay;
   private int    statControllerClockReferenceHour;
   private int    statControllerClockReferenceMinute;
   private int    statControllerClockReferenceSecond;
-  private int    statControllerRequestCollectionSizeLast = 0;
-  private long   statControllerRequestCollectionDurLast = 0;
-  private long   statQueryEdgeDurLast  = 0;
-  private long   statQueryServerRouteRemainingDurLast  = 0;
-  private long   statQueryServersLocationsActiveDurLast  = 0;
-  private long   statQueryUserDurLast  = 0;
-  private long   statQueryVertexDurLast  = 0;
+  private int    statControllerRequestCollectionSize = 0;
+  private long   statControllerRequestCollectionDur = 0;
+  private long statQueryDur = 0;
+  private long statQueryEdgeDur = 0;
+  private long statQueryEdgeStatisticsDur = 0;
+  private long statQueryEdgesDur = 0;
+  private long statQueryEdgesCountDur = 0;
+  private long statQueryMBRDur = 0;
+  private long statQueryMetricRequestDistanceBaseTotalDur = 0;
+  private long statQueryMetricRequestDistanceBaseUnassignedTotalDur = 0;
+  private long statQueryMetricRequestDistanceDetourTotalDur = 0;
+  private long statQueryMetricRequestDistanceTransitTotalDur = 0;
+  private long statQueryMetricRequestDurationPickupTotalDur = 0;
+  private long statQueryMetricRequestDurationTransitTotalDur = 0;
+  private long statQueryMetricRequestDurationTravelTotalDur = 0;
+  private long statQueryMetricRequestTWViolationsTotalDur = 0;
+  private long statQueryMetricServerDistanceBaseTotalDur = 0;
+  private long statQueryMetricServerDistanceCruisingTotalDur = 0;
+  private long statQueryMetricServerDistanceServiceTotalDur = 0;
+  private long statQueryMetricServerDistanceTotalDur = 0;
+  private long statQueryMetricServerDurationTravelTotalDur = 0;
+  private long statQueryMetricServerTWViolationsTotalDur = 0;
+  private long statQueryMetricServiceRateDur = 0;
+  private long statQueryMetricUserDistanceBaseTotalDur = 0;
+  private long statQueryRequestTimeOfArrivalDur = 0;
+  private long statQueryRequestTimeOfDepartureDur = 0;
+  private long statQueryRequestsCountDur = 0;
+  private long statQueryRequestsQueuedDur = 0;
+  private long statQueryServerRouteDur = 0;
+  private long statQueryServerRouteActiveDur = 0;
+  private long statQueryServerRouteRemainingDur = 0;
+  private long statQueryServerScheduleDur = 0;
+  private long statQueryServerTimeOfDepartureDur = 0;
+  private long statQueryServersActiveDur = 0;
+  private long statQueryServersCountDur = 0;
+  private long statQueryServersLocationsActiveDur = 0;
+  private long statQueryUserDur = 0;
+  private long statQueryVertexDur = 0;
+  private long statQueryVerticesDur = 0;
+  private long statQueryVerticesCountDur = 0;
   public Controller() {
     this.storage = new Storage();
     this.communicator = new Communicator();
@@ -181,41 +214,140 @@ public class Controller {
       System.err.printf("Continuing with monitoring disabled\n");
     }
   }
-  public int    getControllerClockNow() {
-           return this.statControllerClockNow;
+  public int    getStatControllerClock() {
+           return this.statControllerClock;
          }
-  public int    getControllerClockReferenceDay() {
+  public int    getStatControllerClockReferenceDay() {
            return this.statControllerClockReferenceDay;
          }
-  public int    getControllerClockReferenceHour() {
+  public int    getStatControllerClockReferenceHour() {
            return this.statControllerClockReferenceHour;
          }
-  public int    getControllerClockReferenceMinute() {
+  public int    getStatControllerClockReferenceMinute() {
            return this.statControllerClockReferenceMinute;
          }
-  public int    getControllerClockReferenceSecond() {
+  public int    getStatControllerClockReferenceSecond() {
            return this.statControllerClockReferenceSecond;
          }
-  public int    getControllerRequestCollectionSizeLast() {
-           return this.statControllerRequestCollectionSizeLast;
+  public long   getStatControllerRequestCollectionDur() {
+           return this.statControllerRequestCollectionDur;
          }
-  public long   getControllerRequestCollectionDurLast() {
-           return this.statControllerRequestCollectionDurLast;
+  public int    getStatControllerRequestCollectionSize() {
+           return this.statControllerRequestCollectionSize;
          }
-  public long   getStatQueryEdgeDurLast() {
-           return this.statQueryEdgeDurLast;
+  public long getStatQueryDur() {
+           return this.statQueryDur;
          }
-  public long   getStatQueryServerRouteRemainingDurLast() {
-           return this.statQueryServerRouteRemainingDurLast;
+  public long getStatQueryEdgeDur() {
+           return this.statQueryEdgeDur;
          }
-  public long   getStatQueryServersLocationsActiveDurLast() {
-           return this.statQueryServersLocationsActiveDurLast;
+  public long getStatQueryEdgeStatisticsDur() {
+           return this.statQueryEdgeStatisticsDur;
          }
-  public long   getStatQueryUserDurLast() {
-           return this.statQueryUserDurLast;
+  public long getStatQueryEdgesCountDur() {
+           return this.statQueryEdgesCountDur;
          }
-  public long   getStatQueryVertexDurLast() {
-           return this.statQueryVertexDurLast;
+  public long getStatQueryEdgesDur() {
+           return this.statQueryEdgesDur;
+         }
+  public long getStatQueryMBRDur() {
+           return this.statQueryMBRDur;
+         }
+  public long getStatQueryMetricRequestDistanceBaseTotalDur() {
+           return this.statQueryMetricRequestDistanceBaseTotalDur;
+         }
+  public long getStatQueryMetricRequestDistanceBaseUnassignedTotalDur() {
+           return this.statQueryMetricRequestDistanceBaseUnassignedTotalDur;
+         }
+  public long getStatQueryMetricRequestDistanceDetourTotalDur() {
+           return this.statQueryMetricRequestDistanceDetourTotalDur;
+         }
+  public long getStatQueryMetricRequestDistanceTransitTotalDur() {
+           return this.statQueryMetricRequestDistanceTransitTotalDur;
+         }
+  public long getStatQueryMetricRequestDurationPickupTotalDur() {
+           return this.statQueryMetricRequestDurationPickupTotalDur;
+         }
+  public long getStatQueryMetricRequestDurationTransitTotalDur() {
+           return this.statQueryMetricRequestDurationTransitTotalDur;
+         }
+  public long getStatQueryMetricRequestDurationTravelTotalDur() {
+           return this.statQueryMetricRequestDurationTravelTotalDur;
+         }
+  public long getStatQueryMetricRequestTWViolationsTotalDur() {
+           return this.statQueryMetricRequestTWViolationsTotalDur;
+         }
+  public long getStatQueryMetricServerDistanceBaseTotalDur() {
+           return this.statQueryMetricServerDistanceBaseTotalDur;
+         }
+  public long getStatQueryMetricServerDistanceCruisingTotalDur() {
+           return this.statQueryMetricServerDistanceCruisingTotalDur;
+         }
+  public long getStatQueryMetricServerDistanceServiceTotalDur() {
+           return this.statQueryMetricServerDistanceServiceTotalDur;
+         }
+  public long getStatQueryMetricServerDistanceTotalDur() {
+           return this.statQueryMetricServerDistanceTotalDur;
+         }
+  public long getStatQueryMetricServerDurationTravelTotalDur() {
+           return this.statQueryMetricServerDurationTravelTotalDur;
+         }
+  public long getStatQueryMetricServerTWViolationsTotalDur() {
+           return this.statQueryMetricServerTWViolationsTotalDur;
+         }
+  public long getStatQueryMetricServiceRateDur() {
+           return this.statQueryMetricServiceRateDur;
+         }
+  public long getStatQueryMetricUserDistanceBaseTotalDur() {
+           return this.statQueryMetricUserDistanceBaseTotalDur;
+         }
+  public long getStatQueryRequestTimeOfArrivalDur() {
+           return this.statQueryRequestTimeOfArrivalDur;
+         }
+  public long getStatQueryRequestTimeOfDepartureDur() {
+           return this.statQueryRequestTimeOfDepartureDur;
+         }
+  public long getStatQueryRequestsCountDur() {
+           return this.statQueryRequestsCountDur;
+         }
+  public long getStatQueryRequestsQueuedDur() {
+           return this.statQueryRequestsQueuedDur;
+         }
+  public long getStatQueryServerRouteActiveDur() {
+           return this.statQueryServerRouteActiveDur;
+         }
+  public long getStatQueryServerRouteDur() {
+           return this.statQueryServerRouteDur;
+         }
+  public long getStatQueryServerRouteRemainingDur() {
+           return this.statQueryServerRouteRemainingDur;
+         }
+  public long getStatQueryServerScheduleDur() {
+           return this.statQueryServerScheduleDur;
+         }
+  public long getStatQueryServerTimeOfDepartureDur() {
+           return this.statQueryServerTimeOfDepartureDur;
+         }
+  public long getStatQueryServersActiveDur() {
+           return this.statQueryServersActiveDur;
+         }
+  public long getStatQueryServersCountDur() {
+           return this.statQueryServersCountDur;
+         }
+  public long getStatQueryServersLocationsActiveDur() {
+           return this.statQueryServersLocationsActiveDur;
+         }
+  public long getStatQueryUserDur() {
+           return this.statQueryUserDur;
+         }
+  public long getStatQueryVertexDur() {
+           return this.statQueryVertexDur;
+         }
+  public long getStatQueryVerticesCountDur() {
+           return this.statQueryVerticesCountDur;
+         }
+  public long getStatQueryVerticesDur() {
+           return this.statQueryVerticesDur;
          }
   public int[] query(final String sql, final int ncols) throws SQLException {
            return this.storage.DBQuery(sql, ncols);
@@ -223,7 +355,7 @@ public class Controller {
   public int[] queryEdge(final int v1, final int v2) throws EdgeNotFoundException, SQLException {
            long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryEdge(v1, v2);
-           this.statQueryEdgeDurLast = (System.currentTimeMillis() - A0);
+           this.statQueryEdgeDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryEdgeStatistics() throws SQLException {
@@ -308,7 +440,7 @@ public class Controller {
   public int[] queryServerRouteRemaining(final int sid, final int t) throws SQLException {
            long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryServerRouteRemaining(sid, t);
-           this.statQueryServerRouteRemainingDurLast = (System.currentTimeMillis() - A0);
+           this.statQueryServerRouteRemainingDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryServerSchedule(final int sid) throws SQLException {
@@ -327,19 +459,19 @@ public class Controller {
   public int[] queryServersLocationsActive(final int t) throws SQLException {
            long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryServersLocationsActive(t);
-           this.statQueryServersLocationsActiveDurLast = (System.currentTimeMillis() - A0);
+           this.statQueryServersLocationsActiveDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryUser(final int rid) throws UserNotFoundException, SQLException {
            long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryUser(rid);
-           this.statQueryUserDurLast = (System.currentTimeMillis() - A0);
+           this.statQueryUserDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryVertex(final int v) throws VertexNotFoundException, SQLException {
            long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryVertex(v);
-           this.statQueryVertexDurLast = (System.currentTimeMillis() - A0);
+           this.statQueryVertexDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryVertices() throws SQLException {
@@ -444,8 +576,8 @@ public class Controller {
   public void gtreeLoad(String p) throws FileNotFoundException {
            this.tools.GTGtreeLoad(p);
          }
-  public int getClockNow() {
-           return this.statControllerClockNow;
+  public int getClock() {
+           return this.statControllerClock;
          }
   public Communicator getRefCommunicator() {
            return this.communicator;
@@ -499,13 +631,13 @@ public class Controller {
            return this.kill;
          }
   public void returnRequest(final int[] r) {
-           if (this.statControllerClockNow - r[2] < QUEUE_TIMEOUT) {
+           if (this.statControllerClock - r[2] < QUEUE_TIMEOUT) {
              this.lu_seen.put(r[0], false);
            }
          }
   public void startRealtime(final Consumer<Boolean> app_cb) {
            this.storage.setRequestTimeout(REQUEST_TIMEOUT);
-           this.statControllerClockNow = CLOCK_START;
+           this.statControllerClock = CLOCK_START;
 
            int simulation_duration = (CLOCK_END - CLOCK_START);
 
@@ -529,10 +661,10 @@ public class Controller {
          }
   public void startSequential(final Consumer<Boolean> app_cb) throws Exception {
            this.storage.setRequestTimeout(REQUEST_TIMEOUT);
-           this.statControllerClockNow = CLOCK_START;
-           while (!kill && this.statControllerClockNow < CLOCK_END) {
+           this.statControllerClock = CLOCK_START;
+           while (!kill && this.statControllerClock < CLOCK_END) {
              this.working = true;
-             this.ClockLoop.run();  // this.statControllerClockNow gets incremented here!
+             this.ClockLoop.run();  // this.statControllerClock gets incremented here!
              this.ServerLoop.run();
              this.RequestCollectionLoop.run();
              this.RequestHandlingLoop.run();

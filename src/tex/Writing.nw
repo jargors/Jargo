@@ -715,6 +715,7 @@ throws UserNotFoundException, EdgeNotFoundException, SQLException {
     throw new UserNotFoundException("User "+sid+" not found.");
   }
   try (<<Open [[conn]]>>) {
+    conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
     try {
       final int sq = lu_users.get(sid)[1];
       final int se = lu_users.get(sid)[2];
@@ -747,7 +748,7 @@ the method call and returns [[false]].\\
 void updateServerRoute(final int sid, final int[] route, final int[] sched)
 throws RouteIllegalOverwriteException, UserNotFoundException,
        EdgeNotFoundException, TimeWindowException, SQLException {
-  if (route[0] >= this.retrieveClockNow()) {
+  if (route[0] >= this.retrieveClock()) {
     <<Check time window violation>>
     <<Apply traffic to route, sched>>
     this.storage.DBUpdateServerRoute(sid, mutroute, mutsched);
@@ -851,6 +852,7 @@ throws UserNotFoundException, EdgeNotFoundException, SQLException {
   Map<Integer, int[]> cache  = new HashMap<>();
   Map<Integer, int[]> cache2 = new HashMap<>();
   try (<<Open [[conn]]>>) {
+    conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
     try {
       final int sq = lu_users.get(sid)[1];
       final int se = lu_users.get(sid)[2];
@@ -890,7 +892,7 @@ and returns [[false]].\\
 void updateServerAddToSchedule(final int sid, final int[] route, final int[] sched, final int[] rid)
 throws RouteIllegalOverwriteException, UserNotFoundException,
        EdgeNotFoundException, TimeWindowException, SQLException {
-  final int t = this.retrieveClockNow();
+  final int t = this.retrieveClock();
   final int[] current = this.storage.DBQueryServerRoute(sid);
   int i = 0;
   while (i < current.length && current[i] != route[0]) {
@@ -1007,6 +1009,7 @@ throws UserNotFoundException, EdgeNotFoundException, SQLException {
   }
   Map<Integer, int[]> cache = new HashMap<>();
   try (<<Open [[conn]]>>) {
+    conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
     try {
       final int sq = lu_users.get(sid)[1];
       final int se = lu_users.get(sid)[2];
@@ -1045,7 +1048,7 @@ the method call and returns [[false]].\\
 void updateServerRemoveFromSchedule( final int sid, final int[] route, final int[] sched, final int[] rid)
 throws RouteIllegalOverwriteException, UserNotFoundException,
        EdgeNotFoundException, TimeWindowException, SQLException {
-  if (route[0] >= this.retrieveClockNow()) {
+  if (route[0] >= this.retrieveClock()) {
     <<Check time window violation>>
     <<Apply traffic to route, sched>>
     this.storage.DBUpdateServerRemoveFromSchedule(sid, mutroute, mutsched, rid);
