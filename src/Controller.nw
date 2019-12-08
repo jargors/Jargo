@@ -149,8 +149,8 @@ about the new time.\\
 \midrule
 \textbf{Parameters:} none.\\
 \textbf{Returns:} nothing.\\
-\textbf{Side Effects:} increments [[statControllerClockNow]] by 1, may modify
-[[communicator]] by changing [[Communicator.statControllerClockNow]], may print to
+\textbf{Side Effects:} increments [[statControllerClock]] by 1, may modify
+[[communicator]] by changing [[Communicator.statControllerClock]], may print to
 standard error if [[DEBUG]] is [[true]].\\
 \textbf{Throws:} nothing.\\
 \bottomrule
@@ -167,7 +167,7 @@ private Runnable ClockLoop = () -> {
   // add that duration onto the clock. We can output a "clock rate" to show
   // the user the current simulation rate, i.e. clock_rate=1x means real-time,
   // clock_rate=0.5x means 1 simulated second takes 2 real seconds, etc.
-  this.statControllerClockNow++;
+  this.statControllerClock++;
   this.statControllerClockReferenceSecond++;
   if (this.statControllerClockReferenceSecond > 59) {
     this.statControllerClockReferenceSecond = 0;
@@ -211,7 +211,7 @@ private Runnable RequestCollectionLoop = () -> {
   long A0 = System.currentTimeMillis();
   int  A1 = 0;
   try {
-    int[] output = this.storage.DBQueryRequestsQueued(this.statControllerClockNow);
+    int[] output = this.storage.DBQueryRequestsQueued(this.statControllerClock);
     for (int i = 0; i < (output.length - 6); i += 7) {
       if (!this.lu_seen.containsKey(output[i]) || this.lu_seen.get(output[i]) == false) {
         this.client.addRequest(new int[] {
@@ -264,11 +264,11 @@ private Runnable RequestHandlingLoop = () -> {
     this.client.notifyNew();  // blocks this thread until queue is empty
   } catch (ClientException e) {
     System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientException: %s\n",
-        this.statControllerClockNow, e.toString());
+        this.statControllerClock, e.toString());
     e.printStackTrace();
   } catch (ClientFatalException e) {
     System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientFatalException: %s\n",
-        this.statControllerClockNow, e.toString());
+        this.statControllerClock, e.toString());
     e.printStackTrace();
     System.exit(1);
   }
@@ -301,7 +301,7 @@ exits the JVM if failure occurs.\\
 <<Definition of server collection loop>>=
 private Runnable ServerLoop = () -> {
   try {
-    int[] output = this.storage.DBQueryServersLocationsActive(this.statControllerClockNow);
+    int[] output = this.storage.DBQueryServersLocationsActive(this.statControllerClock);
     this.client.collectServerLocations(output);
   } catch (SQLException e) {
     if (e.getErrorCode() == 40000) {
@@ -445,7 +445,7 @@ for (int i = 0; i < 6; i++) {
 <<startRealtime(1)>>=
 void startRealtime(final Consumer<Boolean> app_cb) {
   this.storage.setRequestTimeout(REQUEST_TIMEOUT);
-  this.statControllerClockNow = CLOCK_START;
+  this.statControllerClock = CLOCK_START;
 
   int simulation_duration = (CLOCK_END - CLOCK_START);
 
@@ -473,10 +473,10 @@ void startRealtime(final Consumer<Boolean> app_cb) {
 <<startSequential(1)>>=
 void startSequential(final Consumer<Boolean> app_cb) throws Exception {
   this.storage.setRequestTimeout(REQUEST_TIMEOUT);
-  this.statControllerClockNow = CLOCK_START;
-  while (!kill && this.statControllerClockNow < CLOCK_END) {
+  this.statControllerClock = CLOCK_START;
+  while (!kill && this.statControllerClock < CLOCK_END) {
     this.working = true;
-    this.ClockLoop.run();  // this.statControllerClockNow gets incremented here!
+    this.ClockLoop.run();  // this.statControllerClock gets incremented here!
     this.ServerLoop.run();
     this.RequestCollectionLoop.run();
     this.RequestHandlingLoop.run();
@@ -522,7 +522,7 @@ void stop(final Consumer<Boolean> app_cb) {
 \subsection{\texttt{returnRequest}(1)}
 <<returnRequest(1)>>=
 void returnRequest(final int[] r) {
-  if (this.statControllerClockNow - r[2] < QUEUE_TIMEOUT) {
+  if (this.statControllerClock - r[2] < QUEUE_TIMEOUT) {
     this.lu_seen.put(r[0], false);
   }
 }

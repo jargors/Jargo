@@ -738,6 +738,7 @@ public class Storage {
            Map<Integer, int[]> cache  = new HashMap<>();
            Map<Integer, int[]> cache2 = new HashMap<>();
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+             conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
              try {
                final int sq = lu_users.get(sid)[1];
                final int se = lu_users.get(sid)[2];
@@ -880,6 +881,7 @@ public class Storage {
            }
            Map<Integer, int[]> cache = new HashMap<>();
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+             conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
              try {
                final int sq = lu_users.get(sid)[1];
                final int se = lu_users.get(sid)[2];
@@ -986,6 +988,7 @@ public class Storage {
              throw new UserNotFoundException("User "+sid+" not found.");
            }
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+             conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
              try {
                final int sq = lu_users.get(sid)[1];
                final int se = lu_users.get(sid)[2];

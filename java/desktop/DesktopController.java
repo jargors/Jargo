@@ -335,7 +335,7 @@ public class DesktopController {
               final double y2 = this.muf.getUnit()*(v2[1] - this.muf.getLatMin());
               this.gc.setStroke(DEFAULT);
               if (this.traffic != null) {
-                double x = this.traffic.apply(this.edges[i], this.edges[(i + 1)], this.controller.getClockNow());
+                double x = this.traffic.apply(this.edges[i], this.edges[(i + 1)], this.controller.getClock());
                 if (0.0 <= x && x <= 0.33) {
                   this.gc.setStroke(SLOW);
                 } else if (0.33 < x && x <= 0.66) {
@@ -415,7 +415,7 @@ public class DesktopController {
       if (!this.muf.getMapVisible()) {
         return;
       }
-      final int t = this.controller.getClockNow();
+      final int t = this.controller.getClock();
       try {
         int[] active = this.controller.queryServersActive(t);
         for (int i = 0; i < active.length; i++) {
@@ -477,7 +477,7 @@ public class DesktopController {
       if (DEBUG) {
         this.A0 = System.currentTimeMillis();
       }
-      final int t = this.controller.getClockNow();
+      final int t = this.controller.getClock();
       Number val = null;
       try {
         if ("chk_serviceRate".equals(this.id)) {

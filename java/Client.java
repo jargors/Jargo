@@ -15,7 +15,7 @@ public abstract class Client {
   protected Tools tools = new Tools();
   protected final boolean DEBUG =
       "true".equals(System.getProperty("jargors.client.debug"));
-  private long   statClientHandleRequestDurLast = 0;
+  private long   statClientHandleRequestDur = 0;
   public Client() {
     try {
       MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
@@ -28,11 +28,11 @@ public abstract class Client {
       System.err.printf("Continuing with monitoring disabled\n");
     }
   }
+  public long getStatClientHandleRequestDur() {
+           return this.statClientHandleRequestDur;
+         }
   public int getStatClientQueueSize() {
            return this.queue.size();
-         }
-  public long getClientHandleRequestDurLast() {
-           return this.statClientHandleRequestDurLast;
          }
   public final void gtreeLoad(String p) throws FileNotFoundException {
                  this.tools.GTGtreeLoad(p);
@@ -62,7 +62,7 @@ public abstract class Client {
                  while (!this.queue.isEmpty()) {
                    long A0 = System.currentTimeMillis();
                    this.handleRequest(this.queue.remove());
-                   this.statClientHandleRequestDurLast = (System.currentTimeMillis() - A0);
+                   this.statClientHandleRequestDur = (System.currentTimeMillis() - A0);
                  }
                }
   protected void end() { }

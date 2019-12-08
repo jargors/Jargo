@@ -1,13 +1,13 @@
 package com.github.jargors.jmx;
 import com.github.jargors.Communicator;
 public interface CommunicatorMonitorMBean {
-  public long   getStatQueryEdgeDurLast();
-  public long   getStatQueryServerDistanceRemainingDurLast();
-  public long   getStatQueryServerDurationRemainingDurLast();
-  public long   getStatQueryServerLoadMaxDurLast();
-  public long   getStatQueryServerRouteRemainingDurLast();
-  public long   getStatQueryServerScheduleRemainingDurLast();
-  public long   getStatQueryServersLocationsActiveDurLast();
-  public long   getStatQueryUserDurLast();
-  public long   getStatQueryVertexDurLast();
+  public long   getStatQueryEdgeDur();
+  public long   getStatQueryServerDistanceRemainingDur();
+  public long   getStatQueryServerDurationRemainingDur();
+  public long   getStatQueryServerLoadMaxDur();
+  public long   getStatQueryServerRouteRemainingDur();
+  public long   getStatQueryServerScheduleRemainingDur();
+  public long   getStatQueryServersLocationsActiveDur();
+  public long   getStatQueryUserDur();
+  public long   getStatQueryVertexDur();
 }

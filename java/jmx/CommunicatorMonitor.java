@@ -6,32 +6,32 @@ public class CommunicatorMonitor implements CommunicatorMonitorMBean {
   public CommunicatorMonitor(final Communicator communicator) {
     this.communicator = communicator;
   }
-  public long   getStatQueryEdgeDurLast() {
-    return this.communicator.getStatQueryEdgeDurLast();
+  public long   getStatQueryEdgeDur() {
+    return this.communicator.getStatQueryEdgeDur();
   }
-  public long   getStatQueryServerDistanceRemainingDurLast() {
-    return this.communicator.getStatQueryServerDistanceRemainingDurLast();
+  public long   getStatQueryServerDistanceRemainingDur() {
+    return this.communicator.getStatQueryServerDistanceRemainingDur();
   }
-  public long   getStatQueryServerDurationRemainingDurLast() {
-    return this.communicator.getStatQueryServerDurationRemainingDurLast();
+  public long   getStatQueryServerDurationRemainingDur() {
+    return this.communicator.getStatQueryServerDurationRemainingDur();
   }
-  public long   getStatQueryServerLoadMaxDurLast() {
-    return this.communicator.getStatQueryServerLoadMaxDurLast();
+  public long   getStatQueryServerLoadMaxDur() {
+    return this.communicator.getStatQueryServerLoadMaxDur();
   }
-  public long   getStatQueryServerRouteRemainingDurLast() {
-    return this.communicator.getStatQueryServerRouteRemainingDurLast();
+  public long   getStatQueryServerRouteRemainingDur() {
+    return this.communicator.getStatQueryServerRouteRemainingDur();
   }
-  public long   getStatQueryServerScheduleRemainingDurLast() {
-    return this.communicator.getStatQueryServerScheduleRemainingDurLast();
+  public long   getStatQueryServerScheduleRemainingDur() {
+    return this.communicator.getStatQueryServerScheduleRemainingDur();
   }
-  public long   getStatQueryServersLocationsActiveDurLast() {
-    return this.communicator.getStatQueryServersLocationsActiveDurLast();
+  public long   getStatQueryServersLocationsActiveDur() {
+    return this.communicator.getStatQueryServersLocationsActiveDur();
   }
-  public long   getStatQueryUserDurLast() {
-    return this.communicator.getStatQueryUserDurLast();
+  public long   getStatQueryUserDur() {
+    return this.communicator.getStatQueryUserDur();
   }
-  public long   getStatQueryVertexDurLast() {
-    return this.communicator.getStatQueryVertexDurLast();
+  public long   getStatQueryVertexDur() {
+    return this.communicator.getStatQueryVertexDur();
   }
 }
 
