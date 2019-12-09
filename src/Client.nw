@@ -74,6 +74,15 @@ void addRequest(final int[] r) {
 }
 @ %def addRequest
 
+\subsection{\texttt{dropRequests}(1)}
+<<dropRequests(1)>>=
+int dropRequests(final int deadline) {
+  final int temp = this.queue.size();
+  this.queue.removeIf((r) -> { return r[2] < deadline; });
+  return Math.max(0, temp - this.queue.size());
+}
+@ %def dropRequests
+
 \subsection{\texttt{collectServerLocations}(1)}
 Array [[src]] =
 

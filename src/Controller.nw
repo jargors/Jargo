@@ -210,8 +210,11 @@ failure occurs.\\
 private Runnable RequestCollectionLoop = () -> {
   long A0 = System.currentTimeMillis();
   int  A1 = 0;
+  int  A2 = 0;
+  final int now = this.statControllerClock;
   try {
-    int[] output = this.storage.DBQueryRequestsQueued(this.statControllerClock);
+    A2 = this.client.dropRequests(now - QUEUE_TIMEOUT);
+    int[] output = this.storage.DBQueryRequestsQueued(now);
     for (int i = 0; i < (output.length - 6); i += 7) {
       if (!this.lu_seen.containsKey(output[i]) || this.lu_seen.get(output[i]) == false) {
         this.client.addRequest(new int[] {

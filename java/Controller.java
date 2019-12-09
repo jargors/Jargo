@@ -93,8 +93,11 @@ public class Controller {
   private Runnable RequestCollectionLoop = () -> {
     long A0 = System.currentTimeMillis();
     int  A1 = 0;
+    int  A2 = 0;
+    final int now = this.statControllerClock;
     try {
-      int[] output = this.storage.DBQueryRequestsQueued(this.statControllerClock);
+      A2 = this.client.dropRequests(now - QUEUE_TIMEOUT);
+      int[] output = this.storage.DBQueryRequestsQueued(now);
       for (int i = 0; i < (output.length - 6); i += 7) {
         if (!this.lu_seen.containsKey(output[i]) || this.lu_seen.get(output[i]) == false) {
           this.client.addRequest(new int[] {
@@ -121,6 +124,7 @@ public class Controller {
       }
     }
     this.statControllerRequestCollectionSize = A1;
+    this.statControllerRequestCollectionDropped = A2;
     this.statControllerRequestCollectionDur = (System.currentTimeMillis() - A0);
   };
   private Runnable RequestHandlingLoop = () -> {
@@ -159,6 +163,7 @@ public class Controller {
   private int    statControllerClockReferenceMinute;
   private int    statControllerClockReferenceSecond;
   private int    statControllerRequestCollectionSize = 0;
+  private int    statControllerRequestCollectionDropped = 0;
   private long   statControllerRequestCollectionDur = 0;
   private long statQueryDur = 0;
   private long statQueryEdgeDur = 0;
@@ -229,11 +234,14 @@ public class Controller {
   public int    getStatControllerClockReferenceSecond() {
            return this.statControllerClockReferenceSecond;
          }
-  public long   getStatControllerRequestCollectionDur() {
-           return this.statControllerRequestCollectionDur;
-         }
   public int    getStatControllerRequestCollectionSize() {
            return this.statControllerRequestCollectionSize;
+         }
+  public int    getStatControllerRequestCollectionDropped() {
+           return this.statControllerRequestCollectionDropped;
+         }
+  public long   getStatControllerRequestCollectionDur() {
+           return this.statControllerRequestCollectionDur;
          }
   public long getStatQueryDur() {
            return this.statQueryDur;

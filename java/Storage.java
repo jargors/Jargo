@@ -739,6 +739,12 @@ public class Storage {
            Map<Integer, int[]> cache2 = new HashMap<>();
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
              conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+             Statement temp = conn.createStatement();
+             temp.execute("LOCK TABLE CQ IN EXCLUSIVE MODE");
+             temp.execute("LOCK TABLE CW IN EXCLUSIVE MODE");
+             temp.execute("LOCK TABLE W IN EXCLUSIVE MODE");
+             temp.execute("LOCK TABLE PD IN EXCLUSIVE MODE");
+             temp.execute("LOCK TABLE CPD IN EXCLUSIVE MODE");
              try {
                final int sq = lu_users.get(sid)[1];
                final int se = lu_users.get(sid)[2];
@@ -882,6 +888,12 @@ public class Storage {
            Map<Integer, int[]> cache = new HashMap<>();
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
              conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+             Statement temp = conn.createStatement();
+             temp.execute("LOCK TABLE CQ IN EXCLUSIVE MODE");
+             temp.execute("LOCK TABLE CW IN EXCLUSIVE MODE");
+             temp.execute("LOCK TABLE W IN EXCLUSIVE MODE");
+             temp.execute("LOCK TABLE PD IN EXCLUSIVE MODE");
+             temp.execute("LOCK TABLE CPD IN EXCLUSIVE MODE");
              try {
                final int sq = lu_users.get(sid)[1];
                final int se = lu_users.get(sid)[2];
@@ -989,6 +1001,12 @@ public class Storage {
            }
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
              conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+             Statement temp = conn.createStatement();
+             temp.execute("LOCK TABLE CQ IN EXCLUSIVE MODE");
+             temp.execute("LOCK TABLE CW IN EXCLUSIVE MODE");
+             temp.execute("LOCK TABLE W IN EXCLUSIVE MODE");
+             temp.execute("LOCK TABLE PD IN EXCLUSIVE MODE");
+             temp.execute("LOCK TABLE CPD IN EXCLUSIVE MODE");
              try {
                final int sq = lu_users.get(sid)[1];
                final int se = lu_users.get(sid)[2];

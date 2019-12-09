@@ -55,6 +55,11 @@ public abstract class Client {
   public final void addRequest(final int[] r) {
                  this.queue.add(r);
                }
+  public final int dropRequests(final int deadline) {
+                 final int temp = this.queue.size();
+                 this.queue.removeIf((r) -> { return r[2] < deadline; });
+                 return Math.max(0, temp - this.queue.size());
+               }
   public final void collectServerLocations(final int[] src) {
                  this.endCollectServerLocations(src.clone());
                }

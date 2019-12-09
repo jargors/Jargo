@@ -7,6 +7,7 @@ public interface ControllerMonitorMBean {
   public int  getStatControllerClockReferenceMinute();
   public int  getStatControllerClockReferenceSecond();
   public int  getStatControllerRequestCollectionSize();
+  public int  getStatControllerRequestCollectionDropped();
   public long getStatControllerRequestCollectionDur();
   public long getStatQueryDur();
   public long getStatQueryEdgeDur();

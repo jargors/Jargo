@@ -24,6 +24,9 @@ public class ControllerMonitor implements ControllerMonitorMBean {
   public int getStatControllerRequestCollectionSize() {
     return this.controller.getStatControllerRequestCollectionSize();
   }
+  public int getStatControllerRequestCollectionDropped() {
+    return this.controller.getStatControllerRequestCollectionDropped();
+  }
   public long getStatControllerRequestCollectionDur() {
     return this.controller.getStatControllerRequestCollectionDur();
   }

@@ -83,8 +83,9 @@ public <<Get: getStatControllerClockReferenceDay(0)>>
 public <<Get: getStatControllerClockReferenceHour(0)>>
 public <<Get: getStatControllerClockReferenceMinute(0)>>
 public <<Get: getStatControllerClockReferenceSecond(0)>>
-public <<Get: getStatControllerRequestCollectionDur(0)>>
 public <<Get: getStatControllerRequestCollectionSize(0)>>
+public <<Get: getStatControllerRequestCollectionDropped(0)>>
+public <<Get: getStatControllerRequestCollectionDur(0)>>
 public <<Get: getStatQueryDur(0)>>
 public <<Get: getStatQueryEdgeDur(0)>>
 public <<Get: getStatQueryEdgeStatisticsDur(0)>>
@@ -230,6 +231,7 @@ private int    statControllerClockReferenceSecond;
 \subsection{Stats members: controllerRequestCollection}
 <<Stats members: controllerRequestCollection>>=
 private int    statControllerRequestCollectionSize = 0;
+private int    statControllerRequestCollectionDropped = 0;
 private long   statControllerRequestCollectionDur = 0;
 @
 
@@ -461,6 +463,7 @@ private long statUpdateServerRouteDur = 0;
 \subsection{Stats: controllerRequestCollection}
 <<Stats: controllerRequestCollection>>=
 this.statControllerRequestCollectionSize = A1;
+this.statControllerRequestCollectionDropped = A2;
 this.statControllerRequestCollectionDur = (System.currentTimeMillis() - A0);
 @
 
@@ -737,6 +740,13 @@ int    getStatControllerRequestCollectionSize() {
   return this.statControllerRequestCollectionSize;
 }
 @ %def getStatControllerRequestCollectionSize
+
+\subsection{Get: getStatControllerRequestCollectionDropped(0)}
+<<Get: getStatControllerRequestCollectionDropped(0)>>=
+int    getStatControllerRequestCollectionDropped() {
+  return this.statControllerRequestCollectionDropped;
+}
+@ %def getStatControllerRequestCollectionDropped
 
 \subsection{Get: getStatControllerRequestCollectionDur(0)}
 <<Get: getStatControllerRequestCollectionDur(0)>>=
