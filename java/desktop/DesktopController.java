@@ -59,6 +59,7 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -84,7 +85,6 @@ public class DesktopController {
   @FXML private Button btn_gtree;
   @FXML private Button btn_load;
   @FXML private Button btn_new;
-  @FXML private Button btn_pause;
   @FXML private Button btn_prob;
   @FXML private Button btn_road;
   @FXML private Button btn_startreal;
@@ -146,6 +146,8 @@ public class DesktopController {
   private String trafficclass = null;
   private String trafficjar = null;
   private Traffic traffic = null;
+  private ImageView logo = null;
+  private int access_path = 1;  // 1="New", 2="Load"
   private FetcherOfMapUnits muf = null;
   private GraphicsContext gc = null;
   private Map<String, ScheduledFuture<?>> cbFetcherOfMetrics = null;
@@ -624,10 +626,16 @@ public class DesktopController {
   private ConcurrentHashMap<String, ConcurrentHashMap<String, Series<Number, Number>>> lu_series =
       new ConcurrentHashMap<String, ConcurrentHashMap<String, Series<Number, Number>>>();
   public void actionAbout(final ActionEvent e) {
-           // ...
+           Alert alert = new Alert(AlertType.INFORMATION, "https:github.com/jargors");
+           alert.setTitle("About");
+           alert.setHeaderText("Jargo Desktop v1.0.0");
+           alert.setGraphic(this.logo);
+           alert.showAndWait();
          }
   public void actionClient(final ActionEvent e) {
            this.btn_client   .setDisable(true);
+           this.tf_client    .setDisable(true);
+           this.btn_stop     .setDisable(true);
            this.tabpane      .setDisable(true);
            this.circ_status  .setFill(C_WARN);
            this.lbl_status   .setText("Select *.jar...");
@@ -653,44 +661,74 @@ public class DesktopController {
          /******/
                if (classNames.size() == 0) {
                  Platform.runLater(() -> {
+                   this.circ_status  .setFill(C_ERROR);
+                   this.lbl_status   .setText("Bad jar!");
+                   Alert alert = new Alert(AlertType.ERROR, "Couldn't load client!");
+                   alert.showAndWait();
+                   this.btn_client   .setDisable(false);
+                   this.tf_client    .setDisable(false);
+                   this.btn_stop     .setDisable(false);
+                   this.tabpane      .setDisable(false);
+                   this.circ_status  .setFill(C_SUCCESS);
+                   this.lbl_status   .setText("Ready.");
+                 });
+                 Platform.runLater(() -> {
                    this.stage.getScene().setCursor(Cursor.DEFAULT);
                  });
-                 System.err.println("Bad jar?");
                  return;
                }
-               this.clientclass = classNames.get(0);
-             } catch (IOException ie) {
+               Platform.runLater(() -> {
+                 this.clientclass = classNames.get(0);
+                 this.btn_client   .setText(cj.getName());
+                 this.tf_client    .setText(this.clientclass);
+                 this.tf_client    .setDisable(false);
+                 this.btn_traffic  .setDisable(false);
+                 this.tf_traffic   .setDisable(false);
+                 this.tf_t0        .setDisable(false);
+                 this.tf_t1        .setDisable(false);
+                 this.btn_startseq .setDisable(false);
+                 this.btn_startreal.setDisable(false);
+                 this.btn_stop     .setDisable(false);
+                 this.tabpane      .setDisable(false);
+                 this.circ_status  .setFill(C_SUCCESS);
+                 this.lbl_status   .setText("Loaded "+cj.getName());
+               });
                Platform.runLater(() -> {
                  this.stage.getScene().setCursor(Cursor.DEFAULT);
                });
-               System.err.println(ie.toString());
-               return;
+             } catch (IOException ie) {
+               Platform.runLater(() -> {
+                 this.circ_status  .setFill(C_ERROR);
+                 this.lbl_status   .setText("Bad jar!");
+                 Alert alert = new Alert(AlertType.ERROR, "Couldn't load client!");
+                 alert.showAndWait();
+                 this.btn_client   .setDisable(false);
+                 this.tf_client    .setDisable(false);
+                 this.btn_stop     .setDisable(false);
+                 this.tabpane      .setDisable(false);
+                 this.circ_status  .setFill(C_SUCCESS);
+                 this.lbl_status   .setText("Ready.");
+               });
+               Platform.runLater(() -> {
+                 this.stage.getScene().setCursor(Cursor.DEFAULT);
+               });
              }
-             this.tf_client.setText(this.clientclass);
-             this.btn_client   .setText(cj.getName());
-             this.tf_client     .setDisable(false);
-             this.tf_t0        .setDisable(false);
-             this.tf_t1        .setDisable(false);
-             this.btn_startseq .setDisable(false);
-             this.btn_startreal.setDisable(false);
+           } else {
+             // FD cancelled
+             this.btn_client   .setDisable(false);
+             this.tf_client    .setDisable(false);
+             this.btn_stop     .setDisable(false);
              this.tabpane      .setDisable(false);
              this.circ_status  .setFill(C_SUCCESS);
-             this.lbl_status   .setText("Loaded "+cj.getName());
-             Platform.runLater(() -> {
-               this.stage.getScene().setCursor(Cursor.DEFAULT);
-             });
+             this.lbl_status   .setText("Ready.");
            }
          }
   public void actionGitHub(final ActionEvent e) {
            // ...
          }
   public void actionGtree(final ActionEvent e) {
-           boolean state_btn_prob = this.btn_prob.isDisabled();
-           boolean state_btn_road = this.btn_road.isDisabled();
-           this.btn_prob     .setDisable(true);
-           this.btn_road     .setDisable(true);
-           this.btn_stop     .setDisable(true);
            this.btn_gtree    .setDisable(true);
+           this.btn_stop     .setDisable(true);
            this.tabpane      .setDisable(true);
            this.circ_status  .setFill(C_WARN);
            this.lbl_status   .setText("Select *.gtree...");
@@ -701,44 +739,55 @@ public class DesktopController {
              Platform.runLater(() -> {
                this.stage.getScene().setCursor(Cursor.WAIT);
              });
-             if (this.gtree != null) {
-               this.controller.gtreeClose();
-             }
              this.gtree = gt.toString();
+             this.circ_status.setFill(C_WARN);
              this.lbl_status.setText("Load '"+this.gtree+"'...");
              CompletableFuture.runAsync(() -> {
                try {
                  this.controller.gtreeLoad(this.gtree);
                  Platform.runLater(() -> {
-                   this.btn_prob     .setDisable(state_btn_prob);
-                   this.btn_road     .setDisable(state_btn_road);
-                   this.btn_stop     .setDisable(false);
-                   if (this.road != null && this.prob == null) {
+                   if (this.access_path == 1) {
                      this.btn_prob   .setDisable(false);
-                   }
-                   if (this.road != null && this.prob != null) {
+                   } else if (this.access_path == 2) {
                      this.btn_client .setDisable(false);
-                     this.btn_traffic.setDisable(false);
+                     this.tf_client  .setDisable(false);
                    }
-                   this.tabpane      .setDisable(false);
                    this.btn_gtree    .setText(gt.getName());
+                   this.btn_stop     .setDisable(false);
+                   this.tabpane      .setDisable(false);
                    this.circ_status  .setFill(C_SUCCESS);
                    this.lbl_status   .setText("Loaded "+gt.getName());
+                 });
+                 Platform.runLater(() -> {
                    this.stage.getScene().setCursor(Cursor.DEFAULT);
                  });
-               } catch (FileNotFoundException fe) {
-                 System.err.println("Failed: "+fe.toString());
-                 return;
+               } catch (Exception ee) {
+                 if (DEBUG) {
+                   System.err.println("Failed: "+ee.toString());
+                 }
+                 Platform.runLater(() -> {
+                   this.circ_status  .setFill(C_ERROR);
+                   this.lbl_status   .setText("Failed to load G-tree!");
+                   Alert alert = new Alert(AlertType.ERROR, "Couldn't load G-tree!");
+                   alert.showAndWait();
+                   this.btn_gtree    .setDisable(false);
+                   this.btn_stop     .setDisable(false);
+                   this.tabpane      .setDisable(false);
+                   this.circ_status  .setFill(C_SUCCESS);
+                   this.lbl_status   .setText("Ready.");
+                 });
+                 Platform.runLater(() -> {
+                   this.stage.getScene().setCursor(Cursor.DEFAULT);
+                 });
                }
              });
            } else {
-             this.btn_prob     .setDisable(state_btn_prob);
-             this.btn_road     .setDisable(state_btn_road);
-             this.btn_stop     .setDisable(false);
+             // FD cancelled
              this.btn_gtree    .setDisable(false);
+             this.btn_stop     .setDisable(false);
              this.tabpane      .setDisable(false);
              this.circ_status  .setFill(C_SUCCESS);
-             this.lbl_status   .setText("Cancelled load gtree.");
+             this.lbl_status   .setText("Ready.");
            }
          }
   public void actionLoad(final ActionEvent e) {
@@ -766,44 +815,57 @@ public class DesktopController {
                  int ns = this.controller.queryServersCount()[0];
                  int nr = this.controller.queryRequestsCount()[0];
                  Platform.runLater(() -> {
-                   this.btn_prob     .setDisable(true);
+                   this.access_path = 2;
                    this.btn_prob     .setText("*in-instance problem*");
                    this.prob = "*in-instance problem*";
-                   this.btn_road     .setDisable(true);
                    this.btn_road     .setText("*in-instance road network*");
                    this.road = "*in-instance road network*";
                    this.btn_gtree    .setDisable(false);
                    this.btn_stop     .setDisable(false);
+                   this.tabpane      .setDisable(false);
                    this.circ_status  .setFill(C_SUCCESS);
                    this.lbl_status   .setText("Loaded Jargo instance (#vertices="+nv+"; #edges="+ne+") (#servers="+ns+"; #requests="+nr+")");
-                   this.tabpane      .setDisable(false);
                    this.container_canvas.setContent(null);
                    this.container_lc_rates.getChildren().clear();
                    this.container_lc_distances.getChildren().clear();
                    this.container_lc_durations.getChildren().clear();
                    this.initializeCanvas();
+                   this.ren_road = new RendererOfRoads(this.can_road.getGraphicsContext2D(), this.controller, this.muf);
+                   this.ren_road.start();
+                 });
+                 Platform.runLater(() -> {
                    this.stage.getScene().setCursor(Cursor.DEFAULT);
                  });
                } catch (SQLException se) {
+                 if (DEBUG) {
+                   Tools.PrintSQLException(se);
+                 }
                  Platform.runLater(() -> {
-                   this.stage.getScene().setCursor(Cursor.DEFAULT);
                    this.circ_status  .setFill(C_ERROR);
                    this.lbl_status   .setText("Failed to load snapshot!");
                    Alert alert = new Alert(AlertType.ERROR, "Couldn't load snapshot! (Not a valid Jargo instance?)");
                    alert.showAndWait();
+                   this.btn_new      .setDisable(false);
+                   this.btn_load     .setDisable(false);
+                   this.btn_stop     .setDisable(false);
+                   this.tabpane      .setDisable(false);
                    this.circ_status  .setFill(C_SUCCESS);
                    this.lbl_status   .setText("Ready.");
                  });
-                 if (DEBUG) {
-                   Tools.PrintSQLException(se);
-                 }
+                 Platform.runLater(() -> {
+                   this.stage.getScene().setCursor(Cursor.DEFAULT);
+                 });
                }
              });
+           } else {
+             // FD canceled
+             this.btn_new      .setDisable(false);
+             this.btn_load     .setDisable(false);
+             this.btn_stop     .setDisable(false);
+             this.tabpane      .setDisable(false);
+             this.circ_status  .setFill(C_SUCCESS);
+             this.lbl_status   .setText("Ready.");
            }
-           this.btn_new      .setDisable(false);
-           this.btn_load     .setDisable(false);
-           this.btn_stop     .setDisable(false);
-           this.tabpane      .setDisable(false);
          }
   public void actionNew(final ActionEvent e) {
            Platform.runLater(() -> {
@@ -820,18 +882,16 @@ public class DesktopController {
              try {
                this.controller.instanceNew();
              } catch (SQLException se) {
-               System.err.println("Could not create new instance");
+               Alert alert = new Alert(AlertType.ERROR, se.getMessage());
+               alert.showAndWait();
                System.exit(1);
              }
              this.controller.instanceInitialize();
              this.db = "no-name";
              Platform.runLater(() -> {
+               this.access_path = 1;
                this.btn_road     .setDisable(false);
-               this.btn_gtree    .setDisable(false);
                this.btn_stop     .setDisable(false);
-               this.tf_client    .setDisable(false);
-               this.tf_t0        .setDisable(false);
-               this.tf_t1        .setDisable(false);
                this.tabpane      .setDisable(false);
                this.container_canvas.setContent(null);
                this.container_lc_rates.getChildren().clear();
@@ -839,12 +899,15 @@ public class DesktopController {
                this.container_lc_durations.getChildren().clear();
                this.circ_status.setFill(C_SUCCESS);
                this.lbl_status.setText("Created new Jargo instance.");
+             });
+             Platform.runLater(() -> {
                this.stage.getScene().setCursor(Cursor.DEFAULT);
              });
            });
          }
   public void actionProb(final ActionEvent e) {
            this.btn_prob     .setDisable(true);
+           this.btn_stop     .setDisable(true);
            this.tabpane      .setDisable(true);
            this.circ_status  .setFill(C_WARN);
            this.lbl_status   .setText("Select *.instance...");
@@ -865,49 +928,50 @@ public class DesktopController {
                  Platform.runLater(() -> {
                    this.btn_prob     .setText(pb.getName());
                    this.btn_client   .setDisable(false);
-                   this.btn_traffic  .setDisable(false);
+                   this.tf_client    .setDisable(false);
+                   this.btn_stop     .setDisable(false);
                    this.tabpane      .setDisable(false);
                    this.circ_status  .setFill(C_SUCCESS);
                    this.lbl_status   .setText("Loaded "+pb.getName()+"(#servers="+ns+"; #requests="+nr+")");
+                 });
+                 Platform.runLater(() -> {
                    this.stage.getScene().setCursor(Cursor.DEFAULT);
                  });
-               } catch (FileNotFoundException fe) {
-                 System.err.println("File not found: "+fe.toString());
-                 return;
-               } catch (DuplicateUserException de) {
-                 System.err.println("Duplicate user: "+de.toString());
-                 return;
-               } catch (EdgeNotFoundException ee) {
-                 System.err.println("Edge not found: "+ee.toString());
-                 return;
-               } catch (SQLException se) {
-                 System.err.println("SQL error:");
-                 Tools.PrintSQLException(se);
-                 return;
-               } catch (GtreeNotLoadedException ge) {
-                 System.err.println("Gtree not loaded? "+ge.toString());
-                 return;
-               } catch (GtreeIllegalSourceException ge) {
-                 System.err.println("Gtree illegal source? "+ge.toString());
-                 return;
-               } catch (GtreeIllegalTargetException ge) {
-                 System.err.println("Gtree illegal target? "+ge.toString());
-                 return;
+               } catch (Exception ee) {
+                 if (DEBUG) {
+                   System.err.println(ee.toString());
+                 }
+                 Platform.runLater(() -> {
+                   this.circ_status  .setFill(C_ERROR);
+                   this.lbl_status   .setText("Failed to load problem!");
+                   Alert alert = new Alert(AlertType.ERROR, "Couldn't load problem! (Not a valid Jargo instance?)");
+                   alert.showAndWait();
+                   this.btn_prob     .setDisable(false);
+                   this.btn_stop     .setDisable(false);
+                   this.tabpane      .setDisable(false);
+                   this.circ_status  .setFill(C_SUCCESS);
+                   this.lbl_status   .setText("Ready.");
+                 });
+                 Platform.runLater(() -> {
+                   this.stage.getScene().setCursor(Cursor.DEFAULT);
+                 });
                }
              });
+           } else {
+             // FD cancelled
+             this.btn_prob     .setDisable(false);
+             this.btn_stop     .setDisable(false);
+             this.tabpane      .setDisable(false);
+             this.circ_status  .setFill(C_SUCCESS);
+             this.lbl_status   .setText("Ready.");
            }
          }
   public void actionQuit(final ActionEvent e) {
            System.exit(0);
          }
   public void actionRoad(final ActionEvent e) {
-           boolean state_btn_gtree = this.btn_gtree.isDisabled();
            this.btn_road     .setDisable(true);
-           this.btn_gtree    .setDisable(true);
            this.btn_stop     .setDisable(true);
-           this.tf_client    .setDisable(true);
-           this.tf_t0        .setDisable(true);
-           this.tf_t1        .setDisable(true);
            this.tabpane      .setDisable(true);
            this.circ_status  .setFill(C_WARN);
            this.lbl_status   .setText("Select *.rnet...");
@@ -926,15 +990,9 @@ public class DesktopController {
                  int nv = this.controller.queryVerticesCount()[0];
                  int ne = this.controller.queryEdgesCount()[0];
                  Platform.runLater(() -> {
-                   this.btn_gtree    .setDisable(state_btn_gtree);
-                   this.btn_stop     .setDisable(false);
                    this.btn_road     .setText(road.getName());
-                   if (this.gtree != null) {
-                     this.btn_prob   .setDisable(false);
-                   }
-                   this.tf_client    .setDisable(false);
-                   this.tf_t0        .setDisable(false);
-                   this.tf_t1        .setDisable(false);
+                   this.btn_stop     .setDisable(false);
+                   this.btn_gtree    .setDisable(false);
                    this.tabpane      .setDisable(false);
                    this.circ_status  .setFill(C_SUCCESS);
                    this.lbl_status   .setText("Loaded "+road.getName()+" (#vertices="+nv+"; #edges="+ne+")");
@@ -943,13 +1001,34 @@ public class DesktopController {
                    this.ren_road = new RendererOfRoads(this.can_road.getGraphicsContext2D(), this.controller, this.muf);
                    this.ren_road.start();
                  });
-               } catch (FileNotFoundException fe) {
-                 System.err.println("Failed: "+fe.toString());
-               } catch (SQLException se) {
-                 System.err.println("SQL error:");
-                 Tools.PrintSQLException(se);
+                 Platform.runLater(() -> {
+                   this.stage.getScene().setCursor(Cursor.DEFAULT);
+                 });
+               } catch (Exception ee) {
+                 if (DEBUG) {
+                   System.err.println("Failed: "+ee.toString());
+                 }
+                 this.circ_status  .setFill(C_ERROR);
+                 this.lbl_status   .setText("Failed to load road network!");
+                 Alert alert = new Alert(AlertType.ERROR, "Couldn't load road network! (Not a valid Jargo *.rnet?)");
+                 alert.showAndWait();
+                 this.btn_road     .setDisable(false);
+                 this.btn_stop     .setDisable(false);
+                 this.tabpane      .setDisable(false);
+                 this.circ_status  .setFill(C_SUCCESS);
+                 this.lbl_status   .setText("Ready.");
+                 Platform.runLater(() -> {
+                   this.stage.getScene().setCursor(Cursor.DEFAULT);
+                 });
                }
              });
+           } else {
+             // FD cancelled
+             this.btn_road     .setDisable(false);
+             this.btn_stop     .setDisable(false);
+             this.tabpane      .setDisable(false);
+             this.circ_status  .setFill(C_SUCCESS);
+             this.lbl_status   .setText("Ready.");
            }
          }
   public void actionStartRealtime(final ActionEvent e) {
@@ -1323,6 +1402,9 @@ public class DesktopController {
                  this.controller, this.lbl_status, this.muf, this.ren_servers), 0, 1, TimeUnit.SECONDS);
          }
   public void actionStop(final ActionEvent e) {
+           Platform.runLater(() -> {
+             this.stage.getScene().setCursor(Cursor.WAIT);
+           });
            if (this.controller != null) {
              this.btn_stop     .setDisable(true);
              this.vbox_metrics_rates.setDisable(true);
@@ -1354,8 +1436,12 @@ public class DesktopController {
              this.chk_countServersViolations.setSelected(false);
              this.chk_timeRequestHandling.setSelected(false);
              this.chk_timeServerHandling.setSelected(false);
-             this.ren_road.stop();
-             this.ren_servers.stop();
+             if (this.ren_road != null) {
+               this.ren_road.stop();
+             }
+             if (this.ren_servers != null) {
+               this.ren_servers.stop();
+             }
              if (this.exe != null) {
                this.exe.shutdown();
              }
@@ -1403,8 +1489,32 @@ public class DesktopController {
                    this.btn_startseq .setDisable(true);
                    this.btn_startreal.setDisable(true);
                    this.db = null;
+                   this.rates_x = new NumberAxis();
+                   this.rates_y = new NumberAxis();
+                   this.distances_x = new NumberAxis();
+                   this.distances_y = new NumberAxis();
+                   this.durations_x = new NumberAxis();
+                   this.durations_y = new NumberAxis();
+                   this.counts_x = new NumberAxis();
+                   this.counts_y = new NumberAxis();
+                   this.times_x = new NumberAxis();
+                   this.times_y = new NumberAxis();
+                   this.lc_rates = new LineChart<Number, Number>(rates_x, rates_y);
+                   this.lc_distances = new LineChart<Number, Number>(distances_x, distances_y);
+                   this.lc_durations = new LineChart<Number, Number>(durations_x, durations_y);
+                   this.lc_counts = new LineChart<Number, Number>(counts_x, counts_y);
+                   this.lc_times = new LineChart<Number, Number>(times_x, times_y);
+                   this.lc_rates_series = new ConcurrentHashMap<String, Series<Number, Number>>();
+                   this.lc_distances_series = new ConcurrentHashMap<String, Series<Number, Number>>();
+                   this.lc_durations_series = new ConcurrentHashMap<String, Series<Number, Number>>();
+                   this.lc_counts_series = new ConcurrentHashMap<String, Series<Number, Number>>();
+                   this.lc_times_series = new ConcurrentHashMap<String, Series<Number, Number>>();
+                   this.lu_series = new ConcurrentHashMap<String, ConcurrentHashMap<String, Series<Number, Number>>>();
                    this.circ_status.setFill(C_SUCCESS);
                    this.lbl_status.setText("Closed instance.");
+                 });
+                 Platform.runLater(() -> {
+                   this.stage.getScene().setCursor(Cursor.DEFAULT);
                  });
                } catch (SQLException se) {
                  System.err.println("Failure");
@@ -1412,12 +1522,21 @@ public class DesktopController {
                }
              });
            } else {
-             this.lbl_status.setText("Ready.");
+             Platform.runLater(() -> {
+               this.stage.getScene().setCursor(Cursor.DEFAULT);
+             });
            }
          }
   public void actionTraffic(final ActionEvent e) {
            this.btn_traffic  .setDisable(true);
+           this.tf_traffic   .setDisable(true);
+           this.tf_client    .setDisable(true);
+           this.btn_stop     .setDisable(true);
            this.tabpane      .setDisable(true);
+           this.tf_t0        .setDisable(true);
+           this.tf_t1        .setDisable(true);
+           this.btn_startseq .setDisable(true);
+           this.btn_startreal.setDisable(true);
            this.circ_status  .setFill(C_WARN);
            this.lbl_status   .setText("Select *.jar...");
            FileChooser fc = new FileChooser();
@@ -1442,28 +1561,80 @@ public class DesktopController {
          /******/
                if (classNames.size() == 0) {
                  Platform.runLater(() -> {
+                   this.circ_status  .setFill(C_ERROR);
+                   this.lbl_status   .setText("Bad jar!");
+                   Alert alert = new Alert(AlertType.ERROR, "Couldn't load traffic!");
+                   alert.showAndWait();
+                   this.btn_traffic  .setDisable(false);
+                   this.tf_traffic   .setDisable(false);
+                   this.tf_client    .setDisable(false);
+                   this.btn_stop     .setDisable(false);
+                   this.tabpane      .setDisable(false);
+                   this.tf_t0        .setDisable(false);
+                   this.tf_t1        .setDisable(false);
+                   this.btn_startseq .setDisable(false);
+                   this.btn_startreal.setDisable(false);
+                   this.circ_status  .setFill(C_SUCCESS);
+                   this.lbl_status   .setText("Ready.");
+                 });
+                 Platform.runLater(() -> {
                    this.stage.getScene().setCursor(Cursor.DEFAULT);
                  });
-                 System.err.println("Bad jar?");
                  return;
                }
-               this.trafficclass = classNames.get(0);
-             } catch (IOException ie) {
+               Platform.runLater(() -> {
+                 this.trafficclass = classNames.get(0);
+                 this.tf_traffic   .setText(this.trafficclass);
+                 this.btn_traffic  .setText(cj.getName());
+                 this.tf_traffic   .setDisable(false);
+                 this.tf_client    .setDisable(false);
+                 this.btn_stop     .setDisable(false);
+                 this.tabpane      .setDisable(false);
+                 this.tf_t0        .setDisable(false);
+                 this.tf_t1        .setDisable(false);
+                 this.btn_startseq .setDisable(false);
+                 this.btn_startreal.setDisable(false);
+                 this.circ_status  .setFill(C_SUCCESS);
+                 this.lbl_status   .setText("Loaded "+cj.getName());
+               });
                Platform.runLater(() -> {
                  this.stage.getScene().setCursor(Cursor.DEFAULT);
                });
-               System.err.println(ie.toString());
-               return;
+             } catch (IOException ie) {
+               Platform.runLater(() -> {
+                 this.circ_status  .setFill(C_ERROR);
+                 this.lbl_status   .setText("Bad jar!");
+                 Alert alert = new Alert(AlertType.ERROR, "Couldn't load traffic!");
+                 alert.showAndWait();
+                 this.btn_traffic  .setDisable(false);
+                 this.tf_traffic   .setDisable(false);
+                 this.tf_client    .setDisable(false);
+                 this.btn_stop     .setDisable(false);
+                 this.tabpane      .setDisable(false);
+                 this.tf_t0        .setDisable(false);
+                 this.tf_t1        .setDisable(false);
+                 this.btn_startseq .setDisable(false);
+                 this.btn_startreal.setDisable(false);
+                 this.circ_status  .setFill(C_SUCCESS);
+                 this.lbl_status   .setText("Ready.");
+               });
+               Platform.runLater(() -> {
+                 this.stage.getScene().setCursor(Cursor.DEFAULT);
+               });
              }
-             this.tf_traffic   .setText(this.trafficclass);
-             this.btn_traffic  .setText(cj.getName());
+           } else {
+             // FD cancelled
+             this.btn_traffic  .setDisable(false);
              this.tf_traffic   .setDisable(false);
+             this.tf_client    .setDisable(false);
+             this.btn_stop     .setDisable(false);
              this.tabpane      .setDisable(false);
+             this.tf_t0        .setDisable(false);
+             this.tf_t1        .setDisable(false);
+             this.btn_startseq .setDisable(false);
+             this.btn_startreal.setDisable(false);
              this.circ_status  .setFill(C_SUCCESS);
-             this.lbl_status   .setText("Loaded "+cj.getName());
-             Platform.runLater(() -> {
-               this.stage.getScene().setCursor(Cursor.DEFAULT);
-             });
+             this.lbl_status   .setText("Ready.");
            }
          }
   public void actionZoomCanvas(ScrollEvent e) {
@@ -1475,11 +1646,6 @@ public class DesktopController {
            }
            this.zoom = Math.max(this.zoom, 1);
            this.zoom = Math.min(this.zoom, 5);
-           System.out.println(this.zoom);
-           //this.can_road.setScaleX(this.zoom);
-           //this.can_road.setScaleY(this.zoom);
-           //this.can_servers.setScaleX(this.zoom);
-           //this.can_servers.setScaleY(this.zoom);
            this.muf.setUnit(this.unit*this.zoom);
            this.can_road.setWidth(this.window_width*this.zoom);
            this.can_road.setHeight(this.window_height*this.zoom);
@@ -1556,5 +1722,12 @@ public class DesktopController {
       }
     });
     this.cbFetcherOfMetrics = new HashMap<String, ScheduledFuture<?>>();
+    Image image = new Image("res/icon.gif");
+    this.logo = new ImageView();
+    this.logo.setImage(image);
+    this.logo.setFitWidth(64);
+    this.logo.setPreserveRatio(true);
+    this.logo.setSmooth(true);
+    this.logo.setCache(true);
   }
 }

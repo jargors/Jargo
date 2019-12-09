@@ -3314,6 +3314,8 @@ int[] queryServerRoute(final int sid) throws SQLException \{
 \nwixlogsorted{c}{{S87}{NW1vLSTU-3PORbo-1}{\nwixu{NW1vLSTU-1dEGs4-1}\nwixd{NW1vLSTU-3PORbo-1}}}%
 \nwixlogsorted{c}{{S9}{NW1vLSTU-4Ai05A-1}{\nwixu{NW1vLSTU-1dEGs4-1}\nwixd{NW1vLSTU-4Ai05A-1}}}%
 \nwixlogsorted{c}{{Select from CQ latest order number}{NW1l0GC8-i1RXX-1}{\nwixu{NW1l0GC8-2g0LzJ-1}\nwixu{NW1l0GC8-4JHoKM-1}\nwixd{NW1l0GC8-i1RXX-1}}}%
+\nwixlogsorted{c}{{Set cursor default}{NWn0bN8-48WpZf-1}{\nwixd{NWn0bN8-48WpZf-1}\nwixu{NWn0bN8-T7Xhs-1}\nwixu{NWn0bN8-2dDAtx-1}\nwixu{NWn0bN8-2qwznl-1}\nwixu{NWn0bN8-ZrzWj-1}\nwixu{NWn0bN8-18974H-1}\nwixu{NWn0bN8-4G0CtX-1}\nwixu{NWn0bN8-2Ft1U2-1}\nwixu{NWn0bN8-27hSI5-1}}}%
+\nwixlogsorted{c}{{Set cursor wait}{NWn0bN8-4SKNow-1}{\nwixd{NWn0bN8-4SKNow-1}\nwixu{NWn0bN8-T7Xhs-1}\nwixu{NWn0bN8-2dDAtx-1}\nwixu{NWn0bN8-2qwznl-1}\nwixu{NWn0bN8-ZrzWj-1}\nwixu{NWn0bN8-18974H-1}\nwixu{NWn0bN8-4G0CtX-1}\nwixu{NWn0bN8-2Ft1U2-1}\nwixu{NWn0bN8-27hSI5-1}}}%
 \nwixlogsorted{c}{{Set default t0, t1}{NWn0bN8-TFk9A-1}{\nwixd{NWn0bN8-TFk9A-1}\nwixu{NWn0bN8-2DyoOl-1}\nwixu{NWn0bN8-1u3CLd-1}}}%
 \nwixlogsorted{c}{{Set statement values}{NW1vLSTU-GuyVo-1}{\nwixd{NW1vLSTU-GuyVo-1}\nwixu{NW1vLSTU-1X4ymL-1}\nwixu{NW1vLSTU-yHOIP-1}}}%
 \nwixlogsorted{c}{{Set: forwardRefCacheEdges(1)}{NW1vLSTU-2pv9fW-1}{\nwixu{NW1pDwO-1aFZ2n-3}\nwixu{NW1pDwO-1sp72R-3}\nwixd{NW1vLSTU-2pv9fW-1}}}%
@@ -3462,6 +3464,7 @@ int[] queryServerRoute(final int sid) throws SQLException \{
 \nwixlogsorted{c}{{Write: updateServerRoute(3)}{NW1l0GC8-3PimUR-1}{\nwixu{NW1pDwO-2Rlctf-2}\nwixd{NW1l0GC8-3PimUR-1}}}%
 \nwixlogsorted{i}{{actionAbout}{actionAbout}}%
 \nwixlogsorted{i}{{actionGitHub}{actionGitHub}}%
+\nwixlogsorted{i}{{actionGtree}{actionGtree}}%
 \nwixlogsorted{i}{{actionLoad}{actionLoad}}%
 \nwixlogsorted{i}{{actionNew}{actionNew}}%
 \nwixlogsorted{i}{{actionQuit}{actionQuit}}%
@@ -9100,6 +9103,13 @@ public class DesktopController \{
       \}
     \});
     this.cbFetcherOfMetrics = new HashMap<String, ScheduledFuture<?>>();
+    Image image = new Image("res/icon.gif");
+    this.logo = new ImageView();
+    this.logo.setImage(image);
+    this.logo.setFitWidth(64);
+    this.logo.setPreserveRatio(true);
+    this.logo.setSmooth(true);
+    this.logo.setCache(true);
   \}
 \}
 \nwendcode{}\nwbegindocs{2}\nwdocspar
@@ -9173,6 +9183,7 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -9207,7 +9218,6 @@ private final boolean DEBUG =
 @FXML private Button btn_gtree;
 @FXML private Button btn_load;
 @FXML private Button btn_new;
-@FXML private Button btn_pause;
 @FXML private Button btn_prob;
 @FXML private Button btn_road;
 @FXML private Button btn_startreal;
@@ -9269,10 +9279,12 @@ private String road = null;
 private String trafficclass = null;
 private String trafficjar = null;
 private Traffic traffic = null;
+private ImageView logo = null;
 \nwendcode{}\nwbegindocs{12}\nwdocspar
 
 \subsection{Workspace}
 \nwenddocs{}\nwbegincode{13}\sublabel{NWn0bN8-2iHsHO-3}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-3}}}\moddef{\code{}DesktopController\edoc{} member variables~{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-1}}}\plusendmoddef
+private int access_path = 1;  // 1="New", 2="Load"
 private FetcherOfMapUnits muf = null;
 private GraphicsContext gc = null;
 private Map<String, ScheduledFuture<?>> cbFetcherOfMetrics = null;
@@ -9755,8 +9767,22 @@ private ConcurrentHashMap<String, ConcurrentHashMap<String, Series<Number, Numbe
 \nwendcode{}\nwbegindocs{26}\nwdocspar
 
 \section{Chunks}
+\subsection{Set cursor wait}
+\nwenddocs{}\nwbegincode{27}\sublabel{NWn0bN8-4SKNow-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-4SKNow-1}}}\moddef{Set cursor wait~{\nwtagstyle{}\subpageref{NWn0bN8-4SKNow-1}}}\endmoddef\nwused{\\{NWn0bN8-T7Xhs-1}\\{NWn0bN8-2dDAtx-1}\\{NWn0bN8-2qwznl-1}\\{NWn0bN8-ZrzWj-1}\\{NWn0bN8-18974H-1}\\{NWn0bN8-4G0CtX-1}\\{NWn0bN8-2Ft1U2-1}\\{NWn0bN8-27hSI5-1}}
+Platform.runLater(() -> \{
+  this.stage.getScene().setCursor(Cursor.WAIT);
+\});
+\nwendcode{}\nwbegindocs{28}\nwdocspar
+
+\subsection{Set cursor default}
+\nwenddocs{}\nwbegincode{29}\sublabel{NWn0bN8-48WpZf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-48WpZf-1}}}\moddef{Set cursor default~{\nwtagstyle{}\subpageref{NWn0bN8-48WpZf-1}}}\endmoddef\nwused{\\{NWn0bN8-T7Xhs-1}\\{NWn0bN8-2dDAtx-1}\\{NWn0bN8-2qwznl-1}\\{NWn0bN8-ZrzWj-1}\\{NWn0bN8-18974H-1}\\{NWn0bN8-4G0CtX-1}\\{NWn0bN8-2Ft1U2-1}\\{NWn0bN8-27hSI5-1}}
+Platform.runLater(() -> \{
+  this.stage.getScene().setCursor(Cursor.DEFAULT);
+\});
+\nwendcode{}\nwbegindocs{30}\nwdocspar
+
 \subsection{Initialize chart settings}
-\nwenddocs{}\nwbegincode{27}\sublabel{NWn0bN8-2Khh2C-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2Khh2C-1}}}\moddef{Initialize chart settings~{\nwtagstyle{}\subpageref{NWn0bN8-2Khh2C-1}}}\endmoddef\nwused{\\{NWn0bN8-35Xz53-1}}
+\nwenddocs{}\nwbegincode{31}\sublabel{NWn0bN8-2Khh2C-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2Khh2C-1}}}\moddef{Initialize chart settings~{\nwtagstyle{}\subpageref{NWn0bN8-2Khh2C-1}}}\endmoddef\nwused{\\{NWn0bN8-35Xz53-1}}
 this.lc_rates.setCreateSymbols(false);
 this.lc_rates.setAnimated(false);
 this.lc_rates.setLegendVisible(false);
@@ -9792,10 +9818,10 @@ this.times_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 
 this.times_y = new NumberAxis("Value (milliseconds)", 0, 100, 10);
 this.times_x.setAutoRanging(true);
 this.times_y.setAutoRanging(true);
-\nwendcode{}\nwbegindocs{28}\nwdocspar
+\nwendcode{}\nwbegindocs{32}\nwdocspar
 
 \subsection{Initialize chart series}
-\nwenddocs{}\nwbegincode{29}\sublabel{NWn0bN8-2jgBHG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2jgBHG-1}}}\moddef{Initialize chart series~{\nwtagstyle{}\subpageref{NWn0bN8-2jgBHG-1}}}\endmoddef\nwused{\\{NWn0bN8-35Xz53-1}}
+\nwenddocs{}\nwbegincode{33}\sublabel{NWn0bN8-2jgBHG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2jgBHG-1}}}\moddef{Initialize chart series~{\nwtagstyle{}\subpageref{NWn0bN8-2jgBHG-1}}}\endmoddef\nwused{\\{NWn0bN8-35Xz53-1}}
 for (String metric : this.metric_rates) \{
   this.lc_rates_series.put(metric, new Series<Number, Number>());
   this.lc_rates.getData().add(this.lc_rates_series.get(metric));
@@ -9821,20 +9847,20 @@ for (String metric : this.metric_times) \{
   this.lc_times.getData().add(this.lc_times_series.get(metric));
   this.lu_series.put(metric, this.lc_times_series);
 \}
-\nwendcode{}\nwbegindocs{30}\nwdocspar
+\nwendcode{}\nwbegindocs{34}\nwdocspar
 
 \subsection{Set default t0, t1}
-\nwenddocs{}\nwbegincode{31}\sublabel{NWn0bN8-TFk9A-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-TFk9A-1}}}\moddef{Set default t0, t1~{\nwtagstyle{}\subpageref{NWn0bN8-TFk9A-1}}}\endmoddef\nwused{\\{NWn0bN8-2DyoOl-1}\\{NWn0bN8-1u3CLd-1}}
+\nwenddocs{}\nwbegincode{35}\sublabel{NWn0bN8-TFk9A-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-TFk9A-1}}}\moddef{Set default t0, t1~{\nwtagstyle{}\subpageref{NWn0bN8-TFk9A-1}}}\endmoddef\nwused{\\{NWn0bN8-2DyoOl-1}\\{NWn0bN8-1u3CLd-1}}
 if ("".equals(this.tf_t0.getText())) \{
   this.tf_t0.setText("0");
 \}
 if ("".equals(this.tf_t1.getText())) \{
   this.tf_t1.setText("1800");
 \}
-\nwendcode{}\nwbegindocs{32}\nwdocspar
+\nwendcode{}\nwbegindocs{36}\nwdocspar
 
 \subsection{Add charts to chart containers}
-\nwenddocs{}\nwbegincode{33}\sublabel{NWn0bN8-35Xz53-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-35Xz53-1}}}\moddef{Add charts to chart containers~{\nwtagstyle{}\subpageref{NWn0bN8-35Xz53-1}}}\endmoddef\nwused{\\{NWn0bN8-2DyoOl-1}\\{NWn0bN8-1u3CLd-1}}
+\nwenddocs{}\nwbegincode{37}\sublabel{NWn0bN8-35Xz53-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-35Xz53-1}}}\moddef{Add charts to chart containers~{\nwtagstyle{}\subpageref{NWn0bN8-35Xz53-1}}}\endmoddef\nwused{\\{NWn0bN8-2DyoOl-1}\\{NWn0bN8-1u3CLd-1}}
 \LA{}Initialize chart settings~{\nwtagstyle{}\subpageref{NWn0bN8-2Khh2C-1}}\RA{}
 \LA{}Initialize chart series~{\nwtagstyle{}\subpageref{NWn0bN8-2jgBHG-1}}\RA{}
 this.container_lc_rates.setTopAnchor(this.lc_rates, 0.0);
@@ -9862,28 +9888,28 @@ this.container_lc_times.setLeftAnchor(this.lc_times, 0.0);
 this.container_lc_times.setRightAnchor(this.lc_times, 0.0);
 this.container_lc_times.setBottomAnchor(this.lc_times, 0.0);
 this.container_lc_times.getChildren().add(this.lc_times);
-\nwendcode{}\nwbegindocs{34}\nwdocspar
+\nwendcode{}\nwbegindocs{38}\nwdocspar
 
 \subsection{Enable metrics checkbox containers}
-\nwenddocs{}\nwbegincode{35}\sublabel{NWn0bN8-1VIplt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1VIplt-1}}}\moddef{Enable metrics checkbox containers~{\nwtagstyle{}\subpageref{NWn0bN8-1VIplt-1}}}\endmoddef\nwused{\\{NWn0bN8-2DyoOl-1}\\{NWn0bN8-1u3CLd-1}}
+\nwenddocs{}\nwbegincode{39}\sublabel{NWn0bN8-1VIplt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1VIplt-1}}}\moddef{Enable metrics checkbox containers~{\nwtagstyle{}\subpageref{NWn0bN8-1VIplt-1}}}\endmoddef\nwused{\\{NWn0bN8-2DyoOl-1}\\{NWn0bN8-1u3CLd-1}}
 this.vbox_metrics_rates.setDisable(false);
 this.vbox_metrics_distances.setDisable(false);
 this.vbox_metrics_durations.setDisable(false);
 this.vbox_metrics_counts.setDisable(false);
 this.vbox_metrics_times.setDisable(false);
-\nwendcode{}\nwbegindocs{36}\nwdocspar
+\nwendcode{}\nwbegindocs{40}\nwdocspar
 
 \subsection{Disable metrics checkbox containers}
-\nwenddocs{}\nwbegincode{37}\sublabel{NWn0bN8-1tcU0w-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1tcU0w-1}}}\moddef{Disable metrics checkbox containers~{\nwtagstyle{}\subpageref{NWn0bN8-1tcU0w-1}}}\endmoddef\nwused{\\{NWn0bN8-27hSI5-1}}
+\nwenddocs{}\nwbegincode{41}\sublabel{NWn0bN8-1tcU0w-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1tcU0w-1}}}\moddef{Disable metrics checkbox containers~{\nwtagstyle{}\subpageref{NWn0bN8-1tcU0w-1}}}\endmoddef\nwused{\\{NWn0bN8-27hSI5-1}}
 this.vbox_metrics_rates.setDisable(true);
 this.vbox_metrics_distances.setDisable(true);
 this.vbox_metrics_durations.setDisable(true);
 this.vbox_metrics_counts.setDisable(true);
 this.vbox_metrics_times.setDisable(true);
-\nwendcode{}\nwbegindocs{38}\nwdocspar
+\nwendcode{}\nwbegindocs{42}\nwdocspar
 
 \subsection{Deselect metrics checkboxes}
-\nwenddocs{}\nwbegincode{39}\sublabel{NWn0bN8-MvQLz-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-MvQLz-1}}}\moddef{Deselect metrics checkboxes~{\nwtagstyle{}\subpageref{NWn0bN8-MvQLz-1}}}\endmoddef\nwused{\\{NWn0bN8-27hSI5-1}}
+\nwenddocs{}\nwbegincode{43}\sublabel{NWn0bN8-MvQLz-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-MvQLz-1}}}\moddef{Deselect metrics checkboxes~{\nwtagstyle{}\subpageref{NWn0bN8-MvQLz-1}}}\endmoddef\nwused{\\{NWn0bN8-27hSI5-1}}
 this.chk_serviceRate.setSelected(false);
 this.chk_distanceSavings.setSelected(false);
 this.chk_serverTravelDistance.setSelected(false);
@@ -9908,16 +9934,16 @@ this.chk_countRequestsViolations.setSelected(false);
 this.chk_countServersViolations.setSelected(false);
 this.chk_timeRequestHandling.setSelected(false);
 this.chk_timeServerHandling.setSelected(false);
-\nwendcode{}\nwbegindocs{40}\nwdocspar
+\nwendcode{}\nwbegindocs{44}\nwdocspar
 
 \subsection{Retrieve serviceRate}
-\nwenddocs{}\nwbegincode{41}\sublabel{NWn0bN8-1Zm9TM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1Zm9TM-1}}}\moddef{Retrieve serviceRate~{\nwtagstyle{}\subpageref{NWn0bN8-1Zm9TM-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
+\nwenddocs{}\nwbegincode{45}\sublabel{NWn0bN8-1Zm9TM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1Zm9TM-1}}}\moddef{Retrieve serviceRate~{\nwtagstyle{}\subpageref{NWn0bN8-1Zm9TM-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
 int[] output = this.controller.queryMetricServiceRate();
 val = (output.length > 0 ? (output[0]/100.0) : 0);
-\nwidentuses{\\{{queryMetricServiceRate}{queryMetricServiceRate}}}\nwindexuse{queryMetricServiceRate}{queryMetricServiceRate}{NWn0bN8-1Zm9TM-1}\nwendcode{}\nwbegindocs{42}\nwdocspar
+\nwidentuses{\\{{queryMetricServiceRate}{queryMetricServiceRate}}}\nwindexuse{queryMetricServiceRate}{queryMetricServiceRate}{NWn0bN8-1Zm9TM-1}\nwendcode{}\nwbegindocs{46}\nwdocspar
 
 \subsection{Retrieve distanceSavings}
-\nwenddocs{}\nwbegincode{43}\sublabel{NWn0bN8-291XnK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-291XnK-1}}}\moddef{Retrieve distanceSavings~{\nwtagstyle{}\subpageref{NWn0bN8-291XnK-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
+\nwenddocs{}\nwbegincode{47}\sublabel{NWn0bN8-291XnK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-291XnK-1}}}\moddef{Retrieve distanceSavings~{\nwtagstyle{}\subpageref{NWn0bN8-291XnK-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
 int[] output = this.controller.queryMetricServerDistanceTotal();
 final int val1 = (output.length > 0 ? output[0] : 0);
 output = this.controller.queryMetricRequestDistanceBaseUnassignedTotal();
@@ -9925,123 +9951,123 @@ final int val2 = (output.length > 0 ? output[0] : 0);
 output = this.controller.queryMetricUserDistanceBaseTotal();
 final int val3 = (output.length > 0 ? output[0] : 0);
 val = (val3 == 0 ? 0 : (100.0*(1 - ((double) (val1 + val2)/val3))));
-\nwidentuses{\\{{queryMetricRequestDistanceBaseUnassignedTotal}{queryMetricRequestDistanceBaseUnassignedTotal}}\\{{queryMetricServerDistanceTotal}{queryMetricServerDistanceTotal}}\\{{queryMetricUserDistanceBaseTotal}{queryMetricUserDistanceBaseTotal}}}\nwindexuse{queryMetricRequestDistanceBaseUnassignedTotal}{queryMetricRequestDistanceBaseUnassignedTotal}{NWn0bN8-291XnK-1}\nwindexuse{queryMetricServerDistanceTotal}{queryMetricServerDistanceTotal}{NWn0bN8-291XnK-1}\nwindexuse{queryMetricUserDistanceBaseTotal}{queryMetricUserDistanceBaseTotal}{NWn0bN8-291XnK-1}\nwendcode{}\nwbegindocs{44}\nwdocspar
+\nwidentuses{\\{{queryMetricRequestDistanceBaseUnassignedTotal}{queryMetricRequestDistanceBaseUnassignedTotal}}\\{{queryMetricServerDistanceTotal}{queryMetricServerDistanceTotal}}\\{{queryMetricUserDistanceBaseTotal}{queryMetricUserDistanceBaseTotal}}}\nwindexuse{queryMetricRequestDistanceBaseUnassignedTotal}{queryMetricRequestDistanceBaseUnassignedTotal}{NWn0bN8-291XnK-1}\nwindexuse{queryMetricServerDistanceTotal}{queryMetricServerDistanceTotal}{NWn0bN8-291XnK-1}\nwindexuse{queryMetricUserDistanceBaseTotal}{queryMetricUserDistanceBaseTotal}{NWn0bN8-291XnK-1}\nwendcode{}\nwbegindocs{48}\nwdocspar
 
 \subsection{Retrieve serverTravelDistance}
-\nwenddocs{}\nwbegincode{45}\sublabel{NWn0bN8-2om2Zr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2om2Zr-1}}}\moddef{Retrieve serverTravelDistance~{\nwtagstyle{}\subpageref{NWn0bN8-2om2Zr-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
+\nwenddocs{}\nwbegincode{49}\sublabel{NWn0bN8-2om2Zr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2om2Zr-1}}}\moddef{Retrieve serverTravelDistance~{\nwtagstyle{}\subpageref{NWn0bN8-2om2Zr-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
 int[] output = this.controller.queryMetricServerDistanceTotal();
 val = (output.length > 0 ? output[0] : 0);
-\nwidentuses{\\{{queryMetricServerDistanceTotal}{queryMetricServerDistanceTotal}}}\nwindexuse{queryMetricServerDistanceTotal}{queryMetricServerDistanceTotal}{NWn0bN8-2om2Zr-1}\nwendcode{}\nwbegindocs{46}\nwdocspar
+\nwidentuses{\\{{queryMetricServerDistanceTotal}{queryMetricServerDistanceTotal}}}\nwindexuse{queryMetricServerDistanceTotal}{queryMetricServerDistanceTotal}{NWn0bN8-2om2Zr-1}\nwendcode{}\nwbegindocs{50}\nwdocspar
 
 \subsection{Retrieve serverServiceDistance}
-\nwenddocs{}\nwbegincode{47}\sublabel{NWn0bN8-2HdZms-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2HdZms-1}}}\moddef{Retrieve serverServiceDistance~{\nwtagstyle{}\subpageref{NWn0bN8-2HdZms-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
+\nwenddocs{}\nwbegincode{51}\sublabel{NWn0bN8-2HdZms-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2HdZms-1}}}\moddef{Retrieve serverServiceDistance~{\nwtagstyle{}\subpageref{NWn0bN8-2HdZms-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
 // VERY SLOW AND BAD
 // int[] output = this.controller.queryServerServiceDistanceTotal();
 // val = (output.length > 0 ? output[0] : 0);
-\nwendcode{}\nwbegindocs{48}\nwdocspar
+\nwendcode{}\nwbegindocs{52}\nwdocspar
 
 \subsection{Retrieve serverCruisingDistance}
-\nwenddocs{}\nwbegincode{49}\sublabel{NWn0bN8-4HFFxW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-4HFFxW-1}}}\moddef{Retrieve serverCruisingDistance~{\nwtagstyle{}\subpageref{NWn0bN8-4HFFxW-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
+\nwenddocs{}\nwbegincode{53}\sublabel{NWn0bN8-4HFFxW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-4HFFxW-1}}}\moddef{Retrieve serverCruisingDistance~{\nwtagstyle{}\subpageref{NWn0bN8-4HFFxW-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
 // VERY SLOW AND BAD
 // int[] output = this.controller.queryServerCruisingDistanceTotal();
 // val = (output.length > 0 ? output[0] : 0);
-\nwendcode{}\nwbegindocs{50}\nwdocspar
-
-\subsection{Retrieve serverTravelDuration}
-\nwenddocs{}\nwbegincode{51}\sublabel{NWn0bN8-3YgpXN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3YgpXN-1}}}\moddef{Retrieve serverTravelDuration~{\nwtagstyle{}\subpageref{NWn0bN8-3YgpXN-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
-int[] output = this.controller.queryMetricServerDurationTravelTotal();
-val = (output.length > 0 ? output[0] : 0);
-\nwidentuses{\\{{queryMetricServerDurationTravelTotal}{queryMetricServerDurationTravelTotal}}}\nwindexuse{queryMetricServerDurationTravelTotal}{queryMetricServerDurationTravelTotal}{NWn0bN8-3YgpXN-1}\nwendcode{}\nwbegindocs{52}\nwdocspar
-
-\subsection{Retrieve serverServiceDuration}
-\nwenddocs{}\nwbegincode{53}\sublabel{NWn0bN8-iLjau-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-iLjau-1}}}\moddef{Retrieve serverServiceDuration~{\nwtagstyle{}\subpageref{NWn0bN8-iLjau-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
 \nwendcode{}\nwbegindocs{54}\nwdocspar
 
+\subsection{Retrieve serverTravelDuration}
+\nwenddocs{}\nwbegincode{55}\sublabel{NWn0bN8-3YgpXN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3YgpXN-1}}}\moddef{Retrieve serverTravelDuration~{\nwtagstyle{}\subpageref{NWn0bN8-3YgpXN-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
+int[] output = this.controller.queryMetricServerDurationTravelTotal();
+val = (output.length > 0 ? output[0] : 0);
+\nwidentuses{\\{{queryMetricServerDurationTravelTotal}{queryMetricServerDurationTravelTotal}}}\nwindexuse{queryMetricServerDurationTravelTotal}{queryMetricServerDurationTravelTotal}{NWn0bN8-3YgpXN-1}\nwendcode{}\nwbegindocs{56}\nwdocspar
+
+\subsection{Retrieve serverServiceDuration}
+\nwenddocs{}\nwbegincode{57}\sublabel{NWn0bN8-iLjau-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-iLjau-1}}}\moddef{Retrieve serverServiceDuration~{\nwtagstyle{}\subpageref{NWn0bN8-iLjau-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
+\nwendcode{}\nwbegindocs{58}\nwdocspar
+
 \subsection{Retrieve serverCruisingDuration}
-\nwenddocs{}\nwbegincode{55}\sublabel{NWn0bN8-3GIbUG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3GIbUG-1}}}\moddef{Retrieve serverCruisingDuration~{\nwtagstyle{}\subpageref{NWn0bN8-3GIbUG-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
-\nwendcode{}\nwbegindocs{56}\nwdocspar
+\nwenddocs{}\nwbegincode{59}\sublabel{NWn0bN8-3GIbUG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3GIbUG-1}}}\moddef{Retrieve serverCruisingDuration~{\nwtagstyle{}\subpageref{NWn0bN8-3GIbUG-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
+\nwendcode{}\nwbegindocs{60}\nwdocspar
 
 \subsection{Retrieve requestDistanceUnassigned}
-\nwenddocs{}\nwbegincode{57}\sublabel{NWn0bN8-330MzF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-330MzF-1}}}\moddef{Retrieve requestDistanceUnassigned~{\nwtagstyle{}\subpageref{NWn0bN8-330MzF-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
+\nwenddocs{}\nwbegincode{61}\sublabel{NWn0bN8-330MzF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-330MzF-1}}}\moddef{Retrieve requestDistanceUnassigned~{\nwtagstyle{}\subpageref{NWn0bN8-330MzF-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
 int[] output = this.controller.queryMetricRequestDistanceBaseUnassignedTotal();
 val = (output.length > 0 ? output[0] : 0);
-\nwidentuses{\\{{queryMetricRequestDistanceBaseUnassignedTotal}{queryMetricRequestDistanceBaseUnassignedTotal}}}\nwindexuse{queryMetricRequestDistanceBaseUnassignedTotal}{queryMetricRequestDistanceBaseUnassignedTotal}{NWn0bN8-330MzF-1}\nwendcode{}\nwbegindocs{58}\nwdocspar
+\nwidentuses{\\{{queryMetricRequestDistanceBaseUnassignedTotal}{queryMetricRequestDistanceBaseUnassignedTotal}}}\nwindexuse{queryMetricRequestDistanceBaseUnassignedTotal}{queryMetricRequestDistanceBaseUnassignedTotal}{NWn0bN8-330MzF-1}\nwendcode{}\nwbegindocs{62}\nwdocspar
 
 \subsection{Retrieve requestTransitDistance}
-\nwenddocs{}\nwbegincode{59}\sublabel{NWn0bN8-3cTfr4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3cTfr4-1}}}\moddef{Retrieve requestTransitDistance~{\nwtagstyle{}\subpageref{NWn0bN8-3cTfr4-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
+\nwenddocs{}\nwbegincode{63}\sublabel{NWn0bN8-3cTfr4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3cTfr4-1}}}\moddef{Retrieve requestTransitDistance~{\nwtagstyle{}\subpageref{NWn0bN8-3cTfr4-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
 int[] output = this.controller.queryMetricRequestDistanceTransitTotal();
 val = (output.length > 0 ? output[0] : 0);
-\nwidentuses{\\{{queryMetricRequestDistanceTransitTotal}{queryMetricRequestDistanceTransitTotal}}}\nwindexuse{queryMetricRequestDistanceTransitTotal}{queryMetricRequestDistanceTransitTotal}{NWn0bN8-3cTfr4-1}\nwendcode{}\nwbegindocs{60}\nwdocspar
+\nwidentuses{\\{{queryMetricRequestDistanceTransitTotal}{queryMetricRequestDistanceTransitTotal}}}\nwindexuse{queryMetricRequestDistanceTransitTotal}{queryMetricRequestDistanceTransitTotal}{NWn0bN8-3cTfr4-1}\nwendcode{}\nwbegindocs{64}\nwdocspar
 
 \subsection{Retrieve requestDetourDistance}
-\nwenddocs{}\nwbegincode{61}\sublabel{NWn0bN8-1gub9i-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1gub9i-1}}}\moddef{Retrieve requestDetourDistance~{\nwtagstyle{}\subpageref{NWn0bN8-1gub9i-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
+\nwenddocs{}\nwbegincode{65}\sublabel{NWn0bN8-1gub9i-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1gub9i-1}}}\moddef{Retrieve requestDetourDistance~{\nwtagstyle{}\subpageref{NWn0bN8-1gub9i-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
 int[] output = this.controller.queryMetricRequestDistanceDetourTotal();
 val = (output.length > 0 ? output[0] : 0);
-\nwidentuses{\\{{queryMetricRequestDistanceDetourTotal}{queryMetricRequestDistanceDetourTotal}}}\nwindexuse{queryMetricRequestDistanceDetourTotal}{queryMetricRequestDistanceDetourTotal}{NWn0bN8-1gub9i-1}\nwendcode{}\nwbegindocs{62}\nwdocspar
+\nwidentuses{\\{{queryMetricRequestDistanceDetourTotal}{queryMetricRequestDistanceDetourTotal}}}\nwindexuse{queryMetricRequestDistanceDetourTotal}{queryMetricRequestDistanceDetourTotal}{NWn0bN8-1gub9i-1}\nwendcode{}\nwbegindocs{66}\nwdocspar
 
 \subsection{Retrieve requestTransitDuration}
-\nwenddocs{}\nwbegincode{63}\sublabel{NWn0bN8-2tPgJc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2tPgJc-1}}}\moddef{Retrieve requestTransitDuration~{\nwtagstyle{}\subpageref{NWn0bN8-2tPgJc-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
+\nwenddocs{}\nwbegincode{67}\sublabel{NWn0bN8-2tPgJc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2tPgJc-1}}}\moddef{Retrieve requestTransitDuration~{\nwtagstyle{}\subpageref{NWn0bN8-2tPgJc-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
 int[] output = this.controller.queryMetricRequestDurationTransitTotal();
 val = (output.length > 0 ? output[0] : 0);
-\nwidentuses{\\{{queryMetricRequestDurationTransitTotal}{queryMetricRequestDurationTransitTotal}}}\nwindexuse{queryMetricRequestDurationTransitTotal}{queryMetricRequestDurationTransitTotal}{NWn0bN8-2tPgJc-1}\nwendcode{}\nwbegindocs{64}\nwdocspar
+\nwidentuses{\\{{queryMetricRequestDurationTransitTotal}{queryMetricRequestDurationTransitTotal}}}\nwindexuse{queryMetricRequestDurationTransitTotal}{queryMetricRequestDurationTransitTotal}{NWn0bN8-2tPgJc-1}\nwendcode{}\nwbegindocs{68}\nwdocspar
 
 \subsection{Retrieve requestDetourDuration}
-\nwenddocs{}\nwbegincode{65}\sublabel{NWn0bN8-8tg1w-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-8tg1w-1}}}\moddef{Retrieve requestDetourDuration~{\nwtagstyle{}\subpageref{NWn0bN8-8tg1w-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
-\nwendcode{}\nwbegindocs{66}\nwdocspar
+\nwenddocs{}\nwbegincode{69}\sublabel{NWn0bN8-8tg1w-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-8tg1w-1}}}\moddef{Retrieve requestDetourDuration~{\nwtagstyle{}\subpageref{NWn0bN8-8tg1w-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
+\nwendcode{}\nwbegindocs{70}\nwdocspar
 
 \subsection{Retrieve requestTravelDuration}
-\nwenddocs{}\nwbegincode{67}\sublabel{NWn0bN8-1aBbYv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1aBbYv-1}}}\moddef{Retrieve requestTravelDuration~{\nwtagstyle{}\subpageref{NWn0bN8-1aBbYv-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
+\nwenddocs{}\nwbegincode{71}\sublabel{NWn0bN8-1aBbYv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1aBbYv-1}}}\moddef{Retrieve requestTravelDuration~{\nwtagstyle{}\subpageref{NWn0bN8-1aBbYv-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
 int[] output = this.controller.queryMetricRequestDurationTravelTotal();
 val = (output.length > 0 ? output[0] : 0);
-\nwidentuses{\\{{queryMetricRequestDurationTravelTotal}{queryMetricRequestDurationTravelTotal}}}\nwindexuse{queryMetricRequestDurationTravelTotal}{queryMetricRequestDurationTravelTotal}{NWn0bN8-1aBbYv-1}\nwendcode{}\nwbegindocs{68}\nwdocspar
+\nwidentuses{\\{{queryMetricRequestDurationTravelTotal}{queryMetricRequestDurationTravelTotal}}}\nwindexuse{queryMetricRequestDurationTravelTotal}{queryMetricRequestDurationTravelTotal}{NWn0bN8-1aBbYv-1}\nwendcode{}\nwbegindocs{72}\nwdocspar
 
 \subsection{Retrieve requestPickupDuration}
-\nwenddocs{}\nwbegincode{69}\sublabel{NWn0bN8-4by79p-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-4by79p-1}}}\moddef{Retrieve requestPickupDuration~{\nwtagstyle{}\subpageref{NWn0bN8-4by79p-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
+\nwenddocs{}\nwbegincode{73}\sublabel{NWn0bN8-4by79p-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-4by79p-1}}}\moddef{Retrieve requestPickupDuration~{\nwtagstyle{}\subpageref{NWn0bN8-4by79p-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
 int[] output = this.controller.queryMetricRequestDurationPickupTotal();
 val = (output.length > 0 ? output[0] : 0);
-\nwidentuses{\\{{queryMetricRequestDurationPickupTotal}{queryMetricRequestDurationPickupTotal}}}\nwindexuse{queryMetricRequestDurationPickupTotal}{queryMetricRequestDurationPickupTotal}{NWn0bN8-4by79p-1}\nwendcode{}\nwbegindocs{70}\nwdocspar
+\nwidentuses{\\{{queryMetricRequestDurationPickupTotal}{queryMetricRequestDurationPickupTotal}}}\nwindexuse{queryMetricRequestDurationPickupTotal}{queryMetricRequestDurationPickupTotal}{NWn0bN8-4by79p-1}\nwendcode{}\nwbegindocs{74}\nwdocspar
 
 \subsection{Retrieve countRequestsQueue}
-\nwenddocs{}\nwbegincode{71}\sublabel{NWn0bN8-2M0IDQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2M0IDQ-1}}}\moddef{Retrieve countRequestsQueue~{\nwtagstyle{}\subpageref{NWn0bN8-2M0IDQ-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
+\nwenddocs{}\nwbegincode{75}\sublabel{NWn0bN8-2M0IDQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2M0IDQ-1}}}\moddef{Retrieve countRequestsQueue~{\nwtagstyle{}\subpageref{NWn0bN8-2M0IDQ-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
 val = this.controller.retrieveQueueSize();
-\nwidentuses{\\{{retrieveQueueSize}{retrieveQueueSize}}}\nwindexuse{retrieveQueueSize}{retrieveQueueSize}{NWn0bN8-2M0IDQ-1}\nwendcode{}\nwbegindocs{72}\nwdocspar
+\nwidentuses{\\{{retrieveQueueSize}{retrieveQueueSize}}}\nwindexuse{retrieveQueueSize}{retrieveQueueSize}{NWn0bN8-2M0IDQ-1}\nwendcode{}\nwbegindocs{76}\nwdocspar
 
 \subsection{Retrieve countRequestsActive}
-\nwenddocs{}\nwbegincode{73}\sublabel{NWn0bN8-3cIbwq-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3cIbwq-1}}}\moddef{Retrieve countRequestsActive~{\nwtagstyle{}\subpageref{NWn0bN8-3cIbwq-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
-\nwendcode{}\nwbegindocs{74}\nwdocspar
-
-\subsection{Retrieve countRequestsCompleted}
-\nwenddocs{}\nwbegincode{75}\sublabel{NWn0bN8-3Gfa93-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3Gfa93-1}}}\moddef{Retrieve countRequestsCompleted~{\nwtagstyle{}\subpageref{NWn0bN8-3Gfa93-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
-\nwendcode{}\nwbegindocs{76}\nwdocspar
-
-\subsection{Retrieve countRequestsFailed}
-\nwenddocs{}\nwbegincode{77}\sublabel{NWn0bN8-1a4eLj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1a4eLj-1}}}\moddef{Retrieve countRequestsFailed~{\nwtagstyle{}\subpageref{NWn0bN8-1a4eLj-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
+\nwenddocs{}\nwbegincode{77}\sublabel{NWn0bN8-3cIbwq-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3cIbwq-1}}}\moddef{Retrieve countRequestsActive~{\nwtagstyle{}\subpageref{NWn0bN8-3cIbwq-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
 \nwendcode{}\nwbegindocs{78}\nwdocspar
 
-\subsection{Retrieve countServersActive}
-\nwenddocs{}\nwbegincode{79}\sublabel{NWn0bN8-md0F8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-md0F8-1}}}\moddef{Retrieve countServersActive~{\nwtagstyle{}\subpageref{NWn0bN8-md0F8-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
+\subsection{Retrieve countRequestsCompleted}
+\nwenddocs{}\nwbegincode{79}\sublabel{NWn0bN8-3Gfa93-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3Gfa93-1}}}\moddef{Retrieve countRequestsCompleted~{\nwtagstyle{}\subpageref{NWn0bN8-3Gfa93-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
 \nwendcode{}\nwbegindocs{80}\nwdocspar
 
-\subsection{Retrieve countRequestsViolations}
-\nwenddocs{}\nwbegincode{81}\sublabel{NWn0bN8-1qBKS6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1qBKS6-1}}}\moddef{Retrieve countRequestsViolations~{\nwtagstyle{}\subpageref{NWn0bN8-1qBKS6-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
+\subsection{Retrieve countRequestsFailed}
+\nwenddocs{}\nwbegincode{81}\sublabel{NWn0bN8-1a4eLj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1a4eLj-1}}}\moddef{Retrieve countRequestsFailed~{\nwtagstyle{}\subpageref{NWn0bN8-1a4eLj-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
 \nwendcode{}
 
 \nwbegindocs{82}\nwdocspar
 
-\subsection{Retrieve countServersViolations}
-\nwenddocs{}\nwbegincode{83}\sublabel{NWn0bN8-40qlxP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-40qlxP-1}}}\moddef{Retrieve countServersViolations~{\nwtagstyle{}\subpageref{NWn0bN8-40qlxP-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
+\subsection{Retrieve countServersActive}
+\nwenddocs{}\nwbegincode{83}\sublabel{NWn0bN8-md0F8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-md0F8-1}}}\moddef{Retrieve countServersActive~{\nwtagstyle{}\subpageref{NWn0bN8-md0F8-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
 \nwendcode{}\nwbegindocs{84}\nwdocspar
 
-\subsection{Retrieve timeRequestHandling}
-\nwenddocs{}\nwbegincode{85}\sublabel{NWn0bN8-2L8WYA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2L8WYA-1}}}\moddef{Retrieve timeRequestHandling~{\nwtagstyle{}\subpageref{NWn0bN8-2L8WYA-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
+\subsection{Retrieve countRequestsViolations}
+\nwenddocs{}\nwbegincode{85}\sublabel{NWn0bN8-1qBKS6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1qBKS6-1}}}\moddef{Retrieve countRequestsViolations~{\nwtagstyle{}\subpageref{NWn0bN8-1qBKS6-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
 \nwendcode{}\nwbegindocs{86}\nwdocspar
 
-\subsection{Retrieve timeServerHandling}
-\nwenddocs{}\nwbegincode{87}\sublabel{NWn0bN8-2BeaZo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2BeaZo-1}}}\moddef{Retrieve timeServerHandling~{\nwtagstyle{}\subpageref{NWn0bN8-2BeaZo-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
+\subsection{Retrieve countServersViolations}
+\nwenddocs{}\nwbegincode{87}\sublabel{NWn0bN8-40qlxP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-40qlxP-1}}}\moddef{Retrieve countServersViolations~{\nwtagstyle{}\subpageref{NWn0bN8-40qlxP-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
 \nwendcode{}\nwbegindocs{88}\nwdocspar
 
+\subsection{Retrieve timeRequestHandling}
+\nwenddocs{}\nwbegincode{89}\sublabel{NWn0bN8-2L8WYA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2L8WYA-1}}}\moddef{Retrieve timeRequestHandling~{\nwtagstyle{}\subpageref{NWn0bN8-2L8WYA-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
+\nwendcode{}\nwbegindocs{90}\nwdocspar
+
+\subsection{Retrieve timeServerHandling}
+\nwenddocs{}\nwbegincode{91}\sublabel{NWn0bN8-2BeaZo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2BeaZo-1}}}\moddef{Retrieve timeServerHandling~{\nwtagstyle{}\subpageref{NWn0bN8-2BeaZo-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
+\nwendcode{}\nwbegindocs{92}\nwdocspar
+
 \subsection{Load client}
-\nwenddocs{}\nwbegincode{89}\sublabel{NWn0bN8-1Tfjod-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1Tfjod-1}}}\moddef{Load client~{\nwtagstyle{}\subpageref{NWn0bN8-1Tfjod-1}}}\endmoddef\nwused{\\{NWn0bN8-2DyoOl-1}\\{NWn0bN8-1u3CLd-1}}
+\nwenddocs{}\nwbegincode{93}\sublabel{NWn0bN8-1Tfjod-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1Tfjod-1}}}\moddef{Load client~{\nwtagstyle{}\subpageref{NWn0bN8-1Tfjod-1}}}\endmoddef\nwused{\\{NWn0bN8-2DyoOl-1}\\{NWn0bN8-1u3CLd-1}}
 this.clientclass = this.tf_client.getText();
 if ("".equals(this.clientclass)) \{
   System.err.println("Class empty!");
@@ -10068,10 +10094,10 @@ try \{
   me.printStackTrace();
   return;
 \}
-\nwidentuses{\\{{forwardRefCacheEdges}{forwardRefCacheEdges}}\\{{forwardRefCacheUsers}{forwardRefCacheUsers}}\\{{forwardRefCacheVertices}{forwardRefCacheVertices}}\\{{forwardRefCommunicator}{forwardRefCommunicator}}\\{{getRefCommunicator}{getRefCommunicator}}\\{{retrieveRefCacheEdges}{retrieveRefCacheEdges}}\\{{retrieveRefCacheUsers}{retrieveRefCacheUsers}}\\{{retrieveRefCacheVertices}{retrieveRefCacheVertices}}\\{{setRefClient}{setRefClient}}}\nwindexuse{forwardRefCacheEdges}{forwardRefCacheEdges}{NWn0bN8-1Tfjod-1}\nwindexuse{forwardRefCacheUsers}{forwardRefCacheUsers}{NWn0bN8-1Tfjod-1}\nwindexuse{forwardRefCacheVertices}{forwardRefCacheVertices}{NWn0bN8-1Tfjod-1}\nwindexuse{forwardRefCommunicator}{forwardRefCommunicator}{NWn0bN8-1Tfjod-1}\nwindexuse{getRefCommunicator}{getRefCommunicator}{NWn0bN8-1Tfjod-1}\nwindexuse{retrieveRefCacheEdges}{retrieveRefCacheEdges}{NWn0bN8-1Tfjod-1}\nwindexuse{retrieveRefCacheUsers}{retrieveRefCacheUsers}{NWn0bN8-1Tfjod-1}\nwindexuse{retrieveRefCacheVertices}{retrieveRefCacheVertices}{NWn0bN8-1Tfjod-1}\nwindexuse{setRefClient}{setRefClient}{NWn0bN8-1Tfjod-1}\nwendcode{}\nwbegindocs{90}\nwdocspar
+\nwidentuses{\\{{forwardRefCacheEdges}{forwardRefCacheEdges}}\\{{forwardRefCacheUsers}{forwardRefCacheUsers}}\\{{forwardRefCacheVertices}{forwardRefCacheVertices}}\\{{forwardRefCommunicator}{forwardRefCommunicator}}\\{{getRefCommunicator}{getRefCommunicator}}\\{{retrieveRefCacheEdges}{retrieveRefCacheEdges}}\\{{retrieveRefCacheUsers}{retrieveRefCacheUsers}}\\{{retrieveRefCacheVertices}{retrieveRefCacheVertices}}\\{{setRefClient}{setRefClient}}}\nwindexuse{forwardRefCacheEdges}{forwardRefCacheEdges}{NWn0bN8-1Tfjod-1}\nwindexuse{forwardRefCacheUsers}{forwardRefCacheUsers}{NWn0bN8-1Tfjod-1}\nwindexuse{forwardRefCacheVertices}{forwardRefCacheVertices}{NWn0bN8-1Tfjod-1}\nwindexuse{forwardRefCommunicator}{forwardRefCommunicator}{NWn0bN8-1Tfjod-1}\nwindexuse{getRefCommunicator}{getRefCommunicator}{NWn0bN8-1Tfjod-1}\nwindexuse{retrieveRefCacheEdges}{retrieveRefCacheEdges}{NWn0bN8-1Tfjod-1}\nwindexuse{retrieveRefCacheUsers}{retrieveRefCacheUsers}{NWn0bN8-1Tfjod-1}\nwindexuse{retrieveRefCacheVertices}{retrieveRefCacheVertices}{NWn0bN8-1Tfjod-1}\nwindexuse{setRefClient}{setRefClient}{NWn0bN8-1Tfjod-1}\nwendcode{}\nwbegindocs{94}\nwdocspar
 
 \subsection{Load traffic}
-\nwenddocs{}\nwbegincode{91}\sublabel{NWn0bN8-JXEKa-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-JXEKa-1}}}\moddef{Load traffic~{\nwtagstyle{}\subpageref{NWn0bN8-JXEKa-1}}}\endmoddef\nwused{\\{NWn0bN8-2DyoOl-1}\\{NWn0bN8-1u3CLd-1}}
+\nwenddocs{}\nwbegincode{95}\sublabel{NWn0bN8-JXEKa-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-JXEKa-1}}}\moddef{Load traffic~{\nwtagstyle{}\subpageref{NWn0bN8-JXEKa-1}}}\endmoddef\nwused{\\{NWn0bN8-2DyoOl-1}\\{NWn0bN8-1u3CLd-1}}
 this.trafficclass = this.tf_traffic.getText();
 try \{
   if (this.trafficclass.length() > 0) \{
@@ -10095,47 +10121,49 @@ try \{
   me.printStackTrace();
   return;
 \}
-\nwidentuses{\\{{forwardRefCacheEdges}{forwardRefCacheEdges}}\\{{forwardRefCacheVertices}{forwardRefCacheVertices}}\\{{forwardRefTraffic}{forwardRefTraffic}}\\{{retrieveRefCacheEdges}{retrieveRefCacheEdges}}\\{{retrieveRefCacheVertices}{retrieveRefCacheVertices}}}\nwindexuse{forwardRefCacheEdges}{forwardRefCacheEdges}{NWn0bN8-JXEKa-1}\nwindexuse{forwardRefCacheVertices}{forwardRefCacheVertices}{NWn0bN8-JXEKa-1}\nwindexuse{forwardRefTraffic}{forwardRefTraffic}{NWn0bN8-JXEKa-1}\nwindexuse{retrieveRefCacheEdges}{retrieveRefCacheEdges}{NWn0bN8-JXEKa-1}\nwindexuse{retrieveRefCacheVertices}{retrieveRefCacheVertices}{NWn0bN8-JXEKa-1}\nwendcode{}\nwbegindocs{92}\nwdocspar
+\nwidentuses{\\{{forwardRefCacheEdges}{forwardRefCacheEdges}}\\{{forwardRefCacheVertices}{forwardRefCacheVertices}}\\{{forwardRefTraffic}{forwardRefTraffic}}\\{{retrieveRefCacheEdges}{retrieveRefCacheEdges}}\\{{retrieveRefCacheVertices}{retrieveRefCacheVertices}}}\nwindexuse{forwardRefCacheEdges}{forwardRefCacheEdges}{NWn0bN8-JXEKa-1}\nwindexuse{forwardRefCacheVertices}{forwardRefCacheVertices}{NWn0bN8-JXEKa-1}\nwindexuse{forwardRefTraffic}{forwardRefTraffic}{NWn0bN8-JXEKa-1}\nwindexuse{retrieveRefCacheEdges}{retrieveRefCacheEdges}{NWn0bN8-JXEKa-1}\nwindexuse{retrieveRefCacheVertices}{retrieveRefCacheVertices}{NWn0bN8-JXEKa-1}\nwendcode{}\nwbegindocs{96}\nwdocspar
 
 \subsection{Load Gtree}
-\nwenddocs{}\nwbegincode{93}\sublabel{NWn0bN8-2XIXzX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2XIXzX-1}}}\moddef{Load gtree~{\nwtagstyle{}\subpageref{NWn0bN8-2XIXzX-1}}}\endmoddef\nwused{\\{NWn0bN8-2DyoOl-1}\\{NWn0bN8-1u3CLd-1}}
+\nwenddocs{}\nwbegincode{97}\sublabel{NWn0bN8-2XIXzX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2XIXzX-1}}}\moddef{Load gtree~{\nwtagstyle{}\subpageref{NWn0bN8-2XIXzX-1}}}\endmoddef\nwused{\\{NWn0bN8-2DyoOl-1}\\{NWn0bN8-1u3CLd-1}}
 try \{
   this.client.gtreeLoad(this.gtree);
 \} catch (FileNotFoundException fe) \{
   System.err.println(e.toString());
   return;
 \}
-\nwidentuses{\\{{gtreeLoad}{gtreeLoad}}}\nwindexuse{gtreeLoad}{gtreeLoad}{NWn0bN8-2XIXzX-1}\nwendcode{}\nwbegindocs{94}\nwdocspar
+\nwidentuses{\\{{gtreeLoad}{gtreeLoad}}}\nwindexuse{gtreeLoad}{gtreeLoad}{NWn0bN8-2XIXzX-1}\nwendcode{}\nwbegindocs{98}\nwdocspar
 
 \section{Methods}
 
 \subsection{\texttt{actionQuit}(1)}
-\nwenddocs{}\nwbegincode{95}\sublabel{NWn0bN8-2vzGSf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2vzGSf-1}}}\moddef{actionQuit(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2vzGSf-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{99}\sublabel{NWn0bN8-2vzGSf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2vzGSf-1}}}\moddef{actionQuit(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2vzGSf-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void actionQuit(final ActionEvent e) \{
   System.exit(0);
 \}
 \nwindexdefn{actionQuit}{actionQuit}{NWn0bN8-2vzGSf-1}\eatline
-\nwidentdefs{\\{{actionQuit}{actionQuit}}}\nwendcode{}\nwbegindocs{96}\nwdocspar
+\nwidentdefs{\\{{actionQuit}{actionQuit}}}\nwendcode{}\nwbegindocs{100}\nwdocspar
 \subsection{\texttt{actionGitHub}(1)}
-\nwenddocs{}\nwbegincode{97}\sublabel{NWn0bN8-1K1K6E-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1K1K6E-1}}}\moddef{actionGitHub(1)~{\nwtagstyle{}\subpageref{NWn0bN8-1K1K6E-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{101}\sublabel{NWn0bN8-1K1K6E-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1K1K6E-1}}}\moddef{actionGitHub(1)~{\nwtagstyle{}\subpageref{NWn0bN8-1K1K6E-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void actionGitHub(final ActionEvent e) \{
   // ...
 \}
 \nwindexdefn{actionGitHub}{actionGitHub}{NWn0bN8-1K1K6E-1}\eatline
-\nwidentdefs{\\{{actionGitHub}{actionGitHub}}}\nwendcode{}\nwbegindocs{98}\nwdocspar
+\nwidentdefs{\\{{actionGitHub}{actionGitHub}}}\nwendcode{}\nwbegindocs{102}\nwdocspar
 \subsection{\texttt{actionAbout}(1)}
-\nwenddocs{}\nwbegincode{99}\sublabel{NWn0bN8-3NAmly-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3NAmly-1}}}\moddef{actionAbout(1)~{\nwtagstyle{}\subpageref{NWn0bN8-3NAmly-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{103}\sublabel{NWn0bN8-3NAmly-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3NAmly-1}}}\moddef{actionAbout(1)~{\nwtagstyle{}\subpageref{NWn0bN8-3NAmly-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void actionAbout(final ActionEvent e) \{
-  // ...
+  Alert alert = new Alert(AlertType.INFORMATION, "https:github.com/jargors");
+  alert.setTitle("About");
+  alert.setHeaderText("Jargo Desktop v1.0.0");
+  alert.setGraphic(this.logo);
+  alert.showAndWait();
 \}
 \nwindexdefn{actionAbout}{actionAbout}{NWn0bN8-3NAmly-1}\eatline
-\nwidentdefs{\\{{actionAbout}{actionAbout}}}\nwendcode{}\nwbegindocs{100}\nwdocspar
+\nwidentdefs{\\{{actionAbout}{actionAbout}}}\nwendcode{}\nwbegindocs{104}\nwdocspar
 \subsection{\texttt{actionNew}(1)}
-\nwenddocs{}\nwbegincode{101}\sublabel{NWn0bN8-T7Xhs-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-T7Xhs-1}}}\moddef{actionNew(1)~{\nwtagstyle{}\subpageref{NWn0bN8-T7Xhs-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{105}\sublabel{NWn0bN8-T7Xhs-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-T7Xhs-1}}}\moddef{actionNew(1)~{\nwtagstyle{}\subpageref{NWn0bN8-T7Xhs-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void actionNew(final ActionEvent e) \{
-  Platform.runLater(() -> \{
-    this.stage.getScene().setCursor(Cursor.WAIT);
-  \});
+  \LA{}Set cursor wait~{\nwtagstyle{}\subpageref{NWn0bN8-4SKNow-1}}\RA{}
   this.btn_new      .setDisable(true);
   this.btn_load     .setDisable(true);
   this.btn_stop     .setDisable(true);
@@ -10147,18 +10175,16 @@ void actionNew(final ActionEvent e) \{
     try \{
       this.controller.instanceNew();
     \} catch (SQLException se) \{
-      System.err.println("Could not create new instance");
+      Alert alert = new Alert(AlertType.ERROR, se.getMessage());
+      alert.showAndWait();
       System.exit(1);
     \}
     this.controller.instanceInitialize();
     this.db = "no-name";
     Platform.runLater(() -> \{
+      this.access_path = 1;
       this.btn_road     .setDisable(false);
-      this.btn_gtree    .setDisable(false);
       this.btn_stop     .setDisable(false);
-      this.tf_client    .setDisable(false);
-      this.tf_t0        .setDisable(false);
-      this.tf_t1        .setDisable(false);
       this.tabpane      .setDisable(false);
       this.container_canvas.setContent(null);
       this.container_lc_rates.getChildren().clear();
@@ -10166,14 +10192,14 @@ void actionNew(final ActionEvent e) \{
       this.container_lc_durations.getChildren().clear();
       this.circ_status.setFill(C_SUCCESS);
       this.lbl_status.setText("Created new Jargo instance.");
-      this.stage.getScene().setCursor(Cursor.DEFAULT);
     \});
+    \LA{}Set cursor default~{\nwtagstyle{}\subpageref{NWn0bN8-48WpZf-1}}\RA{}
   \});
 \}
-\nwindexdefn{actionNew}{actionNew}{NWn0bN8-T7Xhs-1}\eatline
-\nwidentdefs{\\{{actionNew}{actionNew}}}\nwidentuses{\\{{instanceInitialize}{instanceInitialize}}\\{{instanceNew}{instanceNew}}}\nwindexuse{instanceInitialize}{instanceInitialize}{NWn0bN8-T7Xhs-1}\nwindexuse{instanceNew}{instanceNew}{NWn0bN8-T7Xhs-1}\nwendcode{}\nwbegindocs{102}\nwdocspar
+\nosublabel{NWn0bN8-T7Xhs-1-u2}\nwindexdefn{actionNew}{actionNew}{NWn0bN8-T7Xhs-1}\eatline
+\nwidentdefs{\\{{actionNew}{actionNew}}}\nwidentuses{\\{{instanceInitialize}{instanceInitialize}}\\{{instanceNew}{instanceNew}}}\nwindexuse{instanceInitialize}{instanceInitialize}{NWn0bN8-T7Xhs-1}\nwindexuse{instanceNew}{instanceNew}{NWn0bN8-T7Xhs-1}\nwendcode{}\nwbegindocs{106}\nwdocspar
 \subsection{\texttt{actionLoad}(1)}
-\nwenddocs{}\nwbegincode{103}\sublabel{NWn0bN8-2dDAtx-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2dDAtx-1}}}\moddef{actionLoad(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2dDAtx-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{107}\sublabel{NWn0bN8-2dDAtx-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2dDAtx-1}}}\moddef{actionLoad(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2dDAtx-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void actionLoad(final ActionEvent e) \{
   this.btn_new      .setDisable(true);
   this.btn_load     .setDisable(true);
@@ -10182,9 +10208,7 @@ void actionLoad(final ActionEvent e) \{
   DirectoryChooser dc = new DirectoryChooser();
   File db = dc.showDialog(this.stage);
   if (db != null) \{
-    Platform.runLater(() -> \{
-      this.stage.getScene().setCursor(Cursor.WAIT);
-    \});
+    \LA{}Set cursor wait~{\nwtagstyle{}\subpageref{NWn0bN8-4SKNow-1}}\RA{}
     this.db = db.toString();
     this.circ_status.setFill(C_WARN);
     this.lbl_status.setText("Load '"+this.db+"'...");
@@ -10199,57 +10223,61 @@ void actionLoad(final ActionEvent e) \{
         int ns = this.controller.queryServersCount()[0];
         int nr = this.controller.queryRequestsCount()[0];
         Platform.runLater(() -> \{
-          this.btn_prob     .setDisable(true);
+          this.access_path = 2;
           this.btn_prob     .setText("*in-instance problem*");
           this.prob = "*in-instance problem*";
-          this.btn_road     .setDisable(true);
           this.btn_road     .setText("*in-instance road network*");
           this.road = "*in-instance road network*";
           this.btn_gtree    .setDisable(false);
           this.btn_stop     .setDisable(false);
+          this.tabpane      .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
           this.lbl_status   .setText("Loaded Jargo instance (#vertices="+nv+"; #edges="+ne+") (#servers="+ns+"; #requests="+nr+")");
-          this.tabpane      .setDisable(false);
           this.container_canvas.setContent(null);
           this.container_lc_rates.getChildren().clear();
           this.container_lc_distances.getChildren().clear();
           this.container_lc_durations.getChildren().clear();
           this.initializeCanvas();
-          this.stage.getScene().setCursor(Cursor.DEFAULT);
+          this.ren_road = new RendererOfRoads(this.can_road.getGraphicsContext2D(), this.controller, this.muf);
+          this.ren_road.start();
         \});
+        \LA{}Set cursor default~{\nwtagstyle{}\subpageref{NWn0bN8-48WpZf-1}}\RA{}
       \} catch (SQLException se) \{
+        if (DEBUG) \{
+          Tools.PrintSQLException(se);
+        \}
         Platform.runLater(() -> \{
-          this.stage.getScene().setCursor(Cursor.DEFAULT);
           this.circ_status  .setFill(C_ERROR);
           this.lbl_status   .setText("Failed to load snapshot!");
           Alert alert = new Alert(AlertType.ERROR, "Couldn't load snapshot! (Not a valid Jargo instance?)");
           alert.showAndWait();
+          this.btn_new      .setDisable(false);
+          this.btn_load     .setDisable(false);
+          this.btn_stop     .setDisable(false);
+          this.tabpane      .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
           this.lbl_status   .setText("Ready.");
         \});
-        if (DEBUG) \{
-          Tools.PrintSQLException(se);
-        \}
+        \LA{}Set cursor default~{\nwtagstyle{}\subpageref{NWn0bN8-48WpZf-1}}\RA{}
       \}
     \});
+  \} else \{
+    // FD canceled
+    this.btn_new      .setDisable(false);
+    this.btn_load     .setDisable(false);
+    this.btn_stop     .setDisable(false);
+    this.tabpane      .setDisable(false);
+    this.circ_status  .setFill(C_SUCCESS);
+    this.lbl_status   .setText("Ready.");
   \}
-  this.btn_new      .setDisable(false);
-  this.btn_load     .setDisable(false);
-  this.btn_stop     .setDisable(false);
-  this.tabpane      .setDisable(false);
 \}
-\nwindexdefn{actionLoad}{actionLoad}{NWn0bN8-2dDAtx-1}\eatline
-\nwidentdefs{\\{{actionLoad}{actionLoad}}}\nwidentuses{\\{{cacheRoadNetworkFromDB}{cacheRoadNetworkFromDB}}\\{{cacheUsersFromDB}{cacheUsersFromDB}}\\{{initializeCanvas}{initializeCanvas}}\\{{instanceLoad}{instanceLoad}}\\{{PrintSQLException}{PrintSQLException}}\\{{queryEdgesCount}{queryEdgesCount}}\\{{queryRequestsCount}{queryRequestsCount}}\\{{queryServersCount}{queryServersCount}}\\{{queryVerticesCount}{queryVerticesCount}}}\nwindexuse{cacheRoadNetworkFromDB}{cacheRoadNetworkFromDB}{NWn0bN8-2dDAtx-1}\nwindexuse{cacheUsersFromDB}{cacheUsersFromDB}{NWn0bN8-2dDAtx-1}\nwindexuse{initializeCanvas}{initializeCanvas}{NWn0bN8-2dDAtx-1}\nwindexuse{instanceLoad}{instanceLoad}{NWn0bN8-2dDAtx-1}\nwindexuse{PrintSQLException}{PrintSQLException}{NWn0bN8-2dDAtx-1}\nwindexuse{queryEdgesCount}{queryEdgesCount}{NWn0bN8-2dDAtx-1}\nwindexuse{queryRequestsCount}{queryRequestsCount}{NWn0bN8-2dDAtx-1}\nwindexuse{queryServersCount}{queryServersCount}{NWn0bN8-2dDAtx-1}\nwindexuse{queryVerticesCount}{queryVerticesCount}{NWn0bN8-2dDAtx-1}\nwendcode{}\nwbegindocs{104}\nwdocspar
+\nosublabel{NWn0bN8-2dDAtx-1-u3}\nwindexdefn{actionLoad}{actionLoad}{NWn0bN8-2dDAtx-1}\eatline
+\nwidentdefs{\\{{actionLoad}{actionLoad}}}\nwidentuses{\\{{cacheRoadNetworkFromDB}{cacheRoadNetworkFromDB}}\\{{cacheUsersFromDB}{cacheUsersFromDB}}\\{{initializeCanvas}{initializeCanvas}}\\{{instanceLoad}{instanceLoad}}\\{{PrintSQLException}{PrintSQLException}}\\{{queryEdgesCount}{queryEdgesCount}}\\{{queryRequestsCount}{queryRequestsCount}}\\{{queryServersCount}{queryServersCount}}\\{{queryVerticesCount}{queryVerticesCount}}}\nwindexuse{cacheRoadNetworkFromDB}{cacheRoadNetworkFromDB}{NWn0bN8-2dDAtx-1}\nwindexuse{cacheUsersFromDB}{cacheUsersFromDB}{NWn0bN8-2dDAtx-1}\nwindexuse{initializeCanvas}{initializeCanvas}{NWn0bN8-2dDAtx-1}\nwindexuse{instanceLoad}{instanceLoad}{NWn0bN8-2dDAtx-1}\nwindexuse{PrintSQLException}{PrintSQLException}{NWn0bN8-2dDAtx-1}\nwindexuse{queryEdgesCount}{queryEdgesCount}{NWn0bN8-2dDAtx-1}\nwindexuse{queryRequestsCount}{queryRequestsCount}{NWn0bN8-2dDAtx-1}\nwindexuse{queryServersCount}{queryServersCount}{NWn0bN8-2dDAtx-1}\nwindexuse{queryVerticesCount}{queryVerticesCount}{NWn0bN8-2dDAtx-1}\nwendcode{}\nwbegindocs{108}\nwdocspar
 \subsection{\texttt{actionRoad(1)}}
-\nwenddocs{}\nwbegincode{105}\sublabel{NWn0bN8-2qwznl-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2qwznl-1}}}\moddef{actionRoad(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2qwznl-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{109}\sublabel{NWn0bN8-2qwznl-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2qwznl-1}}}\moddef{actionRoad(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2qwznl-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void actionRoad(final ActionEvent e) \{
-  boolean state_btn_gtree = this.btn_gtree.isDisabled();
   this.btn_road     .setDisable(true);
-  this.btn_gtree    .setDisable(true);
   this.btn_stop     .setDisable(true);
-  this.tf_client    .setDisable(true);
-  this.tf_t0        .setDisable(true);
-  this.tf_t1        .setDisable(true);
   this.tabpane      .setDisable(true);
   this.circ_status  .setFill(C_WARN);
   this.lbl_status   .setText("Select *.rnet...");
@@ -10257,9 +10285,7 @@ void actionRoad(final ActionEvent e) \{
   fc.getExtensionFilters().addAll(new ExtensionFilter("Road network *.rnet", "*.rnet"));
   File road = fc.showOpenDialog(this.stage);
   if (road != null) \{
-    Platform.runLater(() -> \{
-      this.stage.getScene().setCursor(Cursor.WAIT);
-    \});
+    \LA{}Set cursor wait~{\nwtagstyle{}\subpageref{NWn0bN8-4SKNow-1}}\RA{}
     this.road = road.toString();
     this.lbl_status.setText("Load '"+this.road+"'...");
     CompletableFuture.runAsync(() -> \{
@@ -10268,15 +10294,9 @@ void actionRoad(final ActionEvent e) \{
         int nv = this.controller.queryVerticesCount()[0];
         int ne = this.controller.queryEdgesCount()[0];
         Platform.runLater(() -> \{
-          this.btn_gtree    .setDisable(state_btn_gtree);
-          this.btn_stop     .setDisable(false);
           this.btn_road     .setText(road.getName());
-          if (this.gtree != null) \{
-            this.btn_prob   .setDisable(false);
-          \}
-          this.tf_client    .setDisable(false);
-          this.tf_t0        .setDisable(false);
-          this.tf_t1        .setDisable(false);
+          this.btn_stop     .setDisable(false);
+          this.btn_gtree    .setDisable(false);
           this.tabpane      .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
           this.lbl_status   .setText("Loaded "+road.getName()+" (#vertices="+nv+"; #edges="+ne+")");
@@ -10285,82 +10305,39 @@ void actionRoad(final ActionEvent e) \{
           this.ren_road = new RendererOfRoads(this.can_road.getGraphicsContext2D(), this.controller, this.muf);
           this.ren_road.start();
         \});
-      \} catch (FileNotFoundException fe) \{
-        System.err.println("Failed: "+fe.toString());
-      \} catch (SQLException se) \{
-        System.err.println("SQL error:");
-        Tools.PrintSQLException(se);
-      \}
-    \});
-  \}
-\}
-\nwidentuses{\\{{initializeCanvas}{initializeCanvas}}\\{{loadRoadNetworkFromFile}{loadRoadNetworkFromFile}}\\{{PrintSQLException}{PrintSQLException}}\\{{queryEdgesCount}{queryEdgesCount}}\\{{queryVerticesCount}{queryVerticesCount}}}\nwindexuse{initializeCanvas}{initializeCanvas}{NWn0bN8-2qwznl-1}\nwindexuse{loadRoadNetworkFromFile}{loadRoadNetworkFromFile}{NWn0bN8-2qwznl-1}\nwindexuse{PrintSQLException}{PrintSQLException}{NWn0bN8-2qwznl-1}\nwindexuse{queryEdgesCount}{queryEdgesCount}{NWn0bN8-2qwznl-1}\nwindexuse{queryVerticesCount}{queryVerticesCount}{NWn0bN8-2qwznl-1}\nwendcode{}\nwbegindocs{106}\nwdocspar
-
-\subsection{\texttt{actionGtree(1)}}
-\nwenddocs{}\nwbegincode{107}\sublabel{NWn0bN8-18974H-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-18974H-1}}}\moddef{actionGtree(1)~{\nwtagstyle{}\subpageref{NWn0bN8-18974H-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
-void actionGtree(final ActionEvent e) \{
-  boolean state_btn_prob = this.btn_prob.isDisabled();
-  boolean state_btn_road = this.btn_road.isDisabled();
-  this.btn_prob     .setDisable(true);
-  this.btn_road     .setDisable(true);
-  this.btn_stop     .setDisable(true);
-  this.btn_gtree    .setDisable(true);
-  this.tabpane      .setDisable(true);
-  this.circ_status  .setFill(C_WARN);
-  this.lbl_status   .setText("Select *.gtree...");
-  FileChooser fc = new FileChooser();
-  fc.getExtensionFilters().addAll(new ExtensionFilter("G-tree *.gtree", "*.gtree"));
-  File gt = fc.showOpenDialog(this.stage);
-  if (gt != null) \{
-    Platform.runLater(() -> \{
-      this.stage.getScene().setCursor(Cursor.WAIT);
-    \});
-    if (this.gtree != null) \{
-      this.controller.gtreeClose();
-    \}
-    this.gtree = gt.toString();
-    this.lbl_status.setText("Load '"+this.gtree+"'...");
-    CompletableFuture.runAsync(() -> \{
-      try \{
-        this.controller.gtreeLoad(this.gtree);
-        Platform.runLater(() -> \{
-          this.btn_prob     .setDisable(state_btn_prob);
-          this.btn_road     .setDisable(state_btn_road);
-          this.btn_stop     .setDisable(false);
-          if (this.road != null && this.prob == null) \{
-            this.btn_prob   .setDisable(false);
-          \}
-          if (this.road != null && this.prob != null) \{
-            this.btn_client .setDisable(false);
-            this.btn_traffic.setDisable(false);
-          \}
-          this.tabpane      .setDisable(false);
-          this.btn_gtree    .setText(gt.getName());
-          this.circ_status  .setFill(C_SUCCESS);
-          this.lbl_status   .setText("Loaded "+gt.getName());
-          this.stage.getScene().setCursor(Cursor.DEFAULT);
-        \});
-      \} catch (FileNotFoundException fe) \{
-        System.err.println("Failed: "+fe.toString());
-        return;
+        \LA{}Set cursor default~{\nwtagstyle{}\subpageref{NWn0bN8-48WpZf-1}}\RA{}
+      \} catch (Exception ee) \{
+        if (DEBUG) \{
+          System.err.println("Failed: "+ee.toString());
+        \}
+        this.circ_status  .setFill(C_ERROR);
+        this.lbl_status   .setText("Failed to load road network!");
+        Alert alert = new Alert(AlertType.ERROR, "Couldn't load road network! (Not a valid Jargo *.rnet?)");
+        alert.showAndWait();
+        this.btn_road     .setDisable(false);
+        this.btn_stop     .setDisable(false);
+        this.tabpane      .setDisable(false);
+        this.circ_status  .setFill(C_SUCCESS);
+        this.lbl_status   .setText("Ready.");
+        \LA{}Set cursor default~{\nwtagstyle{}\subpageref{NWn0bN8-48WpZf-1}}\RA{}
       \}
     \});
   \} else \{
-    this.btn_prob     .setDisable(state_btn_prob);
-    this.btn_road     .setDisable(state_btn_road);
+    // FD cancelled
+    this.btn_road     .setDisable(false);
     this.btn_stop     .setDisable(false);
-    this.btn_gtree    .setDisable(false);
     this.tabpane      .setDisable(false);
     this.circ_status  .setFill(C_SUCCESS);
-    this.lbl_status   .setText("Cancelled load gtree.");
+    this.lbl_status   .setText("Ready.");
   \}
 \}
-\nwidentuses{\\{{gtreeClose}{gtreeClose}}\\{{gtreeLoad}{gtreeLoad}}}\nwindexuse{gtreeClose}{gtreeClose}{NWn0bN8-18974H-1}\nwindexuse{gtreeLoad}{gtreeLoad}{NWn0bN8-18974H-1}\nwendcode{}\nwbegindocs{108}\nwdocspar
+\nwidentuses{\\{{initializeCanvas}{initializeCanvas}}\\{{loadRoadNetworkFromFile}{loadRoadNetworkFromFile}}\\{{queryEdgesCount}{queryEdgesCount}}\\{{queryVerticesCount}{queryVerticesCount}}}\nwindexuse{initializeCanvas}{initializeCanvas}{NWn0bN8-2qwznl-1}\nwindexuse{loadRoadNetworkFromFile}{loadRoadNetworkFromFile}{NWn0bN8-2qwznl-1}\nwindexuse{queryEdgesCount}{queryEdgesCount}{NWn0bN8-2qwznl-1}\nwindexuse{queryVerticesCount}{queryVerticesCount}{NWn0bN8-2qwznl-1}\nwendcode{}\nwbegindocs{110}\nwdocspar
 
 \subsection{\texttt{actionProb}(1)}
-\nwenddocs{}\nwbegincode{109}\sublabel{NWn0bN8-ZrzWj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-ZrzWj-1}}}\moddef{actionProb(1)~{\nwtagstyle{}\subpageref{NWn0bN8-ZrzWj-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{111}\sublabel{NWn0bN8-ZrzWj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-ZrzWj-1}}}\moddef{actionProb(1)~{\nwtagstyle{}\subpageref{NWn0bN8-ZrzWj-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void actionProb(final ActionEvent e) \{
   this.btn_prob     .setDisable(true);
+  this.btn_stop     .setDisable(true);
   this.tabpane      .setDisable(true);
   this.circ_status  .setFill(C_WARN);
   this.lbl_status   .setText("Select *.instance...");
@@ -10368,9 +10345,7 @@ void actionProb(final ActionEvent e) \{
   fc.getExtensionFilters().addAll(new ExtensionFilter("Problem Instance *.instance", "*.instance"));
   File pb = fc.showOpenDialog(this.stage);
   if (pb != null) \{
-    Platform.runLater(() -> \{
-      this.stage.getScene().setCursor(Cursor.WAIT);
-    \});
+    \LA{}Set cursor wait~{\nwtagstyle{}\subpageref{NWn0bN8-4SKNow-1}}\RA{}
     this.prob = pb.toString();
     this.lbl_status.setText("Load '"+this.prob+"'...");
     CompletableFuture.runAsync(() -> \{
@@ -10381,44 +10356,110 @@ void actionProb(final ActionEvent e) \{
         Platform.runLater(() -> \{
           this.btn_prob     .setText(pb.getName());
           this.btn_client   .setDisable(false);
-          this.btn_traffic  .setDisable(false);
+          this.tf_client    .setDisable(false);
+          this.btn_stop     .setDisable(false);
           this.tabpane      .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
           this.lbl_status   .setText("Loaded "+pb.getName()+"(#servers="+ns+"; #requests="+nr+")");
-          this.stage.getScene().setCursor(Cursor.DEFAULT);
         \});
-      \} catch (FileNotFoundException fe) \{
-        System.err.println("File not found: "+fe.toString());
-        return;
-      \} catch (DuplicateUserException de) \{
-        System.err.println("Duplicate user: "+de.toString());
-        return;
-      \} catch (EdgeNotFoundException ee) \{
-        System.err.println("Edge not found: "+ee.toString());
-        return;
-      \} catch (SQLException se) \{
-        System.err.println("SQL error:");
-        Tools.PrintSQLException(se);
-        return;
-      \} catch (GtreeNotLoadedException ge) \{
-        System.err.println("Gtree not loaded? "+ge.toString());
-        return;
-      \} catch (GtreeIllegalSourceException ge) \{
-        System.err.println("Gtree illegal source? "+ge.toString());
-        return;
-      \} catch (GtreeIllegalTargetException ge) \{
-        System.err.println("Gtree illegal target? "+ge.toString());
-        return;
+        \LA{}Set cursor default~{\nwtagstyle{}\subpageref{NWn0bN8-48WpZf-1}}\RA{}
+      \} catch (Exception ee) \{
+        if (DEBUG) \{
+          System.err.println(ee.toString());
+        \}
+        Platform.runLater(() -> \{
+          this.circ_status  .setFill(C_ERROR);
+          this.lbl_status   .setText("Failed to load problem!");
+          Alert alert = new Alert(AlertType.ERROR, "Couldn't load problem! (Not a valid Jargo instance?)");
+          alert.showAndWait();
+          this.btn_prob     .setDisable(false);
+          this.btn_stop     .setDisable(false);
+          this.tabpane      .setDisable(false);
+          this.circ_status  .setFill(C_SUCCESS);
+          this.lbl_status   .setText("Ready.");
+        \});
+        \LA{}Set cursor default~{\nwtagstyle{}\subpageref{NWn0bN8-48WpZf-1}}\RA{}
       \}
     \});
+  \} else \{
+    // FD cancelled
+    this.btn_prob     .setDisable(false);
+    this.btn_stop     .setDisable(false);
+    this.tabpane      .setDisable(false);
+    this.circ_status  .setFill(C_SUCCESS);
+    this.lbl_status   .setText("Ready.");
   \}
 \}
-\nwidentuses{\\{{loadProblem}{loadProblem}}\\{{PrintSQLException}{PrintSQLException}}\\{{queryRequestsCount}{queryRequestsCount}}\\{{queryServersCount}{queryServersCount}}}\nwindexuse{loadProblem}{loadProblem}{NWn0bN8-ZrzWj-1}\nwindexuse{PrintSQLException}{PrintSQLException}{NWn0bN8-ZrzWj-1}\nwindexuse{queryRequestsCount}{queryRequestsCount}{NWn0bN8-ZrzWj-1}\nwindexuse{queryServersCount}{queryServersCount}{NWn0bN8-ZrzWj-1}\nwendcode{}\nwbegindocs{110}\nwdocspar
+\nwidentuses{\\{{loadProblem}{loadProblem}}\\{{queryRequestsCount}{queryRequestsCount}}\\{{queryServersCount}{queryServersCount}}}\nwindexuse{loadProblem}{loadProblem}{NWn0bN8-ZrzWj-1}\nwindexuse{queryRequestsCount}{queryRequestsCount}{NWn0bN8-ZrzWj-1}\nwindexuse{queryServersCount}{queryServersCount}{NWn0bN8-ZrzWj-1}\nwendcode{}\nwbegindocs{112}\nwdocspar
 
+\subsection{\texttt{actionGtree(1)}}
+\nwenddocs{}\nwbegincode{113}\sublabel{NWn0bN8-18974H-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-18974H-1}}}\moddef{actionGtree(1)~{\nwtagstyle{}\subpageref{NWn0bN8-18974H-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+void actionGtree(final ActionEvent e) \{
+  this.btn_gtree    .setDisable(true);
+  this.btn_stop     .setDisable(true);
+  this.tabpane      .setDisable(true);
+  this.circ_status  .setFill(C_WARN);
+  this.lbl_status   .setText("Select *.gtree...");
+  FileChooser fc = new FileChooser();
+  fc.getExtensionFilters().addAll(new ExtensionFilter("G-tree *.gtree", "*.gtree"));
+  File gt = fc.showOpenDialog(this.stage);
+  if (gt != null) \{
+    \LA{}Set cursor wait~{\nwtagstyle{}\subpageref{NWn0bN8-4SKNow-1}}\RA{}
+    this.gtree = gt.toString();
+    this.circ_status.setFill(C_WARN);
+    this.lbl_status.setText("Load '"+this.gtree+"'...");
+    CompletableFuture.runAsync(() -> \{
+      try \{
+        this.controller.gtreeLoad(this.gtree);
+        Platform.runLater(() -> \{
+          if (this.access_path == 1) \{
+            this.btn_prob   .setDisable(false);
+          \} else if (this.access_path == 2) \{
+            this.btn_client .setDisable(false);
+            this.tf_client  .setDisable(false);
+          \}
+          this.btn_gtree    .setText(gt.getName());
+          this.btn_stop     .setDisable(false);
+          this.tabpane      .setDisable(false);
+          this.circ_status  .setFill(C_SUCCESS);
+          this.lbl_status   .setText("Loaded "+gt.getName());
+        \});
+        \LA{}Set cursor default~{\nwtagstyle{}\subpageref{NWn0bN8-48WpZf-1}}\RA{}
+      \} catch (Exception ee) \{
+        if (DEBUG) \{
+          System.err.println("Failed: "+ee.toString());
+        \}
+        Platform.runLater(() -> \{
+          this.circ_status  .setFill(C_ERROR);
+          this.lbl_status   .setText("Failed to load G-tree!");
+          Alert alert = new Alert(AlertType.ERROR, "Couldn't load G-tree!");
+          alert.showAndWait();
+          this.btn_gtree    .setDisable(false);
+          this.btn_stop     .setDisable(false);
+          this.tabpane      .setDisable(false);
+          this.circ_status  .setFill(C_SUCCESS);
+          this.lbl_status   .setText("Ready.");
+        \});
+        \LA{}Set cursor default~{\nwtagstyle{}\subpageref{NWn0bN8-48WpZf-1}}\RA{}
+      \}
+    \});
+  \} else \{
+    // FD cancelled
+    this.btn_gtree    .setDisable(false);
+    this.btn_stop     .setDisable(false);
+    this.tabpane      .setDisable(false);
+    this.circ_status  .setFill(C_SUCCESS);
+    this.lbl_status   .setText("Ready.");
+  \}
+\}
+\nosublabel{NWn0bN8-18974H-1-u3}\nwindexdefn{actionGtree}{actionGtree}{NWn0bN8-18974H-1}\eatline
+\nwidentdefs{\\{{actionGtree}{actionGtree}}}\nwidentuses{\\{{gtreeLoad}{gtreeLoad}}}\nwindexuse{gtreeLoad}{gtreeLoad}{NWn0bN8-18974H-1}\nwendcode{}\nwbegindocs{114}\nwdocspar
 \subsection{\texttt{actionClient}(1)}
-\nwenddocs{}\nwbegincode{111}\sublabel{NWn0bN8-4G0CtX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-4G0CtX-1}}}\moddef{actionClient(1)~{\nwtagstyle{}\subpageref{NWn0bN8-4G0CtX-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{115}\sublabel{NWn0bN8-4G0CtX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-4G0CtX-1}}}\moddef{actionClient(1)~{\nwtagstyle{}\subpageref{NWn0bN8-4G0CtX-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void actionClient(final ActionEvent e) \{
   this.btn_client   .setDisable(true);
+  this.tf_client    .setDisable(true);
+  this.btn_stop     .setDisable(true);
   this.tabpane      .setDisable(true);
   this.circ_status  .setFill(C_WARN);
   this.lbl_status   .setText("Select *.jar...");
@@ -10426,9 +10467,7 @@ void actionClient(final ActionEvent e) \{
   fc.getExtensionFilters().addAll(new ExtensionFilter("Client *.jar", "*.jar"));
   File cj = fc.showOpenDialog(this.stage);
   if (cj != null) \{
-    Platform.runLater(() -> \{
-      this.stage.getScene().setCursor(Cursor.WAIT);
-    \});
+    \LA{}Set cursor wait~{\nwtagstyle{}\subpageref{NWn0bN8-4SKNow-1}}\RA{}
     this.clientjar = cj.toString();
 
     try \{
@@ -10444,50 +10483,83 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
 /******/
       if (classNames.size() == 0) \{
         Platform.runLater(() -> \{
-          this.stage.getScene().setCursor(Cursor.DEFAULT);
+          this.circ_status  .setFill(C_ERROR);
+          this.lbl_status   .setText("Bad jar!");
+          Alert alert = new Alert(AlertType.ERROR, "Couldn't load client!");
+          alert.showAndWait();
+          this.btn_client   .setDisable(false);
+          this.tf_client    .setDisable(false);
+          this.btn_stop     .setDisable(false);
+          this.tabpane      .setDisable(false);
+          this.circ_status  .setFill(C_SUCCESS);
+          this.lbl_status   .setText("Ready.");
         \});
-        System.err.println("Bad jar?");
+        \LA{}Set cursor default~{\nwtagstyle{}\subpageref{NWn0bN8-48WpZf-1}}\RA{}
         return;
       \}
-      this.clientclass = classNames.get(0);
+      Platform.runLater(() -> \{
+        this.clientclass = classNames.get(0);
+        this.btn_client   .setText(cj.getName());
+        this.tf_client    .setText(this.clientclass);
+        this.tf_client    .setDisable(false);
+        this.btn_traffic  .setDisable(false);
+        this.tf_traffic   .setDisable(false);
+        this.tf_t0        .setDisable(false);
+        this.tf_t1        .setDisable(false);
+        this.btn_startseq .setDisable(false);
+        this.btn_startreal.setDisable(false);
+        this.btn_stop     .setDisable(false);
+        this.tabpane      .setDisable(false);
+        this.circ_status  .setFill(C_SUCCESS);
+        this.lbl_status   .setText("Loaded "+cj.getName());
+      \});
+      \LA{}Set cursor default~{\nwtagstyle{}\subpageref{NWn0bN8-48WpZf-1}}\RA{}
     \} catch (IOException ie) \{
       Platform.runLater(() -> \{
-        this.stage.getScene().setCursor(Cursor.DEFAULT);
+        this.circ_status  .setFill(C_ERROR);
+        this.lbl_status   .setText("Bad jar!");
+        Alert alert = new Alert(AlertType.ERROR, "Couldn't load client!");
+        alert.showAndWait();
+        this.btn_client   .setDisable(false);
+        this.tf_client    .setDisable(false);
+        this.btn_stop     .setDisable(false);
+        this.tabpane      .setDisable(false);
+        this.circ_status  .setFill(C_SUCCESS);
+        this.lbl_status   .setText("Ready.");
       \});
-      System.err.println(ie.toString());
-      return;
+      \LA{}Set cursor default~{\nwtagstyle{}\subpageref{NWn0bN8-48WpZf-1}}\RA{}
     \}
-    this.tf_client.setText(this.clientclass);
-    this.btn_client   .setText(cj.getName());
-    this.tf_client     .setDisable(false);
-    this.tf_t0        .setDisable(false);
-    this.tf_t1        .setDisable(false);
-    this.btn_startseq .setDisable(false);
-    this.btn_startreal.setDisable(false);
+  \} else \{
+    // FD cancelled
+    this.btn_client   .setDisable(false);
+    this.tf_client    .setDisable(false);
+    this.btn_stop     .setDisable(false);
     this.tabpane      .setDisable(false);
     this.circ_status  .setFill(C_SUCCESS);
-    this.lbl_status   .setText("Loaded "+cj.getName());
-    Platform.runLater(() -> \{
-      this.stage.getScene().setCursor(Cursor.DEFAULT);
-    \});
+    this.lbl_status   .setText("Ready.");
   \}
 \}
-\nwendcode{}\nwbegindocs{112}\nwdocspar
+\nwendcode{}\nwbegindocs{116}\nwdocspar
 
 \subsection{\texttt{actionTraffic}(1)}
-\nwenddocs{}\nwbegincode{113}\sublabel{NWn0bN8-2Ft1U2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2Ft1U2-1}}}\moddef{actionTraffic(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2Ft1U2-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{117}\sublabel{NWn0bN8-2Ft1U2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2Ft1U2-1}}}\moddef{actionTraffic(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2Ft1U2-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void actionTraffic(final ActionEvent e) \{
   this.btn_traffic  .setDisable(true);
+  this.tf_traffic   .setDisable(true);
+  this.tf_client    .setDisable(true);
+  this.btn_stop     .setDisable(true);
   this.tabpane      .setDisable(true);
+  this.tf_t0        .setDisable(true);
+  this.tf_t1        .setDisable(true);
+  this.btn_startseq .setDisable(true);
+  this.btn_startreal.setDisable(true);
   this.circ_status  .setFill(C_WARN);
   this.lbl_status   .setText("Select *.jar...");
   FileChooser fc = new FileChooser();
   fc.getExtensionFilters().addAll(new ExtensionFilter("Traffic *.jar", "*.jar"));
   File cj = fc.showOpenDialog(this.stage);
   if (cj != null) \{
-    Platform.runLater(() -> \{
-      this.stage.getScene().setCursor(Cursor.WAIT);
-    \});
+    \LA{}Set cursor wait~{\nwtagstyle{}\subpageref{NWn0bN8-4SKNow-1}}\RA{}
     this.trafficjar = cj.toString();
 
     try \{
@@ -10503,34 +10575,80 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
 /******/
       if (classNames.size() == 0) \{
         Platform.runLater(() -> \{
-          this.stage.getScene().setCursor(Cursor.DEFAULT);
+          this.circ_status  .setFill(C_ERROR);
+          this.lbl_status   .setText("Bad jar!");
+          Alert alert = new Alert(AlertType.ERROR, "Couldn't load traffic!");
+          alert.showAndWait();
+          this.btn_traffic  .setDisable(false);
+          this.tf_traffic   .setDisable(false);
+          this.tf_client    .setDisable(false);
+          this.btn_stop     .setDisable(false);
+          this.tabpane      .setDisable(false);
+          this.tf_t0        .setDisable(false);
+          this.tf_t1        .setDisable(false);
+          this.btn_startseq .setDisable(false);
+          this.btn_startreal.setDisable(false);
+          this.circ_status  .setFill(C_SUCCESS);
+          this.lbl_status   .setText("Ready.");
         \});
-        System.err.println("Bad jar?");
+        \LA{}Set cursor default~{\nwtagstyle{}\subpageref{NWn0bN8-48WpZf-1}}\RA{}
         return;
       \}
-      this.trafficclass = classNames.get(0);
+      Platform.runLater(() -> \{
+        this.trafficclass = classNames.get(0);
+        this.tf_traffic   .setText(this.trafficclass);
+        this.btn_traffic  .setText(cj.getName());
+        this.tf_traffic   .setDisable(false);
+        this.tf_client    .setDisable(false);
+        this.btn_stop     .setDisable(false);
+        this.tabpane      .setDisable(false);
+        this.tf_t0        .setDisable(false);
+        this.tf_t1        .setDisable(false);
+        this.btn_startseq .setDisable(false);
+        this.btn_startreal.setDisable(false);
+        this.circ_status  .setFill(C_SUCCESS);
+        this.lbl_status   .setText("Loaded "+cj.getName());
+      \});
+      \LA{}Set cursor default~{\nwtagstyle{}\subpageref{NWn0bN8-48WpZf-1}}\RA{}
     \} catch (IOException ie) \{
       Platform.runLater(() -> \{
-        this.stage.getScene().setCursor(Cursor.DEFAULT);
+        this.circ_status  .setFill(C_ERROR);
+        this.lbl_status   .setText("Bad jar!");
+        Alert alert = new Alert(AlertType.ERROR, "Couldn't load traffic!");
+        alert.showAndWait();
+        this.btn_traffic  .setDisable(false);
+        this.tf_traffic   .setDisable(false);
+        this.tf_client    .setDisable(false);
+        this.btn_stop     .setDisable(false);
+        this.tabpane      .setDisable(false);
+        this.tf_t0        .setDisable(false);
+        this.tf_t1        .setDisable(false);
+        this.btn_startseq .setDisable(false);
+        this.btn_startreal.setDisable(false);
+        this.circ_status  .setFill(C_SUCCESS);
+        this.lbl_status   .setText("Ready.");
       \});
-      System.err.println(ie.toString());
-      return;
+      \LA{}Set cursor default~{\nwtagstyle{}\subpageref{NWn0bN8-48WpZf-1}}\RA{}
     \}
-    this.tf_traffic   .setText(this.trafficclass);
-    this.btn_traffic  .setText(cj.getName());
+  \} else \{
+    // FD cancelled
+    this.btn_traffic  .setDisable(false);
     this.tf_traffic   .setDisable(false);
+    this.tf_client    .setDisable(false);
+    this.btn_stop     .setDisable(false);
     this.tabpane      .setDisable(false);
+    this.tf_t0        .setDisable(false);
+    this.tf_t1        .setDisable(false);
+    this.btn_startseq .setDisable(false);
+    this.btn_startreal.setDisable(false);
     this.circ_status  .setFill(C_SUCCESS);
-    this.lbl_status   .setText("Loaded "+cj.getName());
-    Platform.runLater(() -> \{
-      this.stage.getScene().setCursor(Cursor.DEFAULT);
-    \});
+    this.lbl_status   .setText("Ready.");
   \}
 \}
-\nwendcode{}\nwbegindocs{114}\nwdocspar
+\nwendcode{}\nwbegindocs{118}\nwdocspar
 
 \subsection{\texttt{actionStartSequential}(1)}
-\nwenddocs{}\nwbegincode{115}\sublabel{NWn0bN8-2DyoOl-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2DyoOl-1}}}\moddef{actionStartSequential(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2DyoOl-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{119}\sublabel{NWn0bN8-2DyoOl-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2DyoOl-1}}}\moddef{actionStartSequential(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2DyoOl-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void actionStartSequential(final ActionEvent e) \{
   \LA{}Load client~{\nwtagstyle{}\subpageref{NWn0bN8-1Tfjod-1}}\RA{}
   \LA{}Set default t0, t1~{\nwtagstyle{}\subpageref{NWn0bN8-TFk9A-1}}\RA{}
@@ -10572,9 +10690,9 @@ void actionStartSequential(final ActionEvent e) \{
         this.controller, this.lbl_status, this.muf, this.ren_servers), 0, 1, TimeUnit.SECONDS);
 \}
 \nwindexdefn{actionStartSequential}{actionStartSequential}{NWn0bN8-2DyoOl-1}\eatline
-\nwidentdefs{\\{{actionStartSequential}{actionStartSequential}}}\nwidentuses{\\{{setClockEnd}{setClockEnd}}\\{{setClockStart}{setClockStart}}\\{{startSequential}{startSequential}}}\nwindexuse{setClockEnd}{setClockEnd}{NWn0bN8-2DyoOl-1}\nwindexuse{setClockStart}{setClockStart}{NWn0bN8-2DyoOl-1}\nwindexuse{startSequential}{startSequential}{NWn0bN8-2DyoOl-1}\nwendcode{}\nwbegindocs{116}\nwdocspar
+\nwidentdefs{\\{{actionStartSequential}{actionStartSequential}}}\nwidentuses{\\{{setClockEnd}{setClockEnd}}\\{{setClockStart}{setClockStart}}\\{{startSequential}{startSequential}}}\nwindexuse{setClockEnd}{setClockEnd}{NWn0bN8-2DyoOl-1}\nwindexuse{setClockStart}{setClockStart}{NWn0bN8-2DyoOl-1}\nwindexuse{startSequential}{startSequential}{NWn0bN8-2DyoOl-1}\nwendcode{}\nwbegindocs{120}\nwdocspar
 \subsection{\texttt{actionStartRealtime}(1)}
-\nwenddocs{}\nwbegincode{117}\sublabel{NWn0bN8-1u3CLd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1u3CLd-1}}}\moddef{actionStartRealtime(1)~{\nwtagstyle{}\subpageref{NWn0bN8-1u3CLd-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{121}\sublabel{NWn0bN8-1u3CLd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1u3CLd-1}}}\moddef{actionStartRealtime(1)~{\nwtagstyle{}\subpageref{NWn0bN8-1u3CLd-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void actionStartRealtime(final ActionEvent e) \{
   \LA{}Load client~{\nwtagstyle{}\subpageref{NWn0bN8-1Tfjod-1}}\RA{}
   \LA{}Set default t0, t1~{\nwtagstyle{}\subpageref{NWn0bN8-TFk9A-1}}\RA{}
@@ -10616,16 +10734,21 @@ void actionStartRealtime(final ActionEvent e) \{
         this.controller, this.lbl_status, this.muf, this.ren_servers), 0, 1, TimeUnit.SECONDS);
 \}
 \nwindexdefn{actionStartRealtime}{actionStartRealtime}{NWn0bN8-1u3CLd-1}\eatline
-\nwidentdefs{\\{{actionStartRealtime}{actionStartRealtime}}}\nwidentuses{\\{{setClockEnd}{setClockEnd}}\\{{setClockStart}{setClockStart}}\\{{startRealtime}{startRealtime}}}\nwindexuse{setClockEnd}{setClockEnd}{NWn0bN8-1u3CLd-1}\nwindexuse{setClockStart}{setClockStart}{NWn0bN8-1u3CLd-1}\nwindexuse{startRealtime}{startRealtime}{NWn0bN8-1u3CLd-1}\nwendcode{}\nwbegindocs{118}\nwdocspar
+\nwidentdefs{\\{{actionStartRealtime}{actionStartRealtime}}}\nwidentuses{\\{{setClockEnd}{setClockEnd}}\\{{setClockStart}{setClockStart}}\\{{startRealtime}{startRealtime}}}\nwindexuse{setClockEnd}{setClockEnd}{NWn0bN8-1u3CLd-1}\nwindexuse{setClockStart}{setClockStart}{NWn0bN8-1u3CLd-1}\nwindexuse{startRealtime}{startRealtime}{NWn0bN8-1u3CLd-1}\nwendcode{}\nwbegindocs{122}\nwdocspar
 \subsection{\texttt{actionStop}(1)}
-\nwenddocs{}\nwbegincode{119}\sublabel{NWn0bN8-27hSI5-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-27hSI5-1}}}\moddef{actionStop(1)~{\nwtagstyle{}\subpageref{NWn0bN8-27hSI5-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{123}\sublabel{NWn0bN8-27hSI5-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-27hSI5-1}}}\moddef{actionStop(1)~{\nwtagstyle{}\subpageref{NWn0bN8-27hSI5-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void actionStop(final ActionEvent e) \{
+  \LA{}Set cursor wait~{\nwtagstyle{}\subpageref{NWn0bN8-4SKNow-1}}\RA{}
   if (this.controller != null) \{
     this.btn_stop     .setDisable(true);
     \LA{}Disable metrics checkbox containers~{\nwtagstyle{}\subpageref{NWn0bN8-1tcU0w-1}}\RA{}
     \LA{}Deselect metrics checkboxes~{\nwtagstyle{}\subpageref{NWn0bN8-MvQLz-1}}\RA{}
-    this.ren_road.stop();
-    this.ren_servers.stop();
+    if (this.ren_road != null) \{
+      this.ren_road.stop();
+    \}
+    if (this.ren_servers != null) \{
+      this.ren_servers.stop();
+    \}
     if (this.exe != null) \{
       this.exe.shutdown();
     \}
@@ -10673,22 +10796,44 @@ void actionStop(final ActionEvent e) \{
           this.btn_startseq .setDisable(true);
           this.btn_startreal.setDisable(true);
           this.db = null;
+          this.rates_x = new NumberAxis();
+          this.rates_y = new NumberAxis();
+          this.distances_x = new NumberAxis();
+          this.distances_y = new NumberAxis();
+          this.durations_x = new NumberAxis();
+          this.durations_y = new NumberAxis();
+          this.counts_x = new NumberAxis();
+          this.counts_y = new NumberAxis();
+          this.times_x = new NumberAxis();
+          this.times_y = new NumberAxis();
+          this.lc_rates = new LineChart<Number, Number>(rates_x, rates_y);
+          this.lc_distances = new LineChart<Number, Number>(distances_x, distances_y);
+          this.lc_durations = new LineChart<Number, Number>(durations_x, durations_y);
+          this.lc_counts = new LineChart<Number, Number>(counts_x, counts_y);
+          this.lc_times = new LineChart<Number, Number>(times_x, times_y);
+          this.lc_rates_series = new ConcurrentHashMap<String, Series<Number, Number>>();
+          this.lc_distances_series = new ConcurrentHashMap<String, Series<Number, Number>>();
+          this.lc_durations_series = new ConcurrentHashMap<String, Series<Number, Number>>();
+          this.lc_counts_series = new ConcurrentHashMap<String, Series<Number, Number>>();
+          this.lc_times_series = new ConcurrentHashMap<String, Series<Number, Number>>();
+          this.lu_series = new ConcurrentHashMap<String, ConcurrentHashMap<String, Series<Number, Number>>>();
           this.circ_status.setFill(C_SUCCESS);
           this.lbl_status.setText("Closed instance.");
         \});
+        \LA{}Set cursor default~{\nwtagstyle{}\subpageref{NWn0bN8-48WpZf-1}}\RA{}
       \} catch (SQLException se) \{
         System.err.println("Failure");
         System.exit(1);
       \}
     \});
   \} else \{
-    this.lbl_status.setText("Ready.");
+    \LA{}Set cursor default~{\nwtagstyle{}\subpageref{NWn0bN8-48WpZf-1}}\RA{}
   \}
 \}
-\nwindexdefn{actionStop}{actionStop}{NWn0bN8-27hSI5-1}\eatline
-\nwidentdefs{\\{{actionStop}{actionStop}}}\nwidentuses{\\{{gtreeClose}{gtreeClose}}\\{{instanceClose}{instanceClose}}\\{{stop}{stop}}}\nwindexuse{gtreeClose}{gtreeClose}{NWn0bN8-27hSI5-1}\nwindexuse{instanceClose}{instanceClose}{NWn0bN8-27hSI5-1}\nwindexuse{stop}{stop}{NWn0bN8-27hSI5-1}\nwendcode{}\nwbegindocs{120}\nwdocspar
+\nosublabel{NWn0bN8-27hSI5-1-u5}\nwindexdefn{actionStop}{actionStop}{NWn0bN8-27hSI5-1}\eatline
+\nwidentdefs{\\{{actionStop}{actionStop}}}\nwidentuses{\\{{gtreeClose}{gtreeClose}}\\{{instanceClose}{instanceClose}}\\{{stop}{stop}}}\nwindexuse{gtreeClose}{gtreeClose}{NWn0bN8-27hSI5-1}\nwindexuse{instanceClose}{instanceClose}{NWn0bN8-27hSI5-1}\nwindexuse{stop}{stop}{NWn0bN8-27hSI5-1}\nwendcode{}\nwbegindocs{124}\nwdocspar
 \subsection{\texttt{toggleMetric}(1)}
-\nwenddocs{}\nwbegincode{121}\sublabel{NWn0bN8-dsz3A-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-dsz3A-1}}}\moddef{toggleMetric(1)~{\nwtagstyle{}\subpageref{NWn0bN8-dsz3A-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{125}\sublabel{NWn0bN8-dsz3A-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-dsz3A-1}}}\moddef{toggleMetric(1)~{\nwtagstyle{}\subpageref{NWn0bN8-dsz3A-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void toggleMetric(final ActionEvent e) \{
   CheckBox source = (CheckBox) e.getSource();
   final String id = source.getId();
@@ -10709,9 +10854,9 @@ void toggleMetric(final ActionEvent e) \{
   \}
 \}
 \nwindexdefn{toggleMetric}{toggleMetric}{NWn0bN8-dsz3A-1}\eatline
-\nwidentdefs{\\{{toggleMetric}{toggleMetric}}}\nwendcode{}\nwbegindocs{122}\nwdocspar
+\nwidentdefs{\\{{toggleMetric}{toggleMetric}}}\nwendcode{}\nwbegindocs{126}\nwdocspar
 \subsection{\texttt{actionZoomCanvas}(1)}
-\nwenddocs{}\nwbegincode{123}\sublabel{NWn0bN8-1NTRHE-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1NTRHE-1}}}\moddef{actionZoomCanvas(1)~{\nwtagstyle{}\subpageref{NWn0bN8-1NTRHE-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{127}\sublabel{NWn0bN8-1NTRHE-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1NTRHE-1}}}\moddef{actionZoomCanvas(1)~{\nwtagstyle{}\subpageref{NWn0bN8-1NTRHE-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void actionZoomCanvas(ScrollEvent e) \{
   if (e.getDeltaY() > 0) \{
     this.zoom += 1;
@@ -10721,11 +10866,6 @@ void actionZoomCanvas(ScrollEvent e) \{
   \}
   this.zoom = Math.max(this.zoom, 1);
   this.zoom = Math.min(this.zoom, 5);
-  System.out.println(this.zoom);
-  //this.can_road.setScaleX(this.zoom);
-  //this.can_road.setScaleY(this.zoom);
-  //this.can_servers.setScaleX(this.zoom);
-  //this.can_servers.setScaleY(this.zoom);
   this.muf.setUnit(this.unit*this.zoom);
   this.can_road.setWidth(this.window_width*this.zoom);
   this.can_road.setHeight(this.window_height*this.zoom);
@@ -10740,9 +10880,9 @@ void actionZoomCanvas(ScrollEvent e) \{
   e.consume();
 \}
 \nwindexdefn{actionZoomCanvas}{actionZoomCanvas}{NWn0bN8-1NTRHE-1}\eatline
-\nwidentdefs{\\{{actionZoomCanvas}{actionZoomCanvas}}}\nwendcode{}\nwbegindocs{124}\nwdocspar
+\nwidentdefs{\\{{actionZoomCanvas}{actionZoomCanvas}}}\nwendcode{}\nwbegindocs{128}\nwdocspar
 \subsection{\texttt{initializeCanvas}(0)}
-\nwenddocs{}\nwbegincode{125}\sublabel{NWn0bN8-4X9Oqe-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-4X9Oqe-1}}}\moddef{initializeCanvas(0)~{\nwtagstyle{}\subpageref{NWn0bN8-4X9Oqe-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{129}\sublabel{NWn0bN8-4X9Oqe-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-4X9Oqe-1}}}\moddef{initializeCanvas(0)~{\nwtagstyle{}\subpageref{NWn0bN8-4X9Oqe-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void initializeCanvas() \{
   try \{
     this.can_road    = new Canvas(this.window_width, this.window_height);
@@ -10771,28 +10911,28 @@ void initializeCanvas() \{
   \}
 \}
 \nwindexdefn{initializeCanvas}{initializeCanvas}{NWn0bN8-4X9Oqe-1}\eatline
-\nwidentdefs{\\{{initializeCanvas}{initializeCanvas}}}\nwidentuses{\\{{actionZoomCanvas}{actionZoomCanvas}}\\{{PrintSQLException}{PrintSQLException}}\\{{queryMBR}{queryMBR}}}\nwindexuse{actionZoomCanvas}{actionZoomCanvas}{NWn0bN8-4X9Oqe-1}\nwindexuse{PrintSQLException}{PrintSQLException}{NWn0bN8-4X9Oqe-1}\nwindexuse{queryMBR}{queryMBR}{NWn0bN8-4X9Oqe-1}\nwendcode{}\nwbegindocs{126}\nwdocspar
+\nwidentdefs{\\{{initializeCanvas}{initializeCanvas}}}\nwidentuses{\\{{actionZoomCanvas}{actionZoomCanvas}}\\{{PrintSQLException}{PrintSQLException}}\\{{queryMBR}{queryMBR}}}\nwindexuse{actionZoomCanvas}{actionZoomCanvas}{NWn0bN8-4X9Oqe-1}\nwindexuse{PrintSQLException}{PrintSQLException}{NWn0bN8-4X9Oqe-1}\nwindexuse{queryMBR}{queryMBR}{NWn0bN8-4X9Oqe-1}\nwendcode{}\nwbegindocs{130}\nwdocspar
 \subsection{\texttt{setWindowWidth}(1)}
-\nwenddocs{}\nwbegincode{127}\sublabel{NWn0bN8-3x7jy7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3x7jy7-1}}}\moddef{setWindowWidth(1)~{\nwtagstyle{}\subpageref{NWn0bN8-3x7jy7-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{131}\sublabel{NWn0bN8-3x7jy7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3x7jy7-1}}}\moddef{setWindowWidth(1)~{\nwtagstyle{}\subpageref{NWn0bN8-3x7jy7-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void setWindowWidth(double w) \{
   this.window_width = w;
 \}
 \nwindexdefn{setWindowWidth}{setWindowWidth}{NWn0bN8-3x7jy7-1}\eatline
-\nwidentdefs{\\{{setWindowWidth}{setWindowWidth}}}\nwendcode{}\nwbegindocs{128}\nwdocspar
+\nwidentdefs{\\{{setWindowWidth}{setWindowWidth}}}\nwendcode{}\nwbegindocs{132}\nwdocspar
 \subsection{\texttt{setWindowHeight}(1)}
-\nwenddocs{}\nwbegincode{129}\sublabel{NWn0bN8-13qzEo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-13qzEo-1}}}\moddef{setWindowHeight(1)~{\nwtagstyle{}\subpageref{NWn0bN8-13qzEo-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{133}\sublabel{NWn0bN8-13qzEo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-13qzEo-1}}}\moddef{setWindowHeight(1)~{\nwtagstyle{}\subpageref{NWn0bN8-13qzEo-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void setWindowHeight(double h) \{
   this.window_height = h;
 \}
 \nwindexdefn{setWindowHeight}{setWindowHeight}{NWn0bN8-13qzEo-1}\eatline
-\nwidentdefs{\\{{setWindowHeight}{setWindowHeight}}}\nwendcode{}\nwbegindocs{130}\nwdocspar
+\nwidentdefs{\\{{setWindowHeight}{setWindowHeight}}}\nwendcode{}\nwbegindocs{134}\nwdocspar
 \subsection{\texttt{setStage}(1)}
-\nwenddocs{}\nwbegincode{131}\sublabel{NWn0bN8-4RWb4b-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-4RWb4b-1}}}\moddef{setStage(1)~{\nwtagstyle{}\subpageref{NWn0bN8-4RWb4b-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{135}\sublabel{NWn0bN8-4RWb4b-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-4RWb4b-1}}}\moddef{setStage(1)~{\nwtagstyle{}\subpageref{NWn0bN8-4RWb4b-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void setStage(Stage s) \{
   this.stage = s;
 \}
 \nwindexdefn{setStage}{setStage}{NWn0bN8-4RWb4b-1}\eatline
-\nwidentdefs{\\{{setStage}{setStage}}}\nwendcode{}\nwbegindocs{132}\nwdocspar
+\nwidentdefs{\\{{setStage}{setStage}}}\nwendcode{}\nwbegindocs{136}\nwdocspar
 \nwenddocs{}\nwfilename{src/tex/JMX.nw}\nwbegindocs{0}\chapter{Statistics with JMX}
 \label{jmx}
 
