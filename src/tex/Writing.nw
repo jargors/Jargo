@@ -748,6 +748,7 @@ the method call and returns [[false]].\\
 void updateServerRoute(final int sid, final int[] route, final int[] sched)
 throws RouteIllegalOverwriteException, UserNotFoundException,
        EdgeNotFoundException, TimeWindowException, SQLException {
+  long A0 = System.currentTimeMillis();
   if (route[0] >= this.retrieveClock()) {
     <<Check time window violation>>
     <<Apply traffic to route, sched>>
@@ -755,6 +756,7 @@ throws RouteIllegalOverwriteException, UserNotFoundException,
   } else {
     throw new RouteIllegalOverwriteException();
   }
+  <<Stats: updateServerRoute(3)>>
 }
 @ %def updateServerRoute
 
@@ -892,6 +894,7 @@ and returns [[false]].\\
 void updateServerAddToSchedule(final int sid, final int[] route, final int[] sched, final int[] rid)
 throws RouteIllegalOverwriteException, UserNotFoundException,
        EdgeNotFoundException, TimeWindowException, SQLException {
+  long A0 = System.currentTimeMillis();
   final int t = this.retrieveClock();
   final int[] current = this.storage.DBQueryServerRoute(sid);
   int i = 0;
@@ -914,6 +917,7 @@ throws RouteIllegalOverwriteException, UserNotFoundException,
   <<Check time window violation>>
   <<Apply traffic to route, sched>>
   this.storage.DBUpdateServerAddToSchedule(sid, mutroute, mutsched, rid);
+  <<Stats: updateServerAddToSchedule(4)>>
 }
 @ %def updateServerAddToSchedule
 
@@ -1048,6 +1052,7 @@ the method call and returns [[false]].\\
 void updateServerRemoveFromSchedule( final int sid, final int[] route, final int[] sched, final int[] rid)
 throws RouteIllegalOverwriteException, UserNotFoundException,
        EdgeNotFoundException, TimeWindowException, SQLException {
+  long A0 = System.currentTimeMillis();
   if (route[0] >= this.retrieveClock()) {
     <<Check time window violation>>
     <<Apply traffic to route, sched>>
@@ -1055,6 +1060,7 @@ throws RouteIllegalOverwriteException, UserNotFoundException,
   } else {
     throw new RouteIllegalOverwriteException();
   }
+  <<Stats: updateServerRemoveFromSchedule(4)>>
 }
 @ %def updateServerRemoveFromSchedule
 

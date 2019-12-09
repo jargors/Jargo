@@ -32,9 +32,9 @@ public class Communicator {
   private long statQueryServersLocationsActiveDur = 0;
   private long statQueryUserDur = 0;
   private long statQueryVertexDur = 0;
-  private long statQpdateServerAddToScheduleDur = 0;
-  private long statQpdateServerRemoveFromScheduleDur = 0;
-  private long statQpdateServerRouteDur = 0;
+  private long statUpdateServerAddToScheduleDur = 0;
+  private long statUpdateServerRemoveFromScheduleDur = 0;
+  private long statUpdateServerRouteDur = 0;
   public Communicator() {
     try {
       MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
@@ -131,6 +131,7 @@ public class Communicator {
   public void updateServerAddToSchedule(final int sid, final int[] route, final int[] sched, final int[] rid)
          throws RouteIllegalOverwriteException, UserNotFoundException,
                 EdgeNotFoundException, TimeWindowException, SQLException {
+           long A0 = System.currentTimeMillis();
            final int t = this.retrieveClock();
            final int[] current = this.storage.DBQueryServerRoute(sid);
            int i = 0;
@@ -185,10 +186,12 @@ public class Communicator {
              }
            }
            this.storage.DBUpdateServerAddToSchedule(sid, mutroute, mutsched, rid);
+           this.statUpdateServerAddToScheduleDur = (System.currentTimeMillis() - A0);
          }
   public void updateServerRemoveFromSchedule( final int sid, final int[] route, final int[] sched, final int[] rid)
          throws RouteIllegalOverwriteException, UserNotFoundException,
                 EdgeNotFoundException, TimeWindowException, SQLException {
+           long A0 = System.currentTimeMillis();
            if (route[0] >= this.retrieveClock()) {
              for (int k = 0; k < (sched.length - 2); k += 3) {
                final int tl = this.storage.DBQueryUser(sched[(k + 2)])[3];
@@ -228,10 +231,12 @@ public class Communicator {
            } else {
              throw new RouteIllegalOverwriteException();
            }
+           this.statUpdateServerRemoveFromScheduleDur = (System.currentTimeMillis() - A0);
          }
   public void updateServerRoute(final int sid, final int[] route, final int[] sched)
          throws RouteIllegalOverwriteException, UserNotFoundException,
                 EdgeNotFoundException, TimeWindowException, SQLException {
+           long A0 = System.currentTimeMillis();
            if (route[0] >= this.retrieveClock()) {
              for (int k = 0; k < (sched.length - 2); k += 3) {
                final int tl = this.storage.DBQueryUser(sched[(k + 2)])[3];
@@ -271,6 +276,7 @@ public class Communicator {
            } else {
              throw new RouteIllegalOverwriteException();
            }
+           this.statUpdateServerRouteDur = (System.currentTimeMillis() - A0);
          }
   public int retrieveClock() {
            return this.controller.getClock();
