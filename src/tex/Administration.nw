@@ -167,6 +167,26 @@ void instanceInitialize() {
 }
 @ %def instanceInitialize
 
+
+\subsection{\texttt{JargoInstanceLoad}(1)}
+<<Admin: JargoInstanceLoad(1)>>=
+void JargoInstanceLoad(final String p) throws SQLException {
+  this.CONNECTIONS_URL = "jdbc:derby:jargo;createFrom="+p;
+  try {
+    this.JargoSetupDriver();
+  } catch (ClassNotFoundException e) {
+    System.out.println("Fatal error.");
+    e.printStackTrace();
+    System.exit(1);
+  }
+}
+@ %def JargoInstanceLoad
+<<Admin: instanceLoad(1)>>=
+void instanceLoad(final String p) throws SQLException {
+  this.storage.JargoInstanceLoad(p);
+}
+@ %def instanceLoad
+
 \subsection{\texttt{JargoInstanceLoadInMem}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule

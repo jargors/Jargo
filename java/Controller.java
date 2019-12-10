@@ -669,6 +669,9 @@ public class Controller {
   public void instanceInitialize() {
            this.storage.JargoInstanceInitialize();
          }
+  public void instanceLoad(final String p) throws SQLException {
+           this.storage.JargoInstanceLoad(p);
+         }
   public void instanceLoadInMem(final String p) throws SQLException {
            this.storage.JargoInstanceLoadInMem(p);
          }

@@ -1512,6 +1512,16 @@ public class Storage {
              System.exit(1);
            }
          }
+  public void JargoInstanceLoad(final String p) throws SQLException {
+           this.CONNECTIONS_URL = "jdbc:derby:jargo;createFrom="+p;
+           try {
+             this.JargoSetupDriver();
+           } catch (ClassNotFoundException e) {
+             System.out.println("Fatal error.");
+             e.printStackTrace();
+             System.exit(1);
+           }
+         }
   public void JargoInstanceLoadInMem(final String p) throws SQLException {
            this.CONNECTIONS_URL = "jdbc:derby:memory:jargo;createFrom="+p;
            try {
