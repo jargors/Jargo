@@ -1513,7 +1513,7 @@ public class Storage {
            }
          }
   public void JargoInstanceLoad(final String p) throws SQLException {
-           this.CONNECTIONS_URL = "jdbc:derby:jargo;createFrom="+p;
+           this.CONNECTIONS_URL = "jdbc:derby:"+p;
            try {
              this.JargoSetupDriver();
            } catch (ClassNotFoundException e) {
