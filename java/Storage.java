@@ -1512,7 +1512,7 @@ public class Storage {
              System.exit(1);
            }
          }
-  public void JargoInstanceLoad(final String p) throws SQLException {
+  public void JargoInstanceLoadInMem(final String p) throws SQLException {
            this.CONNECTIONS_URL = "jdbc:derby:memory:jargo;createFrom="+p;
            try {
              this.JargoSetupDriver();

@@ -167,11 +167,11 @@ void instanceInitialize() {
 }
 @ %def instanceInitialize
 
-\subsection{\texttt{JargoInstanceLoad}(1)}
+\subsection{\texttt{JargoInstanceLoadInMem}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[JargoInstanceLoad]]}(1) loads a previously saved Jargo
+Method \textcolor{blue}{[[JargoInstanceLoadInMem]]}(1) loads a previously saved Jargo
 database instance from disk into working memory. It uses [[JargoSetupDriver]](0) to
 register the JDBC [[DriverManager]] to the new instance.  If the DBCP2
 [[PoolingDriver]] cannot be found, a [[ClassNotFoundException]] is thrown. We
@@ -189,8 +189,8 @@ JVM if failure occurs.\\
 [[ClassNotFoundException]] if the DBCP2 driver cannot be found.\\
 \bottomrule
 \end{tabular}
-<<Admin: JargoInstanceLoad(1)>>=
-void JargoInstanceLoad(final String p) throws SQLException {
+<<Admin: JargoInstanceLoadInMem(1)>>=
+void JargoInstanceLoadInMem(final String p) throws SQLException {
   this.CONNECTIONS_URL = "jdbc:derby:memory:jargo;createFrom="+p;
   try {
     this.JargoSetupDriver();
@@ -200,18 +200,18 @@ void JargoInstanceLoad(final String p) throws SQLException {
     System.exit(1);
   }
 }
-@ %def JargoInstanceLoad
+@ %def JargoInstanceLoadInMem
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[instanceLoad]]}(1) wraps [[JargoInstanceLoad]](1).\\
+Method \textcolor{blue}{[[instanceLoadInMem]]}(1) wraps [[JargoInstanceLoadInMem]](1).\\
 \bottomrule
 \end{tabular}
-<<Admin: instanceLoad(1)>>=
-void instanceLoad(final String p) throws SQLException {
-  this.storage.JargoInstanceLoad(p);
+<<Admin: instanceLoadInMem(1)>>=
+void instanceLoadInMem(final String p) throws SQLException {
+  this.storage.JargoInstanceLoadInMem(p);
 }
-@ %def instanceLoad
+@ %def instanceLoadInMem
 
 \subsection{\texttt{JargoInstanceExport}(1)}
 \begin{tabular}{p{\textwidth}}
