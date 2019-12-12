@@ -2516,11 +2516,13 @@ where $H$ is the time horizon.\\
 \end{tabular}
 <<Read: DBQueryMetricRequestDistanceBaseUnassignedTotal(0)>>=
 int[] DBQueryMetricRequestDistanceBaseUnassignedTotal() throws SQLException {
-  try (<<Open [[conn]]>>) {
-    return PSQuery(conn, "S138", 1);
-  } catch (SQLException e) {
-    throw e;
-  }
+  /* Query 138 works but it's faster to just keep a running tally. */
+  // try (<<Open [[conn]]>>) {
+  //   return PSQuery(conn, "S138", 1);
+  // } catch (SQLException e) {
+  //   throw e;
+  // }
+  return new int[] { this.sum_distance_unassigned };
 }
 @ %def DBQueryMetricRequestDistanceBaseUnassignedTotal
 \begin{tabular}{p{\textwidth}}

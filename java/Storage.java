@@ -35,6 +35,7 @@ public class Storage {
   private Map<Integer, Integer>             lu_lvt      = new HashMap<Integer, Integer>();
   private int count_requests = 0;
   private int count_assigned = 0;
+  private int sum_distance_unassigned = 0;
   private final int    STATEMENTS_MAX_COUNT   = 20;
   private       int    REQUEST_TIMEOUT        = 30;
   private       String CONNECTIONS_URL        = "jdbc:derby:memory:jargo;create=true";
@@ -128,11 +129,13 @@ public class Storage {
            }
          }
   public int[] DBQueryMetricRequestDistanceBaseUnassignedTotal() throws SQLException {
-           try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-             return PSQuery(conn, "S138", 1);
-           } catch (SQLException e) {
-             throw e;
-           }
+           /* Query 138 works but it's faster to just keep a running tally. */
+           // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+           //   return PSQuery(conn, "S138", 1);
+           // } catch (SQLException e) {
+           //   throw e;
+           // }
+           return new int[] { this.sum_distance_unassigned };
          }
   public int[] DBQueryMetricRequestDistanceDetourTotal() throws SQLException {
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
@@ -626,6 +629,7 @@ public class Storage {
            this.lu_users.put(u[0], u.clone());
            this.lu_rstatus.put(u[0], false);
            this.count_requests++;
+           this.sum_distance_unassigned += u[6];
          }
   public void DBInsertServer(final int[] u, final int[] route)
          throws DuplicateUserException, EdgeNotFoundException, SQLException {
@@ -879,6 +883,7 @@ public class Storage {
            for (final int r : rid) {
              this.lu_rstatus.put(r, true);
              this.count_assigned++;
+             this.sum_distance_unassigned -= this.lu_users.get(r)[6];
            }
          }
   public void DBUpdateServerRemoveFromSchedule(
@@ -1000,6 +1005,7 @@ public class Storage {
            for (final int r : rid) {
              this.lu_rstatus.put(r, false);
              this.count_assigned--;
+             this.sum_distance_unassigned += this.lu_users.get(r)[6];
            }
          }
   public void DBUpdateServerRoute(final int sid, final int[] route, final int[] sched)
@@ -1171,11 +1177,13 @@ public class Storage {
            this.lu_users.forEach((uid, u) -> {
              if (u[1] > 0) {
                this.count_requests++;
+               this.sum_distance_unassigned += u[6];
              }
            });
            this.lu_rstatus.forEach((rid, flag) -> {
              if (flag == true) {
                this.count_assigned++;
+               this.sum_distance_unassigned -= this.lu_users.get(rid)[6];
              }
            });
          }

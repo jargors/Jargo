@@ -5217,11 +5217,13 @@ where $H$ is the time horizon.\\
 \end{tabular}
 \nwenddocs{}\nwbegincode{180}\sublabel{NW4K8pCk-421s5A-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4K8pCk-421s5A-1}}}\moddef{Read: DBQueryMetricRequestDistanceBaseUnassignedTotal(0)~{\nwtagstyle{}\subpageref{NW4K8pCk-421s5A-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-1}}
 int[] DBQueryMetricRequestDistanceBaseUnassignedTotal() throws SQLException \{
-  try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1vLSTU-JT1v9-1}}\RA{}) \{
-    return PSQuery(conn, "S138", 1);
-  \} catch (SQLException e) \{
-    throw e;
-  \}
+  /* Query 138 works but it's faster to just keep a running tally. */
+  // try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1vLSTU-JT1v9-1}}\RA{}) \{
+  //   return PSQuery(conn, "S138", 1);
+  // \} catch (SQLException e) \{
+  //   throw e;
+  // \}
+  return new int[] \{ this.sum_distance_unassigned \};
 \}
 \nwindexdefn{DBQueryMetricRequestDistanceBaseUnassignedTotal}{DBQueryMetricRequestDistanceBaseUnassignedTotal}{NW4K8pCk-421s5A-1}\eatline
 \nwidentdefs{\\{{DBQueryMetricRequestDistanceBaseUnassignedTotal}{DBQueryMetricRequestDistanceBaseUnassignedTotal}}}\nwidentuses{\\{{PSQuery}{PSQuery}}\\{{S138}{S138}}}\nwindexuse{PSQuery}{PSQuery}{NW4K8pCk-421s5A-1}\nwindexuse{S138}{S138}{NW4K8pCk-421s5A-1}\nwendcode{}\nwbegindocs{181}\begin{tabular}{p{\textwidth}}
@@ -6022,6 +6024,7 @@ up in our cache (we are considering users to be immutable).}
   this.lu_users.put(u[0], u.clone());
   this.lu_rstatus.put(u[0], false);
   this.count_requests++;
+  this.sum_distance_unassigned += u[6];
 \}
 \nwendcode{}\nwbegindocs{60}\nwdocspar
 \begin{tabular}{p{\textwidth}}
@@ -6378,6 +6381,7 @@ is now \emph{assigned}.}
   for (final int r : rid) \{
     this.lu_rstatus.put(r, true);
     this.count_assigned++;
+    this.sum_distance_unassigned -= this.lu_users.get(r)[6];
   \}
 \}
 \nwendcode{}\nwbegindocs{76}\nwdocspar
@@ -6545,6 +6549,7 @@ is now \emph{unassigned}.}
   for (final int r : rid) \{
     this.lu_rstatus.put(r, false);
     this.count_assigned--;
+    this.sum_distance_unassigned += this.lu_users.get(r)[6];
   \}
 \}
 \nwendcode{}
@@ -7031,11 +7036,13 @@ we query the request's assignment status. Else, we initialize the last-visitatio
   this.lu_users.forEach((uid, u) -> \{
     if (u[1] > 0) \{
       this.count_requests++;
+      this.sum_distance_unassigned += u[6];
     \}
   \});
   this.lu_rstatus.forEach((rid, flag) -> \{
     if (flag == true) \{
       this.count_assigned++;
+      this.sum_distance_unassigned -= this.lu_users.get(rid)[6];
     \}
   \});
 \}
@@ -7996,10 +8003,11 @@ private Map<Integer, Integer>             lu_lvt      = new HashMap<Integer, Int
 \nwendcode{}\nwbegindocs{18}\nwdocspar
 \end{itemize}
 
-Cache some stats:
+Cache some stats for metrics:
 \nwenddocs{}\nwbegincode{19}\sublabel{NW27XAxz-17yXws-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-3}}}\moddef{\code{}Storage\edoc{} member variables~{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-1}}}\plusendmoddef
 private int count_requests = 0;
 private int count_assigned = 0;
+private int sum_distance_unassigned = 0;
 \nwendcode{}\nwbegindocs{20}\nwdocspar
 
 The storage interface also contains configuration settings and JDBC objects.
