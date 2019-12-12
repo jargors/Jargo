@@ -497,13 +497,11 @@ public class DesktopController {
           int[] output = this.controller.queryMetricServerDistanceTotal();
           val = (output.length > 0 ? output[0] : 0);
         } else if ("chk_serverServiceDistance".equals(this.id)) {
-          // VERY SLOW AND BAD
-          // int[] output = this.controller.queryServerServiceDistanceTotal();
-          // val = (output.length > 0 ? output[0] : 0);
+          int[] output = this.controller.queryMetricServerDistanceServiceTotal();
+          val = (output.length > 0 ? output[0] : 0);
         } else if ("chk_serverCruisingDistance".equals(this.id)) {
-          // VERY SLOW AND BAD
-          // int[] output = this.controller.queryServerCruisingDistanceTotal();
-          // val = (output.length > 0 ? output[0] : 0);
+          int[] output = this.controller.queryMetricServerDistanceCruisingTotal();
+          val = (output.length > 0 ? output[0] : 0);
         } else if ("chk_serverTravelDuration".equals(this.id)) {
           int[] output = this.controller.queryMetricServerDurationTravelTotal();
           val = (output.length > 0 ? output[0] : 0);

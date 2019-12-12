@@ -19,6 +19,15 @@ for (int i = 0; i < values.length; i++) {
 }
 @
 
+\subsection{Cache server distance}
+<<Cache server distance>>=
+try (<<Open [[conn]]>>) {
+  this.distance_servers.put(sid, this.PSQuery(conn, "S104", 1, sid)[0]);
+} catch (SQLException e) {
+  throw e;
+}
+@
+
 \subsection{Cache service distance}
 <<Cache service distance>>=
 try (<<Open [[conn]]>>) {
@@ -486,11 +495,7 @@ we query the request's assignment status. Else, we initialize the last-visitatio
       this.sum_distance_unassigned += u[6];
     } else {
       final int sid = uid;
-      try (<<Open [[conn]]>>) {
-        this.distance_servers.put(uid, this.PSQuery(conn, "S104", 1, sid)[0]);
-      } catch (SQLException e) {
-        throw e;
-      }
+      <<Cache server distance>>
       <<Cache service distance>>
     }
   }
@@ -738,7 +743,7 @@ this.lu_pstr.put("S60", SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC");
 this.lu_pstr.put("S129", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC");
 @ %def S129
 <<S152>>=
-this.lu_pstr.put("S152", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC FETCH FIRST ? ROWS ONLY");
+this.lu_pstr.put("S152", SEL+"t2, v2 FROM W WHERE sid=? AND t2>? ORDER BY t2 ASC FETCH FIRST ? ROWS ONLY");
 @ %def S152
 <<S61>>=
 this.lu_pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
