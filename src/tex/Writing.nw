@@ -622,6 +622,8 @@ throws DuplicateUserException, EdgeNotFoundException, SQLException {
   this.lu_users.put(uid, u.clone());
   this.lu_lvt.put(uid, 0);
   this.sum_distance_base_servers += u[6];
+  this.distance_servers.put(uid, u[6]);
+  this.distance_servers_service.put(uid, u[6]);
 }
 @
 \begin{tabular}{p{\textwidth}}
@@ -743,6 +745,7 @@ throws UserNotFoundException, EdgeNotFoundException, SQLException {
     throw e;
   }
   this.distance_servers.put(sid, this.DBQueryServerDistance(sid)[0]);
+  <<Cache service distance>>
 }
 @ %def DBUpdateServerRoute
 \begin{tabular}{p{\textwidth}}
@@ -896,6 +899,7 @@ is now \emph{assigned}.}
     this.sum_distance_unassigned -= this.lu_users.get(r)[6];
   }
   this.distance_servers.put(sid, this.DBQueryServerDistance(sid)[0]);
+  <<Cache service distance>>
 }
 @
 \begin{tabular}{p{\textwidth}}
@@ -1065,6 +1069,7 @@ is now \emph{unassigned}.}
     this.sum_distance_unassigned += this.lu_users.get(r)[6];
   }
   this.distance_servers.put(sid, this.DBQueryServerDistance(sid)[0]);
+  <<Cache service distance>>
 }
 @
 \begin{tabular}{p{\textwidth}}

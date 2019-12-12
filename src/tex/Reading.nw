@@ -1433,11 +1433,12 @@ where $w$ is the route of the given server identified by [[sid]] (param. 1).\\
 \end{tabular}
 <<Read: DBQueryServerDistance(1)>>=
 int[] DBQueryServerDistance(final int sid) throws SQLException {
-  try (<<Open [[conn]]>>) {
-    return PSQuery(conn, "S104", 1, sid);
-  } catch (SQLException e) {
-    throw e;
-  }
+  // try (<<Open [[conn]]>>) {
+  //   return PSQuery(conn, "S104", 1, sid);
+  // } catch (SQLException e) {
+  //   throw e;
+  // }
+  return new int[] { this.distance_servers.get(sid) };
 }
 @ %def DBQueryServerDistance
 
@@ -1524,11 +1525,12 @@ where $s$ is the server identified by [[sid]] (param. 1).\\
 \end{tabular}
 <<Read: DBQueryServerDistanceCruising(1)>>=
 int[] DBQueryServerDistanceCruising(final int sid) throws SQLException {
-  try (<<Open [[conn]]>>) {
-    return PSQuery(conn, "S106", 1, sid);
-  } catch (SQLException e) {
-    throw e;
-  }
+  // try (<<Open [[conn]]>>) {
+  //   return PSQuery(conn, "S106", 1, sid);
+  // } catch (SQLException e) {
+  //   throw e;
+  // }
+  return new int [] { this.distance_servers.get(sid) - this.distance_servers_service.get(sid) };
 }
 @ %def DBQueryServerDistanceCruising
 
@@ -1562,11 +1564,12 @@ where $s$ is the server identified by [[sid]] (param. 1).\\
 \end{tabular}
 <<Read: DBQueryServerDistanceService(1)>>=
 int[] DBQueryServerDistanceService(final int sid) throws SQLException {
-  try (<<Open [[conn]]>>) {
-    return PSQuery(conn, "S108", 1, sid);
-  } catch (SQLException e) {
-    throw e;
-  }
+  // try (<<Open [[conn]]>>) {
+  //   return PSQuery(conn, "S108", 1, sid);
+  // } catch (SQLException e) {
+  //   throw e;
+  // }
+  return new int[] { this.distance_servers_service.get(sid) };
 }
 @ %def DBQueryServerDistanceService
 
@@ -2317,11 +2320,16 @@ or [[null]] if no results.
 \end{tabular}
 <<Read: DBQueryMetricServerDistanceCruisingTotal(0)>>=
 int[] DBQueryMetricServerDistanceCruisingTotal() throws SQLException {
-  try (<<Open [[conn]]>>) {
-    return PSQuery(conn, "S107", 1);
-  } catch (SQLException e) {
-    throw e;
-  }
+  // try (<<Open [[conn]]>>) {
+  //   return PSQuery(conn, "S107", 1);
+  // } catch (SQLException e) {
+  //   throw e;
+  // }
+  final int[] output = new int[] { 0 };
+  this.distance_servers.forEach((sid, val) ->
+    output[0] += (val - this.distance_servers_service.get(sid))
+  );
+  return output;
 }
 @ %def DBQueryMetricServerDistanceCruisingTotal
 \begin{tabular}{p{\textwidth}}
@@ -2363,11 +2371,14 @@ or [[null]] if no results.
 \end{tabular}
 <<Read: DBQueryMetricServerDistanceServiceTotal(0)>>=
 int[] DBQueryMetricServerDistanceServiceTotal() throws SQLException {
-  try (<<Open [[conn]]>>) {
-    return PSQuery(conn, "S109", 1);
-  } catch (SQLException e) {
-    throw e;
-  }
+  // try (<<Open [[conn]]>>) {
+  //   return PSQuery(conn, "S109", 1);
+  // } catch (SQLException e) {
+  //   throw e;
+  // }
+  final int[] output = new int[] { 0 };
+  this.distance_servers_service.forEach((sid, val) -> output[0] += val);
+  return output;
 }
 @ %def DBQueryMetricServerDistanceServiceTotal
 \begin{tabular}{p{\textwidth}}

@@ -19,6 +19,24 @@ for (int i = 0; i < values.length; i++) {
 }
 @
 
+\subsection{Cache service distance}
+<<Cache service distance>>=
+try (<<Open [[conn]]>>) {
+  int sum = 0;
+  int[] output = this.PSQuery(conn, "S153", 2, sid);
+  for (int i = 0; i < output.length - 1; i++) {
+    final int t1 = output[(i + 0)];
+    final int t2 = output[(i + 1)];
+    sum += this.PSQuery(conn, "S154", 1, sid, t1, t2)[0];
+  }
+  final int tt = this.PSQuery(conn, "S155", 1, sid)[0];
+  sum += this.DBQueryServerDistanceRemaining(sid, tt)[0];
+  this.distance_servers_service.put(sid, sum);
+} catch (SQLException e) {
+  throw e;
+}
+@
+
 \section{Methods: Administration}
 
 \subsection{\texttt{JargoInstanceNew}(0)}
@@ -456,7 +474,13 @@ we query the request's assignment status. Else, we initialize the last-visitatio
       this.count_requests++;
       this.sum_distance_unassigned += u[6];
     } else {
-      this.distance_servers.put(uid, this.DBQueryServerDistance(uid)[0]);
+      final int sid = uid;
+      try (<<Open [[conn]]>>) {
+        this.distance_servers.put(uid, this.PSQuery(conn, "S104", 1, sid)[0]);
+      } catch (SQLException e) {
+        throw e;
+      }
+      <<Cache service distance>>
     }
   }
   this.lu_rstatus.forEach((rid, flag) -> {
@@ -557,6 +581,7 @@ void JargoSetupPreparedStatements() {
   <<S123>> <<S124>> <<S125>> <<S126>> <<S127>> <<S133>> <<S134>> <<S135>>
   <<S136>> <<S137>> <<S138>> <<S139>> <<S140>> <<S141>> <<S142>> <<S143>>
   <<S144>> <<S145>> <<S147>> <<S148>> <<S149>> <<S150>> <<S151>> <<S152>>
+  <<S153>> <<S154>> <<S155>>
 }
 @ %def JargoSetupPreparedStatements
 <<S0>>=
@@ -870,6 +895,15 @@ this.lu_pstr.put("S150", SEL+"sid, val FROM violations_t_s");
 <<S151>>=
 this.lu_pstr.put("S151", SEL+"rid, val FROM violations_t_r");
 @ %def S151
+<<S153>>=
+this.lu_pstr.put("S153", SEL+"t1, t2 FROM CQ WHERE sid=? AND q1=sq");
+@ %def S153
+<<S154>>=
+this.lu_pstr.put("S154", SEL+"SUM (dd) FROM W WHERE sid=? AND t2 BETWEEN ? AND ?");
+@ %def S154
+<<S155>>=
+this.lu_pstr.put("S155", SEL+"MAX (td) FROM CPD WHERE sid = ?");
+@ %def S155
 
 \subsection{\texttt{PSCreate}(2)}
 \begin{tabular}{p{\textwidth}}
