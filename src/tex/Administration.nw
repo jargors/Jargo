@@ -37,6 +37,17 @@ try (<<Open [[conn]]>>) {
 }
 @
 
+\subsection{Cache request transit distance}
+<<Cache request transit distance>>=
+try (<<Open [[conn]]>>) {
+  int[] tpd = this.PSQuery(conn, "S86", 2, r);
+  int d = this.PSQuery(conn, "S154", 1, sid, tpd[0], tpd[1])[0];
+  this.distance_requests_transit.put(r, d);
+} catch (SQLException e) {
+  throw e;
+}
+@
+
 \section{Methods: Administration}
 
 \subsection{\texttt{JargoInstanceNew}(0)}
@@ -483,12 +494,20 @@ we query the request's assignment status. Else, we initialize the last-visitatio
       <<Cache service distance>>
     }
   }
-  this.lu_rstatus.forEach((rid, flag) -> {
+  for (Integer rid : this.lu_rstatus.keySet()) {
+    final boolean flag = this.lu_rstatus.get(rid);
     if (flag == true) {
       this.count_assigned++;
       this.sum_distance_unassigned -= this.lu_users.get(rid)[6];
+      int r = rid;
+      try {
+        int sid = this.DBQueryRequestIsAssigned(rid)[0];
+        <<Cache request transit distance>>
+      } catch (SQLException e) {
+        throw e;
+      }
     }
-  });
+  }
 }
 @
 \noindent\begin{tabular}{p{\textwidth}}
@@ -884,7 +903,7 @@ this.lu_pstr.put("S147", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
     + "SELECT t1 FROM W WHERE sid=? AND v2=0)");
 @ %def S147
 <<S148>>=
-this.lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
+this.lu_pstr.put("S148", SEL+"sid FROM assignments WHERE rid=?");
 @ %def S148
 <<S149>>=
 this.lu_pstr.put("S149", SEL+"t2, v2 FROM W WHERE sid=? ORDER BY t2 ASC");

@@ -2405,11 +2405,14 @@ where $r$ is the request identified by {\tt{}rid} (param. 1).\\
 \end{tabular}
 \nwenddocs{}\nwbegincode{49}\sublabel{NW4K8pCk-3Jk4Pm-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4K8pCk-3Jk4Pm-1}}}\moddef{Read: DBQueryRequestDistanceDetour(1)~{\nwtagstyle{}\subpageref{NW4K8pCk-3Jk4Pm-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-1}}
 int[] DBQueryRequestDistanceDetour(final int rid) throws SQLException \{
-  try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1vLSTU-JT1v9-1}}\RA{}) \{
-    return PSQuery(conn, "S112", 1, rid);
-  \} catch (SQLException e) \{
-    throw e;
-  \}
+  // try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1vLSTU-JT1v9-1}}\RA{}) \{
+  //   return PSQuery(conn, "S112", 1, rid);
+  // \} catch (SQLException e) \{
+  //   throw e;
+  // \}
+  return new int[] \{ this.distance_requests_transit.containsKey(rid)
+    ? this.distance_requests_transit.get(rid) - this.lu_users.get(rid)[6]
+    : 0 \};
 \}
 \nwindexdefn{DBQueryRequestDistanceDetour}{DBQueryRequestDistanceDetour}{NW4K8pCk-3Jk4Pm-1}\eatline
 \nwidentdefs{\\{{DBQueryRequestDistanceDetour}{DBQueryRequestDistanceDetour}}}\nwidentuses{\\{{PSQuery}{PSQuery}}\\{{S112}{S112}}}\nwindexuse{PSQuery}{PSQuery}{NW4K8pCk-3Jk4Pm-1}\nwindexuse{S112}{S112}{NW4K8pCk-3Jk4Pm-1}\nwendcode{}\nwbegindocs{50}\nwdocspar
@@ -2443,11 +2446,14 @@ where $r$ is the request identified by {\tt{}rid} (param. 1).\\
 \end{tabular}
 \nwenddocs{}\nwbegincode{51}\sublabel{NW4K8pCk-4808iY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4K8pCk-4808iY-1}}}\moddef{Read: DBQueryRequestDistanceTransit(1)~{\nwtagstyle{}\subpageref{NW4K8pCk-4808iY-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-1}}
 int[] DBQueryRequestDistanceTransit(final int rid) throws SQLException \{
-  try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1vLSTU-JT1v9-1}}\RA{}) \{
-    return PSQuery(conn, "S114", 1, rid);
-  \} catch (SQLException e) \{
-    throw e;
-  \}
+  // try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1vLSTU-JT1v9-1}}\RA{}) \{
+  //   return PSQuery(conn, "S114", 1, rid);
+  // \} catch (SQLException e) \{
+  //   throw e;
+  // \}
+  return new int[] \{ this.distance_requests_transit.containsKey(rid)
+    ? this.distance_requests_transit.get(rid)
+    : 0 \};
 \}
 \nwindexdefn{DBQueryRequestDistanceTransit}{DBQueryRequestDistanceTransit}{NW4K8pCk-4808iY-1}\eatline
 \nwidentdefs{\\{{DBQueryRequestDistanceTransit}{DBQueryRequestDistanceTransit}}}\nwidentuses{\\{{PSQuery}{PSQuery}}\\{{S114}{S114}}}\nwindexuse{PSQuery}{PSQuery}{NW4K8pCk-4808iY-1}\nwindexuse{S114}{S114}{NW4K8pCk-4808iY-1}\nwendcode{}\nwbegindocs{52}\nwdocspar
@@ -2922,6 +2928,7 @@ int[] queryServerRoute(final int sid) throws SQLException \{
 \nwixlogsorted{c}{{Admin: PSSubmit(1..)}{NW1vLSTU-1S1xBT-1}{\nwixu{NW1pDwO-Oyob-3}\nwixd{NW1vLSTU-1S1xBT-1}}}%
 \nwixlogsorted{c}{{Apply traffic to route, sched}{NW1l0GC8-UeHS0-1}{\nwixd{NW1l0GC8-UeHS0-1}\nwixu{NW1l0GC8-3PimUR-1}\nwixu{NW1l0GC8-42pL1g-1}\nwixu{NW1l0GC8-3O61Nf-1}}}%
 \nwixlogsorted{c}{{apply(3)}{NW24od5B-14vbUh-1}{\nwixu{NW1pDwO-1sp72R-3}\nwixd{NW24od5B-14vbUh-1}}}%
+\nwixlogsorted{c}{{Cache request transit distance}{NW1vLSTU-47sE81-1}{\nwixu{NW1l0GC8-3yF6ns-2}\nwixd{NW1vLSTU-47sE81-1}\nwixu{NW1vLSTU-3RkokI-5}}}%
 \nwixlogsorted{c}{{Cache service distance}{NW1vLSTU-fUuSd-1}{\nwixu{NW1l0GC8-MMhxz-1}\nwixu{NW1l0GC8-3yF6ns-2}\nwixu{NW1l0GC8-PxyQL-2}\nwixd{NW1vLSTU-fUuSd-1}\nwixu{NW1vLSTU-3RkokI-5}}}%
 \nwixlogsorted{c}{{Check time window violation}{NW1l0GC8-3kBClV-1}{\nwixd{NW1l0GC8-3kBClV-1}\nwixu{NW1l0GC8-3PimUR-1}\nwixu{NW1l0GC8-42pL1g-1}\nwixu{NW1l0GC8-3O61Nf-1}}}%
 \nwixlogsorted{c}{{Client.java}{NW2q3QGT-bpC9O-1}{\nwixd{NW2q3QGT-bpC9O-1}}}%
@@ -3087,7 +3094,7 @@ int[] queryServerRoute(final int sid) throws SQLException \{
 \nwixlogsorted{c}{{loadRoadNetworkFromFile(1)}{NW2ZDXo8-f2kmq-1}{\nwixu{NW1pDwO-2u8vSA-2}\nwixd{NW2ZDXo8-f2kmq-1}\nwixd{NW2ZDXo8-f2kmq-2}\nwixd{NW2ZDXo8-f2kmq-3}\nwixd{NW2ZDXo8-f2kmq-4}\nwixd{NW2ZDXo8-f2kmq-5}\nwixd{NW2ZDXo8-f2kmq-6}}}%
 \nwixlogsorted{c}{{Loop objects}{NW2ZDXo8-2e0Sfa-1}{\nwixu{NW2ZDXo8-3yXfwG-1}\nwixd{NW2ZDXo8-2e0Sfa-1}}}%
 \nwixlogsorted{c}{{notifyNew(0)}{NW2q3QGT-1rh8pC-1}{\nwixu{NW1pDwO-1aFZ2n-3}\nwixd{NW2q3QGT-1rh8pC-1}}}%
-\nwixlogsorted{c}{{Open \code{}conn\edoc{}}{NW1vLSTU-JT1v9-1}{\nwixu{NW4K8pCk-3OEpPU-1}\nwixu{NW4K8pCk-17SWaf-1}\nwixu{NW4K8pCk-1imYqa-1}\nwixu{NW4K8pCk-1C883O-1}\nwixu{NW4K8pCk-1uCRXX-1}\nwixu{NW4K8pCk-4bU7WY-1}\nwixu{NW4K8pCk-3w6nA9-1}\nwixu{NW4K8pCk-4dNZxZ-1}\nwixu{NW4K8pCk-2bbv1T-1}\nwixu{NW4K8pCk-1ZOEl0-1}\nwixu{NW4K8pCk-3Jk4Pm-1}\nwixu{NW4K8pCk-4808iY-1}\nwixu{NW4K8pCk-3eqIl6-1}\nwixu{NW4K8pCk-4Aq6dV-1}\nwixu{NW4K8pCk-3CyHZy-1}\nwixu{NW4K8pCk-dlG5g-1}\nwixu{NW4K8pCk-cz5yf-1}\nwixu{NW4K8pCk-3PzevO-1}\nwixu{NW4K8pCk-4AIMTx-1}\nwixu{NW4K8pCk-1cB9Z1-1}\nwixu{NW4K8pCk-4JTjfI-1}\nwixu{NW4K8pCk-4IICVC-1}\nwixu{NW4K8pCk-71ppP-1}\nwixu{NW4K8pCk-48DsrJ-1}\nwixu{NW4K8pCk-1O34Sj-1}\nwixu{NW4K8pCk-cE03j-1}\nwixu{NW4K8pCk-23Wg9M-1}\nwixu{NW4K8pCk-4MxFHH-1}\nwixu{NW4K8pCk-1qZuKY-1}\nwixu{NW4K8pCk-1aOzfQ-1}\nwixu{NW4K8pCk-Sjxu7-1}\nwixu{NW4K8pCk-3pEbv2-1}\nwixu{NW4K8pCk-4OXq2M-1}\nwixu{NW4K8pCk-2nZ1VB-1}\nwixu{NW4K8pCk-31osvi-1}\nwixu{NW4K8pCk-23ZhQ2-1}\nwixu{NW4K8pCk-3NWzRo-1}\nwixu{NW4K8pCk-1zUdrf-1}\nwixu{NW4K8pCk-2tWQc-1}\nwixu{NW4K8pCk-49bCCM-1}\nwixu{NW4K8pCk-1ZAnmM-1}\nwixu{NW4K8pCk-47NowU-1}\nwixu{NW4K8pCk-2gaNGt-1}\nwixu{NW4K8pCk-3ENmOe-1}\nwixu{NW4K8pCk-423lHf-1}\nwixu{NW4K8pCk-4UAOce-1}\nwixu{NW4K8pCk-31p3Hv-1}\nwixu{NW4K8pCk-3ddWJ0-1}\nwixu{NW4K8pCk-421s5A-1}\nwixu{NW4K8pCk-3066Ie-1}\nwixu{NW4K8pCk-Z4xun-1}\nwixu{NW4K8pCk-28z28Y-1}\nwixu{NW4K8pCk-2RC1QH-1}\nwixu{NW4K8pCk-3y4D9i-1}\nwixu{NW4K8pCk-4Q7d2w-1}\nwixu{NW1l0GC8-3leoJR-3}\nwixu{NW1l0GC8-14ASIs-1}\nwixu{NW1l0GC8-4RKqny-1}\nwixu{NW1l0GC8-xsVjY-1}\nwixu{NW1l0GC8-4Dmn3V-1}\nwixu{NW1l0GC8-MMhxz-1}\nwixu{NW1l0GC8-3yF6ns-1}\nwixu{NW1l0GC8-PxyQL-1}\nwixd{NW1vLSTU-JT1v9-1}\nwixu{NW1vLSTU-fUuSd-1}\nwixu{NW1vLSTU-RmKLy-1}\nwixu{NW1vLSTU-4UssFH-1}\nwixu{NW1vLSTU-3RkokI-5}}}%
+\nwixlogsorted{c}{{Open \code{}conn\edoc{}}{NW1vLSTU-JT1v9-1}{\nwixu{NW4K8pCk-3OEpPU-1}\nwixu{NW4K8pCk-17SWaf-1}\nwixu{NW4K8pCk-1imYqa-1}\nwixu{NW4K8pCk-1C883O-1}\nwixu{NW4K8pCk-1uCRXX-1}\nwixu{NW4K8pCk-4bU7WY-1}\nwixu{NW4K8pCk-3w6nA9-1}\nwixu{NW4K8pCk-4dNZxZ-1}\nwixu{NW4K8pCk-2bbv1T-1}\nwixu{NW4K8pCk-1ZOEl0-1}\nwixu{NW4K8pCk-3Jk4Pm-1}\nwixu{NW4K8pCk-4808iY-1}\nwixu{NW4K8pCk-3eqIl6-1}\nwixu{NW4K8pCk-4Aq6dV-1}\nwixu{NW4K8pCk-3CyHZy-1}\nwixu{NW4K8pCk-dlG5g-1}\nwixu{NW4K8pCk-cz5yf-1}\nwixu{NW4K8pCk-3PzevO-1}\nwixu{NW4K8pCk-4AIMTx-1}\nwixu{NW4K8pCk-1cB9Z1-1}\nwixu{NW4K8pCk-4JTjfI-1}\nwixu{NW4K8pCk-4IICVC-1}\nwixu{NW4K8pCk-71ppP-1}\nwixu{NW4K8pCk-48DsrJ-1}\nwixu{NW4K8pCk-1O34Sj-1}\nwixu{NW4K8pCk-cE03j-1}\nwixu{NW4K8pCk-23Wg9M-1}\nwixu{NW4K8pCk-4MxFHH-1}\nwixu{NW4K8pCk-1qZuKY-1}\nwixu{NW4K8pCk-1aOzfQ-1}\nwixu{NW4K8pCk-Sjxu7-1}\nwixu{NW4K8pCk-3pEbv2-1}\nwixu{NW4K8pCk-4OXq2M-1}\nwixu{NW4K8pCk-2nZ1VB-1}\nwixu{NW4K8pCk-31osvi-1}\nwixu{NW4K8pCk-23ZhQ2-1}\nwixu{NW4K8pCk-3NWzRo-1}\nwixu{NW4K8pCk-1zUdrf-1}\nwixu{NW4K8pCk-2tWQc-1}\nwixu{NW4K8pCk-49bCCM-1}\nwixu{NW4K8pCk-1ZAnmM-1}\nwixu{NW4K8pCk-47NowU-1}\nwixu{NW4K8pCk-2gaNGt-1}\nwixu{NW4K8pCk-3ENmOe-1}\nwixu{NW4K8pCk-423lHf-1}\nwixu{NW4K8pCk-4UAOce-1}\nwixu{NW4K8pCk-31p3Hv-1}\nwixu{NW4K8pCk-3ddWJ0-1}\nwixu{NW4K8pCk-421s5A-1}\nwixu{NW4K8pCk-3066Ie-1}\nwixu{NW4K8pCk-Z4xun-1}\nwixu{NW4K8pCk-28z28Y-1}\nwixu{NW4K8pCk-2RC1QH-1}\nwixu{NW4K8pCk-3y4D9i-1}\nwixu{NW4K8pCk-4Q7d2w-1}\nwixu{NW1l0GC8-3leoJR-3}\nwixu{NW1l0GC8-14ASIs-1}\nwixu{NW1l0GC8-4RKqny-1}\nwixu{NW1l0GC8-xsVjY-1}\nwixu{NW1l0GC8-4Dmn3V-1}\nwixu{NW1l0GC8-MMhxz-1}\nwixu{NW1l0GC8-3yF6ns-1}\nwixu{NW1l0GC8-PxyQL-1}\nwixd{NW1vLSTU-JT1v9-1}\nwixu{NW1vLSTU-fUuSd-1}\nwixu{NW1vLSTU-47sE81-1}\nwixu{NW1vLSTU-RmKLy-1}\nwixu{NW1vLSTU-4UssFH-1}\nwixu{NW1vLSTU-3RkokI-5}}}%
 \nwixlogsorted{c}{{Populate the tp, td cache and update CQ}{NW1l0GC8-2B99VS-1}{\nwixu{NW1l0GC8-2g0LzJ-1}\nwixd{NW1l0GC8-2B99VS-1}}}%
 \nwixlogsorted{c}{{Populate the tp, td cache and vp, vd cache and update CQ}{NW1l0GC8-1O0X6W-1}{\nwixu{NW1l0GC8-4JHoKM-1}\nwixd{NW1l0GC8-1O0X6W-1}}}%
 \nwixlogsorted{c}{{Print(1)}{NW3zOIuJ-1EoAPq-1}{\nwixu{NW1pDwO-3QhyAk-3}\nwixd{NW3zOIuJ-1EoAPq-1}}}%
@@ -5290,11 +5297,14 @@ or {\tt{}null} if no results.
 \end{tabular}
 \nwenddocs{}\nwbegincode{184}\sublabel{NW4K8pCk-3066Ie-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4K8pCk-3066Ie-1}}}\moddef{Read: DBQueryMetricRequestDistanceDetourTotal(0)~{\nwtagstyle{}\subpageref{NW4K8pCk-3066Ie-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-1}}
 int[] DBQueryMetricRequestDistanceDetourTotal() throws SQLException \{
-  try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1vLSTU-JT1v9-1}}\RA{}) \{
-    return PSQuery(conn, "S113", 1);
-  \} catch (SQLException e) \{
-    throw e;
-  \}
+  // try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1vLSTU-JT1v9-1}}\RA{}) \{
+  //   return PSQuery(conn, "S113", 1);
+  // \} catch (SQLException e) \{
+  //   throw e;
+  // \}
+  final int[] output = new int[] \{ 0 \};
+  this.distance_requests_transit.forEach((rid, val) -> output[0] += (val - this.lu_users.get(rid)[6]));
+  return output;
 \}
 \nwindexdefn{DBQueryMetricRequestDistanceDetourTotal}{DBQueryMetricRequestDistanceDetourTotal}{NW4K8pCk-3066Ie-1}\eatline
 \nwidentdefs{\\{{DBQueryMetricRequestDistanceDetourTotal}{DBQueryMetricRequestDistanceDetourTotal}}}\nwidentuses{\\{{PSQuery}{PSQuery}}\\{{S113}{S113}}}\nwindexuse{PSQuery}{PSQuery}{NW4K8pCk-3066Ie-1}\nwindexuse{S113}{S113}{NW4K8pCk-3066Ie-1}\nwendcode{}\nwbegindocs{185}\begin{tabular}{p{\textwidth}}
@@ -5336,11 +5346,14 @@ or {\tt{}null} if no results.
 \end{tabular}
 \nwenddocs{}\nwbegincode{188}\sublabel{NW4K8pCk-Z4xun-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4K8pCk-Z4xun-1}}}\moddef{Read: DBQueryMetricRequestDistanceTransitTotal(0)~{\nwtagstyle{}\subpageref{NW4K8pCk-Z4xun-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-1}}
 int[] DBQueryMetricRequestDistanceTransitTotal() throws SQLException \{
-  try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1vLSTU-JT1v9-1}}\RA{}) \{
-    return PSQuery(conn, "S115", 1);
-  \} catch (SQLException e) \{
-    throw e;
-  \}
+  // try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1vLSTU-JT1v9-1}}\RA{}) \{
+  //   return PSQuery(conn, "S115", 1);
+  // \} catch (SQLException e) \{
+  //   throw e;
+  // \}
+  final int[] output = new int[] \{ 0 \};
+  this.distance_requests_transit.forEach((rid, val) -> output[0] += val);
+  return output;
 \}
 \nwindexdefn{DBQueryMetricRequestDistanceTransitTotal}{DBQueryMetricRequestDistanceTransitTotal}{NW4K8pCk-Z4xun-1}\eatline
 \nwidentdefs{\\{{DBQueryMetricRequestDistanceTransitTotal}{DBQueryMetricRequestDistanceTransitTotal}}}\nwidentuses{\\{{PSQuery}{PSQuery}}\\{{S115}{S115}}}\nwindexuse{PSQuery}{PSQuery}{NW4K8pCk-Z4xun-1}\nwindexuse{S115}{S115}{NW4K8pCk-Z4xun-1}\nwendcode{}\nwbegindocs{189}\begin{tabular}{p{\textwidth}}
@@ -6413,6 +6426,7 @@ is now \emph{assigned}.}
     this.lu_rstatus.put(r, true);
     this.count_assigned++;
     this.sum_distance_unassigned -= this.lu_users.get(r)[6];
+    \LA{}Cache request transit distance~{\nwtagstyle{}\subpageref{NW1vLSTU-47sE81-1}}\RA{}
   \}
   this.distance_servers.put(sid, this.DBQueryServerDistance(sid)[0]);
   \LA{}Cache service distance~{\nwtagstyle{}\subpageref{NW1vLSTU-fUuSd-1}}\RA{}
@@ -6421,7 +6435,7 @@ is now \emph{assigned}.}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{{\tt{}\protect\nosublabel{NW1l0GC8-3yF6ns-2-u1}\protect\nwindexuse{updateServerAddToSchedule}{updateServerAddToSchedule}{NW1l0GC8-42pL1g-1}updateServerAddToSchedule}}(4) wraps
+Method \textcolor{blue}{{\tt{}\protect\nosublabel{NW1l0GC8-3yF6ns-2-u2}\protect\nwindexuse{updateServerAddToSchedule}{updateServerAddToSchedule}{NW1l0GC8-42pL1g-1}updateServerAddToSchedule}}(4) wraps
 {\tt{}\protect\nwindexuse{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}{NW1l0GC8-3yF6ns-1}DBUpdateServerAddToSchedule}(4).  This wrapper adds an additional condition
 before calling {\tt{}\protect\nwindexuse{DBUpdateServerAddToSchedule}{DBUpdateServerAddToSchedule}{NW1l0GC8-3yF6ns-1}DBUpdateServerAddToSchedule}(4).  Given some arbitrary
 {\tt{}world{\char95}time}, all waypoints in {\tt{}route} (param. 2) occurring before
@@ -6583,6 +6597,7 @@ is now \emph{unassigned}.}
     this.lu_rstatus.put(r, false);
     this.count_assigned--;
     this.sum_distance_unassigned += this.lu_users.get(r)[6];
+    this.distance_requests_transit.put(r, 0);
   \}
   this.distance_servers.put(sid, this.DBQueryServerDistance(sid)[0]);
   \LA{}Cache service distance~{\nwtagstyle{}\subpageref{NW1vLSTU-fUuSd-1}}\RA{}
@@ -6622,7 +6637,7 @@ throws RouteIllegalOverwriteException, UserNotFoundException,
 \section{Chunks}
 
 \subsection{Open \texttt{conn}}
-\nwenddocs{}\nwbegincode{1}\sublabel{NW1vLSTU-JT1v9-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-JT1v9-1}}}\moddef{Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1vLSTU-JT1v9-1}}}\endmoddef\nwused{\\{NW4K8pCk-3OEpPU-1}\\{NW4K8pCk-17SWaf-1}\\{NW4K8pCk-1imYqa-1}\\{NW4K8pCk-1C883O-1}\\{NW4K8pCk-1uCRXX-1}\\{NW4K8pCk-4bU7WY-1}\\{NW4K8pCk-3w6nA9-1}\\{NW4K8pCk-4dNZxZ-1}\\{NW4K8pCk-2bbv1T-1}\\{NW4K8pCk-1ZOEl0-1}\\{NW4K8pCk-3Jk4Pm-1}\\{NW4K8pCk-4808iY-1}\\{NW4K8pCk-3eqIl6-1}\\{NW4K8pCk-4Aq6dV-1}\\{NW4K8pCk-3CyHZy-1}\\{NW4K8pCk-dlG5g-1}\\{NW4K8pCk-cz5yf-1}\\{NW4K8pCk-3PzevO-1}\\{NW4K8pCk-4AIMTx-1}\\{NW4K8pCk-1cB9Z1-1}\\{NW4K8pCk-4JTjfI-1}\\{NW4K8pCk-4IICVC-1}\\{NW4K8pCk-71ppP-1}\\{NW4K8pCk-48DsrJ-1}\\{NW4K8pCk-1O34Sj-1}\\{NW4K8pCk-cE03j-1}\\{NW4K8pCk-23Wg9M-1}\\{NW4K8pCk-4MxFHH-1}\\{NW4K8pCk-1qZuKY-1}\\{NW4K8pCk-1aOzfQ-1}\\{NW4K8pCk-Sjxu7-1}\\{NW4K8pCk-3pEbv2-1}\\{NW4K8pCk-4OXq2M-1}\\{NW4K8pCk-2nZ1VB-1}\\{NW4K8pCk-31osvi-1}\\{NW4K8pCk-23ZhQ2-1}\\{NW4K8pCk-3NWzRo-1}\\{NW4K8pCk-1zUdrf-1}\\{NW4K8pCk-2tWQc-1}\\{NW4K8pCk-49bCCM-1}\\{NW4K8pCk-1ZAnmM-1}\\{NW4K8pCk-47NowU-1}\\{NW4K8pCk-2gaNGt-1}\\{NW4K8pCk-3ENmOe-1}\\{NW4K8pCk-423lHf-1}\\{NW4K8pCk-4UAOce-1}\\{NW4K8pCk-31p3Hv-1}\\{NW4K8pCk-3ddWJ0-1}\\{NW4K8pCk-421s5A-1}\\{NW4K8pCk-3066Ie-1}\\{NW4K8pCk-Z4xun-1}\\{NW4K8pCk-28z28Y-1}\\{NW4K8pCk-2RC1QH-1}\\{NW4K8pCk-3y4D9i-1}\\{NW4K8pCk-4Q7d2w-1}\\{NW1l0GC8-3leoJR-3}\\{NW1l0GC8-14ASIs-1}\\{NW1l0GC8-4RKqny-1}\\{NW1l0GC8-xsVjY-1}\\{NW1l0GC8-4Dmn3V-1}\\{NW1l0GC8-MMhxz-1}\\{NW1l0GC8-3yF6ns-1}\\{NW1l0GC8-PxyQL-1}\\{NW1vLSTU-fUuSd-1}\\{NW1vLSTU-RmKLy-1}\\{NW1vLSTU-4UssFH-1}\\{NW1vLSTU-3RkokI-5}}
+\nwenddocs{}\nwbegincode{1}\sublabel{NW1vLSTU-JT1v9-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-JT1v9-1}}}\moddef{Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1vLSTU-JT1v9-1}}}\endmoddef\nwused{\\{NW4K8pCk-3OEpPU-1}\\{NW4K8pCk-17SWaf-1}\\{NW4K8pCk-1imYqa-1}\\{NW4K8pCk-1C883O-1}\\{NW4K8pCk-1uCRXX-1}\\{NW4K8pCk-4bU7WY-1}\\{NW4K8pCk-3w6nA9-1}\\{NW4K8pCk-4dNZxZ-1}\\{NW4K8pCk-2bbv1T-1}\\{NW4K8pCk-1ZOEl0-1}\\{NW4K8pCk-3Jk4Pm-1}\\{NW4K8pCk-4808iY-1}\\{NW4K8pCk-3eqIl6-1}\\{NW4K8pCk-4Aq6dV-1}\\{NW4K8pCk-3CyHZy-1}\\{NW4K8pCk-dlG5g-1}\\{NW4K8pCk-cz5yf-1}\\{NW4K8pCk-3PzevO-1}\\{NW4K8pCk-4AIMTx-1}\\{NW4K8pCk-1cB9Z1-1}\\{NW4K8pCk-4JTjfI-1}\\{NW4K8pCk-4IICVC-1}\\{NW4K8pCk-71ppP-1}\\{NW4K8pCk-48DsrJ-1}\\{NW4K8pCk-1O34Sj-1}\\{NW4K8pCk-cE03j-1}\\{NW4K8pCk-23Wg9M-1}\\{NW4K8pCk-4MxFHH-1}\\{NW4K8pCk-1qZuKY-1}\\{NW4K8pCk-1aOzfQ-1}\\{NW4K8pCk-Sjxu7-1}\\{NW4K8pCk-3pEbv2-1}\\{NW4K8pCk-4OXq2M-1}\\{NW4K8pCk-2nZ1VB-1}\\{NW4K8pCk-31osvi-1}\\{NW4K8pCk-23ZhQ2-1}\\{NW4K8pCk-3NWzRo-1}\\{NW4K8pCk-1zUdrf-1}\\{NW4K8pCk-2tWQc-1}\\{NW4K8pCk-49bCCM-1}\\{NW4K8pCk-1ZAnmM-1}\\{NW4K8pCk-47NowU-1}\\{NW4K8pCk-2gaNGt-1}\\{NW4K8pCk-3ENmOe-1}\\{NW4K8pCk-423lHf-1}\\{NW4K8pCk-4UAOce-1}\\{NW4K8pCk-31p3Hv-1}\\{NW4K8pCk-3ddWJ0-1}\\{NW4K8pCk-421s5A-1}\\{NW4K8pCk-3066Ie-1}\\{NW4K8pCk-Z4xun-1}\\{NW4K8pCk-28z28Y-1}\\{NW4K8pCk-2RC1QH-1}\\{NW4K8pCk-3y4D9i-1}\\{NW4K8pCk-4Q7d2w-1}\\{NW1l0GC8-3leoJR-3}\\{NW1l0GC8-14ASIs-1}\\{NW1l0GC8-4RKqny-1}\\{NW1l0GC8-xsVjY-1}\\{NW1l0GC8-4Dmn3V-1}\\{NW1l0GC8-MMhxz-1}\\{NW1l0GC8-3yF6ns-1}\\{NW1l0GC8-PxyQL-1}\\{NW1vLSTU-fUuSd-1}\\{NW1vLSTU-47sE81-1}\\{NW1vLSTU-RmKLy-1}\\{NW1vLSTU-4UssFH-1}\\{NW1vLSTU-3RkokI-5}}
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 \nwendcode{}\nwbegindocs{2}\nwdocspar
 
@@ -6655,6 +6670,17 @@ try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1vLSTU-JT1v9-1}}\R
 \}
 \nwidentuses{\\{{DBQueryServerDistanceRemaining}{DBQueryServerDistanceRemaining}}\\{{PSQuery}{PSQuery}}\\{{S153}{S153}}\\{{S154}{S154}}\\{{S155}{S155}}}\nwindexuse{DBQueryServerDistanceRemaining}{DBQueryServerDistanceRemaining}{NW1vLSTU-fUuSd-1}\nwindexuse{PSQuery}{PSQuery}{NW1vLSTU-fUuSd-1}\nwindexuse{S153}{S153}{NW1vLSTU-fUuSd-1}\nwindexuse{S154}{S154}{NW1vLSTU-fUuSd-1}\nwindexuse{S155}{S155}{NW1vLSTU-fUuSd-1}\nwendcode{}\nwbegindocs{6}\nwdocspar
 
+\subsection{Cache request transit distance}
+\nwenddocs{}\nwbegincode{7}\sublabel{NW1vLSTU-47sE81-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-47sE81-1}}}\moddef{Cache request transit distance~{\nwtagstyle{}\subpageref{NW1vLSTU-47sE81-1}}}\endmoddef\nwused{\\{NW1l0GC8-3yF6ns-2}\\{NW1vLSTU-3RkokI-5}}
+try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1vLSTU-JT1v9-1}}\RA{}) \{
+  int[] tpd = this.PSQuery(conn, "S86", 2, r);
+  int d = this.PSQuery(conn, "S154", 1, sid, tpd[0], tpd[1])[0];
+  this.distance_requests_transit.put(r, d);
+\} catch (SQLException e) \{
+  throw e;
+\}
+\nwidentuses{\\{{PSQuery}{PSQuery}}\\{{S154}{S154}}\\{{S86}{S86}}}\nwindexuse{PSQuery}{PSQuery}{NW1vLSTU-47sE81-1}\nwindexuse{S154}{S154}{NW1vLSTU-47sE81-1}\nwindexuse{S86}{S86}{NW1vLSTU-47sE81-1}\nwendcode{}\nwbegindocs{8}\nwdocspar
+
 \section{Methods: Administration}
 
 \subsection{\texttt{JargoInstanceNew}(0)}
@@ -6678,7 +6704,7 @@ cannot be loaded.\\
 reason.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{7}\sublabel{NW1vLSTU-2umFNk-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2umFNk-1}}}\moddef{Admin: JargoInstanceNew(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-2umFNk-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
+\nwenddocs{}\nwbegincode{9}\sublabel{NW1vLSTU-2umFNk-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2umFNk-1}}}\moddef{Admin: JargoInstanceNew(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-2umFNk-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
 void JargoInstanceNew() throws SQLException \{
   try \{
     this.JargoSetupDriver();
@@ -6691,18 +6717,18 @@ void JargoInstanceNew() throws SQLException \{
   \}
 \}
 \nwindexdefn{JargoInstanceNew}{JargoInstanceNew}{NW1vLSTU-2umFNk-1}\eatline
-\nwidentdefs{\\{{JargoInstanceNew}{JargoInstanceNew}}}\nwidentuses{\\{{JargoSetupDriver}{JargoSetupDriver}}}\nwindexuse{JargoSetupDriver}{JargoSetupDriver}{NW1vLSTU-2umFNk-1}\nwendcode{}\nwbegindocs{8}\begin{tabular}{p{\textwidth}}
+\nwidentdefs{\\{{JargoInstanceNew}{JargoInstanceNew}}}\nwidentuses{\\{{JargoSetupDriver}{JargoSetupDriver}}}\nwindexuse{JargoSetupDriver}{JargoSetupDriver}{NW1vLSTU-2umFNk-1}\nwendcode{}\nwbegindocs{10}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\tt{}\protect\nwindexuse{instanceNew}{instanceNew}{NW1vLSTU-7iNDJ-1}instanceNew}}(0) wraps {\tt{}\protect\nwindexuse{JargoInstanceNew}{JargoInstanceNew}{NW1vLSTU-2umFNk-1}JargoInstanceNew}(0).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{9}\sublabel{NW1vLSTU-7iNDJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-7iNDJ-1}}}\moddef{Admin: instanceNew(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-7iNDJ-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{11}\sublabel{NW1vLSTU-7iNDJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-7iNDJ-1}}}\moddef{Admin: instanceNew(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-7iNDJ-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
 void instanceNew() throws SQLException \{
   this.storage.JargoInstanceNew();
 \}
 \nwindexdefn{instanceNew}{instanceNew}{NW1vLSTU-7iNDJ-1}\eatline
-\nwidentdefs{\\{{instanceNew}{instanceNew}}}\nwidentuses{\\{{JargoInstanceNew}{JargoInstanceNew}}}\nwindexuse{JargoInstanceNew}{JargoInstanceNew}{NW1vLSTU-7iNDJ-1}\nwendcode{}\nwbegindocs{10}\nwdocspar
+\nwidentdefs{\\{{instanceNew}{instanceNew}}}\nwidentuses{\\{{JargoInstanceNew}{JargoInstanceNew}}}\nwindexuse{JargoInstanceNew}{JargoInstanceNew}{NW1vLSTU-7iNDJ-1}\nwendcode{}\nwbegindocs{12}\nwdocspar
 \subsection{\texttt{JargoInstanceInitialize}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -6724,7 +6750,7 @@ into the Jargo instance, or exits the JVM if failure occurs.\\
 \textbf{Throws:} nothing.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{11}\sublabel{NW1vLSTU-RmKLy-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-RmKLy-1}}}\moddef{Admin: JargoInstanceInitialize(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-RmKLy-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
+\nwenddocs{}\nwbegincode{13}\sublabel{NW1vLSTU-RmKLy-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-RmKLy-1}}}\moddef{Admin: JargoInstanceInitialize(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-RmKLy-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
 void JargoInstanceInitialize() \{
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1vLSTU-JT1v9-1}}\RA{}) \{
     Statement stmt = conn.createStatement();
@@ -6791,21 +6817,21 @@ void JargoInstanceInitialize() \{
   \}
 \}
 \nwindexdefn{JargoInstanceInitialize}{JargoInstanceInitialize}{NW1vLSTU-RmKLy-1}\eatline
-\nwidentdefs{\\{{JargoInstanceInitialize}{JargoInstanceInitialize}}}\nwidentuses{\\{{JargoInstanceLoad}{JargoInstanceLoad}}\\{{JargoInstanceNew}{JargoInstanceNew}}}\nwindexuse{JargoInstanceLoad}{JargoInstanceLoad}{NW1vLSTU-RmKLy-1}\nwindexuse{JargoInstanceNew}{JargoInstanceNew}{NW1vLSTU-RmKLy-1}\nwendcode{}\nwbegindocs{12}\begin{tabular}{p{\textwidth}}
+\nwidentdefs{\\{{JargoInstanceInitialize}{JargoInstanceInitialize}}}\nwidentuses{\\{{JargoInstanceLoad}{JargoInstanceLoad}}\\{{JargoInstanceNew}{JargoInstanceNew}}}\nwindexuse{JargoInstanceLoad}{JargoInstanceLoad}{NW1vLSTU-RmKLy-1}\nwindexuse{JargoInstanceNew}{JargoInstanceNew}{NW1vLSTU-RmKLy-1}\nwendcode{}\nwbegindocs{14}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\tt{}\protect\nwindexuse{instanceInitialize}{instanceInitialize}{NW1vLSTU-3zrPv1-1}instanceInitialize}}(0) wraps {\tt{}\protect\nwindexuse{JargoInstanceInitialize}{JargoInstanceInitialize}{NW1vLSTU-RmKLy-1}JargoInstanceInitialize}(0).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{13}\sublabel{NW1vLSTU-3zrPv1-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3zrPv1-1}}}\moddef{Admin: instanceInitialize(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-3zrPv1-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{15}\sublabel{NW1vLSTU-3zrPv1-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3zrPv1-1}}}\moddef{Admin: instanceInitialize(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-3zrPv1-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
 void instanceInitialize() \{
   this.storage.JargoInstanceInitialize();
 \}
 \nwindexdefn{instanceInitialize}{instanceInitialize}{NW1vLSTU-3zrPv1-1}\eatline
-\nwidentdefs{\\{{instanceInitialize}{instanceInitialize}}}\nwidentuses{\\{{JargoInstanceInitialize}{JargoInstanceInitialize}}}\nwindexuse{JargoInstanceInitialize}{JargoInstanceInitialize}{NW1vLSTU-3zrPv1-1}\nwendcode{}\nwbegindocs{14}\nwdocspar
+\nwidentdefs{\\{{instanceInitialize}{instanceInitialize}}}\nwidentuses{\\{{JargoInstanceInitialize}{JargoInstanceInitialize}}}\nwindexuse{JargoInstanceInitialize}{JargoInstanceInitialize}{NW1vLSTU-3zrPv1-1}\nwendcode{}\nwbegindocs{16}\nwdocspar
 
 \subsection{\texttt{JargoInstanceLoad}(1)}
-\nwenddocs{}\nwbegincode{15}\sublabel{NW1vLSTU-2ccHxN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2ccHxN-1}}}\moddef{Admin: JargoInstanceLoad(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-2ccHxN-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
+\nwenddocs{}\nwbegincode{17}\sublabel{NW1vLSTU-2ccHxN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2ccHxN-1}}}\moddef{Admin: JargoInstanceLoad(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-2ccHxN-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
 void JargoInstanceLoad(final String p) throws SQLException \{
   this.CONNECTIONS_URL = "jdbc:derby:"+p;
   try \{
@@ -6817,12 +6843,12 @@ void JargoInstanceLoad(final String p) throws SQLException \{
   \}
 \}
 \nwindexdefn{JargoInstanceLoad}{JargoInstanceLoad}{NW1vLSTU-2ccHxN-1}\eatline
-\nwidentdefs{\\{{JargoInstanceLoad}{JargoInstanceLoad}}}\nwidentuses{\\{{JargoSetupDriver}{JargoSetupDriver}}}\nwindexuse{JargoSetupDriver}{JargoSetupDriver}{NW1vLSTU-2ccHxN-1}\nwendcode{}\nwbegincode{16}\sublabel{NW1vLSTU-1xqWgs-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1xqWgs-1}}}\moddef{Admin: instanceLoad(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-1xqWgs-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
+\nwidentdefs{\\{{JargoInstanceLoad}{JargoInstanceLoad}}}\nwidentuses{\\{{JargoSetupDriver}{JargoSetupDriver}}}\nwindexuse{JargoSetupDriver}{JargoSetupDriver}{NW1vLSTU-2ccHxN-1}\nwendcode{}\nwbegincode{18}\sublabel{NW1vLSTU-1xqWgs-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1xqWgs-1}}}\moddef{Admin: instanceLoad(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-1xqWgs-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
 void instanceLoad(final String p) throws SQLException \{
   this.storage.JargoInstanceLoad(p);
 \}
 \nwindexdefn{instanceLoad}{instanceLoad}{NW1vLSTU-1xqWgs-1}\eatline
-\nwidentdefs{\\{{instanceLoad}{instanceLoad}}}\nwidentuses{\\{{JargoInstanceLoad}{JargoInstanceLoad}}}\nwindexuse{JargoInstanceLoad}{JargoInstanceLoad}{NW1vLSTU-1xqWgs-1}\nwendcode{}\nwbegindocs{17}\nwdocspar
+\nwidentdefs{\\{{instanceLoad}{instanceLoad}}}\nwidentuses{\\{{JargoInstanceLoad}{JargoInstanceLoad}}}\nwindexuse{JargoInstanceLoad}{JargoInstanceLoad}{NW1vLSTU-1xqWgs-1}\nwendcode{}\nwbegindocs{19}\nwdocspar
 \subsection{\texttt{JargoInstanceLoadInMem}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -6845,7 +6871,7 @@ JVM if failure occurs.\\
 {\tt{}ClassNotFoundException} if the DBCP2 driver cannot be found.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{18}\sublabel{NW1vLSTU-2xla6D-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2xla6D-1}}}\moddef{Admin: JargoInstanceLoadInMem(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-2xla6D-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
+\nwenddocs{}\nwbegincode{20}\sublabel{NW1vLSTU-2xla6D-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2xla6D-1}}}\moddef{Admin: JargoInstanceLoadInMem(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-2xla6D-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
 void JargoInstanceLoadInMem(final String p) throws SQLException \{
   this.CONNECTIONS_URL = "jdbc:derby:memory:jargo;createFrom="+p;
   try \{
@@ -6857,18 +6883,18 @@ void JargoInstanceLoadInMem(final String p) throws SQLException \{
   \}
 \}
 \nwindexdefn{JargoInstanceLoadInMem}{JargoInstanceLoadInMem}{NW1vLSTU-2xla6D-1}\eatline
-\nwidentdefs{\\{{JargoInstanceLoadInMem}{JargoInstanceLoadInMem}}}\nwidentuses{\\{{JargoSetupDriver}{JargoSetupDriver}}}\nwindexuse{JargoSetupDriver}{JargoSetupDriver}{NW1vLSTU-2xla6D-1}\nwendcode{}\nwbegindocs{19}\begin{tabular}{p{\textwidth}}
+\nwidentdefs{\\{{JargoInstanceLoadInMem}{JargoInstanceLoadInMem}}}\nwidentuses{\\{{JargoSetupDriver}{JargoSetupDriver}}}\nwindexuse{JargoSetupDriver}{JargoSetupDriver}{NW1vLSTU-2xla6D-1}\nwendcode{}\nwbegindocs{21}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\tt{}\protect\nwindexuse{instanceLoadInMem}{instanceLoadInMem}{NW1vLSTU-XgCfU-1}instanceLoadInMem}}(1) wraps {\tt{}\protect\nwindexuse{JargoInstanceLoadInMem}{JargoInstanceLoadInMem}{NW1vLSTU-2xla6D-1}JargoInstanceLoadInMem}(1).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{20}\sublabel{NW1vLSTU-XgCfU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-XgCfU-1}}}\moddef{Admin: instanceLoadInMem(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-XgCfU-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{22}\sublabel{NW1vLSTU-XgCfU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-XgCfU-1}}}\moddef{Admin: instanceLoadInMem(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-XgCfU-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
 void instanceLoadInMem(final String p) throws SQLException \{
   this.storage.JargoInstanceLoadInMem(p);
 \}
 \nwindexdefn{instanceLoadInMem}{instanceLoadInMem}{NW1vLSTU-XgCfU-1}\eatline
-\nwidentdefs{\\{{instanceLoadInMem}{instanceLoadInMem}}}\nwidentuses{\\{{JargoInstanceLoadInMem}{JargoInstanceLoadInMem}}}\nwindexuse{JargoInstanceLoadInMem}{JargoInstanceLoadInMem}{NW1vLSTU-XgCfU-1}\nwendcode{}\nwbegindocs{21}\nwdocspar
+\nwidentdefs{\\{{instanceLoadInMem}{instanceLoadInMem}}}\nwidentuses{\\{{JargoInstanceLoadInMem}{JargoInstanceLoadInMem}}}\nwindexuse{JargoInstanceLoadInMem}{JargoInstanceLoadInMem}{NW1vLSTU-XgCfU-1}\nwendcode{}\nwbegindocs{23}\nwdocspar
 \subsection{\texttt{JargoInstanceExport}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -6885,7 +6911,7 @@ be exported to.\\
 \textbf{Throws:} {\tt{}SQLException} if failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{22}\sublabel{NW1vLSTU-4UssFH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4UssFH-1}}}\moddef{Admin: JargoInstanceExport(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-4UssFH-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
+\nwenddocs{}\nwbegincode{24}\sublabel{NW1vLSTU-4UssFH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4UssFH-1}}}\moddef{Admin: JargoInstanceExport(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-4UssFH-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
 void JargoInstanceExport(final String p) throws SQLException \{
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1vLSTU-JT1v9-1}}\RA{}) \{
     CallableStatement cs = conn.prepareCall("CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE('"+p+"')");
@@ -6895,18 +6921,18 @@ void JargoInstanceExport(final String p) throws SQLException \{
   \}
 \}
 \nosublabel{NW1vLSTU-4UssFH-1-u1}\nwindexdefn{JargoInstanceExport}{JargoInstanceExport}{NW1vLSTU-4UssFH-1}\eatline
-\nwidentdefs{\\{{JargoInstanceExport}{JargoInstanceExport}}}\nwendcode{}\nwbegindocs{23}\noindent\begin{tabular}{p{\textwidth}}
+\nwidentdefs{\\{{JargoInstanceExport}{JargoInstanceExport}}}\nwendcode{}\nwbegindocs{25}\noindent\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\tt{}\protect\nwindexuse{instanceExport}{instanceExport}{NW1vLSTU-41pCsM-1}instanceExport}}(1) wraps {\tt{}\protect\nwindexuse{JargoInstanceExport}{JargoInstanceExport}{NW1vLSTU-4UssFH-1}JargoInstanceExport}(1).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{24}\sublabel{NW1vLSTU-41pCsM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-41pCsM-1}}}\moddef{Admin: instanceExport(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-41pCsM-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{26}\sublabel{NW1vLSTU-41pCsM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-41pCsM-1}}}\moddef{Admin: instanceExport(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-41pCsM-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
 void instanceExport(final String p) throws SQLException \{
   this.storage.JargoInstanceExport(p);
 \}
 \nwindexdefn{instanceExport}{instanceExport}{NW1vLSTU-41pCsM-1}\eatline
-\nwidentdefs{\\{{instanceExport}{instanceExport}}}\nwidentuses{\\{{JargoInstanceExport}{JargoInstanceExport}}}\nwindexuse{JargoInstanceExport}{JargoInstanceExport}{NW1vLSTU-41pCsM-1}\nwendcode{}\nwbegindocs{25}\nwdocspar
+\nwidentdefs{\\{{instanceExport}{instanceExport}}}\nwidentuses{\\{{JargoInstanceExport}{JargoInstanceExport}}}\nwindexuse{JargoInstanceExport}{JargoInstanceExport}{NW1vLSTU-41pCsM-1}\nwendcode{}\nwbegindocs{27}\nwdocspar
 \subsection{\texttt{JargoInstanceClose}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -6923,7 +6949,7 @@ thrown. In this case we rethrow to let the caller handle it.\\
 reason.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{26}\sublabel{NW1vLSTU-46VGhz-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-46VGhz-1}}}\moddef{Admin: JargoInstanceClose(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-46VGhz-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
+\nwenddocs{}\nwbegincode{28}\sublabel{NW1vLSTU-46VGhz-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-46VGhz-1}}}\moddef{Admin: JargoInstanceClose(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-46VGhz-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
 void JargoInstanceClose() throws SQLException \{
   try \{
     DriverManager.getConnection("jdbc:derby:memory:jargo;drop=true");
@@ -6934,18 +6960,18 @@ void JargoInstanceClose() throws SQLException \{
   \}
 \}
 \nwindexdefn{JargoInstanceClose}{JargoInstanceClose}{NW1vLSTU-46VGhz-1}\eatline
-\nwidentdefs{\\{{JargoInstanceClose}{JargoInstanceClose}}}\nwendcode{}\nwbegindocs{27}\begin{tabular}{p{\textwidth}}
+\nwidentdefs{\\{{JargoInstanceClose}{JargoInstanceClose}}}\nwendcode{}\nwbegindocs{29}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\tt{}\protect\nwindexuse{instanceClose}{instanceClose}{NW1vLSTU-1Uv5LH-1}instanceClose}}(0) wraps {\tt{}\protect\nwindexuse{JargoInstanceClose}{JargoInstanceClose}{NW1vLSTU-46VGhz-1}JargoInstanceClose}(0).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{28}\sublabel{NW1vLSTU-1Uv5LH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1Uv5LH-1}}}\moddef{Admin: instanceClose(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-1Uv5LH-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{30}\sublabel{NW1vLSTU-1Uv5LH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1Uv5LH-1}}}\moddef{Admin: instanceClose(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-1Uv5LH-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
 void instanceClose() throws SQLException \{
   this.storage.JargoInstanceClose();
 \}
 \nwindexdefn{instanceClose}{instanceClose}{NW1vLSTU-1Uv5LH-1}\eatline
-\nwidentdefs{\\{{instanceClose}{instanceClose}}}\nwidentuses{\\{{JargoInstanceClose}{JargoInstanceClose}}}\nwindexuse{JargoInstanceClose}{JargoInstanceClose}{NW1vLSTU-1Uv5LH-1}\nwendcode{}\nwbegindocs{29}\nwdocspar
+\nwidentdefs{\\{{instanceClose}{instanceClose}}}\nwidentuses{\\{{JargoInstanceClose}{JargoInstanceClose}}}\nwindexuse{JargoInstanceClose}{JargoInstanceClose}{NW1vLSTU-1Uv5LH-1}\nwendcode{}\nwbegindocs{31}\nwdocspar
 \subsection{\texttt{JargoCacheRoadNetworkFromDB}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -6962,22 +6988,22 @@ and E in the database. If queries on Tables V and E fail, this method throws a
 other database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{30}\sublabel{NW1vLSTU-1Dy9Ql-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1Dy9Ql-1}}}\moddef{Admin: JargoCacheRoadNetworkFromDB(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-1Dy9Ql-1}}}\endmoddef\nwalsodefined{\\{NW1vLSTU-1Dy9Ql-2}\\{NW1vLSTU-1Dy9Ql-3}\\{NW1vLSTU-1Dy9Ql-4}\\{NW1vLSTU-1Dy9Ql-5}}\nwused{\\{NW1pDwO-Oyob-3}}
+\nwenddocs{}\nwbegincode{32}\sublabel{NW1vLSTU-1Dy9Ql-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1Dy9Ql-1}}}\moddef{Admin: JargoCacheRoadNetworkFromDB(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-1Dy9Ql-1}}}\endmoddef\nwalsodefined{\\{NW1vLSTU-1Dy9Ql-2}\\{NW1vLSTU-1Dy9Ql-3}\\{NW1vLSTU-1Dy9Ql-4}\\{NW1vLSTU-1Dy9Ql-5}}\nwused{\\{NW1pDwO-Oyob-3}}
 void JargoCacheRoadNetworkFromDB() throws SQLException \{
 \nwindexdefn{JargoCacheRoadNetworkFromDB}{JargoCacheRoadNetworkFromDB}{NW1vLSTU-1Dy9Ql-1}\eatline
-\nwidentdefs{\\{{JargoCacheRoadNetworkFromDB}{JargoCacheRoadNetworkFromDB}}}\nwendcode{}\nwbegindocs{31}{\small Our approach is to create two temporary maps on the heap, populate the
+\nwidentdefs{\\{{JargoCacheRoadNetworkFromDB}{JargoCacheRoadNetworkFromDB}}}\nwendcode{}\nwbegindocs{33}{\small Our approach is to create two temporary maps on the heap, populate the
 temporary maps, then assign {\tt{}lu{\char95}vertices} and {\tt{}lu{\char95}edges} to reference the
 temporary maps if all succeeds. This way we don't corrupt {\tt{}lu{\char95}vertices} and
 {\tt{}lu{\char95}edges} in case of failure. (The approach might be overly cautious as it's
 hard to imagine why this method would ever be called if the caches are already
 populated.)}
-\nwenddocs{}\nwbegincode{32}\sublabel{NW1vLSTU-1Dy9Ql-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1Dy9Ql-2}}}\moddef{Admin: JargoCacheRoadNetworkFromDB(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-1Dy9Ql-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{34}\sublabel{NW1vLSTU-1Dy9Ql-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1Dy9Ql-2}}}\moddef{Admin: JargoCacheRoadNetworkFromDB(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-1Dy9Ql-1}}}\plusendmoddef
   ConcurrentHashMap<Integer, int[]>    lu1 = new ConcurrentHashMap<Integer, int[]>();
   ConcurrentHashMap<Integer,
     ConcurrentHashMap<Integer, int[]>> lu2 = new ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>>();
-\nwendcode{}\nwbegindocs{33}\nwdocspar
+\nwendcode{}\nwbegindocs{35}\nwdocspar
 {\small We start by querying the vertices.}
-\nwenddocs{}\nwbegincode{34}\sublabel{NW1vLSTU-1Dy9Ql-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1Dy9Ql-3}}}\moddef{Admin: JargoCacheRoadNetworkFromDB(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-1Dy9Ql-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{36}\sublabel{NW1vLSTU-1Dy9Ql-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1Dy9Ql-3}}}\moddef{Admin: JargoCacheRoadNetworkFromDB(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-1Dy9Ql-1}}}\plusendmoddef
   try \{
     final int[] output = this.DBQueryVertices();
     for (int i = 0; i < (output.length - 2); i += 3) \{
@@ -6989,9 +7015,9 @@ populated.)}
   \} catch (SQLException e) \{
     throw e;
   \}
-\nwidentuses{\\{{DBQueryVertices}{DBQueryVertices}}}\nwindexuse{DBQueryVertices}{DBQueryVertices}{NW1vLSTU-1Dy9Ql-3}\nwendcode{}\nwbegindocs{35}\nwdocspar
+\nwidentuses{\\{{DBQueryVertices}{DBQueryVertices}}}\nwindexuse{DBQueryVertices}{DBQueryVertices}{NW1vLSTU-1Dy9Ql-3}\nwendcode{}\nwbegindocs{37}\nwdocspar
 {\small Then we go on to query the edges.}
-\nwenddocs{}\nwbegincode{36}\sublabel{NW1vLSTU-1Dy9Ql-4}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1Dy9Ql-4}}}\moddef{Admin: JargoCacheRoadNetworkFromDB(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-1Dy9Ql-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{38}\sublabel{NW1vLSTU-1Dy9Ql-4}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1Dy9Ql-4}}}\moddef{Admin: JargoCacheRoadNetworkFromDB(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-1Dy9Ql-1}}}\plusendmoddef
   try \{
     final int[] output = this.DBQueryEdges();
     for (int i = 0; i < (output.length - 3); i += 4) \{
@@ -7007,25 +7033,25 @@ populated.)}
   \} catch (SQLException e) \{
     throw e;
   \}
-\nwidentuses{\\{{DBQueryEdges}{DBQueryEdges}}}\nwindexuse{DBQueryEdges}{DBQueryEdges}{NW1vLSTU-1Dy9Ql-4}\nwendcode{}\nwbegindocs{37}\nwdocspar
+\nwidentuses{\\{{DBQueryEdges}{DBQueryEdges}}}\nwindexuse{DBQueryEdges}{DBQueryEdges}{NW1vLSTU-1Dy9Ql-4}\nwendcode{}\nwbegindocs{39}\nwdocspar
 {\small Finally we do the assignment.}
-\nwenddocs{}\nwbegincode{38}\sublabel{NW1vLSTU-1Dy9Ql-5}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1Dy9Ql-5}}}\moddef{Admin: JargoCacheRoadNetworkFromDB(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-1Dy9Ql-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{40}\sublabel{NW1vLSTU-1Dy9Ql-5}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1Dy9Ql-5}}}\moddef{Admin: JargoCacheRoadNetworkFromDB(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-1Dy9Ql-1}}}\plusendmoddef
   this.lu_vertices = lu1;
   this.lu_edges    = lu2;
 \}
-\nwendcode{}\nwbegindocs{39}\nwdocspar
+\nwendcode{}\nwbegindocs{41}\nwdocspar
 \noindent\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\tt{}\protect\nwindexuse{cacheRoadNetworkFromDB}{cacheRoadNetworkFromDB}{NW1vLSTU-fYeVD-1}cacheRoadNetworkFromDB}}(0) wraps {\tt{}\protect\nwindexuse{JargoCacheRoadNetworkFromDB}{JargoCacheRoadNetworkFromDB}{NW1vLSTU-1Dy9Ql-1}JargoCacheRoadNetworkFromDB}(0).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{40}\sublabel{NW1vLSTU-fYeVD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-fYeVD-1}}}\moddef{Admin: cacheRoadNetworkFromDB(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-fYeVD-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{42}\sublabel{NW1vLSTU-fYeVD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-fYeVD-1}}}\moddef{Admin: cacheRoadNetworkFromDB(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-fYeVD-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
 void cacheRoadNetworkFromDB() throws SQLException \{
   this.storage.JargoCacheRoadNetworkFromDB();
 \}
 \nwindexdefn{cacheRoadNetworkFromDB}{cacheRoadNetworkFromDB}{NW1vLSTU-fYeVD-1}\eatline
-\nwidentdefs{\\{{cacheRoadNetworkFromDB}{cacheRoadNetworkFromDB}}}\nwidentuses{\\{{JargoCacheRoadNetworkFromDB}{JargoCacheRoadNetworkFromDB}}}\nwindexuse{JargoCacheRoadNetworkFromDB}{JargoCacheRoadNetworkFromDB}{NW1vLSTU-fYeVD-1}\nwendcode{}\nwbegindocs{41}\nwdocspar
+\nwidentdefs{\\{{cacheRoadNetworkFromDB}{cacheRoadNetworkFromDB}}}\nwidentuses{\\{{JargoCacheRoadNetworkFromDB}{JargoCacheRoadNetworkFromDB}}}\nwindexuse{JargoCacheRoadNetworkFromDB}{JargoCacheRoadNetworkFromDB}{NW1vLSTU-fYeVD-1}\nwendcode{}\nwbegindocs{43}\nwdocspar
 
 
 \subsection{\texttt{JargoCacheUsersFromDB}(0)}
@@ -7044,18 +7070,18 @@ the database. If queries on these tables fail, this method throws a
 queried or other database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{42}\sublabel{NW1vLSTU-3RkokI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3RkokI-1}}}\moddef{Admin: JargoCacheUsersFromDB(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-3RkokI-1}}}\endmoddef\nwalsodefined{\\{NW1vLSTU-3RkokI-2}\\{NW1vLSTU-3RkokI-3}\\{NW1vLSTU-3RkokI-4}\\{NW1vLSTU-3RkokI-5}}\nwused{\\{NW1pDwO-Oyob-3}}
+\nwenddocs{}\nwbegincode{44}\sublabel{NW1vLSTU-3RkokI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3RkokI-1}}}\moddef{Admin: JargoCacheUsersFromDB(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-3RkokI-1}}}\endmoddef\nwalsodefined{\\{NW1vLSTU-3RkokI-2}\\{NW1vLSTU-3RkokI-3}\\{NW1vLSTU-3RkokI-4}\\{NW1vLSTU-3RkokI-5}}\nwused{\\{NW1pDwO-Oyob-3}}
 void JargoCacheUsersFromDB() throws SQLException \{
 \nwindexdefn{JargoCacheUsersFromDB}{JargoCacheUsersFromDB}{NW1vLSTU-3RkokI-1}\eatline
-\nwidentdefs{\\{{JargoCacheUsersFromDB}{JargoCacheUsersFromDB}}}\nwendcode{}\nwbegindocs{43}{\small Our approach follows the approach for {\tt{}\protect\nwindexuse{JargoCacheRoadNetworkFromDB}{JargoCacheRoadNetworkFromDB}{NW1vLSTU-1Dy9Ql-1}JargoCacheRoadNetworkFromDB}(0).
+\nwidentdefs{\\{{JargoCacheUsersFromDB}{JargoCacheUsersFromDB}}}\nwendcode{}\nwbegindocs{45}{\small Our approach follows the approach for {\tt{}\protect\nwindexuse{JargoCacheRoadNetworkFromDB}{JargoCacheRoadNetworkFromDB}{NW1vLSTU-1Dy9Ql-1}JargoCacheRoadNetworkFromDB}(0).
 We start by creating two temporary maps on the heap.}
-\nwenddocs{}\nwbegincode{44}\sublabel{NW1vLSTU-3RkokI-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3RkokI-2}}}\moddef{Admin: JargoCacheUsersFromDB(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-3RkokI-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{46}\sublabel{NW1vLSTU-3RkokI-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3RkokI-2}}}\moddef{Admin: JargoCacheUsersFromDB(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-3RkokI-1}}}\plusendmoddef
   ConcurrentHashMap<Integer, int[]> lu1 = new ConcurrentHashMap<Integer, int[]>();
   Map<Integer, Boolean>             lu2 = new HashMap<Integer, Boolean>();
   Map<Integer, Integer>             lu3 = new HashMap<Integer, Integer>();
-\nwendcode{}\nwbegindocs{45}\nwdocspar
+\nwendcode{}\nwbegindocs{47}\nwdocspar
 {\small Then we query the users.}
-\nwenddocs{}\nwbegincode{46}\sublabel{NW1vLSTU-3RkokI-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3RkokI-3}}}\moddef{Admin: JargoCacheUsersFromDB(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-3RkokI-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{48}\sublabel{NW1vLSTU-3RkokI-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3RkokI-3}}}\moddef{Admin: JargoCacheUsersFromDB(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-3RkokI-1}}}\plusendmoddef
   try \{
     final int[] output = this.DBQueryUsers();
     for (int i = 0; i < (output.length - 6); i += 7) \{
@@ -7067,10 +7093,10 @@ We start by creating two temporary maps on the heap.}
       final int  ud = output[(i + 5)];
       final int  ub = output[(i + 6)];
       lu1.put(uid, new int[] \{ uid, uq, ue, ul, uo, ud, ub \});
-\nwidentuses{\\{{DBQueryUsers}{DBQueryUsers}}}\nwindexuse{DBQueryUsers}{DBQueryUsers}{NW1vLSTU-3RkokI-3}\nwendcode{}\nwbegindocs{47}\nwdocspar
+\nwidentuses{\\{{DBQueryUsers}{DBQueryUsers}}}\nwindexuse{DBQueryUsers}{DBQueryUsers}{NW1vLSTU-3RkokI-3}\nwendcode{}\nwbegindocs{49}\nwdocspar
 {\small If the user is a request, in other words the user load is positive,
 we query the request's assignment status. Else, we initialize the last-visitation time.}
-\nwenddocs{}\nwbegincode{48}\sublabel{NW1vLSTU-3RkokI-4}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3RkokI-4}}}\moddef{Admin: JargoCacheUsersFromDB(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-3RkokI-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{50}\sublabel{NW1vLSTU-3RkokI-4}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3RkokI-4}}}\moddef{Admin: JargoCacheUsersFromDB(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-3RkokI-1}}}\plusendmoddef
       if (uq > 0) \{
         lu2.put(uid, (this.DBQueryRequestIsAssigned(uid).length > 0 ? true : false));
       \} else \{
@@ -7080,9 +7106,9 @@ we query the request's assignment status. Else, we initialize the last-visitatio
   \} catch (SQLException e) \{
     throw e;
   \}
-\nwidentuses{\\{{DBQueryRequestIsAssigned}{DBQueryRequestIsAssigned}}}\nwindexuse{DBQueryRequestIsAssigned}{DBQueryRequestIsAssigned}{NW1vLSTU-3RkokI-4}\nwendcode{}\nwbegindocs{49}\nwdocspar
+\nwidentuses{\\{{DBQueryRequestIsAssigned}{DBQueryRequestIsAssigned}}}\nwindexuse{DBQueryRequestIsAssigned}{DBQueryRequestIsAssigned}{NW1vLSTU-3RkokI-4}\nwendcode{}\nwbegindocs{51}\nwdocspar
 {\small Finally we do the assignment and populate some counters.}
-\nwenddocs{}\nwbegincode{50}\sublabel{NW1vLSTU-3RkokI-5}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3RkokI-5}}}\moddef{Admin: JargoCacheUsersFromDB(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-3RkokI-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{52}\sublabel{NW1vLSTU-3RkokI-5}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3RkokI-5}}}\moddef{Admin: JargoCacheUsersFromDB(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-3RkokI-1}}}\plusendmoddef
   this.lu_users   = lu1;
   this.lu_rstatus = lu2;
   this.lu_lvt     = lu3;
@@ -7101,26 +7127,34 @@ we query the request's assignment status. Else, we initialize the last-visitatio
       \LA{}Cache service distance~{\nwtagstyle{}\subpageref{NW1vLSTU-fUuSd-1}}\RA{}
     \}
   \}
-  this.lu_rstatus.forEach((rid, flag) -> \{
+  for (Integer rid : this.lu_rstatus.keySet()) \{
+    final boolean flag = this.lu_rstatus.get(rid);
     if (flag == true) \{
       this.count_assigned++;
       this.sum_distance_unassigned -= this.lu_users.get(rid)[6];
+      int r = rid;
+      try \{
+        int sid = this.DBQueryRequestIsAssigned(rid)[0];
+        \LA{}Cache request transit distance~{\nwtagstyle{}\subpageref{NW1vLSTU-47sE81-1}}\RA{}
+      \} catch (SQLException e) \{
+        throw e;
+      \}
     \}
-  \});
+  \}
 \}
-\nwidentuses{\\{{PSQuery}{PSQuery}}\\{{S104}{S104}}}\nwindexuse{PSQuery}{PSQuery}{NW1vLSTU-3RkokI-5}\nwindexuse{S104}{S104}{NW1vLSTU-3RkokI-5}\nwendcode{}\nwbegindocs{51}\nwdocspar
+\nwidentuses{\\{{DBQueryRequestIsAssigned}{DBQueryRequestIsAssigned}}\\{{PSQuery}{PSQuery}}\\{{S104}{S104}}}\nwindexuse{DBQueryRequestIsAssigned}{DBQueryRequestIsAssigned}{NW1vLSTU-3RkokI-5}\nwindexuse{PSQuery}{PSQuery}{NW1vLSTU-3RkokI-5}\nwindexuse{S104}{S104}{NW1vLSTU-3RkokI-5}\nwendcode{}\nwbegindocs{53}\nwdocspar
 \noindent\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{{\tt{}\protect\nosublabel{NW1vLSTU-3RkokI-5-u2}\protect\nwindexuse{cacheUsersFromDB}{cacheUsersFromDB}{NW1vLSTU-3L7Lsf-1}cacheUsersFromDB}}(0) wraps {\tt{}\protect\nwindexuse{JargoCacheUsersFromDB}{JargoCacheUsersFromDB}{NW1vLSTU-3RkokI-1}JargoCacheUsersFromDB}(0).\\
+Method \textcolor{blue}{{\tt{}\protect\nosublabel{NW1vLSTU-3RkokI-5-u3}\protect\nwindexuse{cacheUsersFromDB}{cacheUsersFromDB}{NW1vLSTU-3L7Lsf-1}cacheUsersFromDB}}(0) wraps {\tt{}\protect\nwindexuse{JargoCacheUsersFromDB}{JargoCacheUsersFromDB}{NW1vLSTU-3RkokI-1}JargoCacheUsersFromDB}(0).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{52}\sublabel{NW1vLSTU-3L7Lsf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3L7Lsf-1}}}\moddef{Admin: cacheUsersFromDB(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-3L7Lsf-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{54}\sublabel{NW1vLSTU-3L7Lsf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3L7Lsf-1}}}\moddef{Admin: cacheUsersFromDB(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-3L7Lsf-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
 void cacheUsersFromDB() throws SQLException \{
   this.storage.JargoCacheUsersFromDB();
 \}
 \nwindexdefn{cacheUsersFromDB}{cacheUsersFromDB}{NW1vLSTU-3L7Lsf-1}\eatline
-\nwidentdefs{\\{{cacheUsersFromDB}{cacheUsersFromDB}}}\nwidentuses{\\{{JargoCacheUsersFromDB}{JargoCacheUsersFromDB}}}\nwindexuse{JargoCacheUsersFromDB}{JargoCacheUsersFromDB}{NW1vLSTU-3L7Lsf-1}\nwendcode{}\nwbegindocs{53}\nwdocspar
+\nwidentdefs{\\{{cacheUsersFromDB}{cacheUsersFromDB}}}\nwidentuses{\\{{JargoCacheUsersFromDB}{JargoCacheUsersFromDB}}}\nwindexuse{JargoCacheUsersFromDB}{JargoCacheUsersFromDB}{NW1vLSTU-3L7Lsf-1}\nwendcode{}\nwbegindocs{55}\nwdocspar
 \subsection{\texttt{JargoSetupDriver}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -7141,7 +7175,7 @@ Portions of this code are licensed by the Apache Software Foundation.\\
 {\tt{}ClassNotFoundException} if the DBCP2 driver cannot be found.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{54}\sublabel{NW1vLSTU-2KJvvu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2KJvvu-1}}}\moddef{Admin: JargoSetupDriver(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-2KJvvu-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
+\nwenddocs{}\nwbegincode{56}\sublabel{NW1vLSTU-2KJvvu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2KJvvu-1}}}\moddef{Admin: JargoSetupDriver(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-2KJvvu-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
 void JargoSetupDriver() throws SQLException, ClassNotFoundException \{
   connection_factory = new DriverManagerConnectionFactory(CONNECTIONS_URL);
   poolableconnection_factory = new PoolableConnectionFactory(connection_factory, null);
@@ -7160,7 +7194,7 @@ void JargoSetupDriver() throws SQLException, ClassNotFoundException \{
   driver.registerPool(CONNECTIONS_POOL_NAME, pool);
 \}
 \nwindexdefn{JargoSetupDriver}{JargoSetupDriver}{NW1vLSTU-2KJvvu-1}\eatline
-\nwidentdefs{\\{{JargoSetupDriver}{JargoSetupDriver}}}\nwendcode{}\nwbegindocs{55}\nwdocspar
+\nwidentdefs{\\{{JargoSetupDriver}{JargoSetupDriver}}}\nwendcode{}\nwbegindocs{57}\nwdocspar
 \subsection{\texttt{JargoSetupPreparedStatements}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -7174,7 +7208,7 @@ Method \textcolor{blue}{{\tt{}\protect\nwindexuse{JargoSetupPreparedStatements}{
 \textbf{Throws:} nothing.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{56}\sublabel{NW1vLSTU-1dEGs4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1dEGs4-1}}}\moddef{Admin: JargoSetupPreparedStatements(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-1dEGs4-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
+\nwenddocs{}\nwbegincode{58}\sublabel{NW1vLSTU-1dEGs4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1dEGs4-1}}}\moddef{Admin: JargoSetupPreparedStatements(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-1dEGs4-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
 void JargoSetupPreparedStatements() \{
   final String INS = "INSERT INTO ";
   final String UPD = "UPDATE ";
@@ -7202,127 +7236,127 @@ void JargoSetupPreparedStatements() \{
   \LA{}S153~{\nwtagstyle{}\subpageref{NW1vLSTU-3QHpWt-1}}\RA{} \LA{}S154~{\nwtagstyle{}\subpageref{NW1vLSTU-9KdWl-1}}\RA{} \LA{}S155~{\nwtagstyle{}\subpageref{NW1vLSTU-4dVWzz-1}}\RA{}
 \}
 \nosublabel{NW1vLSTU-1dEGs4-1-u98}\nwindexdefn{JargoSetupPreparedStatements}{JargoSetupPreparedStatements}{NW1vLSTU-1dEGs4-1}\eatline
-\nwidentdefs{\\{{JargoSetupPreparedStatements}{JargoSetupPreparedStatements}}}\nwendcode{}\nwbegincode{57}\sublabel{NW1vLSTU-9czRY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-9czRY-1}}}\moddef{S0~{\nwtagstyle{}\subpageref{NW1vLSTU-9czRY-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{JargoSetupPreparedStatements}{JargoSetupPreparedStatements}}}\nwendcode{}\nwbegincode{59}\sublabel{NW1vLSTU-9czRY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-9czRY-1}}}\moddef{S0~{\nwtagstyle{}\subpageref{NW1vLSTU-9czRY-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S0", INS+"V VALUES "+q3);
 \nwindexdefn{S0}{S0}{NW1vLSTU-9czRY-1}\eatline
-\nwidentdefs{\\{{S0}{S0}}}\nwendcode{}\nwbegincode{58}\sublabel{NW1vLSTU-4dnsum-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4dnsum-1}}}\moddef{S1~{\nwtagstyle{}\subpageref{NW1vLSTU-4dnsum-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S0}{S0}}}\nwendcode{}\nwbegincode{60}\sublabel{NW1vLSTU-4dnsum-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4dnsum-1}}}\moddef{S1~{\nwtagstyle{}\subpageref{NW1vLSTU-4dnsum-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S1", INS+"E VALUES "+q4);
 \nwindexdefn{S1}{S1}{NW1vLSTU-4dnsum-1}\eatline
-\nwidentdefs{\\{{S1}{S1}}}\nwendcode{}\nwbegincode{59}\sublabel{NW1vLSTU-26Y6r2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-26Y6r2-1}}}\moddef{S2~{\nwtagstyle{}\subpageref{NW1vLSTU-26Y6r2-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S1}{S1}}}\nwendcode{}\nwbegincode{61}\sublabel{NW1vLSTU-26Y6r2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-26Y6r2-1}}}\moddef{S2~{\nwtagstyle{}\subpageref{NW1vLSTU-26Y6r2-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S2", INS+"UQ VALUES "+q2);
 \nwindexdefn{S2}{S2}{NW1vLSTU-26Y6r2-1}\eatline
-\nwidentdefs{\\{{S2}{S2}}}\nwendcode{}\nwbegincode{60}\sublabel{NW1vLSTU-2UOPmS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2UOPmS-1}}}\moddef{S3~{\nwtagstyle{}\subpageref{NW1vLSTU-2UOPmS-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S2}{S2}}}\nwendcode{}\nwbegincode{62}\sublabel{NW1vLSTU-2UOPmS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2UOPmS-1}}}\moddef{S3~{\nwtagstyle{}\subpageref{NW1vLSTU-2UOPmS-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S3", INS+"UE VALUES "+q2);
 \nwindexdefn{S3}{S3}{NW1vLSTU-2UOPmS-1}\eatline
-\nwidentdefs{\\{{S3}{S3}}}\nwendcode{}\nwbegincode{61}\sublabel{NW1vLSTU-yRBj6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-yRBj6-1}}}\moddef{S4~{\nwtagstyle{}\subpageref{NW1vLSTU-yRBj6-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S3}{S3}}}\nwendcode{}\nwbegincode{63}\sublabel{NW1vLSTU-yRBj6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-yRBj6-1}}}\moddef{S4~{\nwtagstyle{}\subpageref{NW1vLSTU-yRBj6-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S4", INS+"UL VALUES "+q2);
 \nwindexdefn{S4}{S4}{NW1vLSTU-yRBj6-1}\eatline
-\nwidentdefs{\\{{S4}{S4}}}\nwendcode{}\nwbegincode{62}\sublabel{NW1vLSTU-3WGA2y-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3WGA2y-1}}}\moddef{S5~{\nwtagstyle{}\subpageref{NW1vLSTU-3WGA2y-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S4}{S4}}}\nwendcode{}\nwbegincode{64}\sublabel{NW1vLSTU-3WGA2y-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3WGA2y-1}}}\moddef{S5~{\nwtagstyle{}\subpageref{NW1vLSTU-3WGA2y-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S5", INS+"UO VALUES "+q2);
 \nwindexdefn{S5}{S5}{NW1vLSTU-3WGA2y-1}\eatline
-\nwidentdefs{\\{{S5}{S5}}}\nwendcode{}\nwbegincode{63}\sublabel{NW1vLSTU-1SWfVw-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1SWfVw-1}}}\moddef{S6~{\nwtagstyle{}\subpageref{NW1vLSTU-1SWfVw-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S5}{S5}}}\nwendcode{}\nwbegincode{65}\sublabel{NW1vLSTU-1SWfVw-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1SWfVw-1}}}\moddef{S6~{\nwtagstyle{}\subpageref{NW1vLSTU-1SWfVw-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S6", INS+"UD VALUES "+q2);
 \nwindexdefn{S6}{S6}{NW1vLSTU-1SWfVw-1}\eatline
-\nwidentdefs{\\{{S6}{S6}}}\nwendcode{}\nwbegincode{64}\sublabel{NW1vLSTU-3Q0zBY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3Q0zBY-1}}}\moddef{S7~{\nwtagstyle{}\subpageref{NW1vLSTU-3Q0zBY-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S6}{S6}}}\nwendcode{}\nwbegincode{66}\sublabel{NW1vLSTU-3Q0zBY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3Q0zBY-1}}}\moddef{S7~{\nwtagstyle{}\subpageref{NW1vLSTU-3Q0zBY-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S7", INS+"UB VALUES "+q2);
 \nwindexdefn{S7}{S7}{NW1vLSTU-3Q0zBY-1}\eatline
-\nwidentdefs{\\{{S7}{S7}}}\nwendcode{}\nwbegincode{65}\sublabel{NW1vLSTU-PwvQG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-PwvQG-1}}}\moddef{S8~{\nwtagstyle{}\subpageref{NW1vLSTU-PwvQG-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S7}{S7}}}\nwendcode{}\nwbegincode{67}\sublabel{NW1vLSTU-PwvQG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-PwvQG-1}}}\moddef{S8~{\nwtagstyle{}\subpageref{NW1vLSTU-PwvQG-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S8", INS+"S VALUES "+q7);
 \nwindexdefn{S8}{S8}{NW1vLSTU-PwvQG-1}\eatline
-\nwidentdefs{\\{{S8}{S8}}}\nwendcode{}\nwbegincode{66}\sublabel{NW1vLSTU-4Ai05A-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4Ai05A-1}}}\moddef{S9~{\nwtagstyle{}\subpageref{NW1vLSTU-4Ai05A-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S8}{S8}}}\nwendcode{}\nwbegincode{68}\sublabel{NW1vLSTU-4Ai05A-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4Ai05A-1}}}\moddef{S9~{\nwtagstyle{}\subpageref{NW1vLSTU-4Ai05A-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S9", INS+"R VALUES "+q7);
 \nwindexdefn{S9}{S9}{NW1vLSTU-4Ai05A-1}\eatline
-\nwidentdefs{\\{{S9}{S9}}}\nwendcode{}\nwbegincode{67}\sublabel{NW1vLSTU-96fbA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-96fbA-1}}}\moddef{S10~{\nwtagstyle{}\subpageref{NW1vLSTU-96fbA-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S9}{S9}}}\nwendcode{}\nwbegincode{69}\sublabel{NW1vLSTU-96fbA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-96fbA-1}}}\moddef{S10~{\nwtagstyle{}\subpageref{NW1vLSTU-96fbA-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S10", INS+"W VALUES "+q8);
 \nwindexdefn{S10}{S10}{NW1vLSTU-96fbA-1}\eatline
-\nwidentdefs{\\{{S10}{S10}}}\nwendcode{}\nwbegincode{68}\sublabel{NW1vLSTU-9NVqO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-9NVqO-1}}}\moddef{S70~{\nwtagstyle{}\subpageref{NW1vLSTU-9NVqO-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S10}{S10}}}\nwendcode{}\nwbegincode{70}\sublabel{NW1vLSTU-9NVqO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-9NVqO-1}}}\moddef{S70~{\nwtagstyle{}\subpageref{NW1vLSTU-9NVqO-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S70", SEL+"sid, sq, se, sl, so, sd, sb FROM S WHERE sid=?");
 \nwindexdefn{S70}{S70}{NW1vLSTU-9NVqO-1}\eatline
-\nwidentdefs{\\{{S70}{S70}}}\nwendcode{}\nwbegincode{69}\sublabel{NW1vLSTU-4dHZ4O-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4dHZ4O-1}}}\moddef{S11~{\nwtagstyle{}\subpageref{NW1vLSTU-4dHZ4O-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S70}{S70}}}\nwendcode{}\nwbegincode{71}\sublabel{NW1vLSTU-4dHZ4O-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4dHZ4O-1}}}\moddef{S11~{\nwtagstyle{}\subpageref{NW1vLSTU-4dHZ4O-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S11", INS+"CW VALUES "+q9);
 \nwindexdefn{S11}{S11}{NW1vLSTU-4dHZ4O-1}\eatline
-\nwidentdefs{\\{{S11}{S11}}}\nwendcode{}\nwbegincode{70}\sublabel{NW1vLSTU-261n0e-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-261n0e-1}}}\moddef{S12~{\nwtagstyle{}\subpageref{NW1vLSTU-261n0e-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S11}{S11}}}\nwendcode{}\nwbegincode{72}\sublabel{NW1vLSTU-261n0e-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-261n0e-1}}}\moddef{S12~{\nwtagstyle{}\subpageref{NW1vLSTU-261n0e-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S12", INS+"PD VALUES "+q4);
 \nwindexdefn{S12}{S12}{NW1vLSTU-261n0e-1}\eatline
-\nwidentdefs{\\{{S12}{S12}}}\nwendcode{}\nwbegincode{71}\sublabel{NW1vLSTU-2Ts5w4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2Ts5w4-1}}}\moddef{S13~{\nwtagstyle{}\subpageref{NW1vLSTU-2Ts5w4-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S12}{S12}}}\nwendcode{}\nwbegincode{73}\sublabel{NW1vLSTU-2Ts5w4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2Ts5w4-1}}}\moddef{S13~{\nwtagstyle{}\subpageref{NW1vLSTU-2Ts5w4-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S13", INS+"CPD VALUES "+q12);
 \nwindexdefn{S13}{S13}{NW1vLSTU-2Ts5w4-1}\eatline
-\nwidentdefs{\\{{S13}{S13}}}\nwendcode{}\nwbegincode{72}\sublabel{NW1vLSTU-yU48q-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-yU48q-1}}}\moddef{S14~{\nwtagstyle{}\subpageref{NW1vLSTU-yU48q-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S13}{S13}}}\nwendcode{}\nwbegincode{74}\sublabel{NW1vLSTU-yU48q-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-yU48q-1}}}\moddef{S14~{\nwtagstyle{}\subpageref{NW1vLSTU-yU48q-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S14", INS+"CQ VALUES "+q14);
 \nwindexdefn{S14}{S14}{NW1vLSTU-yU48q-1}\eatline
-\nwidentdefs{\\{{S14}{S14}}}\nwendcode{}\nwbegincode{73}\sublabel{NW1vLSTU-3WJ2Si-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3WJ2Si-1}}}\moddef{S15~{\nwtagstyle{}\subpageref{NW1vLSTU-3WJ2Si-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S14}{S14}}}\nwendcode{}\nwbegincode{75}\sublabel{NW1vLSTU-3WJ2Si-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3WJ2Si-1}}}\moddef{S15~{\nwtagstyle{}\subpageref{NW1vLSTU-3WJ2Si-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S15", UPD+"E SET nu=? WHERE v1=? AND v2=?");
 \nwindexdefn{S15}{S15}{NW1vLSTU-3WJ2Si-1}\eatline
-\nwidentdefs{\\{{S15}{S15}}}\nwendcode{}\nwbegincode{74}\sublabel{NW1vLSTU-3WHOrj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3WHOrj-1}}}\moddef{S131~{\nwtagstyle{}\subpageref{NW1vLSTU-3WHOrj-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S15}{S15}}}\nwendcode{}\nwbegincode{76}\sublabel{NW1vLSTU-3WHOrj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3WHOrj-1}}}\moddef{S131~{\nwtagstyle{}\subpageref{NW1vLSTU-3WHOrj-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S131", UPD+"W SET nu=? WHERE v1=? AND v2=?");
 \nwindexdefn{S131}{S131}{NW1vLSTU-3WHOrj-1}\eatline
-\nwidentdefs{\\{{S131}{S131}}}\nwendcode{}\nwbegincode{75}\sublabel{NW1vLSTU-3PlVaO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3PlVaO-1}}}\moddef{S77~{\nwtagstyle{}\subpageref{NW1vLSTU-3PlVaO-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S131}{S131}}}\nwendcode{}\nwbegincode{77}\sublabel{NW1vLSTU-3PlVaO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3PlVaO-1}}}\moddef{S77~{\nwtagstyle{}\subpageref{NW1vLSTU-3PlVaO-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S77", UPD+"CW SET te=?, ve=? WHERE sid=?");
 \nwindexdefn{S77}{S77}{NW1vLSTU-3PlVaO-1}\eatline
-\nwidentdefs{\\{{S77}{S77}}}\nwendcode{}\nwbegincode{76}\sublabel{NW1vLSTU-yx2fc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-yx2fc-1}}}\moddef{S84~{\nwtagstyle{}\subpageref{NW1vLSTU-yx2fc-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S77}{S77}}}\nwendcode{}\nwbegincode{78}\sublabel{NW1vLSTU-yx2fc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-yx2fc-1}}}\moddef{S84~{\nwtagstyle{}\subpageref{NW1vLSTU-yx2fc-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S84", UPD+"PD SET t2=? WHERE v2=? AND rid=?");
 \nwindexdefn{S84}{S84}{NW1vLSTU-yx2fc-1}\eatline
-\nwidentdefs{\\{{S84}{S84}}}\nwendcode{}\nwbegincode{77}\sublabel{NW1vLSTU-25vZHI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-25vZHI-1}}}\moddef{S82~{\nwtagstyle{}\subpageref{NW1vLSTU-25vZHI-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S84}{S84}}}\nwendcode{}\nwbegincode{79}\sublabel{NW1vLSTU-25vZHI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-25vZHI-1}}}\moddef{S82~{\nwtagstyle{}\subpageref{NW1vLSTU-25vZHI-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S82", UPD+"CPD SET tp=? WHERE vp=? AND rid=?");
 \nwindexdefn{S82}{S82}{NW1vLSTU-25vZHI-1}\eatline
-\nwidentdefs{\\{{S82}{S82}}}\nwendcode{}\nwbegincode{78}\sublabel{NW1vLSTU-2TlsCi-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2TlsCi-1}}}\moddef{S83~{\nwtagstyle{}\subpageref{NW1vLSTU-2TlsCi-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S82}{S82}}}\nwendcode{}\nwbegincode{80}\sublabel{NW1vLSTU-2TlsCi-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2TlsCi-1}}}\moddef{S83~{\nwtagstyle{}\subpageref{NW1vLSTU-2TlsCi-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S83", UPD+"CPD SET td=? WHERE vd=? AND rid=?");
 \nwindexdefn{S83}{S83}{NW1vLSTU-2TlsCi-1}\eatline
-\nwidentdefs{\\{{S83}{S83}}}\nwendcode{}\nwbegincode{79}\sublabel{NW1vLSTU-1SHBum-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1SHBum-1}}}\moddef{S76~{\nwtagstyle{}\subpageref{NW1vLSTU-1SHBum-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S83}{S83}}}\nwendcode{}\nwbegincode{81}\sublabel{NW1vLSTU-1SHBum-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1SHBum-1}}}\moddef{S76~{\nwtagstyle{}\subpageref{NW1vLSTU-1SHBum-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S76", DEL+"W WHERE sid=? AND t2>?");
 \nwindexdefn{S76}{S76}{NW1vLSTU-1SHBum-1}\eatline
-\nwidentdefs{\\{{S76}{S76}}}\nwendcode{}\nwbegincode{80}\sublabel{NW1vLSTU-25mK0a-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-25mK0a-1}}}\moddef{S42~{\nwtagstyle{}\subpageref{NW1vLSTU-25mK0a-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S76}{S76}}}\nwendcode{}\nwbegincode{82}\sublabel{NW1vLSTU-25mK0a-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-25mK0a-1}}}\moddef{S42~{\nwtagstyle{}\subpageref{NW1vLSTU-25mK0a-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S42", DEL+"PD WHERE rid=?");
 \nwindexdefn{S42}{S42}{NW1vLSTU-25mK0a-1}\eatline
-\nwidentdefs{\\{{S42}{S42}}}\nwendcode{}\nwbegincode{81}\sublabel{NW1vLSTU-2Tccw0-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2Tccw0-1}}}\moddef{S43~{\nwtagstyle{}\subpageref{NW1vLSTU-2Tccw0-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S42}{S42}}}\nwendcode{}\nwbegincode{83}\sublabel{NW1vLSTU-2Tccw0-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2Tccw0-1}}}\moddef{S43~{\nwtagstyle{}\subpageref{NW1vLSTU-2Tccw0-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S43", DEL+"CPD WHERE rid=?");
 \nwindexdefn{S43}{S43}{NW1vLSTU-2Tccw0-1}\eatline
-\nwidentdefs{\\{{S43}{S43}}}\nwendcode{}\nwbegincode{82}\sublabel{NW1vLSTU-A8qO4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-A8qO4-1}}}\moddef{S80~{\nwtagstyle{}\subpageref{NW1vLSTU-A8qO4-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S43}{S43}}}\nwendcode{}\nwbegincode{84}\sublabel{NW1vLSTU-A8qO4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-A8qO4-1}}}\moddef{S80~{\nwtagstyle{}\subpageref{NW1vLSTU-A8qO4-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S80", DEL+"CQ WHERE sid=? AND t2>?");
 \nwindexdefn{S80}{S80}{NW1vLSTU-A8qO4-1}\eatline
-\nwidentdefs{\\{{S80}{S80}}}\nwendcode{}\nwbegincode{83}\sublabel{NW1vLSTU-25gPSO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-25gPSO-1}}}\moddef{S62~{\nwtagstyle{}\subpageref{NW1vLSTU-25gPSO-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S80}{S80}}}\nwendcode{}\nwbegincode{85}\sublabel{NW1vLSTU-25gPSO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-25gPSO-1}}}\moddef{S62~{\nwtagstyle{}\subpageref{NW1vLSTU-25gPSO-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S62", SEL+"COUNT (*) FROM V WHERE v<>0");
 \nwindexdefn{S62}{S62}{NW1vLSTU-25gPSO-1}\eatline
-\nwidentdefs{\\{{S62}{S62}}}\nwendcode{}\nwbegincode{84}\sublabel{NW1vLSTU-zH56q-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-zH56q-1}}}\moddef{S64~{\nwtagstyle{}\subpageref{NW1vLSTU-zH56q-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S62}{S62}}}\nwendcode{}\nwbegincode{86}\sublabel{NW1vLSTU-zH56q-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-zH56q-1}}}\moddef{S64~{\nwtagstyle{}\subpageref{NW1vLSTU-zH56q-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S64", SEL+"MIN (lng), MAX (lng), MIN (lat), MAX (lat) "
       + "FROM V WHERE v<>0");
 \nwindexdefn{S64}{S64}{NW1vLSTU-zH56q-1}\eatline
-\nwidentdefs{\\{{S64}{S64}}}\nwendcode{}\nwbegincode{85}\sublabel{NW1vLSTU-2TWiNo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2TWiNo-1}}}\moddef{S63~{\nwtagstyle{}\subpageref{NW1vLSTU-2TWiNo-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S64}{S64}}}\nwendcode{}\nwbegincode{87}\sublabel{NW1vLSTU-2TWiNo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2TWiNo-1}}}\moddef{S63~{\nwtagstyle{}\subpageref{NW1vLSTU-2TWiNo-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S63", SEL+"COUNT (*) FROM E WHERE v1<>0 AND v2<>0");
 \nwindexdefn{S63}{S63}{NW1vLSTU-2TWiNo-1}\eatline
-\nwidentdefs{\\{{S63}{S63}}}\nwendcode{}\nwbegincode{86}\sublabel{NW1vLSTU-3X63Qi-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3X63Qi-1}}}\moddef{S65~{\nwtagstyle{}\subpageref{NW1vLSTU-3X63Qi-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S63}{S63}}}\nwendcode{}\nwbegincode{88}\sublabel{NW1vLSTU-3X63Qi-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3X63Qi-1}}}\moddef{S65~{\nwtagstyle{}\subpageref{NW1vLSTU-3X63Qi-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S65", SEL+"MIN (dd), MAX (dd), SUM (dd) / COUNT (dd), "
       + "MIN (nu), MAX (nu), SUM (nu) / COUNT (nu) "
       + "FROM E WHERE v1<>0 AND v2<>0");
 \nwindexdefn{S65}{S65}{NW1vLSTU-3X63Qi-1}\eatline
-\nwidentdefs{\\{{S65}{S65}}}\nwendcode{}\nwbegincode{87}\sublabel{NW1vLSTU-1RksfU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1RksfU-1}}}\moddef{S46~{\nwtagstyle{}\subpageref{NW1vLSTU-1RksfU-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S65}{S65}}}\nwendcode{}\nwbegincode{89}\sublabel{NW1vLSTU-1RksfU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1RksfU-1}}}\moddef{S46~{\nwtagstyle{}\subpageref{NW1vLSTU-1RksfU-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S46", SEL+"dd, nu FROM E WHERE v1=? AND v2=?");
 \nwindexdefn{S46}{S46}{NW1vLSTU-1RksfU-1}\eatline
-\nwidentdefs{\\{{S46}{S46}}}\nwendcode{}\nwbegincode{88}\sublabel{NW1vLSTU-ySQXr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-ySQXr-1}}}\moddef{S130~{\nwtagstyle{}\subpageref{NW1vLSTU-ySQXr-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S46}{S46}}}\nwendcode{}\nwbegincode{90}\sublabel{NW1vLSTU-ySQXr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-ySQXr-1}}}\moddef{S130~{\nwtagstyle{}\subpageref{NW1vLSTU-ySQXr-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S130", SEL+"lng, lat FROM V WHERE v=?");
 \nwindexdefn{S130}{S130}{NW1vLSTU-ySQXr-1}\eatline
-\nwidentdefs{\\{{S130}{S130}}}\nwendcode{}\nwbegincode{89}\sublabel{NW1vLSTU-PSjhs-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-PSjhs-1}}}\moddef{S48~{\nwtagstyle{}\subpageref{NW1vLSTU-PSjhs-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S130}{S130}}}\nwendcode{}\nwbegincode{91}\sublabel{NW1vLSTU-PSjhs-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-PSjhs-1}}}\moddef{S48~{\nwtagstyle{}\subpageref{NW1vLSTU-PSjhs-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S48", SEL+"sq, se FROM S WHERE sid=?");
 \nwindexdefn{S48}{S48}{NW1vLSTU-PSjhs-1}\eatline
-\nwidentdefs{\\{{S48}{S48}}}\nwendcode{}\nwbegincode{90}\sublabel{NW1vLSTU-1SEANQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1SEANQ-1}}}\moddef{S66~{\nwtagstyle{}\subpageref{NW1vLSTU-1SEANQ-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S48}{S48}}}\nwendcode{}\nwbegincode{92}\sublabel{NW1vLSTU-1SEANQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1SEANQ-1}}}\moddef{S66~{\nwtagstyle{}\subpageref{NW1vLSTU-1SEANQ-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S66", SEL+"COUNT (*) FROM S");
 \nwindexdefn{S66}{S66}{NW1vLSTU-1SEANQ-1}\eatline
-\nwidentdefs{\\{{S66}{S66}}}\nwendcode{}\nwbegincode{91}\sublabel{NW1vLSTU-3W0gRo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3W0gRo-1}}}\moddef{S75~{\nwtagstyle{}\subpageref{NW1vLSTU-3W0gRo-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S66}{S66}}}\nwendcode{}\nwbegincode{93}\sublabel{NW1vLSTU-3W0gRo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3W0gRo-1}}}\moddef{S75~{\nwtagstyle{}\subpageref{NW1vLSTU-3W0gRo-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S75", SEL+"rid, rq, re, rl, ro, rd, rb FROM R WHERE rid=?");
 \nwindexdefn{S75}{S75}{NW1vLSTU-3W0gRo-1}\eatline
-\nwidentdefs{\\{{S75}{S75}}}\nwendcode{}\nwbegincode{92}\sublabel{NW1vLSTU-4dVWIm-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4dVWIm-1}}}\moddef{S51~{\nwtagstyle{}\subpageref{NW1vLSTU-4dVWIm-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S75}{S75}}}\nwendcode{}\nwbegincode{94}\sublabel{NW1vLSTU-4dVWIm-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4dVWIm-1}}}\moddef{S51~{\nwtagstyle{}\subpageref{NW1vLSTU-4dVWIm-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S51", SEL+"rq, re, rl, ro, rd FROM R WHERE rid=?");
 \nwindexdefn{S51}{S51}{NW1vLSTU-4dVWIm-1}\eatline
-\nwidentdefs{\\{{S51}{S51}}}\nwendcode{}\nwbegincode{93}\sublabel{NW1vLSTU-3PiU32-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3PiU32-1}}}\moddef{S67~{\nwtagstyle{}\subpageref{NW1vLSTU-3PiU32-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S51}{S51}}}\nwendcode{}\nwbegincode{95}\sublabel{NW1vLSTU-3PiU32-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3PiU32-1}}}\moddef{S67~{\nwtagstyle{}\subpageref{NW1vLSTU-3PiU32-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S67", SEL+"COUNT (*) FROM R");
 \nwindexdefn{S67}{S67}{NW1vLSTU-3PiU32-1}\eatline
-\nwidentdefs{\\{{S67}{S67}}}\nwendcode{}\nwbegincode{94}\sublabel{NW1vLSTU-4APdTA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4APdTA-1}}}\moddef{S59~{\nwtagstyle{}\subpageref{NW1vLSTU-4APdTA-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S67}{S67}}}\nwendcode{}\nwbegincode{96}\sublabel{NW1vLSTU-4APdTA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4APdTA-1}}}\moddef{S59~{\nwtagstyle{}\subpageref{NW1vLSTU-4APdTA-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S59", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
       + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
       + "GROUP BY sid"
       + ") as b ON a.sid=b.sid AND ABS(a.t2-?)=b.tdiff AND a.t2<=?");
 \nwindexdefn{S59}{S59}{NW1vLSTU-4APdTA-1}\eatline
-\nwidentdefs{\\{{S59}{S59}}}\nwendcode{}\nwbegincode{95}\sublabel{NW1vLSTU-nIIRf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-nIIRf-1}}}\moddef{S128~{\nwtagstyle{}\subpageref{NW1vLSTU-nIIRf-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S59}{S59}}}\nwendcode{}\nwbegincode{97}\sublabel{NW1vLSTU-nIIRf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-nIIRf-1}}}\moddef{S128~{\nwtagstyle{}\subpageref{NW1vLSTU-nIIRf-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S128", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
       + "SELECT sid FROM CW WHERE te>? OR (ve=0 AND sl>?)"
       + ") as b ON a.sid=b.sid INNER JOIN ("
@@ -7330,22 +7364,22 @@ this.lu_pstr.put("S128", SEL+"a.sid, a.t2, a.v2 FROM W AS a INNER JOIN ("
       + "GROUP BY sid"
       + ") as c ON a.sid=c.sid AND ABS(a.t2-?)=c.tdiff AND a.t2<=?");
 \nwindexdefn{S128}{S128}{NW1vLSTU-nIIRf-1}\eatline
-\nwidentdefs{\\{{S128}{S128}}}\nwendcode{}\nwbegincode{96}\sublabel{NW1vLSTU-9tgZA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-9tgZA-1}}}\moddef{S60~{\nwtagstyle{}\subpageref{NW1vLSTU-9tgZA-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S128}{S128}}}\nwendcode{}\nwbegincode{98}\sublabel{NW1vLSTU-9tgZA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-9tgZA-1}}}\moddef{S60~{\nwtagstyle{}\subpageref{NW1vLSTU-9tgZA-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S60", SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC");
 \nwindexdefn{S60}{S60}{NW1vLSTU-9tgZA-1}\eatline
-\nwidentdefs{\\{{S60}{S60}}}\nwendcode{}\nwbegincode{97}\sublabel{NW1vLSTU-44X5Zr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-44X5Zr-1}}}\moddef{S129~{\nwtagstyle{}\subpageref{NW1vLSTU-44X5Zr-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S60}{S60}}}\nwendcode{}\nwbegincode{99}\sublabel{NW1vLSTU-44X5Zr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-44X5Zr-1}}}\moddef{S129~{\nwtagstyle{}\subpageref{NW1vLSTU-44X5Zr-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S129", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC");
 \nwindexdefn{S129}{S129}{NW1vLSTU-44X5Zr-1}\eatline
-\nwidentdefs{\\{{S129}{S129}}}\nwendcode{}\nwbegincode{98}\sublabel{NW1vLSTU-1SnVrH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1SnVrH-1}}}\moddef{S152~{\nwtagstyle{}\subpageref{NW1vLSTU-1SnVrH-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S129}{S129}}}\nwendcode{}\nwbegincode{100}\sublabel{NW1vLSTU-1SnVrH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1SnVrH-1}}}\moddef{S152~{\nwtagstyle{}\subpageref{NW1vLSTU-1SnVrH-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S152", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC FETCH FIRST ? ROWS ONLY");
 \nwindexdefn{S152}{S152}{NW1vLSTU-1SnVrH-1}\eatline
-\nwidentdefs{\\{{S152}{S152}}}\nwendcode{}\nwbegincode{99}\sublabel{NW1vLSTU-4e4a2O-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4e4a2O-1}}}\moddef{S61~{\nwtagstyle{}\subpageref{NW1vLSTU-4e4a2O-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S152}{S152}}}\nwendcode{}\nwbegincode{101}\sublabel{NW1vLSTU-4e4a2O-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4e4a2O-1}}}\moddef{S61~{\nwtagstyle{}\subpageref{NW1vLSTU-4e4a2O-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
       + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC");
 \nwindexdefn{S61}{S61}{NW1vLSTU-4e4a2O-1}\eatline
-\nwidentdefs{\\{{S61}{S61}}}\nwendcode{}\nwbegindocs{100}Need to join CQ in order to sort by order number {\tt{}o2}. This query has
+\nwidentdefs{\\{{S61}{S61}}}\nwendcode{}\nwbegindocs{102}Need to join CQ in order to sort by order number {\tt{}o2}. This query has
 worse performance after W (r\_server), CQ, PD grow.
-\nwenddocs{}\nwbegincode{101}\sublabel{NW1vLSTU-49qIgW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-49qIgW-1}}}\moddef{S69~{\nwtagstyle{}\subpageref{NW1vLSTU-49qIgW-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwenddocs{}\nwbegincode{103}\sublabel{NW1vLSTU-49qIgW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-49qIgW-1}}}\moddef{S69~{\nwtagstyle{}\subpageref{NW1vLSTU-49qIgW-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S69", SEL+"t, v, Ls, Lr "
       + "FROM r_server LEFT JOIN CQ ON t=t2 and v=v2 and Lr=rid "
       + "WHERE r_server.sid=?"
@@ -7353,176 +7387,176 @@ this.lu_pstr.put("S69", SEL+"t, v, Ls, Lr "
       + "   AND (Ls IS NOT NULL OR Lr IS NOT NULL)"
       + "ORDER BY t ASC, o2 ASC");
 \nwindexdefn{S69}{S69}{NW1vLSTU-49qIgW-1}\eatline
-\nwidentdefs{\\{{S69}{S69}}}\nwendcode{}\nwbegincode{102}\sublabel{NW1vLSTU-P5E1c-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-P5E1c-1}}}\moddef{S68~{\nwtagstyle{}\subpageref{NW1vLSTU-P5E1c-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S69}{S69}}}\nwendcode{}\nwbegincode{104}\sublabel{NW1vLSTU-P5E1c-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-P5E1c-1}}}\moddef{S68~{\nwtagstyle{}\subpageref{NW1vLSTU-P5E1c-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 // A "timeout" of 30 seconds is hard-coded here
 this.lu_pstr.put("S68", SEL+"* FROM R WHERE re<=? AND ?<=re+30 AND rid NOT IN  "
       + "(SELECT rid FROM assignments_r)");
 \nwindexdefn{S68}{S68}{NW1vLSTU-P5E1c-1}\eatline
-\nwidentdefs{\\{{S68}{S68}}}\nwendcode{}\nwbegincode{103}\sublabel{NW1vLSTU-3Wm0zU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3Wm0zU-1}}}\moddef{S85~{\nwtagstyle{}\subpageref{NW1vLSTU-3Wm0zU-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S68}{S68}}}\nwendcode{}\nwbegincode{105}\sublabel{NW1vLSTU-3Wm0zU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3Wm0zU-1}}}\moddef{S85~{\nwtagstyle{}\subpageref{NW1vLSTU-3Wm0zU-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S85", SEL+"uq FROM UQ WHERE uid=?");
 \nwindexdefn{S85}{S85}{NW1vLSTU-3Wm0zU-1}\eatline
-\nwidentdefs{\\{{S85}{S85}}}\nwendcode{}\nwbegincode{104}\sublabel{NW1vLSTU-1Ru7wC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1Ru7wC-1}}}\moddef{S86~{\nwtagstyle{}\subpageref{NW1vLSTU-1Ru7wC-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S85}{S85}}}\nwendcode{}\nwbegincode{106}\sublabel{NW1vLSTU-1Ru7wC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1Ru7wC-1}}}\moddef{S86~{\nwtagstyle{}\subpageref{NW1vLSTU-1Ru7wC-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S86", SEL+"tp, td FROM CPD WHERE rid=?");
 \nwindexdefn{S86}{S86}{NW1vLSTU-1Ru7wC-1}\eatline
-\nwidentdefs{\\{{S86}{S86}}}\nwendcode{}\nwbegincode{105}\sublabel{NW1vLSTU-2U8wBI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2U8wBI-1}}}\moddef{S73~{\nwtagstyle{}\subpageref{NW1vLSTU-2U8wBI-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S86}{S86}}}\nwendcode{}\nwbegincode{107}\sublabel{NW1vLSTU-2U8wBI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2U8wBI-1}}}\moddef{S73~{\nwtagstyle{}\subpageref{NW1vLSTU-2U8wBI-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S73", SEL+"q2 FROM CQ WHERE sid=? AND t2<=? "
       + "ORDER BY t2 DESC, q2 DESC FETCH FIRST ROW ONLY");
 \nwindexdefn{S73}{S73}{NW1vLSTU-2U8wBI-1}\eatline
-\nwidentdefs{\\{{S73}{S73}}}\nwendcode{}\nwbegincode{106}\sublabel{NW1vLSTU-3PORbo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3PORbo-1}}}\moddef{S87~{\nwtagstyle{}\subpageref{NW1vLSTU-3PORbo-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S73}{S73}}}\nwendcode{}\nwbegincode{108}\sublabel{NW1vLSTU-3PORbo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3PORbo-1}}}\moddef{S87~{\nwtagstyle{}\subpageref{NW1vLSTU-3PORbo-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S87", SEL+"t2, q2, o2 FROM CQ WHERE sid=? AND t2<=? "
       + "ORDER BY t2 DESC, o2 DESC FETCH FIRST ROW ONLY");
 \nwindexdefn{S87}{S87}{NW1vLSTU-3PORbo-1}\eatline
-\nwidentdefs{\\{{S87}{S87}}}\nwendcode{}\nwbegincode{107}\sublabel{NW1vLSTU-yxMXz-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-yxMXz-1}}}\moddef{S100~{\nwtagstyle{}\subpageref{NW1vLSTU-yxMXz-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S87}{S87}}}\nwendcode{}\nwbegincode{109}\sublabel{NW1vLSTU-yxMXz-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-yxMXz-1}}}\moddef{S100~{\nwtagstyle{}\subpageref{NW1vLSTU-yxMXz-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S100", SEL+"rid FROM assignments WHERE t>? AND sid=?");
 \nwindexdefn{S100}{S100}{NW1vLSTU-yxMXz-1}\eatline
-\nwidentdefs{\\{{S100}{S100}}}\nwendcode{}\nwbegincode{108}\sublabel{NW1vLSTU-3WmKrr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3WmKrr-1}}}\moddef{S101~{\nwtagstyle{}\subpageref{NW1vLSTU-3WmKrr-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S100}{S100}}}\nwendcode{}\nwbegincode{110}\sublabel{NW1vLSTU-3WmKrr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3WmKrr-1}}}\moddef{S101~{\nwtagstyle{}\subpageref{NW1vLSTU-3WmKrr-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S101", SEL+"rid FROM assignments WHERE t<=? AND sid=?");
 \nwindexdefn{S101}{S101}{NW1vLSTU-3WmKrr-1}\eatline
-\nwidentdefs{\\{{S101}{S101}}}\nwendcode{}\nwbegincode{109}\sublabel{NW1vLSTU-1RuRoZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1RuRoZ-1}}}\moddef{S102~{\nwtagstyle{}\subpageref{NW1vLSTU-1RuRoZ-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S101}{S101}}}\nwendcode{}\nwbegincode{111}\sublabel{NW1vLSTU-1RuRoZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1RuRoZ-1}}}\moddef{S102~{\nwtagstyle{}\subpageref{NW1vLSTU-1RuRoZ-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S102", SEL+"* FROM service_rate");
 \nwindexdefn{S102}{S102}{NW1vLSTU-1RuRoZ-1}\eatline
-\nwidentdefs{\\{{S102}{S102}}}\nwendcode{}\nwbegincode{110}\sublabel{NW1vLSTU-3POlUB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3POlUB-1}}}\moddef{S103~{\nwtagstyle{}\subpageref{NW1vLSTU-3POlUB-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S102}{S102}}}\nwendcode{}\nwbegincode{112}\sublabel{NW1vLSTU-3POlUB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3POlUB-1}}}\moddef{S103~{\nwtagstyle{}\subpageref{NW1vLSTU-3POlUB-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S103", SEL+"* FROM dist_base");
 \nwindexdefn{S103}{S103}{NW1vLSTU-3POlUB-1}\eatline
-\nwidentdefs{\\{{S103}{S103}}}\nwendcode{}\nwbegincode{111}\sublabel{NW1vLSTU-A9AGR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-A9AGR-1}}}\moddef{S104~{\nwtagstyle{}\subpageref{NW1vLSTU-A9AGR-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S103}{S103}}}\nwendcode{}\nwbegincode{113}\sublabel{NW1vLSTU-A9AGR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-A9AGR-1}}}\moddef{S104~{\nwtagstyle{}\subpageref{NW1vLSTU-A9AGR-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S104", SEL+"val FROM dist_s_travel WHERE sid=?");
 \nwindexdefn{S104}{S104}{NW1vLSTU-A9AGR-1}\eatline
-\nwidentdefs{\\{{S104}{S104}}}\nwendcode{}\nwbegincode{112}\sublabel{NW1vLSTU-4eK3jf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4eK3jf-1}}}\moddef{S105~{\nwtagstyle{}\subpageref{NW1vLSTU-4eK3jf-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S104}{S104}}}\nwendcode{}\nwbegincode{114}\sublabel{NW1vLSTU-4eK3jf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4eK3jf-1}}}\moddef{S105~{\nwtagstyle{}\subpageref{NW1vLSTU-4eK3jf-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S105", SEL+"SUM (val) FROM dist_s_travel");
 \nwindexdefn{S105}{S105}{NW1vLSTU-4eK3jf-1}\eatline
-\nwidentdefs{\\{{S105}{S105}}}\nwendcode{}\nwbegincode{113}\sublabel{NW1vLSTU-25vt9f-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-25vt9f-1}}}\moddef{S106~{\nwtagstyle{}\subpageref{NW1vLSTU-25vt9f-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S105}{S105}}}\nwendcode{}\nwbegincode{115}\sublabel{NW1vLSTU-25vt9f-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-25vt9f-1}}}\moddef{S106~{\nwtagstyle{}\subpageref{NW1vLSTU-25vt9f-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S106", SEL+"val FROM dist_s_cruising WHERE sid=?");
 \nwindexdefn{S106}{S106}{NW1vLSTU-25vt9f-1}\eatline
-\nwidentdefs{\\{{S106}{S106}}}\nwendcode{}\nwbegincode{114}\sublabel{NW1vLSTU-2TmC55-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2TmC55-1}}}\moddef{S107~{\nwtagstyle{}\subpageref{NW1vLSTU-2TmC55-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S106}{S106}}}\nwendcode{}\nwbegincode{116}\sublabel{NW1vLSTU-2TmC55-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2TmC55-1}}}\moddef{S107~{\nwtagstyle{}\subpageref{NW1vLSTU-2TmC55-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S107", SEL+"SUM (val) FROM dist_s_cruising");
 \nwindexdefn{S107}{S107}{NW1vLSTU-2TmC55-1}\eatline
-\nwidentdefs{\\{{S107}{S107}}}\nwendcode{}\nwbegincode{115}\sublabel{NW1vLSTU-mtPWF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-mtPWF-1}}}\moddef{S108~{\nwtagstyle{}\subpageref{NW1vLSTU-mtPWF-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S107}{S107}}}\nwendcode{}\nwbegincode{117}\sublabel{NW1vLSTU-mtPWF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-mtPWF-1}}}\moddef{S108~{\nwtagstyle{}\subpageref{NW1vLSTU-mtPWF-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S108", SEL+"val FROM dist_s_service WHERE sid=?");
 \nwindexdefn{S108}{S108}{NW1vLSTU-mtPWF-1}\eatline
-\nwidentdefs{\\{{S108}{S108}}}\nwendcode{}\nwbegincode{116}\sublabel{NW1vLSTU-448CeR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-448CeR-1}}}\moddef{S109~{\nwtagstyle{}\subpageref{NW1vLSTU-448CeR-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S108}{S108}}}\nwendcode{}\nwbegincode{118}\sublabel{NW1vLSTU-448CeR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-448CeR-1}}}\moddef{S109~{\nwtagstyle{}\subpageref{NW1vLSTU-448CeR-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S109", SEL+"SUM (val) FROM dist_s_service");
 \nwindexdefn{S109}{S109}{NW1vLSTU-448CeR-1}\eatline
-\nwidentdefs{\\{{S109}{S109}}}\nwendcode{}\nwbegincode{117}\sublabel{NW1vLSTU-yTwJX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-yTwJX-1}}}\moddef{S110~{\nwtagstyle{}\subpageref{NW1vLSTU-yTwJX-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S109}{S109}}}\nwendcode{}\nwbegincode{119}\sublabel{NW1vLSTU-yTwJX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-yTwJX-1}}}\moddef{S110~{\nwtagstyle{}\subpageref{NW1vLSTU-yTwJX-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S110", SEL+"val FROM dist_s_base");
 \nwindexdefn{S110}{S110}{NW1vLSTU-yTwJX-1}\eatline
-\nwidentdefs{\\{{S110}{S110}}}\nwendcode{}\nwbegincode{118}\sublabel{NW1vLSTU-3WIudP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3WIudP-1}}}\moddef{S111~{\nwtagstyle{}\subpageref{NW1vLSTU-3WIudP-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S110}{S110}}}\nwendcode{}\nwbegincode{120}\sublabel{NW1vLSTU-3WIudP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3WIudP-1}}}\moddef{S111~{\nwtagstyle{}\subpageref{NW1vLSTU-3WIudP-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S111", SEL+"val FROM dist_r_base");
 \nwindexdefn{S111}{S111}{NW1vLSTU-3WIudP-1}\eatline
-\nwidentdefs{\\{{S111}{S111}}}\nwendcode{}\nwbegincode{119}\sublabel{NW1vLSTU-1SZQ6N-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1SZQ6N-1}}}\moddef{S112~{\nwtagstyle{}\subpageref{NW1vLSTU-1SZQ6N-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S111}{S111}}}\nwendcode{}\nwbegincode{121}\sublabel{NW1vLSTU-1SZQ6N-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1SZQ6N-1}}}\moddef{S112~{\nwtagstyle{}\subpageref{NW1vLSTU-1SZQ6N-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S112", SEL+"val FROM dist_r_detour WHERE rid=?");
 \nwindexdefn{S112}{S112}{NW1vLSTU-1SZQ6N-1}\eatline
-\nwidentdefs{\\{{S112}{S112}}}\nwendcode{}\nwbegincode{120}\sublabel{NW1vLSTU-3Q3jlz-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3Q3jlz-1}}}\moddef{S113~{\nwtagstyle{}\subpageref{NW1vLSTU-3Q3jlz-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S112}{S112}}}\nwendcode{}\nwbegincode{122}\sublabel{NW1vLSTU-3Q3jlz-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3Q3jlz-1}}}\moddef{S113~{\nwtagstyle{}\subpageref{NW1vLSTU-3Q3jlz-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S113", SEL+"SUM (val) FROM dist_r_detour");
 \nwindexdefn{S113}{S113}{NW1vLSTU-3Q3jlz-1}\eatline
-\nwidentdefs{\\{{S113}{S113}}}\nwendcode{}\nwbegincode{121}\sublabel{NW1vLSTU-96Xlr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-96Xlr-1}}}\moddef{S114~{\nwtagstyle{}\subpageref{NW1vLSTU-96Xlr-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S113}{S113}}}\nwendcode{}\nwbegincode{123}\sublabel{NW1vLSTU-96Xlr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-96Xlr-1}}}\moddef{S114~{\nwtagstyle{}\subpageref{NW1vLSTU-96Xlr-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S114", SEL+"val FROM dist_r_transit WHERE rid=?");
 \nwindexdefn{S114}{S114}{NW1vLSTU-96Xlr-1}\eatline
-\nwidentdefs{\\{{S114}{S114}}}\nwendcode{}\nwbegincode{122}\sublabel{NW1vLSTU-4dHRF5-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4dHRF5-1}}}\moddef{S115~{\nwtagstyle{}\subpageref{NW1vLSTU-4dHRF5-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S114}{S114}}}\nwendcode{}\nwbegincode{124}\sublabel{NW1vLSTU-4dHRF5-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4dHRF5-1}}}\moddef{S115~{\nwtagstyle{}\subpageref{NW1vLSTU-4dHRF5-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S115", SEL+"SUM (val) FROM dist_r_transit");
 \nwindexdefn{S115}{S115}{NW1vLSTU-4dHRF5-1}\eatline
-\nwidentdefs{\\{{S115}{S115}}}\nwendcode{}\nwbegincode{123}\sublabel{NW1vLSTU-261fBL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-261fBL-1}}}\moddef{S116~{\nwtagstyle{}\subpageref{NW1vLSTU-261fBL-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S115}{S115}}}\nwendcode{}\nwbegincode{125}\sublabel{NW1vLSTU-261fBL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-261fBL-1}}}\moddef{S116~{\nwtagstyle{}\subpageref{NW1vLSTU-261fBL-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S116", SEL+"val FROM dur_s_travel WHERE sid=?");
 \nwindexdefn{S116}{S116}{NW1vLSTU-261fBL-1}\eatline
-\nwidentdefs{\\{{S116}{S116}}}\nwendcode{}\nwbegincode{124}\sublabel{NW1vLSTU-2Try6l-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2Try6l-1}}}\moddef{S117~{\nwtagstyle{}\subpageref{NW1vLSTU-2Try6l-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S116}{S116}}}\nwendcode{}\nwbegincode{126}\sublabel{NW1vLSTU-2Try6l-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2Try6l-1}}}\moddef{S117~{\nwtagstyle{}\subpageref{NW1vLSTU-2Try6l-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S117", SEL+"SUM (val) FROM dur_s_travel");
 \nwindexdefn{S117}{S117}{NW1vLSTU-2Try6l-1}\eatline
-\nwidentdefs{\\{{S117}{S117}}}\nwendcode{}\nwbegincode{125}\sublabel{NW1vLSTU-npyw7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-npyw7-1}}}\moddef{S118~{\nwtagstyle{}\subpageref{NW1vLSTU-npyw7-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S117}{S117}}}\nwendcode{}\nwbegincode{127}\sublabel{NW1vLSTU-npyw7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-npyw7-1}}}\moddef{S118~{\nwtagstyle{}\subpageref{NW1vLSTU-npyw7-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S118", SEL+"val FROM dur_r_pickup WHERE rid=?");
 \nwindexdefn{S118}{S118}{NW1vLSTU-npyw7-1}\eatline
-\nwidentdefs{\\{{S118}{S118}}}\nwendcode{}\nwbegincode{126}\sublabel{NW1vLSTU-454m4J-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-454m4J-1}}}\moddef{S119~{\nwtagstyle{}\subpageref{NW1vLSTU-454m4J-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S118}{S118}}}\nwendcode{}\nwbegincode{128}\sublabel{NW1vLSTU-454m4J-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-454m4J-1}}}\moddef{S119~{\nwtagstyle{}\subpageref{NW1vLSTU-454m4J-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S119", SEL+"SUM (val) FROM dur_r_pickup");
 \nwindexdefn{S119}{S119}{NW1vLSTU-454m4J-1}\eatline
-\nwidentdefs{\\{{S119}{S119}}}\nwendcode{}\nwbegincode{127}\sublabel{NW1vLSTU-z4eLL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-z4eLL-1}}}\moddef{S120~{\nwtagstyle{}\subpageref{NW1vLSTU-z4eLL-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S119}{S119}}}\nwendcode{}\nwbegincode{129}\sublabel{NW1vLSTU-z4eLL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-z4eLL-1}}}\moddef{S120~{\nwtagstyle{}\subpageref{NW1vLSTU-z4eLL-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S120", SEL+"val FROM dur_r_transit WHERE rid=?");
 \nwindexdefn{S120}{S120}{NW1vLSTU-z4eLL-1}\eatline
-\nwidentdefs{\\{{S120}{S120}}}\nwendcode{}\nwbegincode{128}\sublabel{NW1vLSTU-3WtcfD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3WtcfD-1}}}\moddef{S121~{\nwtagstyle{}\subpageref{NW1vLSTU-3WtcfD-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S120}{S120}}}\nwendcode{}\nwbegincode{130}\sublabel{NW1vLSTU-3WtcfD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3WtcfD-1}}}\moddef{S121~{\nwtagstyle{}\subpageref{NW1vLSTU-3WtcfD-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S121", SEL+"SUM (val) FROM dur_r_transit");
 \nwindexdefn{S121}{S121}{NW1vLSTU-3WtcfD-1}\eatline
-\nwidentdefs{\\{{S121}{S121}}}\nwendcode{}\nwbegincode{129}\sublabel{NW1vLSTU-1S1jbv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1S1jbv-1}}}\moddef{S122~{\nwtagstyle{}\subpageref{NW1vLSTU-1S1jbv-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S121}{S121}}}\nwendcode{}\nwbegincode{131}\sublabel{NW1vLSTU-1S1jbv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1S1jbv-1}}}\moddef{S122~{\nwtagstyle{}\subpageref{NW1vLSTU-1S1jbv-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S122", SEL+"val FROM dur_r_travel WHERE rid=?");
 \nwindexdefn{S122}{S122}{NW1vLSTU-1S1jbv-1}\eatline
-\nwidentdefs{\\{{S122}{S122}}}\nwendcode{}\nwbegincode{130}\sublabel{NW1vLSTU-3PW3HX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3PW3HX-1}}}\moddef{S123~{\nwtagstyle{}\subpageref{NW1vLSTU-3PW3HX-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S122}{S122}}}\nwendcode{}\nwbegincode{132}\sublabel{NW1vLSTU-3PW3HX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3PW3HX-1}}}\moddef{S123~{\nwtagstyle{}\subpageref{NW1vLSTU-3PW3HX-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S123", SEL+"SUM (val) FROM dur_r_travel");
 \nwindexdefn{S123}{S123}{NW1vLSTU-3PW3HX-1}\eatline
-\nwidentdefs{\\{{S123}{S123}}}\nwendcode{}\nwbegincode{131}\sublabel{NW1vLSTU-9hFnf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-9hFnf-1}}}\moddef{S124~{\nwtagstyle{}\subpageref{NW1vLSTU-9hFnf-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S123}{S123}}}\nwendcode{}\nwbegincode{133}\sublabel{NW1vLSTU-9hFnf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-9hFnf-1}}}\moddef{S124~{\nwtagstyle{}\subpageref{NW1vLSTU-9hFnf-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S124", SEL+"val FROM t_r_depart WHERE rid=?");
 \nwindexdefn{S124}{S124}{NW1vLSTU-9hFnf-1}\eatline
-\nwidentdefs{\\{{S124}{S124}}}\nwendcode{}\nwbegincode{132}\sublabel{NW1vLSTU-4ds9Gt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4ds9Gt-1}}}\moddef{S125~{\nwtagstyle{}\subpageref{NW1vLSTU-4ds9Gt-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S124}{S124}}}\nwendcode{}\nwbegincode{134}\sublabel{NW1vLSTU-4ds9Gt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4ds9Gt-1}}}\moddef{S125~{\nwtagstyle{}\subpageref{NW1vLSTU-4ds9Gt-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S125", SEL+"val FROM t_s_depart WHERE sid=?");
 \nwindexdefn{S125}{S125}{NW1vLSTU-4ds9Gt-1}\eatline
-\nwidentdefs{\\{{S125}{S125}}}\nwendcode{}\nwbegincode{133}\sublabel{NW1vLSTU-25Tygt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-25Tygt-1}}}\moddef{S126~{\nwtagstyle{}\subpageref{NW1vLSTU-25Tygt-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S125}{S125}}}\nwendcode{}\nwbegincode{135}\sublabel{NW1vLSTU-25Tygt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-25Tygt-1}}}\moddef{S126~{\nwtagstyle{}\subpageref{NW1vLSTU-25Tygt-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S126", SEL+"val FROM t_r_arrive WHERE rid=?");
 \nwindexdefn{S126}{S126}{NW1vLSTU-25Tygt-1}\eatline
-\nwidentdefs{\\{{S126}{S126}}}\nwendcode{}\nwbegincode{134}\sublabel{NW1vLSTU-2TKHcJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2TKHcJ-1}}}\moddef{S127~{\nwtagstyle{}\subpageref{NW1vLSTU-2TKHcJ-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S126}{S126}}}\nwendcode{}\nwbegincode{136}\sublabel{NW1vLSTU-2TKHcJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2TKHcJ-1}}}\moddef{S127~{\nwtagstyle{}\subpageref{NW1vLSTU-2TKHcJ-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S127", SEL+"te FROM CW WHERE sid=?");
 \nwindexdefn{S127}{S127}{NW1vLSTU-2TKHcJ-1}\eatline
-\nwidentdefs{\\{{S127}{S127}}}\nwendcode{}\nwbegincode{135}\sublabel{NW1vLSTU-3Q2E0J-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3Q2E0J-1}}}\moddef{S133~{\nwtagstyle{}\subpageref{NW1vLSTU-3Q2E0J-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S127}{S127}}}\nwendcode{}\nwbegincode{137}\sublabel{NW1vLSTU-3Q2E0J-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3Q2E0J-1}}}\moddef{S133~{\nwtagstyle{}\subpageref{NW1vLSTU-3Q2E0J-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S133", SEL+"val FROM f_status WHERE rid=? AND t<=? "
     + "ORDER BY t DESC FETCH FIRST ROW ONLY");
 \nwindexdefn{S133}{S133}{NW1vLSTU-3Q2E0J-1}\eatline
-\nwidentdefs{\\{{S133}{S133}}}\nwendcode{}\nwbegincode{136}\sublabel{NW1vLSTU-9eEGJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-9eEGJ-1}}}\moddef{S134~{\nwtagstyle{}\subpageref{NW1vLSTU-9eEGJ-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S133}{S133}}}\nwendcode{}\nwbegincode{138}\sublabel{NW1vLSTU-9eEGJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-9eEGJ-1}}}\moddef{S134~{\nwtagstyle{}\subpageref{NW1vLSTU-9eEGJ-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S134", SEL+"sid, te FROM CW WHERE se<=? AND (?<te OR (ve=0 AND sl>?))");
 \nwindexdefn{S134}{S134}{NW1vLSTU-9eEGJ-1}\eatline
-\nwidentdefs{\\{{S134}{S134}}}\nwendcode{}\nwbegincode{137}\sublabel{NW1vLSTU-4dp7jX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4dp7jX-1}}}\moddef{S135~{\nwtagstyle{}\subpageref{NW1vLSTU-4dp7jX-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S134}{S134}}}\nwendcode{}\nwbegincode{139}\sublabel{NW1vLSTU-4dp7jX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4dp7jX-1}}}\moddef{S135~{\nwtagstyle{}\subpageref{NW1vLSTU-4dp7jX-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S135", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
     + "SELECT t1 FROM W WHERE sid=? AND ? <= t1 AND t1 <= ? AND ? < t2)");
 \nwindexdefn{S135}{S135}{NW1vLSTU-4dp7jX-1}\eatline
-\nwidentdefs{\\{{S135}{S135}}}\nwendcode{}\nwbegincode{138}\sublabel{NW1vLSTU-26ZLfn-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-26ZLfn-1}}}\moddef{S136~{\nwtagstyle{}\subpageref{NW1vLSTU-26ZLfn-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S135}{S135}}}\nwendcode{}\nwbegincode{140}\sublabel{NW1vLSTU-26ZLfn-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-26ZLfn-1}}}\moddef{S136~{\nwtagstyle{}\subpageref{NW1vLSTU-26ZLfn-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S136", SEL+"* FROM V");
 \nwindexdefn{S136}{S136}{NW1vLSTU-26ZLfn-1}\eatline
-\nwidentdefs{\\{{S136}{S136}}}\nwendcode{}\nwbegincode{139}\sublabel{NW1vLSTU-2UPebD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2UPebD-1}}}\moddef{S137~{\nwtagstyle{}\subpageref{NW1vLSTU-2UPebD-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S136}{S136}}}\nwendcode{}\nwbegincode{141}\sublabel{NW1vLSTU-2UPebD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2UPebD-1}}}\moddef{S137~{\nwtagstyle{}\subpageref{NW1vLSTU-2UPebD-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S137", SEL+"* FROM E");
 \nwindexdefn{S137}{S137}{NW1vLSTU-2UPebD-1}\eatline
-\nwidentdefs{\\{{S137}{S137}}}\nwendcode{}\nwbegincode{140}\sublabel{NW1vLSTU-nWs2N-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-nWs2N-1}}}\moddef{S138~{\nwtagstyle{}\subpageref{NW1vLSTU-nWs2N-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S137}{S137}}}\nwendcode{}\nwbegincode{142}\sublabel{NW1vLSTU-nWs2N-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-nWs2N-1}}}\moddef{S138~{\nwtagstyle{}\subpageref{NW1vLSTU-nWs2N-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S138", SEL+"val FROM dist_r_unassigned");
 \nwindexdefn{S138}{S138}{NW1vLSTU-nWs2N-1}\eatline
-\nwidentdefs{\\{{S138}{S138}}}\nwendcode{}\nwbegincode{141}\sublabel{NW1vLSTU-44lfAZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-44lfAZ-1}}}\moddef{S139~{\nwtagstyle{}\subpageref{NW1vLSTU-44lfAZ-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S138}{S138}}}\nwendcode{}\nwbegincode{143}\sublabel{NW1vLSTU-44lfAZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-44lfAZ-1}}}\moddef{S139~{\nwtagstyle{}\subpageref{NW1vLSTU-44lfAZ-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S139", UPD+"CPD SET te=? WHERE sid=?");
 \nwindexdefn{S139}{S139}{NW1vLSTU-44lfAZ-1}\eatline
-\nwidentdefs{\\{{S139}{S139}}}\nwendcode{}\nwbegincode{142}\sublabel{NW1vLSTU-yno67-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-yno67-1}}}\moddef{S140~{\nwtagstyle{}\subpageref{NW1vLSTU-yno67-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S139}{S139}}}\nwendcode{}\nwbegincode{144}\sublabel{NW1vLSTU-yno67-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-yno67-1}}}\moddef{S140~{\nwtagstyle{}\subpageref{NW1vLSTU-yno67-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S140", UPD+"CQ SET tp=?, td=? WHERE rid=?");
 \nwindexdefn{S140}{S140}{NW1vLSTU-yno67-1}\eatline
-\nwidentdefs{\\{{S140}{S140}}}\nwendcode{}\nwbegincode{143}\sublabel{NW1vLSTU-3WcmPz-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3WcmPz-1}}}\moddef{S141~{\nwtagstyle{}\subpageref{NW1vLSTU-3WcmPz-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S140}{S140}}}\nwendcode{}\nwbegincode{145}\sublabel{NW1vLSTU-3WcmPz-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3WcmPz-1}}}\moddef{S141~{\nwtagstyle{}\subpageref{NW1vLSTU-3WcmPz-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S141", SEL+"* FROM r_user");
 \nwindexdefn{S141}{S141}{NW1vLSTU-3WcmPz-1}\eatline
-\nwidentdefs{\\{{S141}{S141}}}\nwendcode{}\nwbegincode{144}\sublabel{NW1vLSTU-1RktMh-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1RktMh-1}}}\moddef{S142~{\nwtagstyle{}\subpageref{NW1vLSTU-1RktMh-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S141}{S141}}}\nwendcode{}\nwbegincode{146}\sublabel{NW1vLSTU-1RktMh-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1RktMh-1}}}\moddef{S142~{\nwtagstyle{}\subpageref{NW1vLSTU-1RktMh-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S142", SEL+"SUM (dd) FROM W WHERE sid=? AND t2>?");
 \nwindexdefn{S142}{S142}{NW1vLSTU-1RktMh-1}\eatline
-\nwidentdefs{\\{{S142}{S142}}}\nwendcode{}\nwbegincode{145}\sublabel{NW1vLSTU-3PFD2J-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3PFD2J-1}}}\moddef{S143~{\nwtagstyle{}\subpageref{NW1vLSTU-3PFD2J-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S142}{S142}}}\nwendcode{}\nwbegincode{147}\sublabel{NW1vLSTU-3PFD2J-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3PFD2J-1}}}\moddef{S143~{\nwtagstyle{}\subpageref{NW1vLSTU-3PFD2J-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S143", SEL+"* FROM R WHERE re<=? AND ?<=re+?");
 \nwindexdefn{S143}{S143}{NW1vLSTU-3PFD2J-1}\eatline
-\nwidentdefs{\\{{S143}{S143}}}\nwendcode{}\nwbegincode{146}\sublabel{NW1vLSTU-9zboZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-9zboZ-1}}}\moddef{S144~{\nwtagstyle{}\subpageref{NW1vLSTU-9zboZ-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S143}{S143}}}\nwendcode{}\nwbegincode{148}\sublabel{NW1vLSTU-9zboZ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-9zboZ-1}}}\moddef{S144~{\nwtagstyle{}\subpageref{NW1vLSTU-9zboZ-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S144", SEL+"t2, v2, rid FROM CQ WHERE sid=? AND t2>? ORDER BY o2 ASC");
 \nwindexdefn{S144}{S144}{NW1vLSTU-9zboZ-1}\eatline
-\nwidentdefs{\\{{S144}{S144}}}\nwendcode{}\nwbegincode{147}\sublabel{NW1vLSTU-4eAVHn-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4eAVHn-1}}}\moddef{S145~{\nwtagstyle{}\subpageref{NW1vLSTU-4eAVHn-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S144}{S144}}}\nwendcode{}\nwbegincode{149}\sublabel{NW1vLSTU-4eAVHn-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4eAVHn-1}}}\moddef{S145~{\nwtagstyle{}\subpageref{NW1vLSTU-4eAVHn-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S145", SEL+"te, ve FROM CW WHERE sid=?");
 \nwindexdefn{S145}{S145}{NW1vLSTU-4eAVHn-1}\eatline
-\nwidentdefs{\\{{S145}{S145}}}\nwendcode{}\nwbegincode{148}\sublabel{NW1vLSTU-2TcddD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2TcddD-1}}}\moddef{S147~{\nwtagstyle{}\subpageref{NW1vLSTU-2TcddD-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S145}{S145}}}\nwendcode{}\nwbegincode{150}\sublabel{NW1vLSTU-2TcddD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2TcddD-1}}}\moddef{S147~{\nwtagstyle{}\subpageref{NW1vLSTU-2TcddD-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S147", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
     + "SELECT t1 FROM W WHERE sid=? AND v2=0)");
 \nwindexdefn{S147}{S147}{NW1vLSTU-2TcddD-1}\eatline
-\nwidentdefs{\\{{S147}{S147}}}\nwendcode{}\nwbegincode{149}\sublabel{NW1vLSTU-n1SCR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-n1SCR-1}}}\moddef{S148~{\nwtagstyle{}\subpageref{NW1vLSTU-n1SCR-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
-this.lu_pstr.put("S148", SEL+"1 FROM assignments_r WHERE rid=?");
+\nwidentdefs{\\{{S147}{S147}}}\nwendcode{}\nwbegincode{151}\sublabel{NW1vLSTU-n1SCR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-n1SCR-1}}}\moddef{S148~{\nwtagstyle{}\subpageref{NW1vLSTU-n1SCR-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+this.lu_pstr.put("S148", SEL+"sid FROM assignments WHERE rid=?");
 \nwindexdefn{S148}{S148}{NW1vLSTU-n1SCR-1}\eatline
-\nwidentdefs{\\{{S148}{S148}}}\nwendcode{}\nwbegincode{150}\sublabel{NW1vLSTU-44GFKd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-44GFKd-1}}}\moddef{S149~{\nwtagstyle{}\subpageref{NW1vLSTU-44GFKd-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S148}{S148}}}\nwendcode{}\nwbegincode{152}\sublabel{NW1vLSTU-44GFKd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-44GFKd-1}}}\moddef{S149~{\nwtagstyle{}\subpageref{NW1vLSTU-44GFKd-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S149", SEL+"t2, v2 FROM W WHERE sid=? ORDER BY t2 ASC");
 \nwindexdefn{S149}{S149}{NW1vLSTU-44GFKd-1}\eatline
-\nwidentdefs{\\{{S149}{S149}}}\nwendcode{}\nwbegincode{151}\sublabel{NW1vLSTU-yi24R-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-yi24R-1}}}\moddef{S150~{\nwtagstyle{}\subpageref{NW1vLSTU-yi24R-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S149}{S149}}}\nwendcode{}\nwbegincode{153}\sublabel{NW1vLSTU-yi24R-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-yi24R-1}}}\moddef{S150~{\nwtagstyle{}\subpageref{NW1vLSTU-yi24R-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S150", SEL+"sid, val FROM violations_t_s");
 \nwindexdefn{S150}{S150}{NW1vLSTU-yi24R-1}\eatline
-\nwidentdefs{\\{{S150}{S150}}}\nwendcode{}\nwbegincode{152}\sublabel{NW1vLSTU-3WX0OJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3WX0OJ-1}}}\moddef{S151~{\nwtagstyle{}\subpageref{NW1vLSTU-3WX0OJ-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S150}{S150}}}\nwendcode{}\nwbegincode{154}\sublabel{NW1vLSTU-3WX0OJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3WX0OJ-1}}}\moddef{S151~{\nwtagstyle{}\subpageref{NW1vLSTU-3WX0OJ-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S151", SEL+"rid, val FROM violations_t_r");
 \nwindexdefn{S151}{S151}{NW1vLSTU-3WX0OJ-1}\eatline
-\nwidentdefs{\\{{S151}{S151}}}\nwendcode{}\nwbegincode{153}\sublabel{NW1vLSTU-3QHpWt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3QHpWt-1}}}\moddef{S153~{\nwtagstyle{}\subpageref{NW1vLSTU-3QHpWt-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S151}{S151}}}\nwendcode{}\nwbegincode{155}\sublabel{NW1vLSTU-3QHpWt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3QHpWt-1}}}\moddef{S153~{\nwtagstyle{}\subpageref{NW1vLSTU-3QHpWt-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S153", SEL+"t1, t2 FROM CQ WHERE sid=? AND q1=sq");
 \nwindexdefn{S153}{S153}{NW1vLSTU-3QHpWt-1}\eatline
-\nwidentdefs{\\{{S153}{S153}}}\nwendcode{}\nwbegincode{154}\sublabel{NW1vLSTU-9KdWl-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-9KdWl-1}}}\moddef{S154~{\nwtagstyle{}\subpageref{NW1vLSTU-9KdWl-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S153}{S153}}}\nwendcode{}\nwbegincode{156}\sublabel{NW1vLSTU-9KdWl-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-9KdWl-1}}}\moddef{S154~{\nwtagstyle{}\subpageref{NW1vLSTU-9KdWl-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S154", SEL+"SUM (dd) FROM W WHERE sid=? AND t2 BETWEEN ? AND ?");
 \nwindexdefn{S154}{S154}{NW1vLSTU-9KdWl-1}\eatline
-\nwidentdefs{\\{{S154}{S154}}}\nwendcode{}\nwbegincode{155}\sublabel{NW1vLSTU-4dVWzz-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4dVWzz-1}}}\moddef{S155~{\nwtagstyle{}\subpageref{NW1vLSTU-4dVWzz-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
+\nwidentdefs{\\{{S154}{S154}}}\nwendcode{}\nwbegincode{157}\sublabel{NW1vLSTU-4dVWzz-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4dVWzz-1}}}\moddef{S155~{\nwtagstyle{}\subpageref{NW1vLSTU-4dVWzz-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
 this.lu_pstr.put("S155", SEL+"MAX (td) FROM CPD WHERE sid = ?");
 \nwindexdefn{S155}{S155}{NW1vLSTU-4dVWzz-1}\eatline
-\nwidentdefs{\\{{S155}{S155}}}\nwendcode{}\nwbegindocs{156}\nwdocspar
+\nwidentdefs{\\{{S155}{S155}}}\nwendcode{}\nwbegindocs{158}\nwdocspar
 \subsection{\texttt{PSCreate}(2)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -7542,7 +7576,7 @@ statement string identified by param. 2.\\
 \textbf{Throws:} {\tt{}SQLException} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{157}\sublabel{NW1vLSTU-47iuYD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-47iuYD-1}}}\moddef{Admin: PSCreate(2)~{\nwtagstyle{}\subpageref{NW1vLSTU-47iuYD-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
+\nwenddocs{}\nwbegincode{159}\sublabel{NW1vLSTU-47iuYD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-47iuYD-1}}}\moddef{Admin: PSCreate(2)~{\nwtagstyle{}\subpageref{NW1vLSTU-47iuYD-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
 PreparedStatement PSCreate(final Connection conn, final String k) throws SQLException \{
   PreparedStatement p = null;
   try \{
@@ -7556,7 +7590,7 @@ PreparedStatement PSCreate(final Connection conn, final String k) throws SQLExce
   return p;
 \}
 \nwindexdefn{PSCreate}{PSCreate}{NW1vLSTU-47iuYD-1}\eatline
-\nwidentdefs{\\{{PSCreate}{PSCreate}}}\nwendcode{}\nwbegindocs{158}\nwdocspar
+\nwidentdefs{\\{{PSCreate}{PSCreate}}}\nwendcode{}\nwbegindocs{160}\nwdocspar
 \subsection{\texttt{PSAdd}(2..)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -7575,7 +7609,7 @@ Integer... {\tt{}values} (param. 2..):&values to use in the statement, in order 
 \textbf{Throws:} {\tt{}SQLException} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{159}\sublabel{NW1vLSTU-1X4ymL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1X4ymL-1}}}\moddef{Admin: PSAdd(2..)~{\nwtagstyle{}\subpageref{NW1vLSTU-1X4ymL-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
+\nwenddocs{}\nwbegincode{161}\sublabel{NW1vLSTU-1X4ymL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1X4ymL-1}}}\moddef{Admin: PSAdd(2..)~{\nwtagstyle{}\subpageref{NW1vLSTU-1X4ymL-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
 void PSAdd(PreparedStatement p, final Integer... values) throws SQLException \{
   p.clearParameters();
   \LA{}Set statement values~{\nwtagstyle{}\subpageref{NW1vLSTU-GuyVo-1}}\RA{}
@@ -7586,7 +7620,7 @@ void PSAdd(PreparedStatement p, final Integer... values) throws SQLException \{
   \}
 \}
 \nosublabel{NW1vLSTU-1X4ymL-1-u1}\nwindexdefn{PSAdd}{PSAdd}{NW1vLSTU-1X4ymL-1}\eatline
-\nwidentdefs{\\{{PSAdd}{PSAdd}}}\nwendcode{}\nwbegindocs{160}\nwdocspar
+\nwidentdefs{\\{{PSAdd}{PSAdd}}}\nwendcode{}\nwbegindocs{162}\nwdocspar
 \subsection{\texttt{PSSubmit}(1..)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -7603,7 +7637,7 @@ Prepared statement {\tt{}p} (param. 1..):&prepared statements.
 \textbf{Throws:} {\tt{}SQLException} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{161}\sublabel{NW1vLSTU-1S1xBT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1S1xBT-1}}}\moddef{Admin: PSSubmit(1..)~{\nwtagstyle{}\subpageref{NW1vLSTU-1S1xBT-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
+\nwenddocs{}\nwbegincode{163}\sublabel{NW1vLSTU-1S1xBT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1S1xBT-1}}}\moddef{Admin: PSSubmit(1..)~{\nwtagstyle{}\subpageref{NW1vLSTU-1S1xBT-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
 void PSSubmit(PreparedStatement... statements) throws SQLException \{
   try \{
     for (PreparedStatement p : statements) \{
@@ -7615,7 +7649,7 @@ void PSSubmit(PreparedStatement... statements) throws SQLException \{
   \}
 \}
 \nwindexdefn{PSSubmit}{PSSubmit}{NW1vLSTU-1S1xBT-1}\eatline
-\nwidentdefs{\\{{PSSubmit}{PSSubmit}}}\nwendcode{}\nwbegindocs{162}\nwdocspar
+\nwidentdefs{\\{{PSSubmit}{PSSubmit}}}\nwendcode{}\nwbegindocs{164}\nwdocspar
 \subsection{\texttt{PSQuery}(3..)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -7649,7 +7683,7 @@ where $i$, $j$ start from 0.\\
 \textbf{Throws:} {\tt{}SQLException} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{163}\sublabel{NW1vLSTU-yHOIP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-yHOIP-1}}}\moddef{Admin: PSQuery(3..)~{\nwtagstyle{}\subpageref{NW1vLSTU-yHOIP-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
+\nwenddocs{}\nwbegincode{165}\sublabel{NW1vLSTU-yHOIP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-yHOIP-1}}}\moddef{Admin: PSQuery(3..)~{\nwtagstyle{}\subpageref{NW1vLSTU-yHOIP-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
 int[] PSQuery(final Connection conn, final String k, final int ncols, final Integer... values)
 throws SQLException \{
   int[] output = new int[] \{ \};
@@ -7668,7 +7702,7 @@ throws SQLException \{
   return output;
 \}
 \nosublabel{NW1vLSTU-yHOIP-1-u2}\nwindexdefn{PSQuery}{PSQuery}{NW1vLSTU-yHOIP-1}\eatline
-\nwidentdefs{\\{{PSQuery}{PSQuery}}}\nwidentuses{\\{{PSCreate}{PSCreate}}}\nwindexuse{PSCreate}{PSCreate}{NW1vLSTU-yHOIP-1}\nwendcode{}\nwbegindocs{164}\nwdocspar
+\nwidentdefs{\\{{PSQuery}{PSQuery}}}\nwidentuses{\\{{PSCreate}{PSCreate}}}\nwindexuse{PSCreate}{PSCreate}{NW1vLSTU-yHOIP-1}\nwendcode{}\nwbegindocs{166}\nwdocspar
 \section{Methods: Getters}
 
 \subsection{\texttt{getRefCacheEdges}(0)}
@@ -7684,12 +7718,12 @@ reference to {\tt{}lu{\char95}edges}.\\
 \textbf{Throws:} nothing.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{165}\sublabel{NW1vLSTU-4JnCHJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4JnCHJ-1}}}\moddef{Get: getRefCacheEdges(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-4JnCHJ-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
+\nwenddocs{}\nwbegincode{167}\sublabel{NW1vLSTU-4JnCHJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4JnCHJ-1}}}\moddef{Get: getRefCacheEdges(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-4JnCHJ-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
 final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> getRefCacheEdges() \{
   return this.lu_edges;
 \}
 \nwindexdefn{getRefCacheEdges}{getRefCacheEdges}{NW1vLSTU-4JnCHJ-1}\eatline
-\nwidentdefs{\\{{getRefCacheEdges}{getRefCacheEdges}}}\nwendcode{}\nwbegindocs{166}\nwdocspar
+\nwidentdefs{\\{{getRefCacheEdges}{getRefCacheEdges}}}\nwendcode{}\nwbegindocs{168}\nwdocspar
 \subsection{\texttt{getRefCacheUsers}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -7703,12 +7737,12 @@ reference to {\tt{}lu{\char95}users}.\\
 \textbf{Throws:} nothing.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{167}\sublabel{NW1vLSTU-2K219H-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2K219H-1}}}\moddef{Get: getRefCacheUsers(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-2K219H-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
+\nwenddocs{}\nwbegincode{169}\sublabel{NW1vLSTU-2K219H-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2K219H-1}}}\moddef{Get: getRefCacheUsers(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-2K219H-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
 final ConcurrentHashMap<Integer, int[]> getRefCacheUsers() \{
   return this.lu_users;
 \}
 \nwindexdefn{getRefCacheUsers}{getRefCacheUsers}{NW1vLSTU-2K219H-1}\eatline
-\nwidentdefs{\\{{getRefCacheUsers}{getRefCacheUsers}}}\nwendcode{}\nwbegindocs{168}\nwdocspar
+\nwidentdefs{\\{{getRefCacheUsers}{getRefCacheUsers}}}\nwendcode{}\nwbegindocs{170}\nwdocspar
 
 \subsection{\texttt{getRefCacheVertices}(0)}
 \begin{tabular}{p{\textwidth}}
@@ -7723,73 +7757,73 @@ reference to {\tt{}lu{\char95}vertices}.\\
 \textbf{Throws:} nothing.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{169}\sublabel{NW1vLSTU-36IzCR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-36IzCR-1}}}\moddef{Get: getRefCacheVertices(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-36IzCR-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
+\nwenddocs{}\nwbegincode{171}\sublabel{NW1vLSTU-36IzCR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-36IzCR-1}}}\moddef{Get: getRefCacheVertices(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-36IzCR-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
 final ConcurrentHashMap<Integer, int[]> getRefCacheVertices() \{
   return this.lu_vertices;
 \}
 \nwindexdefn{getRefCacheVertices}{getRefCacheVertices}{NW1vLSTU-36IzCR-1}\eatline
-\nwidentdefs{\\{{getRefCacheVertices}{getRefCacheVertices}}}\nwendcode{}\nwbegindocs{170}\nwdocspar
+\nwidentdefs{\\{{getRefCacheVertices}{getRefCacheVertices}}}\nwendcode{}\nwbegindocs{172}\nwdocspar
 \subsection{\texttt{getRefCommunicator}(0)}
-\nwenddocs{}\nwbegincode{171}\sublabel{NW1vLSTU-3YpYRT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3YpYRT-1}}}\moddef{Get: getRefCommunicator(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-3YpYRT-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{173}\sublabel{NW1vLSTU-3YpYRT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3YpYRT-1}}}\moddef{Get: getRefCommunicator(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-3YpYRT-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
 Communicator getRefCommunicator() \{
   return this.communicator;
 \}
 \nwindexdefn{getRefCommunicator}{getRefCommunicator}{NW1vLSTU-3YpYRT-1}\eatline
-\nwidentdefs{\\{{getRefCommunicator}{getRefCommunicator}}}\nwendcode{}\nwbegindocs{172}\nwdocspar
+\nwidentdefs{\\{{getRefCommunicator}{getRefCommunicator}}}\nwendcode{}\nwbegindocs{174}\nwdocspar
 \subsection{\texttt{getRefStorage}(0)}
-\nwenddocs{}\nwbegincode{173}\sublabel{NW1vLSTU-vW5JI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-vW5JI-1}}}\moddef{Get: getRefStorage(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-vW5JI-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{175}\sublabel{NW1vLSTU-vW5JI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-vW5JI-1}}}\moddef{Get: getRefStorage(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-vW5JI-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
 Storage getRefStorage() \{
   return this.storage;
 \}
 \nwindexdefn{getRefStorage}{getRefStorage}{NW1vLSTU-vW5JI-1}\eatline
-\nwidentdefs{\\{{getRefStorage}{getRefStorage}}}\nwendcode{}\nwbegindocs{174}\nwdocspar
+\nwidentdefs{\\{{getRefStorage}{getRefStorage}}}\nwendcode{}\nwbegindocs{176}\nwdocspar
 \subsection{\texttt{getClock(0)}}
-\nwenddocs{}\nwbegincode{175}\sublabel{NW1vLSTU-1c1l12-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1c1l12-1}}}\moddef{Get: getClock(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-1c1l12-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{177}\sublabel{NW1vLSTU-1c1l12-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1c1l12-1}}}\moddef{Get: getClock(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-1c1l12-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
 int getClock() \{
   return this.statControllerClock;
 \}
 \nwindexdefn{getClock}{getClock}{NW1vLSTU-1c1l12-1}\eatline
-\nwidentdefs{\\{{getClock}{getClock}}}\nwendcode{}\nwbegindocs{176}\nwdocspar
+\nwidentdefs{\\{{getClock}{getClock}}}\nwendcode{}\nwbegindocs{178}\nwdocspar
 \subsection{\texttt{retrieveQueueSize}(0)}
-\nwenddocs{}\nwbegincode{177}\sublabel{NW1vLSTU-2CdKcD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2CdKcD-1}}}\moddef{Get: retrieveQueueSize(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-2CdKcD-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{179}\sublabel{NW1vLSTU-2CdKcD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2CdKcD-1}}}\moddef{Get: retrieveQueueSize(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-2CdKcD-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
 int retrieveQueueSize() \{
   return this.client.getStatClientQueueSize();
 \}
 \nwindexdefn{retrieveQueueSize}{retrieveQueueSize}{NW1vLSTU-2CdKcD-1}\eatline
-\nwidentdefs{\\{{retrieveQueueSize}{retrieveQueueSize}}}\nwidentuses{\\{{getStatClientQueueSize}{getStatClientQueueSize}}}\nwindexuse{getStatClientQueueSize}{getStatClientQueueSize}{NW1vLSTU-2CdKcD-1}\nwendcode{}\nwbegindocs{178}\nwdocspar
+\nwidentdefs{\\{{retrieveQueueSize}{retrieveQueueSize}}}\nwidentuses{\\{{getStatClientQueueSize}{getStatClientQueueSize}}}\nwindexuse{getStatClientQueueSize}{getStatClientQueueSize}{NW1vLSTU-2CdKcD-1}\nwendcode{}\nwbegindocs{180}\nwdocspar
 \subsection{\texttt{retrieveClock}(0)}
-\nwenddocs{}\nwbegincode{179}\sublabel{NW1vLSTU-FIq64-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-FIq64-1}}}\moddef{Get: retrieveClock(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-FIq64-1}}}\endmoddef\nwused{\\{NW1pDwO-2Rlctf-3}}
+\nwenddocs{}\nwbegincode{181}\sublabel{NW1vLSTU-FIq64-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-FIq64-1}}}\moddef{Get: retrieveClock(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-FIq64-1}}}\endmoddef\nwused{\\{NW1pDwO-2Rlctf-3}}
 int retrieveClock() \{
   return this.controller.getClock();
 \}
 \nwindexdefn{retrieveClock}{retrieveClock}{NW1vLSTU-FIq64-1}\eatline
-\nwidentdefs{\\{{retrieveClock}{retrieveClock}}}\nwidentuses{\\{{getClock}{getClock}}}\nwindexuse{getClock}{getClock}{NW1vLSTU-FIq64-1}\nwendcode{}\nwbegindocs{180}\nwdocspar
+\nwidentdefs{\\{{retrieveClock}{retrieveClock}}}\nwidentuses{\\{{getClock}{getClock}}}\nwindexuse{getClock}{getClock}{NW1vLSTU-FIq64-1}\nwendcode{}\nwbegindocs{182}\nwdocspar
 \subsection{\texttt{retrieveRefCacheVertices}(0)}
-\nwenddocs{}\nwbegincode{181}\sublabel{NW1vLSTU-38KfuO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-38KfuO-1}}}\moddef{Get: retrieveRefCacheVertices(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-38KfuO-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}\\{NW1pDwO-2Rlctf-3}}
+\nwenddocs{}\nwbegincode{183}\sublabel{NW1vLSTU-38KfuO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-38KfuO-1}}}\moddef{Get: retrieveRefCacheVertices(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-38KfuO-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}\\{NW1pDwO-2Rlctf-3}}
 final ConcurrentHashMap<Integer, int[]> retrieveRefCacheVertices() \{
   return this.storage.getRefCacheVertices();
 \}
 \nwindexdefn{retrieveRefCacheVertices}{retrieveRefCacheVertices}{NW1vLSTU-38KfuO-1}\eatline
-\nwidentdefs{\\{{retrieveRefCacheVertices}{retrieveRefCacheVertices}}}\nwidentuses{\\{{getRefCacheVertices}{getRefCacheVertices}}}\nwindexuse{getRefCacheVertices}{getRefCacheVertices}{NW1vLSTU-38KfuO-1}\nwendcode{}\nwbegindocs{182}\nwdocspar
+\nwidentdefs{\\{{retrieveRefCacheVertices}{retrieveRefCacheVertices}}}\nwidentuses{\\{{getRefCacheVertices}{getRefCacheVertices}}}\nwindexuse{getRefCacheVertices}{getRefCacheVertices}{NW1vLSTU-38KfuO-1}\nwendcode{}\nwbegindocs{184}\nwdocspar
 \subsection{\texttt{retrieveRefCacheEdges}(0)}
-\nwenddocs{}\nwbegincode{183}\sublabel{NW1vLSTU-2ftMHn-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2ftMHn-1}}}\moddef{Get: retrieveRefCacheEdges(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-2ftMHn-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}\\{NW1pDwO-2Rlctf-3}}
+\nwenddocs{}\nwbegincode{185}\sublabel{NW1vLSTU-2ftMHn-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2ftMHn-1}}}\moddef{Get: retrieveRefCacheEdges(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-2ftMHn-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}\\{NW1pDwO-2Rlctf-3}}
 final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> retrieveRefCacheEdges() \{
   return this.storage.getRefCacheEdges();
 \}
 \nwindexdefn{retrieveRefCacheEdges}{retrieveRefCacheEdges}{NW1vLSTU-2ftMHn-1}\eatline
-\nwidentdefs{\\{{retrieveRefCacheEdges}{retrieveRefCacheEdges}}}\nwidentuses{\\{{getRefCacheEdges}{getRefCacheEdges}}}\nwindexuse{getRefCacheEdges}{getRefCacheEdges}{NW1vLSTU-2ftMHn-1}\nwendcode{}\nwbegindocs{184}\nwdocspar
+\nwidentdefs{\\{{retrieveRefCacheEdges}{retrieveRefCacheEdges}}}\nwidentuses{\\{{getRefCacheEdges}{getRefCacheEdges}}}\nwindexuse{getRefCacheEdges}{getRefCacheEdges}{NW1vLSTU-2ftMHn-1}\nwendcode{}\nwbegindocs{186}\nwdocspar
 \subsection{\texttt{retrieveRefCacheUsers}(0)}
-\nwenddocs{}\nwbegincode{185}\sublabel{NW1vLSTU-842o1-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-842o1-1}}}\moddef{Get: retrieveRefCacheUsers(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-842o1-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}\\{NW1pDwO-2Rlctf-3}}
+\nwenddocs{}\nwbegincode{187}\sublabel{NW1vLSTU-842o1-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-842o1-1}}}\moddef{Get: retrieveRefCacheUsers(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-842o1-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}\\{NW1pDwO-2Rlctf-3}}
 final ConcurrentHashMap<Integer, int[]> retrieveRefCacheUsers() \{
   return this.storage.getRefCacheUsers();
 \}
 \nwindexdefn{retrieveRefCacheUsers}{retrieveRefCacheUsers}{NW1vLSTU-842o1-1}\eatline
-\nwidentdefs{\\{{retrieveRefCacheUsers}{retrieveRefCacheUsers}}}\nwidentuses{\\{{getRefCacheUsers}{getRefCacheUsers}}}\nwindexuse{getRefCacheUsers}{getRefCacheUsers}{NW1vLSTU-842o1-1}\nwendcode{}\nwbegindocs{186}\nwdocspar
+\nwidentdefs{\\{{retrieveRefCacheUsers}{retrieveRefCacheUsers}}}\nwidentuses{\\{{getRefCacheUsers}{getRefCacheUsers}}}\nwindexuse{getRefCacheUsers}{getRefCacheUsers}{NW1vLSTU-842o1-1}\nwendcode{}\nwbegindocs{188}\nwdocspar
 
 \section{Methods: Setters}
 
 \subsection{\texttt{setClockReference}(1)}
-\nwenddocs{}\nwbegincode{187}\sublabel{NW1vLSTU-3HH1hk-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3HH1hk-1}}}\moddef{Set: setClockReference(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-3HH1hk-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{189}\sublabel{NW1vLSTU-3HH1hk-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3HH1hk-1}}}\moddef{Set: setClockReference(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-3HH1hk-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
 void setClockReference(final String clock_reference) throws IllegalArgumentException \{
   int hour = Integer.parseInt(clock_reference.substring(0, 2));
   if (!(0 <= hour && hour <= 23)) \{
@@ -7803,129 +7837,129 @@ void setClockReference(final String clock_reference) throws IllegalArgumentExcep
   this.statControllerClockReferenceMinute = minute;
 \}
 \nwindexdefn{setClockReference}{setClockReference}{NW1vLSTU-3HH1hk-1}\eatline
-\nwidentdefs{\\{{setClockReference}{setClockReference}}}\nwendcode{}\nwbegindocs{188}\nwdocspar
+\nwidentdefs{\\{{setClockReference}{setClockReference}}}\nwendcode{}\nwbegindocs{190}\nwdocspar
 \subsection{\texttt{setClockStart}(1)}
-\nwenddocs{}\nwbegincode{189}\sublabel{NW1vLSTU-3EQcO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3EQcO-1}}}\moddef{Set: setClockStart(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-3EQcO-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{191}\sublabel{NW1vLSTU-3EQcO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3EQcO-1}}}\moddef{Set: setClockStart(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-3EQcO-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
 void setClockStart(final int clock_start) \{
   this.CLOCK_START = clock_start;
 \}
 \nwindexdefn{setClockStart}{setClockStart}{NW1vLSTU-3EQcO-1}\eatline
-\nwidentdefs{\\{{setClockStart}{setClockStart}}}\nwendcode{}\nwbegindocs{190}\nwdocspar
+\nwidentdefs{\\{{setClockStart}{setClockStart}}}\nwendcode{}\nwbegindocs{192}\nwdocspar
 \subsection{\texttt{setClockEnd}(1)}
-\nwenddocs{}\nwbegincode{191}\sublabel{NW1vLSTU-1ORCdK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1ORCdK-1}}}\moddef{Set: setClockEnd(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-1ORCdK-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{193}\sublabel{NW1vLSTU-1ORCdK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1ORCdK-1}}}\moddef{Set: setClockEnd(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-1ORCdK-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
 void setClockEnd(final int clock_end) \{
   this.CLOCK_END = clock_end;
 \}
 \nwindexdefn{setClockEnd}{setClockEnd}{NW1vLSTU-1ORCdK-1}\eatline
-\nwidentdefs{\\{{setClockEnd}{setClockEnd}}}\nwendcode{}\nwbegindocs{192}\nwdocspar
+\nwidentdefs{\\{{setClockEnd}{setClockEnd}}}\nwendcode{}\nwbegindocs{194}\nwdocspar
 \subsection{\texttt{setQueueTimeout}(1)}
-\nwenddocs{}\nwbegincode{193}\sublabel{NW1vLSTU-1fyoFF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1fyoFF-1}}}\moddef{Set: setQueueTimeout(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-1fyoFF-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{195}\sublabel{NW1vLSTU-1fyoFF-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1fyoFF-1}}}\moddef{Set: setQueueTimeout(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-1fyoFF-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
 void setQueueTimeout(final int queue_timeout) \{
   this.QUEUE_TIMEOUT = queue_timeout;
 \}
 \nwindexdefn{setQueueTimeout}{setQueueTimeout}{NW1vLSTU-1fyoFF-1}\eatline
-\nwidentdefs{\\{{setQueueTimeout}{setQueueTimeout}}}\nwendcode{}\nwbegindocs{194}\nwdocspar
+\nwidentdefs{\\{{setQueueTimeout}{setQueueTimeout}}}\nwendcode{}\nwbegindocs{196}\nwdocspar
 \subsection{\texttt{setRequestTimeout}(1)}
-\nwenddocs{}\nwbegincode{195}\sublabel{NW1vLSTU-380A5h-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-380A5h-1}}}\moddef{Set: setRequestTimeout(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-380A5h-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
+\nwenddocs{}\nwbegincode{197}\sublabel{NW1vLSTU-380A5h-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-380A5h-1}}}\moddef{Set: setRequestTimeout(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-380A5h-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-3}}
 void setRequestTimeout(final int request_timeout) \{
   this.REQUEST_TIMEOUT = request_timeout;
 \}
 \nwindexdefn{setRequestTimeout}{setRequestTimeout}{NW1vLSTU-380A5h-1}\eatline
-\nwidentdefs{\\{{setRequestTimeout}{setRequestTimeout}}}\nwendcode{}\nwbegindocs{196}\nwdocspar
+\nwidentdefs{\\{{setRequestTimeout}{setRequestTimeout}}}\nwendcode{}\nwbegindocs{198}\nwdocspar
 
 \subsection{\texttt{setRefCacheVertices}(1)}
-\nwenddocs{}\nwbegincode{197}\sublabel{NW1vLSTU-ybch6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-ybch6-1}}}\moddef{Set: setRefCacheVertices(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-ybch6-1}}}\endmoddef\nwused{\\{NW1pDwO-3QhyAk-3}}
+\nwenddocs{}\nwbegincode{199}\sublabel{NW1vLSTU-ybch6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-ybch6-1}}}\moddef{Set: setRefCacheVertices(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-ybch6-1}}}\endmoddef\nwused{\\{NW1pDwO-3QhyAk-3}}
 void setRefCacheVertices(final ConcurrentHashMap<Integer, int[]> lu_vertices) \{
   this.lu_vertices = lu_vertices;
 \}
 \nwindexdefn{setRefCacheVertices}{setRefCacheVertices}{NW1vLSTU-ybch6-1}\eatline
-\nwidentdefs{\\{{setRefCacheVertices}{setRefCacheVertices}}}\nwendcode{}\nwbegindocs{198}\nwdocspar
+\nwidentdefs{\\{{setRefCacheVertices}{setRefCacheVertices}}}\nwendcode{}\nwbegindocs{200}\nwdocspar
 \subsection{\texttt{setRefCacheEdges}(1)}
-\nwenddocs{}\nwbegincode{199}\sublabel{NW1vLSTU-2Fbhsd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2Fbhsd-1}}}\moddef{Set: setRefCacheEdges(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-2Fbhsd-1}}}\endmoddef\nwused{\\{NW1pDwO-3QhyAk-3}}
+\nwenddocs{}\nwbegincode{201}\sublabel{NW1vLSTU-2Fbhsd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2Fbhsd-1}}}\moddef{Set: setRefCacheEdges(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-2Fbhsd-1}}}\endmoddef\nwused{\\{NW1pDwO-3QhyAk-3}}
 void setRefCacheEdges(final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> lu_edges) \{
   this.lu_edges = lu_edges;
 \}
 \nwindexdefn{setRefCacheEdges}{setRefCacheEdges}{NW1vLSTU-2Fbhsd-1}\eatline
-\nwidentdefs{\\{{setRefCacheEdges}{setRefCacheEdges}}}\nwendcode{}\nwbegindocs{200}\nwdocspar
+\nwidentdefs{\\{{setRefCacheEdges}{setRefCacheEdges}}}\nwendcode{}\nwbegindocs{202}\nwdocspar
 \subsection{\texttt{setRefCacheUsers}(1)}
-\nwenddocs{}\nwbegincode{201}\sublabel{NW1vLSTU-4ORm7x-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4ORm7x-1}}}\moddef{Set: setRefCacheUsers(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-4ORm7x-1}}}\endmoddef\nwused{\\{NW1pDwO-3QhyAk-3}}
+\nwenddocs{}\nwbegincode{203}\sublabel{NW1vLSTU-4ORm7x-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4ORm7x-1}}}\moddef{Set: setRefCacheUsers(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-4ORm7x-1}}}\endmoddef\nwused{\\{NW1pDwO-3QhyAk-3}}
 void setRefCacheUsers(final ConcurrentHashMap<Integer, int[]> lu_users) \{
   this.lu_users = lu_users;
 \}
 \nwindexdefn{setRefCacheUsers}{setRefCacheUsers}{NW1vLSTU-4ORm7x-1}\eatline
-\nwidentdefs{\\{{setRefCacheUsers}{setRefCacheUsers}}}\nwendcode{}\nwbegindocs{202}\nwdocspar
+\nwidentdefs{\\{{setRefCacheUsers}{setRefCacheUsers}}}\nwendcode{}\nwbegindocs{204}\nwdocspar
 \subsection{\texttt{setRefClient}(1)}
-\nwenddocs{}\nwbegincode{203}\sublabel{NW1vLSTU-2cNpBb-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2cNpBb-1}}}\moddef{Set: setRefClient(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-2cNpBb-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{205}\sublabel{NW1vLSTU-2cNpBb-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2cNpBb-1}}}\moddef{Set: setRefClient(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-2cNpBb-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
 void setRefClient(final Client client) \{
   this.client = client;
 \}
 \nwindexdefn{setRefClient}{setRefClient}{NW1vLSTU-2cNpBb-1}\eatline
-\nwidentdefs{\\{{setRefClient}{setRefClient}}}\nwendcode{}\nwbegindocs{204}\nwdocspar
+\nwidentdefs{\\{{setRefClient}{setRefClient}}}\nwendcode{}\nwbegindocs{206}\nwdocspar
 \subsection{\texttt{setRefCommunicator}(1)}
-\nwenddocs{}\nwbegincode{205}\sublabel{NW1vLSTU-1HvZee-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1HvZee-1}}}\moddef{Set: setRefCommunicator(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-1HvZee-1}}}\endmoddef\nwused{\\{NW1pDwO-1aFZ2n-3}}
+\nwenddocs{}\nwbegincode{207}\sublabel{NW1vLSTU-1HvZee-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1HvZee-1}}}\moddef{Set: setRefCommunicator(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-1HvZee-1}}}\endmoddef\nwused{\\{NW1pDwO-1aFZ2n-3}}
 void setRefCommunicator(final Communicator communicator) \{
   this.communicator = communicator;
 \}
 \nwindexdefn{setRefCommunicator}{setRefCommunicator}{NW1vLSTU-1HvZee-1}\eatline
-\nwidentdefs{\\{{setRefCommunicator}{setRefCommunicator}}}\nwendcode{}\nwbegindocs{206}\nwdocspar
+\nwidentdefs{\\{{setRefCommunicator}{setRefCommunicator}}}\nwendcode{}\nwbegindocs{208}\nwdocspar
 \subsection{\texttt{setRefController}(1)}
-\nwenddocs{}\nwbegincode{207}\sublabel{NW1vLSTU-1MHPnS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1MHPnS-1}}}\moddef{Set: setRefController(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-1MHPnS-1}}}\endmoddef\nwused{\\{NW1pDwO-2Rlctf-3}}
+\nwenddocs{}\nwbegincode{209}\sublabel{NW1vLSTU-1MHPnS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1MHPnS-1}}}\moddef{Set: setRefController(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-1MHPnS-1}}}\endmoddef\nwused{\\{NW1pDwO-2Rlctf-3}}
 void setRefController(final Controller controller) \{
   this.controller = controller;
 \}
 \nwindexdefn{setRefController}{setRefController}{NW1vLSTU-1MHPnS-1}\eatline
-\nwidentdefs{\\{{setRefController}{setRefController}}}\nwendcode{}\nwbegindocs{208}\nwdocspar
+\nwidentdefs{\\{{setRefController}{setRefController}}}\nwendcode{}\nwbegindocs{210}\nwdocspar
 \subsection{\texttt{setRefStorage}(1)}
-\nwenddocs{}\nwbegincode{209}\sublabel{NW1vLSTU-2JRkX7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2JRkX7-1}}}\moddef{Set: setRefStorage(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-2JRkX7-1}}}\endmoddef\nwused{\\{NW1pDwO-2Rlctf-3}}
+\nwenddocs{}\nwbegincode{211}\sublabel{NW1vLSTU-2JRkX7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2JRkX7-1}}}\moddef{Set: setRefStorage(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-2JRkX7-1}}}\endmoddef\nwused{\\{NW1pDwO-2Rlctf-3}}
 void setRefStorage(final Storage storage) \{
   this.storage = storage;
 \}
 \nwindexdefn{setRefStorage}{setRefStorage}{NW1vLSTU-2JRkX7-1}\eatline
-\nwidentdefs{\\{{setRefStorage}{setRefStorage}}}\nwendcode{}\nwbegindocs{210}\nwdocspar
+\nwidentdefs{\\{{setRefStorage}{setRefStorage}}}\nwendcode{}\nwbegindocs{212}\nwdocspar
 \subsection{\texttt{setRefTraffic}(1)}
-\nwenddocs{}\nwbegincode{211}\sublabel{NW1vLSTU-2HuHGR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2HuHGR-1}}}\moddef{Set: setRefTraffic(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-2HuHGR-1}}}\endmoddef\nwused{\\{NW1pDwO-2Rlctf-3}}
+\nwenddocs{}\nwbegincode{213}\sublabel{NW1vLSTU-2HuHGR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2HuHGR-1}}}\moddef{Set: setRefTraffic(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-2HuHGR-1}}}\endmoddef\nwused{\\{NW1pDwO-2Rlctf-3}}
 void setRefTraffic (final Traffic traffic) \{
   this.traffic = traffic;
   this.traffic.forwardRefCacheVertices(this.storage.getRefCacheVertices());
   this.traffic.forwardRefCacheEdges(this.storage.getRefCacheEdges());
 \}
 \nwindexdefn{setRefTraffic}{setRefTraffic}{NW1vLSTU-2HuHGR-1}\eatline
-\nwidentdefs{\\{{setRefTraffic}{setRefTraffic}}}\nwidentuses{\\{{forwardRefCacheEdges}{forwardRefCacheEdges}}\\{{forwardRefCacheVertices}{forwardRefCacheVertices}}\\{{getRefCacheEdges}{getRefCacheEdges}}\\{{getRefCacheVertices}{getRefCacheVertices}}}\nwindexuse{forwardRefCacheEdges}{forwardRefCacheEdges}{NW1vLSTU-2HuHGR-1}\nwindexuse{forwardRefCacheVertices}{forwardRefCacheVertices}{NW1vLSTU-2HuHGR-1}\nwindexuse{getRefCacheEdges}{getRefCacheEdges}{NW1vLSTU-2HuHGR-1}\nwindexuse{getRefCacheVertices}{getRefCacheVertices}{NW1vLSTU-2HuHGR-1}\nwendcode{}\nwbegindocs{212}\nwdocspar
+\nwidentdefs{\\{{setRefTraffic}{setRefTraffic}}}\nwidentuses{\\{{forwardRefCacheEdges}{forwardRefCacheEdges}}\\{{forwardRefCacheVertices}{forwardRefCacheVertices}}\\{{getRefCacheEdges}{getRefCacheEdges}}\\{{getRefCacheVertices}{getRefCacheVertices}}}\nwindexuse{forwardRefCacheEdges}{forwardRefCacheEdges}{NW1vLSTU-2HuHGR-1}\nwindexuse{forwardRefCacheVertices}{forwardRefCacheVertices}{NW1vLSTU-2HuHGR-1}\nwindexuse{getRefCacheEdges}{getRefCacheEdges}{NW1vLSTU-2HuHGR-1}\nwindexuse{getRefCacheVertices}{getRefCacheVertices}{NW1vLSTU-2HuHGR-1}\nwendcode{}\nwbegindocs{214}\nwdocspar
 \subsection{\texttt{forwardRefTraffic}(1)}
-\nwenddocs{}\nwbegincode{213}\sublabel{NW1vLSTU-3K5RXB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3K5RXB-1}}}\moddef{Set: forwardRefTraffic(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-3K5RXB-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{215}\sublabel{NW1vLSTU-3K5RXB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3K5RXB-1}}}\moddef{Set: forwardRefTraffic(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-3K5RXB-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
 void forwardRefTraffic(final Traffic traffic) \{
   this.communicator.setRefTraffic(traffic);
 \}
 \nwindexdefn{forwardRefTraffic}{forwardRefTraffic}{NW1vLSTU-3K5RXB-1}\eatline
-\nwidentdefs{\\{{forwardRefTraffic}{forwardRefTraffic}}}\nwidentuses{\\{{setRefTraffic}{setRefTraffic}}}\nwindexuse{setRefTraffic}{setRefTraffic}{NW1vLSTU-3K5RXB-1}\nwendcode{}\nwbegindocs{214}\nwdocspar
+\nwidentdefs{\\{{forwardRefTraffic}{forwardRefTraffic}}}\nwidentuses{\\{{setRefTraffic}{setRefTraffic}}}\nwindexuse{setRefTraffic}{setRefTraffic}{NW1vLSTU-3K5RXB-1}\nwendcode{}\nwbegindocs{216}\nwdocspar
 \subsection{\texttt{forwardRefCommunicator}(1)}
-\nwenddocs{}\nwbegincode{215}\sublabel{NW1vLSTU-1z0h0j-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1z0h0j-1}}}\moddef{Set: forwardRefCommunicator(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-1z0h0j-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
+\nwenddocs{}\nwbegincode{217}\sublabel{NW1vLSTU-1z0h0j-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-1z0h0j-1}}}\moddef{Set: forwardRefCommunicator(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-1z0h0j-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-3}}
 void forwardRefCommunicator(final Communicator communicator) \{
   this.client.setRefCommunicator(communicator);
 \}
 \nwindexdefn{forwardRefCommunicator}{forwardRefCommunicator}{NW1vLSTU-1z0h0j-1}\eatline
-\nwidentdefs{\\{{forwardRefCommunicator}{forwardRefCommunicator}}}\nwidentuses{\\{{setRefCommunicator}{setRefCommunicator}}}\nwindexuse{setRefCommunicator}{setRefCommunicator}{NW1vLSTU-1z0h0j-1}\nwendcode{}\nwbegindocs{216}\nwdocspar
+\nwidentdefs{\\{{forwardRefCommunicator}{forwardRefCommunicator}}}\nwidentuses{\\{{setRefCommunicator}{setRefCommunicator}}}\nwindexuse{setRefCommunicator}{setRefCommunicator}{NW1vLSTU-1z0h0j-1}\nwendcode{}\nwbegindocs{218}\nwdocspar
 \subsection{\texttt{forwardRefCacheEdges}(1)}
-\nwenddocs{}\nwbegincode{217}\sublabel{NW1vLSTU-2pv9fW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2pv9fW-1}}}\moddef{Set: forwardRefCacheEdges(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-2pv9fW-1}}}\endmoddef\nwused{\\{NW1pDwO-1aFZ2n-3}\\{NW1pDwO-1sp72R-3}}
+\nwenddocs{}\nwbegincode{219}\sublabel{NW1vLSTU-2pv9fW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-2pv9fW-1}}}\moddef{Set: forwardRefCacheEdges(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-2pv9fW-1}}}\endmoddef\nwused{\\{NW1pDwO-1aFZ2n-3}\\{NW1pDwO-1sp72R-3}}
 void forwardRefCacheEdges(final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> lu_edges) \{
   this.tools.setRefCacheEdges(lu_edges);
 \}
 \nwindexdefn{forwardRefCacheEdges}{forwardRefCacheEdges}{NW1vLSTU-2pv9fW-1}\eatline
-\nwidentdefs{\\{{forwardRefCacheEdges}{forwardRefCacheEdges}}}\nwidentuses{\\{{setRefCacheEdges}{setRefCacheEdges}}}\nwindexuse{setRefCacheEdges}{setRefCacheEdges}{NW1vLSTU-2pv9fW-1}\nwendcode{}\nwbegindocs{218}\nwdocspar
+\nwidentdefs{\\{{forwardRefCacheEdges}{forwardRefCacheEdges}}}\nwidentuses{\\{{setRefCacheEdges}{setRefCacheEdges}}}\nwindexuse{setRefCacheEdges}{setRefCacheEdges}{NW1vLSTU-2pv9fW-1}\nwendcode{}\nwbegindocs{220}\nwdocspar
 \subsection{\texttt{forwardRefCacheUsers}(1)}
-\nwenddocs{}\nwbegincode{219}\sublabel{NW1vLSTU-I6FmK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-I6FmK-1}}}\moddef{Set: forwardRefCacheUsers(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-I6FmK-1}}}\endmoddef\nwused{\\{NW1pDwO-1aFZ2n-3}}
+\nwenddocs{}\nwbegincode{221}\sublabel{NW1vLSTU-I6FmK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-I6FmK-1}}}\moddef{Set: forwardRefCacheUsers(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-I6FmK-1}}}\endmoddef\nwused{\\{NW1pDwO-1aFZ2n-3}}
 void forwardRefCacheUsers(final ConcurrentHashMap<Integer, int[]> lu_users) \{
   this.tools.setRefCacheUsers(lu_users);
 \}
 \nwindexdefn{forwardRefCacheUsers}{forwardRefCacheUsers}{NW1vLSTU-I6FmK-1}\eatline
-\nwidentdefs{\\{{forwardRefCacheUsers}{forwardRefCacheUsers}}}\nwidentuses{\\{{setRefCacheUsers}{setRefCacheUsers}}}\nwindexuse{setRefCacheUsers}{setRefCacheUsers}{NW1vLSTU-I6FmK-1}\nwendcode{}\nwbegindocs{220}\nwdocspar
+\nwidentdefs{\\{{forwardRefCacheUsers}{forwardRefCacheUsers}}}\nwidentuses{\\{{setRefCacheUsers}{setRefCacheUsers}}}\nwindexuse{setRefCacheUsers}{setRefCacheUsers}{NW1vLSTU-I6FmK-1}\nwendcode{}\nwbegindocs{222}\nwdocspar
 \subsection{\texttt{forwardRefCacheVertices}(1)}
-\nwenddocs{}\nwbegincode{221}\sublabel{NW1vLSTU-4dJ1Eu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4dJ1Eu-1}}}\moddef{Set: forwardRefCacheVertices(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-4dJ1Eu-1}}}\endmoddef\nwused{\\{NW1pDwO-1aFZ2n-3}\\{NW1pDwO-1sp72R-3}}
+\nwenddocs{}\nwbegincode{223}\sublabel{NW1vLSTU-4dJ1Eu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4dJ1Eu-1}}}\moddef{Set: forwardRefCacheVertices(1)~{\nwtagstyle{}\subpageref{NW1vLSTU-4dJ1Eu-1}}}\endmoddef\nwused{\\{NW1pDwO-1aFZ2n-3}\\{NW1pDwO-1sp72R-3}}
 void forwardRefCacheVertices(final ConcurrentHashMap<Integer, int[]> lu_vertices) \{
   this.tools.setRefCacheVertices(lu_vertices);
 \}
 \nwindexdefn{forwardRefCacheVertices}{forwardRefCacheVertices}{NW1vLSTU-4dJ1Eu-1}\eatline
-\nwidentdefs{\\{{forwardRefCacheVertices}{forwardRefCacheVertices}}}\nwidentuses{\\{{setRefCacheVertices}{setRefCacheVertices}}}\nwindexuse{setRefCacheVertices}{setRefCacheVertices}{NW1vLSTU-4dJ1Eu-1}\nwendcode{}\nwbegindocs{222}\nwdocspar
+\nwidentdefs{\\{{forwardRefCacheVertices}{forwardRefCacheVertices}}}\nwidentuses{\\{{setRefCacheVertices}{setRefCacheVertices}}}\nwindexuse{setRefCacheVertices}{setRefCacheVertices}{NW1vLSTU-4dJ1Eu-1}\nwendcode{}\nwbegindocs{224}\nwdocspar
 \nwenddocs{}\nwfilename{src/tex/Gtree.nw}\nwbegindocs{0}\chapter{Using G-tree}
 \label{gtree}
 
@@ -8084,6 +8118,7 @@ private int sum_distance_base_requests = 0;
 private int sum_distance_base_servers = 0;
 private Map<Integer, Integer> distance_servers = new HashMap<Integer, Integer>();
 private Map<Integer, Integer> distance_servers_service = new HashMap<Integer, Integer>();
+private Map<Integer, Integer> distance_requests_transit = new HashMap<Integer, Integer>();
 \nwendcode{}\nwbegindocs{20}\nwdocspar
 
 The storage interface also contains configuration settings and JDBC objects.

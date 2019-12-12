@@ -897,6 +897,7 @@ is now \emph{assigned}.}
     this.lu_rstatus.put(r, true);
     this.count_assigned++;
     this.sum_distance_unassigned -= this.lu_users.get(r)[6];
+    <<Cache request transit distance>>
   }
   this.distance_servers.put(sid, this.DBQueryServerDistance(sid)[0]);
   <<Cache service distance>>
@@ -1067,6 +1068,7 @@ is now \emph{unassigned}.}
     this.lu_rstatus.put(r, false);
     this.count_assigned--;
     this.sum_distance_unassigned += this.lu_users.get(r)[6];
+    this.distance_requests_transit.put(r, 0);
   }
   this.distance_servers.put(sid, this.DBQueryServerDistance(sid)[0]);
   <<Cache service distance>>

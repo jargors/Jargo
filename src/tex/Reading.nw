@@ -678,11 +678,14 @@ where $r$ is the request identified by [[rid]] (param. 1).\\
 \end{tabular}
 <<Read: DBQueryRequestDistanceDetour(1)>>=
 int[] DBQueryRequestDistanceDetour(final int rid) throws SQLException {
-  try (<<Open [[conn]]>>) {
-    return PSQuery(conn, "S112", 1, rid);
-  } catch (SQLException e) {
-    throw e;
-  }
+  // try (<<Open [[conn]]>>) {
+  //   return PSQuery(conn, "S112", 1, rid);
+  // } catch (SQLException e) {
+  //   throw e;
+  // }
+  return new int[] { this.distance_requests_transit.containsKey(rid)
+    ? this.distance_requests_transit.get(rid) - this.lu_users.get(rid)[6]
+    : 0 };
 }
 @ %def DBQueryRequestDistanceDetour
 
@@ -716,11 +719,14 @@ where $r$ is the request identified by [[rid]] (param. 1).\\
 \end{tabular}
 <<Read: DBQueryRequestDistanceTransit(1)>>=
 int[] DBQueryRequestDistanceTransit(final int rid) throws SQLException {
-  try (<<Open [[conn]]>>) {
-    return PSQuery(conn, "S114", 1, rid);
-  } catch (SQLException e) {
-    throw e;
-  }
+  // try (<<Open [[conn]]>>) {
+  //   return PSQuery(conn, "S114", 1, rid);
+  // } catch (SQLException e) {
+  //   throw e;
+  // }
+  return new int[] { this.distance_requests_transit.containsKey(rid)
+    ? this.distance_requests_transit.get(rid)
+    : 0 };
 }
 @ %def DBQueryRequestDistanceTransit
 
@@ -2582,11 +2588,14 @@ or [[null]] if no results.
 \end{tabular}
 <<Read: DBQueryMetricRequestDistanceDetourTotal(0)>>=
 int[] DBQueryMetricRequestDistanceDetourTotal() throws SQLException {
-  try (<<Open [[conn]]>>) {
-    return PSQuery(conn, "S113", 1);
-  } catch (SQLException e) {
-    throw e;
-  }
+  // try (<<Open [[conn]]>>) {
+  //   return PSQuery(conn, "S113", 1);
+  // } catch (SQLException e) {
+  //   throw e;
+  // }
+  final int[] output = new int[] { 0 };
+  this.distance_requests_transit.forEach((rid, val) -> output[0] += (val - this.lu_users.get(rid)[6]));
+  return output;
 }
 @ %def DBQueryMetricRequestDistanceDetourTotal
 \begin{tabular}{p{\textwidth}}
@@ -2628,11 +2637,14 @@ or [[null]] if no results.
 \end{tabular}
 <<Read: DBQueryMetricRequestDistanceTransitTotal(0)>>=
 int[] DBQueryMetricRequestDistanceTransitTotal() throws SQLException {
-  try (<<Open [[conn]]>>) {
-    return PSQuery(conn, "S115", 1);
-  } catch (SQLException e) {
-    throw e;
-  }
+  // try (<<Open [[conn]]>>) {
+  //   return PSQuery(conn, "S115", 1);
+  // } catch (SQLException e) {
+  //   throw e;
+  // }
+  final int[] output = new int[] { 0 };
+  this.distance_requests_transit.forEach((rid, val) -> output[0] += val);
+  return output;
 }
 @ %def DBQueryMetricRequestDistanceTransitTotal
 \begin{tabular}{p{\textwidth}}
