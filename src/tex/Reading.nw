@@ -2124,11 +2124,14 @@ $\mu=.1234$, then [[DBQueryMetricServiceRate]](0) returns $1234$.\\
 \end{tabular}
 <<Read: DBQueryMetricServiceRate(0)>>=
 int[] DBQueryMetricServiceRate() throws SQLException {
-  try (<<Open [[conn]]>>) {
-    return PSQuery(conn, "S102", 1);
-  } catch (SQLException e) {
-    throw e;
-  }
+  /* Query S102 works, but is not as fast as simply caching the running counts
+   * and dividing. */
+  // try (<<Open [[conn]]>>) {
+  //   return PSQuery(conn, "S102", 1);
+  // } catch (SQLException e) {
+  //   throw e;
+  // }
+  return new int[] { (int) (10000*(this.count_assigned/(double) this.count_requests)) };
 }
 @ %def DBQueryMetricServiceRate
 \begin{tabular}{p{\textwidth}}

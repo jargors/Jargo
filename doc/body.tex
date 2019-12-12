@@ -2872,7 +2872,7 @@ int[] queryServerRoute(final int sid) throws SQLException \{
 \nwixlogsorted{c}{{\code{}DesktopController\edoc{} member variables}{NWn0bN8-2iHsHO-1}{\nwixu{NWn0bN8-4ScqTl-1}\nwixd{NWn0bN8-2iHsHO-1}\nwixd{NWn0bN8-2iHsHO-2}\nwixd{NWn0bN8-2iHsHO-3}\nwixd{NWn0bN8-2iHsHO-4}\nwixd{NWn0bN8-2iHsHO-5}\nwixd{NWn0bN8-2iHsHO-6}\nwixd{NWn0bN8-2iHsHO-7}\nwixd{NWn0bN8-2iHsHO-8}\nwixd{NWn0bN8-2iHsHO-9}}}%
 \nwixlogsorted{c}{{\code{}DesktopController\edoc{} methods}{NW1pDwO-14uWYi-1}{\nwixd{NW1pDwO-14uWYi-1}\nwixd{NW1pDwO-14uWYi-2}\nwixd{NW1pDwO-14uWYi-3}\nwixu{NWn0bN8-4ScqTl-1}}}%
 \nwixlogsorted{c}{{\code{}Storage\edoc{} constructor}{NW27XAxz-36NvOs-1}{\nwixu{NW27XAxz-203Bbj-1}\nwixd{NW27XAxz-36NvOs-1}}}%
-\nwixlogsorted{c}{{\code{}Storage\edoc{} member variables}{NW27XAxz-17yXws-1}{\nwixu{NW27XAxz-203Bbj-1}\nwixd{NW27XAxz-17yXws-1}\nwixd{NW27XAxz-17yXws-2}\nwixd{NW27XAxz-17yXws-3}\nwixd{NW27XAxz-17yXws-4}}}%
+\nwixlogsorted{c}{{\code{}Storage\edoc{} member variables}{NW27XAxz-17yXws-1}{\nwixu{NW27XAxz-203Bbj-1}\nwixd{NW27XAxz-17yXws-1}\nwixd{NW27XAxz-17yXws-2}\nwixd{NW27XAxz-17yXws-3}\nwixd{NW27XAxz-17yXws-4}\nwixd{NW27XAxz-17yXws-5}}}%
 \nwixlogsorted{c}{{\code{}Storage\edoc{} methods}{NW1pDwO-Oyob-1}{\nwixd{NW1pDwO-Oyob-1}\nwixd{NW1pDwO-Oyob-2}\nwixd{NW1pDwO-Oyob-3}\nwixu{NW27XAxz-203Bbj-1}}}%
 \nwixlogsorted{c}{{\code{}Storage\edoc{} register JMX monitor}{NW4N9XWl-4R4Mml-1}{\nwixu{NW27XAxz-36NvOs-1}\nwixd{NW4N9XWl-4R4Mml-1}}}%
 \nwixlogsorted{c}{{\code{}Tools\edoc{} constructor}{NW3zOIuJ-t47ol-1}{\nwixu{NW3zOIuJ-2Vh5vZ-1}\nwixd{NW3zOIuJ-t47ol-1}}}%
@@ -4825,11 +4825,14 @@ $\mu=.1234$, then {\tt{}\protect\nwindexuse{DBQueryMetricServiceRate}{DBQueryMet
 \end{tabular}
 \nwenddocs{}\nwbegincode{145}\sublabel{NW4K8pCk-49bCCM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4K8pCk-49bCCM-1}}}\moddef{Read: DBQueryMetricServiceRate(0)~{\nwtagstyle{}\subpageref{NW4K8pCk-49bCCM-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-1}}
 int[] DBQueryMetricServiceRate() throws SQLException \{
-  try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1vLSTU-JT1v9-1}}\RA{}) \{
-    return PSQuery(conn, "S102", 1);
-  \} catch (SQLException e) \{
-    throw e;
-  \}
+  /* Query S102 works, but is not as fast as simply caching the running counts
+   * and dividing. */
+  // try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1vLSTU-JT1v9-1}}\RA{}) \{
+  //   return PSQuery(conn, "S102", 1);
+  // \} catch (SQLException e) \{
+  //   throw e;
+  // \}
+  return new int[] \{ (int) (10000*(this.count_assigned/(double) this.count_requests)) \};
 \}
 \nwindexdefn{DBQueryMetricServiceRate}{DBQueryMetricServiceRate}{NW4K8pCk-49bCCM-1}\eatline
 \nwidentdefs{\\{{DBQueryMetricServiceRate}{DBQueryMetricServiceRate}}}\nwidentuses{\\{{PSQuery}{PSQuery}}\\{{S102}{S102}}}\nwindexuse{PSQuery}{PSQuery}{NW4K8pCk-49bCCM-1}\nwindexuse{S102}{S102}{NW4K8pCk-49bCCM-1}\nwendcode{}\nwbegindocs{146}\begin{tabular}{p{\textwidth}}
@@ -6018,6 +6021,7 @@ up in our cache (we are considering users to be immutable).}
 \nwenddocs{}\nwbegincode{59}\sublabel{NW1l0GC8-xsVjY-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW1l0GC8-xsVjY-2}}}\moddef{Write: DBInsertRequest(1)~{\nwtagstyle{}\subpageref{NW1l0GC8-xsVjY-1}}}\plusendmoddef
   this.lu_users.put(u[0], u.clone());
   this.lu_rstatus.put(u[0], false);
+  this.count_requests++;
 \}
 \nwendcode{}\nwbegindocs{60}\nwdocspar
 \begin{tabular}{p{\textwidth}}
@@ -6373,6 +6377,7 @@ is now \emph{assigned}.}
 \nwenddocs{}\nwbegincode{75}\sublabel{NW1l0GC8-3yF6ns-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW1l0GC8-3yF6ns-2}}}\moddef{Write: DBUpdateServerAddToSchedule(4)~{\nwtagstyle{}\subpageref{NW1l0GC8-3yF6ns-1}}}\plusendmoddef
   for (final int r : rid) \{
     this.lu_rstatus.put(r, true);
+    this.count_assigned++;
   \}
 \}
 \nwendcode{}\nwbegindocs{76}\nwdocspar
@@ -6539,6 +6544,7 @@ is now \emph{unassigned}.}
 \nwenddocs{}\nwbegincode{81}\sublabel{NW1l0GC8-PxyQL-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW1l0GC8-PxyQL-2}}}\moddef{Write: DBUpdateServerRemoveFromSchedule(4)~{\nwtagstyle{}\subpageref{NW1l0GC8-PxyQL-1}}}\plusendmoddef
   for (final int r : rid) \{
     this.lu_rstatus.put(r, false);
+    this.count_assigned--;
   \}
 \}
 \nwendcode{}
@@ -7017,11 +7023,21 @@ we query the request's assignment status. Else, we initialize the last-visitatio
     throw e;
   \}
 \nwidentuses{\\{{DBQueryRequestIsAssigned}{DBQueryRequestIsAssigned}}}\nwindexuse{DBQueryRequestIsAssigned}{DBQueryRequestIsAssigned}{NW1vLSTU-3RkokI-4}\nwendcode{}\nwbegindocs{47}\nwdocspar
-{\small Finally we do the assignment.}
+{\small Finally we do the assignment and populate some counters.}
 \nwenddocs{}\nwbegincode{48}\sublabel{NW1vLSTU-3RkokI-5}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-3RkokI-5}}}\moddef{Admin: JargoCacheUsersFromDB(0)~{\nwtagstyle{}\subpageref{NW1vLSTU-3RkokI-1}}}\plusendmoddef
   this.lu_users   = lu1;
   this.lu_rstatus = lu2;
   this.lu_lvt     = lu3;
+  this.lu_users.forEach((uid, u) -> \{
+    if (u[1] > 0) \{
+      this.count_requests++;
+    \}
+  \});
+  this.lu_rstatus.forEach((rid, flag) -> \{
+    if (flag == true) \{
+      this.count_assigned++;
+    \}
+  \});
 \}
 \nwendcode{}\nwbegindocs{49}\nwdocspar
 \noindent\begin{tabular}{p{\textwidth}}
@@ -7964,7 +7980,7 @@ the elements do not change often. Guaranteeing consistency of the map is easy
 because only {\tt{}Storage} can update assignment changes to the database.
 Whenever it successfully does an update, we simply update the map at the same
 time.
-\nwenddocs{}\nwbegincode{15}\sublabel{NW27XAxz-17yXws-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-1}}}\moddef{\code{}Storage\edoc{} member variables~{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-1}}}\endmoddef\nwalsodefined{\\{NW27XAxz-17yXws-2}\\{NW27XAxz-17yXws-3}\\{NW27XAxz-17yXws-4}}\nwused{\\{NW27XAxz-203Bbj-1}}
+\nwenddocs{}\nwbegincode{15}\sublabel{NW27XAxz-17yXws-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-1}}}\moddef{\code{}Storage\edoc{} member variables~{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-1}}}\endmoddef\nwalsodefined{\\{NW27XAxz-17yXws-2}\\{NW27XAxz-17yXws-3}\\{NW27XAxz-17yXws-4}\\{NW27XAxz-17yXws-5}}\nwused{\\{NW27XAxz-203Bbj-1}}
 private Map<Integer, Boolean> lu_rstatus = new HashMap<>();  //*
 \nwendcode{}\nwbegindocs{16}\nwdocspar
 \item The other maps store static data values. References to these maps may be
@@ -7980,6 +7996,12 @@ private Map<Integer, Integer>             lu_lvt      = new HashMap<Integer, Int
 \nwendcode{}\nwbegindocs{18}\nwdocspar
 \end{itemize}
 
+Cache some stats:
+\nwenddocs{}\nwbegincode{19}\sublabel{NW27XAxz-17yXws-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-3}}}\moddef{\code{}Storage\edoc{} member variables~{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-1}}}\plusendmoddef
+private int count_requests = 0;
+private int count_assigned = 0;
+\nwendcode{}\nwbegindocs{20}\nwdocspar
+
 The storage interface also contains configuration settings and JDBC objects.
 \begin{itemize}
 \item Parameter
@@ -7988,7 +8010,7 @@ statements. Parameter {\tt{}REQUEST{\char95}TIMEOUT} sets how long a client is a
 try to match a request, in other words if request $r$ is not assigned within
 $\pi_\texttt{e}(r)+\texttt{REQUEST\_TIMEOUT}$, then it is not tried again.
 The remaining parameters configure the Derby database connection.
-\nwenddocs{}\nwbegincode{19}\sublabel{NW27XAxz-17yXws-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-3}}}\moddef{\code{}Storage\edoc{} member variables~{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{21}\sublabel{NW27XAxz-17yXws-4}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-4}}}\moddef{\code{}Storage\edoc{} member variables~{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-1}}}\plusendmoddef
 private final int    STATEMENTS_MAX_COUNT   = 20;
 private       int    REQUEST_TIMEOUT        = 30;
 private       String CONNECTIONS_URL        = "jdbc:derby:memory:jargo;create=true";
@@ -7996,19 +8018,19 @@ private final String CONNECTIONS_DRIVER_URL = "jdbc:apache:commons:dbcp:";
 private final String CONNECTIONS_POOL_NAME  = "jargo";
 private final String CONNECTIONS_POOL_URL   = (CONNECTIONS_DRIVER_URL + CONNECTIONS_POOL_NAME);
 public static final double CSHIFT           = 10000000.0;
-\nwendcode{}\nwbegindocs{20}\nwdocspar
+\nwendcode{}\nwbegindocs{22}\nwdocspar
 \item The {\tt{}connection{\char95}factory} is an object that returns new connections. The
 {\tt{}poolableconnection{\char95}factory} registers {\tt{}connection{\char95}factory} and then can
 return new poolable connections.  The {\tt{}pool} is an object containing the
 available poolable connections, and it is registered by the
 {\tt{}poolableconnection{\char95}factory}. The {\tt{}driver} is the JDBC {\tt{}DriverManager}.
 We get a reference to {\tt{}DriverManager} in order to register the pool.
-\nwenddocs{}\nwbegincode{21}\sublabel{NW27XAxz-17yXws-4}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-4}}}\moddef{\code{}Storage\edoc{} member variables~{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-1}}}\plusendmoddef
+\nwenddocs{}\nwbegincode{23}\sublabel{NW27XAxz-17yXws-5}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-5}}}\moddef{\code{}Storage\edoc{} member variables~{\nwtagstyle{}\subpageref{NW27XAxz-17yXws-1}}}\plusendmoddef
 private ConnectionFactory               connection_factory;
 private PoolableConnectionFactory       poolableconnection_factory;
 private ObjectPool<PoolableConnection>  pool;
 private PoolingDriver                   driver;
-\nwendcode{}\nwbegindocs{22}\nwdocspar
+\nwendcode{}\nwbegindocs{24}\nwdocspar
 \end{itemize}
 
 \section{Constructor}
@@ -8024,12 +8046,12 @@ prepared statement strings into {\tt{}lu{\char95}pstr} by using {\tt{}\protect\n
 \textbf{Throws:} nothing.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{23}\sublabel{NW27XAxz-36NvOs-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-36NvOs-1}}}\moddef{\code{}Storage\edoc{} constructor~{\nwtagstyle{}\subpageref{NW27XAxz-36NvOs-1}}}\endmoddef\nwused{\\{NW27XAxz-203Bbj-1}}
+\nwenddocs{}\nwbegincode{25}\sublabel{NW27XAxz-36NvOs-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW27XAxz-36NvOs-1}}}\moddef{\code{}Storage\edoc{} constructor~{\nwtagstyle{}\subpageref{NW27XAxz-36NvOs-1}}}\endmoddef\nwused{\\{NW27XAxz-203Bbj-1}}
 public Storage() \{
   this.JargoSetupPreparedStatements();
   \LA{}\code{}Storage\edoc{} register JMX monitor~{\nwtagstyle{}\subpageref{NW4N9XWl-4R4Mml-1}}\RA{}
 \}
-\nwidentuses{\\{{JargoSetupPreparedStatements}{JargoSetupPreparedStatements}}}\nwindexuse{JargoSetupPreparedStatements}{JargoSetupPreparedStatements}{NW27XAxz-36NvOs-1}\nwendcode{}\nwbegindocs{24}\nwdocspar
+\nwidentuses{\\{{JargoSetupPreparedStatements}{JargoSetupPreparedStatements}}}\nwindexuse{JargoSetupPreparedStatements}{JargoSetupPreparedStatements}{NW27XAxz-36NvOs-1}\nwendcode{}\nwbegindocs{26}\nwdocspar
 
 \nwenddocs{}\nwfilename{src/Controller.nw}\nwbegindocs{0}\chapter{Class: Controller}
 \label{controller}

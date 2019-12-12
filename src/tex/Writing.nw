@@ -532,6 +532,7 @@ up in our cache (we are considering users to be immutable).}
 <<Write: DBInsertRequest(1)>>=
   this.lu_users.put(u[0], u.clone());
   this.lu_rstatus.put(u[0], false);
+  this.count_requests++;
 }
 @
 \begin{tabular}{p{\textwidth}}
@@ -887,6 +888,7 @@ is now \emph{assigned}.}
 <<Write: DBUpdateServerAddToSchedule(4)>>=
   for (final int r : rid) {
     this.lu_rstatus.put(r, true);
+    this.count_assigned++;
   }
 }
 @
@@ -1053,6 +1055,7 @@ is now \emph{unassigned}.}
 <<Write: DBUpdateServerRemoveFromSchedule(4)>>=
   for (final int r : rid) {
     this.lu_rstatus.put(r, false);
+    this.count_assigned--;
   }
 }
 @

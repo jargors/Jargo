@@ -445,11 +445,21 @@ we query the request's assignment status. Else, we initialize the last-visitatio
     throw e;
   }
 @
-{\small Finally we do the assignment.}
+{\small Finally we do the assignment and populate some counters.}
 <<Admin: JargoCacheUsersFromDB(0)>>=
   this.lu_users   = lu1;
   this.lu_rstatus = lu2;
   this.lu_lvt     = lu3;
+  this.lu_users.forEach((uid, u) -> {
+    if (u[1] > 0) {
+      this.count_requests++;
+    }
+  });
+  this.lu_rstatus.forEach((rid, flag) -> {
+    if (flag == true) {
+      this.count_assigned++;
+    }
+  });
 }
 @
 \noindent\begin{tabular}{p{\textwidth}}

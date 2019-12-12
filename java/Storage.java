@@ -33,6 +33,8 @@ public class Storage {
       ConcurrentHashMap<Integer, int[]>>    lu_edges    = new ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>>();
   private ConcurrentHashMap<Integer, int[]> lu_users    = new ConcurrentHashMap<Integer, int[]>();
   private Map<Integer, Integer>             lu_lvt      = new HashMap<Integer, Integer>();
+  private int count_requests = 0;
+  private int count_assigned = 0;
   private final int    STATEMENTS_MAX_COUNT   = 20;
   private       int    REQUEST_TIMEOUT        = 30;
   private       String CONNECTIONS_URL        = "jdbc:derby:memory:jargo;create=true";
@@ -217,11 +219,14 @@ public class Storage {
            }
          }
   public int[] DBQueryMetricServiceRate() throws SQLException {
-           try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-             return PSQuery(conn, "S102", 1);
-           } catch (SQLException e) {
-             throw e;
-           }
+           /* Query S102 works, but is not as fast as simply caching the running counts
+            * and dividing. */
+           // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+           //   return PSQuery(conn, "S102", 1);
+           // } catch (SQLException e) {
+           //   throw e;
+           // }
+           return new int[] { (int) (10000*(this.count_assigned/(double) this.count_requests)) };
          }
   public int[] DBQueryMetricUserDistanceBaseTotal() throws SQLException {
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
@@ -620,6 +625,7 @@ public class Storage {
            }
            this.lu_users.put(u[0], u.clone());
            this.lu_rstatus.put(u[0], false);
+           this.count_requests++;
          }
   public void DBInsertServer(final int[] u, final int[] route)
          throws DuplicateUserException, EdgeNotFoundException, SQLException {
@@ -872,6 +878,7 @@ public class Storage {
            }
            for (final int r : rid) {
              this.lu_rstatus.put(r, true);
+             this.count_assigned++;
            }
          }
   public void DBUpdateServerRemoveFromSchedule(
@@ -992,6 +999,7 @@ public class Storage {
            }
            for (final int r : rid) {
              this.lu_rstatus.put(r, false);
+             this.count_assigned--;
            }
          }
   public void DBUpdateServerRoute(final int sid, final int[] route, final int[] sched)
@@ -1160,6 +1168,16 @@ public class Storage {
            this.lu_users   = lu1;
            this.lu_rstatus = lu2;
            this.lu_lvt     = lu3;
+           this.lu_users.forEach((uid, u) -> {
+             if (u[1] > 0) {
+               this.count_requests++;
+             }
+           });
+           this.lu_rstatus.forEach((rid, flag) -> {
+             if (flag == true) {
+               this.count_assigned++;
+             }
+           });
          }
   public void JargoInstanceClose() throws SQLException {
            try {
