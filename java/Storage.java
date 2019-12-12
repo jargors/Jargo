@@ -38,6 +38,7 @@ public class Storage {
   private int sum_distance_unassigned = 0;
   private int sum_distance_base_requests = 0;
   private int sum_distance_base_servers = 0;
+  private Map<Integer, Integer> distance_servers = new HashMap<Integer, Integer>();
   private final int    STATEMENTS_MAX_COUNT   = 20;
   private       int    REQUEST_TIMEOUT        = 30;
   private       String CONNECTIONS_URL        = "jdbc:derby:memory:jargo;create=true";
@@ -205,11 +206,14 @@ public class Storage {
            }
          }
   public int[] DBQueryMetricServerDistanceTotal() throws SQLException {
-           try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-             return PSQuery(conn, "S105", 1);
-           } catch (SQLException e) {
-             throw e;
-           }
+           // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+           //   return PSQuery(conn, "S105", 1);
+           // } catch (SQLException e) {
+           //   throw e;
+           // }
+           final int[] output = new int[] { 0 };
+           this.distance_servers.forEach((sid, val) -> output[0] += val);
+           return output;
          }
   public int[] DBQueryMetricServerDurationTravelTotal() throws SQLException {
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
@@ -1182,12 +1186,15 @@ public class Storage {
            this.lu_users   = lu1;
            this.lu_rstatus = lu2;
            this.lu_lvt     = lu3;
-           this.lu_users.forEach((uid, u) -> {
+           for (Integer uid : this.lu_users.keySet()) {
+             final int[] u = this.lu_users.get(uid);
              if (u[1] > 0) {
                this.count_requests++;
                this.sum_distance_unassigned += u[6];
+             } else {
+               this.distance_servers.put(uid, this.DBQueryServerDistance(uid)[0]);
              }
-           });
+           }
            this.lu_rstatus.forEach((rid, flag) -> {
              if (flag == true) {
                this.count_assigned++;

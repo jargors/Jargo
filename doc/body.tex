@@ -4922,11 +4922,14 @@ or {\tt{}null} if no results.
 \end{tabular}
 \nwenddocs{}\nwbegincode{153}\sublabel{NW4K8pCk-47NowU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4K8pCk-47NowU-1}}}\moddef{Read: DBQueryMetricServerDistanceTotal(0)~{\nwtagstyle{}\subpageref{NW4K8pCk-47NowU-1}}}\endmoddef\nwused{\\{NW1pDwO-Oyob-1}}
 int[] DBQueryMetricServerDistanceTotal() throws SQLException \{
-  try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1vLSTU-JT1v9-1}}\RA{}) \{
-    return PSQuery(conn, "S105", 1);
-  \} catch (SQLException e) \{
-    throw e;
-  \}
+  // try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1vLSTU-JT1v9-1}}\RA{}) \{
+  //   return PSQuery(conn, "S105", 1);
+  // \} catch (SQLException e) \{
+  //   throw e;
+  // \}
+  final int[] output = new int[] \{ 0 \};
+  this.distance_servers.forEach((sid, val) -> output[0] += val);
+  return output;
 \}
 \nwindexdefn{DBQueryMetricServerDistanceTotal}{DBQueryMetricServerDistanceTotal}{NW4K8pCk-47NowU-1}\eatline
 \nwidentdefs{\\{{DBQueryMetricServerDistanceTotal}{DBQueryMetricServerDistanceTotal}}}\nwidentuses{\\{{PSQuery}{PSQuery}}\\{{S105}{S105}}}\nwindexuse{PSQuery}{PSQuery}{NW4K8pCk-47NowU-1}\nwindexuse{S105}{S105}{NW4K8pCk-47NowU-1}\nwendcode{}\nwbegindocs{154}\begin{tabular}{p{\textwidth}}
@@ -7039,12 +7042,15 @@ we query the request's assignment status. Else, we initialize the last-visitatio
   this.lu_users   = lu1;
   this.lu_rstatus = lu2;
   this.lu_lvt     = lu3;
-  this.lu_users.forEach((uid, u) -> \{
+  for (Integer uid : this.lu_users.keySet()) \{
+    final int[] u = this.lu_users.get(uid);
     if (u[1] > 0) \{
       this.count_requests++;
       this.sum_distance_unassigned += u[6];
+    \} else \{
+      this.distance_servers.put(uid, this.DBQueryServerDistance(uid)[0]);
     \}
-  \});
+  \}
   this.lu_rstatus.forEach((rid, flag) -> \{
     if (flag == true) \{
       this.count_assigned++;
@@ -7052,7 +7058,7 @@ we query the request's assignment status. Else, we initialize the last-visitatio
     \}
   \});
 \}
-\nwendcode{}\nwbegindocs{49}\nwdocspar
+\nwidentuses{\\{{DBQueryServerDistance}{DBQueryServerDistance}}}\nwindexuse{DBQueryServerDistance}{DBQueryServerDistance}{NW1vLSTU-3RkokI-5}\nwendcode{}\nwbegindocs{49}\nwdocspar
 \noindent\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -8016,6 +8022,7 @@ private int count_assigned = 0;
 private int sum_distance_unassigned = 0;
 private int sum_distance_base_requests = 0;
 private int sum_distance_base_servers = 0;
+private Map<Integer, Integer> distance_servers = new HashMap<Integer, Integer>();
 \nwendcode{}\nwbegindocs{20}\nwdocspar
 
 The storage interface also contains configuration settings and JDBC objects.

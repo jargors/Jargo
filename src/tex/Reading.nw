@@ -2221,11 +2221,14 @@ or [[null]] if no results.
 \end{tabular}
 <<Read: DBQueryMetricServerDistanceTotal(0)>>=
 int[] DBQueryMetricServerDistanceTotal() throws SQLException {
-  try (<<Open [[conn]]>>) {
-    return PSQuery(conn, "S105", 1);
-  } catch (SQLException e) {
-    throw e;
-  }
+  // try (<<Open [[conn]]>>) {
+  //   return PSQuery(conn, "S105", 1);
+  // } catch (SQLException e) {
+  //   throw e;
+  // }
+  final int[] output = new int[] { 0 };
+  this.distance_servers.forEach((sid, val) -> output[0] += val);
+  return output;
 }
 @ %def DBQueryMetricServerDistanceTotal
 \begin{tabular}{p{\textwidth}}
