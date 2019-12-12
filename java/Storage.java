@@ -897,6 +897,7 @@ public class Storage {
              this.count_assigned++;
              this.sum_distance_unassigned -= this.lu_users.get(r)[6];
            }
+           this.distance_servers.put(sid, this.DBQueryServerDistance(sid)[0]);
          }
   public void DBUpdateServerRemoveFromSchedule(
              final int sid, final int[] route, final int[] sched, final int[] rid)
@@ -1019,6 +1020,7 @@ public class Storage {
              this.count_assigned--;
              this.sum_distance_unassigned += this.lu_users.get(r)[6];
            }
+           this.distance_servers.put(sid, this.DBQueryServerDistance(sid)[0]);
          }
   public void DBUpdateServerRoute(final int sid, final int[] route, final int[] sched)
          throws UserNotFoundException, EdgeNotFoundException, SQLException {
@@ -1125,6 +1127,7 @@ public class Storage {
            } catch (SQLException e) {
              throw e;
            }
+           this.distance_servers.put(sid, this.DBQueryServerDistance(sid)[0]);
          }
   public void JargoCacheRoadNetworkFromDB() throws SQLException {
            ConcurrentHashMap<Integer, int[]>    lu1 = new ConcurrentHashMap<Integer, int[]>();
