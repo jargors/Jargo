@@ -966,11 +966,12 @@ A [[SQLException]] is thrown in case of database failure.\\
 \end{tabular}
 <<Read: DBQueryRequestsCount(0)>>=
 int[] DBQueryRequestsCount() throws SQLException {
-  try (<<Open [[conn]]>>) {
-    return this.PSQuery(conn, "S67", 1);
-  } catch (SQLException e) {
-    throw e;
-  }
+  // try (<<Open [[conn]]>>) {
+  //   return this.PSQuery(conn, "S67", 1);
+  // } catch (SQLException e) {
+  //   throw e;
+  // }
+  return new int[] { this.count_requests };
 }
 @ %def DBQueryRequestsCount
 \begin{tabular}{p{\textwidth}}
@@ -2173,11 +2174,12 @@ or [[null]] if no results.
 \end{tabular}
 <<Read: DBQueryMetricUserDistanceBaseTotal(0)>>=
 int[] DBQueryMetricUserDistanceBaseTotal() throws SQLException {
-  try (<<Open [[conn]]>>) {
-    return PSQuery(conn, "S103", 1);
-  } catch (SQLException e) {
-    throw e;
-  }
+  // try (<<Open [[conn]]>>) {
+  //   return PSQuery(conn, "S103", 1);
+  // } catch (SQLException e) {
+  //   throw e;
+  // }
+  return new int[] { this.sum_distance_base_requests + this.sum_distance_base_servers };
 }
 @ %def DBQueryMetricUserDistanceBaseTotal
 \begin{tabular}{p{\textwidth}}
@@ -2265,11 +2267,12 @@ or [[null]] if no results.
 \end{tabular}
 <<Read: DBQueryMetricServerDistanceBaseTotal(0)>>=
 int[] DBQueryMetricServerDistanceBaseTotal() throws SQLException {
-  try (<<Open [[conn]]>>) {
-    return PSQuery(conn, "S110", 1);
-  } catch (SQLException e) {
-    throw e;
-  }
+  // try (<<Open [[conn]]>>) {
+  //   return PSQuery(conn, "S110", 1);
+  // } catch (SQLException e) {
+  //   throw e;
+  // }
+  return new int[] { this.sum_distance_base_servers };
 }
 @ %def DBQueryMetricServerDistanceBaseTotal
 \begin{tabular}{p{\textwidth}}
@@ -2468,11 +2471,12 @@ or [[null]] if no results.
 \end{tabular}
 <<Read: DBQueryMetricRequestDistanceBaseTotal(0)>>=
 int[] DBQueryMetricRequestDistanceBaseTotal() throws SQLException {
-  try (<<Open [[conn]]>>) {
-    return PSQuery(conn, "S111", 1);
-  } catch (SQLException e) {
-    throw e;
-  }
+  // try (<<Open [[conn]]>>) {
+  //   return PSQuery(conn, "S111", 1);
+  // } catch (SQLException e) {
+  //   throw e;
+  // }
+  return new int[] { this.sum_distance_base_requests };
 }
 @ %def DBQueryMetricRequestDistanceBaseTotal
 \begin{tabular}{p{\textwidth}}

@@ -534,6 +534,7 @@ up in our cache (we are considering users to be immutable).}
   this.lu_rstatus.put(u[0], false);
   this.count_requests++;
   this.sum_distance_unassigned += u[6];
+  this.sum_distance_base_requests += u[6];
 }
 @
 \begin{tabular}{p{\textwidth}}
@@ -620,6 +621,7 @@ throws DuplicateUserException, EdgeNotFoundException, SQLException {
 <<Write: DBInsertServer(2)>>=
   this.lu_users.put(uid, u.clone());
   this.lu_lvt.put(uid, 0);
+  this.sum_distance_base_servers += u[6];
 }
 @
 \begin{tabular}{p{\textwidth}}

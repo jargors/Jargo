@@ -36,6 +36,8 @@ public class Storage {
   private int count_requests = 0;
   private int count_assigned = 0;
   private int sum_distance_unassigned = 0;
+  private int sum_distance_base_requests = 0;
+  private int sum_distance_base_servers = 0;
   private final int    STATEMENTS_MAX_COUNT   = 20;
   private       int    REQUEST_TIMEOUT        = 30;
   private       String CONNECTIONS_URL        = "jdbc:derby:memory:jargo;create=true";
@@ -122,11 +124,12 @@ public class Storage {
            }
          }
   public int[] DBQueryMetricRequestDistanceBaseTotal() throws SQLException {
-           try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-             return PSQuery(conn, "S111", 1);
-           } catch (SQLException e) {
-             throw e;
-           }
+           // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+           //   return PSQuery(conn, "S111", 1);
+           // } catch (SQLException e) {
+           //   throw e;
+           // }
+           return new int[] { this.sum_distance_base_requests };
          }
   public int[] DBQueryMetricRequestDistanceBaseUnassignedTotal() throws SQLException {
            /* Query 138 works but it's faster to just keep a running tally. */
@@ -180,11 +183,12 @@ public class Storage {
            }
          }
   public int[] DBQueryMetricServerDistanceBaseTotal() throws SQLException {
-           try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-             return PSQuery(conn, "S110", 1);
-           } catch (SQLException e) {
-             throw e;
-           }
+           // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+           //   return PSQuery(conn, "S110", 1);
+           // } catch (SQLException e) {
+           //   throw e;
+           // }
+           return new int[] { this.sum_distance_base_servers };
          }
   public int[] DBQueryMetricServerDistanceCruisingTotal() throws SQLException {
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
@@ -232,11 +236,12 @@ public class Storage {
            return new int[] { (int) (10000*(this.count_assigned/(double) this.count_requests)) };
          }
   public int[] DBQueryMetricUserDistanceBaseTotal() throws SQLException {
-           try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-             return PSQuery(conn, "S103", 1);
-           } catch (SQLException e) {
-             throw e;
-           }
+           // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+           //   return PSQuery(conn, "S103", 1);
+           // } catch (SQLException e) {
+           //   throw e;
+           // }
+           return new int[] { this.sum_distance_base_requests + this.sum_distance_base_servers };
          }
   public int[] DBQueryRequestDistanceDetour(final int rid) throws SQLException {
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
@@ -306,11 +311,12 @@ public class Storage {
            }
          }
   public int[] DBQueryRequestsCount() throws SQLException {
-           try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-             return this.PSQuery(conn, "S67", 1);
-           } catch (SQLException e) {
-             throw e;
-           }
+           // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+           //   return this.PSQuery(conn, "S67", 1);
+           // } catch (SQLException e) {
+           //   throw e;
+           // }
+           return new int[] { this.count_requests };
          }
   public int[] DBQueryRequestsQueued(final int t) throws SQLException {
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
@@ -630,6 +636,7 @@ public class Storage {
            this.lu_rstatus.put(u[0], false);
            this.count_requests++;
            this.sum_distance_unassigned += u[6];
+           this.sum_distance_base_requests += u[6];
          }
   public void DBInsertServer(final int[] u, final int[] route)
          throws DuplicateUserException, EdgeNotFoundException, SQLException {
@@ -691,6 +698,7 @@ public class Storage {
            }
            this.lu_users.put(uid, u.clone());
            this.lu_lvt.put(uid, 0);
+           this.sum_distance_base_servers += u[6];
          }
   public void DBInsertVertex(final int v, final int lng, final int lat)
          throws DuplicateVertexException, SQLException {
