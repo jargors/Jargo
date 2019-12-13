@@ -759,8 +759,8 @@ public class Storage {
            this.sum_distance_base_servers += u[6];
            this.distance_servers.put(uid, u[6]);
            this.distance_servers_service.put(uid, u[6]);
-           this.duration_servers.put(uid, route[(route.length - 2)]);
-           this.duration_servers_service.put(uid, route[(route.length - 2)]);
+           this.duration_servers.put(uid, (route[(route.length - 2)] - route[0]));
+           this.duration_servers_service.put(uid, (route[(route.length - 2)] - route[0]));
          }
   public void DBInsertVertex(final int v, final int lng, final int lat)
          throws DuplicateVertexException, SQLException {
