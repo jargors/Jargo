@@ -183,6 +183,8 @@ public class Controller {
   private long statQueryMetricServerDistanceCruisingTotalDur = 0;
   private long statQueryMetricServerDistanceServiceTotalDur = 0;
   private long statQueryMetricServerDistanceTotalDur = 0;
+  private long statQueryMetricServerDurationCruisingTotalDur = 0;
+  private long statQueryMetricServerDurationServiceTotalDur = 0;
   private long statQueryMetricServerDurationTravelTotalDur = 0;
   private long statQueryMetricServerTWViolationsTotalDur = 0;
   private long statQueryMetricServiceRateDur = 0;
@@ -296,6 +298,12 @@ public class Controller {
          }
   public long getStatQueryMetricServerDistanceTotalDur() {
            return this.statQueryMetricServerDistanceTotalDur;
+         }
+  public long getStatQueryMetricServerDurationCruisingTotalDur() {
+           return this.statQueryMetricServerDurationCruisingTotalDur;
+         }
+  public long getStatQueryMetricServerDurationServiceTotalDur() {
+           return this.statQueryMetricServerDurationServiceTotalDur;
          }
   public long getStatQueryMetricServerDurationTravelTotalDur() {
            return this.statQueryMetricServerDurationTravelTotalDur;
@@ -463,6 +471,18 @@ public class Controller {
            long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryMetricServerDistanceTotal();
            this.statQueryMetricServerDistanceTotalDur = (System.currentTimeMillis() - A0);
+           return output;
+         }
+  public int[] queryMetricServerDurationCruisingTotal() throws SQLException {
+           long A0 = System.currentTimeMillis();
+           int[] output = storage.DBQueryMetricServerDurationCruisingTotal();
+           this.statQueryMetricServerDurationCruisingTotalDur = (System.currentTimeMillis() - A0);
+           return output;
+         }
+  public int[] queryMetricServerDurationServiceTotal() throws SQLException {
+           long A0 = System.currentTimeMillis();
+           int[] output = storage.DBQueryMetricServerDurationServiceTotal();
+           this.statQueryMetricServerDurationServiceTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryMetricServerDurationTravelTotal() throws SQLException {

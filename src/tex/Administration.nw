@@ -28,19 +28,26 @@ try (<<Open [[conn]]>>) {
 }
 @
 
-\subsection{Cache service distance}
-<<Cache service distance>>=
+\subsection{Cache service distance and duration}
+<<Cache service distance and duration>>=
 try (<<Open [[conn]]>>) {
   int sum = 0;
+  int dur = 0;
   int[] output = this.PSQuery(conn, "S153", 2, sid);
+  int  ts = output[0];
   for (int i = 0; i < output.length - 1; i++) {
     final int t1 = output[(i + 0)];
     final int t2 = output[(i + 1)];
     sum += this.PSQuery(conn, "S154", 1, sid, t1, t2)[0];
+    dur += (t2 - t1);
   }
   final int tt = this.PSQuery(conn, "S155", 1, sid)[0];
+  final int te = this.PSQuery(conn, "S145", 2, sid)[0];
   sum += this.DBQueryServerDistanceRemaining(sid, tt)[0];
+  dur += (te - tt);
   this.distance_servers_service.put(sid, sum);
+  this.duration_servers_service.put(sid, dur);
+  this.duration_servers.put(sid, (te - ts));
 } catch (SQLException e) {
   throw e;
 }
@@ -496,7 +503,7 @@ we query the request's assignment status. Else, we initialize the last-visitatio
     } else {
       final int sid = uid;
       <<Cache server distance>>
-      <<Cache service distance>>
+      <<Cache service distance and duration>>
     }
   }
   for (Integer rid : this.lu_rstatus.keySet()) {

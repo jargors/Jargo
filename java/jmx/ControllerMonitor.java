@@ -84,6 +84,12 @@ public class ControllerMonitor implements ControllerMonitorMBean {
   public long getStatQueryMetricServerDistanceTotalDur() {
     return this.controller.getStatQueryMetricServerDistanceTotalDur();
   }
+  public long getStatQueryMetricServerDurationCruisingTotalDur() {
+    return this.controller.getStatQueryMetricServerDurationCruisingTotalDur();
+  }
+  public long getStatQueryMetricServerDurationServiceTotalDur() {
+    return this.controller.getStatQueryMetricServerDurationServiceTotalDur();
+  }
   public long getStatQueryMetricServerDurationTravelTotalDur() {
     return this.controller.getStatQueryMetricServerDurationTravelTotalDur();
   }

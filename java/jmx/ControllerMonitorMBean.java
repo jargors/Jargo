@@ -27,6 +27,8 @@ public interface ControllerMonitorMBean {
   public long getStatQueryMetricServerDistanceCruisingTotalDur();
   public long getStatQueryMetricServerDistanceServiceTotalDur();
   public long getStatQueryMetricServerDistanceTotalDur();
+  public long getStatQueryMetricServerDurationCruisingTotalDur();
+  public long getStatQueryMetricServerDurationServiceTotalDur();
   public long getStatQueryMetricServerDurationTravelTotalDur();
   public long getStatQueryMetricServerTWViolationsTotalDur();
   public long getStatQueryMetricServiceRateDur();

@@ -508,7 +508,8 @@ public class DesktopController {
         } else if ("chk_serverServiceDuration".equals(this.id)) {
           
         } else if ("chk_serverCruisingDuration".equals(this.id)) {
-          
+          int[] output = this.controller.queryMetricServerDurationCruisingTotal();
+          val = (output.length > 0 ? output[0] : 0);
         } else if ("chk_requestDistanceUnassigned".equals(this.id)) {
           int[] output = this.controller.queryMetricRequestDistanceBaseUnassignedTotal();
           val = (output.length > 0 ? output[0] : 0);

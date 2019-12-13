@@ -41,6 +41,8 @@ public class Storage {
   private Map<Integer, Integer> distance_servers = new HashMap<Integer, Integer>();
   private Map<Integer, Integer> distance_servers_service = new HashMap<Integer, Integer>();
   private Map<Integer, Integer> distance_requests_transit = new HashMap<Integer, Integer>();
+  private Map<Integer, Integer> duration_servers = new HashMap<Integer, Integer>();
+  private Map<Integer, Integer> duration_servers_service = new HashMap<Integer, Integer>();
   private final int    STATEMENTS_MAX_COUNT   = 20;
   private       int    REQUEST_TIMEOUT        = 30;
   private       String CONNECTIONS_URL        = "jdbc:derby:memory:jargo;create=true";
@@ -231,6 +233,20 @@ public class Storage {
            this.distance_servers.forEach((sid, val) -> output[0] += val);
            return output;
          }
+  public int[] DBQueryMetricServerDurationCruisingTotal() throws SQLException {
+           final int[] output = new int[] { 0 };
+           this.duration_servers_service.forEach((sid, val) ->
+             output[0] += (this.duration_servers.get(sid) - val)
+           );
+           return output;
+         }
+  public int[] DBQueryMetricServerDurationServiceTotal() throws SQLException {
+           final int[] output = new int[] { 0 };
+           this.duration_servers_service.forEach((sid, val) ->
+             output[0] += val
+           );
+           return output;
+         }
   public int[] DBQueryMetricServerDurationTravelTotal() throws SQLException {
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
              return PSQuery(conn, "S117", 1);
@@ -414,6 +430,16 @@ public class Storage {
            // }
            return new int[] { this.distance_servers_service.get(sid) };
          }
+  public int[] DBQueryServerDurationCruising(final int sid) throws SQLException {
+           return this.duration_servers.containsKey(sid)
+             ? new int[] { (this.duration_servers.get(sid) - this.duration_servers_service.get(sid)) }
+             : new int[] { };
+         }
+  public int[] DBQueryServerDurationService(final int sid) throws SQLException {
+           return this.duration_servers_service.containsKey(sid)
+             ? new int[] { this.duration_servers_service.get(sid) }
+             : new int[] { };
+         }
   public int[] DBQueryServerDurationRemaining(final int sid, final int t)
          throws SQLException {
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
@@ -427,11 +453,14 @@ public class Storage {
            }
          }
   public int[] DBQueryServerDurationTravel(final int sid) throws SQLException {
-           try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-             return PSQuery(conn, "S116", 1, sid);
-           } catch (SQLException e) {
-             throw e;
-           }
+           // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+           //   return PSQuery(conn, "S116", 1, sid);
+           // } catch (SQLException e) {
+           //   throw e;
+           // }
+           return this.duration_servers.containsKey(sid)
+             ? new int[] { this.duration_servers.get(sid) }
+             : new int[] { };
          }
   public int[] DBQueryServerLoadMax(final int sid, final int t) throws SQLException {
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
@@ -730,6 +759,8 @@ public class Storage {
            this.sum_distance_base_servers += u[6];
            this.distance_servers.put(uid, u[6]);
            this.distance_servers_service.put(uid, u[6]);
+           this.duration_servers.put(uid, route[(route.length - 2)]);
+           this.duration_servers_service.put(uid, route[(route.length - 2)]);
          }
   public void DBInsertVertex(final int v, final int lng, final int lat)
          throws DuplicateVertexException, SQLException {
@@ -938,15 +969,22 @@ public class Storage {
            }
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
              int sum = 0;
+             int dur = 0;
              int[] output = this.PSQuery(conn, "S153", 2, sid);
+             int  ts = output[0];
              for (int i = 0; i < output.length - 1; i++) {
                final int t1 = output[(i + 0)];
                final int t2 = output[(i + 1)];
                sum += this.PSQuery(conn, "S154", 1, sid, t1, t2)[0];
+               dur += (t2 - t1);
              }
              final int tt = this.PSQuery(conn, "S155", 1, sid)[0];
+             final int te = this.PSQuery(conn, "S145", 2, sid)[0];
              sum += this.DBQueryServerDistanceRemaining(sid, tt)[0];
+             dur += (te - tt);
              this.distance_servers_service.put(sid, sum);
+             this.duration_servers_service.put(sid, dur);
+             this.duration_servers.put(sid, (te - ts));
            } catch (SQLException e) {
              throw e;
            }
@@ -1080,15 +1118,22 @@ public class Storage {
            }
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
              int sum = 0;
+             int dur = 0;
              int[] output = this.PSQuery(conn, "S153", 2, sid);
+             int  ts = output[0];
              for (int i = 0; i < output.length - 1; i++) {
                final int t1 = output[(i + 0)];
                final int t2 = output[(i + 1)];
                sum += this.PSQuery(conn, "S154", 1, sid, t1, t2)[0];
+               dur += (t2 - t1);
              }
              final int tt = this.PSQuery(conn, "S155", 1, sid)[0];
+             final int te = this.PSQuery(conn, "S145", 2, sid)[0];
              sum += this.DBQueryServerDistanceRemaining(sid, tt)[0];
+             dur += (te - tt);
              this.distance_servers_service.put(sid, sum);
+             this.duration_servers_service.put(sid, dur);
+             this.duration_servers.put(sid, (te - ts));
            } catch (SQLException e) {
              throw e;
            }
@@ -1205,15 +1250,22 @@ public class Storage {
            }
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
              int sum = 0;
+             int dur = 0;
              int[] output = this.PSQuery(conn, "S153", 2, sid);
+             int  ts = output[0];
              for (int i = 0; i < output.length - 1; i++) {
                final int t1 = output[(i + 0)];
                final int t2 = output[(i + 1)];
                sum += this.PSQuery(conn, "S154", 1, sid, t1, t2)[0];
+               dur += (t2 - t1);
              }
              final int tt = this.PSQuery(conn, "S155", 1, sid)[0];
+             final int te = this.PSQuery(conn, "S145", 2, sid)[0];
              sum += this.DBQueryServerDistanceRemaining(sid, tt)[0];
+             dur += (te - tt);
              this.distance_servers_service.put(sid, sum);
+             this.duration_servers_service.put(sid, dur);
+             this.duration_servers.put(sid, (te - ts));
            } catch (SQLException e) {
              throw e;
            }
@@ -1292,15 +1344,22 @@ public class Storage {
                }
                try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
                  int sum = 0;
+                 int dur = 0;
                  int[] output = this.PSQuery(conn, "S153", 2, sid);
+                 int  ts = output[0];
                  for (int i = 0; i < output.length - 1; i++) {
                    final int t1 = output[(i + 0)];
                    final int t2 = output[(i + 1)];
                    sum += this.PSQuery(conn, "S154", 1, sid, t1, t2)[0];
+                   dur += (t2 - t1);
                  }
                  final int tt = this.PSQuery(conn, "S155", 1, sid)[0];
+                 final int te = this.PSQuery(conn, "S145", 2, sid)[0];
                  sum += this.DBQueryServerDistanceRemaining(sid, tt)[0];
+                 dur += (te - tt);
                  this.distance_servers_service.put(sid, sum);
+                 this.duration_servers_service.put(sid, dur);
+                 this.duration_servers.put(sid, (te - ts));
                } catch (SQLException e) {
                  throw e;
                }
