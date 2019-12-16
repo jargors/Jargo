@@ -1505,11 +1505,11 @@ int[] queryServerDistanceRemaining(final int sid, final int t) throws SQLExcepti
 }
 @ %def queryServerDistanceRemaining
 
-\subsection{\texttt{DBQueryServerDistanceCruising}(1)}
+\subsection{\texttt{DBQueryServerDistanceCruising}(2)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBQueryServerDistanceCruising]]}(1) returns the
+Method \textcolor{blue}{[[DBQueryServerDistanceCruising]]}(2) returns the
 cruising distance $D^\textrm{cruise}(\mathcal{X},s)$
 (Eq.~\ref{eq:cruising-distance}) of the given server.
 A [[SQLException]] is thrown in case of database failure.\\
@@ -1533,14 +1533,17 @@ where $s$ is the server identified by [[sid]] (param. 1).\\
 \textbf{Throws:} [[SQLException]] if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-<<Read: DBQueryServerDistanceCruising(1)>>=
-int[] DBQueryServerDistanceCruising(final int sid) throws SQLException {
-  // try (<<Open [[conn]]>>) {
-  //   return PSQuery(conn, "S106", 1, sid);
-  // } catch (SQLException e) {
-  //   throw e;
-  // }
-  return new int [] { this.distance_servers_cruising.get(sid) };
+<<Read: DBQueryServerDistanceCruising(2)>>=
+int[] DBQueryServerDistanceCruising(final int sid, boolean flag_usecache) throws SQLException {
+  if (flag_usecache) {
+    return new int [] { this.distance_servers_cruising.get(sid) };
+  } else {
+    try (<<Open [[conn]]>>) {
+      return PSQuery(conn, "S106", 1, sid);
+    } catch (SQLException e) {
+      throw e;
+    }
+  }
 }
 @ %def DBQueryServerDistanceCruising
 
@@ -2414,11 +2417,11 @@ int[] queryMetricServerDistanceBaseTotal() throws SQLException {
 }
 @ %def queryMetricServerDistanceBaseTotal
 
-\subsection{\texttt{DBQueryMetricServerDistanceCruisingTotal}(0)}
+\subsection{\texttt{DBQueryMetricServerDistanceCruisingTotal}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBQueryMetricServerDistanceCruisingTotal]]}(0) returns the
+Method \textcolor{blue}{[[DBQueryMetricServerDistanceCruisingTotal]]}(1) returns the
 total cruising distance of all servers.
 A [[SQLException]] is thrown in case of database failure.\\
 \midrule
@@ -2436,34 +2439,60 @@ or [[null]] if no results.
 \textbf{Throws:} [[SQLException]] if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-<<Read: DBQueryMetricServerDistanceCruisingTotal(0)>>=
-int[] DBQueryMetricServerDistanceCruisingTotal() throws SQLException {
-  // try (<<Open [[conn]]>>) {
-  //   return PSQuery(conn, "S107", 1);
-  // } catch (SQLException e) {
-  //   throw e;
-  // }
-  final int[] output = new int[] { 0 };
-  this.distance_servers_cruising.forEach((sid, val) ->
-    output[0] += (val - this.distance_servers_cruising.get(sid))
-  );
-  return output;
+<<Read: DBQueryMetricServerDistanceCruisingTotal(1)>>=
+int[] DBQueryMetricServerDistanceCruisingTotal(boolean flag_usecache) throws SQLException {
+  if (flag_usecache) {
+    final int[] output = new int[] { 0 };
+    this.distance_servers_cruising.forEach((sid, val) -> output[0] += val);
+    return output;
+  } else {
+    try (<<Open [[conn]]>>) {
+      return PSQuery(conn, "S107", 1);
+    } catch (SQLException e) {
+      throw e;
+    }
+  }
 }
 @ %def DBQueryMetricServerDistanceCruisingTotal
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[queryMetricServerDistanceCruisingTotal]]}(0) wraps [[DBQueryMetricServerDistanceCruisingTotal]](0).\\
+Method \textcolor{blue}{[[DBQueryMetricServerDistanceCruisingTotal]]}(0) calls [[DBQueryMetricServerDistanceCruisingTotal]](1)
+with a default parameter.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryMetricServerDistanceCruisingTotal(0)>>=
+int[] DBQueryMetricServerDistanceCruisingTotal() throws SQLException {
+  return DBQueryMetricServerDistanceCruisingTotal(true);
+}
+@
+\noindent
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryMetricServerDistanceCruisingTotal]]}(1) wraps [[DBQueryMetricServerDistanceCruisingTotal]](1).\\
+\bottomrule
+\end{tabular}
+<<Read: queryMetricServerDistanceCruisingTotal(1)>>=
+int[] queryMetricServerDistanceCruisingTotal(boolean flag_usecache) throws SQLException {
+  long A0 = System.currentTimeMillis();
+  int[] output = storage.DBQueryMetricServerDistanceCruisingTotal(flag_usecache);
+  <<Stats: queryMetricServerDistanceCruisingTotal(1)>>
+  return output;
+}
+@ %def queryMetricServerDistanceCruisingTotal
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryMetricServerDistanceCruisingTotal]]}(0) calls [[queryMetricServerDistanceCruisingTotal]](1)
+with a default parameter.\\
 \bottomrule
 \end{tabular}
 <<Read: queryMetricServerDistanceCruisingTotal(0)>>=
 int[] queryMetricServerDistanceCruisingTotal() throws SQLException {
-  long A0 = System.currentTimeMillis();
-  int[] output = storage.DBQueryMetricServerDistanceCruisingTotal();
-  <<Stats: queryMetricServerDistanceCruisingTotal(0)>>
-  return output;
+  return queryMetricServerDistanceCruisingTotal(true);
 }
-@ %def queryMetricServerDistanceCruisingTotal
+@
 
 \subsection{\texttt{DBQueryMetricServerDistanceServiceTotal}(1)}
 \begin{tabular}{p{\textwidth}}

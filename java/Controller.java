@@ -455,9 +455,9 @@ public class Controller {
            this.statQueryMetricServerDistanceBaseTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
-  public int[] queryMetricServerDistanceCruisingTotal() throws SQLException {
+  public int[] queryMetricServerDistanceCruisingTotal(boolean flag_usecache) throws SQLException {
            long A0 = System.currentTimeMillis();
-           int[] output = storage.DBQueryMetricServerDistanceCruisingTotal();
+           int[] output = storage.DBQueryMetricServerDistanceCruisingTotal(flag_usecache);
            this.statQueryMetricServerDistanceCruisingTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
@@ -607,6 +607,9 @@ public class Controller {
          }
   public int[] queryMetricRequestDistanceBaseUnassignedTotal() throws SQLException {
            return queryMetricRequestDistanceBaseUnassignedTotal(true);
+         }
+  public int[] queryMetricServerDistanceCruisingTotal() throws SQLException {
+           return queryMetricServerDistanceCruisingTotal(true);
          }
   public int[] queryMetricServerDistanceServiceTotal() throws SQLException {
            return queryMetricServerDistanceServiceTotal(true);

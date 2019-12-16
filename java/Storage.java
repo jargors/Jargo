@@ -203,17 +203,18 @@ public class Storage {
            // }
            return new int[] { this.sum_distance_base_servers };
          }
-  public int[] DBQueryMetricServerDistanceCruisingTotal() throws SQLException {
-           // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-           //   return PSQuery(conn, "S107", 1);
-           // } catch (SQLException e) {
-           //   throw e;
-           // }
-           final int[] output = new int[] { 0 };
-           this.distance_servers_cruising.forEach((sid, val) ->
-             output[0] += (val - this.distance_servers_cruising.get(sid))
-           );
-           return output;
+  public int[] DBQueryMetricServerDistanceCruisingTotal(boolean flag_usecache) throws SQLException {
+           if (flag_usecache) {
+             final int[] output = new int[] { 0 };
+             this.distance_servers_cruising.forEach((sid, val) -> output[0] += val);
+             return output;
+           } else {
+             try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+               return PSQuery(conn, "S107", 1);
+             } catch (SQLException e) {
+               throw e;
+             }
+           }
          }
   public int[] DBQueryMetricServerDistanceServiceTotal(boolean flag_usecache) throws SQLException {
            if (flag_usecache) {
@@ -424,13 +425,16 @@ public class Storage {
              }
            }
          }
-  public int[] DBQueryServerDistanceCruising(final int sid) throws SQLException {
-           // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-           //   return PSQuery(conn, "S106", 1, sid);
-           // } catch (SQLException e) {
-           //   throw e;
-           // }
-           return new int [] { this.distance_servers_cruising.get(sid) };
+  public int[] DBQueryServerDistanceCruising(final int sid, boolean flag_usecache) throws SQLException {
+           if (flag_usecache) {
+             return new int [] { this.distance_servers_cruising.get(sid) };
+           } else {
+             try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+               return PSQuery(conn, "S106", 1, sid);
+             } catch (SQLException e) {
+               throw e;
+             }
+           }
          }
   public int[] DBQueryServerDistanceRemaining(final int sid, final int t)
          throws SQLException {
@@ -654,6 +658,9 @@ public class Storage {
          }
   public int[] DBQueryMetricRequestDistanceBaseUnassignedTotal() throws SQLException {
            return DBQueryMetricRequestDistanceBaseUnassignedTotal(true);
+         }
+  public int[] DBQueryMetricServerDistanceCruisingTotal() throws SQLException {
+           return DBQueryMetricServerDistanceCruisingTotal(true);
          }
   public int[] DBQueryMetricServerDistanceServiceTotal() throws SQLException {
            return DBQueryMetricServerDistanceServiceTotal(true);
