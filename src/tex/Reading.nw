@@ -648,11 +648,11 @@ int[] DBQueryRequestIsAssigned(final int rid) throws SQLException {
 }
 @ %def DBQueryRequestIsAssigned
 
-\subsection{\texttt{DBQueryRequestDistanceDetour}(1)}
+\subsection{\texttt{DBQueryRequestDistanceDetour}(2)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBQueryRequestDistanceDetour]]}(1) returns the
+Method \textcolor{blue}{[[DBQueryRequestDistanceDetour]]}(2) returns the
 detour distance $D^\textrm{detour}(\mathcal{X},r)$
 (Eq.~\ref{eq:detour-distance}) of the given request.
 A [[SQLException]] is thrown in case of database failure.\\
@@ -676,16 +676,19 @@ where $r$ is the request identified by [[rid]] (param. 1).\\
 \textbf{Throws:} [[SQLException]] if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-<<Read: DBQueryRequestDistanceDetour(1)>>=
-int[] DBQueryRequestDistanceDetour(final int rid) throws SQLException {
-  // try (<<Open [[conn]]>>) {
-  //   return PSQuery(conn, "S112", 1, rid);
-  // } catch (SQLException e) {
-  //   throw e;
-  // }
-  return new int[] { this.distance_requests_transit.containsKey(rid)
-    ? this.distance_requests_transit.get(rid) - this.lu_users.get(rid)[6]
-    : 0 };
+<<Read: DBQueryRequestDistanceDetour(2)>>=
+int[] DBQueryRequestDistanceDetour(final int rid, boolean flag_usecache) throws SQLException {
+  if (flag_usecache) {
+    return new int[] { this.distance_requests_transit.containsKey(rid)
+      ? this.distance_requests_transit.get(rid) - this.lu_users.get(rid)[6]
+      : 0 };
+  } else {
+    try (<<Open [[conn]]>>) {
+      return PSQuery(conn, "S112", 1, rid);
+    } catch (SQLException e) {
+      throw e;
+    }
+  }
 }
 @ %def DBQueryRequestDistanceDetour
 
@@ -2803,11 +2806,11 @@ int[] queryMetricRequestDistanceBaseUnassignedTotal() throws SQLException {
 }
 @
 
-\subsection{\texttt{DBQueryMetricRequestDistanceDetourTotal}(0)}
+\subsection{\texttt{DBQueryMetricRequestDistanceDetourTotal}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBQueryMetricRequestDistanceDetourTotal]]}(0) returns the
+Method \textcolor{blue}{[[DBQueryMetricRequestDistanceDetourTotal]]}(1) returns the
 total detour distance of all requests.
 A [[SQLException]] is thrown in case of database failure.\\
 \midrule
@@ -2825,32 +2828,62 @@ or [[null]] if no results.
 \textbf{Throws:} [[SQLException]] if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-<<Read: DBQueryMetricRequestDistanceDetourTotal(0)>>=
-int[] DBQueryMetricRequestDistanceDetourTotal() throws SQLException {
-  // try (<<Open [[conn]]>>) {
-  //   return PSQuery(conn, "S113", 1);
-  // } catch (SQLException e) {
-  //   throw e;
-  // }
-  final int[] output = new int[] { 0 };
-  this.distance_requests_transit.forEach((rid, val) -> output[0] += (val - this.lu_users.get(rid)[6]));
-  return output;
+<<Read: DBQueryMetricRequestDistanceDetourTotal(1)>>=
+int[] DBQueryMetricRequestDistanceDetourTotal(boolean flag_usecache) throws SQLException {
+  if (flag_usecache) {
+    final int[] output = new int[] { 0 };
+    this.distance_requests_transit.forEach((rid, val) ->
+      output[0] += (val - this.lu_users.get(rid)[6])
+    );
+    return output;
+  } else {
+    try (<<Open [[conn]]>>) {
+      return PSQuery(conn, "S113", 1);
+    } catch (SQLException e) {
+      throw e;
+    }
+  }
 }
 @ %def DBQueryMetricRequestDistanceDetourTotal
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[queryMetricRequestDistanceDetourTotal]]}(0) wraps [[DBQueryMetricRequestDistanceDetourTotal]](0).\\
+Method \textcolor{blue}{[[DBQueryMetricRequestDistanceDetourTotal]]}(0) calls [[DBQueryMetricRequestDistanceDetourTotal]](1)
+with a default parameter.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryMetricRequestDistanceDetourTotal(0)>>=
+int[] DBQueryMetricRequestDistanceDetourTotal() throws SQLException {
+  return DBQueryMetricRequestDistanceDetourTotal(true);
+}
+@
+\noindent
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryMetricRequestDistanceDetourTotal]]}(1) wraps [[DBQueryMetricRequestDistanceDetourTotal]](1).\\
+\bottomrule
+\end{tabular}
+<<Read: queryMetricRequestDistanceDetourTotal(1)>>=
+int[] queryMetricRequestDistanceDetourTotal(boolean flag_usecache) throws SQLException {
+  long A0 = System.currentTimeMillis();
+  int[] output = storage.DBQueryMetricRequestDistanceDetourTotal(flag_usecache);
+  <<Stats: queryMetricRequestDistanceDetourTotal(1)>>
+  return output;
+}
+@ %def queryMetricRequestDistanceDetourTotal
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryMetricRequestDistanceDetourTotal]]}(0) calls [[queryMetricRequestDistanceDetourTotal]](1)
+with a default parameter.\\
 \bottomrule
 \end{tabular}
 <<Read: queryMetricRequestDistanceDetourTotal(0)>>=
 int[] queryMetricRequestDistanceDetourTotal() throws SQLException {
-  long A0 = System.currentTimeMillis();
-  int[] output = storage.DBQueryMetricRequestDistanceDetourTotal();
-  <<Stats: queryMetricRequestDistanceDetourTotal(0)>>
-  return output;
+  return queryMetricRequestDistanceDetourTotal(true);
 }
-@ %def queryMetricRequestDistanceDetourTotal
+@
 
 \subsection{\texttt{DBQueryMetricRequestDistanceTransitTotal}(1)}
 \begin{tabular}{p{\textwidth}}

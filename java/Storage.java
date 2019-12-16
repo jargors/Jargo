@@ -147,15 +147,20 @@ public class Storage {
              }
            }
          }
-  public int[] DBQueryMetricRequestDistanceDetourTotal() throws SQLException {
-           // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-           //   return PSQuery(conn, "S113", 1);
-           // } catch (SQLException e) {
-           //   throw e;
-           // }
-           final int[] output = new int[] { 0 };
-           this.distance_requests_transit.forEach((rid, val) -> output[0] += (val - this.lu_users.get(rid)[6]));
-           return output;
+  public int[] DBQueryMetricRequestDistanceDetourTotal(boolean flag_usecache) throws SQLException {
+           if (flag_usecache) {
+             final int[] output = new int[] { 0 };
+             this.distance_requests_transit.forEach((rid, val) ->
+               output[0] += (val - this.lu_users.get(rid)[6])
+             );
+             return output;
+           } else {
+             try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+               return PSQuery(conn, "S113", 1);
+             } catch (SQLException e) {
+               throw e;
+             }
+           }
          }
   public int[] DBQueryMetricRequestDistanceTransitTotal(boolean flag_usecache) throws SQLException {
            if (flag_usecache) {
@@ -298,15 +303,18 @@ public class Storage {
              }
            }
          }
-  public int[] DBQueryRequestDistanceDetour(final int rid) throws SQLException {
-           // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-           //   return PSQuery(conn, "S112", 1, rid);
-           // } catch (SQLException e) {
-           //   throw e;
-           // }
-           return new int[] { this.distance_requests_transit.containsKey(rid)
-             ? this.distance_requests_transit.get(rid) - this.lu_users.get(rid)[6]
-             : 0 };
+  public int[] DBQueryRequestDistanceDetour(final int rid, boolean flag_usecache) throws SQLException {
+           if (flag_usecache) {
+             return new int[] { this.distance_requests_transit.containsKey(rid)
+               ? this.distance_requests_transit.get(rid) - this.lu_users.get(rid)[6]
+               : 0 };
+           } else {
+             try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+               return PSQuery(conn, "S112", 1, rid);
+             } catch (SQLException e) {
+               throw e;
+             }
+           }
          }
   public int[] DBQueryRequestDistanceTransit(final int rid, boolean flag_usecache) throws SQLException {
            if (flag_usecache) {
@@ -664,6 +672,9 @@ public class Storage {
          }
   public int[] DBQueryMetricRequestDistanceBaseUnassignedTotal() throws SQLException {
            return DBQueryMetricRequestDistanceBaseUnassignedTotal(true);
+         }
+  public int[] DBQueryMetricRequestDistanceDetourTotal() throws SQLException {
+           return DBQueryMetricRequestDistanceDetourTotal(true);
          }
   public int[] DBQueryMetricRequestDistanceTransitTotal() throws SQLException {
            return DBQueryMetricRequestDistanceTransitTotal(true);
