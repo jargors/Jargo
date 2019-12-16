@@ -467,9 +467,9 @@ public class Controller {
            this.statQueryMetricServerDistanceServiceTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
-  public int[] queryMetricServerDistanceTotal() throws SQLException {
+  public int[] queryMetricServerDistanceTotal(boolean flag_usecache) throws SQLException {
            long A0 = System.currentTimeMillis();
-           int[] output = storage.DBQueryMetricServerDistanceTotal();
+           int[] output = storage.DBQueryMetricServerDistanceTotal(flag_usecache);
            this.statQueryMetricServerDistanceTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
@@ -604,6 +604,9 @@ public class Controller {
            int[] output = this.storage.DBQueryVerticesCount();
            this.statQueryVerticesCountDur = (System.currentTimeMillis() - A0);
            return output;
+         }
+  public int[] queryMetricServerDistanceTotal() throws SQLException {
+           return queryMetricServerDistanceTotal(true);
          }
   public int[] queryMetricServiceRate() throws SQLException {
            return queryMetricServiceRate(true);

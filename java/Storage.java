@@ -223,15 +223,18 @@ public class Storage {
            this.distance_servers_service.forEach((sid, val) -> output[0] += val);
            return output;
          }
-  public int[] DBQueryMetricServerDistanceTotal() throws SQLException {
-           // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-           //   return PSQuery(conn, "S105", 1);
-           // } catch (SQLException e) {
-           //   throw e;
-           // }
-           final int[] output = new int[] { 0 };
-           this.distance_servers.forEach((sid, val) -> output[0] += val);
-           return output;
+  public int[] DBQueryMetricServerDistanceTotal(boolean flag_usecache) throws SQLException {
+           if (flag_usecache) {
+             final int[] output = new int[] { 0 };
+             this.distance_servers.forEach((sid, val) -> output[0] += val);
+             return output;
+           } else {
+             try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+               return PSQuery(conn, "S105", 1);
+             } catch (SQLException e) {
+               throw e;
+             }
+           }
          }
   public int[] DBQueryMetricServerDurationCruisingTotal() throws SQLException {
            final int[] output = new int[] { 0 };
@@ -638,6 +641,9 @@ public class Storage {
            } catch (SQLException e) {
              throw e;
            }
+         }
+  public int[] DBQueryMetricServerDistanceTotal() throws SQLException {
+           return DBQueryMetricServerDistanceTotal(true);
          }
   public int[] DBQueryMetricServiceRate() throws SQLException {
            return DBQueryMetricServiceRate(true);
