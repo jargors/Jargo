@@ -1652,11 +1652,11 @@ int[] queryServerDurationRemaining(final int sid, final int t) throws SQLExcepti
 }
 @ %def queryServerDurationRemaining
 
-\subsection{\texttt{DBQueryServerDurationTravel}(1)}
+\subsection{\texttt{DBQueryServerDurationTravel}(2)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBQueryServerDurationTravel]]}(1) returns the
+Method \textcolor{blue}{[[DBQueryServerDurationTravel]]}(2) returns the
 travel duration $\delta^\textrm{travel}(\mathcal{X},r)$
 (Eq.~\ref{eq:travel-duration}) of the given server.
 A [[SQLException]] is thrown in case of database failure.\\
@@ -1680,16 +1680,19 @@ where $s$ is the server identified by [[sid]] (param. 1).\\
 \textbf{Throws:} [[SQLException]] if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-<<Read: DBQueryServerDurationTravel(1)>>=
-int[] DBQueryServerDurationTravel(final int sid) throws SQLException {
-  // try (<<Open [[conn]]>>) {
-  //   return PSQuery(conn, "S116", 1, sid);
-  // } catch (SQLException e) {
-  //   throw e;
-  // }
-  return this.duration_servers.containsKey(sid)
-    ? new int[] { this.duration_servers.get(sid) }
-    : new int[] { };
+<<Read: DBQueryServerDurationTravel(2)>>=
+int[] DBQueryServerDurationTravel(final int sid, boolean flag_usecache) throws SQLException {
+  if (flag_usecache) {
+    return new int[] { this.duration_servers.containsKey(sid)
+      ? this.duration_servers.get(sid)
+      : 0 };
+  } else {
+    try (<<Open [[conn]]>>) {
+      return PSQuery(conn, "S116", 1, sid);
+    } catch (SQLException e) {
+      throw e;
+    }
+  }
 }
 @ %def DBQueryServerDurationTravel
 
@@ -2577,11 +2580,11 @@ int[] queryMetricServerDistanceServiceTotal() throws SQLException {
 }
 @
 
-\subsection{\texttt{DBQueryMetricServerDurationTravelTotal}(0)}
+\subsection{\texttt{DBQueryMetricServerDurationTravelTotal}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBQueryMetricServerDurationTravelTotal]]}(0) returns the
+Method \textcolor{blue}{[[DBQueryMetricServerDurationTravelTotal]]}(1) returns the
 total travel duration of all servers.
 A [[SQLException]] is thrown in case of database failure.\\
 \midrule
@@ -2599,29 +2602,60 @@ or [[null]] if no results.
 \textbf{Throws:} [[SQLException]] if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-<<Read: DBQueryMetricServerDurationTravelTotal(0)>>=
-int[] DBQueryMetricServerDurationTravelTotal() throws SQLException {
-  try (<<Open [[conn]]>>) {
-    return PSQuery(conn, "S117", 1);
-  } catch (SQLException e) {
-    throw e;
+<<Read: DBQueryMetricServerDurationTravelTotal(1)>>=
+int[] DBQueryMetricServerDurationTravelTotal(boolean flag_usecache) throws SQLException {
+  if (flag_usecache) {
+    final int[] output = new int[] { 0 };
+    this.duration_servers.forEach((sid, val) -> output[0] += val);
+    return output;
+  } else {
+    try (<<Open [[conn]]>>) {
+      return PSQuery(conn, "S117", 1);
+    } catch (SQLException e) {
+      throw e;
+    }
   }
 }
 @ %def DBQueryMetricServerDurationTravelTotal
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[queryMetricServerDurationTravelTotal]]}(0) wraps [[DBQueryMetricServerDurationTravelTotal]](0).\\
+Method \textcolor{blue}{[[DBQueryMetricServerDurationTravelTotal]]}(0) calls [[DBQueryMetricServerDurationTravelTotal]](1)
+with a default parameter.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryMetricServerDurationTravelTotal(0)>>=
+int[] DBQueryMetricServerDurationTravelTotal() throws SQLException {
+  return DBQueryMetricServerDurationTravelTotal(true);
+}
+@
+\noindent
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryMetricServerDurationTravelTotal]]}(1) wraps [[DBQueryMetricServerDurationTravelTotal]](1).\\
+\bottomrule
+\end{tabular}
+<<Read: queryMetricServerDurationTravelTotal(1)>>=
+int[] queryMetricServerDurationTravelTotal(boolean flag_usecache) throws SQLException {
+  long A0 = System.currentTimeMillis();
+  int[] output = storage.DBQueryMetricServerDurationTravelTotal(flag_usecache);
+  <<Stats: queryMetricServerDurationTravelTotal(1)>>
+  return output;
+}
+@ %def queryMetricServerDurationTravelTotal
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryMetricServerDurationTravelTotal]]}(0) calls [[queryMetricServerDurationTravelTotal]](1)
+with a default parameter.\\
 \bottomrule
 \end{tabular}
 <<Read: queryMetricServerDurationTravelTotal(0)>>=
 int[] queryMetricServerDurationTravelTotal() throws SQLException {
-  long A0 = System.currentTimeMillis();
-  int[] output = storage.DBQueryMetricServerDurationTravelTotal();
-  <<Stats: queryMetricServerDurationTravelTotal(0)>>
-  return output;
+  return queryMetricServerDurationTravelTotal(true);
 }
-@ %def queryMetricServerDurationTravelTotal
+@
 
 \subsection{\texttt{DBQueryMetricServerDurationCruisingTotal}(0)}
 <<Read: DBQueryMetricServerDurationCruisingTotal(0)>>=

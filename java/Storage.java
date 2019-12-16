@@ -264,11 +264,17 @@ public class Storage {
            );
            return output;
          }
-  public int[] DBQueryMetricServerDurationTravelTotal() throws SQLException {
-           try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-             return PSQuery(conn, "S117", 1);
-           } catch (SQLException e) {
-             throw e;
+  public int[] DBQueryMetricServerDurationTravelTotal(boolean flag_usecache) throws SQLException {
+           if (flag_usecache) {
+             final int[] output = new int[] { 0 };
+             this.duration_servers.forEach((sid, val) -> output[0] += val);
+             return output;
+           } else {
+             try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+               return PSQuery(conn, "S117", 1);
+             } catch (SQLException e) {
+               throw e;
+             }
            }
          }
   public int[] DBQueryMetricServerTWViolationsTotal() throws SQLException {
@@ -487,15 +493,18 @@ public class Storage {
              throw e;
            }
          }
-  public int[] DBQueryServerDurationTravel(final int sid) throws SQLException {
-           // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-           //   return PSQuery(conn, "S116", 1, sid);
-           // } catch (SQLException e) {
-           //   throw e;
-           // }
-           return this.duration_servers.containsKey(sid)
-             ? new int[] { this.duration_servers.get(sid) }
-             : new int[] { };
+  public int[] DBQueryServerDurationTravel(final int sid, boolean flag_usecache) throws SQLException {
+           if (flag_usecache) {
+             return new int[] { this.duration_servers.containsKey(sid)
+               ? this.duration_servers.get(sid)
+               : 0 };
+           } else {
+             try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+               return PSQuery(conn, "S116", 1, sid);
+             } catch (SQLException e) {
+               throw e;
+             }
+           }
          }
   public int[] DBQueryServerLoadMax(final int sid, final int t) throws SQLException {
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
@@ -687,6 +696,9 @@ public class Storage {
          }
   public int[] DBQueryMetricServerDistanceTotal() throws SQLException {
            return DBQueryMetricServerDistanceTotal(true);
+         }
+  public int[] DBQueryMetricServerDurationTravelTotal() throws SQLException {
+           return DBQueryMetricServerDurationTravelTotal(true);
          }
   public int[] DBQueryMetricServiceRate() throws SQLException {
            return DBQueryMetricServiceRate(true);
