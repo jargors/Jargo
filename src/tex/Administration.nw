@@ -508,10 +508,12 @@ we query the request's assignment status. Else, we initialize the last-visitatio
     if (u[1] > 0) {
       this.count_requests++;
       this.sum_distance_unassigned += u[6];
+      this.sum_distance_base_requests += u[6];
     } else {
       final int sid = uid;
       <<Cache server distance>>
       <<Cache service distance and duration>>
+      this.sum_distance_base_servers += u[6];
     }
   }
   for (Integer rid : this.lu_rstatus.keySet()) {

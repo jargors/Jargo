@@ -136,14 +136,16 @@ public class Storage {
            // }
            return new int[] { this.sum_distance_base_requests };
          }
-  public int[] DBQueryMetricRequestDistanceBaseUnassignedTotal() throws SQLException {
-           /* Query 138 works but it's faster to just keep a running tally. */
-           // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-           //   return PSQuery(conn, "S138", 1);
-           // } catch (SQLException e) {
-           //   throw e;
-           // }
-           return new int[] { this.sum_distance_unassigned };
+  public int[] DBQueryMetricRequestDistanceBaseUnassignedTotal(boolean flag_usecache) throws SQLException {
+           if (flag_usecache) {
+             return new int[] { this.sum_distance_unassigned };
+           } else {
+             try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+               return PSQuery(conn, "S138", 1);
+             } catch (SQLException e) {
+               throw e;
+             }
+           }
          }
   public int[] DBQueryMetricRequestDistanceDetourTotal() throws SQLException {
            // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
@@ -278,13 +280,16 @@ public class Storage {
            }
            return output;
          }
-  public int[] DBQueryMetricUserDistanceBaseTotal() throws SQLException {
-           // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-           //   return PSQuery(conn, "S103", 1);
-           // } catch (SQLException e) {
-           //   throw e;
-           // }
-           return new int[] { this.sum_distance_base_requests + this.sum_distance_base_servers };
+  public int[] DBQueryMetricUserDistanceBaseTotal(boolean flag_usecache) throws SQLException {
+           if (flag_usecache) {
+             return new int[] { this.sum_distance_base_requests + this.sum_distance_base_servers };
+           } else {
+             try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+               return PSQuery(conn, "S103", 1);
+             } catch (SQLException e) {
+               throw e;
+             }
+           }
          }
   public int[] DBQueryRequestDistanceDetour(final int rid) throws SQLException {
            // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
@@ -642,11 +647,17 @@ public class Storage {
              throw e;
            }
          }
+  public int[] DBQueryMetricRequestDistanceBaseUnassignedTotal() throws SQLException {
+           return DBQueryMetricRequestDistanceBaseUnassignedTotal(true);
+         }
   public int[] DBQueryMetricServerDistanceTotal() throws SQLException {
            return DBQueryMetricServerDistanceTotal(true);
          }
   public int[] DBQueryMetricServiceRate() throws SQLException {
            return DBQueryMetricServiceRate(true);
+         }
+  public int[] DBQueryMetricUserDistanceBaseTotal() throws SQLException {
+           return DBQueryMetricUserDistanceBaseTotal(true);
          }
   public void DBInsertEdge(final int v1, final int v2, final int dd, final int nu)
          throws DuplicateEdgeException, SQLException {
@@ -1372,6 +1383,7 @@ public class Storage {
              if (u[1] > 0) {
                this.count_requests++;
                this.sum_distance_unassigned += u[6];
+               this.sum_distance_base_requests += u[6];
              } else {
                final int sid = uid;
                try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
@@ -1408,6 +1420,7 @@ public class Storage {
                } catch (SQLException e) {
                  throw e;
                }
+               this.sum_distance_base_servers += u[6];
              }
            }
            for (Integer rid : this.lu_rstatus.keySet()) {

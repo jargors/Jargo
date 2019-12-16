@@ -407,9 +407,9 @@ public class Controller {
            this.statQueryMetricRequestDistanceBaseTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
-  public int[] queryMetricRequestDistanceBaseUnassignedTotal() throws SQLException {
+  public int[] queryMetricRequestDistanceBaseUnassignedTotal(boolean flag_usecache) throws SQLException {
            long A0 = System.currentTimeMillis();
-           int[] output = storage.DBQueryMetricRequestDistanceBaseUnassignedTotal();
+           int[] output = storage.DBQueryMetricRequestDistanceBaseUnassignedTotal(flag_usecache);
            this.statQueryMetricRequestDistanceBaseUnassignedTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
@@ -503,9 +503,9 @@ public class Controller {
            this.statQueryMetricServiceRateDur = (System.currentTimeMillis() - A0);
            return output;
          }
-  public int[] queryMetricUserDistanceBaseTotal() throws SQLException {
+  public int[] queryMetricUserDistanceBaseTotal(boolean flag_usecache) throws SQLException {
            long A0 = System.currentTimeMillis();
-           int[] output = storage.DBQueryMetricUserDistanceBaseTotal();
+           int[] output = storage.DBQueryMetricUserDistanceBaseTotal(flag_usecache);
            this.statQueryMetricUserDistanceBaseTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
@@ -605,11 +605,17 @@ public class Controller {
            this.statQueryVerticesCountDur = (System.currentTimeMillis() - A0);
            return output;
          }
+  public int[] queryMetricRequestDistanceBaseUnassignedTotal() throws SQLException {
+           return queryMetricRequestDistanceBaseUnassignedTotal(true);
+         }
   public int[] queryMetricServerDistanceTotal() throws SQLException {
            return queryMetricServerDistanceTotal(true);
          }
   public int[] queryMetricServiceRate() throws SQLException {
            return queryMetricServiceRate(true);
+         }
+  public int[] queryMetricUserDistanceBaseTotal() throws SQLException {
+           return queryMetricUserDistanceBaseTotal(true);
          }
   public void insertRequest(final int[] u) throws DuplicateUserException, SQLException {
            this.storage.DBInsertRequest(u);
