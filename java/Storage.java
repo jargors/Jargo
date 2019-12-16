@@ -39,10 +39,10 @@ public class Storage {
   private int sum_distance_base_requests = 0;
   private int sum_distance_base_servers = 0;
   private Map<Integer, Integer> distance_servers = new HashMap<Integer, Integer>();
-  private Map<Integer, Integer> distance_servers_service = new HashMap<Integer, Integer>();
+  private Map<Integer, Integer> distance_servers_cruising = new HashMap<Integer, Integer>();
   private Map<Integer, Integer> distance_requests_transit = new HashMap<Integer, Integer>();
   private Map<Integer, Integer> duration_servers = new HashMap<Integer, Integer>();
-  private Map<Integer, Integer> duration_servers_service = new HashMap<Integer, Integer>();
+  private Map<Integer, Integer> duration_servers_cruising = new HashMap<Integer, Integer>();
   private final int    STATEMENTS_MAX_COUNT   = 20;
   private       int    REQUEST_TIMEOUT        = 30;
   private       String CONNECTIONS_URL        = "jdbc:derby:memory:jargo;create=true";
@@ -210,8 +210,8 @@ public class Storage {
            //   throw e;
            // }
            final int[] output = new int[] { 0 };
-           this.distance_servers.forEach((sid, val) ->
-             output[0] += (val - this.distance_servers_service.get(sid))
+           this.distance_servers_cruising.forEach((sid, val) ->
+             output[0] += (val - this.distance_servers_cruising.get(sid))
            );
            return output;
          }
@@ -222,7 +222,7 @@ public class Storage {
            //   throw e;
            // }
            final int[] output = new int[] { 0 };
-           this.distance_servers_service.forEach((sid, val) -> output[0] += val);
+           this.distance_servers.forEach((sid, val) -> output[0] += (val - this.distance_servers_cruising.get(sid)));
            return output;
          }
   public int[] DBQueryMetricServerDistanceTotal(boolean flag_usecache) throws SQLException {
@@ -240,15 +240,15 @@ public class Storage {
          }
   public int[] DBQueryMetricServerDurationCruisingTotal() throws SQLException {
            final int[] output = new int[] { 0 };
-           this.duration_servers_service.forEach((sid, val) ->
-             output[0] += (this.duration_servers.get(sid) - val)
+           this.duration_servers_cruising.forEach((sid, val) ->
+             output[0] += val
            );
            return output;
          }
   public int[] DBQueryMetricServerDurationServiceTotal() throws SQLException {
            final int[] output = new int[] { 0 };
-           this.duration_servers_service.forEach((sid, val) ->
-             output[0] += val
+           this.duration_servers.forEach((sid, val) ->
+             output[0] += (val - this.duration_servers_cruising.get(sid))
            );
            return output;
          }
@@ -424,7 +424,7 @@ public class Storage {
            // } catch (SQLException e) {
            //   throw e;
            // }
-           return new int [] { this.distance_servers.get(sid) - this.distance_servers_service.get(sid) };
+           return new int [] { this.distance_servers_cruising.get(sid) };
          }
   public int[] DBQueryServerDistanceRemaining(final int sid, final int t)
          throws SQLException {
@@ -440,17 +440,13 @@ public class Storage {
            // } catch (SQLException e) {
            //   throw e;
            // }
-           return new int[] { this.distance_servers_service.get(sid) };
+           return new int [] { this.distance_servers.get(sid) - this.distance_servers_cruising.get(sid) };
          }
   public int[] DBQueryServerDurationCruising(final int sid) throws SQLException {
-           return this.duration_servers.containsKey(sid)
-             ? new int[] { (this.duration_servers.get(sid) - this.duration_servers_service.get(sid)) }
-             : new int[] { };
+           return new int[] { this.duration_servers_cruising.get(sid) };
          }
   public int[] DBQueryServerDurationService(final int sid) throws SQLException {
-           return this.duration_servers_service.containsKey(sid)
-             ? new int[] { this.duration_servers_service.get(sid) }
-             : new int[] { };
+           return new int[] { (this.duration_servers.get(sid) - this.duration_servers_cruising.get(sid)) };
          }
   public int[] DBQueryServerDurationRemaining(final int sid, final int t)
          throws SQLException {
@@ -782,9 +778,9 @@ public class Storage {
            this.lu_lvt.put(uid, 0);
            this.sum_distance_base_servers += u[6];
            this.distance_servers.put(uid, u[6]);
-           this.distance_servers_service.put(uid, u[6]);
+           this.distance_servers_cruising.put(uid, u[6]);
            this.duration_servers.put(uid, (route[(route.length - 2)] - route[0]));
-           this.duration_servers_service.put(uid, (route[(route.length - 2)] - route[0]));
+           this.duration_servers_cruising.put(uid, (route[(route.length - 2)] - route[0]));
          }
   public void DBInsertVertex(final int v, final int lng, final int lat)
          throws DuplicateVertexException, SQLException {
@@ -1007,14 +1003,15 @@ public class Storage {
                final int te = this.PSQuery(conn, "S145", 2, sid)[0];
                sum += this.DBQueryServerDistanceRemaining(sid, tt)[0];
                dur += (te - tt);
-               this.distance_servers_service.put(sid, sum);
-               this.duration_servers_service.put(sid, dur);
+               this.distance_servers_cruising.put(sid, sum);
+               this.duration_servers_cruising.put(sid, dur);
                this.duration_servers.put(sid, (te - ts));
              } else {
                final int te = this.PSQuery(conn, "S145", 2, sid)[0];
                final int ts = this.PSQuery(conn, "S156", 2, sid)[0];
-               this.distance_servers_service.put(sid, 0);
-               this.duration_servers_service.put(sid, 0);
+               sum = this.DBQueryServerDistanceRemaining(sid, ts)[0];
+               this.distance_servers_cruising.put(sid, sum);
+               this.duration_servers_cruising.put(sid, (te - ts));
                this.duration_servers.put(sid, (te - ts));
              }
            } catch (SQLException e) {
@@ -1164,14 +1161,15 @@ public class Storage {
                final int te = this.PSQuery(conn, "S145", 2, sid)[0];
                sum += this.DBQueryServerDistanceRemaining(sid, tt)[0];
                dur += (te - tt);
-               this.distance_servers_service.put(sid, sum);
-               this.duration_servers_service.put(sid, dur);
+               this.distance_servers_cruising.put(sid, sum);
+               this.duration_servers_cruising.put(sid, dur);
                this.duration_servers.put(sid, (te - ts));
              } else {
                final int te = this.PSQuery(conn, "S145", 2, sid)[0];
                final int ts = this.PSQuery(conn, "S156", 2, sid)[0];
-               this.distance_servers_service.put(sid, 0);
-               this.duration_servers_service.put(sid, 0);
+               sum = this.DBQueryServerDistanceRemaining(sid, ts)[0];
+               this.distance_servers_cruising.put(sid, sum);
+               this.duration_servers_cruising.put(sid, (te - ts));
                this.duration_servers.put(sid, (te - ts));
              }
            } catch (SQLException e) {
@@ -1304,14 +1302,15 @@ public class Storage {
                final int te = this.PSQuery(conn, "S145", 2, sid)[0];
                sum += this.DBQueryServerDistanceRemaining(sid, tt)[0];
                dur += (te - tt);
-               this.distance_servers_service.put(sid, sum);
-               this.duration_servers_service.put(sid, dur);
+               this.distance_servers_cruising.put(sid, sum);
+               this.duration_servers_cruising.put(sid, dur);
                this.duration_servers.put(sid, (te - ts));
              } else {
                final int te = this.PSQuery(conn, "S145", 2, sid)[0];
                final int ts = this.PSQuery(conn, "S156", 2, sid)[0];
-               this.distance_servers_service.put(sid, 0);
-               this.duration_servers_service.put(sid, 0);
+               sum = this.DBQueryServerDistanceRemaining(sid, ts)[0];
+               this.distance_servers_cruising.put(sid, sum);
+               this.duration_servers_cruising.put(sid, (te - ts));
                this.duration_servers.put(sid, (te - ts));
              }
            } catch (SQLException e) {
@@ -1407,14 +1406,15 @@ public class Storage {
                    final int te = this.PSQuery(conn, "S145", 2, sid)[0];
                    sum += this.DBQueryServerDistanceRemaining(sid, tt)[0];
                    dur += (te - tt);
-                   this.distance_servers_service.put(sid, sum);
-                   this.duration_servers_service.put(sid, dur);
+                   this.distance_servers_cruising.put(sid, sum);
+                   this.duration_servers_cruising.put(sid, dur);
                    this.duration_servers.put(sid, (te - ts));
                  } else {
                    final int te = this.PSQuery(conn, "S145", 2, sid)[0];
                    final int ts = this.PSQuery(conn, "S156", 2, sid)[0];
-                   this.distance_servers_service.put(sid, 0);
-                   this.duration_servers_service.put(sid, 0);
+                   sum = this.DBQueryServerDistanceRemaining(sid, ts)[0];
+                   this.distance_servers_cruising.put(sid, sum);
+                   this.duration_servers_cruising.put(sid, (te - ts));
                    this.duration_servers.put(sid, (te - ts));
                  }
                } catch (SQLException e) {

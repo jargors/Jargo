@@ -28,8 +28,8 @@ try (<<Open [[conn]]>>) {
 }
 @
 
-\subsection{Cache service distance and duration}
-<<Cache service distance and duration>>=
+\subsection{Cache cruising distance and duration}
+<<Cache cruising distance and duration>>=
 try (<<Open [[conn]]>>) {
   int sum = 0;
   int dur = 0;
@@ -46,14 +46,15 @@ try (<<Open [[conn]]>>) {
     final int te = this.PSQuery(conn, "S145", 2, sid)[0];
     sum += this.DBQueryServerDistanceRemaining(sid, tt)[0];
     dur += (te - tt);
-    this.distance_servers_service.put(sid, sum);
-    this.duration_servers_service.put(sid, dur);
+    this.distance_servers_cruising.put(sid, sum);
+    this.duration_servers_cruising.put(sid, dur);
     this.duration_servers.put(sid, (te - ts));
   } else {
     final int te = this.PSQuery(conn, "S145", 2, sid)[0];
     final int ts = this.PSQuery(conn, "S156", 2, sid)[0];
-    this.distance_servers_service.put(sid, 0);
-    this.duration_servers_service.put(sid, 0);
+    sum = this.DBQueryServerDistanceRemaining(sid, ts)[0];
+    this.distance_servers_cruising.put(sid, sum);
+    this.duration_servers_cruising.put(sid, (te - ts));
     this.duration_servers.put(sid, (te - ts));
   }
 } catch (SQLException e) {
@@ -512,7 +513,7 @@ we query the request's assignment status. Else, we initialize the last-visitatio
     } else {
       final int sid = uid;
       <<Cache server distance>>
-      <<Cache service distance and duration>>
+      <<Cache cruising distance and duration>>
       this.sum_distance_base_servers += u[6];
     }
   }

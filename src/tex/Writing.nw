@@ -623,9 +623,9 @@ throws DuplicateUserException, EdgeNotFoundException, SQLException {
   this.lu_lvt.put(uid, 0);
   this.sum_distance_base_servers += u[6];
   this.distance_servers.put(uid, u[6]);
-  this.distance_servers_service.put(uid, u[6]);
+  this.distance_servers_cruising.put(uid, u[6]);
   this.duration_servers.put(uid, (route[(route.length - 2)] - route[0]));
-  this.duration_servers_service.put(uid, (route[(route.length - 2)] - route[0]));
+  this.duration_servers_cruising.put(uid, (route[(route.length - 2)] - route[0]));
 }
 @
 \begin{tabular}{p{\textwidth}}
@@ -747,7 +747,7 @@ throws UserNotFoundException, EdgeNotFoundException, SQLException {
     throw e;
   }
   <<Cache server distance>>
-  <<Cache service distance and duration>>
+  <<Cache cruising distance and duration>>
 }
 @ %def DBUpdateServerRoute
 \begin{tabular}{p{\textwidth}}
@@ -902,7 +902,7 @@ is now \emph{assigned}.}
     <<Cache request transit distance>>
   }
   <<Cache server distance>>
-  <<Cache service distance and duration>>
+  <<Cache cruising distance and duration>>
 }
 @
 \begin{tabular}{p{\textwidth}}
@@ -1073,7 +1073,7 @@ is now \emph{unassigned}.}
     this.distance_requests_transit.put(r, 0);
   }
   <<Cache server distance>>
-  <<Cache service distance and duration>>
+  <<Cache cruising distance and duration>>
 }
 @
 \begin{tabular}{p{\textwidth}}

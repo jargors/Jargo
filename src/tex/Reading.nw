@@ -1536,7 +1536,7 @@ int[] DBQueryServerDistanceCruising(final int sid) throws SQLException {
   // } catch (SQLException e) {
   //   throw e;
   // }
-  return new int [] { this.distance_servers.get(sid) - this.distance_servers_service.get(sid) };
+  return new int [] { this.distance_servers_cruising.get(sid) };
 }
 @ %def DBQueryServerDistanceCruising
 
@@ -1575,7 +1575,7 @@ int[] DBQueryServerDistanceService(final int sid) throws SQLException {
   // } catch (SQLException e) {
   //   throw e;
   // }
-  return new int[] { this.distance_servers_service.get(sid) };
+  return new int [] { this.distance_servers.get(sid) - this.distance_servers_cruising.get(sid) };
 }
 @ %def DBQueryServerDistanceService
 
@@ -1680,18 +1680,14 @@ int[] DBQueryServerDurationTravel(final int sid) throws SQLException {
 \subsection{\texttt{DBQueryServerDurationCruising}(1)}
 <<Read: DBQueryServerDurationCruising(1)>>=
 int[] DBQueryServerDurationCruising(final int sid) throws SQLException {
-  return this.duration_servers.containsKey(sid)
-    ? new int[] { (this.duration_servers.get(sid) - this.duration_servers_service.get(sid)) }
-    : new int[] { };
+  return new int[] { this.duration_servers_cruising.get(sid) };
 }
 @ %def DBQueryServerDurationCruising
 
 \subsection{\texttt{DBQueryServerDurationService}(1)}
 <<Read: DBQueryServerDurationService(1)>>=
 int[] DBQueryServerDurationService(final int sid) throws SQLException {
-  return this.duration_servers_service.containsKey(sid)
-    ? new int[] { this.duration_servers_service.get(sid) }
-    : new int[] { };
+  return new int[] { (this.duration_servers.get(sid) - this.duration_servers_cruising.get(sid)) };
 }
 @ %def DBQueryServerDurationService
 
@@ -2441,8 +2437,8 @@ int[] DBQueryMetricServerDistanceCruisingTotal() throws SQLException {
   //   throw e;
   // }
   final int[] output = new int[] { 0 };
-  this.distance_servers.forEach((sid, val) ->
-    output[0] += (val - this.distance_servers_service.get(sid))
+  this.distance_servers_cruising.forEach((sid, val) ->
+    output[0] += (val - this.distance_servers_cruising.get(sid))
   );
   return output;
 }
@@ -2492,7 +2488,7 @@ int[] DBQueryMetricServerDistanceServiceTotal() throws SQLException {
   //   throw e;
   // }
   final int[] output = new int[] { 0 };
-  this.distance_servers_service.forEach((sid, val) -> output[0] += val);
+  this.distance_servers.forEach((sid, val) -> output[0] += (val - this.distance_servers_cruising.get(sid)));
   return output;
 }
 @ %def DBQueryMetricServerDistanceServiceTotal
@@ -2561,8 +2557,8 @@ int[] queryMetricServerDurationTravelTotal() throws SQLException {
 <<Read: DBQueryMetricServerDurationCruisingTotal(0)>>=
 int[] DBQueryMetricServerDurationCruisingTotal() throws SQLException {
   final int[] output = new int[] { 0 };
-  this.duration_servers_service.forEach((sid, val) ->
-    output[0] += (this.duration_servers.get(sid) - val)
+  this.duration_servers_cruising.forEach((sid, val) ->
+    output[0] += val
   );
   return output;
 }
@@ -2580,8 +2576,8 @@ int[] queryMetricServerDurationCruisingTotal() throws SQLException {
 <<Read: DBQueryMetricServerDurationServiceTotal(0)>>=
 int[] DBQueryMetricServerDurationServiceTotal() throws SQLException {
   final int[] output = new int[] { 0 };
-  this.duration_servers_service.forEach((sid, val) ->
-    output[0] += val
+  this.duration_servers.forEach((sid, val) ->
+    output[0] += (val - this.duration_servers_cruising.get(sid))
   );
   return output;
 }
