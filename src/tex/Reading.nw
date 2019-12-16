@@ -2127,15 +2127,18 @@ int[] queryServersLocationsActive(final int t) throws SQLException {
 
 \section{Methods: Read Metrics}
 
-\subsection{\texttt{DBQueryMetricServiceRate}(0)}
+\subsection{\texttt{DBQueryMetricServiceRate}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBQueryMetricServiceRate]]}(0) returns the
+Method \textcolor{blue}{[[DBQueryMetricServiceRate]]}(1) returns the
 service rate $\mu$ (Eq.~\ref{eq:service-rate}).
 A [[SQLException]] is thrown in case of database failure.\\
 \midrule
-\textbf{Parameters:} none.\\
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Boolean [[flag_usecache]] (param. 1):&[[false]] to force retrieval from database.\\
+\end{tabular}
 \textbf{Returns:} results of the query flattened into an integer array,
 or [[null]] if no results.
 
@@ -2148,37 +2151,66 @@ or [[null]] if no results.
 
 Note that the service rate is \textbf{multiplied by $10^4$} so that it can be
 returned as an integer with 2 decimal points precision, for example if
-$\mu=.1234$, then [[DBQueryMetricServiceRate]](0) returns $1234$.\\
+$\mu=.1234$, then [[DBQueryMetricServiceRate]](1) returns $1234$.\\
 \textbf{Side Effects:} none.\\
 \textbf{Throws:} [[SQLException]] if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-<<Read: DBQueryMetricServiceRate(0)>>=
-int[] DBQueryMetricServiceRate() throws SQLException {
-  /* Query S102 works, but is not as fast as simply caching the running counts
-   * and dividing. */
-  // try (<<Open [[conn]]>>) {
-  //   return PSQuery(conn, "S102", 1);
-  // } catch (SQLException e) {
-  //   throw e;
-  // }
-  return new int[] { (int) (10000*(this.count_assigned/(double) this.count_requests)) };
+<<Read: DBQueryMetricServiceRate(1)>>=
+int[] DBQueryMetricServiceRate(boolean flag_usecache) throws SQLException {
+  int[] output = new int[] { };
+  if (flag_usecache) {
+    output = new int[] { (int) (10000*(this.count_assigned
+        / (double) this.count_requests)) };
+  } else {
+    try (<<Open [[conn]]>>) {
+      output = PSQuery(conn, "S102", 1);
+    } catch (SQLException e) {
+      throw e;
+    }
+  }
+  return output;
 }
 @ %def DBQueryMetricServiceRate
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[queryMetricServiceRate]]}(0) wraps [[DBQueryMetricServiceRate]](0).\\
+Method \textcolor{blue}{[[DBQueryMetricServiceRate]]}(0) calls [[DBQueryMetricServiceRate]](1)
+with a default parameter.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryMetricServiceRate(0)>>=
+int[] DBQueryMetricServiceRate() throws SQLException {
+  return DBQueryMetricServiceRate(true);
+}
+@
+\noindent
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryMetricServiceRate]]}(1) wraps [[DBQueryMetricServiceRate]](1).\\
+\bottomrule
+\end{tabular}
+<<Read: queryMetricServiceRate(1)>>=
+int[] queryMetricServiceRate(boolean flag_usecache) throws SQLException {
+  long A0 = System.currentTimeMillis();
+  int[] output = storage.DBQueryMetricServiceRate(flag_usecache);
+  <<Stats: queryMetricServiceRate(1)>>
+  return output;
+}
+@ %def queryMetricServiceRate
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryMetricServiceRate]]}(0) calls [[queryMetricServiceRate]](1)
+with a default parameter.\\
 \bottomrule
 \end{tabular}
 <<Read: queryMetricServiceRate(0)>>=
 int[] queryMetricServiceRate() throws SQLException {
-  long A0 = System.currentTimeMillis();
-  int[] output = storage.DBQueryMetricServiceRate();
-  <<Stats: queryMetricServiceRate(0)>>
-  return output;
+  return queryMetricServiceRate(true);
 }
-@ %def queryMetricServiceRate
+@
 
 \subsection{\texttt{DBQueryMetricUserDistanceBaseTotal}(0)}
 \begin{tabular}{p{\textwidth}}

@@ -261,15 +261,19 @@ public class Storage {
              throw e;
            }
          }
-  public int[] DBQueryMetricServiceRate() throws SQLException {
-           /* Query S102 works, but is not as fast as simply caching the running counts
-            * and dividing. */
-           // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-           //   return PSQuery(conn, "S102", 1);
-           // } catch (SQLException e) {
-           //   throw e;
-           // }
-           return new int[] { (int) (10000*(this.count_assigned/(double) this.count_requests)) };
+  public int[] DBQueryMetricServiceRate(boolean flag_usecache) throws SQLException {
+           int[] output = new int[] { };
+           if (flag_usecache) {
+             output = new int[] { (int) (10000*(this.count_assigned
+                 / (double) this.count_requests)) };
+           } else {
+             try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+               output = PSQuery(conn, "S102", 1);
+             } catch (SQLException e) {
+               throw e;
+             }
+           }
+           return output;
          }
   public int[] DBQueryMetricUserDistanceBaseTotal() throws SQLException {
            // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
@@ -635,6 +639,9 @@ public class Storage {
              throw e;
            }
          }
+  public int[] DBQueryMetricServiceRate() throws SQLException {
+           return DBQueryMetricServiceRate(true);
+         }
   public void DBInsertEdge(final int v1, final int v2, final int dd, final int nu)
          throws DuplicateEdgeException, SQLException {
            if (this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2)) {
@@ -971,20 +978,28 @@ public class Storage {
              int sum = 0;
              int dur = 0;
              int[] output = this.PSQuery(conn, "S153", 2, sid);
-             int  ts = output[0];
-             for (int i = 0; i < output.length - 1; i++) {
-               final int t1 = output[(i + 0)];
-               final int t2 = output[(i + 1)];
-               sum += this.PSQuery(conn, "S154", 1, sid, t1, t2)[0];
-               dur += (t2 - t1);
+             if (output.length > 0) {
+               int ts = output[0];
+               for (int i = 0; i < output.length - 1; i++) {
+                 final int t1 = output[(i + 0)];
+                 final int t2 = output[(i + 1)];
+                 sum += this.PSQuery(conn, "S154", 1, sid, t1, t2)[0];
+                 dur += (t2 - t1);
+               }
+               final int tt = this.PSQuery(conn, "S155", 1, sid)[0];
+               final int te = this.PSQuery(conn, "S145", 2, sid)[0];
+               sum += this.DBQueryServerDistanceRemaining(sid, tt)[0];
+               dur += (te - tt);
+               this.distance_servers_service.put(sid, sum);
+               this.duration_servers_service.put(sid, dur);
+               this.duration_servers.put(sid, (te - ts));
+             } else {
+               final int te = this.PSQuery(conn, "S145", 2, sid)[0];
+               final int ts = this.PSQuery(conn, "S156", 2, sid)[0];
+               this.distance_servers_service.put(sid, 0);
+               this.duration_servers_service.put(sid, 0);
+               this.duration_servers.put(sid, (te - ts));
              }
-             final int tt = this.PSQuery(conn, "S155", 1, sid)[0];
-             final int te = this.PSQuery(conn, "S145", 2, sid)[0];
-             sum += this.DBQueryServerDistanceRemaining(sid, tt)[0];
-             dur += (te - tt);
-             this.distance_servers_service.put(sid, sum);
-             this.duration_servers_service.put(sid, dur);
-             this.duration_servers.put(sid, (te - ts));
            } catch (SQLException e) {
              throw e;
            }
@@ -1120,20 +1135,28 @@ public class Storage {
              int sum = 0;
              int dur = 0;
              int[] output = this.PSQuery(conn, "S153", 2, sid);
-             int  ts = output[0];
-             for (int i = 0; i < output.length - 1; i++) {
-               final int t1 = output[(i + 0)];
-               final int t2 = output[(i + 1)];
-               sum += this.PSQuery(conn, "S154", 1, sid, t1, t2)[0];
-               dur += (t2 - t1);
+             if (output.length > 0) {
+               int ts = output[0];
+               for (int i = 0; i < output.length - 1; i++) {
+                 final int t1 = output[(i + 0)];
+                 final int t2 = output[(i + 1)];
+                 sum += this.PSQuery(conn, "S154", 1, sid, t1, t2)[0];
+                 dur += (t2 - t1);
+               }
+               final int tt = this.PSQuery(conn, "S155", 1, sid)[0];
+               final int te = this.PSQuery(conn, "S145", 2, sid)[0];
+               sum += this.DBQueryServerDistanceRemaining(sid, tt)[0];
+               dur += (te - tt);
+               this.distance_servers_service.put(sid, sum);
+               this.duration_servers_service.put(sid, dur);
+               this.duration_servers.put(sid, (te - ts));
+             } else {
+               final int te = this.PSQuery(conn, "S145", 2, sid)[0];
+               final int ts = this.PSQuery(conn, "S156", 2, sid)[0];
+               this.distance_servers_service.put(sid, 0);
+               this.duration_servers_service.put(sid, 0);
+               this.duration_servers.put(sid, (te - ts));
              }
-             final int tt = this.PSQuery(conn, "S155", 1, sid)[0];
-             final int te = this.PSQuery(conn, "S145", 2, sid)[0];
-             sum += this.DBQueryServerDistanceRemaining(sid, tt)[0];
-             dur += (te - tt);
-             this.distance_servers_service.put(sid, sum);
-             this.duration_servers_service.put(sid, dur);
-             this.duration_servers.put(sid, (te - ts));
            } catch (SQLException e) {
              throw e;
            }
@@ -1252,20 +1275,28 @@ public class Storage {
              int sum = 0;
              int dur = 0;
              int[] output = this.PSQuery(conn, "S153", 2, sid);
-             int  ts = output[0];
-             for (int i = 0; i < output.length - 1; i++) {
-               final int t1 = output[(i + 0)];
-               final int t2 = output[(i + 1)];
-               sum += this.PSQuery(conn, "S154", 1, sid, t1, t2)[0];
-               dur += (t2 - t1);
+             if (output.length > 0) {
+               int ts = output[0];
+               for (int i = 0; i < output.length - 1; i++) {
+                 final int t1 = output[(i + 0)];
+                 final int t2 = output[(i + 1)];
+                 sum += this.PSQuery(conn, "S154", 1, sid, t1, t2)[0];
+                 dur += (t2 - t1);
+               }
+               final int tt = this.PSQuery(conn, "S155", 1, sid)[0];
+               final int te = this.PSQuery(conn, "S145", 2, sid)[0];
+               sum += this.DBQueryServerDistanceRemaining(sid, tt)[0];
+               dur += (te - tt);
+               this.distance_servers_service.put(sid, sum);
+               this.duration_servers_service.put(sid, dur);
+               this.duration_servers.put(sid, (te - ts));
+             } else {
+               final int te = this.PSQuery(conn, "S145", 2, sid)[0];
+               final int ts = this.PSQuery(conn, "S156", 2, sid)[0];
+               this.distance_servers_service.put(sid, 0);
+               this.duration_servers_service.put(sid, 0);
+               this.duration_servers.put(sid, (te - ts));
              }
-             final int tt = this.PSQuery(conn, "S155", 1, sid)[0];
-             final int te = this.PSQuery(conn, "S145", 2, sid)[0];
-             sum += this.DBQueryServerDistanceRemaining(sid, tt)[0];
-             dur += (te - tt);
-             this.distance_servers_service.put(sid, sum);
-             this.duration_servers_service.put(sid, dur);
-             this.duration_servers.put(sid, (te - ts));
            } catch (SQLException e) {
              throw e;
            }
@@ -1346,20 +1377,28 @@ public class Storage {
                  int sum = 0;
                  int dur = 0;
                  int[] output = this.PSQuery(conn, "S153", 2, sid);
-                 int  ts = output[0];
-                 for (int i = 0; i < output.length - 1; i++) {
-                   final int t1 = output[(i + 0)];
-                   final int t2 = output[(i + 1)];
-                   sum += this.PSQuery(conn, "S154", 1, sid, t1, t2)[0];
-                   dur += (t2 - t1);
+                 if (output.length > 0) {
+                   int ts = output[0];
+                   for (int i = 0; i < output.length - 1; i++) {
+                     final int t1 = output[(i + 0)];
+                     final int t2 = output[(i + 1)];
+                     sum += this.PSQuery(conn, "S154", 1, sid, t1, t2)[0];
+                     dur += (t2 - t1);
+                   }
+                   final int tt = this.PSQuery(conn, "S155", 1, sid)[0];
+                   final int te = this.PSQuery(conn, "S145", 2, sid)[0];
+                   sum += this.DBQueryServerDistanceRemaining(sid, tt)[0];
+                   dur += (te - tt);
+                   this.distance_servers_service.put(sid, sum);
+                   this.duration_servers_service.put(sid, dur);
+                   this.duration_servers.put(sid, (te - ts));
+                 } else {
+                   final int te = this.PSQuery(conn, "S145", 2, sid)[0];
+                   final int ts = this.PSQuery(conn, "S156", 2, sid)[0];
+                   this.distance_servers_service.put(sid, 0);
+                   this.duration_servers_service.put(sid, 0);
+                   this.duration_servers.put(sid, (te - ts));
                  }
-                 final int tt = this.PSQuery(conn, "S155", 1, sid)[0];
-                 final int te = this.PSQuery(conn, "S145", 2, sid)[0];
-                 sum += this.DBQueryServerDistanceRemaining(sid, tt)[0];
-                 dur += (te - tt);
-                 this.distance_servers_service.put(sid, sum);
-                 this.duration_servers_service.put(sid, dur);
-                 this.duration_servers.put(sid, (te - ts));
                } catch (SQLException e) {
                  throw e;
                }
@@ -1845,7 +1884,7 @@ public class Storage {
             this.lu_pstr.put("S136", SEL+"* FROM V"); this.lu_pstr.put("S137", SEL+"* FROM E"); this.lu_pstr.put("S138", SEL+"val FROM dist_r_unassigned"); this.lu_pstr.put("S139", UPD+"CPD SET te=? WHERE sid=?"); this.lu_pstr.put("S140", UPD+"CQ SET tp=?, td=? WHERE rid=?"); this.lu_pstr.put("S141", SEL+"* FROM r_user"); this.lu_pstr.put("S142", SEL+"SUM (dd) FROM W WHERE sid=? AND t2>?"); this.lu_pstr.put("S143", SEL+"* FROM R WHERE re<=? AND ?<=re+?");
             this.lu_pstr.put("S144", SEL+"t2, v2, rid FROM CQ WHERE sid=? AND t2>? ORDER BY o2 ASC"); this.lu_pstr.put("S145", SEL+"te, ve FROM CW WHERE sid=?"); this.lu_pstr.put("S147", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
                                   + "SELECT t1 FROM W WHERE sid=? AND v2=0)"); this.lu_pstr.put("S148", SEL+"sid FROM assignments WHERE rid=?"); this.lu_pstr.put("S149", SEL+"t2, v2 FROM W WHERE sid=? ORDER BY t2 ASC"); this.lu_pstr.put("S150", SEL+"sid, val FROM violations_t_s"); this.lu_pstr.put("S151", SEL+"rid, val FROM violations_t_r"); this.lu_pstr.put("S152", SEL+"t2, v2 FROM W WHERE sid=? AND t2>? ORDER BY t2 ASC FETCH FIRST ? ROWS ONLY");
-            this.lu_pstr.put("S153", SEL+"t1, t2 FROM CQ WHERE sid=? AND q1=sq"); this.lu_pstr.put("S154", SEL+"SUM (dd) FROM W WHERE sid=? AND t2 BETWEEN ? AND ?"); this.lu_pstr.put("S155", SEL+"MAX (td) FROM CPD WHERE sid = ?");
+            this.lu_pstr.put("S153", SEL+"t1, t2 FROM CQ WHERE sid=? AND q1=sq"); this.lu_pstr.put("S154", SEL+"SUM (dd) FROM W WHERE sid=? AND t2 BETWEEN ? AND ?"); this.lu_pstr.put("S155", SEL+"MAX (td) FROM CPD WHERE sid = ?"); this.lu_pstr.put("S156", SEL+"ts, vs FROM CW WHERE sid=?");
           }
   private void PSAdd(PreparedStatement p, final Integer... values) throws SQLException {
             p.clearParameters();

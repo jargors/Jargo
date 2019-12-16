@@ -34,20 +34,28 @@ try (<<Open [[conn]]>>) {
   int sum = 0;
   int dur = 0;
   int[] output = this.PSQuery(conn, "S153", 2, sid);
-  int  ts = output[0];
-  for (int i = 0; i < output.length - 1; i++) {
-    final int t1 = output[(i + 0)];
-    final int t2 = output[(i + 1)];
-    sum += this.PSQuery(conn, "S154", 1, sid, t1, t2)[0];
-    dur += (t2 - t1);
+  if (output.length > 0) {
+    int ts = output[0];
+    for (int i = 0; i < output.length - 1; i++) {
+      final int t1 = output[(i + 0)];
+      final int t2 = output[(i + 1)];
+      sum += this.PSQuery(conn, "S154", 1, sid, t1, t2)[0];
+      dur += (t2 - t1);
+    }
+    final int tt = this.PSQuery(conn, "S155", 1, sid)[0];
+    final int te = this.PSQuery(conn, "S145", 2, sid)[0];
+    sum += this.DBQueryServerDistanceRemaining(sid, tt)[0];
+    dur += (te - tt);
+    this.distance_servers_service.put(sid, sum);
+    this.duration_servers_service.put(sid, dur);
+    this.duration_servers.put(sid, (te - ts));
+  } else {
+    final int te = this.PSQuery(conn, "S145", 2, sid)[0];
+    final int ts = this.PSQuery(conn, "S156", 2, sid)[0];
+    this.distance_servers_service.put(sid, 0);
+    this.duration_servers_service.put(sid, 0);
+    this.duration_servers.put(sid, (te - ts));
   }
-  final int tt = this.PSQuery(conn, "S155", 1, sid)[0];
-  final int te = this.PSQuery(conn, "S145", 2, sid)[0];
-  sum += this.DBQueryServerDistanceRemaining(sid, tt)[0];
-  dur += (te - tt);
-  this.distance_servers_service.put(sid, sum);
-  this.duration_servers_service.put(sid, dur);
-  this.duration_servers.put(sid, (te - ts));
 } catch (SQLException e) {
   throw e;
 }
@@ -612,7 +620,7 @@ void JargoSetupPreparedStatements() {
   <<S123>> <<S124>> <<S125>> <<S126>> <<S127>> <<S133>> <<S134>> <<S135>>
   <<S136>> <<S137>> <<S138>> <<S139>> <<S140>> <<S141>> <<S142>> <<S143>>
   <<S144>> <<S145>> <<S147>> <<S148>> <<S149>> <<S150>> <<S151>> <<S152>>
-  <<S153>> <<S154>> <<S155>>
+  <<S153>> <<S154>> <<S155>> <<S156>>
 }
 @ %def JargoSetupPreparedStatements
 <<S0>>=
@@ -935,6 +943,9 @@ this.lu_pstr.put("S154", SEL+"SUM (dd) FROM W WHERE sid=? AND t2 BETWEEN ? AND ?
 <<S155>>=
 this.lu_pstr.put("S155", SEL+"MAX (td) FROM CPD WHERE sid = ?");
 @ %def S155
+<<S156>>=
+this.lu_pstr.put("S156", SEL+"ts, vs FROM CW WHERE sid=?");
+@ %def S156
 
 \subsection{\texttt{PSCreate}(2)}
 \begin{tabular}{p{\textwidth}}

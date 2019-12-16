@@ -497,9 +497,9 @@ public class Controller {
            this.statQueryMetricServerTWViolationsTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
-  public int[] queryMetricServiceRate() throws SQLException {
+  public int[] queryMetricServiceRate(boolean flag_usecache) throws SQLException {
            long A0 = System.currentTimeMillis();
-           int[] output = storage.DBQueryMetricServiceRate();
+           int[] output = storage.DBQueryMetricServiceRate(flag_usecache);
            this.statQueryMetricServiceRateDur = (System.currentTimeMillis() - A0);
            return output;
          }
@@ -604,6 +604,9 @@ public class Controller {
            int[] output = this.storage.DBQueryVerticesCount();
            this.statQueryVerticesCountDur = (System.currentTimeMillis() - A0);
            return output;
+         }
+  public int[] queryMetricServiceRate() throws SQLException {
+           return queryMetricServiceRate(true);
          }
   public void insertRequest(final int[] u) throws DuplicateUserException, SQLException {
            this.storage.DBInsertRequest(u);
