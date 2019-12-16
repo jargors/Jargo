@@ -157,15 +157,18 @@ public class Storage {
            this.distance_requests_transit.forEach((rid, val) -> output[0] += (val - this.lu_users.get(rid)[6]));
            return output;
          }
-  public int[] DBQueryMetricRequestDistanceTransitTotal() throws SQLException {
-           // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-           //   return PSQuery(conn, "S115", 1);
-           // } catch (SQLException e) {
-           //   throw e;
-           // }
-           final int[] output = new int[] { 0 };
-           this.distance_requests_transit.forEach((rid, val) -> output[0] += val);
-           return output;
+  public int[] DBQueryMetricRequestDistanceTransitTotal(boolean flag_usecache) throws SQLException {
+           if (flag_usecache) {
+             final int[] output = new int[] { 0 };
+             this.distance_requests_transit.forEach((rid, val) -> output[0] += val);
+             return output;
+           } else {
+             try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+               return PSQuery(conn, "S115", 1);
+             } catch (SQLException e) {
+               throw e;
+             }
+           }
          }
   public int[] DBQueryMetricRequestDurationPickupTotal() throws SQLException {
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
@@ -305,15 +308,18 @@ public class Storage {
              ? this.distance_requests_transit.get(rid) - this.lu_users.get(rid)[6]
              : 0 };
          }
-  public int[] DBQueryRequestDistanceTransit(final int rid) throws SQLException {
-           // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-           //   return PSQuery(conn, "S114", 1, rid);
-           // } catch (SQLException e) {
-           //   throw e;
-           // }
-           return new int[] { this.distance_requests_transit.containsKey(rid)
-             ? this.distance_requests_transit.get(rid)
-             : 0 };
+  public int[] DBQueryRequestDistanceTransit(final int rid, boolean flag_usecache) throws SQLException {
+           if (flag_usecache) {
+             return new int[] { this.distance_requests_transit.containsKey(rid)
+               ? this.distance_requests_transit.get(rid)
+               : 0 };
+           } else {
+             try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+               return PSQuery(conn, "S114", 1, rid);
+             } catch (SQLException e) {
+               throw e;
+             }
+           }
          }
   public int[] DBQueryRequestDurationPickup(final int rid) throws SQLException {
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
@@ -658,6 +664,9 @@ public class Storage {
          }
   public int[] DBQueryMetricRequestDistanceBaseUnassignedTotal() throws SQLException {
            return DBQueryMetricRequestDistanceBaseUnassignedTotal(true);
+         }
+  public int[] DBQueryMetricRequestDistanceTransitTotal() throws SQLException {
+           return DBQueryMetricRequestDistanceTransitTotal(true);
          }
   public int[] DBQueryMetricServerDistanceCruisingTotal() throws SQLException {
            return DBQueryMetricServerDistanceCruisingTotal(true);
@@ -1922,7 +1931,7 @@ public class Storage {
             this.lu_pstr.put("S136", SEL+"* FROM V"); this.lu_pstr.put("S137", SEL+"* FROM E"); this.lu_pstr.put("S138", SEL+"val FROM dist_r_unassigned"); this.lu_pstr.put("S139", UPD+"CPD SET te=? WHERE sid=?"); this.lu_pstr.put("S140", UPD+"CQ SET tp=?, td=? WHERE rid=?"); this.lu_pstr.put("S141", SEL+"* FROM r_user"); this.lu_pstr.put("S142", SEL+"SUM (dd) FROM W WHERE sid=? AND t2>?"); this.lu_pstr.put("S143", SEL+"* FROM R WHERE re<=? AND ?<=re+?");
             this.lu_pstr.put("S144", SEL+"t2, v2, rid FROM CQ WHERE sid=? AND t2>? ORDER BY o2 ASC"); this.lu_pstr.put("S145", SEL+"te, ve FROM CW WHERE sid=?"); this.lu_pstr.put("S147", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
                                   + "SELECT t1 FROM W WHERE sid=? AND v2=0)"); this.lu_pstr.put("S148", SEL+"sid FROM assignments WHERE rid=?"); this.lu_pstr.put("S149", SEL+"t2, v2 FROM W WHERE sid=? ORDER BY t2 ASC"); this.lu_pstr.put("S150", SEL+"sid, val FROM violations_t_s"); this.lu_pstr.put("S151", SEL+"rid, val FROM violations_t_r"); this.lu_pstr.put("S152", SEL+"t2, v2 FROM W WHERE sid=? AND t2>? ORDER BY t2 ASC FETCH FIRST ? ROWS ONLY");
-            this.lu_pstr.put("S153", SEL+"t1, t2 FROM CQ WHERE sid=? AND q1=sq"); this.lu_pstr.put("S154", SEL+"SUM (dd) FROM W WHERE sid=? AND t2 BETWEEN ? AND ?"); this.lu_pstr.put("S155", SEL+"MAX (td) FROM CPD WHERE sid = ?"); this.lu_pstr.put("S156", SEL+"ts, vs FROM CW WHERE sid=?");
+            this.lu_pstr.put("S153", SEL+"t1, t2 FROM CQ WHERE sid=? AND q1=sq"); this.lu_pstr.put("S154", SEL+"SUM (dd) FROM W WHERE sid=? AND t2 > ? AND t2 <= ?"); this.lu_pstr.put("S155", SEL+"MAX (td) FROM CPD WHERE sid = ?"); this.lu_pstr.put("S156", SEL+"ts, vs FROM CW WHERE sid=?");
           }
   private void PSAdd(PreparedStatement p, final Integer... values) throws SQLException {
             p.clearParameters();
