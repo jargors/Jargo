@@ -215,15 +215,18 @@ public class Storage {
            );
            return output;
          }
-  public int[] DBQueryMetricServerDistanceServiceTotal() throws SQLException {
-           // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-           //   return PSQuery(conn, "S109", 1);
-           // } catch (SQLException e) {
-           //   throw e;
-           // }
-           final int[] output = new int[] { 0 };
-           this.distance_servers.forEach((sid, val) -> output[0] += (val - this.distance_servers_cruising.get(sid)));
-           return output;
+  public int[] DBQueryMetricServerDistanceServiceTotal(boolean flag_usecache) throws SQLException {
+           if (flag_usecache) {
+             final int[] output = new int[] { 0 };
+             this.distance_servers.forEach((sid, val) -> output[0] += (val - this.distance_servers_cruising.get(sid)));
+             return output;
+           } else {
+             try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+               return PSQuery(conn, "S109", 1);
+             } catch (SQLException e) {
+               throw e;
+             }
+           }
          }
   public int[] DBQueryMetricServerDistanceTotal(boolean flag_usecache) throws SQLException {
            if (flag_usecache) {
@@ -410,13 +413,16 @@ public class Storage {
              throw e;
            }
          }
-  public int[] DBQueryServerDistance(final int sid) throws SQLException {
-           // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-           //   return PSQuery(conn, "S104", 1, sid);
-           // } catch (SQLException e) {
-           //   throw e;
-           // }
-           return new int[] { this.distance_servers.get(sid) };
+  public int[] DBQueryServerDistance(final int sid, boolean flag_usecache) throws SQLException {
+           if (flag_usecache) {
+             return new int[] { this.distance_servers.get(sid) };
+           } else {
+             try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+               return PSQuery(conn, "S104", 1, sid);
+             } catch (SQLException e) {
+               throw e;
+             }
+           }
          }
   public int[] DBQueryServerDistanceCruising(final int sid) throws SQLException {
            // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
@@ -434,13 +440,16 @@ public class Storage {
              throw e;
            }
          }
-  public int[] DBQueryServerDistanceService(final int sid) throws SQLException {
-           // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-           //   return PSQuery(conn, "S108", 1, sid);
-           // } catch (SQLException e) {
-           //   throw e;
-           // }
-           return new int [] { this.distance_servers.get(sid) - this.distance_servers_cruising.get(sid) };
+  public int[] DBQueryServerDistanceService(final int sid, boolean flag_usecache) throws SQLException {
+           if (flag_usecache) {
+             return new int [] { this.distance_servers.get(sid) - this.distance_servers_cruising.get(sid) };
+           } else {
+             try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+               return PSQuery(conn, "S108", 1, sid);
+             } catch (SQLException e) {
+               throw e;
+             }
+           }
          }
   public int[] DBQueryServerDurationCruising(final int sid) throws SQLException {
            return new int[] { this.duration_servers_cruising.get(sid) };
@@ -645,6 +654,9 @@ public class Storage {
          }
   public int[] DBQueryMetricRequestDistanceBaseUnassignedTotal() throws SQLException {
            return DBQueryMetricRequestDistanceBaseUnassignedTotal(true);
+         }
+  public int[] DBQueryMetricServerDistanceServiceTotal() throws SQLException {
+           return DBQueryMetricServerDistanceServiceTotal(true);
          }
   public int[] DBQueryMetricServerDistanceTotal() throws SQLException {
            return DBQueryMetricServerDistanceTotal(true);
