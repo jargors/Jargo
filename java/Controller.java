@@ -788,6 +788,9 @@ public class Controller {
   public int retrieveQueueSize() {
            return this.client.getStatClientQueueSize();
          }
+  public long retrieveHandleRequestDur() {
+           return this.client.getStatClientHandleRequestDur();
+         }
   public final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> retrieveRefCacheEdges() {
            return this.storage.getRefCacheEdges();
          }
