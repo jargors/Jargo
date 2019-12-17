@@ -193,6 +193,7 @@ public class Controller {
   private long statQueryRequestTimeOfDepartureDur = 0;
   private long statQueryRequestsCountDur = 0;
   private long statQueryRequestsCountActiveDur = 0;
+  private long statQueryRequestsCountCompletedDur = 0;
   private long statQueryRequestsQueuedDur = 0;
   private long statQueryServerRouteDur = 0;
   private long statQueryServerRouteActiveDur = 0;
@@ -329,6 +330,9 @@ public class Controller {
          }
   public long getStatQueryRequestsCountActiveDur() {
            return this.statQueryRequestsCountActiveDur;
+         }
+  public long getStatQueryRequestsCountCompletedDur() {
+           return this.statQueryRequestsCountCompletedDur;
          }
   public long getStatQueryRequestsQueuedDur() {
            return this.statQueryRequestsQueuedDur;
@@ -535,6 +539,12 @@ public class Controller {
            long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryRequestsCountActive(t);
            this.statQueryRequestsCountActiveDur = (System.currentTimeMillis() - A0);
+           return output;
+         }
+  public int[] queryRequestsCountCompleted(final int t) throws SQLException {
+           long A0 = System.currentTimeMillis();
+           int[] output = storage.DBQueryRequestsCountCompleted(t);
+           this.statQueryRequestsCountCompletedDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryRequestsQueued(final int t) throws SQLException {

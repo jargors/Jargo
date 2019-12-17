@@ -114,6 +114,9 @@ public class ControllerMonitor implements ControllerMonitorMBean {
   public long getStatQueryRequestsCountActiveDur() {
     return this.controller.getStatQueryRequestsCountActiveDur();
   }
+  public long getStatQueryRequestsCountCompletedDur() {
+    return this.controller.getStatQueryRequestsCountCompletedDur();
+  }
   public long getStatQueryRequestsQueuedDur() {
     return this.controller.getStatQueryRequestsQueuedDur();
   }
