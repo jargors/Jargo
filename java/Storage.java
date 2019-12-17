@@ -43,6 +43,7 @@ public class Storage {
   private Map<Integer, Integer> distance_requests_transit = new HashMap<Integer, Integer>();
   private Map<Integer, Integer> duration_servers = new HashMap<Integer, Integer>();
   private Map<Integer, Integer> duration_servers_cruising = new HashMap<Integer, Integer>();
+  private Map<Integer, Integer> duration_requests_transit = new HashMap<Integer, Integer>();
   private final int    STATEMENTS_MAX_COUNT   = 20;
   private       int    REQUEST_TIMEOUT        = 30;
   private       String CONNECTIONS_URL        = "jdbc:derby:memory:jargo;create=true";
@@ -182,11 +183,17 @@ public class Storage {
              throw e;
            }
          }
-  public int[] DBQueryMetricRequestDurationTransitTotal() throws SQLException {
-           try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-             return PSQuery(conn, "S121", 1);
-           } catch (SQLException e) {
-             throw e;
+  public int[] DBQueryMetricRequestDurationTransitTotal(boolean flag_usecache) throws SQLException {
+           if (flag_usecache) {
+             final int[] output = new int[] { 0 };
+             this.duration_requests_transit.forEach((rid, val) -> output[0] += val);
+             return output;
+           } else {
+             try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+               return PSQuery(conn, "S121", 1);
+             } catch (SQLException e) {
+               throw e;
+             }
            }
          }
   public int[] DBQueryMetricRequestDurationTravelTotal() throws SQLException {
@@ -356,11 +363,17 @@ public class Storage {
              throw e;
            }
          }
-  public int[] DBQueryRequestDurationTransit(final int rid) throws SQLException {
-           try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-             return PSQuery(conn, "S120", 1, rid);
-           } catch (SQLException e) {
-             throw e;
+  public int[] DBQueryRequestDurationTransit(final int rid, boolean flag_usecache) throws SQLException {
+           if (flag_usecache) {
+             return new int[] { this.duration_requests_transit.containsKey(rid)
+                 ? this.duration_requests_transit.get(rid)
+                 : 0 };
+           } else {
+             try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+               return PSQuery(conn, "S120", 1, rid);
+             } catch (SQLException e) {
+               throw e;
+             }
            }
          }
   public int[] DBQueryRequestDurationTravel(final int rid) throws SQLException {
@@ -719,6 +732,9 @@ public class Storage {
   public int[] DBQueryMetricRequestDistanceTransitTotal() throws SQLException {
            return DBQueryMetricRequestDistanceTransitTotal(true);
          }
+  public int[] DBQueryMetricRequestDurationTransitTotal() throws SQLException {
+           return DBQueryMetricRequestDurationTransitTotal(true);
+         }
   public int[] DBQueryMetricServerDistanceCruisingTotal() throws SQLException {
            return DBQueryMetricServerDistanceCruisingTotal(true);
          }
@@ -1066,6 +1082,7 @@ public class Storage {
                int[] tpd = this.PSQuery(conn, "S86", 2, r);
                int d = this.PSQuery(conn, "S154", 1, sid, tpd[0], tpd[1])[0];
                this.distance_requests_transit.put(r, d);
+               this.duration_requests_transit.put(r, (tpd[1] - tpd[0]));
              } catch (SQLException e) {
                throw e;
              }
@@ -1227,6 +1244,7 @@ public class Storage {
              this.count_assigned--;
              this.sum_distance_unassigned += this.lu_users.get(r)[6];
              this.distance_requests_transit.put(r, 0);
+             this.duration_requests_transit.put(r, 0);
            }
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
              this.distance_servers.put(sid, this.PSQuery(conn, "S104", 1, sid)[0]);
@@ -1523,6 +1541,7 @@ public class Storage {
                    int[] tpd = this.PSQuery(conn, "S86", 2, r);
                    int d = this.PSQuery(conn, "S154", 1, sid, tpd[0], tpd[1])[0];
                    this.distance_requests_transit.put(r, d);
+                   this.duration_requests_transit.put(r, (tpd[1] - tpd[0]));
                  } catch (SQLException e) {
                    throw e;
                  }

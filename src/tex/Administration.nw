@@ -63,11 +63,12 @@ try (<<Open [[conn]]>>) {
 @
 
 \subsection{Cache request transit distance}
-<<Cache request transit distance>>=
+<<Cache request transit distance and duration>>=
 try (<<Open [[conn]]>>) {
   int[] tpd = this.PSQuery(conn, "S86", 2, r);
   int d = this.PSQuery(conn, "S154", 1, sid, tpd[0], tpd[1])[0];
   this.distance_requests_transit.put(r, d);
+  this.duration_requests_transit.put(r, (tpd[1] - tpd[0]));
 } catch (SQLException e) {
   throw e;
 }
@@ -526,7 +527,7 @@ we query the request's assignment status. Else, we initialize the last-visitatio
       int r = rid;
       try {
         int sid = this.DBQueryRequestIsAssigned(rid)[0];
-        <<Cache request transit distance>>
+        <<Cache request transit distance and duration>>
       } catch (SQLException e) {
         throw e;
       }

@@ -431,9 +431,9 @@ public class Controller {
            this.statQueryMetricRequestDurationPickupTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
-  public int[] queryMetricRequestDurationTransitTotal() throws SQLException {
+  public int[] queryMetricRequestDurationTransitTotal(boolean flag_usecache) throws SQLException {
            long A0 = System.currentTimeMillis();
-           int[] output = storage.DBQueryMetricRequestDurationTransitTotal();
+           int[] output = storage.DBQueryMetricRequestDurationTransitTotal(flag_usecache);
            this.statQueryMetricRequestDurationTransitTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
@@ -613,6 +613,9 @@ public class Controller {
          }
   public int[] queryMetricRequestDistanceTransitTotal() throws SQLException {
            return queryMetricRequestDistanceTransitTotal(true);
+         }
+  public int[] queryMetricRequestDurationTransitTotal() throws SQLException {
+           return queryMetricRequestDurationTransitTotal(true);
          }
   public int[] queryMetricServerDistanceCruisingTotal() throws SQLException {
            return queryMetricServerDistanceCruisingTotal(true);
