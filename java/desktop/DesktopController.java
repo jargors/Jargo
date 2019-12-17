@@ -533,7 +533,7 @@ public class DesktopController {
         } else if ("chk_countRequestsQueue".equals(this.id)) {
           val = this.controller.retrieveQueueSize();
         } else if ("chk_countRequestsActive".equals(this.id)) {
-          
+          val = this.controller.queryRequestsCountActive(t)[0];
         } else if ("chk_countRequestsCompleted".equals(this.id)) {
           
         } else if ("chk_countRequestsFailed".equals(this.id)) {

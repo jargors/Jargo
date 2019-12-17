@@ -1019,6 +1019,25 @@ int[] queryRequestsCount() throws SQLException {
 }
 @ %def queryRequestsCount
 
+\subsection{\texttt{DBQueryRequestsCountActive}(1)}
+<<Read: DBQueryRequestsCountActive(1)>>=
+int[] DBQueryRequestsCountActive(final int t) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return this.PSQuery(conn, "S161", 1, t, t, t);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryRequestsCountActive
+<<Read: queryRequestsCountActive(1)>>=
+int[] queryRequestsCountActive(final int t) throws SQLException {
+  long A0 = System.currentTimeMillis();
+  int[] output = storage.DBQueryRequestsCountActive(t);
+  <<Stats: queryRequestsCountActive(1)>>
+  return output;
+}
+@ %def queryRequestsCountActive
+
 \subsection{\texttt{DBQueryRequestsQueued}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule

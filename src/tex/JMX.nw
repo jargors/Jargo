@@ -41,6 +41,7 @@ corresponding \textit{get} method that returns the value of the variable.
 <<Stats members: queryRequestTimeOfArrival(1)>>
 <<Stats members: queryRequestTimeOfDeparture(1)>>
 <<Stats members: queryRequestsCount(0)>>
+<<Stats members: queryRequestsCountActive(1)>>
 <<Stats members: queryRequestsQueued(1)>>
 <<Stats members: queryServerRoute(1)>>
 <<Stats members: queryServerRouteActive(1)>>
@@ -115,6 +116,7 @@ public <<Get: getStatQueryMetricUserDistanceBaseTotalDur(0)>>
 public <<Get: getStatQueryRequestTimeOfArrivalDur(0)>>
 public <<Get: getStatQueryRequestTimeOfDepartureDur(0)>>
 public <<Get: getStatQueryRequestsCountDur(0)>>
+public <<Get: getStatQueryRequestsCountActiveDur(0)>>
 public <<Get: getStatQueryRequestsQueuedDur(0)>>
 public <<Get: getStatQueryServerRouteActiveDur(0)>>
 public <<Get: getStatQueryServerRouteDur(0)>>
@@ -374,6 +376,11 @@ private long statQueryRequestTimeOfDepartureDur = 0;
 private long statQueryRequestsCountDur = 0;
 @
 
+\subsection{Stats members: queryRequestsCountActive(1)}
+<<Stats members: queryRequestsCountActive(1)>>=
+private long statQueryRequestsCountActiveDur = 0;
+@
+
 \subsection{Stats members: queryRequestsQueued(1)}
 <<Stats members: queryRequestsQueued(1)>>=
 private long statQueryRequestsQueuedDur = 0;
@@ -619,6 +626,11 @@ this.statQueryRequestTimeOfDepartureDur = (System.currentTimeMillis() - A0);
 \subsection{Stats: queryRequestsCount(0)}
 <<Stats: queryRequestsCount(0)>>=
 this.statQueryRequestsCountDur = (System.currentTimeMillis() - A0);
+@
+
+\subsection{Stats: queryRequestsCountActive(1)}
+<<Stats: queryRequestsCountActive(1)>>=
+this.statQueryRequestsCountActiveDur = (System.currentTimeMillis() - A0);
 @
 
 \subsection{Stats: queryRequestsQueued(1)}
@@ -981,6 +993,13 @@ long getStatQueryRequestsCountDur() {
   return this.statQueryRequestsCountDur;
 }
 @ %def getStatQueryRequestsCountDur
+
+\subsection{Get: getStatQueryRequestsCountActiveDur(0)}
+<<Get: getStatQueryRequestsCountActiveDur(0)>>=
+long getStatQueryRequestsCountActiveDur() {
+  return this.statQueryRequestsCountActiveDur;
+}
+@ %def getStatQueryRequestsCountActiveDur
 
 \subsection{Get: getStatQueryRequestsQueuedDur(0)}
 <<Get: getStatQueryRequestsQueuedDur(0)>>=

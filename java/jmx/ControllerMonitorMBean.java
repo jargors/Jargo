@@ -36,6 +36,7 @@ public interface ControllerMonitorMBean {
   public long getStatQueryRequestTimeOfArrivalDur();
   public long getStatQueryRequestTimeOfDepartureDur();
   public long getStatQueryRequestsCountDur();
+  public long getStatQueryRequestsCountActiveDur();
   public long getStatQueryRequestsQueuedDur();
   public long getStatQueryServerRouteActiveDur();
   public long getStatQueryServerRouteDur();

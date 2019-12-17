@@ -449,6 +449,13 @@ public class Storage {
            // }
            return new int[] { this.count_requests };
          }
+  public int[] DBQueryRequestsCountActive(final int t) throws SQLException {
+           try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+             return this.PSQuery(conn, "S161", 1, t, t, t);
+           } catch (SQLException e) {
+             throw e;
+           }
+         }
   public int[] DBQueryRequestsQueued(final int t) throws SQLException {
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
              final int[] output = this.PSQuery(conn, "S143", 7, t, t, REQUEST_TIMEOUT);
@@ -2053,6 +2060,9 @@ public class Storage {
                                                                       + "(SELECT val FROM dur_s_service WHERE sid=?) as b"); this.lu_pstr.put("S160", SEL+"(a.val - b.val) FROM "
                                                                                + "(SELECT SUM (val) as val FROM dur_s_travel) as a,"
                                                                                + "(SELECT SUM (val) as val FROM dur_s_service) as b");
+            this.lu_pstr.put("S161", SEL+"(a.val - b.val) FROM "
+                + "(SELECT COUNT (*) as val FROM R WHERE ?>= re AND ? < rl) as a,"
+                + "(SELECT COUNT (*) as val FROM assignments_r WHERE t <= ?) as b");
           }
   private void PSAdd(PreparedStatement p, final Integer... values) throws SQLException {
             p.clearParameters();
