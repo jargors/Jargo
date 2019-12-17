@@ -677,6 +677,13 @@ public class Storage {
              throw e;
            }
          }
+  public int[] DBQueryServersCountActive(final int t) throws SQLException {
+           try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+             return new int[] { this.PSQuery(conn, "S134", 1, t, t, t).length/2 };
+           } catch (SQLException e) {
+             throw e;
+           }
+         }
   public int[] DBQueryServersLocations(final int t) throws SQLException {
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
              return this.PSQuery(conn, "S59", 3, t, t, t, t);

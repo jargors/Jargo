@@ -51,6 +51,7 @@ corresponding \textit{get} method that returns the value of the variable.
 <<Stats members: queryServerTimeOfDeparture(1)>>
 <<Stats members: queryServersActive(1)>>
 <<Stats members: queryServersCount(0)>>
+<<Stats members: queryServersCountActive(1)>>
 <<Stats members: queryServersLocationsActive(1)>>
 <<Stats members: queryUser(1)>>
 <<Stats members: queryVertex(1)>>
@@ -127,6 +128,7 @@ public <<Get: getStatQueryServerScheduleDur(0)>>
 public <<Get: getStatQueryServerTimeOfDepartureDur(0)>>
 public <<Get: getStatQueryServersActiveDur(0)>>
 public <<Get: getStatQueryServersCountDur(0)>>
+public <<Get: getStatQueryServersCountActiveDur(0)>>
 public <<Get: getStatQueryServersLocationsActiveDur(0)>>
 public <<Get: getStatQueryUserDur(0)>>
 public <<Get: getStatQueryVertexDur(0)>>
@@ -448,6 +450,11 @@ private long statQueryServersActiveDur = 0;
 private long statQueryServersCountDur = 0;
 @
 
+\subsection{Stats members: queryServersCountActive(1)}
+<<Stats members: queryServersCountActive(1)>>=
+private long statQueryServersCountActiveDur = 0;
+@
+
 \subsection{Stats members: queryServersLocationsActive(1)}
 <<Stats members: queryServersLocationsActive(1)>>=
 private long statQueryServersLocationsActiveDur = 0;
@@ -703,6 +710,11 @@ this.statQueryServersActiveDur = (System.currentTimeMillis() - A0);
 \subsection{Stats: queryServersCount(0)}
 <<Stats: queryServersCount(0)>>=
 this.statQueryServersCountDur = (System.currentTimeMillis() - A0);
+@
+
+\subsection{Stats: queryServersCountActive(1)}
+<<Stats: queryServersCountActive(1)>>=
+this.statQueryServersCountActiveDur = (System.currentTimeMillis() - A0);
 @
 
 \subsection{Stats: queryServersLocationsActive(1)}
@@ -1103,6 +1115,13 @@ long getStatQueryServersCountDur() {
   return this.statQueryServersCountDur;
 }
 @ %def getStatQueryServersCountDur
+
+\subsection{Get: getStatQueryServersCountActiveDur(0)}
+<<Get: getStatQueryServersCountActiveDur(0)>>=
+long getStatQueryServersCountActiveDur() {
+  return this.statQueryServersCountActiveDur;
+}
+@ %def getStatQueryServersCountActiveDur
 
 \subsection{Get: getStatQueryServersLocationsActiveDur(0)}
 <<Get: getStatQueryServersLocationsActiveDur(0)>>=

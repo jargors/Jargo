@@ -1975,6 +1975,51 @@ throws SQLException {
 }
 @ %def DBQueryServerAssignmentsCompleted
 
+\subsection{\texttt{DBQueryServersActive}(1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServersActive]]}(1) returns the identifiers
+of the active servers at the given time. A server is ``active'' if its
+service has not ended.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[t]] (param. 1):&a time
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array, or
+[[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={draw,minimum size=6mm}] {
+  \node {$0:\textrm{a server identifier}$};
+ &\node {...};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryServersActive(1)>>=
+int[] DBQueryServersActive(final int t) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return this.PSQuery(conn, "S134", 1, t, t, t);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryServersActive
+<<Read: queryServersActive(1)>>=
+int[] queryServersActive(final int t) throws SQLException {
+  long A0 = System.currentTimeMillis();
+  int[] output = this.storage.DBQueryServersActive(t);
+  <<Stats: queryServersActive(1)>>
+  return output;
+}
+@ %def queryServersActive
+
 \subsection{\texttt{DBQueryServersCount}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -2021,11 +2066,11 @@ int[] queryServersCount() throws SQLException {
 }
 @ %def queryServersCount
 
-\subsection{\texttt{DBQueryServersActive}(1)}
+\subsection{\texttt{DBQueryServersCountActive}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBQueryServersActive]]}(1) returns the identifiers
+Method \textcolor{blue}{[[DBQueryServersCountActive]]}(1) returns the identifiers
 of the active servers at the given time. A server is ``active'' if its
 service has not ended.
 A [[SQLException]] is thrown in case of database failure.\\
@@ -2048,23 +2093,23 @@ Integer [[t]] (param. 1):&a time
 \textbf{Throws:} [[SQLException]] if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-<<Read: DBQueryServersActive(1)>>=
-int[] DBQueryServersActive(final int t) throws SQLException {
+<<Read: DBQueryServersCountActive(1)>>=
+int[] DBQueryServersCountActive(final int t) throws SQLException {
   try (<<Open [[conn]]>>) {
-    return this.PSQuery(conn, "S134", 1, t, t, t);
+    return new int[] { this.PSQuery(conn, "S134", 1, t, t, t).length/2 };
   } catch (SQLException e) {
     throw e;
   }
 }
-@ %def DBQueryServersActive
-<<Read: queryServersActive(1)>>=
-int[] queryServersActive(final int t) throws SQLException {
+@ %def DBQueryServersCountActive
+<<Read: queryServersCountActive(1)>>=
+int[] queryServersCountActive(final int t) throws SQLException {
   long A0 = System.currentTimeMillis();
-  int[] output = this.storage.DBQueryServersActive(t);
-  <<Stats: queryServersActive(1)>>
+  int[] output = this.storage.DBQueryServersCountActive(t);
+  <<Stats: queryServersCountActive(1)>>
   return output;
 }
-@ %def queryServersActive
+@ %def queryServersCountActive
 
 \subsection{\texttt{DBQueryServersLocations}(1)}
 \begin{tabular}{p{\textwidth}}

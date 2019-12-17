@@ -202,6 +202,7 @@ public class Controller {
   private long statQueryServerTimeOfDepartureDur = 0;
   private long statQueryServersActiveDur = 0;
   private long statQueryServersCountDur = 0;
+  private long statQueryServersCountActiveDur = 0;
   private long statQueryServersLocationsActiveDur = 0;
   private long statQueryUserDur = 0;
   private long statQueryVertexDur = 0;
@@ -357,6 +358,9 @@ public class Controller {
          }
   public long getStatQueryServersCountDur() {
            return this.statQueryServersCountDur;
+         }
+  public long getStatQueryServersCountActiveDur() {
+           return this.statQueryServersCountActiveDur;
          }
   public long getStatQueryServersLocationsActiveDur() {
            return this.statQueryServersLocationsActiveDur;
@@ -593,6 +597,12 @@ public class Controller {
            long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryServersCount();
            this.statQueryServersCountDur = (System.currentTimeMillis() - A0);
+           return output;
+         }
+  public int[] queryServersCountActive(final int t) throws SQLException {
+           long A0 = System.currentTimeMillis();
+           int[] output = this.storage.DBQueryServersCountActive(t);
+           this.statQueryServersCountActiveDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryServersLocationsActive(final int t) throws SQLException {
