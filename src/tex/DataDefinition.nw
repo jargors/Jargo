@@ -445,6 +445,11 @@ To list travel duration $\delta$ of all servers:
 "CREATE VIEW dur_s_travel (sid, val) AS "
   + "SELECT sid, te - ts FROM CW"
 @
+To list service duration of all servers:
+<<Create View dur\_s\_service statement>>=
+"CREATE VIEW dur_s_service (sid, val) AS "
+  + "SELECT sid, sum (t2 - t1) FROM CQ WHERE Q1 <> SQ GROUP BY sid"
+@
 To list pick-up delay $\delta^\textrm{pickup}$ of all requests:
 <<Create View dur\_r\_pickup statement (Eq.~\ref{eq:pick-up delay})>>=
 "CREATE VIEW dur_r_pickup (rid, val) AS "

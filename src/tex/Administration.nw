@@ -179,6 +179,7 @@ void JargoInstanceInitialize() {
     stmt.addBatch(<<Create View dist\_r\_transit statement (Eq.~\ref{eq:transit-distance})>>);
     stmt.addBatch(<<Create View dist\_r\_detour statement (Eq.~\ref{eq:detour-distance})>>);
     stmt.addBatch(<<Create View dur\_s\_travel statement>>);
+    stmt.addBatch(<<Create View dur\_s\_service statement>>);
     stmt.addBatch(<<Create View dur\_r\_pickup statement (Eq.~\ref{eq:pick-up delay})>>);
     stmt.addBatch(<<Create View dur\_r\_transit statement (Eq.~\ref{eq:transit-duration})>>);
     stmt.addBatch(<<Create View dur\_r\_travel statement (Eq.~\ref{eq:travel-duration})>>);
@@ -623,7 +624,7 @@ void JargoSetupPreparedStatements() {
   <<S123>> <<S124>> <<S125>> <<S126>> <<S127>> <<S133>> <<S134>> <<S135>>
   <<S136>> <<S137>> <<S138>> <<S139>> <<S140>> <<S141>> <<S142>> <<S143>>
   <<S144>> <<S145>> <<S147>> <<S148>> <<S149>> <<S150>> <<S151>> <<S152>>
-  <<S153>> <<S154>> <<S155>> <<S156>>
+  <<S153>> <<S154>> <<S155>> <<S156>> <<S157>> <<S158>>
 }
 @ %def JargoSetupPreparedStatements
 <<S0>>=
@@ -949,6 +950,12 @@ this.lu_pstr.put("S155", SEL+"MAX (td) FROM CPD WHERE sid = ?");
 <<S156>>=
 this.lu_pstr.put("S156", SEL+"ts, vs FROM CW WHERE sid=?");
 @ %def S156
+<<S157>>=
+this.lu_pstr.put("S157", SEL+"val FROM dur_s_service WHERE sid=?");
+@ %def S157
+<<S158>>=
+this.lu_pstr.put("S158", SEL+"SUM (val) FROM dur_s_service");
+@ %def S158
 
 \subsection{\texttt{PSCreate}(2)}
 \begin{tabular}{p{\textwidth}}
