@@ -1132,12 +1132,10 @@ public class Storage {
              this.count_assigned++;
              this.sum_distance_unassigned -= this.lu_users.get(r)[6];
              try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-               int[] tpd = this.PSQuery(conn, "S86", 2, r);
-               int d = this.PSQuery(conn, "S154", 1, sid, tpd[0], tpd[1])[0];
-               this.distance_requests_transit.put(r, d);
-               this.duration_requests_transit.put(r, (tpd[1] - tpd[0]));
-               this.duration_requests_travel.put(r, (tpd[1] - this.lu_users.get(r)[2]));
-               this.duration_requests_pickup.put(r, (tpd[0] - this.lu_users.get(r)[2]));
+               this.distance_requests_transit.put(r, this.DBQueryRequestDistanceTransit(r, false)[0]);
+               this.duration_requests_transit.put(r, this.DBQueryRequestDurationTransit(r, false)[0]);
+               this.duration_requests_travel .put(r, this.DBQueryRequestDurationTravel (r, false)[0]);
+               this.duration_requests_pickup .put(r, this.DBQueryRequestDurationPickup (r, false)[0]);
              } catch (SQLException e) {
                throw e;
              }
@@ -1593,12 +1591,10 @@ public class Storage {
                try {
                  int sid = this.DBQueryRequestIsAssigned(rid)[0];
                  try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-                   int[] tpd = this.PSQuery(conn, "S86", 2, r);
-                   int d = this.PSQuery(conn, "S154", 1, sid, tpd[0], tpd[1])[0];
-                   this.distance_requests_transit.put(r, d);
-                   this.duration_requests_transit.put(r, (tpd[1] - tpd[0]));
-                   this.duration_requests_travel.put(r, (tpd[1] - this.lu_users.get(r)[2]));
-                   this.duration_requests_pickup.put(r, (tpd[0] - this.lu_users.get(r)[2]));
+                   this.distance_requests_transit.put(r, this.DBQueryRequestDistanceTransit(r, false)[0]);
+                   this.duration_requests_transit.put(r, this.DBQueryRequestDurationTransit(r, false)[0]);
+                   this.duration_requests_travel .put(r, this.DBQueryRequestDurationTravel (r, false)[0]);
+                   this.duration_requests_pickup .put(r, this.DBQueryRequestDurationPickup (r, false)[0]);
                  } catch (SQLException e) {
                    throw e;
                  }

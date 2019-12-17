@@ -7446,16 +7446,14 @@ try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1vLSTU-JT1v9-1}}\R
 \subsection{Cache request transit distance and duration}
 \nwenddocs{}\nwbegincode{9}\sublabel{NW1vLSTU-ONjMX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-ONjMX-1}}}\moddef{Cache request transit distance and duration~{\nwtagstyle{}\subpageref{NW1vLSTU-ONjMX-1}}}\endmoddef\nwused{\\{NW1l0GC8-3yF6ns-2}\\{NW1vLSTU-3RkokI-5}}
 try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1vLSTU-JT1v9-1}}\RA{}) \{
-  int[] tpd = this.PSQuery(conn, "S86", 2, r);
-  int d = this.PSQuery(conn, "S154", 1, sid, tpd[0], tpd[1])[0];
-  this.distance_requests_transit.put(r, d);
-  this.duration_requests_transit.put(r, (tpd[1] - tpd[0]));
-  this.duration_requests_travel.put(r, (tpd[1] - this.lu_users.get(r)[2]));
-  this.duration_requests_pickup.put(r, (tpd[0] - this.lu_users.get(r)[2]));
+  this.distance_requests_transit.put(r, this.DBQueryRequestDistanceTransit(r, false)[0]);
+  this.duration_requests_transit.put(r, this.DBQueryRequestDurationTransit(r, false)[0]);
+  this.duration_requests_travel .put(r, this.DBQueryRequestDurationTravel (r, false)[0]);
+  this.duration_requests_pickup .put(r, this.DBQueryRequestDurationPickup (r, false)[0]);
 \} catch (SQLException e) \{
   throw e;
 \}
-\nwidentuses{\\{{PSQuery}{PSQuery}}\\{{S154}{S154}}\\{{S86}{S86}}}\nwindexuse{PSQuery}{PSQuery}{NW1vLSTU-ONjMX-1}\nwindexuse{S154}{S154}{NW1vLSTU-ONjMX-1}\nwindexuse{S86}{S86}{NW1vLSTU-ONjMX-1}\nwendcode{}\nwbegindocs{10}\nwdocspar
+\nwidentuses{\\{{DBQueryRequestDistanceTransit}{DBQueryRequestDistanceTransit}}\\{{DBQueryRequestDurationPickup}{DBQueryRequestDurationPickup}}\\{{DBQueryRequestDurationTransit}{DBQueryRequestDurationTransit}}\\{{DBQueryRequestDurationTravel}{DBQueryRequestDurationTravel}}}\nwindexuse{DBQueryRequestDistanceTransit}{DBQueryRequestDistanceTransit}{NW1vLSTU-ONjMX-1}\nwindexuse{DBQueryRequestDurationPickup}{DBQueryRequestDurationPickup}{NW1vLSTU-ONjMX-1}\nwindexuse{DBQueryRequestDurationTransit}{DBQueryRequestDurationTransit}{NW1vLSTU-ONjMX-1}\nwindexuse{DBQueryRequestDurationTravel}{DBQueryRequestDurationTravel}{NW1vLSTU-ONjMX-1}\nwendcode{}\nwbegindocs{10}\nwdocspar
 
 \section{Methods: Administration}
 
