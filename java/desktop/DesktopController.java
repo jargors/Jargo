@@ -93,14 +93,14 @@ public class DesktopController {
   @FXML private Button btn_traffic;
   @FXML private CheckBox chk_countRequestsActive;
   @FXML private CheckBox chk_countRequestsCompleted;
-  @FXML private CheckBox chk_countRequestsFailed;
+  //@FXML private CheckBox chk_countRequestsFailed;
   @FXML private CheckBox chk_countRequestsQueue;
   @FXML private CheckBox chk_countRequestsViolations;
   @FXML private CheckBox chk_countServersActive;
   @FXML private CheckBox chk_countServersViolations;
   @FXML private CheckBox chk_distanceSavings;
   @FXML private CheckBox chk_requestDetourDistance;
-  @FXML private CheckBox chk_requestDetourDuration;
+  //@FXML private CheckBox chk_requestDetourDuration;
   @FXML private CheckBox chk_requestDistanceUnassigned;
   @FXML private CheckBox chk_requestPickupDuration;
   @FXML private CheckBox chk_requestTransitDistance;
@@ -114,7 +114,7 @@ public class DesktopController {
   @FXML private CheckBox chk_serverTravelDuration;
   @FXML private CheckBox chk_serviceRate;
   @FXML private CheckBox chk_timeRequestHandling;
-  @FXML private CheckBox chk_timeServerHandling;
+  //@FXML private CheckBox chk_timeServerHandling;
   @FXML private Circle circ_status;
   @FXML private Label lbl_status;
   @FXML private ScrollPane container_canvas;
@@ -506,7 +506,8 @@ public class DesktopController {
           int[] output = this.controller.queryMetricServerDurationTravelTotal();
           val = (output.length > 0 ? output[0] : 0);
         } else if ("chk_serverServiceDuration".equals(this.id)) {
-          
+          int[] output = this.controller.queryMetricServerDurationServiceTotal();
+          val = (output.length > 0 ? output[0] : 0);
         } else if ("chk_serverCruisingDuration".equals(this.id)) {
           int[] output = this.controller.queryMetricServerDurationCruisingTotal();
           val = (output.length > 0 ? output[0] : 0);
@@ -533,19 +534,24 @@ public class DesktopController {
         } else if ("chk_countRequestsQueue".equals(this.id)) {
           val = this.controller.retrieveQueueSize();
         } else if ("chk_countRequestsActive".equals(this.id)) {
-          val = this.controller.queryRequestsCountActive(t)[0];
+          int[] output = this.controller.queryRequestsCountActive(t);
+          val = (output.length > 0 ? output[0] : 0);
         } else if ("chk_countRequestsCompleted".equals(this.id)) {
-          val = this.controller.queryRequestsCountCompleted(t)[0];
+          int[] output = this.controller.queryRequestsCountCompleted(t);
+          val = (output.length > 0 ? output[0] : 0);
         } else if ("chk_countRequestsFailed".equals(this.id)) {
           
         } else if ("chk_countServersActive".equals(this.id)) {
-          
+          int[] output = this.controller.queryServersCountActive(t);
+          val = (output.length > 0 ? output[0] : 0);
         } else if ("chk_countRequestsViolations".equals(this.id)) {
-          
+          int[] output = this.controller.queryMetricRequestTWViolationsTotal();
+          val = (output.length > 0 ? output[0] : 0);
         } else if ("chk_countServersViolations".equals(this.id)) {
-          
+          int[] output = this.controller.queryMetricServerTWViolationsTotal();
+          val = (output.length > 0 ? output[0] : 0);
         } else if ("chk_timeRequestHandling".equals(this.id)) {
-          
+          val = this.controller.retrieveHandleRequestDur();
         } else if ("chk_timeServerHandling".equals(this.id)) {
           
         }
@@ -1423,18 +1429,18 @@ public class DesktopController {
              this.chk_requestTransitDistance.setSelected(false);
              this.chk_requestDetourDistance.setSelected(false);
              this.chk_requestTransitDuration.setSelected(false);
-             this.chk_requestDetourDuration.setSelected(false);
+             //this.chk_requestDetourDuration.setSelected(false);
              this.chk_requestTravelDuration.setSelected(false);
              this.chk_requestPickupDuration.setSelected(false);
              this.chk_countRequestsQueue.setSelected(false);
              this.chk_countRequestsActive.setSelected(false);
              this.chk_countRequestsCompleted.setSelected(false);
-             this.chk_countRequestsFailed.setSelected(false);
+             //this.chk_countRequestsFailed.setSelected(false);
              this.chk_countServersActive.setSelected(false);
              this.chk_countRequestsViolations.setSelected(false);
              this.chk_countServersViolations.setSelected(false);
              this.chk_timeRequestHandling.setSelected(false);
-             this.chk_timeServerHandling.setSelected(false);
+             //this.chk_timeServerHandling.setSelected(false);
              if (this.ren_road != null) {
                this.ren_road.stop();
              }

@@ -10241,14 +10241,14 @@ private final boolean DEBUG =
 @FXML private Button btn_traffic;
 @FXML private CheckBox chk_countRequestsActive;
 @FXML private CheckBox chk_countRequestsCompleted;
-@FXML private CheckBox chk_countRequestsFailed;
+//@FXML private CheckBox chk_countRequestsFailed;
 @FXML private CheckBox chk_countRequestsQueue;
 @FXML private CheckBox chk_countRequestsViolations;
 @FXML private CheckBox chk_countServersActive;
 @FXML private CheckBox chk_countServersViolations;
 @FXML private CheckBox chk_distanceSavings;
 @FXML private CheckBox chk_requestDetourDistance;
-@FXML private CheckBox chk_requestDetourDuration;
+//@FXML private CheckBox chk_requestDetourDuration;
 @FXML private CheckBox chk_requestDistanceUnassigned;
 @FXML private CheckBox chk_requestPickupDuration;
 @FXML private CheckBox chk_requestTransitDistance;
@@ -10262,7 +10262,7 @@ private final boolean DEBUG =
 @FXML private CheckBox chk_serverTravelDuration;
 @FXML private CheckBox chk_serviceRate;
 @FXML private CheckBox chk_timeRequestHandling;
-@FXML private CheckBox chk_timeServerHandling;
+//@FXML private CheckBox chk_timeServerHandling;
 @FXML private Circle circ_status;
 @FXML private Label lbl_status;
 @FXML private ScrollPane container_canvas;
@@ -10937,18 +10937,18 @@ this.chk_requestDistanceUnassigned.setSelected(false);
 this.chk_requestTransitDistance.setSelected(false);
 this.chk_requestDetourDistance.setSelected(false);
 this.chk_requestTransitDuration.setSelected(false);
-this.chk_requestDetourDuration.setSelected(false);
+//this.chk_requestDetourDuration.setSelected(false);
 this.chk_requestTravelDuration.setSelected(false);
 this.chk_requestPickupDuration.setSelected(false);
 this.chk_countRequestsQueue.setSelected(false);
 this.chk_countRequestsActive.setSelected(false);
 this.chk_countRequestsCompleted.setSelected(false);
-this.chk_countRequestsFailed.setSelected(false);
+//this.chk_countRequestsFailed.setSelected(false);
 this.chk_countServersActive.setSelected(false);
 this.chk_countRequestsViolations.setSelected(false);
 this.chk_countServersViolations.setSelected(false);
 this.chk_timeRequestHandling.setSelected(false);
-this.chk_timeServerHandling.setSelected(false);
+//this.chk_timeServerHandling.setSelected(false);
 \nwendcode{}\nwbegindocs{44}\nwdocspar
 
 \subsection{Retrieve serviceRate}
@@ -10994,7 +10994,9 @@ val = (output.length > 0 ? output[0] : 0);
 
 \subsection{Retrieve serverServiceDuration}
 \nwenddocs{}\nwbegincode{57}\sublabel{NWn0bN8-iLjau-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-iLjau-1}}}\moddef{Retrieve serverServiceDuration~{\nwtagstyle{}\subpageref{NWn0bN8-iLjau-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
-\nwendcode{}\nwbegindocs{58}\nwdocspar
+int[] output = this.controller.queryMetricServerDurationServiceTotal();
+val = (output.length > 0 ? output[0] : 0);
+\nwidentuses{\\{{queryMetricServerDurationServiceTotal}{queryMetricServerDurationServiceTotal}}}\nwindexuse{queryMetricServerDurationServiceTotal}{queryMetricServerDurationServiceTotal}{NWn0bN8-iLjau-1}\nwendcode{}\nwbegindocs{58}\nwdocspar
 
 \subsection{Retrieve serverCruisingDuration}
 \nwenddocs{}\nwbegincode{59}\sublabel{NWn0bN8-3GIbUG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3GIbUG-1}}}\moddef{Retrieve serverCruisingDuration~{\nwtagstyle{}\subpageref{NWn0bN8-3GIbUG-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
@@ -11049,12 +11051,14 @@ val = this.controller.retrieveQueueSize();
 
 \subsection{Retrieve countRequestsActive}
 \nwenddocs{}\nwbegincode{77}\sublabel{NWn0bN8-3cIbwq-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3cIbwq-1}}}\moddef{Retrieve countRequestsActive~{\nwtagstyle{}\subpageref{NWn0bN8-3cIbwq-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
-val = this.controller.queryRequestsCountActive(t)[0];
+int[] output = this.controller.queryRequestsCountActive(t);
+val = (output.length > 0 ? output[0] : 0);
 \nwidentuses{\\{{queryRequestsCountActive}{queryRequestsCountActive}}}\nwindexuse{queryRequestsCountActive}{queryRequestsCountActive}{NWn0bN8-3cIbwq-1}\nwendcode{}\nwbegindocs{78}\nwdocspar
 
 \subsection{Retrieve countRequestsCompleted}
 \nwenddocs{}\nwbegincode{79}\sublabel{NWn0bN8-3Gfa93-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3Gfa93-1}}}\moddef{Retrieve countRequestsCompleted~{\nwtagstyle{}\subpageref{NWn0bN8-3Gfa93-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
-val = this.controller.queryRequestsCountCompleted(t)[0];
+int[] output = this.controller.queryRequestsCountCompleted(t);
+val = (output.length > 0 ? output[0] : 0);
 \nwidentuses{\\{{queryRequestsCountCompleted}{queryRequestsCountCompleted}}}\nwindexuse{queryRequestsCountCompleted}{queryRequestsCountCompleted}{NWn0bN8-3Gfa93-1}\nwendcode{}\nwbegindocs{80}\nwdocspar
 
 \subsection{Retrieve countRequestsFailed}
@@ -11063,21 +11067,29 @@ val = this.controller.queryRequestsCountCompleted(t)[0];
 
 \subsection{Retrieve countServersActive}
 \nwenddocs{}\nwbegincode{83}\sublabel{NWn0bN8-md0F8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-md0F8-1}}}\moddef{Retrieve countServersActive~{\nwtagstyle{}\subpageref{NWn0bN8-md0F8-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
-\nwendcode{}
+int[] output = this.controller.queryServersCountActive(t);
+val = (output.length > 0 ? output[0] : 0);
+\nwidentuses{\\{{queryServersCountActive}{queryServersCountActive}}}\nwindexuse{queryServersCountActive}{queryServersCountActive}{NWn0bN8-md0F8-1}\nwendcode{}
 
 \nwbegindocs{84}\nwdocspar
 
 \subsection{Retrieve countRequestsViolations}
 \nwenddocs{}\nwbegincode{85}\sublabel{NWn0bN8-1qBKS6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1qBKS6-1}}}\moddef{Retrieve countRequestsViolations~{\nwtagstyle{}\subpageref{NWn0bN8-1qBKS6-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
-\nwendcode{}\nwbegindocs{86}\nwdocspar
+int[] output = this.controller.queryMetricRequestTWViolationsTotal();
+val = (output.length > 0 ? output[0] : 0);
+\nwidentuses{\\{{queryMetricRequestTWViolationsTotal}{queryMetricRequestTWViolationsTotal}}}\nwindexuse{queryMetricRequestTWViolationsTotal}{queryMetricRequestTWViolationsTotal}{NWn0bN8-1qBKS6-1}\nwendcode{}\nwbegindocs{86}\nwdocspar
 
 \subsection{Retrieve countServersViolations}
 \nwenddocs{}\nwbegincode{87}\sublabel{NWn0bN8-40qlxP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-40qlxP-1}}}\moddef{Retrieve countServersViolations~{\nwtagstyle{}\subpageref{NWn0bN8-40qlxP-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
-\nwendcode{}\nwbegindocs{88}\nwdocspar
+int[] output = this.controller.queryMetricServerTWViolationsTotal();
+val = (output.length > 0 ? output[0] : 0);
+\nwidentuses{\\{{queryMetricServerTWViolationsTotal}{queryMetricServerTWViolationsTotal}}}\nwindexuse{queryMetricServerTWViolationsTotal}{queryMetricServerTWViolationsTotal}{NWn0bN8-40qlxP-1}\nwendcode{}\nwbegindocs{88}\nwdocspar
 
 \subsection{Retrieve timeRequestHandling}
+Retrieves the duration of the last call to handle request (suffers from aliasing).
 \nwenddocs{}\nwbegincode{89}\sublabel{NWn0bN8-2L8WYA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2L8WYA-1}}}\moddef{Retrieve timeRequestHandling~{\nwtagstyle{}\subpageref{NWn0bN8-2L8WYA-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
-\nwendcode{}\nwbegindocs{90}\nwdocspar
+val = this.controller.retrieveHandleRequestDur();
+\nwidentuses{\\{{retrieveHandleRequestDur}{retrieveHandleRequestDur}}}\nwindexuse{retrieveHandleRequestDur}{retrieveHandleRequestDur}{NWn0bN8-2L8WYA-1}\nwendcode{}\nwbegindocs{90}\nwdocspar
 
 \subsection{Retrieve timeServerHandling}
 \nwenddocs{}\nwbegincode{91}\sublabel{NWn0bN8-2BeaZo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2BeaZo-1}}}\moddef{Retrieve timeServerHandling~{\nwtagstyle{}\subpageref{NWn0bN8-2BeaZo-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-8}}
