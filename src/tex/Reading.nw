@@ -1696,10 +1696,18 @@ int[] DBQueryServerDurationTravel(final int sid, boolean flag_usecache) throws S
 }
 @ %def DBQueryServerDurationTravel
 
-\subsection{\texttt{DBQueryServerDurationCruising}(1)}
-<<Read: DBQueryServerDurationCruising(1)>>=
-int[] DBQueryServerDurationCruising(final int sid) throws SQLException {
-  return new int[] { this.duration_servers_cruising.get(sid) };
+\subsection{\texttt{DBQueryServerDurationCruising}(2)}
+<<Read: DBQueryServerDurationCruising(2)>>=
+int[] DBQueryServerDurationCruising(final int sid, boolean flag_usecache) throws SQLException {
+  if (flag_usecache) {
+    return new int[] { this.duration_servers_cruising.get(sid) };
+  } else {
+    try (<<Open [[conn]]>>) {
+      return PSQuery(conn, "S158", 1, sid, sid);
+    } catch (SQLException e) {
+      throw e;
+    }
+  }
 }
 @ %def DBQueryServerDurationCruising
 
@@ -2666,24 +2674,55 @@ int[] queryMetricServerDurationTravelTotal() throws SQLException {
 }
 @
 
-\subsection{\texttt{DBQueryMetricServerDurationCruisingTotal}(0)}
-<<Read: DBQueryMetricServerDurationCruisingTotal(0)>>=
-int[] DBQueryMetricServerDurationCruisingTotal() throws SQLException {
-  final int[] output = new int[] { 0 };
-  this.duration_servers_cruising.forEach((sid, val) ->
-    output[0] += val
-  );
-  return output;
+\subsection{\texttt{DBQueryMetricServerDurationCruisingTotal}(1)}
+<<Read: DBQueryMetricServerDurationCruisingTotal(1)>>=
+int[] DBQueryMetricServerDurationCruisingTotal(boolean flag_usecache) throws SQLException {
+  if (flag_usecache) {
+    final int[] output = new int[] { 0 };
+    this.duration_servers_cruising.forEach((sid, val) -> output[0] += val);
+    return output;
+  } else {
+    try (<<Open [[conn]]>>) {
+      return PSQuery(conn, "S160", 1);
+    } catch (SQLException e) {
+      throw e;
+    }
+  }
 }
 @ %def DBQueryMetricServerDurationCruisingTotal
-<<Read: queryMetricServerDurationCruisingTotal(0)>>=
-int[] queryMetricServerDurationCruisingTotal() throws SQLException {
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryMetricServerDurationCruisingTotal]]}(0) calls [[DBQueryMetricServerDurationCruisingTotal]](1)
+with a default parameter.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryMetricServerDurationCruisingTotal(0)>>=
+int[] DBQueryMetricServerDurationCruisingTotal() throws SQLException {
+  return DBQueryMetricServerDurationCruisingTotal(true);
+}
+@
+\noindent
+<<Read: queryMetricServerDurationCruisingTotal(1)>>=
+int[] queryMetricServerDurationCruisingTotal(boolean flag_usecache) throws SQLException {
   long A0 = System.currentTimeMillis();
-  int[] output = storage.DBQueryMetricServerDurationCruisingTotal();
-  <<Stats: queryMetricServerDurationCruisingTotal(0)>>
+  int[] output = storage.DBQueryMetricServerDurationCruisingTotal(flag_usecache);
+  <<Stats: queryMetricServerDurationCruisingTotal(1)>>
   return output;
 }
 @ %def queryMetricServerDurationCruisingTotal
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryMetricServerDurationCruisingTotal]]}(0) calls [[queryMetricServerDurationCruisingTotal]](1)
+with a default parameter.\\
+\bottomrule
+\end{tabular}
+<<Read: queryMetricServerDurationCruisingTotal(0)>>=
+int[] queryMetricServerDurationCruisingTotal() throws SQLException {
+  return queryMetricServerDurationCruisingTotal(true);
+}
+@
 
 \subsection{\texttt{DBQueryMetricServerDurationServiceTotal}(1)}
 <<Read: DBQueryMetricServerDurationServiceTotal(1)>>=

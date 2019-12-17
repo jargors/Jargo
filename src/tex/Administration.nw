@@ -624,7 +624,7 @@ void JargoSetupPreparedStatements() {
   <<S123>> <<S124>> <<S125>> <<S126>> <<S127>> <<S133>> <<S134>> <<S135>>
   <<S136>> <<S137>> <<S138>> <<S139>> <<S140>> <<S141>> <<S142>> <<S143>>
   <<S144>> <<S145>> <<S147>> <<S148>> <<S149>> <<S150>> <<S151>> <<S152>>
-  <<S153>> <<S154>> <<S155>> <<S156>> <<S157>> <<S158>>
+  <<S153>> <<S154>> <<S155>> <<S156>> <<S157>> <<S158>> <<S159>> <<S160>>
 }
 @ %def JargoSetupPreparedStatements
 <<S0>>=
@@ -956,6 +956,16 @@ this.lu_pstr.put("S157", SEL+"val FROM dur_s_service WHERE sid=?");
 <<S158>>=
 this.lu_pstr.put("S158", SEL+"SUM (val) FROM dur_s_service");
 @ %def S158
+<<S159>>=
+this.lu_pstr.put("S159", SEL+"(a.val - b.val) FROM "
+    + "(SELECT val FROM dur_s_travel WHERE sid=?) as a,"
+    + "(SELECT val FROM dur_s_service WHERE sid=?) as b");
+@ %def S159
+<<S160>>=
+this.lu_pstr.put("S160", SEL+"(a.val - b.val) FROM "
+    + "(SELECT SUM (val) as val FROM dur_s_travel) as a,"
+    + "(SELECT SUM (val) as val FROM dur_s_service) as b");
+@ %def S160
 
 \subsection{\texttt{PSCreate}(2)}
 \begin{tabular}{p{\textwidth}}
