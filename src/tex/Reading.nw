@@ -736,11 +736,11 @@ int[] DBQueryRequestDistanceTransit(final int rid, boolean flag_usecache) throws
 }
 @ %def DBQueryRequestDistanceTransit
 
-\subsection{\texttt{DBQueryRequestDurationPickup}(1)}
+\subsection{\texttt{DBQueryRequestDurationPickup}(2)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBQueryRequestDurationPickup]]}(1) returns the
+Method \textcolor{blue}{[[DBQueryRequestDurationPickup]]}(2) returns the
 pickup delay $\delta^\textrm{pickup}(\mathcal{X},r)$
 (Eq.~\ref{eq:pick-up delay}) of the given request.
 A [[SQLException]] is thrown in case of database failure.\\
@@ -764,12 +764,18 @@ where $r$ is the request identified by [[rid]] (param. 1).\\
 \textbf{Throws:} [[SQLException]] if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-<<Read: DBQueryRequestDurationPickup(1)>>=
-int[] DBQueryRequestDurationPickup(final int rid) throws SQLException {
-  try (<<Open [[conn]]>>) {
-    return PSQuery(conn, "S118", 1, rid);
-  } catch (SQLException e) {
-    throw e;
+<<Read: DBQueryRequestDurationPickup(2)>>=
+int[] DBQueryRequestDurationPickup(final int rid, boolean flag_usecache) throws SQLException {
+  if (flag_usecache) {
+    return new int[] { this.duration_requests_pickup.containsKey(rid)
+        ? this.duration_requests_pickup.get(rid)
+        : 0 };
+  } else {
+    try (<<Open [[conn]]>>) {
+      return PSQuery(conn, "S118", 1, rid);
+    } catch (SQLException e) {
+      throw e;
+    }
   }
 }
 @ %def DBQueryRequestDurationPickup
@@ -3089,11 +3095,11 @@ int[] queryMetricRequestDistanceTransitTotal() throws SQLException {
 }
 @
 
-\subsection{\texttt{DBQueryMetricRequestDurationPickupTotal}(0)}
+\subsection{\texttt{DBQueryMetricRequestDurationPickupTotal}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBQueryMetricRequestDurationPickupTotal]]}(0) returns the
+Method \textcolor{blue}{[[DBQueryMetricRequestDurationPickupTotal]]}(1) returns the
 total pickup delay of all requests.
 A [[SQLException]] is thrown in case of database failure.\\
 \midrule
@@ -3111,29 +3117,60 @@ or [[null]] if no results.
 \textbf{Throws:} [[SQLException]] if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-<<Read: DBQueryMetricRequestDurationPickupTotal(0)>>=
-int[] DBQueryMetricRequestDurationPickupTotal() throws SQLException {
-  try (<<Open [[conn]]>>) {
-    return PSQuery(conn, "S119", 1);
-  } catch (SQLException e) {
-    throw e;
+<<Read: DBQueryMetricRequestDurationPickupTotal(1)>>=
+int[] DBQueryMetricRequestDurationPickupTotal(boolean flag_usecache) throws SQLException {
+  if (flag_usecache) {
+    final int[] output = new int[] { 0 };
+    this.duration_requests_pickup.forEach((rid, val) -> output[0] += val);
+    return output;
+  } else {
+    try (<<Open [[conn]]>>) {
+      return PSQuery(conn, "S119", 1);
+    } catch (SQLException e) {
+      throw e;
+    }
   }
 }
 @ %def DBQueryMetricRequestDurationPickupTotal
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
-Method \textcolor{blue}{[[queryMetricRequestDurationPickupTotal]]}(0) wraps [[DBQueryMetricRequestDurationPickupTotal]](0).\\
+Method \textcolor{blue}{[[DBQueryMetricRequestDurationPickupTotal]]}(0) calls [[DBQueryMetricRequestDurationPickupTotal]](1)
+with a default parameter.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryMetricRequestDurationPickupTotal(0)>>=
+int[] DBQueryMetricRequestDurationPickupTotal() throws SQLException {
+  return DBQueryMetricRequestDurationPickupTotal(true);
+}
+@
+\noindent
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryMetricRequestDurationPickupTotal]]}(1) wraps [[DBQueryMetricRequestDurationPickupTotal]](1).\\
+\bottomrule
+\end{tabular}
+<<Read: queryMetricRequestDurationPickupTotal(1)>>=
+int[] queryMetricRequestDurationPickupTotal(boolean flag_usecache) throws SQLException {
+  long A0 = System.currentTimeMillis();
+  int[] output = storage.DBQueryMetricRequestDurationPickupTotal(flag_usecache);
+  <<Stats: queryMetricRequestDurationPickupTotal(1)>>
+  return output;
+}
+@ %def queryMetricRequestDurationPickupTotal
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryMetricRequestDurationPickupTotal]]}(0) calls [[queryMetricRequestDurationPickupTotal]](1)
+with a default parameter.\\
 \bottomrule
 \end{tabular}
 <<Read: queryMetricRequestDurationPickupTotal(0)>>=
 int[] queryMetricRequestDurationPickupTotal() throws SQLException {
-  long A0 = System.currentTimeMillis();
-  int[] output = storage.DBQueryMetricRequestDurationPickupTotal();
-  <<Stats: queryMetricRequestDurationPickupTotal(0)>>
-  return output;
+  return queryMetricRequestDurationPickupTotal(true);
 }
-@ %def queryMetricRequestDurationPickupTotal
+@
 
 \subsection{\texttt{DBQueryMetricRequestDurationTransitTotal}(1)}
 \begin{tabular}{p{\textwidth}}

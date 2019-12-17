@@ -45,6 +45,7 @@ public class Storage {
   private Map<Integer, Integer> duration_servers_cruising = new HashMap<Integer, Integer>();
   private Map<Integer, Integer> duration_requests_transit = new HashMap<Integer, Integer>();
   private Map<Integer, Integer> duration_requests_travel = new HashMap<Integer, Integer>();
+  private Map<Integer, Integer> duration_requests_pickup = new HashMap<Integer, Integer>();
   private final int    STATEMENTS_MAX_COUNT   = 20;
   private       int    REQUEST_TIMEOUT        = 30;
   private       String CONNECTIONS_URL        = "jdbc:derby:memory:jargo;create=true";
@@ -177,11 +178,17 @@ public class Storage {
              }
            }
          }
-  public int[] DBQueryMetricRequestDurationPickupTotal() throws SQLException {
-           try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-             return PSQuery(conn, "S119", 1);
-           } catch (SQLException e) {
-             throw e;
+  public int[] DBQueryMetricRequestDurationPickupTotal(boolean flag_usecache) throws SQLException {
+           if (flag_usecache) {
+             final int[] output = new int[] { 0 };
+             this.duration_requests_pickup.forEach((rid, val) -> output[0] += val);
+             return output;
+           } else {
+             try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+               return PSQuery(conn, "S119", 1);
+             } catch (SQLException e) {
+               throw e;
+             }
            }
          }
   public int[] DBQueryMetricRequestDurationTransitTotal(boolean flag_usecache) throws SQLException {
@@ -363,11 +370,17 @@ public class Storage {
              }
            }
          }
-  public int[] DBQueryRequestDurationPickup(final int rid) throws SQLException {
-           try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-             return PSQuery(conn, "S118", 1, rid);
-           } catch (SQLException e) {
-             throw e;
+  public int[] DBQueryRequestDurationPickup(final int rid, boolean flag_usecache) throws SQLException {
+           if (flag_usecache) {
+             return new int[] { this.duration_requests_pickup.containsKey(rid)
+                 ? this.duration_requests_pickup.get(rid)
+                 : 0 };
+           } else {
+             try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+               return PSQuery(conn, "S118", 1, rid);
+             } catch (SQLException e) {
+               throw e;
+             }
            }
          }
   public int[] DBQueryRequestDurationTransit(final int rid, boolean flag_usecache) throws SQLException {
@@ -745,6 +758,9 @@ public class Storage {
   public int[] DBQueryMetricRequestDistanceTransitTotal() throws SQLException {
            return DBQueryMetricRequestDistanceTransitTotal(true);
          }
+  public int[] DBQueryMetricRequestDurationPickupTotal() throws SQLException {
+           return DBQueryMetricRequestDurationPickupTotal(true);
+         }
   public int[] DBQueryMetricRequestDurationTransitTotal() throws SQLException {
            return DBQueryMetricRequestDurationTransitTotal(true);
          }
@@ -1100,6 +1116,7 @@ public class Storage {
                this.distance_requests_transit.put(r, d);
                this.duration_requests_transit.put(r, (tpd[1] - tpd[0]));
                this.duration_requests_travel.put(r, (tpd[1] - this.lu_users.get(r)[2]));
+               this.duration_requests_pickup.put(r, (tpd[0] - this.lu_users.get(r)[2]));
              } catch (SQLException e) {
                throw e;
              }
@@ -1560,6 +1577,7 @@ public class Storage {
                    this.distance_requests_transit.put(r, d);
                    this.duration_requests_transit.put(r, (tpd[1] - tpd[0]));
                    this.duration_requests_travel.put(r, (tpd[1] - this.lu_users.get(r)[2]));
+                   this.duration_requests_pickup.put(r, (tpd[0] - this.lu_users.get(r)[2]));
                  } catch (SQLException e) {
                    throw e;
                  }
