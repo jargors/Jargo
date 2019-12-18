@@ -225,6 +225,9 @@ for (int j = 0; j < (sched.length - 2); j += 3) {
   if (Lj != sid) {
     if (!cache.containsKey(Lj)) {
       final int[] output = PSQuery(conn, "S86", 2, Lj);
+      if (output.length == 0) {
+        throw new UserNotFoundException("Request "+Lj+" not in pickups/dropoffs!");
+      }
       final int tp = output[0];
       final int td = output[1];
       final int rq = this.lu_users.get(Lj)[1];

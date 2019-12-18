@@ -1244,6 +1244,9 @@ public class Storage {
                  if (Lj != sid) {
                    if (!cache.containsKey(Lj)) {
                      final int[] output = PSQuery(conn, "S86", 2, Lj);
+                     if (output.length == 0) {
+                       throw new UserNotFoundException("Request "+Lj+" not in pickups/dropoffs!");
+                     }
                      final int tp = output[0];
                      final int td = output[1];
                      final int rq = this.lu_users.get(Lj)[1];
@@ -1398,6 +1401,9 @@ public class Storage {
                    if (Lj != sid) {
                      if (!cache.containsKey(Lj)) {
                        final int[] output = PSQuery(conn, "S86", 2, Lj);
+                       if (output.length == 0) {
+                         throw new UserNotFoundException("Request "+Lj+" not in pickups/dropoffs!");
+                       }
                        final int tp = output[0];
                        final int td = output[1];
                        final int rq = this.lu_users.get(Lj)[1];
@@ -1610,6 +1616,29 @@ public class Storage {
            } catch (SQLException e) {
              if (e.getErrorCode() != 45000) {
                throw e;
+             } else {
+               this.lu_rstatus.clear();
+               this.lu_vertices.clear();
+               this.lu_edges.clear();
+               this.lu_users.clear();
+               this.lu_lvt.clear();
+               this.count_requests = 0;
+               this.count_assigned = 0;
+               this.sum_distance_unassigned = 0;
+               this.sum_distance_base_requests = 0;
+               this.sum_distance_base_servers = 0;
+               this.distance_servers.clear();
+               this.distance_servers_cruising.clear();
+               this.distance_requests_transit.clear();
+               this.duration_servers.clear();
+               this.duration_servers_cruising.clear();
+               this.duration_requests_transit.clear();
+               this.duration_requests_travel.clear();
+               this.duration_requests_pickup.clear();
+               this.connection_factory = null;
+               this.poolableconnection_factory = null;
+               this.pool = null;
+               this.driver = null;
              }
            }
          }
@@ -2045,8 +2074,8 @@ public class Storage {
                   + ") as b ON a.sid=b.sid INNER JOIN ("
                   + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
                   + "GROUP BY sid"
-                  + ") as c ON a.sid=c.sid AND ABS(a.t2-?)=c.tdiff AND a.t2<=?"); this.lu_pstr.put("S60", SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC"); this.lu_pstr.put("S129", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC"); this.lu_pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
-                                            + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC"); this.lu_pstr.put("S69", SEL+"t, v, Ls, Lr "
+                  + ") as c ON a.sid=c.sid AND ABS(a.t2-?)=c.tdiff AND a.t2<=?"); this.lu_pstr.put("S60", SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC"); this.lu_pstr.put("S129", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC"); this.lu_pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server LEFT JOIN CQ ON t=t2 WHERE r_server.sid=?"
+                                            + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t, o2 ASC"); this.lu_pstr.put("S69", SEL+"t, v, Ls, Lr "
                                                     + "FROM r_server LEFT JOIN CQ ON t=t2 and v=v2 and Lr=rid "
                                                     + "WHERE r_server.sid=?"
                                                     + "   AND (t>? OR v=0)"

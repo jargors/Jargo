@@ -6499,6 +6499,9 @@ for (int j = 0; j < (sched.length - 2); j += 3) \{
   if (Lj != sid) \{
     if (!cache.containsKey(Lj)) \{
       final int[] output = PSQuery(conn, "S86", 2, Lj);
+      if (output.length == 0) \{
+        throw new UserNotFoundException("Request "+Lj+" not in pickups/dropoffs!");
+      \}
       final int tp = output[0];
       final int td = output[1];
       final int rq = this.lu_users.get(Lj)[1];
@@ -7731,6 +7734,29 @@ void JargoInstanceClose() throws SQLException \{
   \} catch (SQLException e) \{
     if (e.getErrorCode() != 45000) \{
       throw e;
+    \} else \{
+      this.lu_rstatus.clear();
+      this.lu_vertices.clear();
+      this.lu_edges.clear();
+      this.lu_users.clear();
+      this.lu_lvt.clear();
+      this.count_requests = 0;
+      this.count_assigned = 0;
+      this.sum_distance_unassigned = 0;
+      this.sum_distance_base_requests = 0;
+      this.sum_distance_base_servers = 0;
+      this.distance_servers.clear();
+      this.distance_servers_cruising.clear();
+      this.distance_requests_transit.clear();
+      this.duration_servers.clear();
+      this.duration_servers_cruising.clear();
+      this.duration_requests_transit.clear();
+      this.duration_requests_travel.clear();
+      this.duration_requests_pickup.clear();
+      this.connection_factory = null;
+      this.poolableconnection_factory = null;
+      this.pool = null;
+      this.driver = null;
     \}
   \}
 \}
@@ -8148,8 +8174,8 @@ this.lu_pstr.put("S129", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t 
 this.lu_pstr.put("S152", SEL+"t2, v2 FROM W WHERE sid=? AND t2>? ORDER BY t2 ASC FETCH FIRST ? ROWS ONLY");
 \nwindexdefn{S152}{S152}{NW1vLSTU-1SnVrH-1}\eatline
 \nwidentdefs{\\{{S152}{S152}}}\nwendcode{}\nwbegincode{103}\sublabel{NW1vLSTU-4e4a2O-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1vLSTU-4e4a2O-1}}}\moddef{S61~{\nwtagstyle{}\subpageref{NW1vLSTU-4e4a2O-1}}}\endmoddef\nwused{\\{NW1vLSTU-1dEGs4-1}}
-this.lu_pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server WHERE sid=?"
-      + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t ASC");
+this.lu_pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server LEFT JOIN CQ ON t=t2 WHERE r_server.sid=?"
+      + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t, o2 ASC");
 \nwindexdefn{S61}{S61}{NW1vLSTU-4e4a2O-1}\eatline
 \nwidentdefs{\\{{S61}{S61}}}\nwendcode{}\nwbegindocs{104}Need to join CQ in order to sort by order number {\tt{}o2}. This query has
 worse performance after W (r\_server), CQ, PD grow.
