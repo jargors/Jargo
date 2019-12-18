@@ -1070,6 +1070,9 @@ public class Storage {
                      }
                    } else {
                      final int[] output = this.PSQuery(conn, "S86", 2, Lj);
+                     if (output.length == 0) {
+                       throw new UserNotFoundException("Request "+Lj+" not in pickups/dropoffs!");
+                     }
                      final int tp = output[0];
                      final int td = output[1];
                      this.PSAdd(pS140, tp, td, Lj);
