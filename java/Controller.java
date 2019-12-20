@@ -76,6 +76,7 @@ public class Controller {
     // the user the current simulation rate, i.e. clock_rate=1x means real-time,
     // clock_rate=0.5x means 1 simulated second takes 2 real seconds, etc.
     this.statControllerClock++;
+    if (DEBUG) System.out.printf("t=%d\n", this.statControllerClock);
     this.statControllerClockReferenceSecond++;
     if (this.statControllerClockReferenceSecond > 59) {
       this.statControllerClockReferenceSecond = 0;
@@ -688,6 +689,9 @@ public class Controller {
   public void loadProblem(String p)
          throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException, SQLException,
                 GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException {
+           if (DEBUG) {
+             System.out.printf("loadProblem(1), arg1=%s\n", p);
+           }
            Scanner sc = new Scanner(new File(p));
            for (int i = 0; i < 6; i++) {
              sc.nextLine();
@@ -708,6 +712,9 @@ public class Controller {
            }
          }
   public void loadRoadNetworkFromFile(final String f_rnet) throws FileNotFoundException, SQLException {
+           if (DEBUG) {
+             System.out.printf("loadRoadNetworkFileFile(1), arg1=%s\n", f_rnet);
+           }
            Scanner sc = new Scanner(new File(f_rnet));
            while (sc.hasNext()) {
          final int col0 = sc.nextInt();
@@ -839,6 +846,9 @@ public class Controller {
            }
          }
   public void startRealtime(final Consumer<Boolean> app_cb) {
+           if (DEBUG) {
+             System.out.printf("startRealtime(1)\n");
+           }
            this.storage.setRequestTimeout(REQUEST_TIMEOUT);
            this.statControllerClock = CLOCK_START;
 
@@ -863,6 +873,9 @@ public class Controller {
            }, simulation_duration, TimeUnit.SECONDS);
          }
   public void startSequential(final Consumer<Boolean> app_cb) throws Exception {
+           if (DEBUG) {
+             System.out.printf("startSequuential(1)\n");
+           }
            this.storage.setRequestTimeout(REQUEST_TIMEOUT);
            this.statControllerClock = CLOCK_START;
            while (!kill && this.statControllerClock < CLOCK_END) {
@@ -876,6 +889,9 @@ public class Controller {
            this.stop(app_cb);
          }
   public void stop(final Consumer<Boolean> app_cb) {
+           if (DEBUG) {
+             System.out.printf("stop(1)\n");
+           }
            if (this.exe == null) {  // sequential mode
              this.kill = true;
              while (this.working) {

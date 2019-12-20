@@ -209,15 +209,6 @@ this.PSSubmit(pS10);
 <<Update CW, CPD route endpoint>>
 @
 
-\subsection{Procedure to update schedule}
-<<Procedure to update schedule>>=
-<<Update PD, CPD arrival and departure times>>
-<<Populate the tp, td cache and update CQ>>
-<<Select from CQ latest order number>>
-<<Delete from CQ remaining schedule>>
-<<Insert into CQ new remaining schedule>>
-@
-
 \subsection{Procedure to update and add to schedule}
 <<Procedure to update and add to schedule>>=
 <<Update PD, CPD arrival and departure times>>
@@ -682,6 +673,10 @@ throws DuplicateUserException, EdgeNotFoundException, SQLException,
 void DBUpdateServerService(final int sid, final int[] route, final int[] sched,
     final int[] ridpos, final int[] ridneg)
 throws UserNotFoundException, EdgeNotFoundException, SQLException {
+  if (DEBUG) {
+    System.out.printf("DBUpdateServerService(5), arg1=%d, arg2=[arr], arg3=[arr], arg4=[arr], arg5=[arr]\n",
+        sid);
+  }
   if (!this.lu_users.containsKey(sid)) {
     throw new UserNotFoundException("User "+sid+" not found.");
   }

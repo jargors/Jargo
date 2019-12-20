@@ -53,6 +53,8 @@ public class Storage {
   private final String CONNECTIONS_POOL_NAME  = "jargo";
   private final String CONNECTIONS_POOL_URL   = (CONNECTIONS_DRIVER_URL + CONNECTIONS_POOL_NAME);
   public static final double CSHIFT           = 10000000.0;
+  private final boolean DEBUG =
+      "true".equals(System.getProperty("jargors.storage.debug"));
   private ConnectionFactory               connection_factory;
   private PoolableConnectionFactory       poolableconnection_factory;
   private ObjectPool<PoolableConnection>  pool;
@@ -984,6 +986,10 @@ public class Storage {
   public void DBUpdateServerService(final int sid, final int[] route, final int[] sched,
              final int[] ridpos, final int[] ridneg)
          throws UserNotFoundException, EdgeNotFoundException, SQLException {
+           if (DEBUG) {
+             System.out.printf("DBUpdateServerService(5), arg1=%d, arg2=[arr], arg3=[arr], arg4=[arr], arg5=[arr]\n",
+                 sid);
+           }
            if (!this.lu_users.containsKey(sid)) {
              throw new UserNotFoundException("User "+sid+" not found.");
            }

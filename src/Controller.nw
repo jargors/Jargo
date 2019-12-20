@@ -168,6 +168,7 @@ private Runnable ClockLoop = () -> {
   // the user the current simulation rate, i.e. clock_rate=1x means real-time,
   // clock_rate=0.5x means 1 simulated second takes 2 real seconds, etc.
   this.statControllerClock++;
+  if (DEBUG) System.out.printf("t=%d\n", this.statControllerClock);
   this.statControllerClockReferenceSecond++;
   if (this.statControllerClockReferenceSecond > 59) {
     this.statControllerClockReferenceSecond = 0;
@@ -351,6 +352,9 @@ public Controller() {
 \subsection{\texttt{loadRoadNetworkFromFile}(1)}
 <<loadRoadNetworkFromFile(1)>>=
 void loadRoadNetworkFromFile(final String f_rnet) throws FileNotFoundException, SQLException {
+  if (DEBUG) {
+    System.out.printf("loadRoadNetworkFileFile(1), arg1=%s\n", f_rnet);
+  }
   Scanner sc = new Scanner(new File(f_rnet));
   while (sc.hasNext()) {
 @ %def loadRoadNetworkFromFile
@@ -420,6 +424,9 @@ try {
 void loadProblem(String p)
 throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException, SQLException,
        GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException {
+  if (DEBUG) {
+    System.out.printf("loadProblem(1), arg1=%s\n", p);
+  }
   Scanner sc = new Scanner(new File(p));
   <<..skip header rows>>
   while (sc.hasNext()) {
@@ -447,6 +454,9 @@ for (int i = 0; i < 6; i++) {
 \subsection{\texttt{startRealtime}(1)}
 <<startRealtime(1)>>=
 void startRealtime(final Consumer<Boolean> app_cb) {
+  if (DEBUG) {
+    System.out.printf("startRealtime(1)\n");
+  }
   this.storage.setRequestTimeout(REQUEST_TIMEOUT);
   this.statControllerClock = CLOCK_START;
 
@@ -475,6 +485,9 @@ void startRealtime(final Consumer<Boolean> app_cb) {
 \subsection{\texttt{startSequential}(1)}
 <<startSequential(1)>>=
 void startSequential(final Consumer<Boolean> app_cb) throws Exception {
+  if (DEBUG) {
+    System.out.printf("startSequuential(1)\n");
+  }
   this.storage.setRequestTimeout(REQUEST_TIMEOUT);
   this.statControllerClock = CLOCK_START;
   while (!kill && this.statControllerClock < CLOCK_END) {
@@ -492,6 +505,9 @@ void startSequential(final Consumer<Boolean> app_cb) throws Exception {
 \subsection{\texttt{stop}(1)}
 <<stop(1)>>=
 void stop(final Consumer<Boolean> app_cb) {
+  if (DEBUG) {
+    System.out.printf("stop(1)\n");
+  }
   if (this.exe == null) {  // sequential mode
     this.kill = true;
     while (this.working) {
