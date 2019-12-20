@@ -790,7 +790,7 @@ this.lu_pstr.put("S129", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t 
 this.lu_pstr.put("S152", SEL+"t2, v2 FROM W WHERE sid=? AND t2>? ORDER BY t2 ASC FETCH FIRST ? ROWS ONLY");
 @ %def S152
 <<S61>>=
-this.lu_pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server LEFT JOIN CQ ON t=t2 WHERE r_server.sid=?"
+this.lu_pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server LEFT JOIN CQ ON t=t2 and lr=rid WHERE r_server.sid=?"
       + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t, o2 ASC");
 @ %def S61
 Need to join CQ in order to sort by order number [[o2]]. This query has

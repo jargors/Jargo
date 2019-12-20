@@ -56,7 +56,7 @@ this.PSSubmit(pS76);
 <<Delete from PD, CPD jobs>>=
 PreparedStatement pS42 = this.PSCreate(conn, "S42");
 PreparedStatement pS43 = this.PSCreate(conn, "S43");
-for (final int r : rid) {
+for (final int r : ridneg) {
   this.PSAdd(pS42, r);
   this.PSAdd(pS43, r);
 }
@@ -139,14 +139,20 @@ for (int j = 0; j < (sched.length - 2); j += 3) {
   final int v2 = sched[(j + 1)];
   final int Lj = sched[(j + 2)];
   if (Lj != sid) {
-    final int[] qpd = cache.get(Lj);
-    final int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
-    final int o2 = o1 + 1;
-    this.PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
-          qpd[0], qpd[1], qpd[2], o1, o2);
-    t1 = t2;
-    q1 = q2;
-    o1 = o2;
+    // if only origin or only destination is in sched, cache will
+    // not contain key Lj.
+    if (cache.containsKey(Lj)) {
+      final int[] qpd = cache.get(Lj);
+      final int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
+      final int o2 = o1 + 1;
+      this.PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
+            qpd[0], qpd[1], qpd[2], o1, o2);
+      t1 = t2;
+      q1 = q2;
+      o1 = o2;
+    } else {
+      throw new UserNotFoundException("User "+Lj+" not found in schedule!");
+    }
   }
 }
 this.PSSubmit(pS14);
@@ -156,19 +162,24 @@ this.PSSubmit(pS14);
 <<Insert into PD, CPD new jobs>>=
 PreparedStatement pS12 = this.PSCreate(conn, "S12");
 PreparedStatement pS13 = this.PSCreate(conn, "S13");
-for (final int r : rid) {
+for (final int r : ridpos) {
   final int[] output2 = this.PSQuery(conn, "S51", 5, r);
   final int rq = output2[0];
   final int re = output2[1];
   final int rl = output2[2];
   final int ro = output2[3];
   final int rd = output2[4];
-  final int[] qpd = cache.get(r);
-  final int[]  pd = cache2.get(r);
-  this.PSAdd(pS12, sid, qpd[1], pd[0], r);
-  this.PSAdd(pS12, sid, qpd[2], pd[1], r);
-  this.PSAdd(pS13, sid, se, route[(route.length - 2)], qpd[1], pd[0], qpd[2], pd[1],
-        r, re, rl, ro, rd);
+  // if r not in sched, cache and cache2 will not contain key r
+  if (cache.containsKey(r) && cache2.containsKey(r)) {
+    final int[] qpd = cache.get(r);
+    final int[]  pd = cache2.get(r);
+    this.PSAdd(pS12, sid, qpd[1], pd[0], r);
+    this.PSAdd(pS12, sid, qpd[2], pd[1], r);
+    this.PSAdd(pS13, sid, se, route[(route.length - 2)], qpd[1], pd[0], qpd[2], pd[1],
+          r, re, rl, ro, rd);
+  } else {
+    throw new UserNotFoundException("User "+r+" not found in schedule!");
+  }
 }
 this.PSSubmit(pS12, pS13);
 @
@@ -247,7 +258,7 @@ for (int j = 0; j < (sched.length - 2); j += 3) {
   if (Lj != sid && !cache.containsKey(Lj)) {
     final int rq = lu_users.get(Lj)[1];
     boolean flagged = false;
-    for (final int r : rid) {
+    for (final int r : ridpos) {
       if (Lj == r) {
         flagged = true;
         break;
@@ -272,6 +283,22 @@ for (int j = 0; j < (sched.length - 2); j += 3) {
       }
       final int tp = output[0];
       final int td = output[1];
+      // Here is first time we've seen Lj in the schedule
+      // If tp, td both greater than route[0], it means sched should
+      // provide two Lj waypoints. If only one is found, then
+      // Lj is "dangling".
+      if (tp > route[0] && td > route[0]) {
+        boolean dangling = true;
+        for (int k = (j + 3); k < (sched.length - 2); k += 3) {
+          if (Lj == sched[(k + 2)]) {
+            dangling = false;
+            break;
+          }
+        }
+        if (dangling) {
+          throw new UserNotFoundException("Request "+Lj+" is dangling!");
+        }
+      }
       this.PSAdd(pS140, tp, td, Lj);
       cache.put(Lj, new int[] { rq, tp, td });
     }
@@ -1108,4 +1135,109 @@ throws RouteIllegalOverwriteException, UserNotFoundException,
   <<Stats: updateServerRemoveFromSchedule(4)>>
 }
 @ %def updateServerRemoveFromSchedule
+
+
+\subsection{\texttt{DBUpdateServerService}(5)}
+<<Write: DBUpdateServerService(5)>>=
+void DBUpdateServerService(final int sid, final int[] route, final int[] sched,
+    final int[] ridpos, final int[] ridneg)
+throws UserNotFoundException, EdgeNotFoundException, SQLException {
+  if (!this.lu_users.containsKey(sid)) {
+    throw new UserNotFoundException("User "+sid+" not found.");
+  }
+  for (final int r : ridpos) {
+    if (!this.lu_users.containsKey(r)) {
+      throw new UserNotFoundException("User "+r+" not found.");
+    }
+  }
+  for (final int r : ridneg) {
+    if (!this.lu_users.containsKey(r)) {
+      throw new UserNotFoundException("User "+r+" not found.");
+    }
+  }
+  {
+    int count = 0;
+    for (int i = 0; i < (sched.length - 2); i += 3) {
+      if (sched[(i + 2)] == sid) {
+        count++;
+      }
+    }
+    if (count != 1) {
+      throw new UserNotFoundException("Server "+sid+" not found in schedule!");
+    }
+  }
+  Map<Integer, int[]> cache  = new HashMap<>();
+  Map<Integer, int[]> cache2 = new HashMap<>();
+  try (<<Open [[conn]]>>) {
+    conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+    Statement temp = conn.createStatement();
+    temp.execute("LOCK TABLE CQ  IN EXCLUSIVE MODE");
+    temp.execute("LOCK TABLE CW  IN EXCLUSIVE MODE");
+    temp.execute("LOCK TABLE W   IN EXCLUSIVE MODE");
+    temp.execute("LOCK TABLE PD  IN EXCLUSIVE MODE");
+    temp.execute("LOCK TABLE CPD IN EXCLUSIVE MODE");
+    try {
+      final int sq = lu_users.get(sid)[1];
+      final int se = lu_users.get(sid)[2];
+      <<Procedure to update route>>
+      <<Procedure to update and add to schedule>>
+      <<Delete from PD, CPD jobs>>
+      conn.commit();
+    } catch (SQLException e) {
+      conn.rollback();
+      throw e;
+    }
+  } catch (SQLException e) {
+    throw e;
+  }
+@ %def DBUpdateServerService
+<<Write: DBUpdateServerService(5)>>=
+  for (final int r : ridpos) {
+    this.lu_rstatus.put(r, true);
+    this.count_assigned++;
+    this.sum_distance_unassigned -= this.lu_users.get(r)[6];
+    <<Cache request transit distance and duration>>
+  }
+  for (final int r : ridneg) {
+    this.lu_rstatus.put(r, false);
+    this.count_assigned--;
+    this.sum_distance_unassigned += this.lu_users.get(r)[6];
+    this.distance_requests_transit.put(r, 0);
+    this.duration_requests_transit.put(r, 0);
+  }
+  <<Cache server distance>>
+  <<Cache cruising distance and duration>>
+}
+@
+<<Write: updateServerService(5)>>=
+void updateServerService(final int sid, final int[] route, final int[] sched,
+    final int[] ridpos, final int[] ridneg)
+throws RouteIllegalOverwriteException, UserNotFoundException,
+       EdgeNotFoundException, TimeWindowException, SQLException {
+  long A0 = System.currentTimeMillis();
+  final int t = this.retrieveClock();
+  final int[] current = this.storage.DBQueryServerRoute(sid);
+  int i = 0;
+  while (i < current.length && current[i] != route[0]) {
+    i += 2;
+  }
+  if (i == current.length) {
+    // branch point not found
+    throw new RouteIllegalOverwriteException();
+  }
+  int j = 0;
+  while (i < current.length && (current[i] <= t && current[(i + 1)] != 0)) {
+    if (current[i] != route[j] || current[(i + 1)] != route[(j + 1)]) {
+      // overwrite history occurred
+      throw new RouteIllegalOverwriteException();
+    }
+    i += 2;
+    j += 2;
+  }
+  <<Check time window violation>>
+  <<Apply traffic to route, sched>>
+  this.storage.DBUpdateServerService(sid, mutroute, mutsched, ridpos, ridneg);
+  /*<Stats: updateServerService(5)>*/
+}
+@ %def updateServerAddToSchedule
 
