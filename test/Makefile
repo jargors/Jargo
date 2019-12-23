@@ -1,11 +1,13 @@
+.PHONY : all clean
+
 obj=\
-	SchedulesTest1.class \
-	SchedulesTest2.class
+	DBUpdateServerServiceT1.class \
+	DBUpdateServerServiceT2.class
 
 all : $(obj)
 
-SchedulesTest1.class : SchedulesTest1.java
-	javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:../deps:../deps/*:../jar/*:$(JUNIT)/* SchedulesTest1.java
+$(obj) : %.class : src/%.java
+	javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:../jar/*:$(JUNIT)/* $<
 
-SchedulesTest2.class : SchedulesTest2.java
-	javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:../deps:../deps/*:../jar/*:$(JUNIT)/* SchedulesTest2.java
+clean :
+	rm *.class

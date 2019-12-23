@@ -10,7 +10,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertArrayEquals;
-public class SchedulesTest1 {
+public class DBUpdateServerServiceT1 {
   public final Controller controller = new Controller();
   public final int   ok_sid = 1;
   public final int[] EMPTY     = new int[] { };
