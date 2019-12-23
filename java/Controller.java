@@ -880,13 +880,16 @@ public class Controller {
            this.statControllerClock = CLOCK_START;
            while (!kill && this.statControllerClock < CLOCK_END) {
              this.working = true;
-             this.ClockLoop.run();  // this.statControllerClock gets incremented here!
-             this.ServerLoop.run();
-             this.RequestCollectionLoop.run();
-             this.RequestHandlingLoop.run();
+             this.step();
              this.working = false;
            }
            this.stop(app_cb);
+         }
+  public void step() {
+           this.ClockLoop.run();
+           this.ServerLoop.run();
+           this.RequestCollectionLoop.run();
+           this.RequestHandlingLoop.run();
          }
   public void stop(final Consumer<Boolean> app_cb) {
            if (DEBUG) {

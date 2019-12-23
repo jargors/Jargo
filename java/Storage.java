@@ -1186,18 +1186,23 @@ public class Storage {
            } catch (SQLException e) {
              throw e;
            }
+           for (int i = 0; i < sched.length - 2; i += 3) {
+             final int r = sched[(i + 2)];
+             if (r != sid) {
+               try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+                 this.distance_requests_transit.put(r, this.DBQueryRequestDistanceTransit(r, false)[0]);
+                 this.duration_requests_transit.put(r, this.DBQueryRequestDurationTransit(r, false)[0]);
+                 this.duration_requests_travel .put(r, this.DBQueryRequestDurationTravel (r, false)[0]);
+                 this.duration_requests_pickup .put(r, this.DBQueryRequestDurationPickup (r, false)[0]);
+               } catch (SQLException e) {
+                 throw e;
+               }
+             }
+           }
            for (final int r : ridpos) {
              this.lu_rstatus.put(r, true);
              this.count_assigned++;
              this.sum_distance_unassigned -= this.lu_users.get(r)[6];
-             try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-               this.distance_requests_transit.put(r, this.DBQueryRequestDistanceTransit(r, false)[0]);
-               this.duration_requests_transit.put(r, this.DBQueryRequestDurationTransit(r, false)[0]);
-               this.duration_requests_travel .put(r, this.DBQueryRequestDurationTravel (r, false)[0]);
-               this.duration_requests_pickup .put(r, this.DBQueryRequestDurationPickup (r, false)[0]);
-             } catch (SQLException e) {
-               throw e;
-             }
            }
            for (final int r : ridneg) {
              this.lu_rstatus.put(r, false);
@@ -1678,7 +1683,7 @@ public class Storage {
                              + "FROM ( "
                              + "SELECT (SELECT COUNT(*) FROM assignments_r) AS NUM, "
                              + "       (SELECT COUNT(*) FROM R) AS DENOM "
-                             + "       FROM assignments_r FETCH FIRST ROW ONLY "
+                             + "       FROM R FETCH FIRST ROW ONLY "
                              + ") A");
              stmt.addBatch("CREATE VIEW dist_base (val) AS "
                              + "SELECT SUM (ub) FROM UB");

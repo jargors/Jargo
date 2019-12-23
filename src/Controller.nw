@@ -451,6 +451,22 @@ for (int i = 0; i < 6; i++) {
 }
 @
 
+\subsection{\texttt{isKilled}(0)}
+<<isKilled(0)>>=
+final boolean isKilled() {
+  return this.kill;
+}
+@ %def isKilled
+
+\subsection{\texttt{returnRequest}(1)}
+<<returnRequest(1)>>=
+void returnRequest(final int[] r) {
+  if (this.statControllerClock - r[2] < QUEUE_TIMEOUT) {
+    this.lu_seen.put(r[0], false);
+  }
+}
+@ %def returnRequest
+
 \subsection{\texttt{startRealtime}(1)}
 <<startRealtime(1)>>=
 void startRealtime(final Consumer<Boolean> app_cb) {
@@ -492,15 +508,22 @@ void startSequential(final Consumer<Boolean> app_cb) throws Exception {
   this.statControllerClock = CLOCK_START;
   while (!kill && this.statControllerClock < CLOCK_END) {
     this.working = true;
-    this.ClockLoop.run();  // this.statControllerClock gets incremented here!
-    this.ServerLoop.run();
-    this.RequestCollectionLoop.run();
-    this.RequestHandlingLoop.run();
+    this.step();
     this.working = false;
   }
   this.stop(app_cb);
 }
 @ %def startSequential
+
+\subsection{\texttt{step}(0)}
+<<step(0)>>=
+void step() {
+  this.ClockLoop.run();
+  this.ServerLoop.run();
+  this.RequestCollectionLoop.run();
+  this.RequestHandlingLoop.run();
+}
+@
 
 \subsection{\texttt{stop}(1)}
 <<stop(1)>>=
@@ -537,20 +560,4 @@ void stop(final Consumer<Boolean> app_cb) {
   }
 }
 @ %def stop
-
-\subsection{\texttt{returnRequest}(1)}
-<<returnRequest(1)>>=
-void returnRequest(final int[] r) {
-  if (this.statControllerClock - r[2] < QUEUE_TIMEOUT) {
-    this.lu_seen.put(r[0], false);
-  }
-}
-@ %def returnRequest
-
-\subsection{\texttt{isKilled}(0)}
-<<isKilled(0)>>=
-final boolean isKilled() {
-  return this.kill;
-}
-@ %def isKilled
 

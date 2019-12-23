@@ -727,11 +727,16 @@ throws UserNotFoundException, EdgeNotFoundException, SQLException {
   }
 @ %def DBUpdateServerService
 <<Write: DBUpdateServerService(5)>>=
+  for (int i = 0; i < sched.length - 2; i += 3) {
+    final int r = sched[(i + 2)];
+    if (r != sid) {
+      <<Cache request transit distance and duration>>
+    }
+  }
   for (final int r : ridpos) {
     this.lu_rstatus.put(r, true);
     this.count_assigned++;
     this.sum_distance_unassigned -= this.lu_users.get(r)[6];
-    <<Cache request transit distance and duration>>
   }
   for (final int r : ridneg) {
     this.lu_rstatus.put(r, false);
