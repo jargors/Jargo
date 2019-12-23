@@ -6,4 +6,5 @@ java \
     -cp .:../deps:../deps/*:../jar/*:$DERBY_PATH/derby.jar:$JUNIT/* \
 org.junit.runner.JUnitCore \
     DBUpdateServerServiceT1 \
-    DBUpdateServerServiceT2
+    DBUpdateServerServiceT2 \
+    DBUpdateServerServiceT3

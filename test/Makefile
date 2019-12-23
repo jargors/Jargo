@@ -2,7 +2,8 @@
 
 obj=\
 	DBUpdateServerServiceT1.class \
-	DBUpdateServerServiceT2.class
+	DBUpdateServerServiceT2.class \
+	DBUpdateServerServiceT3.class
 
 all : $(obj)
 
