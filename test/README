@@ -1,9 +1,24 @@
+I. Running Tests
+
+The tests depend on jUnit, Derby, and Jargo. To run the tests, (1) set an
+environmental variable `JUNIT` to point to a directory on your machine
+containing
+
+    junit-4.12.jar
+    hamcrest-2.2.jar (needed by jUnit),
+
+(2) set an environmental variable `DERBY_PATH` to point to a directory on your
+machine containing the Apache Derby jars, (3) confirm that
+`jar/jargors-1.0.0.jar` exists in the Jargo parent directory (../), (4) type
+`make && ./run.sh`.
+
+II. Schedules
+
 Writing schedules into the database is the most critical functionality. It is
 also the most vulnerable to bugs because schedules are stored across multiple
 tables. Table writes must succeed or fail atomically, otherwise the ridesharing
-state described by the data in the tables will be inconsistent.
-
-The DBUpdateServerService(5) method performs schedule writes. The files
+state described by the data in the tables will be inconsistent.  The
+DBUpdateServerService(5) method performs schedule writes. The files
 
     fig/DBUpdateServerServiceT1.svg,
     fig/DBUpdateServerServiceT2.svg, and
@@ -20,15 +35,19 @@ describe the functions for testing each of the success/failure conditions.
 The directory `data/` contains a small problem instance used by the test
 functions.
 
-The tests depend on jUnit, Derby, and Jargo. To run the tests, (1) set an
-environmental variable `JUNIT` to point to a directory on your machine
-containing
+III. Caches
 
-    junit-4.12.jar
-    hamcrest-2.2.jar (needed by jUnit),
+Jargo's Storage component maintains a set of caches to reduce the processing
+time for certain analytical queries. The caches are updated (1) when
+cacheRoadNetworkFromDB(0) and cacheUsersFromDB(0) are called, and (2) during
+normal simulation progression. For a cache to be useful, a query that hits the
+cache must return the same value as if the query was handled directly by the
+database. The files
 
-(2) set an environmental variable `DERBY_PATH` to point to a directory on your
-machine containing the Apache Derby jars, (3) confirm that
-`jar/jargors-1.0.0.jar` exists in the Jargo parent directory (../), (4) type
-`make && ./run.sh`.
+    src/CacheT1.java and
+    src/CacheT2.java
+
+describe the functions for testing queries that use the caches. The directory
+`data/db` contains an example Jargo solution. The directoy has been ignored
+from the github repository due to large size (~500 MB).
 
