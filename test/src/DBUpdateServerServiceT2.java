@@ -23,9 +23,9 @@ public class DBUpdateServerServiceT2 {
   public void start() throws Exception {
     this.controller.instanceNew();
     this.controller.instanceInitialize();
-    this.controller.gtreeLoad("data/cd0n4m2.gtree");
-    this.controller.loadRoadNetworkFromFile("data/cd0n4m2.rnet");
-    this.controller.loadProblem("data/cd0n4m2.instance");
+    this.controller.gtreeLoad("data/cd00DN.gtree");
+    this.controller.loadRoadNetworkFromFile("data/cd01DY.rnet");
+    this.controller.loadProblem("data/cd0m2n4.instance");
     this.storage = controller.getRefStorage();
     assertArrayEquals("pre-condition failure",
         new int[] { 1,22,1,0, 2,0,1,0 },

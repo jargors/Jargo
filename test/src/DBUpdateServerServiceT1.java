@@ -25,9 +25,9 @@ public class DBUpdateServerServiceT1 {
   public void start() throws Exception {
     this.controller.instanceNew();
     this.controller.instanceInitialize();
-    this.controller.gtreeLoad("data/cd0n4m2.gtree");
-    this.controller.loadRoadNetworkFromFile("data/cd0n4m2.rnet");
-    this.controller.loadProblem("data/cd0n4m2.instance");
+    this.controller.gtreeLoad("data/cd00DN.gtree");
+    this.controller.loadRoadNetworkFromFile("data/cd01DY.rnet");
+    this.controller.loadProblem("data/cd0m2n4.instance");
     this.storage = controller.getRefStorage();
   }
   @After
