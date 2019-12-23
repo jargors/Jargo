@@ -4,7 +4,7 @@ JAVA2=$(addsuffix .java, $(subst src/desktop/,java/desktop/,$(basename $(wildcar
 
 VERSION=1.0.0
 
-.PHONY : all src jar pdf purge
+.PHONY : all src jar pdf purge clean
 
 all : src jar pdf
 
@@ -17,8 +17,11 @@ jar : src
 pdf : src
 	make -f makepdf.mk
 
-purge :
+clean :
 	rm -f jargo.pdf jar/jargors-$(VERSION).jar
-	rm -f doc/body.tex $(JAVA1) $(JAVA2)
-	rm -rf com/ 
+	rm -rf com/
 	latexmk -f -c jargo.tex
+
+purge : clean
+	rm -f $(JAVA1) $(JAVA2)
+	rm -f doc/body.tex
