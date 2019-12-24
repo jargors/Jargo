@@ -1,51 +1,46 @@
 package com.github.jargors.desktop;
-import com.github.jargors.Controller;
 import com.github.jargors.Client;
-import com.github.jargors.Traffic;
+import com.github.jargors.Controller;
 import com.github.jargors.Tools;
+import com.github.jargors.Traffic;
 import com.github.jargors.exceptions.*;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipEntry;
-import java.net.URLClassLoader;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.util.zip.ZipInputStream;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.embed.swing.SwingNode;
 import javafx.event.ActionEvent;
-import javafx.stage.Stage;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart.Series;
-import javafx.scene.chart.XYChart.Data;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -53,22 +48,29 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import com.sun.tools.visualvm.charts.ChartFactory;
+import com.sun.tools.visualvm.charts.SimpleXYChartDescriptor;
+import com.sun.tools.visualvm.charts.SimpleXYChartSupport;
+import javax.swing.JComponent;
+import javax.swing.SwingUtilities;
 public class DesktopController {
   private final Color C_ERROR   = Color.RED;
   private final Color C_SUCCESS = Color.GREEN;
@@ -91,30 +93,6 @@ public class DesktopController {
   @FXML private Button btn_startseq;
   @FXML private Button btn_stop;
   @FXML private Button btn_traffic;
-  @FXML private CheckBox chk_countRequestsActive;
-  @FXML private CheckBox chk_countRequestsCompleted;
-  //@FXML private CheckBox chk_countRequestsFailed;
-  @FXML private CheckBox chk_countRequestsQueue;
-  @FXML private CheckBox chk_countRequestsViolations;
-  @FXML private CheckBox chk_countServersActive;
-  @FXML private CheckBox chk_countServersViolations;
-  @FXML private CheckBox chk_distanceSavings;
-  @FXML private CheckBox chk_requestDetourDistance;
-  //@FXML private CheckBox chk_requestDetourDuration;
-  @FXML private CheckBox chk_requestDistanceUnassigned;
-  @FXML private CheckBox chk_requestPickupDuration;
-  @FXML private CheckBox chk_requestTransitDistance;
-  @FXML private CheckBox chk_requestTransitDuration;
-  @FXML private CheckBox chk_requestTravelDuration;
-  @FXML private CheckBox chk_serverCruisingDistance;
-  @FXML private CheckBox chk_serverCruisingDuration;
-  @FXML private CheckBox chk_serverServiceDistance;
-  @FXML private CheckBox chk_serverServiceDuration;
-  @FXML private CheckBox chk_serverTravelDistance;
-  @FXML private CheckBox chk_serverTravelDuration;
-  @FXML private CheckBox chk_serviceRate;
-  @FXML private CheckBox chk_timeRequestHandling;
-  //@FXML private CheckBox chk_timeServerHandling;
   @FXML private Circle circ_status;
   @FXML private Label lbl_status;
   @FXML private ScrollPane container_canvas;
@@ -125,11 +103,6 @@ public class DesktopController {
   @FXML private TextField tf_t0;
   @FXML private TextField tf_t1;
   @FXML private TextField tf_traffic;
-  @FXML private VBox vbox_metrics_counts;
-  @FXML private VBox vbox_metrics_distances;
-  @FXML private VBox vbox_metrics_durations;
-  @FXML private VBox vbox_metrics_rates;
-  @FXML private VBox vbox_metrics_times;
   private Canvas can_road;
   private Canvas can_servers;
   private Client client = null;
@@ -150,7 +123,7 @@ public class DesktopController {
   private int access_path = 1;  // 1="New", 2="Load"
   private FetcherOfMapUnits muf = null;
   private GraphicsContext gc = null;
-  private Map<String, ScheduledFuture<?>> cbFetcherOfMetrics = null;
+  private ScheduledFuture<?> cbFetcherOfMetrics = null;
   private RendererOfRoads ren_road = null;
   private RendererOfServers ren_servers = null;
   private ScheduledExecutorService exe = null;
@@ -464,172 +437,137 @@ public class DesktopController {
   }
   private class FetcherOfMetrics implements Runnable {
     private Controller controller = null;
-    private ConcurrentHashMap<String, Series<Number, Number>> series = null;
-    private String id = "";
+    private ConcurrentHashMap<String, SimpleXYChartSupport> lu_series = null;
     private long A0 = 0;
     public FetcherOfMetrics(
         final Controller controller,
-        final ConcurrentHashMap<String, Series<Number, Number>> series,
-        final String id) {
+        final ConcurrentHashMap<String, SimpleXYChartSupport> lu_series) {
       this.controller = controller;
-      this.series = series;
-      this.id = id;
+      this.lu_series = lu_series;
     }
     public void run() {
       if (DEBUG) {
         this.A0 = System.currentTimeMillis();
       }
       final int t = this.controller.getClock();
-      Number val = null;
       try {
-        if ("chk_serviceRate".equals(this.id)) {
-          int[] output = this.controller.queryMetricServiceRate();
-          val = (output.length > 0 ? (output[0]/100.0) : 0);
-        } else if ("chk_distanceSavings".equals(this.id)) {
-          int[] output = this.controller.queryMetricServerDistanceTotal();
-          final int val1 = (output.length > 0 ? output[0] : 0);
-          output = this.controller.queryMetricRequestDistanceBaseUnassignedTotal();
-          final int val2 = (output.length > 0 ? output[0] : 0);
-          output = this.controller.queryMetricUserDistanceBaseTotal();
-          final int val3 = (output.length > 0 ? output[0] : 0);
-          val = (val3 == 0 ? 0 : (100.0*(1 - ((double) (val1 + val2)/val3))));
-        } else if ("chk_serverTravelDistance".equals(this.id)) {
-          int[] output = this.controller.queryMetricServerDistanceTotal();
-          val = (output.length > 0 ? output[0] : 0);
-        } else if ("chk_serverServiceDistance".equals(this.id)) {
-          int[] output = this.controller.queryMetricServerDistanceServiceTotal();
-          val = (output.length > 0 ? output[0] : 0);
-        } else if ("chk_serverCruisingDistance".equals(this.id)) {
-          int[] output = this.controller.queryMetricServerDistanceCruisingTotal();
-          val = (output.length > 0 ? output[0] : 0);
-        } else if ("chk_serverTravelDuration".equals(this.id)) {
-          int[] output = this.controller.queryMetricServerDurationTravelTotal();
-          val = (output.length > 0 ? output[0] : 0);
-        } else if ("chk_serverServiceDuration".equals(this.id)) {
-          int[] output = this.controller.queryMetricServerDurationServiceTotal();
-          val = (output.length > 0 ? output[0] : 0);
-        } else if ("chk_serverCruisingDuration".equals(this.id)) {
-          int[] output = this.controller.queryMetricServerDurationCruisingTotal();
-          val = (output.length > 0 ? output[0] : 0);
-        } else if ("chk_requestDistanceUnassigned".equals(this.id)) {
-          int[] output = this.controller.queryMetricRequestDistanceBaseUnassignedTotal();
-          val = (output.length > 0 ? output[0] : 0);
-        } else if ("chk_requestTransitDistance".equals(this.id)) {
-          int[] output = this.controller.queryMetricRequestDistanceTransitTotal();
-          val = (output.length > 0 ? output[0] : 0);
-        } else if ("chk_requestDetourDistance".equals(this.id)) {
-          int[] output = this.controller.queryMetricRequestDistanceDetourTotal();
-          val = (output.length > 0 ? output[0] : 0);
-        } else if ("chk_requestTransitDuration".equals(this.id)) {
-          int[] output = this.controller.queryMetricRequestDurationTransitTotal();
-          val = (output.length > 0 ? output[0] : 0);
-        } else if ("chk_requestDetourDuration".equals(this.id)) {
-          
-        } else if ("chk_requestTravelDuration".equals(this.id)) {
-          int[] output = this.controller.queryMetricRequestDurationTravelTotal();
-          val = (output.length > 0 ? output[0] : 0);
-        } else if ("chk_requestPickupDuration".equals(this.id)) {
-          int[] output = this.controller.queryMetricRequestDurationPickupTotal();
-          val = (output.length > 0 ? output[0] : 0);
-        } else if ("chk_countRequestsQueue".equals(this.id)) {
-          val = this.controller.retrieveQueueSize();
-        } else if ("chk_countRequestsActive".equals(this.id)) {
-          int[] output = this.controller.queryRequestsCountActive(t);
-          val = (output.length > 0 ? output[0] : 0);
-        } else if ("chk_countRequestsCompleted".equals(this.id)) {
-          int[] output = this.controller.queryRequestsCountCompleted(t);
-          val = (output.length > 0 ? output[0] : 0);
-        } else if ("chk_countRequestsFailed".equals(this.id)) {
-          
-        } else if ("chk_countServersActive".equals(this.id)) {
-          int[] output = this.controller.queryServersCountActive(t);
-          val = (output.length > 0 ? output[0] : 0);
-        } else if ("chk_countRequestsViolations".equals(this.id)) {
-          int[] output = this.controller.queryMetricRequestTWViolationsTotal();
-          val = (output.length > 0 ? output[0] : 0);
-        } else if ("chk_countServersViolations".equals(this.id)) {
-          int[] output = this.controller.queryMetricServerTWViolationsTotal();
-          val = (output.length > 0 ? output[0] : 0);
-        } else if ("chk_timeRequestHandling".equals(this.id)) {
-          val = this.controller.retrieveHandleRequestDur();
-        } else if ("chk_timeServerHandling".equals(this.id)) {
-          
-        }
+        int[] output = new int[] { };
+        Number val = null;
+        output = this.controller.queryMetricServiceRate();
+        val = (output.length > 0 ? (output[0]/100.0) : 0);               final long y01 = val.longValue();
+        output = this.controller.queryMetricServerDistanceTotal();
+        final int val1 = (output.length > 0 ? output[0] : 0);
+        output = this.controller.queryMetricRequestDistanceBaseUnassignedTotal();
+        final int val2 = (output.length > 0 ? output[0] : 0);
+        output = this.controller.queryMetricUserDistanceBaseTotal();
+        final int val3 = (output.length > 0 ? output[0] : 0);
+        val = (val3 == 0 ? 0 : (100.0*(1 - ((double) (val1 + val2)/val3))));           final long y02 = val.longValue();
+        output = this.controller.queryMetricServerDistanceTotal();
+        val = (output.length > 0 ? output[0] : 0);      final long y03 = val.longValue();
+        output = this.controller.queryMetricServerDistanceServiceTotal();
+        val = (output.length > 0 ? output[0] : 0);     final long y04 = val.longValue();
+        output = this.controller.queryMetricServerDistanceCruisingTotal();
+        val = (output.length > 0 ? output[0] : 0);    final long y05 = val.longValue();
+        output = this.controller.queryMetricRequestDistanceBaseUnassignedTotal();
+        val = (output.length > 0 ? output[0] : 0); final long y06 = val.longValue();
+        output = this.controller.queryMetricRequestDistanceTransitTotal();
+        val = (output.length > 0 ? output[0] : 0);    final long y07 = val.longValue();
+        output = this.controller.queryMetricRequestDistanceDetourTotal();
+        val = (output.length > 0 ? output[0] : 0);     final long y08 = val.longValue();
+        output = this.controller.queryMetricServerDurationTravelTotal();
+        val = (output.length > 0 ? output[0] : 0);      final long y09 = val.longValue();
+        output = this.controller.queryMetricServerDurationServiceTotal();
+        val = (output.length > 0 ? output[0] : 0);     final long y10 = val.longValue();
+        output = this.controller.queryMetricServerDurationCruisingTotal();
+        val = (output.length > 0 ? output[0] : 0);    final long y11 = val.longValue();
+        output = this.controller.queryMetricRequestDurationTransitTotal();
+        val = (output.length > 0 ? output[0] : 0);    final long y12 = val.longValue();
+        output = this.controller.queryMetricRequestDurationTravelTotal();
+        val = (output.length > 0 ? output[0] : 0);     final long y13 = val.longValue();
+        output = this.controller.queryMetricRequestDurationPickupTotal();
+        val = (output.length > 0 ? output[0] : 0);     final long y14 = val.longValue();
+        val = this.controller.retrieveQueueSize();        final long y15 = val.longValue();
+        output = this.controller.queryRequestsCountActive(t);
+        val = (output.length > 0 ? output[0] : 0);       final long y16 = val.longValue();
+        output = this.controller.queryRequestsCountCompleted(t);
+        val = (output.length > 0 ? output[0] : 0);    final long y17 = val.longValue();
+        output = this.controller.queryServersCountActive(t);
+        val = (output.length > 0 ? output[0] : 0);        final long y18 = val.longValue();
+        output = this.controller.queryMetricRequestTWViolationsTotal();
+        val = (output.length > 0 ? output[0] : 0);   final long y19 = val.longValue();
+        output = this.controller.queryMetricServerTWViolationsTotal();
+        val = (output.length > 0 ? output[0] : 0);    final long y20 = val.longValue();
+        val = this.controller.retrieveHandleRequestDur();       final long y21 = val.longValue();
+        SwingUtilities.invokeLater(() -> {
+           this.lu_series.get("lc_rates").addValues(t, new long[] {
+              y01, y02 });
+           this.lu_series.get("lc_distances").addValues(t, new long[] {
+              y03, y04, y05, y06, y07, y08 });
+           this.lu_series.get("lc_durations").addValues(t, new long[] {
+              y09, y10, y11, y12, y13, y14 });
+           this.lu_series.get("lc_counts").addValues(t, new long[] {
+              y15, y16, y17, y18, y19, y20 });
+           this.lu_series.get("lc_times").addValues(t, new long[] {
+              y21 });
+        });
       } catch (SQLException se) {
         System.err.printf("SQL failure: %s\n", se.getMessage());
-      }
-      if (val != null) {
-        final Number fval = val;
-        Platform.runLater(() -> {
-          this.series.get(this.id).getData().add(new Data<Number, Number>(t, fval));
-        });
+      } catch (Exception ee) {
+        ee.printStackTrace();
       }
       if (DEBUG) {
-        System.err.printf("t=%s, %s execution took %d ms\n", t, id, (System.currentTimeMillis() - this.A0));
+        System.err.printf("t=%s, execution took %d ms\n", t, (System.currentTimeMillis() - this.A0));
       }
     }
   }
-  private NumberAxis rates_x = new NumberAxis();
-  private NumberAxis rates_y = new NumberAxis();
-  private NumberAxis distances_x = new NumberAxis();
-  private NumberAxis distances_y = new NumberAxis();
-  private NumberAxis durations_x = new NumberAxis();
-  private NumberAxis durations_y = new NumberAxis();
-  private NumberAxis counts_x = new NumberAxis();
-  private NumberAxis counts_y = new NumberAxis();
-  private NumberAxis times_x = new NumberAxis();
-  private NumberAxis times_y = new NumberAxis();
-  private LineChart<Number, Number> lc_rates = new LineChart<Number, Number>(rates_x, rates_y);
-  private LineChart<Number, Number> lc_distances = new LineChart<Number, Number>(distances_x, distances_y);
-  private LineChart<Number, Number> lc_durations = new LineChart<Number, Number>(durations_x, durations_y);
-  private LineChart<Number, Number> lc_counts = new LineChart<Number, Number>(counts_x, counts_y);
-  private LineChart<Number, Number> lc_times = new LineChart<Number, Number>(times_x, times_y);
-  private ConcurrentHashMap<String, Series<Number, Number>> lc_rates_series =
-      new ConcurrentHashMap<String, Series<Number, Number>>();
-  private ConcurrentHashMap<String, Series<Number, Number>> lc_distances_series =
-      new ConcurrentHashMap<String, Series<Number, Number>>();
-  private ConcurrentHashMap<String, Series<Number, Number>> lc_durations_series =
-      new ConcurrentHashMap<String, Series<Number, Number>>();
-  private ConcurrentHashMap<String, Series<Number, Number>> lc_counts_series =
-      new ConcurrentHashMap<String, Series<Number, Number>>();
-  private ConcurrentHashMap<String, Series<Number, Number>> lc_times_series =
-      new ConcurrentHashMap<String, Series<Number, Number>>();
+  private SimpleXYChartDescriptor lc_counts_descriptor = SimpleXYChartDescriptor.decimal(0, true, 3600);
+  private SimpleXYChartDescriptor lc_distances_descriptor = SimpleXYChartDescriptor.decimal(0, true, 3600);
+  private SimpleXYChartDescriptor lc_durations_descriptor = SimpleXYChartDescriptor.decimal(0, true, 3600);
+  private SimpleXYChartDescriptor lc_rates_descriptor = SimpleXYChartDescriptor.decimal(0, true, 3600);
+  private SimpleXYChartDescriptor lc_times_descriptor = SimpleXYChartDescriptor.decimal(0, true, 3600);
+  private SimpleXYChartSupport lc_counts_support = null;
+  private SimpleXYChartSupport lc_distances_support = null;
+  private SimpleXYChartSupport lc_durations_support = null;
+  private SimpleXYChartSupport lc_rates_support = null;
+  private SimpleXYChartSupport lc_times_support = null;
+  private SwingNode lc_counts = new SwingNode();
+  private SwingNode lc_distances = new SwingNode();
+  private SwingNode lc_durations = new SwingNode();
+  private SwingNode lc_rates = new SwingNode();
+  private SwingNode lc_times = new SwingNode();
   private String[] metric_rates = new String[] {
-        "chk_serviceRate",
-        "chk_distanceSavings"
+  /*y01*/      "chk_serviceRate",
+  /*y02*/      "chk_distanceSavings"
       };
   private String[] metric_distances = new String[] {
-        "chk_serverTravelDistance",
-        "chk_serverServiceDistance",
-        "chk_serverCruisingDistance",
-        "chk_requestDistanceUnassigned",
-        "chk_requestTransitDistance",
-        "chk_requestDetourDistance"
+  /*y03*/      "chk_serverTravelDistance",
+  /*y04*/      "chk_serverServiceDistance",
+  /*y05*/      "chk_serverCruisingDistance",
+  /*y06*/      "chk_requestDistanceUnassigned",
+  /*y07*/      "chk_requestTransitDistance",
+  /*y08*/      "chk_requestDetourDistance"
       };
   private String[] metric_durations = new String[] {
-        "chk_serverTravelDuration",
-        "chk_serverServiceDuration",
-        "chk_serverCruisingDuration",
-        "chk_requestTransitDuration",
-        "chk_requestDetourDuration",
-        "chk_requestTravelDuration",
-        "chk_requestPickupDuration"
+  /*y09*/      "chk_serverTravelDuration",
+  /*y10*/      "chk_serverServiceDuration",
+  /*y11*/      "chk_serverCruisingDuration",
+  /*y12*/      "chk_requestTransitDuration",
+  /*y13*/      "chk_requestTravelDuration",
+  /*y14*/      "chk_requestPickupDuration"
       };
   private String[] metric_counts = new String[] {
-        "chk_countRequestsQueue",
-        "chk_countRequestsActive",
-        "chk_countRequestsCompleted",
-        "chk_countRequestsFailed",
-        "chk_countServersActive",
-        "chk_countRequestsViolations",
-        "chk_countServersViolations"
+  /*y15*/      "chk_countRequestsQueue",
+  /*y16*/      "chk_countRequestsActive",
+  /*y17*/      "chk_countRequestsCompleted",
+  /*y18*/      "chk_countServersActive",
+  /*y19*/      "chk_countRequestsViolations",
+  /*y20*/      "chk_countServersViolations"
       };
   private String[] metric_times = new String[] {
-        "chk_timeRequestHandling",
-        "chk_timeServerHandling"
+  /*y21*/      "chk_timeRequestHandling",
       };
-  private ConcurrentHashMap<String, ConcurrentHashMap<String, Series<Number, Number>>> lu_series =
-      new ConcurrentHashMap<String, ConcurrentHashMap<String, Series<Number, Number>>>();
+  private ConcurrentHashMap<String, SimpleXYChartSupport> lu_series
+    = new ConcurrentHashMap<String, SimpleXYChartSupport>();
   public void actionAbout(final ActionEvent e) {
            Alert alert = new Alert(AlertType.INFORMATION, "https:github.com/jargors");
            alert.setTitle("About");
@@ -1109,66 +1047,36 @@ public class DesktopController {
            this.t1 = Integer.parseInt(this.tf_t1.getText());
            this.controller.setClockStart(this.t0);
            this.controller.setClockEnd(this.t1);
-           this.lc_rates.setCreateSymbols(false);
-           this.lc_rates.setAnimated(false);
-           this.lc_rates.setLegendVisible(false);
-           this.lc_distances.setCreateSymbols(false);
-           this.lc_distances.setAnimated(false);
-           this.lc_distances.setLegendVisible(false);
-           this.lc_durations.setCreateSymbols(false);
-           this.lc_durations.setAnimated(false);
-           this.lc_durations.setLegendVisible(false);
-           this.lc_counts.setCreateSymbols(false);
-           this.lc_counts.setAnimated(false);
-           this.lc_counts.setLegendVisible(false);
-           this.lc_times.setCreateSymbols(false);
-           this.lc_times.setAnimated(false);
-           this.lc_times.setLegendVisible(false);
-           this.rates_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
-           this.rates_y = new NumberAxis("Value (%)", 0, 100, 10);
-           this.rates_x.setAutoRanging(true);
-           this.rates_y.setAutoRanging(true);
-           this.distances_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
-           this.distances_y = new NumberAxis("Value (meters)", 0, 100, 10);
-           this.distances_x.setAutoRanging(true);
-           this.distances_y.setAutoRanging(true);
-           this.durations_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
-           this.durations_y = new NumberAxis("Value (seconds)", 0, 100, 10);
-           this.durations_x.setAutoRanging(true);
-           this.durations_y.setAutoRanging(true);
-           this.counts_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
-           this.counts_y = new NumberAxis("Value (count)", 0, 100, 10);
-           this.counts_x.setAutoRanging(true);
-           this.counts_y.setAutoRanging(true);
-           this.times_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
-           this.times_y = new NumberAxis("Value (milliseconds)", 0, 100, 10);
-           this.times_x.setAutoRanging(true);
-           this.times_y.setAutoRanging(true);
            for (String metric : this.metric_rates) {
-             this.lc_rates_series.put(metric, new Series<Number, Number>());
-             this.lc_rates.getData().add(this.lc_rates_series.get(metric));
-             this.lu_series.put(metric, this.lc_rates_series);
+             this.lc_rates_descriptor.addLineItems(metric);
            }
            for (String metric : this.metric_distances) {
-             this.lc_distances_series.put(metric, new Series<Number, Number>());
-             this.lc_distances.getData().add(this.lc_distances_series.get(metric));
-             this.lu_series.put(metric, this.lc_distances_series);
+             this.lc_distances_descriptor.addLineItems(metric);
            }
            for (String metric : this.metric_durations) {
-             this.lc_durations_series.put(metric, new Series<Number, Number>());
-             this.lc_durations.getData().add(this.lc_durations_series.get(metric));
-             this.lu_series.put(metric, this.lc_durations_series);
+             this.lc_durations_descriptor.addLineItems(metric);
            }
            for (String metric : this.metric_counts) {
-             this.lc_counts_series.put(metric, new Series<Number, Number>());
-             this.lc_counts.getData().add(this.lc_counts_series.get(metric));
-             this.lu_series.put(metric, this.lc_counts_series);
+             this.lc_counts_descriptor.addLineItems(metric);
            }
            for (String metric : this.metric_times) {
-             this.lc_times_series.put(metric, new Series<Number, Number>());
-             this.lc_times.getData().add(this.lc_times_series.get(metric));
-             this.lu_series.put(metric, this.lc_times_series);
+             this.lc_times_descriptor.addLineItems(metric);
            }
+           this.lc_counts_support = ChartFactory.createSimpleXYChart(this.lc_counts_descriptor);
+           this.lc_distances_support = ChartFactory.createSimpleXYChart(this.lc_distances_descriptor);
+           this.lc_durations_support = ChartFactory.createSimpleXYChart(this.lc_durations_descriptor);
+           this.lc_rates_support = ChartFactory.createSimpleXYChart(this.lc_rates_descriptor);
+           this.lc_times_support = ChartFactory.createSimpleXYChart(this.lc_times_descriptor);
+           this.lu_series.put("lc_counts", this.lc_counts_support);
+           this.lu_series.put("lc_distances", this.lc_distances_support);
+           this.lu_series.put("lc_durations", this.lc_durations_support);
+           this.lu_series.put("lc_rates", this.lc_rates_support);
+           this.lu_series.put("lc_times", this.lc_times_support);
+           this.lc_counts.setContent(this.lc_counts_support.getChart());
+           this.lc_distances.setContent(this.lc_distances_support.getChart());
+           this.lc_durations.setContent(this.lc_durations_support.getChart());
+           this.lc_rates.setContent(this.lc_rates_support.getChart());
+           this.lc_times.setContent(this.lc_times_support.getChart());
            this.container_lc_rates.setTopAnchor(this.lc_rates, 0.0);
            this.container_lc_rates.setLeftAnchor(this.lc_rates, 0.0);
            this.container_lc_rates.setRightAnchor(this.lc_rates, 0.0);
@@ -1194,11 +1102,6 @@ public class DesktopController {
            this.container_lc_times.setRightAnchor(this.lc_times, 0.0);
            this.container_lc_times.setBottomAnchor(this.lc_times, 0.0);
            this.container_lc_times.getChildren().add(this.lc_times);
-           this.vbox_metrics_rates.setDisable(false);
-           this.vbox_metrics_distances.setDisable(false);
-           this.vbox_metrics_durations.setDisable(false);
-           this.vbox_metrics_counts.setDisable(false);
-           this.vbox_metrics_times.setDisable(false);
            this.ren_servers = new RendererOfServers(this.can_servers.getGraphicsContext2D(), this.lbl_fps, true, this.muf);
            this.ren_servers.start();
            this.circ_status  .setFill(C_SUCCESS);
@@ -1211,6 +1114,8 @@ public class DesktopController {
                    this.lbl_status.setText("Simulation "+(status ? "ended." : "failed."));
                  });
                });
+               this.cbFetcherOfMetrics = this.exe.scheduleAtFixedRate(
+                   new FetcherOfMetrics(this.controller, this.lu_series), 0, 1, TimeUnit.SECONDS);
              } catch (Exception ee) {
                System.err.println("Unexepected error in startRealtime");
                ee.printStackTrace();
@@ -1294,66 +1199,36 @@ public class DesktopController {
            this.t1 = Integer.parseInt(this.tf_t1.getText());
            this.controller.setClockStart(this.t0);
            this.controller.setClockEnd(this.t1);
-           this.lc_rates.setCreateSymbols(false);
-           this.lc_rates.setAnimated(false);
-           this.lc_rates.setLegendVisible(false);
-           this.lc_distances.setCreateSymbols(false);
-           this.lc_distances.setAnimated(false);
-           this.lc_distances.setLegendVisible(false);
-           this.lc_durations.setCreateSymbols(false);
-           this.lc_durations.setAnimated(false);
-           this.lc_durations.setLegendVisible(false);
-           this.lc_counts.setCreateSymbols(false);
-           this.lc_counts.setAnimated(false);
-           this.lc_counts.setLegendVisible(false);
-           this.lc_times.setCreateSymbols(false);
-           this.lc_times.setAnimated(false);
-           this.lc_times.setLegendVisible(false);
-           this.rates_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
-           this.rates_y = new NumberAxis("Value (%)", 0, 100, 10);
-           this.rates_x.setAutoRanging(true);
-           this.rates_y.setAutoRanging(true);
-           this.distances_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
-           this.distances_y = new NumberAxis("Value (meters)", 0, 100, 10);
-           this.distances_x.setAutoRanging(true);
-           this.distances_y.setAutoRanging(true);
-           this.durations_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
-           this.durations_y = new NumberAxis("Value (seconds)", 0, 100, 10);
-           this.durations_x.setAutoRanging(true);
-           this.durations_y.setAutoRanging(true);
-           this.counts_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
-           this.counts_y = new NumberAxis("Value (count)", 0, 100, 10);
-           this.counts_x.setAutoRanging(true);
-           this.counts_y.setAutoRanging(true);
-           this.times_x = new NumberAxis("Simulation World Time (seconds since start)", 0, 60, 5);
-           this.times_y = new NumberAxis("Value (milliseconds)", 0, 100, 10);
-           this.times_x.setAutoRanging(true);
-           this.times_y.setAutoRanging(true);
            for (String metric : this.metric_rates) {
-             this.lc_rates_series.put(metric, new Series<Number, Number>());
-             this.lc_rates.getData().add(this.lc_rates_series.get(metric));
-             this.lu_series.put(metric, this.lc_rates_series);
+             this.lc_rates_descriptor.addLineItems(metric);
            }
            for (String metric : this.metric_distances) {
-             this.lc_distances_series.put(metric, new Series<Number, Number>());
-             this.lc_distances.getData().add(this.lc_distances_series.get(metric));
-             this.lu_series.put(metric, this.lc_distances_series);
+             this.lc_distances_descriptor.addLineItems(metric);
            }
            for (String metric : this.metric_durations) {
-             this.lc_durations_series.put(metric, new Series<Number, Number>());
-             this.lc_durations.getData().add(this.lc_durations_series.get(metric));
-             this.lu_series.put(metric, this.lc_durations_series);
+             this.lc_durations_descriptor.addLineItems(metric);
            }
            for (String metric : this.metric_counts) {
-             this.lc_counts_series.put(metric, new Series<Number, Number>());
-             this.lc_counts.getData().add(this.lc_counts_series.get(metric));
-             this.lu_series.put(metric, this.lc_counts_series);
+             this.lc_counts_descriptor.addLineItems(metric);
            }
            for (String metric : this.metric_times) {
-             this.lc_times_series.put(metric, new Series<Number, Number>());
-             this.lc_times.getData().add(this.lc_times_series.get(metric));
-             this.lu_series.put(metric, this.lc_times_series);
+             this.lc_times_descriptor.addLineItems(metric);
            }
+           this.lc_counts_support = ChartFactory.createSimpleXYChart(this.lc_counts_descriptor);
+           this.lc_distances_support = ChartFactory.createSimpleXYChart(this.lc_distances_descriptor);
+           this.lc_durations_support = ChartFactory.createSimpleXYChart(this.lc_durations_descriptor);
+           this.lc_rates_support = ChartFactory.createSimpleXYChart(this.lc_rates_descriptor);
+           this.lc_times_support = ChartFactory.createSimpleXYChart(this.lc_times_descriptor);
+           this.lu_series.put("lc_counts", this.lc_counts_support);
+           this.lu_series.put("lc_distances", this.lc_distances_support);
+           this.lu_series.put("lc_durations", this.lc_durations_support);
+           this.lu_series.put("lc_rates", this.lc_rates_support);
+           this.lu_series.put("lc_times", this.lc_times_support);
+           this.lc_counts.setContent(this.lc_counts_support.getChart());
+           this.lc_distances.setContent(this.lc_distances_support.getChart());
+           this.lc_durations.setContent(this.lc_durations_support.getChart());
+           this.lc_rates.setContent(this.lc_rates_support.getChart());
+           this.lc_times.setContent(this.lc_times_support.getChart());
            this.container_lc_rates.setTopAnchor(this.lc_rates, 0.0);
            this.container_lc_rates.setLeftAnchor(this.lc_rates, 0.0);
            this.container_lc_rates.setRightAnchor(this.lc_rates, 0.0);
@@ -1379,11 +1254,6 @@ public class DesktopController {
            this.container_lc_times.setRightAnchor(this.lc_times, 0.0);
            this.container_lc_times.setBottomAnchor(this.lc_times, 0.0);
            this.container_lc_times.getChildren().add(this.lc_times);
-           this.vbox_metrics_rates.setDisable(false);
-           this.vbox_metrics_distances.setDisable(false);
-           this.vbox_metrics_durations.setDisable(false);
-           this.vbox_metrics_counts.setDisable(false);
-           this.vbox_metrics_times.setDisable(false);
            this.ren_servers = new RendererOfServers(this.can_servers.getGraphicsContext2D(), this.lbl_fps, false, this.muf);
            this.ren_servers.start();
            this.circ_status  .setFill(C_SUCCESS);
@@ -1412,35 +1282,6 @@ public class DesktopController {
            });
            if (this.controller != null) {
              this.btn_stop     .setDisable(true);
-             this.vbox_metrics_rates.setDisable(true);
-             this.vbox_metrics_distances.setDisable(true);
-             this.vbox_metrics_durations.setDisable(true);
-             this.vbox_metrics_counts.setDisable(true);
-             this.vbox_metrics_times.setDisable(true);
-             this.chk_serviceRate.setSelected(false);
-             this.chk_distanceSavings.setSelected(false);
-             this.chk_serverTravelDistance.setSelected(false);
-             this.chk_serverServiceDistance.setSelected(false);
-             this.chk_serverCruisingDistance.setSelected(false);
-             this.chk_serverTravelDuration.setSelected(false);
-             this.chk_serverServiceDuration.setSelected(false);
-             this.chk_serverCruisingDuration.setSelected(false);
-             this.chk_requestDistanceUnassigned.setSelected(false);
-             this.chk_requestTransitDistance.setSelected(false);
-             this.chk_requestDetourDistance.setSelected(false);
-             this.chk_requestTransitDuration.setSelected(false);
-             //this.chk_requestDetourDuration.setSelected(false);
-             this.chk_requestTravelDuration.setSelected(false);
-             this.chk_requestPickupDuration.setSelected(false);
-             this.chk_countRequestsQueue.setSelected(false);
-             this.chk_countRequestsActive.setSelected(false);
-             this.chk_countRequestsCompleted.setSelected(false);
-             //this.chk_countRequestsFailed.setSelected(false);
-             this.chk_countServersActive.setSelected(false);
-             this.chk_countRequestsViolations.setSelected(false);
-             this.chk_countServersViolations.setSelected(false);
-             this.chk_timeRequestHandling.setSelected(false);
-             //this.chk_timeServerHandling.setSelected(false);
              if (this.ren_road != null) {
                this.ren_road.stop();
              }
@@ -1494,27 +1335,6 @@ public class DesktopController {
                    this.btn_startseq .setDisable(true);
                    this.btn_startreal.setDisable(true);
                    this.db = null;
-                   this.rates_x = new NumberAxis();
-                   this.rates_y = new NumberAxis();
-                   this.distances_x = new NumberAxis();
-                   this.distances_y = new NumberAxis();
-                   this.durations_x = new NumberAxis();
-                   this.durations_y = new NumberAxis();
-                   this.counts_x = new NumberAxis();
-                   this.counts_y = new NumberAxis();
-                   this.times_x = new NumberAxis();
-                   this.times_y = new NumberAxis();
-                   this.lc_rates = new LineChart<Number, Number>(rates_x, rates_y);
-                   this.lc_distances = new LineChart<Number, Number>(distances_x, distances_y);
-                   this.lc_durations = new LineChart<Number, Number>(durations_x, durations_y);
-                   this.lc_counts = new LineChart<Number, Number>(counts_x, counts_y);
-                   this.lc_times = new LineChart<Number, Number>(times_x, times_y);
-                   this.lc_rates_series = new ConcurrentHashMap<String, Series<Number, Number>>();
-                   this.lc_distances_series = new ConcurrentHashMap<String, Series<Number, Number>>();
-                   this.lc_durations_series = new ConcurrentHashMap<String, Series<Number, Number>>();
-                   this.lc_counts_series = new ConcurrentHashMap<String, Series<Number, Number>>();
-                   this.lc_times_series = new ConcurrentHashMap<String, Series<Number, Number>>();
-                   this.lu_series = new ConcurrentHashMap<String, ConcurrentHashMap<String, Series<Number, Number>>>();
                    this.circ_status.setFill(C_SUCCESS);
                    this.lbl_status.setText("Closed instance.");
                  });
@@ -1674,23 +1494,6 @@ public class DesktopController {
            this.window_width = w;
          }
   public void toggleMetric(final ActionEvent e) {
-           CheckBox source = (CheckBox) e.getSource();
-           final String id = source.getId();
-           if (DEBUG) {
-             System.err.printf("Toggle CheckBox(id=%s)\n", id);
-           }
-           if (source.isSelected()) {
-             this.cbFetcherOfMetrics.put(id, this.exe.scheduleAtFixedRate(
-                 new FetcherOfMetrics(this.controller, this.lu_series.get(id), id), 0, 1, TimeUnit.SECONDS));
-             if (DEBUG) {
-               System.err.printf("Schedule FetcherOfMetrics(%s)\n", id);
-             }
-           } else {
-             if (DEBUG) {
-               System.err.printf("Cancel FetcherOfMetrics(%s)", id);
-             }
-             this.cbFetcherOfMetrics.get(id).cancel(true);
-           }
          }
   private void initializeCanvas() {
             try {
@@ -1726,7 +1529,6 @@ public class DesktopController {
         this.muf.setMapVisible((newTab.intValue() == 0 ? true : false));
       }
     });
-    this.cbFetcherOfMetrics = new HashMap<String, ScheduledFuture<?>>();
     Image image = new Image("res/icon.gif");
     this.logo = new ImageView();
     this.logo.setImage(image);
