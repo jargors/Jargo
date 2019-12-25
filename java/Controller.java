@@ -559,6 +559,11 @@ public class Controller {
            this.statQueryRequestsQueuedDur = (System.currentTimeMillis() - A0);
            return output;
          }
+  public int[] queryRequestsWaiting(final int t) throws SQLException {
+           long A0 = System.currentTimeMillis();
+           int[] output = storage.DBQueryRequestsWaiting(t);
+           return output;
+         }
   public int[] queryServerRoute(final int sid) throws SQLException {
            long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryServerRoute(sid);

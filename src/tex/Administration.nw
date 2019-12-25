@@ -730,6 +730,7 @@ void JargoSetupPreparedStatements() {
   <<S158>>
   <<S160>>
   <<S161>>
+  <<S162>>
 }
 @ %def JargoSetupPreparedStatements
 <<S0>>=
@@ -866,9 +867,6 @@ this.lu_pstr.put("S60", SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC");
 <<S129>>=
 this.lu_pstr.put("S129", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC");
 @ %def S129
-<<S152>>=
-this.lu_pstr.put("S152", SEL+"t2, v2 FROM W WHERE sid=? AND t2>? ORDER BY t2 ASC FETCH FIRST ? ROWS ONLY");
-@ %def S152
 <<S61>>=
 this.lu_pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server LEFT JOIN CQ ON t=t2 and lr=rid WHERE r_server.sid=?"
       + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t, o2 ASC");
@@ -883,11 +881,6 @@ this.lu_pstr.put("S69", SEL+"t, v, Ls, Lr "
       + "   AND (Ls IS NOT NULL OR Lr IS NOT NULL)"
       + "ORDER BY t ASC, o2 ASC");
 @ %def S69
-<<S68>>=
-// A "timeout" of 30 seconds is hard-coded here
-this.lu_pstr.put("S68", SEL+"* FROM R WHERE re<=? AND ?<=re+30 AND rid NOT IN  "
-      + "(SELECT rid FROM assignments_r)");
-@ %def S68
 <<S85>>=
 this.lu_pstr.put("S85", SEL+"uq FROM UQ WHERE uid=?");
 @ %def S85
@@ -1043,6 +1036,9 @@ this.lu_pstr.put("S150", SEL+"sid, val FROM violations_t_s");
 <<S151>>=
 this.lu_pstr.put("S151", SEL+"rid, val FROM violations_t_r");
 @ %def S151
+<<S152>>=
+this.lu_pstr.put("S152", SEL+"t2, v2 FROM W WHERE sid=? AND t2>=? ORDER BY t2 ASC FETCH FIRST ? ROWS ONLY");
+@ %def S152
 <<S153>>=
 this.lu_pstr.put("S153", SEL+"t1, t2 FROM CQ WHERE sid=? AND q1=sq");
 @ %def S153
@@ -1077,7 +1073,8 @@ this.lu_pstr.put("S161", SEL+"(a.val - b.val) FROM "
     + "(SELECT COUNT (*) as val FROM assignments_r WHERE t <= ?) as b");
 @ %def S161
 <<S162>>=
-this.lu_pstr.put("S162", SEL+"COUNT (*) FROM assignments_r WHERE t <= ?");
+this.lu_pstr.put("S162", SEL+"r.rid, r.ro FROM R LEFT JOIN CPD ON R.rid = CPD.rid "
+    + "WHERE R.re <= ? AND ? < (R.re + ?) AND (? < CPD.tp OR CPD.tp IS NULL)");
 @ %def S162
 
 \subsection{\texttt{PSCreate}(2)}

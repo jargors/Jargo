@@ -64,6 +64,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
@@ -108,6 +109,7 @@ public class DesktopController {
   @FXML private TextField tf_traffic;
   private Canvas can_road;
   private Canvas can_servers;
+  private Canvas can_requests;
   private Client client = null;
   private Controller controller = null;
   private Label lbl_fps;
@@ -129,8 +131,10 @@ public class DesktopController {
   private ScheduledFuture<?> cbFetcherOfMetrics = null;
   private RendererOfRoads ren_road = null;
   private RendererOfServers ren_servers = null;
+  private RendererOfRequests ren_requests = null;
   private ScheduledExecutorService exe = null;
   private ScheduledFuture<?> cbFetcherOfLocations = null;
+  private ScheduledFuture<?> cbFetcherOfRequests = null;
   private ScheduledFuture<?> cbSimulation = null;
   private double unit = 0;
   private double window_height = 0;
@@ -142,16 +146,92 @@ public class DesktopController {
   private int zoom = 1;
   private int[] edges = null;
   private int[] mbr = null;
+  private class RendererOfRequests extends AnimationTimer {
+    private final Color BG = Color.web("0xD7FFFF");
+    private final Color REQUEST_FILL = Color.web("0xff5500");
+    private final int REQUEST_WIDTH = 2;
+    private final int REQUEST_HEIGHT = 2;
+    private Canvas canvas = null;
+    private ConcurrentHashMap<Integer, double[]> buffer =
+        new ConcurrentHashMap<Integer, double[]>();
+    private final ConcurrentHashMap<Integer, Image> bufimg =
+        new ConcurrentHashMap<Integer, Image>();
+    private FetcherOfMapUnits muf = null;
+    private GraphicsContext gc = null;
+    private Image image = null;
+    private int zoom = 1;
+    private long now = 0;
+    private long prev = 0;
+    public RendererOfRequests(final GraphicsContext gc, final FetcherOfMapUnits muf) {
+      super();
+      this.canvas = gc.getCanvas();
+      this.gc = gc;
+      this.gc.setStroke(REQUEST_FILL);
+      this.muf = muf;
+      this.setZoom(1);
+      for (int i = 0; i <= 10; i++) {
+        WritableImage wi = new WritableImage(80, 14);
+        SnapshotParameters parameters = new SnapshotParameters();
+        parameters.setFill(new Color(0, 0, 0, 0));
+        Text txt = new Text(i == 10 ? "R" : ""+i);
+        txt.setStroke(REQUEST_FILL);
+        txt.snapshot(parameters, wi);
+        this.bufimg.put(i, wi);
+      }
+    }
+    public void setZoom(final int zoom) {
+      this.zoom = zoom;
+      Rectangle shape = new Rectangle(this.REQUEST_WIDTH*zoom, this.REQUEST_HEIGHT*zoom);
+      shape.setFill(this.REQUEST_FILL);
+      WritableImage wi = new WritableImage(this.REQUEST_WIDTH*zoom, this.REQUEST_HEIGHT*zoom);
+      SnapshotParameters parameters = new SnapshotParameters();
+      shape.snapshot(parameters, wi);
+      this.image = wi;
+    }
+    public void fillBuffer(final int rid, final double[] buffer) {
+      this.buffer.put(rid, buffer);
+    }
+    public void clearBuffer() {
+      this.buffer.clear();
+    }
+    public void handle(final long now) {
+      if (!this.muf.getMapVisible()) {
+        return;
+      }
+      if (now - prev > 500_000_000) {  // render every 0.5 sec
+        prev = now;
+        this.gc.clearRect(0, 0, this.canvas.getWidth(), this.canvas.getHeight());
+        for (final Map.Entry<Integer, double[]> kv : this.buffer.entrySet()) {
+          final int rid = kv.getKey();
+          final double[] buffer = kv.getValue();
+          final double x = buffer[0]*this.muf.getUnit();
+          final double y = this.canvas.getHeight() - buffer[1]*this.muf.getUnit();
+          this.gc.drawImage(this.image, x, y);
+          // this.gc.strokeText("R"+rid, x, y);
+          int uid = rid;
+          char[] digits = String.valueOf(uid).toCharArray();
+          this.gc.drawImage(this.bufimg.get(10), x, y);
+          for (int j = 0; j < digits.length; j++) {
+            this.gc.drawImage(
+              /*image*/this.bufimg.get(Character.getNumericValue(digits[j])),
+              /*position*/(x + 8*(j+1)), y);
+          }
+        }
+      }
+    }
+  }
   private class RendererOfServers extends AnimationTimer {
     private final Color BG = Color.web("0xD7FFFF");
     private final Color SERVER_FILL = Color.web("0x555555");
     private final int SERVER_WIDTH = 5;
     private final int SERVER_HEIGHT = 3;
     private Canvas canvas = null;
-    private ConcurrentHashMap<Integer, Integer>  bufidx =
+    private final ConcurrentHashMap<Integer, Integer>  bufidx =
         new ConcurrentHashMap<Integer, Integer>();
-    private ConcurrentHashMap<Integer, double[]> buffer =
+    private final ConcurrentHashMap<Integer, double[]> buffer =
         new ConcurrentHashMap<Integer, double[]>();
+    private final ConcurrentHashMap<Integer, Image> bufimg =
+        new ConcurrentHashMap<Integer, Image>();
     private FetcherOfMapUnits muf = null;
     private GraphicsContext gc = null;
     private Image image = null;
@@ -167,10 +247,20 @@ public class DesktopController {
       super();
       this.canvas = gc.getCanvas();
       this.gc = gc;
+      this.gc.setStroke(SERVER_FILL);
       this.isRealtime = isRealtime;
       this.lbl_fps = lbl_fps;
       this.muf = muf;
       this.setZoom(1);
+      for (int i = 0; i <= 10; i++) {
+        WritableImage wi = new WritableImage(80, 14);
+        SnapshotParameters parameters = new SnapshotParameters();
+        parameters.setFill(new Color(0, 0, 0, 0));
+        Text txt = new Text(i == 10 ? "S" : ""+i);
+        txt.setStroke(SERVER_FILL);
+        txt.snapshot(parameters, wi);
+        this.bufimg.put(i, wi);
+      }
     }
     public void setZoom(final int zoom) {
       this.zoom = zoom;
@@ -199,6 +289,18 @@ public class DesktopController {
       ref[(i + 0)] = (this.now + (buffer[6] - buffer[0])*1_000_000_000);
       ref[(i + 1)] = buffer[7];
       ref[(i + 2)] = buffer[8];
+  /**
+  if (sid == 1) System.out.printf("%.2f %.2f %.2f\n%.2f %.2f %.2f\n%.2f %.2f %.2f\n",
+      buffer[0],
+      buffer[1],
+      buffer[2],
+      buffer[3],
+      buffer[4],
+      buffer[5],
+      buffer[6],
+      buffer[7],
+      buffer[8]);
+  **/
     }
     public void handle(final long now) {
       if (!this.muf.getMapVisible()) {
@@ -235,19 +337,35 @@ public class DesktopController {
           if (delta >= 1) {
             this.bufidx.put(sid, (i + 3) % 9);
             delta = 1;
+          } else if (delta >= 0) {
+            x = this.muf.getUnit()*(x1 + delta*(x2 - x1));
+            y = this.canvas.getHeight() - this.muf.getUnit()*(y1 + delta*(y2 - y1));
+          } else {
+            // delta < 0 means we didn't get a buffer update
           }
-          x = this.muf.getUnit()*(x1 + delta*(x2 - x1));
-          y = this.muf.getUnit()*(y1 + delta*(y2 - y1));
+  /**
+  if (sid == 1) System.out.printf("S%d: (%.2f,%.2f) (%.2f,%.2f) bufidx=%d, delta=%.2f\n",
+      sid, x1, y1, x2, y2, i, delta);
+  **/
         } else {
           x = this.muf.getUnit()*x1;
-          y = this.muf.getUnit()*y1;
+          y = this.canvas.getHeight() - this.muf.getUnit()*y1;
         }
         this.gc.save();
-        double angle = Math.toDegrees(Math.atan2((y2 - y1), (x2 - x1)));
+        double angle = (360 - Math.toDegrees(Math.atan2((y2 - y1), (x2 - x1))));
         Rotate r = new Rotate(angle, x, y);
         this.gc.setTransform(r.getMxx(), r.getMyx(), r.getMxy(), r.getMyy(), r.getTx(), r.getTy());
         this.gc.drawImage(this.image, x, y);
         this.gc.restore();
+        //this.gc.strokeText("S"+sid, x, y);
+        int uid = sid;
+        char[] digits = String.valueOf(uid).toCharArray();
+        this.gc.drawImage(this.bufimg.get(10), x, y);
+        for (int j = 0; j < digits.length; j++) {
+          this.gc.drawImage(
+            /*image*/this.bufimg.get(Character.getNumericValue(digits[j])),
+            /*position*/(x + 8*(j+1)), y);
+        }
       }
     }
   }
@@ -309,8 +427,8 @@ public class DesktopController {
               final int[] v2 = this.controller.queryVertex(this.edges[(i + 1)]);
               final double x1 = this.muf.getUnit()*(v1[0] - this.muf.getLngMin());
               final double x2 = this.muf.getUnit()*(v2[0] - this.muf.getLngMin());
-              final double y1 = this.muf.getUnit()*(v1[1] - this.muf.getLatMin());
-              final double y2 = this.muf.getUnit()*(v2[1] - this.muf.getLatMin());
+              final double y1 = this.can_road.getHeight() - this.muf.getUnit()*(v1[1] - this.muf.getLatMin());
+              final double y2 = this.can_road.getHeight() - this.muf.getUnit()*(v2[1] - this.muf.getLatMin());
               this.gc.setStroke(DEFAULT);
               if (this.traffic != null) {
                 double x = this.traffic.apply(this.edges[i], this.edges[(i + 1)], this.controller.getClock());
@@ -346,6 +464,8 @@ public class DesktopController {
     private double unit = 0;
     private int lng_min = 0;
     private int lat_min = 0;
+    private int lng_max = 0;
+    private int lat_max = 0;
     private boolean mapVisible = true;
     public FetcherOfMapUnits() { }
     public double getUnit() {
@@ -354,8 +474,14 @@ public class DesktopController {
     public int getLngMin() {
       return this.lng_min;
     }
+    public int getLngMax() {
+      return this.lng_max;
+    }
     public int getLatMin() {
       return this.lat_min;
+    }
+    public int getLatMax() {
+      return this.lat_max;
     }
     public boolean getMapVisible() {
       return this.mapVisible;
@@ -369,8 +495,55 @@ public class DesktopController {
     public void setLatMin(final int lat_min) {
       this.lat_min = lat_min;
     }
+    public void setLngMax(final int lng_max) {
+      this.lng_max = lng_max;
+    }
+    public void setLatMax(final int lat_max) {
+      this.lat_max = lat_max;
+    }
     public void setMapVisible(final boolean flag) {
       this.mapVisible = flag;
+    }
+  }
+  private class FetcherOfRequests implements Runnable {
+    private Controller controller = null;
+    private FetcherOfMapUnits muf = null;
+    private RendererOfRequests renderer = null;
+    public FetcherOfRequests(
+        final Controller controller,
+        final FetcherOfMapUnits muf,
+        final RendererOfRequests renderer) {
+      this.controller = controller;
+      this.muf = muf;
+      this.renderer = renderer;
+    }
+    public void run() {
+      if (!this.muf.getMapVisible()) {
+        return;
+      }
+      final int t = this.controller.getClock();
+      try {
+        this.renderer.clearBuffer();
+        int[] waiting = this.controller.queryRequestsWaiting(t);
+        for (int i = 0; i < (waiting.length - 1); i += 2) {
+          final int rid = waiting[(i + 0)];
+          final int  ro = waiting[(i + 1)];
+          int[] coordinates = this.controller.queryVertex(ro);
+          final double x = (coordinates[0] - this.muf.getLngMin());
+          final double y = (coordinates[1] - this.muf.getLatMin());
+          this.renderer.fillBuffer(rid, new double[] { x, y });
+        }
+      } catch (SQLException se) {
+        System.err.println("Warning: FetcherOfRequests failed to get requests");
+        System.err.println(se.toString());
+        se.printStackTrace();
+      } catch (VertexNotFoundException ve) {
+        System.err.println("Warning: FetcherOfRequests got unknown location!");
+        System.err.println(ve.toString());
+        ve.printStackTrace();
+      } catch (Exception ee) {
+        ee.printStackTrace();
+      }
     }
   }
   private class FetcherOfLocations implements Runnable {
@@ -407,6 +580,19 @@ public class DesktopController {
               final int v2 = route[3];
               final int t3 = route[4];
               final int v3 = route[5];
+  if (this.buffer.containsKey(sid) && t1 == this.buffer.get(sid)[0]) {
+    // we didn't get an update
+    continue;
+  }
+  /**
+  if (sid == 1) System.out.printf("%d %d\n%d %d\n%d %d\n",
+      route[0],
+      route[1],
+      route[2],
+      route[3],
+      route[4],
+      route[5]);
+  **/
               int[] coordinates = this.controller.queryVertex(v1);
               final double x1 = (coordinates[0] - this.muf.getLngMin());
               final double y1 = (coordinates[1] - this.muf.getLatMin());
@@ -436,7 +622,7 @@ public class DesktopController {
       Platform.runLater(() -> {
         this.lbl_status.setText("Refresh server locations (t="+t+")");
       });
-    };
+    }
   }
   private class FetcherOfMetrics implements Runnable {
     private Controller controller = null;
@@ -454,7 +640,6 @@ public class DesktopController {
       } catch (ParseException ee) {
         ee.printStackTrace();
       }
-      System.out.println("A");
     }
     public void run() {
       if (DEBUG) {
@@ -498,27 +683,43 @@ public class DesktopController {
         output = this.controller.queryMetricRequestDurationPickupTotal();
         val = (output.length > 0 ? output[0] : 0);     final long y14 = val.longValue();
         val = this.controller.retrieveQueueSize();        final long y15 = val.longValue();
-        output = this.controller.queryRequestsCountActive(t);
-        val = (output.length > 0 ? output[0] : 0);       final long y16 = val.longValue();
-        output = this.controller.queryRequestsCountCompleted(t);
-        val = (output.length > 0 ? output[0] : 0);    final long y17 = val.longValue();
-        output = this.controller.queryServersCountActive(t);
-        val = (output.length > 0 ? output[0] : 0);        final long y18 = val.longValue();
+  //      output = this.controller.queryRequestsCountActive(t);
+          val = (output.length > 0 ? output[0] : 0);       final long y16 = val.longValue();
+  //      output = this.controller.queryRequestsCountCompleted(t);
+          val = (output.length > 0 ? output[0] : 0);    final long y17 = val.longValue();
+  //      output = this.controller.queryServersCountActive(t);
+          val = (output.length > 0 ? output[0] : 0);        final long y18 = val.longValue();
         output = this.controller.queryMetricRequestTWViolationsTotal();
         val = (output.length > 0 ? output[0] : 0);   final long y19 = val.longValue();
         output = this.controller.queryMetricServerTWViolationsTotal();
         val = (output.length > 0 ? output[0] : 0);    final long y20 = val.longValue();
         val = this.controller.retrieveHandleRequestDur();       final long y21 = val.longValue();
         SwingUtilities.invokeLater(() -> {
-           final long tf = (t + t_ref);
+           final long tf = (1000*t + t_ref);
            this.lu_series.get("lc_rates").addValues(tf, new long[] {
-              y01, y02 });
+              y01,
+              y02 });
            this.lu_series.get("lc_distances").addValues(tf, new long[] {
-              y03, y04, y05, y06, y07, y08 });
+              y03,
+              y04,
+              y05,
+              y06,
+              y07,
+              y08 });
            this.lu_series.get("lc_durations").addValues(tf, new long[] {
-              y09, y10, y11, y12, y13, y14 });
+              y09,
+              y10,
+              y11,
+              y12,
+              y13,
+              y14 });
            this.lu_series.get("lc_counts").addValues(tf, new long[] {
-              y15, y16, y17, y18, y19, y20 });
+              y15,
+  //            y16,
+  //            y17,
+  //            y18,
+              y19,
+              y20 });
            this.lu_series.get("lc_times").addValues(tf, new long[] {
               y21 });
         });
@@ -569,9 +770,9 @@ public class DesktopController {
       };
   private String[] metric_counts = new String[] {
   /*y15*/      "R-Queue",
-  /*y16*/      "R-Active",
-  /*y17*/      "R-Completed",
-  /*y18*/      "S-Active",
+  ///*y16*/      "R-Active",
+  ///*y17*/      "R-Completed",
+  ///*y18*/      "S-Active",
   /*y19*/      "R-Violations",
   /*y20*/      "S-Violations"
       };
@@ -1116,6 +1317,8 @@ public class DesktopController {
            this.container_lc_times.getChildren().add(this.lc_times);
            this.ren_servers = new RendererOfServers(this.can_servers.getGraphicsContext2D(), this.lbl_fps, true, this.muf);
            this.ren_servers.start();
+           this.ren_requests = new RendererOfRequests(this.can_requests.getGraphicsContext2D(), this.muf);
+           this.ren_requests.start();
            this.circ_status  .setFill(C_SUCCESS);
            this.lbl_status   .setText("Simulation started.");
            this.exe = Executors.newScheduledThreadPool(3);
@@ -1134,6 +1337,9 @@ public class DesktopController {
            }, 0, TimeUnit.SECONDS);
            this.cbFetcherOfMetrics = this.exe.scheduleAtFixedRate(
                new FetcherOfMetrics(this.controller, this.lu_series), 0, 1, TimeUnit.SECONDS);
+           this.cbFetcherOfRequests = this.exe.scheduleAtFixedRate(
+               new FetcherOfRequests(
+                 this.controller, this.muf, this.ren_requests), 0, 1, TimeUnit.SECONDS);
            this.cbFetcherOfLocations = this.exe.scheduleAtFixedRate(
                new FetcherOfLocations(
                  this.controller, this.lbl_status, this.muf, this.ren_servers), 0, 1, TimeUnit.SECONDS);
@@ -1268,6 +1474,8 @@ public class DesktopController {
            this.container_lc_times.getChildren().add(this.lc_times);
            this.ren_servers = new RendererOfServers(this.can_servers.getGraphicsContext2D(), this.lbl_fps, false, this.muf);
            this.ren_servers.start();
+           this.ren_requests = new RendererOfRequests(this.can_requests.getGraphicsContext2D(), this.muf);
+           this.ren_requests.start();
            this.circ_status  .setFill(C_SUCCESS);
            this.lbl_status   .setText("Simulation started.");
            this.exe = Executors.newScheduledThreadPool(3);
@@ -1286,6 +1494,9 @@ public class DesktopController {
            }, 0, TimeUnit.SECONDS);
            this.cbFetcherOfMetrics = this.exe.scheduleAtFixedRate(
                new FetcherOfMetrics(this.controller, this.lu_series), 0, 1, TimeUnit.SECONDS);
+           this.cbFetcherOfRequests = this.exe.scheduleAtFixedRate(
+               new FetcherOfRequests(
+                 this.controller, this.muf, this.ren_requests), 0, 1, TimeUnit.SECONDS);
            this.cbFetcherOfLocations = this.exe.scheduleAtFixedRate(
                new FetcherOfLocations(
                  this.controller, this.lbl_status, this.muf, this.ren_servers), 0, 1, TimeUnit.SECONDS);
@@ -1490,11 +1701,16 @@ public class DesktopController {
            this.can_road.setHeight(this.window_height*this.zoom);
            this.can_servers.setWidth(this.window_width*this.zoom);
            this.can_servers.setHeight(this.window_height*this.zoom);
+           this.can_requests.setWidth(this.window_width*this.zoom);
+           this.can_requests.setHeight(this.window_height*this.zoom);
            if (this.ren_road != null) {
              this.ren_road.forceRender();
            }
            if (this.ren_servers != null) {
              this.ren_servers.setZoom(this.zoom);
+           }
+           if (this.ren_requests != null) {
+             this.ren_requests.setZoom(this.zoom);
            }
            e.consume();
          }
@@ -1511,9 +1727,10 @@ public class DesktopController {
          }
   private void initializeCanvas() {
             try {
-              this.can_road    = new Canvas(this.window_width, this.window_height);
-              this.can_servers = new Canvas(this.window_width, this.window_height);
-              this.lbl_fps     = new Label("FPS");
+              this.can_road     = new Canvas(this.window_width, this.window_height);
+              this.can_servers  = new Canvas(this.window_width, this.window_height);
+              this.can_requests = new Canvas(this.window_width, this.window_height);
+              this.lbl_fps      = new Label("FPS");
               // Determine pixels-per-coordinate
               this.mbr   = this.controller.queryMBR();
               this.xunit = this.can_road.getWidth() /(double) (this.mbr[1] - this.mbr[0]);
@@ -1524,12 +1741,19 @@ public class DesktopController {
               this.muf.setUnit(this.unit);
               this.muf.setLngMin(this.mbr[0]);
               this.muf.setLatMin(this.mbr[2]);
+              this.muf.setLngMax(this.mbr[1]);
+              this.muf.setLatMax(this.mbr[3]);
               // Add canvas to pane
-              this.container_canvas_container = new Pane(this.can_road, this.can_servers, this.lbl_fps);
+              this.container_canvas_container = new Pane(
+                  this.can_road,
+                  this.can_servers,
+                  this.can_requests
+          //        this.lbl_fps
+              );
               this.container_canvas.setContent(this.container_canvas_container);
               // Register mouse event handlers
-              // (can_servers is on top so it will trap all mouse events)
-              this.can_servers.setOnScroll((e) -> { actionZoomCanvas(e); });
+              // (can_requests is on top so it will trap all mouse events)
+              this.can_requests.setOnScroll((e) -> { actionZoomCanvas(e); });
             } catch (SQLException se) {
               System.err.println("Failed with SQLException");
               Tools.PrintSQLException(se);

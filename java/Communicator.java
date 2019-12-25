@@ -133,8 +133,14 @@ public class Communicator {
          throws RouteIllegalOverwriteException, UserNotFoundException,
                 EdgeNotFoundException, TimeWindowException, SQLException {
            long A0 = System.currentTimeMillis();
-           final int t = this.retrieveClock();
            final int[] current = this.storage.DBQueryServerRoute(sid);
+           int t_next = this.retrieveClock();
+           for (int i = 0; i < (current.length - 1); i += 2) {
+             if (current[i] > t_next) {
+               t_next = current[i];
+               break;
+             }
+           }
            int i = 0;
            while (i < current.length && current[i] != route[0]) {
              i += 2;
@@ -144,7 +150,7 @@ public class Communicator {
              throw new RouteIllegalOverwriteException();
            }
            int j = 0;
-           while (i < current.length && (current[i] <= t && current[(i + 1)] != 0)) {
+           while (i < current.length && (current[i] <= t_next && current[(i + 1)] != 0)) {
              if (current[i] != route[j] || current[(i + 1)] != route[(j + 1)]) {
                // overwrite history occurred
                throw new RouteIllegalOverwriteException();

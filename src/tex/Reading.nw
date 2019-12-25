@@ -1140,6 +1140,24 @@ int[] queryRequestsQueued(final int t) throws SQLException {
 }
 @ %def queryRequestsQueued
 
+\subsection{\texttt{DBQueryRequestsWaiting}(1)}
+<<Read: DBQueryRequestsWaiting(1)>>=
+int[] DBQueryRequestsWaiting(final int t) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return this.PSQuery(conn, "S162", 2, t, t, REQUEST_TIMEOUT, t);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryRequestsWaiting
+<<Read: queryRequestsWaiting(1)>>=
+int[] queryRequestsWaiting(final int t) throws SQLException {
+  long A0 = System.currentTimeMillis();
+  int[] output = storage.DBQueryRequestsWaiting(t);
+  return output;
+}
+@ %def queryRequestsWaiting
+
 \subsection{\texttt{DBQueryServerRoute}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule

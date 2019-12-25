@@ -487,6 +487,13 @@ public class Storage {
              throw e;
            }
          }
+  public int[] DBQueryRequestsWaiting(final int t) throws SQLException {
+           try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+             return this.PSQuery(conn, "S162", 2, t, t, REQUEST_TIMEOUT, t);
+           } catch (SQLException e) {
+             throw e;
+           }
+         }
   public int[] DBQueryServerAssignmentsCompleted(final int sid, final int t)
          throws SQLException {
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
@@ -1925,7 +1932,7 @@ public class Storage {
             this.lu_pstr.put("S148", SEL+"sid FROM assignments WHERE rid=?");
             this.lu_pstr.put("S150", SEL+"sid, val FROM violations_t_s");
             this.lu_pstr.put("S151", SEL+"rid, val FROM violations_t_r");
-            this.lu_pstr.put("S152", SEL+"t2, v2 FROM W WHERE sid=? AND t2>? ORDER BY t2 ASC FETCH FIRST ? ROWS ONLY");
+            this.lu_pstr.put("S152", SEL+"t2, v2 FROM W WHERE sid=? AND t2>=? ORDER BY t2 ASC FETCH FIRST ? ROWS ONLY");
             this.lu_pstr.put("S153", SEL+"t1, t2 FROM CQ WHERE sid=? AND q1=sq");
             this.lu_pstr.put("S154", SEL+"SUM (dd) FROM W WHERE sid=? AND t2 > ? AND t2 <= ?");
             this.lu_pstr.put("S155", SEL+"MAX (td) FROM CPD WHERE sid = ?");
@@ -1938,6 +1945,8 @@ public class Storage {
             this.lu_pstr.put("S161", SEL+"(a.val - b.val) FROM "
                 + "(SELECT COUNT (*) as val FROM R WHERE ?>= re AND ? < rl) as a,"
                 + "(SELECT COUNT (*) as val FROM assignments_r WHERE t <= ?) as b");
+            this.lu_pstr.put("S162", SEL+"r.rid, r.ro FROM R LEFT JOIN CPD ON R.rid = CPD.rid "
+                + "WHERE R.re <= ? AND ? < (R.re + ?) AND (? < CPD.tp OR CPD.tp IS NULL)");
           }
   private void PSAdd(PreparedStatement p, final Integer... values) throws SQLException {
             p.clearParameters();
