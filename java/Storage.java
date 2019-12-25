@@ -221,7 +221,7 @@ public class Storage {
          }
   public int[] DBQueryMetricRequestTWViolationsTotal() throws SQLException {
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-             return PSQuery(conn, "S151", 2);
+             return PSQuery(conn, "S151", 1);
            } catch (SQLException e) {
              throw e;
            }
@@ -316,7 +316,7 @@ public class Storage {
          }
   public int[] DBQueryMetricServerTWViolationsTotal() throws SQLException {
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-             return PSQuery(conn, "S150", 2);
+             return PSQuery(conn, "S150", 1);
            } catch (SQLException e) {
              throw e;
            }
@@ -1930,8 +1930,8 @@ public class Storage {
             this.lu_pstr.put("S147", SEL+"t2, v2 FROM W WHERE sid=? AND t2=("
                 + "SELECT t1 FROM W WHERE sid=? AND v2=0)");
             this.lu_pstr.put("S148", SEL+"sid FROM assignments WHERE rid=?");
-            this.lu_pstr.put("S150", SEL+"sid, val FROM violations_t_s");
-            this.lu_pstr.put("S151", SEL+"rid, val FROM violations_t_r");
+            this.lu_pstr.put("S150", SEL+"COUNT (*) FROM violations_t_s");
+            this.lu_pstr.put("S151", SEL+"COUNT (*) FROM violations_t_r");
             this.lu_pstr.put("S152", SEL+"t2, v2 FROM W WHERE sid=? AND t2>=? ORDER BY t2 ASC FETCH FIRST ? ROWS ONLY");
             this.lu_pstr.put("S153", SEL+"t1, t2 FROM CQ WHERE sid=? AND q1=sq");
             this.lu_pstr.put("S154", SEL+"SUM (dd) FROM W WHERE sid=? AND t2 > ? AND t2 <= ?");
