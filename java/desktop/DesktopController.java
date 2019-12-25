@@ -454,6 +454,7 @@ public class DesktopController {
       } catch (ParseException ee) {
         ee.printStackTrace();
       }
+      System.out.println("A");
     }
     public void run() {
       if (DEBUG) {
@@ -1117,7 +1118,7 @@ public class DesktopController {
            this.ren_servers.start();
            this.circ_status  .setFill(C_SUCCESS);
            this.lbl_status   .setText("Simulation started.");
-           this.exe = Executors.newScheduledThreadPool(2);
+           this.exe = Executors.newScheduledThreadPool(3);
            this.cbSimulation = this.exe.schedule(() -> {
              try {
                this.controller.startRealtime((status) -> {
@@ -1125,14 +1126,14 @@ public class DesktopController {
                    this.lbl_status.setText("Simulation "+(status ? "ended." : "failed."));
                  });
                });
-               this.cbFetcherOfMetrics = this.exe.scheduleAtFixedRate(
-                   new FetcherOfMetrics(this.controller, this.lu_series), 0, 1, TimeUnit.SECONDS);
              } catch (Exception ee) {
                System.err.println("Unexepected error in startRealtime");
                ee.printStackTrace();
                System.exit(1);
              }
            }, 0, TimeUnit.SECONDS);
+           this.cbFetcherOfMetrics = this.exe.scheduleAtFixedRate(
+               new FetcherOfMetrics(this.controller, this.lu_series), 0, 1, TimeUnit.SECONDS);
            this.cbFetcherOfLocations = this.exe.scheduleAtFixedRate(
                new FetcherOfLocations(
                  this.controller, this.lbl_status, this.muf, this.ren_servers), 0, 1, TimeUnit.SECONDS);
@@ -1269,7 +1270,7 @@ public class DesktopController {
            this.ren_servers.start();
            this.circ_status  .setFill(C_SUCCESS);
            this.lbl_status   .setText("Simulation started.");
-           this.exe = Executors.newScheduledThreadPool(2);
+           this.exe = Executors.newScheduledThreadPool(3);
            this.cbSimulation = this.exe.schedule(() -> {
              try {
                this.controller.startSequential((status) -> {
@@ -1283,6 +1284,8 @@ public class DesktopController {
                System.exit(1);
              }
            }, 0, TimeUnit.SECONDS);
+           this.cbFetcherOfMetrics = this.exe.scheduleAtFixedRate(
+               new FetcherOfMetrics(this.controller, this.lu_series), 0, 1, TimeUnit.SECONDS);
            this.cbFetcherOfLocations = this.exe.scheduleAtFixedRate(
                new FetcherOfLocations(
                  this.controller, this.lbl_status, this.muf, this.ren_servers), 0, 1, TimeUnit.SECONDS);
