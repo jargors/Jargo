@@ -14,7 +14,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -439,11 +442,18 @@ public class DesktopController {
     private Controller controller = null;
     private ConcurrentHashMap<String, SimpleXYChartSupport> lu_series = null;
     private long A0 = 0;
+    private long t_ref = 0;
     public FetcherOfMetrics(
         final Controller controller,
         final ConcurrentHashMap<String, SimpleXYChartSupport> lu_series) {
       this.controller = controller;
       this.lu_series = lu_series;
+      SimpleDateFormat sdf = new SimpleDateFormat("hhmm");
+      try {
+        this.t_ref = sdf.parse(this.controller.getClockReference()).getTime();
+      } catch (ParseException ee) {
+        ee.printStackTrace();
+      }
     }
     public void run() {
       if (DEBUG) {
@@ -499,15 +509,16 @@ public class DesktopController {
         val = (output.length > 0 ? output[0] : 0);    final long y20 = val.longValue();
         val = this.controller.retrieveHandleRequestDur();       final long y21 = val.longValue();
         SwingUtilities.invokeLater(() -> {
-           this.lu_series.get("lc_rates").addValues(t, new long[] {
+           final long tf = (t + t_ref);
+           this.lu_series.get("lc_rates").addValues(tf, new long[] {
               y01, y02 });
-           this.lu_series.get("lc_distances").addValues(t, new long[] {
+           this.lu_series.get("lc_distances").addValues(tf, new long[] {
               y03, y04, y05, y06, y07, y08 });
-           this.lu_series.get("lc_durations").addValues(t, new long[] {
+           this.lu_series.get("lc_durations").addValues(tf, new long[] {
               y09, y10, y11, y12, y13, y14 });
-           this.lu_series.get("lc_counts").addValues(t, new long[] {
+           this.lu_series.get("lc_counts").addValues(tf, new long[] {
               y15, y16, y17, y18, y19, y20 });
-           this.lu_series.get("lc_times").addValues(t, new long[] {
+           this.lu_series.get("lc_times").addValues(tf, new long[] {
               y21 });
         });
       } catch (SQLException se) {

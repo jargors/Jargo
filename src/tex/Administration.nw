@@ -1228,6 +1228,20 @@ throws SQLException {
 
 \section{Methods: Getters}
 
+\subsection{\texttt{getClock}(0)}
+<<Get: getClock(0)>>=
+int getClock() {
+  return this.statControllerClock;
+}
+@ %def getClock
+
+\subsection{\texttt{getClockReference}(0)}
+<<Get: getClockReference(0)>>=
+String getClockReference() {
+  return this.refTimeStr;
+}
+@ %def getClockReference
+
 \subsection{\texttt{getRefCacheEdges}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -1300,13 +1314,6 @@ Storage getRefStorage() {
 }
 @ %def getRefStorage
 
-\subsection{\texttt{getClock(0)}}
-<<Get: getClock(0)>>=
-int getClock() {
-  return this.statControllerClock;
-}
-@ %def getClock
-
 \subsection{\texttt{retrieveQueueSize}(0)}
 <<Get: retrieveQueueSize(0)>>=
 int retrieveQueueSize() {
@@ -1363,6 +1370,7 @@ void setClockReference(final String clock_reference) throws IllegalArgumentExcep
   if (!(0 <= minute && minute <= 59)) {
     throw new IllegalArgumentException("Invalid clock reference (minute got "+minute+"; must be between [00, 59])");
   }
+  this.refTimeStr = clock_reference;
   this.statControllerClockReferenceHour= hour;
   this.statControllerClockReferenceMinute = minute;
 }

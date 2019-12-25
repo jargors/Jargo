@@ -81,6 +81,7 @@ private Communicator communicator;
 private Tools tools = new Tools();
 private Client client;
 private Map<Integer, Boolean> lu_seen = new HashMap<Integer, Boolean>();
+private String refTimeStr = "";
 @
 
 \hi{Settings.} Settings objects configure various aspects of the simulation.
@@ -347,6 +348,22 @@ public Controller() {
 }
 @
 
+\section{Chunks}
+<<Read header rows>>=
+System.out.println(sc.next());
+System.out.println(sc.next());
+System.out.println(sc.next());
+System.out.println(sc.next());
+System.out.println(sc.next());
+this.setClockReference(sc.next());
+System.out.println(sc.next());
+System.out.println(sc.next());
+System.out.println(sc.next());
+System.out.println(sc.next());
+System.out.println(sc.next());
+System.out.println(sc.next());
+@
+
 \section{Methods}
 
 \subsection{\texttt{loadRoadNetworkFromFile}(1)}
@@ -428,7 +445,7 @@ throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException, SQL
     System.out.printf("loadProblem(1), arg1=%s\n", p);
   }
   Scanner sc = new Scanner(new File(p));
-  <<..skip header rows>>
+  <<Read header rows>>
   while (sc.hasNext()) {
     final int uid = sc.nextInt();
     final int  uo = sc.nextInt();
@@ -445,11 +462,6 @@ throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException, SQL
   }
 }
 @ %def loadProblem
-<<..skip header rows>>=
-for (int i = 0; i < 6; i++) {
-  sc.nextLine();
-}
-@
 
 \subsection{\texttt{isKilled}(0)}
 <<isKilled(0)>>=

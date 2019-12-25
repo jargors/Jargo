@@ -36,6 +36,7 @@ public class Controller {
   private Tools tools = new Tools();
   private Client client;
   private Map<Integer, Boolean> lu_seen = new HashMap<Integer, Boolean>();
+  private String refTimeStr = "";
   private int CLOCK_START =
       Integer.parseInt(System.getProperty("jargors.controller.clock_start", "0"));
   private int CLOCK_END =
@@ -693,9 +694,18 @@ public class Controller {
              System.out.printf("loadProblem(1), arg1=%s\n", p);
            }
            Scanner sc = new Scanner(new File(p));
-           for (int i = 0; i < 6; i++) {
-             sc.nextLine();
-           }
+           System.out.println(sc.next());
+           System.out.println(sc.next());
+           System.out.println(sc.next());
+           System.out.println(sc.next());
+           System.out.println(sc.next());
+           this.setClockReference(sc.next());
+           System.out.println(sc.next());
+           System.out.println(sc.next());
+           System.out.println(sc.next());
+           System.out.println(sc.next());
+           System.out.println(sc.next());
+           System.out.println(sc.next());
            while (sc.hasNext()) {
              final int uid = sc.nextInt();
              final int  uo = sc.nextInt();
@@ -786,6 +796,9 @@ public class Controller {
   public int getClock() {
            return this.statControllerClock;
          }
+  public String getClockReference() {
+           return this.refTimeStr;
+         }
   public Communicator getRefCommunicator() {
            return this.communicator;
          }
@@ -825,6 +838,7 @@ public class Controller {
            if (!(0 <= minute && minute <= 59)) {
              throw new IllegalArgumentException("Invalid clock reference (minute got "+minute+"; must be between [00, 59])");
            }
+           this.refTimeStr = clock_reference;
            this.statControllerClockReferenceHour= hour;
            this.statControllerClockReferenceMinute = minute;
          }
