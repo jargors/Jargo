@@ -152,6 +152,11 @@ public class Storage {
              }
            }
          }
+  public int[] DBQueryMetricRequestDistanceBaseUnassignedRunning() throws SQLException {
+           int[] output = new int[] { };
+           // ...
+           return output;
+         }
   public int[] DBQueryMetricRequestDistanceDetourTotal(boolean flag_usecache) throws SQLException {
            if (flag_usecache) {
              final int[] output = new int[] { 0 };
@@ -351,6 +356,11 @@ public class Storage {
              }
            }
          }
+  public int[] DBQueryMetricUserDistanceBaseRunning() throws SQLException {
+           int[] output = new int[] { };
+           // ...
+           return output;
+         }
   public int[] DBQueryRequestDistanceDetour(final int rid, boolean flag_usecache) throws SQLException {
            if (flag_usecache) {
              return new int[] { this.distance_requests_transit.containsKey(rid)
@@ -416,11 +426,15 @@ public class Storage {
              }
            }
          }
-  public int[] DBQueryRequestIsAssigned(final int rid) throws SQLException {
-           try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-             return this.PSQuery(conn, "S148", 1, rid);
-           } catch (SQLException e) {
-             throw e;
+  public int[] DBQueryRequestIsAssigned(final int rid, boolean flag_usecache) throws SQLException {
+           if (flag_usecache) {
+             return this.lu_rstatus.get(rid) ? new int[] { 1 } : new int[] { };
+           } else {
+             try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+               return this.PSQuery(conn, "S148", 1, rid);
+             } catch (SQLException e) {
+               throw e;
+             }
            }
          }
   public int[] DBQueryRequestStatus(final int rid, final int t)
@@ -1311,7 +1325,7 @@ public class Storage {
                final int  ub = output[(i + 6)];
                lu1.put(uid, new int[] { uid, uq, ue, ul, uo, ud, ub });
                if (uq > 0) {
-                 lu2.put(uid, (this.DBQueryRequestIsAssigned(uid).length > 0 ? true : false));
+                 lu2.put(uid, (this.DBQueryRequestIsAssigned(uid, false).length > 0 ? true : false));
                } else {
                  lu3.put(uid, 0);
                }
@@ -1375,7 +1389,7 @@ public class Storage {
                this.sum_distance_unassigned -= this.lu_users.get(rid)[6];
                int r = rid;
                try {
-                 int sid = this.DBQueryRequestIsAssigned(rid)[0];
+                 int sid = this.DBQueryRequestIsAssigned(rid, false)[0];
                  try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
                    this.distance_requests_transit.put(r, this.DBQueryRequestDistanceTransit(r, false)[0]);
                    this.duration_requests_transit.put(r, this.DBQueryRequestDurationTransit(r, false)[0]);

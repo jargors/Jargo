@@ -433,6 +433,16 @@ public class Controller {
            this.statQueryMetricRequestDistanceBaseUnassignedTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
+  public int[] queryMetricRequestDistanceBaseUnassignedRunning()
+         throws SQLException, UserNotFoundException {
+           int[] output = new int[] { 0 };
+           for (int rid : this.lu_rseen.keySet()) {
+             if (this.storage.DBQueryRequestIsAssigned(rid, true).length == 0) {
+               output[0] += this.storage.DBQueryUser(rid)[6];
+             }
+           }
+           return output;
+         }
   public int[] queryMetricRequestDistanceDetourTotal(boolean flag_usecache) throws SQLException {
            long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryMetricRequestDistanceDetourTotal(flag_usecache);
@@ -540,6 +550,17 @@ public class Controller {
            long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryMetricUserDistanceBaseTotal(flag_usecache);
            this.statQueryMetricUserDistanceBaseTotalDur = (System.currentTimeMillis() - A0);
+           return output;
+         }
+  public int[] queryMetricUserDistanceBaseRunning()
+         throws SQLException, UserNotFoundException {
+           int[] output = new int[] { 0 };
+           for (int sid : this.lu_sseen.keySet()) {
+             output[0] += this.storage.DBQueryUser(sid)[6];
+           }
+           for (int rid : this.lu_rseen.keySet()) {
+             output[0] += this.storage.DBQueryUser(rid)[6];
+           }
            return output;
          }
   public int[] queryRequestTimeOfArrival(final int rid) throws SQLException {

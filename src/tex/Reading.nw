@@ -610,40 +610,20 @@ throws UserNotFoundException, SQLException {
 }
 @ %def DBQueryRequestStatus
 
-\subsection{\texttt{DBQueryRequestIsAssigned}(1)}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBQueryRequestIsAssigned]]}(1) returns a
-positive-length array if the given request is assigned (even if the request is
-not yet picked-up), or [[null]] if the request is not.  A
-[[UserNotFoundException]] is thrown if the user does not exist.
-A [[SQLException]] is thrown in case of database failure.\\
-\midrule
-\textbf{Parameters:} \\
-\begin{tabular}{lp{116mm}}
-Integer [[rid]] (param. 1):&user identifier for request $r$
-\end{tabular}\\
-\textbf{Returns:} results of the query flattened into an integer array, or
-[[null]] if no results.
-
-\begin{tikzpicture}
-\small
-\matrix[nodes={draw,minimum size=6mm}] {
-  \node {$0:1$};\\
-};
-\end{tikzpicture}\\
-\textbf{Side Effects:} none.\\
-\textbf{Throws:} [[UserNotFoundException]] if user does not exist, or
-[[SQLException]] if database failure is encountered.\\
-\bottomrule
-\end{tabular}
-<<Read: DBQueryRequestIsAssigned(1)>>=
-int[] DBQueryRequestIsAssigned(final int rid) throws SQLException {
-  try (<<Open [[conn]]>>) {
-    return this.PSQuery(conn, "S148", 1, rid);
-  } catch (SQLException e) {
-    throw e;
+\subsection{\texttt{DBQueryRequestIsAssigned}(2)}
+TODO. This is really bad. If param 2 is false, the return is blank or the sid
+of the server assigned to request param 1. But if param 2 is true, the return
+is either blank or 1; no sid.
+<<Read: DBQueryRequestIsAssigned(2)>>=
+int[] DBQueryRequestIsAssigned(final int rid, boolean flag_usecache) throws SQLException {
+  if (flag_usecache) {
+    return this.lu_rstatus.get(rid) ? new int[] { 1 } : new int[] { };
+  } else {
+    try (<<Open [[conn]]>>) {
+      return this.PSQuery(conn, "S148", 1, rid);
+    } catch (SQLException e) {
+      throw e;
+    }
   }
 }
 @ %def DBQueryRequestIsAssigned
@@ -2472,6 +2452,28 @@ int[] queryMetricUserDistanceBaseTotal() throws SQLException {
 }
 @
 
+\subsection{\texttt{DBQueryMetricUserDistanceBaseRunning}(0)}
+<<Read: DBQueryMetricUserDistanceBaseRunning(0)>>=
+int[] DBQueryMetricUserDistanceBaseRunning() throws SQLException {
+  int[] output = new int[] { };
+  // ...
+  return output;
+}
+@ %def DBQueryMetricUserDistanceBaseRunning
+<<Read: queryMetricUserDistanceBaseRunning(0)>>=
+int[] queryMetricUserDistanceBaseRunning()
+throws SQLException, UserNotFoundException {
+  int[] output = new int[] { 0 };
+  for (int sid : this.lu_sseen.keySet()) {
+    output[0] += this.storage.DBQueryUser(sid)[6];
+  }
+  for (int rid : this.lu_rseen.keySet()) {
+    output[0] += this.storage.DBQueryUser(rid)[6];
+  }
+  return output;
+}
+@ %def queryMetricUserDistanceBaseRunning
+
 \subsection{\texttt{DBQueryMetricServerDistanceTotal}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -3089,6 +3091,27 @@ with a default parameter.\\
 <<Read: queryMetricRequestDistanceBaseUnassignedTotal(0)>>=
 int[] queryMetricRequestDistanceBaseUnassignedTotal() throws SQLException {
   return queryMetricRequestDistanceBaseUnassignedTotal(true);
+}
+@
+
+\subsection{\texttt{DBQueryMetricRequestDistanceBaseUnassignedRunning}(0)}
+<<Read: DBQueryMetricRequestDistanceBaseUnassignedRunning(0)>>=
+int[] DBQueryMetricRequestDistanceBaseUnassignedRunning() throws SQLException {
+  int[] output = new int[] { };
+  // ...
+  return output;
+}
+@ %def DBQueryMetricRequestDistanceBaseUnassignedRunning
+<<Read: queryMetricRequestDistanceBaseUnassignedRunning(0)>>=
+int[] queryMetricRequestDistanceBaseUnassignedRunning()
+throws SQLException, UserNotFoundException {
+  int[] output = new int[] { 0 };
+  for (int rid : this.lu_rseen.keySet()) {
+    if (this.storage.DBQueryRequestIsAssigned(rid, true).length == 0) {
+      output[0] += this.storage.DBQueryUser(rid)[6];
+    }
+  }
+  return output;
 }
 @
 

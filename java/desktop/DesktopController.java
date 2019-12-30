@@ -651,11 +651,11 @@ public class DesktopController {
         Number val = null;
         output = this.controller.queryMetricServiceRateRunning();
         val = (output.length > 0 ? output[0] : 0);               final long y01 = val.longValue();
-        output = this.controller.queryMetricServerDistanceTotal();
+        output = this.controller.queryMetricServerDistanceRunning();
         final int val1 = (output.length > 0 ? output[0] : 0);
-        output = this.controller.queryMetricRequestDistanceBaseUnassignedTotal();
+        output = this.controller.queryMetricRequestDistanceBaseUnassignedRunning();
         final int val2 = (output.length > 0 ? output[0] : 0);
-        output = this.controller.queryMetricUserDistanceBaseTotal();
+        output = this.controller.queryMetricUserDistanceBaseRunning();
         final int val3 = (output.length > 0 ? output[0] : 0);
         val = (val3 == 0 ? 0 : (100.0*100*(1 - ((double) (val1 + val2)/val3))));           final long y02 = val.longValue();
         output = this.controller.queryMetricServerDistanceTotal();

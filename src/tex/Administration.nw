@@ -515,7 +515,7 @@ We start by creating two temporary maps on the heap.}
 we query the request's assignment status. Else, we initialize the last-visitation time.}
 <<Admin: JargoCacheUsersFromDB(0)>>=
       if (uq > 0) {
-        lu2.put(uid, (this.DBQueryRequestIsAssigned(uid).length > 0 ? true : false));
+        lu2.put(uid, (this.DBQueryRequestIsAssigned(uid, false).length > 0 ? true : false));
       } else {
         lu3.put(uid, 0);
       }
@@ -549,7 +549,7 @@ we query the request's assignment status. Else, we initialize the last-visitatio
       this.sum_distance_unassigned -= this.lu_users.get(rid)[6];
       int r = rid;
       try {
-        int sid = this.DBQueryRequestIsAssigned(rid)[0];
+        int sid = this.DBQueryRequestIsAssigned(rid, false)[0];
         <<Cache request transit distance and duration>>
       } catch (SQLException e) {
         throw e;
