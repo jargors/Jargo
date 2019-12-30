@@ -2,7 +2,7 @@
 
 ![](https://github.com/jargors/jargo/workflows/Build/badge.svg) (**master**)
 
-Latest Version: 1.0.0 (Nov. 20, 2019) (in-development)
+Latest Version: 1.0.0 (Dec. 30, 2019) (in-development)
 
 Jargo is the second incarnation of [Cargo](https://github.com/jamjpan/Cargo), a
 real-time ridesharing simulator to help researchers evaluate the quality of
@@ -14,7 +14,7 @@ queries against Jargo's data model.
 
 Jargo is written in the [literate programming](http://literateprogramming.com/)
 style using [Noweb](https://www.cs.tufts.edu/~nr/noweb/). The idea behind LP is
-to write code that can be understood by humans as well as machines, in other
+to write code that can be understood by humans as well as machines, or in other
 words code that is explainable. The end result is that the same code can be
 compiled into a PDF intended for humans using the command `make pdf`, into Java
 code intended for the Java compiler using the command `make src`, and into
@@ -22,14 +22,11 @@ bytecode intended for the Java virtual machine using the command `make jar`.
 
 ## Quick Start: Command-line (todo: platforms?)
 
-For those who want to get up and running quickly, try the following.  If your
-machine has `bash`, internet access, and the `mkdir`, `curl`, `unzip`, and
-`tar` command-line programs, run `./getdeps.sh` once to get all the build
-prerequisites into a directory called `deps/` (fetch size 49MB, extracted size
-149MB). Then run `make jar` to produce the bytecode packaged into
-`jar/jargors-1.0.0.jar`.
-
-Now try the following example.
+If your machine can access the internet and has `bash` and the `mkdir`, `curl`,
+`unzip`, and `tar` command-line programs, run `./getdeps.sh` once to get all
+the build prerequisites into a directory called `deps/` (fetch size 52MB,
+extracted size 108MB). Then run `make jar` to produce the bytecode packaged
+into `jar/jargors-1.0.0.jar`.
 
 ### Example
 
