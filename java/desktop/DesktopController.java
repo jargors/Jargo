@@ -1280,6 +1280,11 @@ public class DesktopController {
            this.lc_durations_descriptor.setYAxisDescription("<html>Avg. Duration (sec)</html>");
            this.lc_rates_descriptor.setYAxisDescription("<html>Rate (%)</html>");
            this.lc_times_descriptor.setYAxisDescription("<html>Elapsed Time (ms)</html>");
+           this.lc_counts_descriptor.setXAxisDescription("<html>World Time</html>");
+           this.lc_distances_descriptor.setXAxisDescription("<html>World Time</html>");
+           this.lc_durations_descriptor.setXAxisDescription("<html>World Time</html>");
+           this.lc_rates_descriptor.setXAxisDescription("<html>World Time</html>");
+           this.lc_times_descriptor.setXAxisDescription("<html>World Time</html>");
            this.lc_counts_support = ChartFactory.createSimpleXYChart(this.lc_counts_descriptor);
            this.lc_distances_support = ChartFactory.createSimpleXYChart(this.lc_distances_descriptor);
            this.lc_durations_support = ChartFactory.createSimpleXYChart(this.lc_durations_descriptor);
@@ -1442,6 +1447,11 @@ public class DesktopController {
            this.lc_durations_descriptor.setYAxisDescription("<html>Avg. Duration (sec)</html>");
            this.lc_rates_descriptor.setYAxisDescription("<html>Rate (%)</html>");
            this.lc_times_descriptor.setYAxisDescription("<html>Elapsed Time (ms)</html>");
+           this.lc_counts_descriptor.setXAxisDescription("<html>World Time</html>");
+           this.lc_distances_descriptor.setXAxisDescription("<html>World Time</html>");
+           this.lc_durations_descriptor.setXAxisDescription("<html>World Time</html>");
+           this.lc_rates_descriptor.setXAxisDescription("<html>World Time</html>");
+           this.lc_times_descriptor.setXAxisDescription("<html>World Time</html>");
            this.lc_counts_support = ChartFactory.createSimpleXYChart(this.lc_counts_descriptor);
            this.lc_distances_support = ChartFactory.createSimpleXYChart(this.lc_distances_descriptor);
            this.lc_durations_support = ChartFactory.createSimpleXYChart(this.lc_durations_descriptor);
