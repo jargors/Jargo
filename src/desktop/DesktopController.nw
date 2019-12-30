@@ -718,7 +718,7 @@ private class FetcherOfMetrics implements Runnable {
       <<Retrieve serverTravelDistance>>      final long y03 = val.longValue();
       <<Retrieve serverServiceDistance>>     final long y04 = val.longValue();
       <<Retrieve serverCruisingDistance>>    final long y05 = val.longValue();
-      <<Retrieve requestDistanceUnassigned>> final long y06 = val.longValue();
+//      <<Retrieve requestDistanceUnassigned>> final long y06 = val.longValue();
       <<Retrieve requestTransitDistance>>    final long y07 = val.longValue();
       <<Retrieve requestDetourDistance>>     final long y08 = val.longValue();
       <<Retrieve serverTravelDuration>>      final long y09 = val.longValue();
@@ -743,7 +743,7 @@ private class FetcherOfMetrics implements Runnable {
             y03,
             y04,
             y05,
-            y06,
+//            y06,
             y07,
             y08 });
          this.lu_series.get("lc_durations").addValues(tf, new long[] {
@@ -793,14 +793,14 @@ private SwingNode lc_durations = new SwingNode();
 private SwingNode lc_rates = new SwingNode();
 private SwingNode lc_times = new SwingNode();
 private String[] metric_rates = new String[] {
-/*y01*/      "Service Rate (%)",
-/*y02*/      "Distance Savings (%)"
+/*y01*/      "Service Rate (%, 100x)",
+/*y02*/      "Distance Savings (%, 100x)"
     };
 private String[] metric_distances = new String[] {
 /*y03*/      "S-Travel",
 /*y04*/      "S-Service",
 /*y05*/      "S-Cruising",
-/*y06*/      "R-Unassigned",
+///*y06*/      "R-Unassigned",
 /*y07*/      "R-Transit",
 /*y08*/      "R-Detour"
     };
@@ -930,7 +930,7 @@ this.container_lc_times.getChildren().add(this.lc_times);
 \subsection{Retrieve serviceRate}
 <<Retrieve serviceRate>>=
 output = this.controller.queryMetricServiceRate();
-val = (output.length > 0 ? (output[0]/100.0) : 0);
+val = (output.length > 0 ? output[0] : 0);
 @
 
 \subsection{Retrieve distanceSavings}
@@ -941,7 +941,7 @@ output = this.controller.queryMetricRequestDistanceBaseUnassignedTotal();
 final int val2 = (output.length > 0 ? output[0] : 0);
 output = this.controller.queryMetricUserDistanceBaseTotal();
 final int val3 = (output.length > 0 ? output[0] : 0);
-val = (val3 == 0 ? 0 : (100.0*(1 - ((double) (val1 + val2)/val3))));
+val = (val3 == 0 ? 0 : (100.0*100*(1 - ((double) (val1 + val2)/val3))));
 @
 
 \subsection{Retrieve serverTravelDistance}

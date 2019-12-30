@@ -650,22 +650,22 @@ public class DesktopController {
         int[] output = new int[] { };
         Number val = null;
         output = this.controller.queryMetricServiceRate();
-        val = (output.length > 0 ? (output[0]/100.0) : 0);               final long y01 = val.longValue();
+        val = (output.length > 0 ? output[0] : 0);               final long y01 = val.longValue();
         output = this.controller.queryMetricServerDistanceTotal();
         final int val1 = (output.length > 0 ? output[0] : 0);
         output = this.controller.queryMetricRequestDistanceBaseUnassignedTotal();
         final int val2 = (output.length > 0 ? output[0] : 0);
         output = this.controller.queryMetricUserDistanceBaseTotal();
         final int val3 = (output.length > 0 ? output[0] : 0);
-        val = (val3 == 0 ? 0 : (100.0*(1 - ((double) (val1 + val2)/val3))));           final long y02 = val.longValue();
+        val = (val3 == 0 ? 0 : (100.0*100*(1 - ((double) (val1 + val2)/val3))));           final long y02 = val.longValue();
         output = this.controller.queryMetricServerDistanceTotal();
         val = (output.length > 0 ? output[0] : 0);      final long y03 = val.longValue();
         output = this.controller.queryMetricServerDistanceServiceTotal();
         val = (output.length > 0 ? output[0] : 0);     final long y04 = val.longValue();
         output = this.controller.queryMetricServerDistanceCruisingTotal();
         val = (output.length > 0 ? output[0] : 0);    final long y05 = val.longValue();
-        output = this.controller.queryMetricRequestDistanceBaseUnassignedTotal();
-        val = (output.length > 0 ? output[0] : 0); final long y06 = val.longValue();
+  //      output = this.controller.queryMetricRequestDistanceBaseUnassignedTotal();
+          val = (output.length > 0 ? output[0] : 0); final long y06 = val.longValue();
         output = this.controller.queryMetricRequestDistanceTransitTotal();
         val = (output.length > 0 ? output[0] : 0);    final long y07 = val.longValue();
         output = this.controller.queryMetricRequestDistanceDetourTotal();
@@ -703,7 +703,7 @@ public class DesktopController {
               y03,
               y04,
               y05,
-              y06,
+  //            y06,
               y07,
               y08 });
            this.lu_series.get("lc_durations").addValues(tf, new long[] {
@@ -749,14 +749,14 @@ public class DesktopController {
   private SwingNode lc_rates = new SwingNode();
   private SwingNode lc_times = new SwingNode();
   private String[] metric_rates = new String[] {
-  /*y01*/      "Service Rate (%)",
-  /*y02*/      "Distance Savings (%)"
+  /*y01*/      "Service Rate (%, 100x)",
+  /*y02*/      "Distance Savings (%, 100x)"
       };
   private String[] metric_distances = new String[] {
   /*y03*/      "S-Travel",
   /*y04*/      "S-Service",
   /*y05*/      "S-Cruising",
-  /*y06*/      "R-Unassigned",
+  ///*y06*/      "R-Unassigned",
   /*y07*/      "R-Transit",
   /*y08*/      "R-Detour"
       };
