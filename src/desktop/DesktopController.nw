@@ -199,6 +199,8 @@ private int t1 = 0;
 private int zoom = 1;
 private int[] edges = null;
 private int[] mbr = null;
+private int ns = 0;
+private int nr = 0;
 @
 
 \subsection{Renderers}
@@ -693,11 +695,19 @@ private class FetcherOfMetrics implements Runnable {
   private ConcurrentHashMap<String, SimpleXYChartSupport> lu_series = null;
   private long A0 = 0;
   private long t_ref = 0;
+  private int ns_total = 0;
+  private int nr_total = 0;
+  private int ns = 0;
+  private int nr = 0;
   public FetcherOfMetrics(
       final Controller controller,
-      final ConcurrentHashMap<String, SimpleXYChartSupport> lu_series) {
+      final ConcurrentHashMap<String, SimpleXYChartSupport> lu_series,
+      final int ns,
+      final int nr) {
     this.controller = controller;
     this.lu_series = lu_series;
+    this.ns_total = ns;
+    this.nr_total = nr;
     SimpleDateFormat sdf = new SimpleDateFormat("hhmm");
     try {
       this.t_ref = sdf.parse(this.controller.getClockReference()).getTime();
@@ -711,6 +721,8 @@ private class FetcherOfMetrics implements Runnable {
     }
     final int t = this.controller.getClock();
     try {
+      this.ns = this.controller.queryServersCountAppeared()[0];
+      this.nr = this.controller.queryRequestsCountAppeared()[0];
       int[] output = new int[] { };
       Number val = null;
       <<Retrieve serviceRate>>               final long y01 = val.longValue();
@@ -957,37 +969,47 @@ val = (val3 == 0 ? 0 : (100.0*100*(1 - ((double) (val1 + val2)/val3))));
 \subsection{Retrieve serverTravelDistance}
 <<Retrieve serverTravelDistance>>=
 output = this.controller.queryMetricServerDistanceTotal();
-val = (output.length > 0 ? output[0] : 0);
+val = (output.length > 0 ? Math.round(output[0]/(double) this.ns) : 0);
 @
 
 \subsection{Retrieve serverServiceDistance}
 <<Retrieve serverServiceDistance>>=
 output = this.controller.queryMetricServerDistanceServiceTotal();
-val = (output.length > 0 ? output[0] : 0);
+val = (output.length > 0 ? Math.round(output[0]/(double) this.ns) : 0);
 @
 
 \subsection{Retrieve serverCruisingDistance}
 <<Retrieve serverCruisingDistance>>=
 output = this.controller.queryMetricServerDistanceCruisingTotal();
-val = (output.length > 0 ? output[0] : 0);
+val = (output.length > 0 ? Math.round(output[0]/(double) this.ns) : 0);
 @
 
 \subsection{Retrieve serverTravelDuration}
+HORRIBLE HACK WARNING. Sometimes output[0] is not empty but this.ns is 0. This
+happens in the beginning if all servers are taxis. Taxis have an initial
+duration of 1 sec to move to the dummy vertex, but they don't count has
+appeared, hence ns = 0. the first horrible hack is to check if this.ns > 0
+before doing the averaging. the second horrible hack is to subtract away the
+1-second. It's horrible because we've assumed all the servers are taxis, which
+maybe is not the case.
 <<Retrieve serverTravelDuration>>=
 output = this.controller.queryMetricServerDurationTravelTotal();
-val = (output.length > 0 ? output[0] : 0);
+val = (output.length > 0 && this.ns > 0
+    ? Math.round(Math.max(0, output[0] - this.ns_total)/(double) this.ns) : 0);
 @
 
 \subsection{Retrieve serverServiceDuration}
 <<Retrieve serverServiceDuration>>=
 output = this.controller.queryMetricServerDurationServiceTotal();
-val = (output.length > 0 ? output[0] : 0);
+val = (output.length > 0 ? Math.round(output[0]/(double) this.ns) : 0);
 @
 
 \subsection{Retrieve serverCruisingDuration}
+HORRIBLE HACK WARNING. Same horrible hack as serverTravelDuration chunk.
 <<Retrieve serverCruisingDuration>>=
 output = this.controller.queryMetricServerDurationCruisingTotal();
-val = (output.length > 0 ? output[0] : 0);
+val = (output.length > 0 && this.ns > 0
+    ? Math.round(Math.max(0, output[0] - this.ns_total)/(double) this.ns) : 0);
 @
 
 \subsection{Retrieve requestDistanceUnassigned}
@@ -999,19 +1021,19 @@ val = (output.length > 0 ? output[0] : 0);
 \subsection{Retrieve requestTransitDistance}
 <<Retrieve requestTransitDistance>>=
 output = this.controller.queryMetricRequestDistanceTransitTotal();
-val = (output.length > 0 ? output[0] : 0);
+val = (output.length > 0 ? Math.round(output[0]/(double) this.nr) : 0);
 @
 
 \subsection{Retrieve requestDetourDistance}
 <<Retrieve requestDetourDistance>>=
 output = this.controller.queryMetricRequestDistanceDetourTotal();
-val = (output.length > 0 ? output[0] : 0);
+val = (output.length > 0 ? Math.round(output[0]/(double) this.nr) : 0);
 @
 
 \subsection{Retrieve requestTransitDuration}
 <<Retrieve requestTransitDuration>>=
 output = this.controller.queryMetricRequestDurationTransitTotal();
-val = (output.length > 0 ? output[0] : 0);
+val = (output.length > 0 ? Math.round(output[0]/(double) this.nr) : 0);
 @
 
 \subsection{Retrieve requestDetourDuration}
@@ -1021,13 +1043,13 @@ val = (output.length > 0 ? output[0] : 0);
 \subsection{Retrieve requestTravelDuration}
 <<Retrieve requestTravelDuration>>=
 output = this.controller.queryMetricRequestDurationTravelTotal();
-val = (output.length > 0 ? output[0] : 0);
+val = (output.length > 0 ? Math.round(output[0]/(double) this.nr) : 0);
 @
 
 \subsection{Retrieve requestPickupDuration}
 <<Retrieve requestPickupDuration>>=
 output = this.controller.queryMetricRequestDurationPickupTotal();
-val = (output.length > 0 ? output[0] : 0);
+val = (output.length > 0 ? Math.round(output[0]/(double) this.nr) : 0);
 @
 
 \subsection{Retrieve countRequestsQueue}
@@ -1233,8 +1255,8 @@ void actionLoad(final ActionEvent e) {
         this.controller.cacheUsersFromDB();
         int nv = this.controller.queryVerticesCount()[0];
         int ne = this.controller.queryEdgesCount()[0];
-        int ns = this.controller.queryServersCount()[0];
-        int nr = this.controller.queryRequestsCount()[0];
+        this.ns = this.controller.queryServersCount()[0];
+        this.nr = this.controller.queryRequestsCount()[0];
         Platform.runLater(() -> {
           this.access_path = 2;
           this.btn_prob     .setText("*in-instance problem*");
@@ -1364,8 +1386,8 @@ void actionProb(final ActionEvent e) {
     CompletableFuture.runAsync(() -> {
       try {
         this.controller.loadProblem(this.prob);
-        int ns = this.controller.queryServersCount()[0];
-        int nr = this.controller.queryRequestsCount()[0];
+        this.ns = this.controller.queryServersCount()[0];
+        this.nr = this.controller.queryRequestsCount()[0];
         Platform.runLater(() -> {
           this.btn_prob     .setText(pb.getName());
           this.btn_client   .setDisable(false);
@@ -1700,7 +1722,7 @@ void actionStartSequential(final ActionEvent e) {
     }
   }, 0, TimeUnit.SECONDS);
   this.cbFetcherOfMetrics = this.exe.scheduleAtFixedRate(
-      new FetcherOfMetrics(this.controller, this.lu_series), 0, 1, TimeUnit.SECONDS);
+      new FetcherOfMetrics(this.controller, this.lu_series, this.ns, this.nr), 0, 1, TimeUnit.SECONDS);
   this.cbFetcherOfRequests = this.exe.scheduleAtFixedRate(
       new FetcherOfRequests(
         this.controller, this.muf, this.ren_requests), 0, 1, TimeUnit.SECONDS);
@@ -1750,7 +1772,7 @@ void actionStartRealtime(final ActionEvent e) {
     }
   }, 0, TimeUnit.SECONDS);
   this.cbFetcherOfMetrics = this.exe.scheduleAtFixedRate(
-      new FetcherOfMetrics(this.controller, this.lu_series), 0, 1, TimeUnit.SECONDS);
+      new FetcherOfMetrics(this.controller, this.lu_series, this.ns, this.nr), 0, 1, TimeUnit.SECONDS);
   this.cbFetcherOfRequests = this.exe.scheduleAtFixedRate(
       new FetcherOfRequests(
         this.controller, this.muf, this.ren_requests), 0, 1, TimeUnit.SECONDS);

@@ -146,6 +146,8 @@ public class DesktopController {
   private int zoom = 1;
   private int[] edges = null;
   private int[] mbr = null;
+  private int ns = 0;
+  private int nr = 0;
   private class RendererOfRequests extends AnimationTimer {
     private final Color BG = Color.web("0xD7FFFF");
     private final Color REQUEST_FILL = Color.web("0xff5500");
@@ -629,11 +631,19 @@ public class DesktopController {
     private ConcurrentHashMap<String, SimpleXYChartSupport> lu_series = null;
     private long A0 = 0;
     private long t_ref = 0;
+    private int ns_total = 0;
+    private int nr_total = 0;
+    private int ns = 0;
+    private int nr = 0;
     public FetcherOfMetrics(
         final Controller controller,
-        final ConcurrentHashMap<String, SimpleXYChartSupport> lu_series) {
+        final ConcurrentHashMap<String, SimpleXYChartSupport> lu_series,
+        final int ns,
+        final int nr) {
       this.controller = controller;
       this.lu_series = lu_series;
+      this.ns_total = ns;
+      this.nr_total = nr;
       SimpleDateFormat sdf = new SimpleDateFormat("hhmm");
       try {
         this.t_ref = sdf.parse(this.controller.getClockReference()).getTime();
@@ -647,6 +657,8 @@ public class DesktopController {
       }
       final int t = this.controller.getClock();
       try {
+        this.ns = this.controller.queryServersCountAppeared()[0];
+        this.nr = this.controller.queryRequestsCountAppeared()[0];
         int[] output = new int[] { };
         Number val = null;
         output = this.controller.queryMetricServiceRateRunning();
@@ -659,29 +671,31 @@ public class DesktopController {
         final int val3 = (output.length > 0 ? output[0] : 0);
         val = (val3 == 0 ? 0 : (100.0*100*(1 - ((double) (val1 + val2)/val3))));           final long y02 = val.longValue();
         output = this.controller.queryMetricServerDistanceTotal();
-        val = (output.length > 0 ? output[0] : 0);      final long y03 = val.longValue();
+        val = (output.length > 0 ? Math.round(output[0]/(double) this.ns) : 0);      final long y03 = val.longValue();
         output = this.controller.queryMetricServerDistanceServiceTotal();
-        val = (output.length > 0 ? output[0] : 0);     final long y04 = val.longValue();
+        val = (output.length > 0 ? Math.round(output[0]/(double) this.ns) : 0);     final long y04 = val.longValue();
         output = this.controller.queryMetricServerDistanceCruisingTotal();
-        val = (output.length > 0 ? output[0] : 0);    final long y05 = val.longValue();
+        val = (output.length > 0 ? Math.round(output[0]/(double) this.ns) : 0);    final long y05 = val.longValue();
   //      output = this.controller.queryMetricRequestDistanceBaseUnassignedTotal();
           val = (output.length > 0 ? output[0] : 0); final long y06 = val.longValue();
         output = this.controller.queryMetricRequestDistanceTransitTotal();
-        val = (output.length > 0 ? output[0] : 0);    final long y07 = val.longValue();
+        val = (output.length > 0 ? Math.round(output[0]/(double) this.nr) : 0);    final long y07 = val.longValue();
         output = this.controller.queryMetricRequestDistanceDetourTotal();
-        val = (output.length > 0 ? output[0] : 0);     final long y08 = val.longValue();
+        val = (output.length > 0 ? Math.round(output[0]/(double) this.nr) : 0);     final long y08 = val.longValue();
         output = this.controller.queryMetricServerDurationTravelTotal();
-        val = (output.length > 0 ? output[0] : 0);      final long y09 = val.longValue();
+        val = (output.length > 0 && this.ns > 0
+            ? Math.round(Math.max(0, output[0] - this.ns_total)/(double) this.ns) : 0);      final long y09 = val.longValue();
         output = this.controller.queryMetricServerDurationServiceTotal();
-        val = (output.length > 0 ? output[0] : 0);     final long y10 = val.longValue();
+        val = (output.length > 0 ? Math.round(output[0]/(double) this.ns) : 0);     final long y10 = val.longValue();
         output = this.controller.queryMetricServerDurationCruisingTotal();
-        val = (output.length > 0 ? output[0] : 0);    final long y11 = val.longValue();
+        val = (output.length > 0 && this.ns > 0
+            ? Math.round(Math.max(0, output[0] - this.ns_total)/(double) this.ns) : 0);    final long y11 = val.longValue();
         output = this.controller.queryMetricRequestDurationTransitTotal();
-        val = (output.length > 0 ? output[0] : 0);    final long y12 = val.longValue();
+        val = (output.length > 0 ? Math.round(output[0]/(double) this.nr) : 0);    final long y12 = val.longValue();
         output = this.controller.queryMetricRequestDurationTravelTotal();
-        val = (output.length > 0 ? output[0] : 0);     final long y13 = val.longValue();
+        val = (output.length > 0 ? Math.round(output[0]/(double) this.nr) : 0);     final long y13 = val.longValue();
         output = this.controller.queryMetricRequestDurationPickupTotal();
-        val = (output.length > 0 ? output[0] : 0);     final long y14 = val.longValue();
+        val = (output.length > 0 ? Math.round(output[0]/(double) this.nr) : 0);     final long y14 = val.longValue();
         val = this.controller.retrieveQueueSize();        final long y15 = val.longValue();
   //      output = this.controller.queryRequestsCountActive(t);
           val = (output.length > 0 ? output[0] : 0);       final long y16 = val.longValue();
@@ -968,8 +982,8 @@ public class DesktopController {
                  this.controller.cacheUsersFromDB();
                  int nv = this.controller.queryVerticesCount()[0];
                  int ne = this.controller.queryEdgesCount()[0];
-                 int ns = this.controller.queryServersCount()[0];
-                 int nr = this.controller.queryRequestsCount()[0];
+                 this.ns = this.controller.queryServersCount()[0];
+                 this.nr = this.controller.queryRequestsCount()[0];
                  Platform.runLater(() -> {
                    this.access_path = 2;
                    this.btn_prob     .setText("*in-instance problem*");
@@ -1079,8 +1093,8 @@ public class DesktopController {
              CompletableFuture.runAsync(() -> {
                try {
                  this.controller.loadProblem(this.prob);
-                 int ns = this.controller.queryServersCount()[0];
-                 int nr = this.controller.queryRequestsCount()[0];
+                 this.ns = this.controller.queryServersCount()[0];
+                 this.nr = this.controller.queryRequestsCount()[0];
                  Platform.runLater(() -> {
                    this.btn_prob     .setText(pb.getName());
                    this.btn_client   .setDisable(false);
@@ -1346,7 +1360,7 @@ public class DesktopController {
              }
            }, 0, TimeUnit.SECONDS);
            this.cbFetcherOfMetrics = this.exe.scheduleAtFixedRate(
-               new FetcherOfMetrics(this.controller, this.lu_series), 0, 1, TimeUnit.SECONDS);
+               new FetcherOfMetrics(this.controller, this.lu_series, this.ns, this.nr), 0, 1, TimeUnit.SECONDS);
            this.cbFetcherOfRequests = this.exe.scheduleAtFixedRate(
                new FetcherOfRequests(
                  this.controller, this.muf, this.ren_requests), 0, 1, TimeUnit.SECONDS);
@@ -1513,7 +1527,7 @@ public class DesktopController {
              }
            }, 0, TimeUnit.SECONDS);
            this.cbFetcherOfMetrics = this.exe.scheduleAtFixedRate(
-               new FetcherOfMetrics(this.controller, this.lu_series), 0, 1, TimeUnit.SECONDS);
+               new FetcherOfMetrics(this.controller, this.lu_series, this.ns, this.nr), 0, 1, TimeUnit.SECONDS);
            this.cbFetcherOfRequests = this.exe.scheduleAtFixedRate(
                new FetcherOfRequests(
                  this.controller, this.muf, this.ren_requests), 0, 1, TimeUnit.SECONDS);

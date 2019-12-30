@@ -2143,6 +2143,9 @@ int[] queryServersCountActive(final int t) throws SQLException {
 @ %def queryServersCountActive
 
 \subsection{\texttt{DBQueryServersCountAppeared}(0)}
+TODO. Very bad method name. A server counts as "appeared" only if its route
+distance is greater than 0. For example, a taxi that is idling and has never
+moved does not count as "appeared".
 <<Read: DBQueryServersCountAppeared(0)>>=
 int[] DBQueryServersCountAppeared() throws SQLException {
   int[] output = new int[] { };
@@ -2152,7 +2155,12 @@ int[] DBQueryServersCountAppeared() throws SQLException {
 @ %def DBQueryServersCountAppeared
 <<Read: queryServersCountAppeared(0)>>=
 int[] queryServersCountAppeared() throws SQLException {
-  int[] output = new int[] { this.lu_sseen.size() };
+  int[] output = new int[] { 0 };
+  for (int sid : this.lu_sseen.keySet()) {
+    if (this.storage.DBQueryServerDistance(sid, true)[0] > 0) {
+      output[0]++;
+    }
+  }
   return output;
 }
 @ %def queryServersCountAppeared

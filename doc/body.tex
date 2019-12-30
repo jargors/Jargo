@@ -5023,6 +5023,9 @@ int[] queryServersCountActive(final int t) throws SQLException \{
 \nosublabel{NW4K8pCk-3m8NX0-1-u1}\nwindexdefn{queryServersCountActive}{queryServersCountActive}{NW4K8pCk-3m8NX0-1}\eatline
 \nwidentdefs{\\{{queryServersCountActive}{queryServersCountActive}}}\nwidentuses{\\{{DBQueryServersCountActive}{DBQueryServersCountActive}}}\nwindexuse{DBQueryServersCountActive}{DBQueryServersCountActive}{NW4K8pCk-3m8NX0-1}\nwendcode{}\nwbegindocs{159}\nwdocspar
 \subsection{\texttt{DBQueryServersCountAppeared}(0)}
+TODO. Very bad method name. A server counts as "appeared" only if its route
+distance is greater than 0. For example, a taxi that is idling and has never
+moved does not count as "appeared".
 \nwenddocs{}\nwbegincode{160}\sublabel{NW4K8pCk-w1r5F-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4K8pCk-w1r5F-1}}}\moddef{Read: DBQueryServersCountAppeared(0)~{\nwtagstyle{}\subpageref{NW4K8pCk-w1r5F-1}}}\endmoddef\nwnotused{Read:\ DBQueryServersCountAppeared(0)}
 int[] DBQueryServersCountAppeared() throws SQLException \{
   int[] output = new int[] \{ \};
@@ -5032,11 +5035,16 @@ int[] DBQueryServersCountAppeared() throws SQLException \{
 \nwindexdefn{DBQueryServersCountAppeared}{DBQueryServersCountAppeared}{NW4K8pCk-w1r5F-1}\eatline
 \nwidentdefs{\\{{DBQueryServersCountAppeared}{DBQueryServersCountAppeared}}}\nwendcode{}\nwbegincode{161}\sublabel{NW4K8pCk-1u7qwL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4K8pCk-1u7qwL-1}}}\moddef{Read: queryServersCountAppeared(0)~{\nwtagstyle{}\subpageref{NW4K8pCk-1u7qwL-1}}}\endmoddef\nwused{\\{NW1pDwO-2u8vSA-1}}
 int[] queryServersCountAppeared() throws SQLException \{
-  int[] output = new int[] \{ this.lu_sseen.size() \};
+  int[] output = new int[] \{ 0 \};
+  for (int sid : this.lu_sseen.keySet()) \{
+    if (this.storage.DBQueryServerDistance(sid, true)[0] > 0) \{
+      output[0]++;
+    \}
+  \}
   return output;
 \}
 \nwindexdefn{queryServersCountAppeared}{queryServersCountAppeared}{NW4K8pCk-1u7qwL-1}\eatline
-\nwidentdefs{\\{{queryServersCountAppeared}{queryServersCountAppeared}}}\nwendcode{}\nwbegindocs{162}\subsection{\texttt{DBQueryServersLocations}(1)}
+\nwidentdefs{\\{{queryServersCountAppeared}{queryServersCountAppeared}}}\nwidentuses{\\{{DBQueryServerDistance}{DBQueryServerDistance}}}\nwindexuse{DBQueryServerDistance}{DBQueryServerDistance}{NW4K8pCk-1u7qwL-1}\nwendcode{}\nwbegindocs{162}\subsection{\texttt{DBQueryServersLocations}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -10293,6 +10301,8 @@ private int t1 = 0;
 private int zoom = 1;
 private int[] edges = null;
 private int[] mbr = null;
+private int ns = 0;
+private int nr = 0;
 \nwendcode{}\nwbegindocs{18}\nwdocspar
 
 \subsection{Renderers}
@@ -10787,11 +10797,19 @@ private class FetcherOfMetrics implements Runnable \{
   private ConcurrentHashMap<String, SimpleXYChartSupport> lu_series = null;
   private long A0 = 0;
   private long t_ref = 0;
+  private int ns_total = 0;
+  private int nr_total = 0;
+  private int ns = 0;
+  private int nr = 0;
   public FetcherOfMetrics(
       final Controller controller,
-      final ConcurrentHashMap<String, SimpleXYChartSupport> lu_series) \{
+      final ConcurrentHashMap<String, SimpleXYChartSupport> lu_series,
+      final int ns,
+      final int nr) \{
     this.controller = controller;
     this.lu_series = lu_series;
+    this.ns_total = ns;
+    this.nr_total = nr;
     SimpleDateFormat sdf = new SimpleDateFormat("hhmm");
     try \{
       this.t_ref = sdf.parse(this.controller.getClockReference()).getTime();
@@ -10805,6 +10823,8 @@ private class FetcherOfMetrics implements Runnable \{
     \}
     final int t = this.controller.getClock();
     try \{
+      this.ns = this.controller.queryServersCountAppeared()[0];
+      this.nr = this.controller.queryRequestsCountAppeared()[0];
       int[] output = new int[] \{ \};
       Number val = null;
       \LA{}Retrieve serviceRate~{\nwtagstyle{}\subpageref{NWn0bN8-1Zm9TM-1}}\RA{}               final long y01 = val.longValue();
@@ -10867,7 +10887,7 @@ private class FetcherOfMetrics implements Runnable \{
     \}
   \}
 \}
-\nwidentuses{\\{{getClock}{getClock}}\\{{getClockReference}{getClockReference}}}\nwindexuse{getClock}{getClock}{NWn0bN8-2iHsHO-A}\nwindexuse{getClockReference}{getClockReference}{NWn0bN8-2iHsHO-A}\nwendcode{}\nwbegindocs{32}\nwdocspar
+\nwidentuses{\\{{getClock}{getClock}}\\{{getClockReference}{getClockReference}}\\{{queryRequestsCountAppeared}{queryRequestsCountAppeared}}\\{{queryServersCountAppeared}{queryServersCountAppeared}}}\nwindexuse{getClock}{getClock}{NWn0bN8-2iHsHO-A}\nwindexuse{getClockReference}{getClockReference}{NWn0bN8-2iHsHO-A}\nwindexuse{queryRequestsCountAppeared}{queryRequestsCountAppeared}{NWn0bN8-2iHsHO-A}\nwindexuse{queryServersCountAppeared}{queryServersCountAppeared}{NWn0bN8-2iHsHO-A}\nwendcode{}\nwbegindocs{32}\nwdocspar
 
 \subsection{Charts}
 \nwenddocs{}\nwbegincode{33}\sublabel{NWn0bN8-2iHsHO-B}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-B}}}\moddef{\code{}DesktopController\edoc{} member variables~{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-1}}}\plusendmoddef
@@ -11051,37 +11071,47 @@ val = (val3 == 0 ? 0 : (100.0*100*(1 - ((double) (val1 + val2)/val3))));
 \subsection{Retrieve serverTravelDistance}
 \nwenddocs{}\nwbegincode{51}\sublabel{NWn0bN8-2om2Zr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2om2Zr-1}}}\moddef{Retrieve serverTravelDistance~{\nwtagstyle{}\subpageref{NWn0bN8-2om2Zr-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
 output = this.controller.queryMetricServerDistanceTotal();
-val = (output.length > 0 ? output[0] : 0);
+val = (output.length > 0 ? Math.round(output[0]/(double) this.ns) : 0);
 \nwidentuses{\\{{queryMetricServerDistanceTotal}{queryMetricServerDistanceTotal}}}\nwindexuse{queryMetricServerDistanceTotal}{queryMetricServerDistanceTotal}{NWn0bN8-2om2Zr-1}\nwendcode{}\nwbegindocs{52}\nwdocspar
 
 \subsection{Retrieve serverServiceDistance}
 \nwenddocs{}\nwbegincode{53}\sublabel{NWn0bN8-2HdZms-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2HdZms-1}}}\moddef{Retrieve serverServiceDistance~{\nwtagstyle{}\subpageref{NWn0bN8-2HdZms-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
 output = this.controller.queryMetricServerDistanceServiceTotal();
-val = (output.length > 0 ? output[0] : 0);
+val = (output.length > 0 ? Math.round(output[0]/(double) this.ns) : 0);
 \nwidentuses{\\{{queryMetricServerDistanceServiceTotal}{queryMetricServerDistanceServiceTotal}}}\nwindexuse{queryMetricServerDistanceServiceTotal}{queryMetricServerDistanceServiceTotal}{NWn0bN8-2HdZms-1}\nwendcode{}\nwbegindocs{54}\nwdocspar
 
 \subsection{Retrieve serverCruisingDistance}
 \nwenddocs{}\nwbegincode{55}\sublabel{NWn0bN8-4HFFxW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-4HFFxW-1}}}\moddef{Retrieve serverCruisingDistance~{\nwtagstyle{}\subpageref{NWn0bN8-4HFFxW-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
 output = this.controller.queryMetricServerDistanceCruisingTotal();
-val = (output.length > 0 ? output[0] : 0);
+val = (output.length > 0 ? Math.round(output[0]/(double) this.ns) : 0);
 \nwidentuses{\\{{queryMetricServerDistanceCruisingTotal}{queryMetricServerDistanceCruisingTotal}}}\nwindexuse{queryMetricServerDistanceCruisingTotal}{queryMetricServerDistanceCruisingTotal}{NWn0bN8-4HFFxW-1}\nwendcode{}\nwbegindocs{56}\nwdocspar
 
 \subsection{Retrieve serverTravelDuration}
+HORRIBLE HACK WARNING. Sometimes output[0] is not empty but this.ns is 0. This
+happens in the beginning if all servers are taxis. Taxis have an initial
+duration of 1 sec to move to the dummy vertex, but they don't count has
+appeared, hence ns = 0. the first horrible hack is to check if this.ns > 0
+before doing the averaging. the second horrible hack is to subtract away the
+1-second. It's horrible because we've assumed all the servers are taxis, which
+maybe is not the case.
 \nwenddocs{}\nwbegincode{57}\sublabel{NWn0bN8-3YgpXN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3YgpXN-1}}}\moddef{Retrieve serverTravelDuration~{\nwtagstyle{}\subpageref{NWn0bN8-3YgpXN-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
 output = this.controller.queryMetricServerDurationTravelTotal();
-val = (output.length > 0 ? output[0] : 0);
+val = (output.length > 0 && this.ns > 0
+    ? Math.round(Math.max(0, output[0] - this.ns_total)/(double) this.ns) : 0);
 \nwidentuses{\\{{queryMetricServerDurationTravelTotal}{queryMetricServerDurationTravelTotal}}}\nwindexuse{queryMetricServerDurationTravelTotal}{queryMetricServerDurationTravelTotal}{NWn0bN8-3YgpXN-1}\nwendcode{}\nwbegindocs{58}\nwdocspar
 
 \subsection{Retrieve serverServiceDuration}
 \nwenddocs{}\nwbegincode{59}\sublabel{NWn0bN8-iLjau-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-iLjau-1}}}\moddef{Retrieve serverServiceDuration~{\nwtagstyle{}\subpageref{NWn0bN8-iLjau-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
 output = this.controller.queryMetricServerDurationServiceTotal();
-val = (output.length > 0 ? output[0] : 0);
+val = (output.length > 0 ? Math.round(output[0]/(double) this.ns) : 0);
 \nwidentuses{\\{{queryMetricServerDurationServiceTotal}{queryMetricServerDurationServiceTotal}}}\nwindexuse{queryMetricServerDurationServiceTotal}{queryMetricServerDurationServiceTotal}{NWn0bN8-iLjau-1}\nwendcode{}\nwbegindocs{60}\nwdocspar
 
 \subsection{Retrieve serverCruisingDuration}
+HORRIBLE HACK WARNING. Same horrible hack as serverTravelDuration chunk.
 \nwenddocs{}\nwbegincode{61}\sublabel{NWn0bN8-3GIbUG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3GIbUG-1}}}\moddef{Retrieve serverCruisingDuration~{\nwtagstyle{}\subpageref{NWn0bN8-3GIbUG-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
 output = this.controller.queryMetricServerDurationCruisingTotal();
-val = (output.length > 0 ? output[0] : 0);
+val = (output.length > 0 && this.ns > 0
+    ? Math.round(Math.max(0, output[0] - this.ns_total)/(double) this.ns) : 0);
 \nwidentuses{\\{{queryMetricServerDurationCruisingTotal}{queryMetricServerDurationCruisingTotal}}}\nwindexuse{queryMetricServerDurationCruisingTotal}{queryMetricServerDurationCruisingTotal}{NWn0bN8-3GIbUG-1}\nwendcode{}\nwbegindocs{62}\nwdocspar
 
 \subsection{Retrieve requestDistanceUnassigned}
@@ -11093,19 +11123,19 @@ val = (output.length > 0 ? output[0] : 0);
 \subsection{Retrieve requestTransitDistance}
 \nwenddocs{}\nwbegincode{65}\sublabel{NWn0bN8-3cTfr4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3cTfr4-1}}}\moddef{Retrieve requestTransitDistance~{\nwtagstyle{}\subpageref{NWn0bN8-3cTfr4-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
 output = this.controller.queryMetricRequestDistanceTransitTotal();
-val = (output.length > 0 ? output[0] : 0);
+val = (output.length > 0 ? Math.round(output[0]/(double) this.nr) : 0);
 \nwidentuses{\\{{queryMetricRequestDistanceTransitTotal}{queryMetricRequestDistanceTransitTotal}}}\nwindexuse{queryMetricRequestDistanceTransitTotal}{queryMetricRequestDistanceTransitTotal}{NWn0bN8-3cTfr4-1}\nwendcode{}\nwbegindocs{66}\nwdocspar
 
 \subsection{Retrieve requestDetourDistance}
 \nwenddocs{}\nwbegincode{67}\sublabel{NWn0bN8-1gub9i-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1gub9i-1}}}\moddef{Retrieve requestDetourDistance~{\nwtagstyle{}\subpageref{NWn0bN8-1gub9i-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
 output = this.controller.queryMetricRequestDistanceDetourTotal();
-val = (output.length > 0 ? output[0] : 0);
+val = (output.length > 0 ? Math.round(output[0]/(double) this.nr) : 0);
 \nwidentuses{\\{{queryMetricRequestDistanceDetourTotal}{queryMetricRequestDistanceDetourTotal}}}\nwindexuse{queryMetricRequestDistanceDetourTotal}{queryMetricRequestDistanceDetourTotal}{NWn0bN8-1gub9i-1}\nwendcode{}\nwbegindocs{68}\nwdocspar
 
 \subsection{Retrieve requestTransitDuration}
 \nwenddocs{}\nwbegincode{69}\sublabel{NWn0bN8-2tPgJc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2tPgJc-1}}}\moddef{Retrieve requestTransitDuration~{\nwtagstyle{}\subpageref{NWn0bN8-2tPgJc-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
 output = this.controller.queryMetricRequestDurationTransitTotal();
-val = (output.length > 0 ? output[0] : 0);
+val = (output.length > 0 ? Math.round(output[0]/(double) this.nr) : 0);
 \nwidentuses{\\{{queryMetricRequestDurationTransitTotal}{queryMetricRequestDurationTransitTotal}}}\nwindexuse{queryMetricRequestDurationTransitTotal}{queryMetricRequestDurationTransitTotal}{NWn0bN8-2tPgJc-1}\nwendcode{}\nwbegindocs{70}\nwdocspar
 
 \subsection{Retrieve requestDetourDuration}
@@ -11115,13 +11145,13 @@ val = (output.length > 0 ? output[0] : 0);
 \subsection{Retrieve requestTravelDuration}
 \nwenddocs{}\nwbegincode{73}\sublabel{NWn0bN8-1aBbYv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1aBbYv-1}}}\moddef{Retrieve requestTravelDuration~{\nwtagstyle{}\subpageref{NWn0bN8-1aBbYv-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
 output = this.controller.queryMetricRequestDurationTravelTotal();
-val = (output.length > 0 ? output[0] : 0);
+val = (output.length > 0 ? Math.round(output[0]/(double) this.nr) : 0);
 \nwidentuses{\\{{queryMetricRequestDurationTravelTotal}{queryMetricRequestDurationTravelTotal}}}\nwindexuse{queryMetricRequestDurationTravelTotal}{queryMetricRequestDurationTravelTotal}{NWn0bN8-1aBbYv-1}\nwendcode{}\nwbegindocs{74}\nwdocspar
 
 \subsection{Retrieve requestPickupDuration}
 \nwenddocs{}\nwbegincode{75}\sublabel{NWn0bN8-4by79p-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-4by79p-1}}}\moddef{Retrieve requestPickupDuration~{\nwtagstyle{}\subpageref{NWn0bN8-4by79p-1}}}\endmoddef\nwused{\\{NWn0bN8-2iHsHO-A}}
 output = this.controller.queryMetricRequestDurationPickupTotal();
-val = (output.length > 0 ? output[0] : 0);
+val = (output.length > 0 ? Math.round(output[0]/(double) this.nr) : 0);
 \nwidentuses{\\{{queryMetricRequestDurationPickupTotal}{queryMetricRequestDurationPickupTotal}}}\nwindexuse{queryMetricRequestDurationPickupTotal}{queryMetricRequestDurationPickupTotal}{NWn0bN8-4by79p-1}\nwendcode{}\nwbegindocs{76}\nwdocspar
 
 \subsection{Retrieve countRequestsQueue}
@@ -11329,8 +11359,8 @@ void actionLoad(final ActionEvent e) \{
         this.controller.cacheUsersFromDB();
         int nv = this.controller.queryVerticesCount()[0];
         int ne = this.controller.queryEdgesCount()[0];
-        int ns = this.controller.queryServersCount()[0];
-        int nr = this.controller.queryRequestsCount()[0];
+        this.ns = this.controller.queryServersCount()[0];
+        this.nr = this.controller.queryRequestsCount()[0];
         Platform.runLater(() -> \{
           this.access_path = 2;
           this.btn_prob     .setText("*in-instance problem*");
@@ -11460,8 +11490,8 @@ void actionProb(final ActionEvent e) \{
     CompletableFuture.runAsync(() -> \{
       try \{
         this.controller.loadProblem(this.prob);
-        int ns = this.controller.queryServersCount()[0];
-        int nr = this.controller.queryRequestsCount()[0];
+        this.ns = this.controller.queryServersCount()[0];
+        this.nr = this.controller.queryRequestsCount()[0];
         Platform.runLater(() -> \{
           this.btn_prob     .setText(pb.getName());
           this.btn_client   .setDisable(false);
@@ -11796,7 +11826,7 @@ void actionStartSequential(final ActionEvent e) \{
     \}
   \}, 0, TimeUnit.SECONDS);
   this.cbFetcherOfMetrics = this.exe.scheduleAtFixedRate(
-      new FetcherOfMetrics(this.controller, this.lu_series), 0, 1, TimeUnit.SECONDS);
+      new FetcherOfMetrics(this.controller, this.lu_series, this.ns, this.nr), 0, 1, TimeUnit.SECONDS);
   this.cbFetcherOfRequests = this.exe.scheduleAtFixedRate(
       new FetcherOfRequests(
         this.controller, this.muf, this.ren_requests), 0, 1, TimeUnit.SECONDS);
@@ -11846,7 +11876,7 @@ void actionStartRealtime(final ActionEvent e) \{
     \}
   \}, 0, TimeUnit.SECONDS);
   this.cbFetcherOfMetrics = this.exe.scheduleAtFixedRate(
-      new FetcherOfMetrics(this.controller, this.lu_series), 0, 1, TimeUnit.SECONDS);
+      new FetcherOfMetrics(this.controller, this.lu_series, this.ns, this.nr), 0, 1, TimeUnit.SECONDS);
   this.cbFetcherOfRequests = this.exe.scheduleAtFixedRate(
       new FetcherOfRequests(
         this.controller, this.muf, this.ren_requests), 0, 1, TimeUnit.SECONDS);

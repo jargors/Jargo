@@ -664,7 +664,12 @@ public class Controller {
            return output;
          }
   public int[] queryServersCountAppeared() throws SQLException {
-           int[] output = new int[] { this.lu_sseen.size() };
+           int[] output = new int[] { 0 };
+           for (int sid : this.lu_sseen.keySet()) {
+             if (this.storage.DBQueryServerDistance(sid, true)[0] > 0) {
+               output[0]++;
+             }
+           }
            return output;
          }
   public int[] queryServersLocationsActive(final int t) throws SQLException {
