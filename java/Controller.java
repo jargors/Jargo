@@ -587,6 +587,10 @@ public class Controller {
            this.statQueryRequestsCountActiveDur = (System.currentTimeMillis() - A0);
            return output;
          }
+  public int[] queryRequestsCountAppeared() throws SQLException {
+           int[] output = new int[] { this.lu_rseen.size() };
+           return output;
+         }
   public int[] queryRequestsCountAssigned() throws SQLException {
            int[] output = storage.DBQueryRequestsCountAssigned();
            return output;
