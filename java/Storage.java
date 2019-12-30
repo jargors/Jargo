@@ -458,6 +458,9 @@ public class Storage {
              throw e;
            }
          }
+  public int[] DBQueryRequestsCountAssigned() throws SQLException {
+           return new int[] { this.count_assigned };
+         }
   public int[] DBQueryRequestsCountCompleted(final int t) throws SQLException {
            try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
              return this.PSQuery(conn, "S161", 1, t, t, t);

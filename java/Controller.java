@@ -547,6 +547,10 @@ public class Controller {
            this.statQueryRequestsCountActiveDur = (System.currentTimeMillis() - A0);
            return output;
          }
+  public int[] queryRequestsCountAssigned() throws SQLException {
+           int[] output = storage.DBQueryRequestsCountAssigned();
+           return output;
+         }
   public int[] queryRequestsCountCompleted(final int t) throws SQLException {
            long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryRequestsCountCompleted(t);
