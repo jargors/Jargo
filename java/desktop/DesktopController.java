@@ -1275,6 +1275,11 @@ public class DesktopController {
            for (String metric : this.metric_times) {
              this.lc_times_descriptor.addLineItems(metric);
            }
+           this.lc_counts_descriptor.setYAxisDescription("<html>Count (#)</html>");
+           this.lc_distances_descriptor.setYAxisDescription("<html>Avg. Distance (m)</html>");
+           this.lc_durations_descriptor.setYAxisDescription("<html>Avg. Duration (sec)</html>");
+           this.lc_rates_descriptor.setYAxisDescription("<html>Rate (%)</html>");
+           this.lc_times_descriptor.setYAxisDescription("<html>Elapsed Time (ms)</html>");
            this.lc_counts_support = ChartFactory.createSimpleXYChart(this.lc_counts_descriptor);
            this.lc_distances_support = ChartFactory.createSimpleXYChart(this.lc_distances_descriptor);
            this.lc_durations_support = ChartFactory.createSimpleXYChart(this.lc_durations_descriptor);
@@ -1432,6 +1437,11 @@ public class DesktopController {
            for (String metric : this.metric_times) {
              this.lc_times_descriptor.addLineItems(metric);
            }
+           this.lc_counts_descriptor.setYAxisDescription("<html>Count (#)</html>");
+           this.lc_distances_descriptor.setYAxisDescription("<html>Avg. Distance (m)</html>");
+           this.lc_durations_descriptor.setYAxisDescription("<html>Avg. Duration (sec)</html>");
+           this.lc_rates_descriptor.setYAxisDescription("<html>Rate (%)</html>");
+           this.lc_times_descriptor.setYAxisDescription("<html>Elapsed Time (ms)</html>");
            this.lc_counts_support = ChartFactory.createSimpleXYChart(this.lc_counts_descriptor);
            this.lc_distances_support = ChartFactory.createSimpleXYChart(this.lc_distances_descriptor);
            this.lc_durations_support = ChartFactory.createSimpleXYChart(this.lc_durations_descriptor);
