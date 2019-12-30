@@ -663,6 +663,10 @@ public class Controller {
            this.statQueryServersCountActiveDur = (System.currentTimeMillis() - A0);
            return output;
          }
+  public int[] queryServersCountAppeared() throws SQLException {
+           int[] output = new int[] { this.lu_sseen.size() };
+           return output;
+         }
   public int[] queryServersLocationsActive(final int t) throws SQLException {
            long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryServersLocationsActive(t);
