@@ -247,6 +247,11 @@ public class Storage {
              }
            }
          }
+  public int[] DBQueryMetricServerDistanceRunning() throws SQLException {
+           int[] output = new int[] { };
+           // ...
+           return output;
+         }
   public int[] DBQueryMetricServerDistanceServiceTotal(boolean flag_usecache) throws SQLException {
            if (flag_usecache) {
              final int[] output = new int[] { 0 };

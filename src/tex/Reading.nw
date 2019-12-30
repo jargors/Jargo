@@ -1543,6 +1543,11 @@ int[] DBQueryServerDistance(final int sid, boolean flag_usecache) throws SQLExce
   }
 }
 @ %def DBQueryServerDistance
+<<Read: queryServerDistance(2)>>=
+int[] queryServerDistance(final int sid, boolean flag_usecache) throws SQLException {
+  return this.storage.DBQueryServerDistance(sid, flag_usecache);
+}
+@ %def queryServerDistance
 
 \subsection{\texttt{DBQueryServerDistanceRemaining}(2)}
 \begin{tabular}{p{\textwidth}}
@@ -2543,6 +2548,24 @@ int[] queryMetricServerDistanceTotal() throws SQLException {
   return queryMetricServerDistanceTotal(true);
 }
 @
+
+\subsection{\texttt{DBQueryMetricServerDistanceRunning}(0)}
+<<Read: DBQueryMetricServerDistanceRunning(0)>>=
+int[] DBQueryMetricServerDistanceRunning() throws SQLException {
+  int[] output = new int[] { };
+  // ...
+  return output;
+}
+@ %def DBQueryMetricServerDistanceRunning
+<<Read: queryMetricServerDistanceRunning(0)>>=
+int[] queryMetricServerDistanceRunning() throws SQLException {
+  int[] output = new int[] { 0 };
+  for (int sid : this.lu_sseen.keySet()) {
+    output[0] += this.storage.DBQueryServerDistance(sid, true)[0];
+  }
+  return output;
+}
+@ %def queryMetricServerDistanceRunning
 
 \subsection{\texttt{DBQueryMetricServerDistanceBaseTotal}(0)}
 \begin{tabular}{p{\textwidth}}

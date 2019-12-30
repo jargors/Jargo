@@ -36,6 +36,7 @@ public class Controller {
   private Tools tools = new Tools();
   private Client client;
   private Map<Integer, Boolean> lu_rseen = new HashMap<Integer, Boolean>();
+  private Map<Integer, Boolean> lu_sseen = new HashMap<Integer, Boolean>();
   private String refTimeStr = "";
   private int CLOCK_START =
       Integer.parseInt(System.getProperty("jargors.controller.clock_start", "0"));
@@ -146,6 +147,11 @@ public class Controller {
   private Runnable ServerLoop = () -> {
     try {
       int[] output = this.storage.DBQueryServersLocationsActive(this.statControllerClock);
+      for (int i = 0; i < (output.length - 2); i += 3) {
+        if (!this.lu_sseen.containsKey(output[i])) {
+          this.lu_sseen.put(output[i], true);
+        }
+      }
       this.client.collectServerLocations(output);
     } catch (SQLException e) {
       if (e.getErrorCode() == 40000) {
@@ -475,6 +481,13 @@ public class Controller {
            this.statQueryMetricServerDistanceCruisingTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
+  public int[] queryMetricServerDistanceRunning() throws SQLException {
+           int[] output = new int[] { 0 };
+           for (int sid : this.lu_sseen.keySet()) {
+             output[0] += this.storage.DBQueryServerDistance(sid, true)[0];
+           }
+           return output;
+         }
   public int[] queryMetricServerDistanceServiceTotal(boolean flag_usecache) throws SQLException {
            long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryMetricServerDistanceServiceTotal(flag_usecache);
@@ -573,6 +586,9 @@ public class Controller {
            long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryRequestsWaiting(t);
            return output;
+         }
+  public int[] queryServerDistance(final int sid, boolean flag_usecache) throws SQLException {
+           return this.storage.DBQueryServerDistance(sid, flag_usecache);
          }
   public int[] queryServerRoute(final int sid) throws SQLException {
            long A0 = System.currentTimeMillis();

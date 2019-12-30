@@ -81,6 +81,7 @@ private Communicator communicator;
 private Tools tools = new Tools();
 private Client client;
 private Map<Integer, Boolean> lu_rseen = new HashMap<Integer, Boolean>();
+private Map<Integer, Boolean> lu_sseen = new HashMap<Integer, Boolean>();
 private String refTimeStr = "";
 @
 
@@ -307,6 +308,11 @@ exits the JVM if failure occurs.\\
 private Runnable ServerLoop = () -> {
   try {
     int[] output = this.storage.DBQueryServersLocationsActive(this.statControllerClock);
+    for (int i = 0; i < (output.length - 2); i += 3) {
+      if (!this.lu_sseen.containsKey(output[i])) {
+        this.lu_sseen.put(output[i], true);
+      }
+    }
     this.client.collectServerLocations(output);
   } catch (SQLException e) {
     if (e.getErrorCode() == 40000) {
