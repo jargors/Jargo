@@ -2375,6 +2375,23 @@ int[] queryMetricServiceRate() throws SQLException {
 }
 @
 
+\subsection{\texttt{DBQueryMetricServiceRateRunning}(0)}
+<<Read: DBQueryMetricServiceRateRunning(0)>>=
+int[] DBQueryMetricServiceRateRunning() throws SQLException {
+  int[] output = new int[] { };
+  // ...
+  return output;
+}
+@ %def DBQueryMetricServiceRateRunning
+<<Read: queryMetricServiceRateRunning(0)>>=
+int[] queryMetricServiceRateRunning() throws SQLException {
+  int[] output = new int[] {
+      Math.min((int) (10000*(this.storage.DBQueryRequestsCountAssigned()[0]
+        / (double) this.lu_rseen.size())), 10000) };
+  return output;
+}
+@ %def queryMetricServiceRateRunning
+
 \subsection{\texttt{DBQueryMetricUserDistanceBaseTotal}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule

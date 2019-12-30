@@ -35,7 +35,7 @@ public class Controller {
   private Communicator communicator;
   private Tools tools = new Tools();
   private Client client;
-  private Map<Integer, Boolean> lu_seen = new HashMap<Integer, Boolean>();
+  private Map<Integer, Boolean> lu_rseen = new HashMap<Integer, Boolean>();
   private String refTimeStr = "";
   private int CLOCK_START =
       Integer.parseInt(System.getProperty("jargors.controller.clock_start", "0"));
@@ -101,7 +101,7 @@ public class Controller {
       A2 = this.client.dropRequests(now - QUEUE_TIMEOUT);
       int[] output = this.storage.DBQueryRequestsQueued(now);
       for (int i = 0; i < (output.length - 6); i += 7) {
-        if (!this.lu_seen.containsKey(output[i]) || this.lu_seen.get(output[i]) == false) {
+        if (!this.lu_rseen.containsKey(output[i]) || this.lu_rseen.get(output[i]) == false) {
           this.client.addRequest(new int[] {
             output[(i + 0)],
             output[(i + 1)],
@@ -110,7 +110,7 @@ public class Controller {
             output[(i + 4)],
             output[(i + 5)],
             output[(i + 6)] });
-          this.lu_seen.put(output[i], true);
+          this.lu_rseen.put(output[i], true);
           A1++;
         }
       }
@@ -517,6 +517,12 @@ public class Controller {
            this.statQueryMetricServiceRateDur = (System.currentTimeMillis() - A0);
            return output;
          }
+  public int[] queryMetricServiceRateRunning() throws SQLException {
+           int[] output = new int[] {
+               Math.min((int) (10000*(this.storage.DBQueryRequestsCountAssigned()[0]
+                 / (double) this.lu_rseen.size())), 10000) };
+           return output;
+         }
   public int[] queryMetricUserDistanceBaseTotal(boolean flag_usecache) throws SQLException {
            long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryMetricUserDistanceBaseTotal(flag_usecache);
@@ -865,7 +871,7 @@ public class Controller {
          }
   public void returnRequest(final int[] r) {
            if (this.statControllerClock - r[2] < QUEUE_TIMEOUT) {
-             this.lu_seen.put(r[0], false);
+             this.lu_rseen.put(r[0], false);
            }
          }
   public void startRealtime(final Consumer<Boolean> app_cb) {

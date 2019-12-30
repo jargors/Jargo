@@ -649,7 +649,7 @@ public class DesktopController {
       try {
         int[] output = new int[] { };
         Number val = null;
-        output = this.controller.queryMetricServiceRate();
+        output = this.controller.queryMetricServiceRateRunning();
         val = (output.length > 0 ? output[0] : 0);               final long y01 = val.longValue();
         output = this.controller.queryMetricServerDistanceTotal();
         final int val1 = (output.length > 0 ? output[0] : 0);
@@ -749,8 +749,8 @@ public class DesktopController {
   private SwingNode lc_rates = new SwingNode();
   private SwingNode lc_times = new SwingNode();
   private String[] metric_rates = new String[] {
-  /*y01*/      "Service Rate (%, 100x)",
-  /*y02*/      "Distance Savings (%, 100x)"
+  /*y01*/      "Running Service Rate (%, 100x)",
+  /*y02*/      "Running Distance Savings (%, 100x)"
       };
   private String[] metric_distances = new String[] {
   /*y03*/      "S-Travel",

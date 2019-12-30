@@ -80,7 +80,7 @@ private Storage storage;
 private Communicator communicator;
 private Tools tools = new Tools();
 private Client client;
-private Map<Integer, Boolean> lu_seen = new HashMap<Integer, Boolean>();
+private Map<Integer, Boolean> lu_rseen = new HashMap<Integer, Boolean>();
 private String refTimeStr = "";
 @
 
@@ -203,7 +203,7 @@ reason may be database failure in [[storage]]. \\
 \textbf{Returns:} nothing.\\
 \textbf{Side Effects:} may modify [[client]] by adding objects into
 [[Client.queue]], may put new entries or modify existing entries in
-[[lu_seen]], may print to standard error if [[DEBUG]] is [[true]], or exits the JVM if
+[[lu_rseen]], may print to standard error if [[DEBUG]] is [[true]], or exits the JVM if
 failure occurs.\\
 \textbf{Throws:} nothing.\\
 \bottomrule
@@ -218,7 +218,7 @@ private Runnable RequestCollectionLoop = () -> {
     A2 = this.client.dropRequests(now - QUEUE_TIMEOUT);
     int[] output = this.storage.DBQueryRequestsQueued(now);
     for (int i = 0; i < (output.length - 6); i += 7) {
-      if (!this.lu_seen.containsKey(output[i]) || this.lu_seen.get(output[i]) == false) {
+      if (!this.lu_rseen.containsKey(output[i]) || this.lu_rseen.get(output[i]) == false) {
         this.client.addRequest(new int[] {
           output[(i + 0)],
           output[(i + 1)],
@@ -227,7 +227,7 @@ private Runnable RequestCollectionLoop = () -> {
           output[(i + 4)],
           output[(i + 5)],
           output[(i + 6)] });
-        this.lu_seen.put(output[i], true);
+        this.lu_rseen.put(output[i], true);
         A1++;
       }
     }
@@ -474,7 +474,7 @@ final boolean isKilled() {
 <<returnRequest(1)>>=
 void returnRequest(final int[] r) {
   if (this.statControllerClock - r[2] < QUEUE_TIMEOUT) {
-    this.lu_seen.put(r[0], false);
+    this.lu_rseen.put(r[0], false);
   }
 }
 @ %def returnRequest
