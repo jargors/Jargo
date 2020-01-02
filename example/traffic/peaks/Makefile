@@ -1,5 +1,5 @@
-# 'PeakExponential' Traffic Function
-_WIDGET=PeakExponential
+# 'A_PeakExponential' Traffic Function
+_WIDGET=A_PeakExponential
 _A=.
 _B=../../../jar/*
 _C=commons-math3-3.6.1.jar
@@ -24,6 +24,4 @@ jargors-traffic-$(_WIDGET)-1.0.0.jar : $(_SRC)
 	jar cvf ../$@ com
 
 clean :
-	rm -f $(_WIDGET).pdf
 	rm -rf com/
-	latexmk -f -c doc/$(_WIDGET).tex

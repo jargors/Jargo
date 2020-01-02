@@ -2,8 +2,8 @@ package com.github.jargors.traffic;
 import com.github.jargors.Traffic;
 import com.github.jargors.exceptions.VertexNotFoundException;
 import java.util.Random;
-public class PeakExponential extends Traffic {
-  public PeakExponential() {
+public class A_PeakExponential extends Traffic {
+  public A_PeakExponential() {
     super();
     this.random.setSeed(2019); // to keep reproducibility
   }
