@@ -17,6 +17,7 @@ public class Tools {
   private ConcurrentHashMap<Integer,
       ConcurrentHashMap<Integer, int[]>>    lu_edges    = new ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>>();
   private ConcurrentHashMap<Integer, int[]> lu_users    = new ConcurrentHashMap<Integer, int[]>();
+  private int[] bbox = new int[] { };
   private final double CSHIFT = Storage.CSHIFT;
   private final boolean DEBUG = "true".equals(System.getProperty("jargors.tools.debug"));
   public Tools() { }
@@ -63,6 +64,24 @@ public class Tools {
          }
   public void setRefCacheVertices(final ConcurrentHashMap<Integer, int[]> lu_vertices) {
            this.lu_vertices = lu_vertices;
+         }
+  public int[] computeBoundingBox() {
+           if (this.bbox.length == 0) {
+             int x_min = Integer.MAX_VALUE;
+             int y_min = Integer.MAX_VALUE;
+             int x_max = 0;
+             int y_max = 0;
+             for (int i : this.lu_vertices.keySet()) {
+               if (i == 0) continue;
+               final int[] coord = this.lu_vertices.get(i);
+               x_min = Math.min(x_min, coord[0]);
+               y_min = Math.min(y_min, coord[1]);
+               x_max = Math.max(x_max, coord[0]);
+               y_max = Math.max(y_max, coord[1]);
+             }
+             this.bbox = new int[] { x_min, x_max, y_min, y_max };
+           }
+           return this.bbox.clone();
          }
   public int computeDuration(final int dd, final int nu) {
            int d = (int) Math.ceil(dd/(float) nu);

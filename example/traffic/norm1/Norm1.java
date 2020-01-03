@@ -40,8 +40,8 @@ public class Norm1 extends Traffic {
   // For normalizing the density
   private double d_max = 0;
 
-  public Norm1(final int[] mbr) throws Exception {
-    super();
+  public void init() {
+    final int[] mbr = this.tools.computeBoundingBox();
     this.x_min = mbr[0];
     this.y_min = mbr[2];
     this.x_range = (mbr[1] - mbr[0]);
@@ -62,7 +62,6 @@ public class Norm1 extends Traffic {
 
   public double apply(int v1, int v2, int t) {
     final int min = t/60 % 1440;  // truncates to the latest minute of day
-    System.out.printf("min=%d\n", min);
     double x = 0;
     double y = 0;
     try {

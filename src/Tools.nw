@@ -38,6 +38,7 @@ private ConcurrentHashMap<Integer, int[]> lu_vertices = new ConcurrentHashMap<In
 private ConcurrentHashMap<Integer,
     ConcurrentHashMap<Integer, int[]>>    lu_edges    = new ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>>();
 private ConcurrentHashMap<Integer, int[]> lu_users    = new ConcurrentHashMap<Integer, int[]>();
+private int[] bbox = new int[] { };
 private final double CSHIFT = Storage.CSHIFT;
 private final boolean DEBUG = "true".equals(System.getProperty("jargors.tools.debug"));
 @
@@ -48,6 +49,30 @@ public Tools() { }
 @
 
 \section{Methods}
+
+\subsection{\texttt{computeBoundingBox}(0)}
+Even though there is already DBQueryMBR(0), the Tools class doesn't have access
+to it. So computeBoundingBox(0) is kind of a filler method.
+<<computeBoundingBox(0)>>=
+int[] computeBoundingBox() {
+  if (this.bbox.length == 0) {
+    int x_min = Integer.MAX_VALUE;
+    int y_min = Integer.MAX_VALUE;
+    int x_max = 0;
+    int y_max = 0;
+    for (int i : this.lu_vertices.keySet()) {
+      if (i == 0) continue;
+      final int[] coord = this.lu_vertices.get(i);
+      x_min = Math.min(x_min, coord[0]);
+      y_min = Math.min(y_min, coord[1]);
+      x_max = Math.max(x_max, coord[0]);
+      y_max = Math.max(y_max, coord[1]);
+    }
+    this.bbox = new int[] { x_min, x_max, y_min, y_max };
+  }
+  return this.bbox.clone();
+}
+@ %def computeBoundingBox
 
 \subsection{\texttt{computeHaversine}(4)}
 <<computeHaversine(4)>>=
