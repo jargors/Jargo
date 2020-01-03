@@ -1251,6 +1251,7 @@ public class DesktopController {
                this.traffic = (Traffic) tempcstor2.newInstance();
                this.traffic.forwardRefCacheEdges(controller.retrieveRefCacheEdges());
                this.traffic.forwardRefCacheVertices(controller.retrieveRefCacheVertices());
+               this.traffic.init();
                this.controller.forwardRefTraffic(this.traffic);
                this.ren_road.setTraffic(this.traffic);
              }
@@ -1418,6 +1419,7 @@ public class DesktopController {
                this.traffic = (Traffic) tempcstor2.newInstance();
                this.traffic.forwardRefCacheEdges(controller.retrieveRefCacheEdges());
                this.traffic.forwardRefCacheVertices(controller.retrieveRefCacheVertices());
+               this.traffic.init();
                this.controller.forwardRefTraffic(this.traffic);
                this.ren_road.setTraffic(this.traffic);
              }
