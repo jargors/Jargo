@@ -38,6 +38,7 @@ public class Controller {
   private Map<Integer, Boolean> lu_rseen = new HashMap<Integer, Boolean>();
   private Map<Integer, Boolean> lu_sseen = new HashMap<Integer, Boolean>();
   private String refTimeStr = "";
+  private long refTimeMs = 0;
   private int CLOCK_START =
       Integer.parseInt(System.getProperty("jargors.controller.clock_start", "0"));
   private int CLOCK_END =
@@ -864,6 +865,9 @@ public class Controller {
   public String getClockReference() {
            return this.refTimeStr;
          }
+  public long getClockReferenceMs() {
+           return this.refTimeMs;
+         }
   public Communicator getRefCommunicator() {
            return this.communicator;
          }
@@ -904,6 +908,11 @@ public class Controller {
              throw new IllegalArgumentException("Invalid clock reference (minute got "+minute+"; must be between [00, 59])");
            }
            this.refTimeStr = clock_reference;
+           try {
+             this.refTimeMs  = this.tools.parseClockReference(clock_reference);
+           } catch (Exception pe) {
+             throw new IllegalArgumentException("Invalid clock reference (parse failed)");
+           }
            this.statControllerClockReferenceHour= hour;
            this.statControllerClockReferenceMinute = minute;
          }

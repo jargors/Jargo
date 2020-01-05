@@ -1239,6 +1239,13 @@ String getClockReference() {
 }
 @ %def getClockReference
 
+\subsection{\texttt{getClockReferenceMs}(0)}
+<<Get: getClockReferenceMs(0)>>=
+long getClockReferenceMs() {
+  return this.refTimeMs;
+}
+@ %def getClockReferenceMs
+
 \subsection{\texttt{getRefCacheEdges}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -1368,6 +1375,11 @@ void setClockReference(final String clock_reference) throws IllegalArgumentExcep
     throw new IllegalArgumentException("Invalid clock reference (minute got "+minute+"; must be between [00, 59])");
   }
   this.refTimeStr = clock_reference;
+  try {
+    this.refTimeMs  = this.tools.parseClockReference(clock_reference);
+  } catch (Exception pe) {
+    throw new IllegalArgumentException("Invalid clock reference (parse failed)");
+  }
   this.statControllerClockReferenceHour= hour;
   this.statControllerClockReferenceMinute = minute;
 }

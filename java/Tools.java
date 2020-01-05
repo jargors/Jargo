@@ -5,11 +5,13 @@ import com.github.jargors.exceptions.VertexNotFoundException;
 import com.github.jargors.exceptions.GtreeNotLoadedException;
 import com.github.jargors.exceptions.GtreeIllegalSourceException;
 import com.github.jargors.exceptions.GtreeIllegalTargetException;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.Arrays;
-import java.time.LocalDateTime;
-import java.sql.SQLException;
 import java.io.FileNotFoundException;
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentHashMap;
 public class Tools {
   private G_Tree gtree;
   private boolean flag_gtree_loaded = false;
@@ -188,6 +190,10 @@ public class Tools {
              }
            }
            return Arrays.copyOf(temp, i);
+         }
+  public long parseClockReference (final String refTimeStr) throws ParseException {
+           SimpleDateFormat sdf = new SimpleDateFormat("hhmm");
+           return sdf.parse(refTimeStr).getTime();
          }
   public void printPath(final int[] p) {
            for (Integer i : p) {

@@ -14,8 +14,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -433,7 +431,9 @@ public class DesktopController {
               final double y2 = this.can_road.getHeight() - this.muf.getUnit()*(v2[1] - this.muf.getLatMin());
               this.gc.setStroke(DEFAULT);
               if (this.traffic != null) {
-                double x = this.traffic.apply(this.edges[i], this.edges[(i + 1)], this.controller.getClock());
+                double x = this.traffic.apply(this.edges[i], this.edges[(i + 1)],
+                    (1000*this.controller.getClock() + this.controller.getClockReferenceMs())
+                );
                 if (0.0 <= x && x <= 0.33) {
                   this.gc.setStroke(SLOW);
                 } else if (0.33 < x && x <= 0.66) {
@@ -644,12 +644,7 @@ public class DesktopController {
       this.lu_series = lu_series;
       this.ns_total = ns;
       this.nr_total = nr;
-      SimpleDateFormat sdf = new SimpleDateFormat("hhmm");
-      try {
-        this.t_ref = sdf.parse(this.controller.getClockReference()).getTime();
-      } catch (ParseException ee) {
-        ee.printStackTrace();
-      }
+      this.t_ref = this.controller.getClockReferenceMs();
     }
     public void run() {
       if (DEBUG) {

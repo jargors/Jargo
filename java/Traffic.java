@@ -13,7 +13,7 @@ public abstract class Traffic {
   public void forwardRefCacheVertices(final ConcurrentHashMap<Integer, int[]> lu_vertices) {
            this.tools.setRefCacheVertices(lu_vertices);
          }
-  public double apply(int v1, int v2, int t) {
+  public double apply(int v1, int v2, long t) {
            return 1.0;
          }
   public void init() {
