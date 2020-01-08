@@ -51,6 +51,9 @@ protected final boolean DEBUG =
 <<[[Client]] constructor>>=
 public Client() {
   <<[[Client]] register JMX monitor>>
+  if (DEBUG) {
+    System.out.printf("create Client\n");
+  }
 }
 @
 
@@ -62,6 +65,9 @@ void notifyNew() throws ClientException, ClientFatalException {
   while (!this.queue.isEmpty()) {
     long A0 = System.currentTimeMillis();
     this.handleRequest(this.queue.remove());
+    if (DEBUG) {
+      System.out.printf("handleRequest(1), arg1=[#]\n");
+    }
     <<Stats: clientHandleRequest>>
   }
 }

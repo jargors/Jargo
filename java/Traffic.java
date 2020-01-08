@@ -5,8 +5,12 @@ import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 public abstract class Traffic {
   protected Tools tools = new Tools();
-  private final boolean DEBUG = "true".equals(System.getProperty("jargors.traffic.debug"));
-  public Traffic() { }
+  protected final boolean DEBUG = "true".equals(System.getProperty("jargors.traffic.debug"));
+  public Traffic() {
+    if (DEBUG) {
+      System.out.printf("create Traffic\n");
+    }
+  }
   public void forwardRefCacheEdges(final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> lu_edges) {
            this.tools.setRefCacheEdges(lu_edges);
          }

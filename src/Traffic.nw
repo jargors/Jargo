@@ -25,19 +25,23 @@ import java.util.concurrent.ConcurrentHashMap;
 \section{Member Variables}
 <<[[Traffic]] member variables>>=
 protected Tools tools = new Tools();
-private final boolean DEBUG = "true".equals(System.getProperty("jargors.traffic.debug"));
+protected final boolean DEBUG = "true".equals(System.getProperty("jargors.traffic.debug"));
 @
 
 
 \section{Constructor}
 <<[[Traffic]] constructor>>=
-public Traffic() { }
+public Traffic() {
+  if (DEBUG) {
+    System.out.printf("create Traffic\n");
+  }
+}
 @
 
 \section{Methods}
 
 \subsection{\texttt{apply}(3)}
-Param 3 is milliseconds since start of day (12 AM midnight).
+Param 3 is seconds since start of day (12 AM midnight).
 <<apply(3)>>=
 double apply(int v1, int v2, long t) {
   return 1.0;

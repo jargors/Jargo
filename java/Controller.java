@@ -79,7 +79,6 @@ public class Controller {
     // the user the current simulation rate, i.e. clock_rate=1x means real-time,
     // clock_rate=0.5x means 1 simulated second takes 2 real seconds, etc.
     this.statControllerClock++;
-    if (DEBUG) System.out.printf("t=%d\n", this.statControllerClock);
     this.statControllerClockReferenceSecond++;
     if (this.statControllerClockReferenceSecond > 59) {
       this.statControllerClockReferenceSecond = 0;
@@ -93,6 +92,14 @@ public class Controller {
         }
       }
     }
+    if (DEBUG) {
+      System.out.printf("t=%d (day %d, %02d:%02d:%02d)\n",
+          this.statControllerClock,
+          this.statControllerClockReferenceDay,
+          this.statControllerClockReferenceHour,
+          this.statControllerClockReferenceMinute,
+          this.statControllerClockReferenceSecond);
+    }
   };
   private Runnable RequestCollectionLoop = () -> {
     long A0 = System.currentTimeMillis();
@@ -101,7 +108,13 @@ public class Controller {
     final int now = this.statControllerClock;
     try {
       A2 = this.client.dropRequests(now - QUEUE_TIMEOUT);
+      if (DEBUG) {
+        System.out.printf("drop %d requests\n", A2);
+      }
       int[] output = this.storage.DBQueryRequestsQueued(now);
+      if (DEBUG) {
+        System.out.printf("query %d unassigned requests\n", (output.length/7));
+      }
       for (int i = 0; i < (output.length - 6); i += 7) {
         if (!this.lu_rseen.containsKey(output[i]) || this.lu_rseen.get(output[i]) == false) {
           this.client.addRequest(new int[] {
@@ -115,6 +128,9 @@ public class Controller {
           this.lu_rseen.put(output[i], true);
           A1++;
         }
+      }
+      if (DEBUG) {
+        System.out.printf("add %d new requests\n", A1);
       }
     } catch (SQLException e) {
       if (e.getErrorCode() == 40000) {
@@ -148,6 +164,9 @@ public class Controller {
   private Runnable ServerLoop = () -> {
     try {
       int[] output = this.storage.DBQueryServersLocationsActive(this.statControllerClock);
+      if (DEBUG) {
+        System.out.printf("got %d servers\n", (output.length/3));
+      }
       for (int i = 0; i < (output.length - 2); i += 3) {
         if (!this.lu_sseen.containsKey(output[i])) {
           this.lu_sseen.put(output[i], true);
@@ -772,7 +791,7 @@ public class Controller {
            if (DEBUG) {
              System.out.printf("loadProblem(1), arg1=%s\n", p);
              System.out.printf("Set reference string '%s'\n", this.refTimeStr);
-             System.out.printf("Set reference millis. from epoch '%d'\n", this.refTimeMs);
+             System.out.printf("Set reference milliseconds from midnight '%d'\n", this.refTimeMs);
            }
            while (sc.hasNext()) {
              final int uid = sc.nextInt();
@@ -939,28 +958,61 @@ public class Controller {
            if (DEBUG) {
              System.out.printf("startRealtime(1)\n");
            }
+
            this.storage.setRequestTimeout(REQUEST_TIMEOUT);
+           if (DEBUG) {
+             System.out.printf("setRequestTimeout(1), arg1=%d\n", REQUEST_TIMEOUT);
+           }
+
            this.statControllerClock = CLOCK_START;
+           if (DEBUG) {
+             System.out.printf("statControllerClock=%d\n", CLOCK_START);
+           }
 
            int simulation_duration = (CLOCK_END - CLOCK_START);
+           if (DEBUG) {
+             System.out.printf("simulation_duration=%d\n", simulation_duration);
+           }
 
            this.exe = Executors.newScheduledThreadPool(5);
+           if (DEBUG) {
+             System.out.printf("newScheduledThreadPool(1), arg1=5\n");
+           }
 
            this.cb1 = exe.scheduleAtFixedRate(
              this.ClockLoop, 0, 1, TimeUnit.SECONDS);
+           if (DEBUG) {
+             System.out.printf("exe ClockLoop, delay=0, int=1\n");
+           }
 
            this.cb2 = exe.scheduleAtFixedRate(
              this.RequestCollectionLoop, this.loop_delay, REQUEST_COLLECTION_PERIOD, TimeUnit.SECONDS);
+           if (DEBUG) {
+             System.out.printf("exe RequestCollectionLoop, delay=%d, int=%d\n",
+                 this.loop_delay, REQUEST_COLLECTION_PERIOD);
+           }
 
            this.cb3 = exe.scheduleAtFixedRate(
              this.RequestHandlingLoop, this.loop_delay, REQUEST_HANDLING_PERIOD, TimeUnit.MILLISECONDS);
+           if (DEBUG) {
+             System.out.printf("exe RequestHandlingLoop, delay=%d, int=%d\n",
+                 this.loop_delay, REQUEST_HANDLING_PERIOD);
+           }
 
            this.cb4 = exe.scheduleAtFixedRate(
              this.ServerLoop, this.loop_delay, SERVER_COLLECTION_PERIOD, TimeUnit.SECONDS);
+           if (DEBUG) {
+             System.out.printf("exe ServerLoop, delay=%d, int=%d\n",
+                 this.loop_delay, SERVER_COLLECTION_PERIOD);
+           }
 
            this.exe.schedule(() -> {
              this.stop(app_cb);
            }, simulation_duration, TimeUnit.SECONDS);
+           if (DEBUG) {
+             System.out.printf("exe stop, delay=%d\n",
+                 simulation_duration);
+           }
          }
   public void startSequential(final Consumer<Boolean> app_cb) throws Exception {
            if (DEBUG) {

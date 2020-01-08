@@ -14,10 +14,14 @@ public class Norm1 extends Traffic {
   // The covariance varies by following a sinusoidal wave:
 
   private final double decay(final double hr) {
-    return (1 - (
+    double output = (1 - (
         ( (1.00*Math.sin(0.22*hr - 1.6))
         + (0.25*Math.sin(0.60*hr + 1.0)) ) + 1
-    )/2.5);
+      )/2.5);
+    if (DEBUG) {
+      System.out.printf("decay(1)=%.2f, arg1=%.2f\n", output, hr);
+    }
+    return output;
   }
 
   // speed drops to 80% at 7:30 AM, virtually 0% at 9:00 AM, starts to recover
@@ -46,6 +50,12 @@ public class Norm1 extends Traffic {
     this.y_min = mbr[2];
     this.x_range = (mbr[1] - mbr[0]);
     this.y_range = (mbr[3] - mbr[2]);
+    if (DEBUG) {
+      System.out.printf("mbr={ %d, %d, %d, %d }\n",
+        mbr[0], mbr[1], mbr[2], mbr[3]);
+      System.out.printf("x_min=%d, y_min=%d, x_range=%d, y_range=%d\n",
+        this.x_min, this.y_min, this.x_range, this.y_range);
+    }
     for (int min = 0; min < 1440; min++) {
       final double var = this.decay((double) min/60);
       this.lu_distr.put(min, new MultivariateNormalDistribution(
@@ -55,13 +65,19 @@ public class Norm1 extends Traffic {
           new double[] { 0.0, var } }
         )
       );
+      if (DEBUG) {
+        System.out.printf("put lu_distr[%d]=[#]\n", min);
+      }
       double den = this.lu_distr.get(min).density(new double[] { MU, MU });
       if (den > this.d_max) this.d_max = den;
     }
   }
 
-  public double apply(int v1, int v2, long ms) {
-    final int min = Math.toIntExact(ms/1000/60 % 1440);  // truncates to the latest minute of day
+  public double apply(int v1, int v2, long msec) {
+    final int min = Math.toIntExact(msec/1000/60 % 1440);  // truncates to the latest minute of day
+    if (DEBUG) {
+      System.out.printf("set min=%d\n", min);
+    }
     double x = 0;
     double y = 0;
     try {
@@ -73,7 +89,16 @@ public class Norm1 extends Traffic {
       return 1.0;
     }
     double output = this.lu_distr.get(min).density(new double[] { x, y });
+    if (DEBUG) {
+      System.out.printf("density(1)=%.2f, arg1={ %.2f, %.2f }\n",
+        output, x, y);
+    }
     output /= this.d_max;  // normalize
-    return Math.max(0.1, (1 - output));  // lower-bound to 10%
+    output = Math.max(0.1, (1 - output));  // lower-bound to 10%
+    if (DEBUG) {
+      System.out.printf("apply(3)=%.2f, arg1=%d, arg2=%d, arg3=%d\n",
+        output, v1, v2, msec);
+    }
+    return output;
   }
 }

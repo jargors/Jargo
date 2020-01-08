@@ -29,6 +29,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 @
 
@@ -266,7 +267,11 @@ and time is early in the morning.
 <<parseClockReference(1)>>=
 long parseClockReference (final String refTimeStr) throws ParseException {
   SimpleDateFormat sdf = new SimpleDateFormat("HHmmyyyy");
-  return sdf.parse(refTimeStr+"1971").getTime();
+  Date d = sdf.parse(refTimeStr+"1971");
+  System.out.printf("hr=%d\n", d.getHours());
+  System.out.printf("mn=%d\n", d.getMinutes());
+  // return sdf.parse(refTimeStr+"1971").getTime();
+  return d.getHours()*60*60*1000 + d.getMinutes()*60*1000;
 }
 @
 

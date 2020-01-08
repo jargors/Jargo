@@ -9140,7 +9140,6 @@ private Runnable ClockLoop = () -> \{
   // the user the current simulation rate, i.e. clock_rate=1x means real-time,
   // clock_rate=0.5x means 1 simulated second takes 2 real seconds, etc.
   this.statControllerClock++;
-  if (DEBUG) System.out.printf("t=%d\\n", this.statControllerClock);
   this.statControllerClockReferenceSecond++;
   if (this.statControllerClockReferenceSecond > 59) \{
     this.statControllerClockReferenceSecond = 0;
@@ -9153,6 +9152,14 @@ private Runnable ClockLoop = () -> \{
         this.statControllerClockReferenceDay++;
       \}
     \}
+  \}
+  if (DEBUG) \{
+    System.out.printf("t=%d (day %d, %02d:%02d:%02d)\\n",
+        this.statControllerClock,
+        this.statControllerClockReferenceDay,
+        this.statControllerClockReferenceHour,
+        this.statControllerClockReferenceMinute,
+        this.statControllerClockReferenceSecond);
   \}
 \};
 \nwendcode{}\nwbegindocs{30}\nwdocspar
@@ -9187,7 +9194,13 @@ private Runnable RequestCollectionLoop = () -> \{
   final int now = this.statControllerClock;
   try \{
     A2 = this.client.dropRequests(now - QUEUE_TIMEOUT);
+    if (DEBUG) \{
+      System.out.printf("drop %d requests\\n", A2);
+    \}
     int[] output = this.storage.DBQueryRequestsQueued(now);
+    if (DEBUG) \{
+      System.out.printf("query %d unassigned requests\\n", (output.length/7));
+    \}
     for (int i = 0; i < (output.length - 6); i += 7) \{
       if (!this.lu_rseen.containsKey(output[i]) || this.lu_rseen.get(output[i]) == false) \{
         this.client.addRequest(new int[] \{
@@ -9202,6 +9215,9 @@ private Runnable RequestCollectionLoop = () -> \{
         A1++;
       \}
     \}
+    if (DEBUG) \{
+      System.out.printf("add %d new requests\\n", A1);
+    \}
   \} catch (SQLException e) \{
     if (e.getErrorCode() == 40000) \{
       System.err.println("Warning: database connection interrupted");
@@ -9215,7 +9231,7 @@ private Runnable RequestCollectionLoop = () -> \{
   \}
   \LA{}Stats: controllerRequestCollection~{\nwtagstyle{}\subpageref{NW4N9XWl-2zQqaE-1}}\RA{}
 \};
-\nwidentuses{\\{{addRequest}{addRequest}}\\{{DBQueryRequestsQueued}{DBQueryRequestsQueued}}\\{{dropRequests}{dropRequests}}}\nwindexuse{addRequest}{addRequest}{NW2ZDXo8-10L3rI-1}\nwindexuse{DBQueryRequestsQueued}{DBQueryRequestsQueued}{NW2ZDXo8-10L3rI-1}\nwindexuse{dropRequests}{dropRequests}{NW2ZDXo8-10L3rI-1}\nwendcode{}\nwbegindocs{32}\nwdocspar
+\nwidentuses{\\{{addRequest}{addRequest}}\\{{DBQueryRequestsQueued}{DBQueryRequestsQueued}}\\{{dropRequests}{dropRequests}}\\{{query}{query}}}\nwindexuse{addRequest}{addRequest}{NW2ZDXo8-10L3rI-1}\nwindexuse{DBQueryRequestsQueued}{DBQueryRequestsQueued}{NW2ZDXo8-10L3rI-1}\nwindexuse{dropRequests}{dropRequests}{NW2ZDXo8-10L3rI-1}\nwindexuse{query}{query}{NW2ZDXo8-10L3rI-1}\nwendcode{}\nwbegindocs{32}\nwdocspar
 
 \subsection{Request Handling Loop}
 \begin{tabular}{p{\textwidth}}
@@ -9278,6 +9294,9 @@ exits the JVM if failure occurs.\\
 private Runnable ServerLoop = () -> \{
   try \{
     int[] output = this.storage.DBQueryServersLocationsActive(this.statControllerClock);
+    if (DEBUG) \{
+      System.out.printf("got %d servers\\n", (output.length/3));
+    \}
     for (int i = 0; i < (output.length - 2); i += 3) \{
       if (!this.lu_sseen.containsKey(output[i])) \{
         this.lu_sseen.put(output[i], true);
@@ -9422,7 +9441,7 @@ throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException, SQL
   if (DEBUG) \{
     System.out.printf("loadProblem(1), arg1=%s\\n", p);
     System.out.printf("Set reference string '%s'\\n", this.refTimeStr);
-    System.out.printf("Set reference millis. from epoch '%d'\\n", this.refTimeMs);
+    System.out.printf("Set reference milliseconds from midnight '%d'\\n", this.refTimeMs);
   \}
   while (sc.hasNext()) \{
     final int uid = sc.nextInt();
@@ -9463,28 +9482,61 @@ void startRealtime(final Consumer<Boolean> app_cb) \{
   if (DEBUG) \{
     System.out.printf("startRealtime(1)\\n");
   \}
+
   this.storage.setRequestTimeout(REQUEST_TIMEOUT);
+  if (DEBUG) \{
+    System.out.printf("setRequestTimeout(1), arg1=%d\\n", REQUEST_TIMEOUT);
+  \}
+
   this.statControllerClock = CLOCK_START;
+  if (DEBUG) \{
+    System.out.printf("statControllerClock=%d\\n", CLOCK_START);
+  \}
 
   int simulation_duration = (CLOCK_END - CLOCK_START);
+  if (DEBUG) \{
+    System.out.printf("simulation_duration=%d\\n", simulation_duration);
+  \}
 
   this.exe = Executors.newScheduledThreadPool(5);
+  if (DEBUG) \{
+    System.out.printf("newScheduledThreadPool(1), arg1=5\\n");
+  \}
 
   this.cb1 = exe.scheduleAtFixedRate(
     this.ClockLoop, 0, 1, TimeUnit.SECONDS);
+  if (DEBUG) \{
+    System.out.printf("exe ClockLoop, delay=0, int=1\\n");
+  \}
 
   this.cb2 = exe.scheduleAtFixedRate(
     this.RequestCollectionLoop, this.loop_delay, REQUEST_COLLECTION_PERIOD, TimeUnit.SECONDS);
+  if (DEBUG) \{
+    System.out.printf("exe RequestCollectionLoop, delay=%d, int=%d\\n",
+        this.loop_delay, REQUEST_COLLECTION_PERIOD);
+  \}
 
   this.cb3 = exe.scheduleAtFixedRate(
     this.RequestHandlingLoop, this.loop_delay, REQUEST_HANDLING_PERIOD, TimeUnit.MILLISECONDS);
+  if (DEBUG) \{
+    System.out.printf("exe RequestHandlingLoop, delay=%d, int=%d\\n",
+        this.loop_delay, REQUEST_HANDLING_PERIOD);
+  \}
 
   this.cb4 = exe.scheduleAtFixedRate(
     this.ServerLoop, this.loop_delay, SERVER_COLLECTION_PERIOD, TimeUnit.SECONDS);
+  if (DEBUG) \{
+    System.out.printf("exe ServerLoop, delay=%d, int=%d\\n",
+        this.loop_delay, SERVER_COLLECTION_PERIOD);
+  \}
 
   this.exe.schedule(() -> \{
     this.stop(app_cb);
   \}, simulation_duration, TimeUnit.SECONDS);
+  if (DEBUG) \{
+    System.out.printf("exe stop, delay=%d\\n",
+        simulation_duration);
+  \}
 \}
 \nwindexdefn{startRealtime}{startRealtime}{NW2ZDXo8-1dNtp8-1}\eatline
 \nwidentdefs{\\{{startRealtime}{startRealtime}}}\nwidentuses{\\{{setRequestTimeout}{setRequestTimeout}}\\{{stop}{stop}}}\nwindexuse{setRequestTimeout}{setRequestTimeout}{NW2ZDXo8-1dNtp8-1}\nwindexuse{stop}{stop}{NW2ZDXo8-1dNtp8-1}\nwendcode{}\nwbegindocs{60}\nwdocspar
@@ -9671,6 +9723,9 @@ protected final boolean DEBUG =
 \nwenddocs{}\nwbegincode{11}\sublabel{NW2q3QGT-2crckK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2q3QGT-2crckK-1}}}\moddef{\code{}Client\edoc{} constructor~{\nwtagstyle{}\subpageref{NW2q3QGT-2crckK-1}}}\endmoddef\nwused{\\{NW2q3QGT-bpC9O-1}}
 public Client() \{
   \LA{}\code{}Client\edoc{} register JMX monitor~{\nwtagstyle{}\subpageref{NW4N9XWl-3LVQBe-1}}\RA{}
+  if (DEBUG) \{
+    System.out.printf("create Client\\n");
+  \}
 \}
 \nwendcode{}\nwbegindocs{12}\nwdocspar
 
@@ -9682,6 +9737,9 @@ void notifyNew() throws ClientException, ClientFatalException \{
   while (!this.queue.isEmpty()) \{
     long A0 = System.currentTimeMillis();
     this.handleRequest(this.queue.remove());
+    if (DEBUG) \{
+      System.out.printf("handleRequest(1), arg1=[#]\\n");
+    \}
     \LA{}Stats: clientHandleRequest~{\nwtagstyle{}\subpageref{NW4N9XWl-30b7Xg-1}}\RA{}
   \}
 \}
@@ -9808,19 +9866,23 @@ import java.util.concurrent.ConcurrentHashMap;
 \section{Member Variables}
 \nwenddocs{}\nwbegincode{5}\sublabel{NW24od5B-1j90we-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-1j90we-1}}}\moddef{\code{}Traffic\edoc{} member variables~{\nwtagstyle{}\subpageref{NW24od5B-1j90we-1}}}\endmoddef\nwused{\\{NW24od5B-2eR0nK-1}}
 protected Tools tools = new Tools();
-private final boolean DEBUG = "true".equals(System.getProperty("jargors.traffic.debug"));
+protected final boolean DEBUG = "true".equals(System.getProperty("jargors.traffic.debug"));
 \nwendcode{}\nwbegindocs{6}\nwdocspar
 
 
 \section{Constructor}
 \nwenddocs{}\nwbegincode{7}\sublabel{NW24od5B-4V88df-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-4V88df-1}}}\moddef{\code{}Traffic\edoc{} constructor~{\nwtagstyle{}\subpageref{NW24od5B-4V88df-1}}}\endmoddef\nwused{\\{NW24od5B-2eR0nK-1}}
-public Traffic() \{ \}
+public Traffic() \{
+  if (DEBUG) \{
+    System.out.printf("create Traffic\\n");
+  \}
+\}
 \nwendcode{}\nwbegindocs{8}\nwdocspar
 
 \section{Methods}
 
 \subsection{\texttt{apply}(3)}
-Param 3 is milliseconds since start of day (12 AM midnight).
+Param 3 is seconds since start of day (12 AM midnight).
 \nwenddocs{}\nwbegincode{9}\sublabel{NW24od5B-14vbUh-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW24od5B-14vbUh-1}}}\moddef{apply(3)~{\nwtagstyle{}\subpageref{NW24od5B-14vbUh-1}}}\endmoddef\nwused{\\{NW1pDwO-1sp72R-3}}
 double apply(int v1, int v2, long t) \{
   return 1.0;
@@ -9866,6 +9928,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 \nwendcode{}\nwbegindocs{4}\nwdocspar
 
@@ -10103,7 +10166,11 @@ and time is early in the morning.
 \nwenddocs{}\nwbegincode{27}\sublabel{NW3zOIuJ-2ylLYV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-2ylLYV-1}}}\moddef{parseClockReference(1)~{\nwtagstyle{}\subpageref{NW3zOIuJ-2ylLYV-1}}}\endmoddef\nwused{\\{NW1pDwO-3QhyAk-3}}
 long parseClockReference (final String refTimeStr) throws ParseException \{
   SimpleDateFormat sdf = new SimpleDateFormat("HHmmyyyy");
-  return sdf.parse(refTimeStr+"1971").getTime();
+  Date d = sdf.parse(refTimeStr+"1971");
+  System.out.printf("hr=%d\\n", d.getHours());
+  System.out.printf("mn=%d\\n", d.getMinutes());
+  // return sdf.parse(refTimeStr+"1971").getTime();
+  return d.getHours()*60*60*1000 + d.getMinutes()*60*1000;
 \}
 \nwendcode{}\nwbegindocs{28}\nwdocspar
 

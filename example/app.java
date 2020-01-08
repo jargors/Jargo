@@ -13,36 +13,49 @@ import java.io.FileNotFoundException;
 import java.sql.SQLException;
 public class app {
   public static void main(String[] args) throws Exception {
-    if (args.length != 6) {
-      System.out.println("usage: ['seq' | 'real'] ['grins'] ['none', 'random'] [*.rnet] [*.gtree] [*.instance]");
-      System.exit(0);
-    }
     Client client = null;
     Traffic traffic = null;
     boolean hasTraf = true;
+
+    if (args.length != 6) {
+      System.out.println("usage: ['seq' | 'real'] ['grins' | 'grins-d'] ['none', 'random', 'norm1'] [*.rnet] [*.gtree] [*.instance]");
+      System.exit(0);
+    }
+
+    // Set algorithm
     if (args[1].equals("grins")) {
       client = new GreedyInsertion();
+      System.out.println("set client GreedyInsertion");
+    } else if (args[1].equals("grins-d")) {
+      client = new GreedyDelta();
+      System.out.println("set client GreedyDelta");
     } else {
       System.out.println("Unknown client '"+args[1]+"'");
       System.exit(0);
     }
+
+    // Set traffic
     if (args[2].equals("none")) {
       hasTraf = false;
-    }
-    else if (args[2].equals("random")) {
+    } else if (args[2].equals("random")) {
       traffic = new RandomTraffic();
+    } else if (args[2].equals("norm1")) {
+      traffic = new Norm1();
     } else {
       System.out.println("Uknown traffic '"+args[2]+"'");
       System.exit(0);
     }
+
+    // Initialize Jargo
     try {
       Controller controller = new Controller();
-      controller.setClockReference("1800");
+      controller.instanceNew();
+      controller.instanceInitialize();
       controller.setRefClient(client);
-      controller.forwardRefCommunicator(controller.getRefCommunicator());//*wrap into Controller.setRefClient?
-      if (hasTraf) {
-        controller.forwardRefTraffic(traffic);
-      }
+      controller.forwardRefCommunicator(controller.getRefCommunicator());
+      client.forwardRefCacheVertices(controller.retrieveRefCacheVertices());
+      client.forwardRefCacheEdges(controller.retrieveRefCacheEdges());
+      client.forwardRefCacheUsers(controller.retrieveRefCacheUsers());
       try {
         controller.gtreeLoad(args[4]);
         client.gtreeLoad(args[4]);//*wrap into Controller.gtreeLoad?
@@ -51,10 +64,6 @@ public class app {
         e.printStackTrace();
         System.exit(1);
       }
-
-      controller.instanceNew();
-      controller.instanceInitialize();//*wrap into instanceNew?
-
       try {
         controller.loadRoadNetworkFromFile(args[3]);
       } catch (FileNotFoundException e) {
@@ -62,7 +71,6 @@ public class app {
         e.printStackTrace();
         System.exit(1);
       }
-
       try {
         controller.loadProblem(args[5]);
       } catch (FileNotFoundException e) {
@@ -90,11 +98,12 @@ public class app {
         e.printStackTrace();
         System.exit(1);
       }
-
-     //*wrap into setRefClient?
-      client.forwardRefCacheVertices(controller.retrieveRefCacheVertices());
-      client.forwardRefCacheEdges(controller.retrieveRefCacheEdges());
-      client.forwardRefCacheUsers(controller.retrieveRefCacheUsers());
+      if (hasTraf) {
+        traffic.forwardRefCacheEdges(controller.retrieveRefCacheEdges());
+        traffic.forwardRefCacheVertices(controller.retrieveRefCacheVertices());
+        traffic.init();
+        controller.forwardRefTraffic(traffic);
+      }
 
       // controller.instanceExport("db");
       // System.exit(1);
@@ -207,9 +216,9 @@ public class app {
             System.out.printf("%-54s%10d\n", "Request time window violations (total sec.):", rtw_sum);
             System.out.printf("%-54s%10d\n", "Request time window violations (total #):", rtw_count);
             System.out.printf("%-54s%10.2f\n", "Request time window violations (avg sec./req.):", rtw_avg);
-          } catch (SQLException e1) {
+          } catch (Exception e1) {
             System.err.println("Something bad happened");
-            Tools.PrintSQLException(e1);
+            e1.printStackTrace();
             System.exit(1);
           }
         });
@@ -217,9 +226,9 @@ public class app {
         System.out.println("Unknown mode '"+args[0]+"'");
         System.exit(0);
       }
-    } catch (SQLException e2) {
+    } catch (Exception e2) {
       System.err.println("Something bad happened");
-      Tools.PrintSQLException(e2);
+      e2.printStackTrace();
       System.exit(1);
     }
   }

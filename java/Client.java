@@ -27,6 +27,9 @@ public abstract class Client {
       System.err.printf("ClientMonitor failed; reason: %s\n", e.toString());
       System.err.printf("Continuing with monitoring disabled\n");
     }
+    if (DEBUG) {
+      System.out.printf("create Client\n");
+    }
   }
   public long getStatClientHandleRequestDur() {
            return this.statClientHandleRequestDur;
@@ -67,6 +70,9 @@ public abstract class Client {
                  while (!this.queue.isEmpty()) {
                    long A0 = System.currentTimeMillis();
                    this.handleRequest(this.queue.remove());
+                   if (DEBUG) {
+                     System.out.printf("handleRequest(1), arg1=[#]\n");
+                   }
                    this.statClientHandleRequestDur = (System.currentTimeMillis() - A0);
                  }
                }

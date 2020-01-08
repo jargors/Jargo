@@ -15,13 +15,14 @@ java \
     -Djava.library.path=../deps \
     -Dderby.language.statementCacheSize=200 \
     -Dderby.locks.deadlockTrace=false \
-    -Dderby.locks.monitor=false \
+    -Dderby.locks.monitor=true \
     -Dderby.storage.pageCacheSize=8000 \
-    -Djargors.storage.debug=false \
+    -Djargors.storage.debug=true \
     -Djargors.controller.debug=true \
     -Djargors.controller.clock_start=0 \
     -Djargors.controller.clock_end=1800 \
     -Djargors.client.debug=false \
+    -Djargors.traffic.debug=true \
     -cp $_CLASSPATH:$DERBY_PATH/derby.jar \
 app $@
 
