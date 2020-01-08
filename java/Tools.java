@@ -192,8 +192,8 @@ public class Tools {
            return Arrays.copyOf(temp, i);
          }
   public long parseClockReference (final String refTimeStr) throws ParseException {
-           SimpleDateFormat sdf = new SimpleDateFormat("hhmm");
-           return sdf.parse(refTimeStr).getTime();
+           SimpleDateFormat sdf = new SimpleDateFormat("HHmmyyyy");
+           return sdf.parse(refTimeStr+"1971").getTime();
          }
   public void printPath(final int[] p) {
            for (Integer i : p) {

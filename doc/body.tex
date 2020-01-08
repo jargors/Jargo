@@ -9417,11 +9417,13 @@ try \{
 void loadProblem(String p)
 throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException, SQLException,
        GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException \{
-  if (DEBUG) \{
-    System.out.printf("loadProblem(1), arg1=%s\\n", p);
-  \}
   Scanner sc = new Scanner(new File(p));
   \LA{}Read header rows~{\nwtagstyle{}\subpageref{NW2ZDXo8-1LCWAy-1}}\RA{}
+  if (DEBUG) \{
+    System.out.printf("loadProblem(1), arg1=%s\\n", p);
+    System.out.printf("Set reference string '%s'\\n", this.refTimeStr);
+    System.out.printf("Set reference millis. from epoch '%d'\\n", this.refTimeMs);
+  \}
   while (sc.hasNext()) \{
     final int uid = sc.nextInt();
     final int  uo = sc.nextInt();
@@ -10094,11 +10096,14 @@ throws VertexNotFoundException \{
 \nwindexdefn{filterByHaversine}{filterByHaversine}{NW3zOIuJ-3xPljQ-1}\eatline
 \nwidentdefs{\\{{filterByHaversine}{filterByHaversine}}}\nwidentuses{\\{{computeHaversine}{computeHaversine}}}\nwindexuse{computeHaversine}{computeHaversine}{NW3zOIuJ-3xPljQ-1}\nwendcode{}\nwbegindocs{26}\nwdocspar
 \subsection{\texttt{parseClockReference}(1)}
-Given a time string in "hhmm" format, returns milliseconds since Epoch.
+Given a time string in "hhmm" format, returns milliseconds since Epoch.  We
+force the year to 1971 so the return is always positive value. Due to timezone,
+if left default 1970, the return value can be negative if timezone is China
+and time is early in the morning.
 \nwenddocs{}\nwbegincode{27}\sublabel{NW3zOIuJ-2ylLYV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-2ylLYV-1}}}\moddef{parseClockReference(1)~{\nwtagstyle{}\subpageref{NW3zOIuJ-2ylLYV-1}}}\endmoddef\nwused{\\{NW1pDwO-3QhyAk-3}}
 long parseClockReference (final String refTimeStr) throws ParseException \{
-  SimpleDateFormat sdf = new SimpleDateFormat("hhmm");
-  return sdf.parse(refTimeStr).getTime();
+  SimpleDateFormat sdf = new SimpleDateFormat("HHmmyyyy");
+  return sdf.parse(refTimeStr+"1971").getTime();
 \}
 \nwendcode{}\nwbegindocs{28}\nwdocspar
 
@@ -10783,17 +10788,14 @@ private class FetcherOfRequests implements Runnable \{
 \nwenddocs{}\nwbegincode{29}\sublabel{NWn0bN8-2iHsHO-9}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-9}}}\moddef{\code{}DesktopController\edoc{} member variables~{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-1}}}\plusendmoddef
 private class FetcherOfLocations implements Runnable \{
   private Controller controller = null;
-  private Label lbl_status = null;
   private FetcherOfMapUnits muf = null;
   private Map<Integer, double[]> buffer = new HashMap<Integer, double[]>();
   private RendererOfServers renderer = null;
   public FetcherOfLocations(
       final Controller controller,
-      final Label lbl_status,
       final FetcherOfMapUnits muf,
       final RendererOfServers renderer) \{
     this.controller = controller;
-    this.lbl_status = lbl_status;
     this.muf = muf;
     this.renderer = renderer;
   \}
@@ -10854,9 +10856,6 @@ if (sid == 1) System.out.printf("%d %d\\n%d %d\\n%d %d\\n",
     \} catch (Exception ee) \{
       ee.printStackTrace();
     \}
-    Platform.runLater(() -> \{
-      this.lbl_status.setText("Refresh server locations (t="+t+")");
-    \});
   \}
 \}
 \nwidentuses{\\{{getClock}{getClock}}\\{{queryServerRouteActive}{queryServerRouteActive}}\\{{queryServersActive}{queryServersActive}}\\{{queryVertex}{queryVertex}}}\nwindexuse{getClock}{getClock}{NWn0bN8-2iHsHO-9}\nwindexuse{queryServerRouteActive}{queryServerRouteActive}{NWn0bN8-2iHsHO-9}\nwindexuse{queryServersActive}{queryServersActive}{NWn0bN8-2iHsHO-9}\nwindexuse{queryVertex}{queryVertex}{NWn0bN8-2iHsHO-9}\nwendcode{}\nwbegindocs{30}\nwdocspar
@@ -10864,6 +10863,7 @@ if (sid == 1) System.out.printf("%d %d\\n%d %d\\n%d %d\\n",
 \nwenddocs{}\nwbegincode{31}\sublabel{NWn0bN8-2iHsHO-A}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-A}}}\moddef{\code{}DesktopController\edoc{} member variables~{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-1}}}\plusendmoddef
 private class FetcherOfMetrics implements Runnable \{
   private Controller controller = null;
+  private Label lbl_status = null;
   private ConcurrentHashMap<String, SimpleXYChartSupport> lu_series = null;
   private long A0 = 0;
   private long t_ref = 0;
@@ -10873,10 +10873,12 @@ private class FetcherOfMetrics implements Runnable \{
   private int nr = 0;
   public FetcherOfMetrics(
       final Controller controller,
+      final Label lbl_status,
       final ConcurrentHashMap<String, SimpleXYChartSupport> lu_series,
       final int ns,
       final int nr) \{
     this.controller = controller;
+    this.lbl_status = lbl_status;
     this.lu_series = lu_series;
     this.ns_total = ns;
     this.nr_total = nr;
@@ -10887,6 +10889,14 @@ private class FetcherOfMetrics implements Runnable \{
       this.A0 = System.currentTimeMillis();
     \}
     final int t = this.controller.getClock();
+    final int day = this.controller.getStatControllerClockReferenceDay();
+    final int hr = this.controller.getStatControllerClockReferenceHour();
+    final int min = this.controller.getStatControllerClockReferenceMinute();
+    final int sec = this.controller.getStatControllerClockReferenceSecond();
+    Platform.runLater(() -> \{
+      this.lbl_status.setText("Collect metrics (t="+t+") "
+        +"(day "+day+" "+hr+":"+min+":"+sec+")");
+    \});
     try \{
       this.ns = this.controller.queryServersCountAppeared()[0];
       this.nr = this.controller.queryRequestsCountAppeared()[0];
@@ -10952,7 +10962,7 @@ private class FetcherOfMetrics implements Runnable \{
     \}
   \}
 \}
-\nwidentuses{\\{{getClock}{getClock}}\\{{getClockReferenceMs}{getClockReferenceMs}}\\{{queryRequestsCountAppeared}{queryRequestsCountAppeared}}\\{{queryServersCountAppeared}{queryServersCountAppeared}}}\nwindexuse{getClock}{getClock}{NWn0bN8-2iHsHO-A}\nwindexuse{getClockReferenceMs}{getClockReferenceMs}{NWn0bN8-2iHsHO-A}\nwindexuse{queryRequestsCountAppeared}{queryRequestsCountAppeared}{NWn0bN8-2iHsHO-A}\nwindexuse{queryServersCountAppeared}{queryServersCountAppeared}{NWn0bN8-2iHsHO-A}\nwendcode{}\nwbegindocs{32}\nwdocspar
+\nwidentuses{\\{{getClock}{getClock}}\\{{getClockReferenceMs}{getClockReferenceMs}}\\{{getStatControllerClockReferenceDay}{getStatControllerClockReferenceDay}}\\{{getStatControllerClockReferenceHour}{getStatControllerClockReferenceHour}}\\{{getStatControllerClockReferenceMinute}{getStatControllerClockReferenceMinute}}\\{{getStatControllerClockReferenceSecond}{getStatControllerClockReferenceSecond}}\\{{queryRequestsCountAppeared}{queryRequestsCountAppeared}}\\{{queryServersCountAppeared}{queryServersCountAppeared}}}\nwindexuse{getClock}{getClock}{NWn0bN8-2iHsHO-A}\nwindexuse{getClockReferenceMs}{getClockReferenceMs}{NWn0bN8-2iHsHO-A}\nwindexuse{getStatControllerClockReferenceDay}{getStatControllerClockReferenceDay}{NWn0bN8-2iHsHO-A}\nwindexuse{getStatControllerClockReferenceHour}{getStatControllerClockReferenceHour}{NWn0bN8-2iHsHO-A}\nwindexuse{getStatControllerClockReferenceMinute}{getStatControllerClockReferenceMinute}{NWn0bN8-2iHsHO-A}\nwindexuse{getStatControllerClockReferenceSecond}{getStatControllerClockReferenceSecond}{NWn0bN8-2iHsHO-A}\nwindexuse{queryRequestsCountAppeared}{queryRequestsCountAppeared}{NWn0bN8-2iHsHO-A}\nwindexuse{queryServersCountAppeared}{queryServersCountAppeared}{NWn0bN8-2iHsHO-A}\nwendcode{}\nwbegindocs{32}\nwdocspar
 
 \subsection{Charts}
 \nwenddocs{}\nwbegincode{33}\sublabel{NWn0bN8-2iHsHO-B}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-B}}}\moddef{\code{}DesktopController\edoc{} member variables~{\nwtagstyle{}\subpageref{NWn0bN8-2iHsHO-1}}}\plusendmoddef
@@ -11892,13 +11902,13 @@ void actionStartSequential(final ActionEvent e) \{
     \}
   \}, 0, TimeUnit.SECONDS);
   this.cbFetcherOfMetrics = this.exe.scheduleAtFixedRate(
-      new FetcherOfMetrics(this.controller, this.lu_series, this.ns, this.nr), 0, 1, TimeUnit.SECONDS);
+      new FetcherOfMetrics(this.controller, this.lbl_status, this.lu_series, this.ns, this.nr), 0, 1, TimeUnit.SECONDS);
   this.cbFetcherOfRequests = this.exe.scheduleAtFixedRate(
       new FetcherOfRequests(
         this.controller, this.muf, this.ren_requests), 0, 1, TimeUnit.SECONDS);
   this.cbFetcherOfLocations = this.exe.scheduleAtFixedRate(
       new FetcherOfLocations(
-        this.controller, this.lbl_status, this.muf, this.ren_servers), 0, 1, TimeUnit.SECONDS);
+        this.controller, this.muf, this.ren_servers), 0, 1, TimeUnit.SECONDS);
 \}
 \nwindexdefn{actionStartSequential}{actionStartSequential}{NWn0bN8-2DyoOl-1}\eatline
 \nwidentdefs{\\{{actionStartSequential}{actionStartSequential}}}\nwidentuses{\\{{setClockEnd}{setClockEnd}}\\{{setClockStart}{setClockStart}}\\{{startSequential}{startSequential}}}\nwindexuse{setClockEnd}{setClockEnd}{NWn0bN8-2DyoOl-1}\nwindexuse{setClockStart}{setClockStart}{NWn0bN8-2DyoOl-1}\nwindexuse{startSequential}{startSequential}{NWn0bN8-2DyoOl-1}\nwendcode{}\nwbegindocs{122}\nwdocspar
@@ -11942,13 +11952,13 @@ void actionStartRealtime(final ActionEvent e) \{
     \}
   \}, 0, TimeUnit.SECONDS);
   this.cbFetcherOfMetrics = this.exe.scheduleAtFixedRate(
-      new FetcherOfMetrics(this.controller, this.lu_series, this.ns, this.nr), 0, 1, TimeUnit.SECONDS);
+      new FetcherOfMetrics(this.controller, this.lbl_status, this.lu_series, this.ns, this.nr), 0, 1, TimeUnit.SECONDS);
   this.cbFetcherOfRequests = this.exe.scheduleAtFixedRate(
       new FetcherOfRequests(
         this.controller, this.muf, this.ren_requests), 0, 1, TimeUnit.SECONDS);
   this.cbFetcherOfLocations = this.exe.scheduleAtFixedRate(
       new FetcherOfLocations(
-        this.controller, this.lbl_status, this.muf, this.ren_servers), 0, 1, TimeUnit.SECONDS);
+        this.controller, this.muf, this.ren_servers), 0, 1, TimeUnit.SECONDS);
 \}
 \nwindexdefn{actionStartRealtime}{actionStartRealtime}{NWn0bN8-1u3CLd-1}\eatline
 \nwidentdefs{\\{{actionStartRealtime}{actionStartRealtime}}}\nwidentuses{\\{{setClockEnd}{setClockEnd}}\\{{setClockStart}{setClockStart}}\\{{startRealtime}{startRealtime}}}\nwindexuse{setClockEnd}{setClockEnd}{NWn0bN8-1u3CLd-1}\nwindexuse{setClockStart}{setClockStart}{NWn0bN8-1u3CLd-1}\nwindexuse{startRealtime}{startRealtime}{NWn0bN8-1u3CLd-1}\nwendcode{}\nwbegindocs{124}\nwdocspar

@@ -61,8 +61,7 @@ public class Norm1 extends Traffic {
   }
 
   public double apply(int v1, int v2, long ms) {
-    int t = (int) (ms/1000);
-    final int min = t/60 % 1440;  // truncates to the latest minute of day
+    final int min = Math.toIntExact(ms/1000/60 % 1440);  // truncates to the latest minute of day
     double x = 0;
     double y = 0;
     try {

@@ -259,11 +259,14 @@ throws VertexNotFoundException {
 @ %def filterByHaversine
 
 \subsection{\texttt{parseClockReference}(1)}
-Given a time string in "hhmm" format, returns milliseconds since Epoch.
+Given a time string in "hhmm" format, returns milliseconds since Epoch.  We
+force the year to 1971 so the return is always positive value. Due to timezone,
+if left default 1970, the return value can be negative if timezone is China
+and time is early in the morning.
 <<parseClockReference(1)>>=
 long parseClockReference (final String refTimeStr) throws ParseException {
-  SimpleDateFormat sdf = new SimpleDateFormat("hhmm");
-  return sdf.parse(refTimeStr).getTime();
+  SimpleDateFormat sdf = new SimpleDateFormat("HHmmyyyy");
+  return sdf.parse(refTimeStr+"1971").getTime();
 }
 @
 

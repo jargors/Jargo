@@ -756,9 +756,6 @@ public class Controller {
   public void loadProblem(String p)
          throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException, SQLException,
                 GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException {
-           if (DEBUG) {
-             System.out.printf("loadProblem(1), arg1=%s\n", p);
-           }
            Scanner sc = new Scanner(new File(p));
            System.out.println(sc.next());
            System.out.println(sc.next());
@@ -772,6 +769,11 @@ public class Controller {
            System.out.println(sc.next());
            System.out.println(sc.next());
            System.out.println(sc.next());
+           if (DEBUG) {
+             System.out.printf("loadProblem(1), arg1=%s\n", p);
+             System.out.printf("Set reference string '%s'\n", this.refTimeStr);
+             System.out.printf("Set reference millis. from epoch '%d'\n", this.refTimeMs);
+           }
            while (sc.hasNext()) {
              final int uid = sc.nextInt();
              final int  uo = sc.nextInt();

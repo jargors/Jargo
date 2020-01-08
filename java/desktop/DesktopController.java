@@ -550,17 +550,14 @@ public class DesktopController {
   }
   private class FetcherOfLocations implements Runnable {
     private Controller controller = null;
-    private Label lbl_status = null;
     private FetcherOfMapUnits muf = null;
     private Map<Integer, double[]> buffer = new HashMap<Integer, double[]>();
     private RendererOfServers renderer = null;
     public FetcherOfLocations(
         final Controller controller,
-        final Label lbl_status,
         final FetcherOfMapUnits muf,
         final RendererOfServers renderer) {
       this.controller = controller;
-      this.lbl_status = lbl_status;
       this.muf = muf;
       this.renderer = renderer;
     }
@@ -621,13 +618,11 @@ public class DesktopController {
       } catch (Exception ee) {
         ee.printStackTrace();
       }
-      Platform.runLater(() -> {
-        this.lbl_status.setText("Refresh server locations (t="+t+")");
-      });
     }
   }
   private class FetcherOfMetrics implements Runnable {
     private Controller controller = null;
+    private Label lbl_status = null;
     private ConcurrentHashMap<String, SimpleXYChartSupport> lu_series = null;
     private long A0 = 0;
     private long t_ref = 0;
@@ -637,10 +632,12 @@ public class DesktopController {
     private int nr = 0;
     public FetcherOfMetrics(
         final Controller controller,
+        final Label lbl_status,
         final ConcurrentHashMap<String, SimpleXYChartSupport> lu_series,
         final int ns,
         final int nr) {
       this.controller = controller;
+      this.lbl_status = lbl_status;
       this.lu_series = lu_series;
       this.ns_total = ns;
       this.nr_total = nr;
@@ -651,6 +648,14 @@ public class DesktopController {
         this.A0 = System.currentTimeMillis();
       }
       final int t = this.controller.getClock();
+      final int day = this.controller.getStatControllerClockReferenceDay();
+      final int hr = this.controller.getStatControllerClockReferenceHour();
+      final int min = this.controller.getStatControllerClockReferenceMinute();
+      final int sec = this.controller.getStatControllerClockReferenceSecond();
+      Platform.runLater(() -> {
+        this.lbl_status.setText("Collect metrics (t="+t+") "
+          +"(day "+day+" "+hr+":"+min+":"+sec+")");
+      });
       try {
         this.ns = this.controller.queryServersCountAppeared()[0];
         this.nr = this.controller.queryRequestsCountAppeared()[0];
@@ -1356,13 +1361,13 @@ public class DesktopController {
              }
            }, 0, TimeUnit.SECONDS);
            this.cbFetcherOfMetrics = this.exe.scheduleAtFixedRate(
-               new FetcherOfMetrics(this.controller, this.lu_series, this.ns, this.nr), 0, 1, TimeUnit.SECONDS);
+               new FetcherOfMetrics(this.controller, this.lbl_status, this.lu_series, this.ns, this.nr), 0, 1, TimeUnit.SECONDS);
            this.cbFetcherOfRequests = this.exe.scheduleAtFixedRate(
                new FetcherOfRequests(
                  this.controller, this.muf, this.ren_requests), 0, 1, TimeUnit.SECONDS);
            this.cbFetcherOfLocations = this.exe.scheduleAtFixedRate(
                new FetcherOfLocations(
-                 this.controller, this.lbl_status, this.muf, this.ren_servers), 0, 1, TimeUnit.SECONDS);
+                 this.controller, this.muf, this.ren_servers), 0, 1, TimeUnit.SECONDS);
          }
   public void actionStartSequential(final ActionEvent e) {
            this.clientclass = this.tf_client.getText();
@@ -1524,13 +1529,13 @@ public class DesktopController {
              }
            }, 0, TimeUnit.SECONDS);
            this.cbFetcherOfMetrics = this.exe.scheduleAtFixedRate(
-               new FetcherOfMetrics(this.controller, this.lu_series, this.ns, this.nr), 0, 1, TimeUnit.SECONDS);
+               new FetcherOfMetrics(this.controller, this.lbl_status, this.lu_series, this.ns, this.nr), 0, 1, TimeUnit.SECONDS);
            this.cbFetcherOfRequests = this.exe.scheduleAtFixedRate(
                new FetcherOfRequests(
                  this.controller, this.muf, this.ren_requests), 0, 1, TimeUnit.SECONDS);
            this.cbFetcherOfLocations = this.exe.scheduleAtFixedRate(
                new FetcherOfLocations(
-                 this.controller, this.lbl_status, this.muf, this.ren_servers), 0, 1, TimeUnit.SECONDS);
+                 this.controller, this.muf, this.ren_servers), 0, 1, TimeUnit.SECONDS);
          }
   public void actionStop(final ActionEvent e) {
            Platform.runLater(() -> {
