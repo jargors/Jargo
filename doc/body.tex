@@ -8773,8 +8773,9 @@ void GTGtreeLoad(final String p) throws FileNotFoundException \{
     System.exit(1);
   \}
   if (p.length() > 0) \{
-    gtreeJNI.load(p);
-    this.gtree = gtreeJNI.get();
+    gtreeJNI.setIndex_path(p);
+    this.gtree = new GTree();
+    gtreeJNI.read_GTree(gtree);
     this.flag_gtree_loaded = true;
   \} else \{
     throw new FileNotFoundException("Bad path to gtree");
@@ -9916,7 +9917,9 @@ shortest paths.
 The preamble declares the package and imports dependencies.
 \nwenddocs{}\nwbegincode{3}\sublabel{NW3zOIuJ-1ANZ96-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-1ANZ96-1}}}\moddef{Tools.java preamble~{\nwtagstyle{}\subpageref{NW3zOIuJ-1ANZ96-1}}}\endmoddef\nwused{\\{NW3zOIuJ-2Vh5vZ-1}}
 package com.github.jargors;
-import com.github.jargors.gtreeJNI.*;
+import com.github.jargors.gtree.GTree;
+import com.github.jargors.gtree.gtreeJNI;
+import com.github.jargors.gtree.IntVector;
 import com.github.jargors.exceptions.EdgeNotFoundException;
 import com.github.jargors.exceptions.VertexNotFoundException;
 import com.github.jargors.exceptions.GtreeNotLoadedException;
@@ -9934,7 +9937,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 \section{Member Variables}
 \nwenddocs{}\nwbegincode{5}\sublabel{NW3zOIuJ-2Qlw5e-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3zOIuJ-2Qlw5e-1}}}\moddef{\code{}Tools\edoc{} member variables~{\nwtagstyle{}\subpageref{NW3zOIuJ-2Qlw5e-1}}}\endmoddef\nwused{\\{NW3zOIuJ-2Vh5vZ-1}}
-private G_Tree gtree;
+private GTree gtree;
 private boolean flag_gtree_loaded = false;
 private ConcurrentHashMap<Integer, int[]> lu_vertices = new ConcurrentHashMap<Integer, int[]>();
 private ConcurrentHashMap<Integer,
@@ -10053,7 +10056,8 @@ throws GtreeNotLoadedException, GtreeIllegalSourceException \{
     output = new int[] \{ u \};
   \} else \{
     IntVector path = new IntVector();
-    gtree.find_path((u - 1), (v - 1), path);        // L1
+    gtree.shortest_path_querying((u - 1), (v - 1)); // L1
+    gtree.path_recovery((u - 1), (v - 1), path);
     if (path != null) \{
       output = new int[path.size()];
       for (int i = 0; i < path.size(); i++) \{
@@ -10083,7 +10087,7 @@ throws GtreeNotLoadedException, GtreeIllegalSourceException \{
   \} else if (u == 0) \{
     throw new GtreeIllegalSourceException("Source cannot be 0!");
   \} else if (u != v && v != 0) \{
-    d = gtree.search((u - 1), (v - 1));
+    d = gtree.shortest_path_querying((u - 1), (v - 1));
   \}
   return d;
 \}

@@ -1,5 +1,7 @@
 package com.github.jargors;
-import com.github.jargors.gtreeJNI.*;
+import com.github.jargors.gtree.GTree;
+import com.github.jargors.gtree.gtreeJNI;
+import com.github.jargors.gtree.IntVector;
 import com.github.jargors.exceptions.EdgeNotFoundException;
 import com.github.jargors.exceptions.VertexNotFoundException;
 import com.github.jargors.exceptions.GtreeNotLoadedException;
@@ -14,7 +16,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 public class Tools {
-  private G_Tree gtree;
+  private GTree gtree;
   private boolean flag_gtree_loaded = false;
   private ConcurrentHashMap<Integer, int[]> lu_vertices = new ConcurrentHashMap<Integer, int[]>();
   private ConcurrentHashMap<Integer,
@@ -52,8 +54,9 @@ public class Tools {
              System.exit(1);
            }
            if (p.length() > 0) {
-             gtreeJNI.load(p);
-             this.gtree = gtreeJNI.get();
+             gtreeJNI.setIndex_path(p);
+             this.gtree = new GTree();
+             gtreeJNI.read_GTree(gtree);
              this.flag_gtree_loaded = true;
            } else {
              throw new FileNotFoundException("Bad path to gtree");
@@ -164,7 +167,8 @@ public class Tools {
              output = new int[] { u };
            } else {
              IntVector path = new IntVector();
-             gtree.find_path((u - 1), (v - 1), path);        // L1
+             gtree.shortest_path_querying((u - 1), (v - 1)); // L1
+             gtree.path_recovery((u - 1), (v - 1), path);
              if (path != null) {
                output = new int[path.size()];
                for (int i = 0; i < path.size(); i++) {
@@ -182,7 +186,7 @@ public class Tools {
            } else if (u == 0) {
              throw new GtreeIllegalSourceException("Source cannot be 0!");
            } else if (u != v && v != 0) {
-             d = gtree.search((u - 1), (v - 1));
+             d = gtree.shortest_path_querying((u - 1), (v - 1));
            }
            return d;
          }

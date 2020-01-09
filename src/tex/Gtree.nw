@@ -15,8 +15,9 @@ void GTGtreeLoad(final String p) throws FileNotFoundException {
     System.exit(1);
   }
   if (p.length() > 0) {
-    gtreeJNI.load(p);
-    this.gtree = gtreeJNI.get();
+    gtreeJNI.setIndex_path(p);
+    this.gtree = new GTree();
+    gtreeJNI.read_GTree(gtree);
     this.flag_gtree_loaded = true;
   } else {
     throw new FileNotFoundException("Bad path to gtree");
