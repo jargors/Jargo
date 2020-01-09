@@ -76,6 +76,9 @@ public abstract class Client {
                    this.statClientHandleRequestDur = (System.currentTimeMillis() - A0);
                  }
                }
+  public void init() {
+           // Custom initialization procedures
+         }
   protected void end() { }
   protected void endCollectServerLocations(final int[] locations) {
               for (int i = 0; i < (locations.length - 2); i += 3) {

@@ -15,21 +15,25 @@ public class GreedyDelta extends Client {
   final int MAX_SCHEDULE_LENGTH = 8;
   int[] locations = new int[] { };
   int count_rejections = 0;
-  /* Here is a difference between GreedyDelta and GreedyInsertion. We compute the
-   * bounding box so we can determine the city center. */
+  /* S1. Here is a difference between GreedyDelta and GreedyInsertion. We
+   * compute the bounding box so we can determine the city center. */
   int[] bbox = new int[] { 0, 0, 0, 0 };
   int[] tightbox = new int[] { 0, 0, 0, 0};
-  public GreedyDelta() {
-    super();
+  public void init() {
     this.bbox = this.tools.computeBoundingBox();
     System.out.printf("Bounding-box={ %d, %d, %d, %d }\n",
         this.bbox[0], this.bbox[1], this.bbox[2], this.bbox[3]);
-    int xint = (int) ((this.bbox[1] - this.bbox[0]) * 0.20);
-    int yint = (int) ((this.bbox[3] - this.bbox[2]) * 0.20);
-    this.tightbox[0] = xint + this.bbox[0];
-    this.tightbox[1] = this.bbox[0] - xint;
-    this.tightbox[2] = yint + this.bbox[2];
-    this.tightbox[3] = this.bbox[3] - yint;
+    // A tightbox over the city spans 25% of the longitude and 25% of the
+    // latitude lower-left quadrant. Anything in this box will incur a fixed
+    // penalty (jump to S2)
+    int xint = (int) ((this.bbox[1] - this.bbox[0]) * 0.25);
+    int yint = (int) ((this.bbox[3] - this.bbox[2]) * 0.25);
+    int xavg = (int) ((this.bbox[0] + this.bbox[1]) / 2);
+    int yavg = (int) ((this.bbox[2] + this.bbox[3]) / 2);
+    this.tightbox[0] = xavg - 2*xint;
+    this.tightbox[1] = xavg;
+    this.tightbox[2] = yavg - 2*yint;
+    this.tightbox[3] = yavg;
     System.out.printf("Tight-box={ %d, %d, %d, %d }\n",
         this.tightbox[0], this.tightbox[1], this.tightbox[2], this.tightbox[3]);
   }
@@ -401,16 +405,19 @@ public class GreedyDelta extends Client {
                   if (DEBUG) {
                     tools.Print("....call queryEdge("+leg[(q - 1)]+", "+leg[q]+")");
                   }
-                  c += ddnu[0];
-                  d += tools.computeDuration(ddnu[0], ddnu[1]);
-                  /* Here is where we make another change compared to GreedyInsertion.
+                  /* S2. Here is where we make another change compared to GreedyInsertion.
                    * if the leg is near the city center, we add a fixed-delay
                    * cost penalty. */
+                  int c_int = ddnu[0];
+                  int d_int = tools.computeDuration(ddnu[0], ddnu[1]);
                   int[] coord = communicator.queryVertex(leg[(q - 1)]);
                   if (!((this.tightbox[0] <= coord[0] && coord[0] <= this.tightbox[1])
                      && (this.tightbox[2] <= coord[1] && coord[1] <= this.tightbox[3]))) {
-                    c += (int) Math.round(ddnu[0]*0.5);  // we're adding a 50% penalty
+                    c_int = 10000;  // massive cost penalty
+                    d_int *= 3.0;  // 3x duration penalty
                   }
+                  c += c_int;
+                  d += d_int;
                   /* END */
                   if (DEBUG) {
                     tools.Print("....set c="+c);

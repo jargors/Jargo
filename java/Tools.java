@@ -23,7 +23,11 @@ public class Tools {
   private int[] bbox = new int[] { };
   private final double CSHIFT = Storage.CSHIFT;
   private final boolean DEBUG = "true".equals(System.getProperty("jargors.tools.debug"));
-  public Tools() { }
+  public Tools() {
+    if (DEBUG) {
+      System.out.printf("create Tools\n");
+    }
+  }
   public int[] DBQueryEdge(final int v1, final int v2) throws EdgeNotFoundException {
            if (v1 == v2) {
              return new int[] { 0, -1 };  // 0 distance, -1 speed
@@ -72,10 +76,12 @@ public class Tools {
            if (this.bbox.length == 0) {
              int x_min = Integer.MAX_VALUE;
              int y_min = Integer.MAX_VALUE;
-             int x_max = 0;
-             int y_max = 0;
+             int x_max = Integer.MIN_VALUE;
+             int y_max = Integer.MIN_VALUE;
              for (int i : this.lu_vertices.keySet()) {
-               if (i == 0) continue;
+               if (i == 0) {
+                 continue;
+               }
                final int[] coord = this.lu_vertices.get(i);
                x_min = Math.min(x_min, coord[0]);
                y_min = Math.min(y_min, coord[1]);

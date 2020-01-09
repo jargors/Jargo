@@ -22,30 +22,6 @@ public class app {
       System.exit(0);
     }
 
-    // Set algorithm
-    if (args[1].equals("grins")) {
-      client = new GreedyInsertion();
-      System.out.println("set client GreedyInsertion");
-    } else if (args[1].equals("grins-d")) {
-      client = new GreedyDelta();
-      System.out.println("set client GreedyDelta");
-    } else {
-      System.out.println("Unknown client '"+args[1]+"'");
-      System.exit(0);
-    }
-
-    // Set traffic
-    if (args[2].equals("none")) {
-      hasTraf = false;
-    } else if (args[2].equals("random")) {
-      traffic = new RandomTraffic();
-    } else if (args[2].equals("norm1")) {
-      traffic = new Norm1();
-    } else {
-      System.out.println("Uknown traffic '"+args[2]+"'");
-      System.exit(0);
-    }
-
     // Initialize Jargo
     try {
       Controller controller = new Controller();
@@ -98,6 +74,32 @@ public class app {
         e.printStackTrace();
         System.exit(1);
       }
+
+      // Set algorithm
+      if (args[1].equals("grins")) {
+        client = new GreedyInsertion();
+        System.out.println("set client GreedyInsertion");
+      } else if (args[1].equals("grins-d")) {
+        client = new GreedyDelta();
+        System.out.println("set client GreedyDelta");
+      } else {
+        System.out.println("Unknown client '"+args[1]+"'");
+        System.exit(0);
+      }
+      client.init();
+
+      // Set traffic
+      if (args[2].equals("none")) {
+        hasTraf = false;
+      } else if (args[2].equals("random")) {
+        traffic = new RandomTraffic();
+      } else if (args[2].equals("norm1")) {
+        traffic = new Norm1();
+      } else {
+        System.out.println("Uknown traffic '"+args[2]+"'");
+        System.exit(0);
+      }
+
       if (hasTraf) {
         traffic.forwardRefCacheEdges(controller.retrieveRefCacheEdges());
         traffic.forwardRefCacheVertices(controller.retrieveRefCacheVertices());

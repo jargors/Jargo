@@ -1218,6 +1218,7 @@ public class DesktopController {
              this.client.forwardRefCacheVertices(this.controller.retrieveRefCacheVertices());
              this.client.forwardRefCacheEdges(this.controller.retrieveRefCacheEdges());
              this.client.forwardRefCacheUsers(this.controller.retrieveRefCacheUsers());
+             this.client.init();
            } catch (MalformedURLException
                | ClassNotFoundException
                | NoSuchMethodException
@@ -1386,6 +1387,7 @@ public class DesktopController {
              this.client.forwardRefCacheVertices(this.controller.retrieveRefCacheVertices());
              this.client.forwardRefCacheEdges(this.controller.retrieveRefCacheEdges());
              this.client.forwardRefCacheUsers(this.controller.retrieveRefCacheUsers());
+             this.client.init();
            } catch (MalformedURLException
                | ClassNotFoundException
                | NoSuchMethodException
