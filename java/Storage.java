@@ -315,6 +315,17 @@ public class Storage {
            if (flag_usecache) {
              final int[] output = new int[] { 0 };
              this.duration_servers.forEach((sid, val) -> output[0] += val);
+         /***/
+             this.duration_servers.forEach((sid, val) -> {
+                 if (val > 80000) {
+                   System.out.printf("sid %d dur=%d\n", sid, val);
+                   try {
+                   JargoInstanceExport("debug");
+                   System.exit(1);
+                   } catch (Exception ee) {}
+                 }
+             });
+         /***/
              return output;
            } else {
              try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {

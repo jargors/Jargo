@@ -883,6 +883,9 @@ public class Controller {
   public int getClock() {
            return this.statControllerClock;
          }
+  public int getClockStart() {
+           return this.CLOCK_START;
+         }
   public String getClockReference() {
            return this.refTimeStr;
          }
@@ -930,15 +933,34 @@ public class Controller {
            }
            this.refTimeStr = clock_reference;
            try {
-             this.refTimeMs  = this.tools.parseClockReference(clock_reference);
+             this.refTimeMs = this.tools.parseClockReference(clock_reference);
            } catch (Exception pe) {
              throw new IllegalArgumentException("Invalid clock reference (parse failed)");
            }
            this.statControllerClockReferenceHour= hour;
            this.statControllerClockReferenceMinute = minute;
+           if (DEBUG) {
+             System.out.printf("refHr=%d, refMn=%d, refMs=%d\n",
+               hour, minute, this.refTimeMs);
+           }
          }
   public void setClockStart(final int clock_start) {
            this.CLOCK_START = clock_start;
+           this.statControllerClockReferenceSecond += clock_start;
+           this.statControllerClockReferenceSecond %= 60;
+           this.statControllerClockReferenceMinute += (clock_start / 60);
+           this.statControllerClockReferenceMinute %= 60;
+           this.statControllerClockReferenceHour += (clock_start / 3600);
+           this.statControllerClockReferenceHour %= 24;
+           this.statControllerClockReferenceDay += (clock_start / 86400);
+           if (DEBUG) {
+             System.out.printf("clock_start=%d\n", clock_start);
+             System.out.printf("clock day %d %02d:%02d:%02d\n",
+                 this.statControllerClockReferenceDay,
+                 this.statControllerClockReferenceHour,
+                 this.statControllerClockReferenceMinute,
+                 this.statControllerClockReferenceSecond);
+           }
          }
   public void setQueueTimeout(final int queue_timeout) {
            this.QUEUE_TIMEOUT = queue_timeout;

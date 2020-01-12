@@ -86,6 +86,7 @@ public class DesktopController {
   @FXML private AnchorPane container_lc_rates;
   @FXML private AnchorPane container_lc_times;
   @FXML private Button btn_client;
+  @FXML private Button btn_client_gtree;
   @FXML private Button btn_gtree;
   @FXML private Button btn_load;
   @FXML private Button btn_new;
@@ -117,6 +118,7 @@ public class DesktopController {
   private String clientjar = null;
   private String db = null;
   private String gtree = null;
+  private String gtree_client = null;
   private String prob = null;
   private String road = null;
   private String trafficclass = null;
@@ -653,8 +655,8 @@ public class DesktopController {
       final int min = this.controller.getStatControllerClockReferenceMinute();
       final int sec = this.controller.getStatControllerClockReferenceSecond();
       Platform.runLater(() -> {
-        this.lbl_status.setText("Collect metrics (t="+t+") "
-          +"(day "+day+" "+hr+":"+min+":"+sec+")");
+        this.lbl_status.setText(String.format("Collect metrics (t=%d) (day %d %02d:%02d:%02d)",
+          t, day, hr, min, sec));
       });
       try {
         this.ns = this.controller.queryServersCountAppeared()[0];
@@ -709,7 +711,8 @@ public class DesktopController {
         val = (output.length > 0 ? output[0] : 0);    final long y20 = val.longValue();
         val = this.controller.retrieveHandleRequestDur();       final long y21 = val.longValue();
         SwingUtilities.invokeLater(() -> {
-           final long tf = (1000*t + t_ref);
+           final long tf = 1000*t + t_ref;
+           System.out.printf("tf=%d\n", tf);
            this.lu_series.get("lc_rates").addValues(tf, new long[] {
               y01,
               y02 });
@@ -873,6 +876,7 @@ public class DesktopController {
                  Alert alert = new Alert(AlertType.ERROR, "Couldn't load client!");
                  alert.showAndWait();
                  this.btn_client   .setDisable(false);
+                 this.btn_client_gtree.setDisable(false);
                  this.tf_client    .setDisable(false);
                  this.btn_stop     .setDisable(false);
                  this.tabpane      .setDisable(false);
@@ -887,6 +891,41 @@ public class DesktopController {
              // FD cancelled
              this.btn_client   .setDisable(false);
              this.tf_client    .setDisable(false);
+             this.btn_stop     .setDisable(false);
+             this.tabpane      .setDisable(false);
+             this.circ_status  .setFill(C_SUCCESS);
+             this.lbl_status   .setText("Ready.");
+           }
+         }
+  public void actionClientGtree(final ActionEvent e) {
+           this.btn_client_gtree.setDisable(true);
+           this.btn_stop     .setDisable(true);
+           this.tabpane      .setDisable(true);
+           this.circ_status  .setFill(C_WARN);
+           this.lbl_status   .setText("Select *.gtree...");
+           FileChooser fc = new FileChooser();
+           fc.getExtensionFilters().addAll(new ExtensionFilter("G-tree *.gtree", "*.gtree"));
+           File gt = fc.showOpenDialog(this.stage);
+           if (gt != null) {
+             Platform.runLater(() -> {
+               this.stage.getScene().setCursor(Cursor.WAIT);
+             });
+             this.gtree_client = gt.toString();
+             this.btn_client_gtree.setText(gt.getName());
+             this.circ_status.setFill(C_WARN);
+             this.lbl_status.setText("Load '"+this.gtree_client+"'...");
+             Platform.runLater(() -> {
+               this.btn_stop     .setDisable(false);
+               this.tabpane      .setDisable(false);
+               this.circ_status  .setFill(C_SUCCESS);
+               this.lbl_status   .setText("Loaded "+gt.getName());
+             });
+             Platform.runLater(() -> {
+               this.stage.getScene().setCursor(Cursor.DEFAULT);
+             });
+           } else {
+             // FD cancelled
+             this.btn_client_gtree.setDisable(false);
              this.btn_stop     .setDisable(false);
              this.tabpane      .setDisable(false);
              this.circ_status  .setFill(C_SUCCESS);
@@ -920,6 +959,7 @@ public class DesktopController {
                      this.btn_prob   .setDisable(false);
                    } else if (this.access_path == 2) {
                      this.btn_client .setDisable(false);
+                     this.btn_client_gtree.setDisable(false);
                      this.tf_client  .setDisable(false);
                    }
                    this.btn_gtree    .setText(gt.getName());
@@ -1095,10 +1135,15 @@ public class DesktopController {
                  this.controller.loadProblem(this.prob);
                  this.ns = this.controller.queryServersCount()[0];
                  this.nr = this.controller.queryRequestsCount()[0];
+                 this.t0 = this.controller.query("select min (ue) from r_user where uq > 0", 1)[0];
+                 this.t1 = this.controller.query("select max (ue) from r_user where uq > 0", 1)[0];
                  Platform.runLater(() -> {
                    this.btn_prob     .setText(pb.getName());
                    this.btn_client   .setDisable(false);
+                   this.btn_client_gtree.setDisable(false);
                    this.tf_client    .setDisable(false);
+                   this.tf_t0        .setText(Integer.toString(t0));
+                   this.tf_t1        .setText(Integer.toString(t1));
                    this.btn_stop     .setDisable(false);
                    this.tabpane      .setDisable(false);
                    this.circ_status  .setFill(C_SUCCESS);
@@ -1267,7 +1312,7 @@ public class DesktopController {
              return;
            }
            try {
-             this.client.gtreeLoad(this.gtree);
+             this.client.gtreeLoad(this.gtree_client);
            } catch (FileNotFoundException fe) {
              System.err.println(e.toString());
              return;
@@ -1436,7 +1481,7 @@ public class DesktopController {
              return;
            }
            try {
-             this.client.gtreeLoad(this.gtree);
+             this.client.gtreeLoad(this.gtree_client);
            } catch (FileNotFoundException fe) {
              System.err.println(e.toString());
              return;
@@ -1579,6 +1624,8 @@ public class DesktopController {
                    this.gtree = null;
                    this.btn_client   .setDisable(true);
                    this.btn_client   .setText("(empty client)");
+                   this.btn_client_gtree.setDisable(true);
+                   this.btn_client_gtree.setText("(empty G-tree)");
                    this.btn_traffic  .setDisable(true);
                    this.btn_traffic  .setText("(empty traffic)");
                    this.client = null;

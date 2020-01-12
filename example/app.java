@@ -34,7 +34,7 @@ public class app {
       client.forwardRefCacheUsers(controller.retrieveRefCacheUsers());
       try {
         controller.gtreeLoad(args[4]);
-        client.gtreeLoad(args[4]);//*wrap into Controller.gtreeLoad?
+        client.gtreeLoad(args[4]);
       } catch (FileNotFoundException e) {
         System.err.println("Gtree missing?");
         e.printStackTrace();

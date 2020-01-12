@@ -207,7 +207,6 @@ public class Tools {
            Date d = sdf.parse(refTimeStr+"1971");
            System.out.printf("hr=%d\n", d.getHours());
            System.out.printf("mn=%d\n", d.getMinutes());
-           // return sdf.parse(refTimeStr+"1971").getTime();
            return d.getHours()*60*60*1000 + d.getMinutes()*60*1000;
          }
   public void printPath(final int[] p) {
