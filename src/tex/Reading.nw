@@ -49,6 +49,7 @@ where $i$, $j$ start from 0.\\
 \textbf{Throws:} [[SQLException]] if database failure is encountered.\\
 \bottomrule
 \end{tabular}
+TODO: ncols is no longer necessary, we get number of columns from getMetaData.
 <<Read: DBQuery(2)>>=
 int[] DBQuery(final String sql, final int ncols) throws SQLException {
   int[] output = new int[] { };
@@ -56,6 +57,7 @@ int[] DBQuery(final String sql, final int ncols) throws SQLException {
     Statement stmt = conn.createStatement(
       ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
     ResultSet res = stmt.executeQuery(sql);
+    ncols = res.getMetaData().getColumnCount();
     if (res.last()) {
       <<Flatten results>>
     }

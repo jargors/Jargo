@@ -1777,6 +1777,7 @@ public \LA{}actionGtree(1)~{\nwtagstyle{}\subpageref{NWn0bN8-18974H-1}}\RA{}
 public \LA{}actionLoad(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2dDAtx-1}}\RA{}
 public \LA{}actionNew(1)~{\nwtagstyle{}\subpageref{NWn0bN8-T7Xhs-1}}\RA{}
 public \LA{}actionProb(1)~{\nwtagstyle{}\subpageref{NWn0bN8-ZrzWj-1}}\RA{}
+public \LA{}actionQuery(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2QXoKu-1}}\RA{}
 public \LA{}actionQuit(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2vzGSf-1}}\RA{}
 public \LA{}actionRoad(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2qwznl-1}}\RA{}
 public \LA{}actionStartRealtime(1)~{\nwtagstyle{}\subpageref{NWn0bN8-1u3CLd-1}}\RA{}
@@ -2931,6 +2932,7 @@ int[] DBQueryRequestsQueued(final int t) throws SQLException \{
 \nwixlogsorted{c}{{actionLoad(1)}{NWn0bN8-2dDAtx-1}{\nwixu{NW1pDwO-14uWYi-3}\nwixd{NWn0bN8-2dDAtx-1}}}%
 \nwixlogsorted{c}{{actionNew(1)}{NWn0bN8-T7Xhs-1}{\nwixu{NW1pDwO-14uWYi-3}\nwixd{NWn0bN8-T7Xhs-1}}}%
 \nwixlogsorted{c}{{actionProb(1)}{NWn0bN8-ZrzWj-1}{\nwixu{NW1pDwO-14uWYi-3}\nwixd{NWn0bN8-ZrzWj-1}}}%
+\nwixlogsorted{c}{{actionQuery(1)}{NWn0bN8-2QXoKu-1}{\nwixu{NW1pDwO-14uWYi-3}\nwixd{NWn0bN8-2QXoKu-1}}}%
 \nwixlogsorted{c}{{actionQuit(1)}{NWn0bN8-2vzGSf-1}{\nwixu{NW1pDwO-14uWYi-3}\nwixd{NWn0bN8-2vzGSf-1}}}%
 \nwixlogsorted{c}{{actionRoad(1)}{NWn0bN8-2qwznl-1}{\nwixu{NW1pDwO-14uWYi-3}\nwixd{NWn0bN8-2qwznl-1}}}%
 \nwixlogsorted{c}{{actionStartRealtime(1)}{NWn0bN8-1u3CLd-1}{\nwixu{NW1pDwO-14uWYi-3}\nwixd{NWn0bN8-1u3CLd-1}}}%
@@ -3604,6 +3606,7 @@ int[] DBQueryRequestsQueued(final int t) throws SQLException \{
 \nwixlogsorted{i}{{actionGtree}{actionGtree}}%
 \nwixlogsorted{i}{{actionLoad}{actionLoad}}%
 \nwixlogsorted{i}{{actionNew}{actionNew}}%
+\nwixlogsorted{i}{{actionQuery}{actionQuery}}%
 \nwixlogsorted{i}{{actionQuit}{actionQuit}}%
 \nwixlogsorted{i}{{actionStartRealtime}{actionStartRealtime}}%
 \nwixlogsorted{i}{{actionStartSequential}{actionStartSequential}}%
@@ -10381,6 +10384,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -10436,21 +10440,25 @@ private final boolean DEBUG =
 @FXML private Button btn_load;
 @FXML private Button btn_new;
 @FXML private Button btn_prob;
+@FXML private Button btn_query;
 @FXML private Button btn_road;
 @FXML private Button btn_startreal;
 @FXML private Button btn_startseq;
 @FXML private Button btn_stop;
 @FXML private Button btn_traffic;
+@FXML private CheckBox chk_continuous;
 @FXML private Circle circ_status;
 @FXML private Label lbl_status;
 @FXML private ScrollPane container_canvas;
 @FXML private Tab tab_map;
 @FXML private Tab tab_metrics;
 @FXML private TabPane tabpane;
+@FXML private TextArea txt_query;
 @FXML private TextField tf_client;
 @FXML private TextField tf_t0;
 @FXML private TextField tf_t1;
 @FXML private TextField tf_traffic;
+@FXML private VBox pane_info;
 private Canvas can_road;
 private Canvas can_servers;
 private Canvas can_requests;
@@ -10563,8 +10571,8 @@ private class RendererOfRequests extends AnimationTimer \{
         final double y = this.canvas.getHeight() - buffer[1]*this.muf.getUnit();
         this.gc.drawImage(this.image, x, y);
         // this.gc.strokeText("R"+rid, x, y);
-        int uid = rid;
-        \LA{}Draw identifier~{\nwtagstyle{}\subpageref{NWn0bN8-yvsf8-1}}\RA{}
+        /*int uid = rid;
+        \LA{}Draw identifier~{\nwtagstyle{}\subpageref{NWn0bN8-yvsf8-1}}\RA{}*/
       \}
     \}
   \}
@@ -10710,8 +10718,8 @@ if (sid == 1) System.out.printf("S%d: (%.2f,%.2f) (%.2f,%.2f) bufidx=%d, delta=%
       this.gc.drawImage(this.image, x, y);
       this.gc.restore();
       //this.gc.strokeText("S"+sid, x, y);
-      int uid = sid;
-      \LA{}Draw identifier~{\nwtagstyle{}\subpageref{NWn0bN8-yvsf8-1}}\RA{}
+      /*int uid = sid;
+      \LA{}Draw identifier~{\nwtagstyle{}\subpageref{NWn0bN8-yvsf8-1}}\RA{}*/
     \}
   \}
 \}
@@ -10728,9 +10736,16 @@ private class RendererOfRoads extends AnimationTimer \{
   private int[] edges = null;
   private final Color DEFAULT = Color.BLUE;
   private final Color BG = Color.web("0xD7FFFF");
-  private final Color SLOW = Color.web("0xFF0000");
-  private final Color MED = Color.web("0xFFD700");
-  private final Color FAST = Color.web("0x5FD870");
+  private final Color SPEED1 = Color.web("#FF0000");
+  private final Color SPEED2 = Color.web("#FF2B00");
+  private final Color SPEED3 = Color.web("#FF5600");
+  private final Color SPEED4 = Color.web("#FF8100");
+  private final Color SPEED5 = Color.web("#FFAC00");
+  private final Color SPEED6 = Color.web("#FFD700");
+  private final Color SPEED7 = Color.web("#D7D71B");
+  private final Color SPEED8 = Color.web("#AFD737");
+  private final Color SPEED9 = Color.web("#87D753");
+  private final Color SPEED10 = Color.web("#5FD86F");
   private final double LINEWIDTH = 0.3;
   private final long PERIOD = 10000_000_000L;  // 10 seconds
   public RendererOfRoads(
@@ -10783,12 +10798,26 @@ private class RendererOfRoads extends AnimationTimer \{
               double x = this.traffic.apply(this.edges[i], this.edges[(i + 1)],
                   (1000*this.controller.getClock() + this.controller.getClockReferenceMs())
               );
-              if (0.0 <= x && x <= 0.33) \{
-                this.gc.setStroke(SLOW);
-              \} else if (0.33 < x && x <= 0.66) \{
-                this.gc.setStroke(MED);
-              \} else if (0.66 < x && x <= 1.0) \{
-                this.gc.setStroke(FAST);
+              if (0.0 <= x && x <= 0.1) \{
+                this.gc.setStroke(SPEED1);
+              \} else if (0.1 < x && x <= 0.2) \{
+                this.gc.setStroke(SPEED2);
+              \} else if (0.2 < x && x <= 0.3) \{
+                this.gc.setStroke(SPEED3);
+              \} else if (0.3 < x && x <= 0.4) \{
+                this.gc.setStroke(SPEED4);
+              \} else if (0.4 < x && x <= 0.5) \{
+                this.gc.setStroke(SPEED5);
+              \} else if (0.5 < x && x <= 0.6) \{
+                this.gc.setStroke(SPEED6);
+              \} else if (0.6 < x && x <= 0.7) \{
+                this.gc.setStroke(SPEED7);
+              \} else if (0.7 < x && x <= 0.8) \{
+                this.gc.setStroke(SPEED8);
+              \} else if (0.8 < x && x <= 0.9) \{
+                this.gc.setStroke(SPEED9);
+              \} else if (0.9 < x && x <= 1.0) \{
+                this.gc.setStroke(SPEED10);
               \}
             \}
             // It seems to be less laggy if we call strokeLine(4) right here
@@ -10985,6 +11014,7 @@ if (sid == 1) System.out.printf("%d %d\\n%d %d\\n%d %d\\n",
 private class FetcherOfMetrics implements Runnable \{
   private Controller controller = null;
   private Label lbl_status = null;
+  private VBox pane_info = null;
   private ConcurrentHashMap<String, SimpleXYChartSupport> lu_series = null;
   private long A0 = 0;
   private long t_ref = 0;
@@ -10992,18 +11022,32 @@ private class FetcherOfMetrics implements Runnable \{
   private int nr_total = 0;
   private int ns = 0;
   private int nr = 0;
+  private Text txt1 = null;
+  private Text txt2 = null;
+  private Text txt3 = null;
+  private Text txt4 = null;
   public FetcherOfMetrics(
       final Controller controller,
       final Label lbl_status,
+      final VBox pane_info,
       final ConcurrentHashMap<String, SimpleXYChartSupport> lu_series,
       final int ns,
       final int nr) \{
     this.controller = controller;
     this.lbl_status = lbl_status;
+    this.pane_info = pane_info;
     this.lu_series = lu_series;
     this.ns_total = ns;
     this.nr_total = nr;
     this.t_ref = this.controller.getClockReferenceMs();
+    this.pane_info.getChildren().add(new Text("Count Requests Queued "));
+    this.pane_info.getChildren().add(new Text("Service Rate "));
+    this.pane_info.getChildren().add(new Text("S-Violations "));
+    this.pane_info.getChildren().add(new Text("R-Violations "));
+    this.txt1 = (Text) this.pane_info.getChildren().get(0);
+    this.txt2 = (Text) this.pane_info.getChildren().get(1);
+    this.txt3 = (Text) this.pane_info.getChildren().get(2);
+    this.txt4 = (Text) this.pane_info.getChildren().get(3);
   \}
   public void run() \{
     if (DEBUG) \{
@@ -11073,6 +11117,12 @@ private class FetcherOfMetrics implements Runnable \{
             y20 \});
          this.lu_series.get("lc_times").addValues(tf, new long[] \{
             y21 \});
+      \});
+      Platform.runLater(() -> \{
+        this.txt1.setText("Count Requests Queued "+y15);
+        this.txt2.setText("Service Rate "+(y01/100.0)+"%");
+        this.txt3.setText("S-Violations "+y20);
+        this.txt4.setText("R-Violations "+y19);
       \});
     \} catch (SQLException se) \{
       System.err.printf("SQL failure: %s\\n", se.getMessage());
@@ -11188,8 +11238,8 @@ char[] digits = String.valueOf(uid).toCharArray();
 this.gc.drawImage(this.bufimg.get(10), x, y);
 for (int j = 0; j < digits.length; j++) \{
   this.gc.drawImage(
-    /*image*/this.bufimg.get(Character.getNumericValue(digits[j])),
-    /*position*/(x + 8*(j+1)), y);
+    this.bufimg.get(Character.getNumericValue(digits[j])),  // image
+      position(x + 8*(j+1)), y);  // position
 \}
 \nwendcode{}\nwbegindocs{44}\nwdocspar
 
@@ -11921,8 +11971,16 @@ void actionClientGtree(final ActionEvent e) \{
 \}
 \nosublabel{NWn0bN8-2wfB3l-1-u2}\nwindexdefn{actionClientGtree}{actionClientGtree}{NWn0bN8-2wfB3l-1}\eatline
 \nwidentdefs{\\{{actionClientGtree}{actionClientGtree}}}\nwendcode{}\nwbegindocs{120}\nwdocspar
+\subsection{\texttt{actionQuery}(1)}
+\nwenddocs{}\nwbegincode{121}\sublabel{NWn0bN8-2QXoKu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2QXoKu-1}}}\moddef{actionQuery(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2QXoKu-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+void actionQuery(final ActionEvent e) \{
+  String qstr = this.txt_query.getText();
+  this.controller.query(qstr, 2);
+\}
+\nwindexdefn{actionQuery}{actionQuery}{NWn0bN8-2QXoKu-1}\eatline
+\nwidentdefs{\\{{actionQuery}{actionQuery}}}\nwidentuses{\\{{query}{query}}}\nwindexuse{query}{query}{NWn0bN8-2QXoKu-1}\nwendcode{}\nwbegindocs{122}\nwdocspar
 \subsection{\texttt{actionTraffic}(1)}
-\nwenddocs{}\nwbegincode{121}\sublabel{NWn0bN8-2Ft1U2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2Ft1U2-1}}}\moddef{actionTraffic(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2Ft1U2-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{123}\sublabel{NWn0bN8-2Ft1U2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2Ft1U2-1}}}\moddef{actionTraffic(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2Ft1U2-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void actionTraffic(final ActionEvent e) \{
   this.btn_traffic  .setDisable(true);
   this.tf_traffic   .setDisable(true);
@@ -12025,10 +12083,10 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
     this.lbl_status   .setText("Ready.");
   \}
 \}
-\nwendcode{}\nwbegindocs{122}\nwdocspar
+\nwendcode{}\nwbegindocs{124}\nwdocspar
 
 \subsection{\texttt{actionStartSequential}(1)}
-\nwenddocs{}\nwbegincode{123}\sublabel{NWn0bN8-2DyoOl-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2DyoOl-1}}}\moddef{actionStartSequential(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2DyoOl-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{125}\sublabel{NWn0bN8-2DyoOl-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-2DyoOl-1}}}\moddef{actionStartSequential(1)~{\nwtagstyle{}\subpageref{NWn0bN8-2DyoOl-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void actionStartSequential(final ActionEvent e) \{
   \LA{}Load client~{\nwtagstyle{}\subpageref{NWn0bN8-1Tfjod-1}}\RA{}
   \LA{}Set default t0, t1~{\nwtagstyle{}\subpageref{NWn0bN8-TFk9A-1}}\RA{}
@@ -12067,7 +12125,7 @@ void actionStartSequential(final ActionEvent e) \{
     \}
   \}, 0, TimeUnit.SECONDS);
   this.cbFetcherOfMetrics = this.exe.scheduleAtFixedRate(
-      new FetcherOfMetrics(this.controller, this.lbl_status, this.lu_series, this.ns, this.nr), 0, 1, TimeUnit.SECONDS);
+      new FetcherOfMetrics(this.controller, this.lbl_status, this.pane_info, this.lu_series, this.ns, this.nr), 0, 1, TimeUnit.SECONDS);
   this.cbFetcherOfRequests = this.exe.scheduleAtFixedRate(
       new FetcherOfRequests(
         this.controller, this.muf, this.ren_requests), 0, 1, TimeUnit.SECONDS);
@@ -12076,9 +12134,9 @@ void actionStartSequential(final ActionEvent e) \{
         this.controller, this.muf, this.ren_servers), 0, 1, TimeUnit.SECONDS);
 \}
 \nwindexdefn{actionStartSequential}{actionStartSequential}{NWn0bN8-2DyoOl-1}\eatline
-\nwidentdefs{\\{{actionStartSequential}{actionStartSequential}}}\nwidentuses{\\{{setClockEnd}{setClockEnd}}\\{{setClockStart}{setClockStart}}\\{{startSequential}{startSequential}}}\nwindexuse{setClockEnd}{setClockEnd}{NWn0bN8-2DyoOl-1}\nwindexuse{setClockStart}{setClockStart}{NWn0bN8-2DyoOl-1}\nwindexuse{startSequential}{startSequential}{NWn0bN8-2DyoOl-1}\nwendcode{}\nwbegindocs{124}\nwdocspar
+\nwidentdefs{\\{{actionStartSequential}{actionStartSequential}}}\nwidentuses{\\{{setClockEnd}{setClockEnd}}\\{{setClockStart}{setClockStart}}\\{{startSequential}{startSequential}}}\nwindexuse{setClockEnd}{setClockEnd}{NWn0bN8-2DyoOl-1}\nwindexuse{setClockStart}{setClockStart}{NWn0bN8-2DyoOl-1}\nwindexuse{startSequential}{startSequential}{NWn0bN8-2DyoOl-1}\nwendcode{}\nwbegindocs{126}\nwdocspar
 \subsection{\texttt{actionStartRealtime}(1)}
-\nwenddocs{}\nwbegincode{125}\sublabel{NWn0bN8-1u3CLd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1u3CLd-1}}}\moddef{actionStartRealtime(1)~{\nwtagstyle{}\subpageref{NWn0bN8-1u3CLd-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{127}\sublabel{NWn0bN8-1u3CLd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1u3CLd-1}}}\moddef{actionStartRealtime(1)~{\nwtagstyle{}\subpageref{NWn0bN8-1u3CLd-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void actionStartRealtime(final ActionEvent e) \{
   \LA{}Load client~{\nwtagstyle{}\subpageref{NWn0bN8-1Tfjod-1}}\RA{}
   \LA{}Set default t0, t1~{\nwtagstyle{}\subpageref{NWn0bN8-TFk9A-1}}\RA{}
@@ -12117,7 +12175,7 @@ void actionStartRealtime(final ActionEvent e) \{
     \}
   \}, 0, TimeUnit.SECONDS);
   this.cbFetcherOfMetrics = this.exe.scheduleAtFixedRate(
-      new FetcherOfMetrics(this.controller, this.lbl_status, this.lu_series, this.ns, this.nr), 0, 1, TimeUnit.SECONDS);
+      new FetcherOfMetrics(this.controller, this.lbl_status, this.pane_info, this.lu_series, this.ns, this.nr), 0, 1, TimeUnit.SECONDS);
   this.cbFetcherOfRequests = this.exe.scheduleAtFixedRate(
       new FetcherOfRequests(
         this.controller, this.muf, this.ren_requests), 0, 1, TimeUnit.SECONDS);
@@ -12126,9 +12184,9 @@ void actionStartRealtime(final ActionEvent e) \{
         this.controller, this.muf, this.ren_servers), 0, 1, TimeUnit.SECONDS);
 \}
 \nwindexdefn{actionStartRealtime}{actionStartRealtime}{NWn0bN8-1u3CLd-1}\eatline
-\nwidentdefs{\\{{actionStartRealtime}{actionStartRealtime}}}\nwidentuses{\\{{setClockEnd}{setClockEnd}}\\{{setClockStart}{setClockStart}}\\{{startRealtime}{startRealtime}}}\nwindexuse{setClockEnd}{setClockEnd}{NWn0bN8-1u3CLd-1}\nwindexuse{setClockStart}{setClockStart}{NWn0bN8-1u3CLd-1}\nwindexuse{startRealtime}{startRealtime}{NWn0bN8-1u3CLd-1}\nwendcode{}\nwbegindocs{126}\nwdocspar
+\nwidentdefs{\\{{actionStartRealtime}{actionStartRealtime}}}\nwidentuses{\\{{setClockEnd}{setClockEnd}}\\{{setClockStart}{setClockStart}}\\{{startRealtime}{startRealtime}}}\nwindexuse{setClockEnd}{setClockEnd}{NWn0bN8-1u3CLd-1}\nwindexuse{setClockStart}{setClockStart}{NWn0bN8-1u3CLd-1}\nwindexuse{startRealtime}{startRealtime}{NWn0bN8-1u3CLd-1}\nwendcode{}\nwbegindocs{128}\nwdocspar
 \subsection{\texttt{actionStop}(1)}
-\nwenddocs{}\nwbegincode{127}\sublabel{NWn0bN8-27hSI5-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-27hSI5-1}}}\moddef{actionStop(1)~{\nwtagstyle{}\subpageref{NWn0bN8-27hSI5-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{129}\sublabel{NWn0bN8-27hSI5-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-27hSI5-1}}}\moddef{actionStop(1)~{\nwtagstyle{}\subpageref{NWn0bN8-27hSI5-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void actionStop(final ActionEvent e) \{
   \LA{}Set cursor wait~{\nwtagstyle{}\subpageref{NWn0bN8-4SKNow-1}}\RA{}
   if (this.controller != null) \{
@@ -12202,15 +12260,15 @@ void actionStop(final ActionEvent e) \{
   \}
 \}
 \nosublabel{NWn0bN8-27hSI5-1-u3}\nwindexdefn{actionStop}{actionStop}{NWn0bN8-27hSI5-1}\eatline
-\nwidentdefs{\\{{actionStop}{actionStop}}}\nwidentuses{\\{{gtreeClose}{gtreeClose}}\\{{instanceClose}{instanceClose}}\\{{stop}{stop}}}\nwindexuse{gtreeClose}{gtreeClose}{NWn0bN8-27hSI5-1}\nwindexuse{instanceClose}{instanceClose}{NWn0bN8-27hSI5-1}\nwindexuse{stop}{stop}{NWn0bN8-27hSI5-1}\nwendcode{}\nwbegindocs{128}\nwdocspar
+\nwidentdefs{\\{{actionStop}{actionStop}}}\nwidentuses{\\{{gtreeClose}{gtreeClose}}\\{{instanceClose}{instanceClose}}\\{{stop}{stop}}}\nwindexuse{gtreeClose}{gtreeClose}{NWn0bN8-27hSI5-1}\nwindexuse{instanceClose}{instanceClose}{NWn0bN8-27hSI5-1}\nwindexuse{stop}{stop}{NWn0bN8-27hSI5-1}\nwendcode{}\nwbegindocs{130}\nwdocspar
 \subsection{\texttt{toggleMetric}(1)}
-\nwenddocs{}\nwbegincode{129}\sublabel{NWn0bN8-dsz3A-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-dsz3A-1}}}\moddef{toggleMetric(1)~{\nwtagstyle{}\subpageref{NWn0bN8-dsz3A-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{131}\sublabel{NWn0bN8-dsz3A-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-dsz3A-1}}}\moddef{toggleMetric(1)~{\nwtagstyle{}\subpageref{NWn0bN8-dsz3A-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void toggleMetric(final ActionEvent e) \{
 \}
 \nwindexdefn{toggleMetric}{toggleMetric}{NWn0bN8-dsz3A-1}\eatline
-\nwidentdefs{\\{{toggleMetric}{toggleMetric}}}\nwendcode{}\nwbegindocs{130}\nwdocspar
+\nwidentdefs{\\{{toggleMetric}{toggleMetric}}}\nwendcode{}\nwbegindocs{132}\nwdocspar
 \subsection{\texttt{actionZoomCanvas}(1)}
-\nwenddocs{}\nwbegincode{131}\sublabel{NWn0bN8-1NTRHE-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1NTRHE-1}}}\moddef{actionZoomCanvas(1)~{\nwtagstyle{}\subpageref{NWn0bN8-1NTRHE-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{133}\sublabel{NWn0bN8-1NTRHE-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-1NTRHE-1}}}\moddef{actionZoomCanvas(1)~{\nwtagstyle{}\subpageref{NWn0bN8-1NTRHE-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void actionZoomCanvas(ScrollEvent e) \{
   if (e.getDeltaY() > 0) \{
     this.zoom += 1;
@@ -12239,9 +12297,9 @@ void actionZoomCanvas(ScrollEvent e) \{
   e.consume();
 \}
 \nwindexdefn{actionZoomCanvas}{actionZoomCanvas}{NWn0bN8-1NTRHE-1}\eatline
-\nwidentdefs{\\{{actionZoomCanvas}{actionZoomCanvas}}}\nwendcode{}\nwbegindocs{132}\nwdocspar
+\nwidentdefs{\\{{actionZoomCanvas}{actionZoomCanvas}}}\nwendcode{}\nwbegindocs{134}\nwdocspar
 \subsection{\texttt{initializeCanvas}(0)}
-\nwenddocs{}\nwbegincode{133}\sublabel{NWn0bN8-4X9Oqe-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-4X9Oqe-1}}}\moddef{initializeCanvas(0)~{\nwtagstyle{}\subpageref{NWn0bN8-4X9Oqe-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{135}\sublabel{NWn0bN8-4X9Oqe-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-4X9Oqe-1}}}\moddef{initializeCanvas(0)~{\nwtagstyle{}\subpageref{NWn0bN8-4X9Oqe-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void initializeCanvas() \{
   try \{
     this.can_road     = new Canvas(this.window_width, this.window_height);
@@ -12278,28 +12336,28 @@ void initializeCanvas() \{
   \}
 \}
 \nwindexdefn{initializeCanvas}{initializeCanvas}{NWn0bN8-4X9Oqe-1}\eatline
-\nwidentdefs{\\{{initializeCanvas}{initializeCanvas}}}\nwidentuses{\\{{actionZoomCanvas}{actionZoomCanvas}}\\{{PrintSQLException}{PrintSQLException}}\\{{queryMBR}{queryMBR}}}\nwindexuse{actionZoomCanvas}{actionZoomCanvas}{NWn0bN8-4X9Oqe-1}\nwindexuse{PrintSQLException}{PrintSQLException}{NWn0bN8-4X9Oqe-1}\nwindexuse{queryMBR}{queryMBR}{NWn0bN8-4X9Oqe-1}\nwendcode{}\nwbegindocs{134}\nwdocspar
+\nwidentdefs{\\{{initializeCanvas}{initializeCanvas}}}\nwidentuses{\\{{actionZoomCanvas}{actionZoomCanvas}}\\{{PrintSQLException}{PrintSQLException}}\\{{queryMBR}{queryMBR}}}\nwindexuse{actionZoomCanvas}{actionZoomCanvas}{NWn0bN8-4X9Oqe-1}\nwindexuse{PrintSQLException}{PrintSQLException}{NWn0bN8-4X9Oqe-1}\nwindexuse{queryMBR}{queryMBR}{NWn0bN8-4X9Oqe-1}\nwendcode{}\nwbegindocs{136}\nwdocspar
 \subsection{\texttt{setWindowWidth}(1)}
-\nwenddocs{}\nwbegincode{135}\sublabel{NWn0bN8-3x7jy7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3x7jy7-1}}}\moddef{setWindowWidth(1)~{\nwtagstyle{}\subpageref{NWn0bN8-3x7jy7-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{137}\sublabel{NWn0bN8-3x7jy7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-3x7jy7-1}}}\moddef{setWindowWidth(1)~{\nwtagstyle{}\subpageref{NWn0bN8-3x7jy7-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void setWindowWidth(double w) \{
   this.window_width = w;
 \}
 \nwindexdefn{setWindowWidth}{setWindowWidth}{NWn0bN8-3x7jy7-1}\eatline
-\nwidentdefs{\\{{setWindowWidth}{setWindowWidth}}}\nwendcode{}\nwbegindocs{136}\nwdocspar
+\nwidentdefs{\\{{setWindowWidth}{setWindowWidth}}}\nwendcode{}\nwbegindocs{138}\nwdocspar
 \subsection{\texttt{setWindowHeight}(1)}
-\nwenddocs{}\nwbegincode{137}\sublabel{NWn0bN8-13qzEo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-13qzEo-1}}}\moddef{setWindowHeight(1)~{\nwtagstyle{}\subpageref{NWn0bN8-13qzEo-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{139}\sublabel{NWn0bN8-13qzEo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-13qzEo-1}}}\moddef{setWindowHeight(1)~{\nwtagstyle{}\subpageref{NWn0bN8-13qzEo-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void setWindowHeight(double h) \{
   this.window_height = h;
 \}
 \nwindexdefn{setWindowHeight}{setWindowHeight}{NWn0bN8-13qzEo-1}\eatline
-\nwidentdefs{\\{{setWindowHeight}{setWindowHeight}}}\nwendcode{}\nwbegindocs{138}\nwdocspar
+\nwidentdefs{\\{{setWindowHeight}{setWindowHeight}}}\nwendcode{}\nwbegindocs{140}\nwdocspar
 \subsection{\texttt{setStage}(1)}
-\nwenddocs{}\nwbegincode{139}\sublabel{NWn0bN8-4RWb4b-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-4RWb4b-1}}}\moddef{setStage(1)~{\nwtagstyle{}\subpageref{NWn0bN8-4RWb4b-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
+\nwenddocs{}\nwbegincode{141}\sublabel{NWn0bN8-4RWb4b-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWn0bN8-4RWb4b-1}}}\moddef{setStage(1)~{\nwtagstyle{}\subpageref{NWn0bN8-4RWb4b-1}}}\endmoddef\nwused{\\{NW1pDwO-14uWYi-3}}
 void setStage(Stage s) \{
   this.stage = s;
 \}
 \nwindexdefn{setStage}{setStage}{NWn0bN8-4RWb4b-1}\eatline
-\nwidentdefs{\\{{setStage}{setStage}}}\nwendcode{}\nwbegindocs{140}\nwdocspar
+\nwidentdefs{\\{{setStage}{setStage}}}\nwendcode{}\nwbegindocs{142}\nwdocspar
 \nwenddocs{}\nwfilename{src/tex/JMX.nw}\nwbegindocs{0}\chapter{Statistics with JMX}
 \label{jmx}
 

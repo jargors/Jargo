@@ -11,7 +11,7 @@ import com.github.jargors.exceptions.RouteIllegalOverwriteException;
 import com.github.jargors.exceptions.TimeWindowException;
 import java.sql.SQLException;
 public class GreedyInsertion extends Client {
-  final int PICKUP_THRESHOLD = 1200;  // meters
+  final int PICKUP_THRESHOLD = 600;  // meters
   final int MAX_SCHEDULE_LENGTH = 8;
   int[] locations = new int[] { };
   int count_rejections = 0;

@@ -48,6 +48,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -91,21 +92,25 @@ public class DesktopController {
   @FXML private Button btn_load;
   @FXML private Button btn_new;
   @FXML private Button btn_prob;
+  @FXML private Button btn_query;
   @FXML private Button btn_road;
   @FXML private Button btn_startreal;
   @FXML private Button btn_startseq;
   @FXML private Button btn_stop;
   @FXML private Button btn_traffic;
+  @FXML private CheckBox chk_continuous;
   @FXML private Circle circ_status;
   @FXML private Label lbl_status;
   @FXML private ScrollPane container_canvas;
   @FXML private Tab tab_map;
   @FXML private Tab tab_metrics;
   @FXML private TabPane tabpane;
+  @FXML private TextArea txt_query;
   @FXML private TextField tf_client;
   @FXML private TextField tf_t0;
   @FXML private TextField tf_t1;
   @FXML private TextField tf_traffic;
+  @FXML private VBox pane_info;
   private Canvas can_road;
   private Canvas can_servers;
   private Canvas can_requests;
@@ -210,14 +215,14 @@ public class DesktopController {
           final double y = this.canvas.getHeight() - buffer[1]*this.muf.getUnit();
           this.gc.drawImage(this.image, x, y);
           // this.gc.strokeText("R"+rid, x, y);
-          int uid = rid;
+          /*int uid = rid;
           char[] digits = String.valueOf(uid).toCharArray();
           this.gc.drawImage(this.bufimg.get(10), x, y);
           for (int j = 0; j < digits.length; j++) {
             this.gc.drawImage(
-              /*image*/this.bufimg.get(Character.getNumericValue(digits[j])),
-              /*position*/(x + 8*(j+1)), y);
-          }
+              this.bufimg.get(Character.getNumericValue(digits[j])),  // image
+                position(x + 8*(j+1)), y);  // position
+          }*/
         }
       }
     }
@@ -360,14 +365,14 @@ public class DesktopController {
         this.gc.drawImage(this.image, x, y);
         this.gc.restore();
         //this.gc.strokeText("S"+sid, x, y);
-        int uid = sid;
+        /*int uid = sid;
         char[] digits = String.valueOf(uid).toCharArray();
         this.gc.drawImage(this.bufimg.get(10), x, y);
         for (int j = 0; j < digits.length; j++) {
           this.gc.drawImage(
-            /*image*/this.bufimg.get(Character.getNumericValue(digits[j])),
-            /*position*/(x + 8*(j+1)), y);
-        }
+            this.bufimg.get(Character.getNumericValue(digits[j])),  // image
+              position(x + 8*(j+1)), y);  // position
+        }*/
       }
     }
   }
@@ -381,9 +386,16 @@ public class DesktopController {
     private int[] edges = null;
     private final Color DEFAULT = Color.BLUE;
     private final Color BG = Color.web("0xD7FFFF");
-    private final Color SLOW = Color.web("0xFF0000");
-    private final Color MED = Color.web("0xFFD700");
-    private final Color FAST = Color.web("0x5FD870");
+    private final Color SPEED1 = Color.web("#FF0000");
+    private final Color SPEED2 = Color.web("#FF2B00");
+    private final Color SPEED3 = Color.web("#FF5600");
+    private final Color SPEED4 = Color.web("#FF8100");
+    private final Color SPEED5 = Color.web("#FFAC00");
+    private final Color SPEED6 = Color.web("#FFD700");
+    private final Color SPEED7 = Color.web("#D7D71B");
+    private final Color SPEED8 = Color.web("#AFD737");
+    private final Color SPEED9 = Color.web("#87D753");
+    private final Color SPEED10 = Color.web("#5FD86F");
     private final double LINEWIDTH = 0.3;
     private final long PERIOD = 10000_000_000L;  // 10 seconds
     public RendererOfRoads(
@@ -436,12 +448,26 @@ public class DesktopController {
                 double x = this.traffic.apply(this.edges[i], this.edges[(i + 1)],
                     (1000*this.controller.getClock() + this.controller.getClockReferenceMs())
                 );
-                if (0.0 <= x && x <= 0.33) {
-                  this.gc.setStroke(SLOW);
-                } else if (0.33 < x && x <= 0.66) {
-                  this.gc.setStroke(MED);
-                } else if (0.66 < x && x <= 1.0) {
-                  this.gc.setStroke(FAST);
+                if (0.0 <= x && x <= 0.1) {
+                  this.gc.setStroke(SPEED1);
+                } else if (0.1 < x && x <= 0.2) {
+                  this.gc.setStroke(SPEED2);
+                } else if (0.2 < x && x <= 0.3) {
+                  this.gc.setStroke(SPEED3);
+                } else if (0.3 < x && x <= 0.4) {
+                  this.gc.setStroke(SPEED4);
+                } else if (0.4 < x && x <= 0.5) {
+                  this.gc.setStroke(SPEED5);
+                } else if (0.5 < x && x <= 0.6) {
+                  this.gc.setStroke(SPEED6);
+                } else if (0.6 < x && x <= 0.7) {
+                  this.gc.setStroke(SPEED7);
+                } else if (0.7 < x && x <= 0.8) {
+                  this.gc.setStroke(SPEED8);
+                } else if (0.8 < x && x <= 0.9) {
+                  this.gc.setStroke(SPEED9);
+                } else if (0.9 < x && x <= 1.0) {
+                  this.gc.setStroke(SPEED10);
                 }
               }
               // It seems to be less laggy if we call strokeLine(4) right here
@@ -625,6 +651,7 @@ public class DesktopController {
   private class FetcherOfMetrics implements Runnable {
     private Controller controller = null;
     private Label lbl_status = null;
+    private VBox pane_info = null;
     private ConcurrentHashMap<String, SimpleXYChartSupport> lu_series = null;
     private long A0 = 0;
     private long t_ref = 0;
@@ -632,18 +659,32 @@ public class DesktopController {
     private int nr_total = 0;
     private int ns = 0;
     private int nr = 0;
+    private Text txt1 = null;
+    private Text txt2 = null;
+    private Text txt3 = null;
+    private Text txt4 = null;
     public FetcherOfMetrics(
         final Controller controller,
         final Label lbl_status,
+        final VBox pane_info,
         final ConcurrentHashMap<String, SimpleXYChartSupport> lu_series,
         final int ns,
         final int nr) {
       this.controller = controller;
       this.lbl_status = lbl_status;
+      this.pane_info = pane_info;
       this.lu_series = lu_series;
       this.ns_total = ns;
       this.nr_total = nr;
       this.t_ref = this.controller.getClockReferenceMs();
+      this.pane_info.getChildren().add(new Text("Count Requests Queued "));
+      this.pane_info.getChildren().add(new Text("Service Rate "));
+      this.pane_info.getChildren().add(new Text("S-Violations "));
+      this.pane_info.getChildren().add(new Text("R-Violations "));
+      this.txt1 = (Text) this.pane_info.getChildren().get(0);
+      this.txt2 = (Text) this.pane_info.getChildren().get(1);
+      this.txt3 = (Text) this.pane_info.getChildren().get(2);
+      this.txt4 = (Text) this.pane_info.getChildren().get(3);
     }
     public void run() {
       if (DEBUG) {
@@ -739,6 +780,12 @@ public class DesktopController {
               y20 });
            this.lu_series.get("lc_times").addValues(tf, new long[] {
               y21 });
+        });
+        Platform.runLater(() -> {
+          this.txt1.setText("Count Requests Queued "+y15);
+          this.txt2.setText("Service Rate "+(y01/100.0)+"%");
+          this.txt3.setText("S-Violations "+y20);
+          this.txt4.setText("R-Violations "+y19);
         });
       } catch (SQLException se) {
         System.err.printf("SQL failure: %s\n", se.getMessage());
@@ -1181,6 +1228,10 @@ public class DesktopController {
              this.lbl_status   .setText("Ready.");
            }
          }
+  public void actionQuery(final ActionEvent e) {
+           String qstr = this.txt_query.getText();
+           this.controller.query(qstr, 2);
+         }
   public void actionQuit(final ActionEvent e) {
            System.exit(0);
          }
@@ -1407,7 +1458,7 @@ public class DesktopController {
              }
            }, 0, TimeUnit.SECONDS);
            this.cbFetcherOfMetrics = this.exe.scheduleAtFixedRate(
-               new FetcherOfMetrics(this.controller, this.lbl_status, this.lu_series, this.ns, this.nr), 0, 1, TimeUnit.SECONDS);
+               new FetcherOfMetrics(this.controller, this.lbl_status, this.pane_info, this.lu_series, this.ns, this.nr), 0, 1, TimeUnit.SECONDS);
            this.cbFetcherOfRequests = this.exe.scheduleAtFixedRate(
                new FetcherOfRequests(
                  this.controller, this.muf, this.ren_requests), 0, 1, TimeUnit.SECONDS);
@@ -1576,7 +1627,7 @@ public class DesktopController {
              }
            }, 0, TimeUnit.SECONDS);
            this.cbFetcherOfMetrics = this.exe.scheduleAtFixedRate(
-               new FetcherOfMetrics(this.controller, this.lbl_status, this.lu_series, this.ns, this.nr), 0, 1, TimeUnit.SECONDS);
+               new FetcherOfMetrics(this.controller, this.lbl_status, this.pane_info, this.lu_series, this.ns, this.nr), 0, 1, TimeUnit.SECONDS);
            this.cbFetcherOfRequests = this.exe.scheduleAtFixedRate(
                new FetcherOfRequests(
                  this.controller, this.muf, this.ren_requests), 0, 1, TimeUnit.SECONDS);
