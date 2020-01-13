@@ -18,6 +18,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Font?>
 
 <VBox prefHeight="768.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.jargors.desktop.DesktopController">
   <children>
@@ -121,14 +122,22 @@
                                        <children>
                                           <ToolBar prefHeight="40.0" prefWidth="200.0">
                                              <items>
-                                                <Button fx:id="btn_query" mnemonicParsing="false" text="Submit" />
-                                                <CheckBox fx:id="chk_continuous" mnemonicParsing="false" text="Continuous" />
+                                                <Button fx:id="btn_query" mnemonicParsing="false" onAction="#actionQuery" text="Submit" />
+                                                <CheckBox fx:id="chk_continuous" mnemonicParsing="false" onAction="#actionQueryContinuous" text="Continuous" />
                                              </items>
                                           </ToolBar>
                                           <SplitPane dividerPositions="0.29797979797979796" prefHeight="160.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
                                              <items>
                                                 <TextArea fx:id="txt_query" prefHeight="200.0" prefWidth="200.0" promptText="Custom query..." />
-                                                <TextArea disable="true" layoutX="10.0" layoutY="10.0" prefHeight="200.0" prefWidth="200.0" />
+                                                <ScrollPane fitToHeight="true" fitToWidth="true" vbarPolicy="ALWAYS">
+                                                   <content>
+                                                      <TextArea fx:id="txt_result" prefHeight="200.0" prefWidth="200.0">
+                                                         <font>
+                                                            <Font name="FreeMono" size="13.0" />
+                                                         </font>
+                                                      </TextArea>
+                                                   </content>
+                                                </ScrollPane>
                                              </items>
                                           </SplitPane>
                                        </children>

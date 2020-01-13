@@ -42,12 +42,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.StringBuilder;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -155,6 +157,7 @@ private final boolean DEBUG =
 @FXML private Tab tab_metrics;
 @FXML private TabPane tabpane;
 @FXML private TextArea txt_query;
+@FXML private TextArea txt_result;
 @FXML private TextField tf_client;
 @FXML private TextField tf_t0;
 @FXML private TextField tf_t1;
@@ -191,6 +194,7 @@ private RendererOfRoads ren_road = null;
 private RendererOfServers ren_servers = null;
 private RendererOfRequests ren_requests = null;
 private ScheduledExecutorService exe = null;
+private ScheduledExecutorService exe_query = null;
 private ScheduledFuture<?> cbFetcherOfLocations = null;
 private ScheduledFuture<?> cbFetcherOfRequests = null;
 private ScheduledFuture<?> cbSimulation = null;
@@ -1674,9 +1678,61 @@ void actionClientGtree(final ActionEvent e) {
 <<actionQuery(1)>>=
 void actionQuery(final ActionEvent e) {
   String qstr = this.txt_query.getText();
-  this.controller.query(qstr, 2);
+  if (qstr.length() == 0) {
+    return;
+  }
+  int[] ncols = new int[] { 0 };
+  try {
+    ArrayList<String> header = new ArrayList<String>();
+    int[] output = this.controller.queryQuick(qstr, ncols, header);
+    int ncol = ncols[0];
+    StringBuilder sb = new StringBuilder(output.length);
+    for (String colname : header) {
+      int resl = colname.length();
+      char[] pad = new char[6 - resl];
+      Arrays.fill(pad, ' ');
+      sb.append(pad).append(colname);
+    }
+    sb.append('\n');
+    for (String colname : header) {
+      sb.append("------");
+    }
+    sb.append('\n');
+    for (int row = 0; row < output.length/ncol; row++) {
+      for (int col = 0; col < ncol; col++) {
+        int res = output[(row*ncol + col)];
+        int resl = String.valueOf(res).length();
+        char[] pad = new char[6 - resl];
+        Arrays.fill(pad, ' ');
+        sb.append(pad).append(res);
+      }
+      sb.append('\n');
+    }
+    sb.append('\n').append("Execution time: ");
+    sb.append(this.controller.getStatQueryDur()).append(" ms\n");
+    Platform.runLater(() -> {
+      this.txt_result.setText(sb.toString());
+    });
+  } catch (SQLException se) {
+    Platform.runLater(() -> {
+      this.txt_result.setText("Error: "+se.toString());
+    });
+  }
 }
 @ %def actionQuery
+
+\subsection{\texttt{actionQueryContinuous}(1)}
+<<actionQueryContinuous(1)>>=
+void actionQueryContinuous(final ActionEvent e) {
+  if (this.chk_continuous.isSelected()) {
+    this.exe_query = Executors.newScheduledThreadPool(1);
+    this.exe_query.scheduleAtFixedRate(
+        () -> { actionQuery(e); }, 0, 5, TimeUnit.SECONDS);
+  } else {
+    this.exe_query.shutdown();
+  }
+}
+@ %def actionQueryContinuous(1)
 
 \subsection{\texttt{actionTraffic}(1)}
 <<actionTraffic(1)>>=

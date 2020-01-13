@@ -56,7 +56,6 @@ int[] DBQuery(final String sql, final int ncols) throws SQLException {
     Statement stmt = conn.createStatement(
       ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
     ResultSet res = stmt.executeQuery(sql);
-    ncols = res.getMetaData().getColumnCount();
     if (res.last()) {
       <<Flatten results>>
     }
@@ -67,6 +66,29 @@ int[] DBQuery(final String sql, final int ncols) throws SQLException {
   return output;
 }
 @ %def DBQuery
+Special version for DesktopController
+<<Read: DBQueryQuick(3)>>=
+int[] DBQueryQuick(final String sql, int[] outcols, ArrayList<String> header) throws SQLException {
+  int[] output = new int[] { };
+  try (<<Open [[conn]]>>) {
+    Statement stmt = conn.createStatement(
+      ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+    ResultSet res = stmt.executeQuery(sql);
+    int ncols = res.getMetaData().getColumnCount();
+    for (int i = 1; i <= ncols; i++) {
+      header.add(res.getMetaData().getColumnName(i));
+    }
+    outcols[0] = ncols;
+    if (res.last()) {
+      <<Flatten results>>
+    }
+    conn.close();
+  } catch (SQLException e) {
+    throw e;
+  }
+  return output;
+}
+@ %def DBQueryQuick
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -81,6 +103,14 @@ int[] query(final String sql, final int ncols) throws SQLException {
   return output;
 }
 @ %def query
+<<Read: queryQuick(3)>>=
+int[] queryQuick(final String sql, int[] outcols, ArrayList<String> header) throws SQLException {
+  long A0 = System.currentTimeMillis();
+  int[] output = this.storage.DBQueryQuick(sql, outcols, header);
+  <<Stats: query(2)>>
+  return output;
+}
+@ %def queryQuick
 
 \section{Methods: Read Road Network}
 

@@ -17,6 +17,7 @@ import com.github.jargors.exceptions.GtreeIllegalTargetException;
 import com.github.jargors.jmx.*;
 import java.lang.management.*;
 import javax.management.*;
+import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ConcurrentHashMap;
@@ -408,6 +409,12 @@ public class Controller {
   public int[] query(final String sql, final int ncols) throws SQLException {
            long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQuery(sql, ncols);
+           this.statQueryDur = (System.currentTimeMillis() - A0);
+           return output;
+         }
+  public int[] queryQuick(final String sql, int[] outcols, ArrayList<String> header) throws SQLException {
+           long A0 = System.currentTimeMillis();
+           int[] output = this.storage.DBQueryQuick(sql, outcols, header);
            this.statQueryDur = (System.currentTimeMillis() - A0);
            return output;
          }

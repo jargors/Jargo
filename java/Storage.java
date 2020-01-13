@@ -18,6 +18,7 @@ import org.apache.commons.dbcp2.PoolingDriver;
 import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
@@ -78,6 +79,35 @@ public class Storage {
              Statement stmt = conn.createStatement(
                ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
              ResultSet res = stmt.executeQuery(sql);
+             if (res.last()) {
+               output = new int[(ncols*res.getRow())];
+               res.first();
+               int i = 0;
+               do {
+                 final int idx = i*ncols;
+                 for (int j = 1; j <= ncols; j++) {
+                   output[(idx + (j - 1))] = res.getInt(j);
+                 }
+                 i++;
+               } while (res.next());
+             }
+             conn.close();
+           } catch (SQLException e) {
+             throw e;
+           }
+           return output;
+         }
+  public int[] DBQueryQuick(final String sql, int[] outcols, ArrayList<String> header) throws SQLException {
+           int[] output = new int[] { };
+           try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+             Statement stmt = conn.createStatement(
+               ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+             ResultSet res = stmt.executeQuery(sql);
+             int ncols = res.getMetaData().getColumnCount();
+             for (int i = 1; i <= ncols; i++) {
+               header.add(res.getMetaData().getColumnName(i));
+             }
+             outcols[0] = ncols;
              if (res.last()) {
                output = new int[(ncols*res.getRow())];
                res.first();
