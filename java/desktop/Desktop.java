@@ -1,11 +1,10 @@
 package com.github.jargors.desktop;
 import com.github.jargors.desktop.DesktopController;
+import java.io.IOException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import java.io.IOException;
-
 public class Desktop extends Application {
   public void start(Stage stage) throws IOException {
     System.out.println("JavaFX "+System.getProperties().get("javafx.runtime.version"));
@@ -19,7 +18,6 @@ public class Desktop extends Application {
     scene.heightProperty().addListener((a, b, c) -> {
       dc.setWindowHeight((double) c);
     });
-    scene.getStylesheets().add("css/lctot.css");
     stage.setTitle("Jargo Desktop");
     stage.setScene(scene);
     stage.show();

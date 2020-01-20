@@ -6,36 +6,55 @@ CLASS4=$(addsuffix .class, $(subst java/jmx/,com/github/jargors/jmx/,$(basename 
 
 VERSION = 1.0.0
 
-.PHONY : all compile jar clean
+.PHONY : all compile jar clean _prep
 
-all : compile jar
+all : compile jar _prep
 
 # Compile the *.class files from the *.java files
-compile : $(CLASS1) $(CLASS2) $(CLASS3) $(CLASS4)
+compile : _prep $(CLASS1) $(CLASS2) $(CLASS3) $(CLASS4)
 
 # Zip up *.class files into jar/jargors-$(VERSION).jar
 jar : compile
-	mkdir -p jar
-	jar cvf jar/jargors-$(VERSION).jar com
+	@mkdir -p jar
+	@printf "compress jar/jargors-$(VERSION).jar...\n"
+	@jar cvf jar/jargors-$(VERSION).jar com >> build.log
 
 # Remove *.class and *.jar files
 clean :
-	rm -rf com/ jar/jargors-$(VERSION).jar
+	@rm -rf com/
+	@rm -rf jar/
 
+################################################################################
+# http://www.lunderberg.com/2015/08/25/cpp-makefile-pretty-output/
+define run
+$(1) >> build.log 2>&1; \
+RES=$$?; \
+if [ $$RES -ne 0 ]; then \
+	cat build.log; \
+elif [ -s build.log ]; then \
+	printf "\twarning! check 'build.log' for details...\n"; \
+fi; \
+exit $$RES
+endef
 ################################################################################
 # Just recompile all the java files for any class target
 com/github/jargors/%.class : java/%.java
-	rm -rf com/
-	javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:deps:deps/* java/*.java java/*/*.java
+	@printf "compile java sources...\n";
+	@$(call run, javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:dep:dep/* java/*.java java/*/*.java)
 
 com/github/jargors/desktop/%.class : java/desktop/%.java
-	rm -rf com/
-	javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:deps:deps/* java/*.java java/*/*.java
+	@printf "compile java sources...\n";
+	@$(call run, javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:dep:dep/* java/*.java java/*/*.java)
 
 com/github/jargors/exceptions/%.class : java/exceptions/%.java
-	rm -rf com/
-	javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:deps:deps/* java/*.java java/*/*.java
+	@printf "compile java sources...\n";
+	@$(call run, javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:dep:dep/* java/*.java java/*/*.java)
 
 com/github/jargors/jmx/%.class : java/jmx/%.java
-	rm -rf com/
-	javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:deps:deps/* java/*.java java/*/*.java
+	@printf "compile java sources...\n";
+	@$(call run, javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:dep:dep/* java/*.java java/*/*.java)
+
+_prep :
+	@rm -rf com/
+	@rm -rf build.log
+

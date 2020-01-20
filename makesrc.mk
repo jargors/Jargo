@@ -14,18 +14,18 @@ tex : doc/body.tex
 
 # Remove *.java and body.tex files
 clean :
-	rm -f $(JAVA1) $(JAVA2)
-	rm -f doc/body.tex
+	@rm -f $(JAVA1) $(JAVA2)
+	@rm -f doc/body.tex
 
 ################################################################################
 # Just retangle all the noweb files for any java target
 $(JAVA1) : src/*.nw src/*/*.nw
-	#notangle -L'/*line %L "%F"*/%N' -R$(subst java/,,$@) src/*.nw src/*/*.nw > $@
-	notangle -R$(subst java/,,$@) src/*.nw src/*/*.nw > $@
+	@printf "tangle $@...\n"
+	@notangle -R$(subst java/,,$@) src/*.nw src/*/*.nw > $@
 
 $(JAVA2) : src/*.nw src/*/*.nw
-	#notangle -L'/*line %L "%F"*/%N' -R$(subst java/desktop/,,$@) src/*.nw src/*/*.nw > $@
-	notangle -R$(subst java/desktop/,,$@) src/*.nw src/*/*.nw > $@
+	@printf "tangle $@...\n"
+	@notangle -R$(subst java/desktop/,,$@) src/*.nw src/*/*.nw > $@
 
 # Weave the *.nw files in the right order
 TEXSRCS = \
@@ -49,4 +49,6 @@ TEXSRCS = \
 	src/tex/DataDefinition.nw
 
 doc/body.tex : src/*.nw src/*/*.nw
-	noweave -delay -index $(TEXSRCS) > doc/body.tex
+	@printf "weave $@...\n"
+	@noweave -delay -index $(TEXSRCS) > doc/body.tex
+

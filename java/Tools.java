@@ -1,12 +1,12 @@
 package com.github.jargors;
-import com.github.jargors.gtree.GTree;
-import com.github.jargors.gtree.gtreeJNI;
-import com.github.jargors.gtree.IntVector;
 import com.github.jargors.exceptions.EdgeNotFoundException;
 import com.github.jargors.exceptions.VertexNotFoundException;
 import com.github.jargors.exceptions.GtreeNotLoadedException;
 import com.github.jargors.exceptions.GtreeIllegalSourceException;
 import com.github.jargors.exceptions.GtreeIllegalTargetException;
+import com.github.jamjpan.gtree.GTree;
+import com.github.jamjpan.gtree.gtreeJNI;
+import com.github.jamjpan.gtree.IntVector;
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
 import java.text.ParseException;
