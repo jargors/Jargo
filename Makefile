@@ -67,7 +67,7 @@ clean :
 	@if [ -d "jar" ]; then printf "remove jar/...\n"; rm -rf jar/ ; fi; \
 	 if [ -d "com" ]; then printf "remove com/...\n"; rm -rf com/ ; fi; \
 	 if [ -d "pdf" ]; then printf "remove pdf/...\n"; rm -rf pdf/ ; fi; \
-	 if [ -s "build.log" ]; then printf "remove build.log...\n"; rm -rf build.log ; fi;
+	 if [ -s "build.log" ]; then printf "remove build.log...\n"; rm -rf build.log ; fi; \
 	 if [ -s "wget.log" ]; then printf "remove wget.log...\n"; rm -rf wget.log ; fi;
 	@printf "done clean\n"
 
