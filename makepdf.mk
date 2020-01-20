@@ -13,9 +13,12 @@ endef
 ################################################################################
 
 # Compile jargo.pdf from jargo.tex
+# We call pdflatex three times in order to get the links resolved
 pdf : _prep doc/jargo.tex doc/body.tex
 	@mkdir -p pdf
 	@printf "compile jargo.pdf...\n"
+	@$(call run, texfot pdflatex -output-directory pdf -halt-on-error doc/jargo.tex)
+	@$(call run, texfot pdflatex -output-directory pdf -halt-on-error doc/jargo.tex)
 	@$(call run, texfot pdflatex -output-directory pdf -halt-on-error doc/jargo.tex)
 
 clean :
