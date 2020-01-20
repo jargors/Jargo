@@ -15,13 +15,18 @@ Cargo (https://github.com/jamjpan/Cargo).
 Jargo is written with literate programming. The idea is to write code that can
 be compiled into a form understood by humans (English) and a form understood by
 machines (Java). Developers write 'literate' code, and then use various
-programs to compile the code. Jargo uses noweb. The workflow is:
+programs to compile the code. Jargo uses noweb. The workflows are:
 
-                                    (java/*.java)        (jar/jargors-1.0.0.jar)
-                  /- notangle -> Java source files -> javac -> Java bytecode
-noweb source files
-(src/*.nw,        \- noweave -> LaTeX source file -> pdflatex -> PDF document
-  res/noweb.sty)                  (doc/body.tex)                (pdf/jargo.pdf)
+To produce the jar archive, input
+  src/*.nw source files into
+    | notangle to produce java/*.java files, used by
+    | javac to produce com/*/*.class files, used by
+    | jar to produce jar/jargors-1.0.0.jar file;
+
+To produce the pdf document, input
+  src/*.nw source files into
+    | noweave to produce doc/body.tex, used by
+    | pdflatex to produce pdf/jargo.pdf.
 
 The notangle and noweave programs can be obtained from
     https://www.cs.tufts.edu/~nr/noweb/
