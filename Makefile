@@ -4,7 +4,7 @@ JAVA2=$(addsuffix .java, $(subst src/desktop/,java/desktop/,$(basename $(wildcar
 
 VERSION=1.0.0
 
-.PHONY : _mod all src jar pdf purge clean _mod
+.PHONY : _mod all dep src jar pdf purge clean _mod
 
 _mod :
 	@printf "_______________________________________________________________\n"

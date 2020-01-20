@@ -15,7 +15,16 @@ RES=$$?; \
 if [ $$RES -ne 0 ]; then \
 	cat wget.log; \
 fi; \
-unzip dep/archive/$(2) -d dep/ >> wget.log 2>&1; \
+exit $$RES
+endef
+
+define get_tar
+printf "get $(1)\n"; \
+wget -P dep/archive/ $(1) >> wget.log 2>&1; \
+RES=$$?; \
+if [ $$RES -ne 0 ]; then \
+	cat wget.log; \
+fi; \
 exit $$RES
 endef
 
@@ -58,21 +67,18 @@ dep/commons-dbcp2-2.7.0.jar \
 dep/commons-logging-1.2.jar \
 dep/commons-pool2-2.7.0.jar \
 dep/gtree-2.0.jar \
+dep/libgtree.so \
 dep/com-sun-tools-visualvm-charts-RELEASE139.jar \
 dep/com-sun-tools-visualvm-uisupport-RELEASE139.jar \
 dep/org-netbeans-lib-profiler-ui-RELEASE139.jar \
 dep/org-netbeans-lib-profiler-charts-RELEASE139.jar \
 dep/org-netbeans-modules-profiler-api-RELEASE139.jar \
 dep/org-openide-util-lookup-RELEASE139.jar \
-$(JFX) \
-_cleanup
+$(JFX)
 
 _prep :
 	@rm -f wget.log
 	@mkdir -p dep/archive
-
-_cleanup:
-	@rm -rf dep/javafx-sdk-13.0.1
 
 ####### Core Dependencies ######################################################
 
@@ -85,8 +91,20 @@ dep/commons-logging-1.2.jar :
 dep/commons-pool2-2.7.0.jar :
 	@$(call get_jar,https://repo1.maven.org/maven2/org/apache/commons/commons-pool2/2.7.0/commons-pool2-2.7.0.jar)
 
-dep/gtree-2.0.jar :
-	@$(call get_jar,https://github.com/jamjpan/GTreeJNI/releases/download/2.0/gtree-2.0.jar)
+dep/gtree-2.0.jar : | dep/gtree-2.0-linux
+	@printf "symlink gtree-2.0.jar\n"
+	@ln -s -t dep/ gtree-2.0-linux/$(@F)
+
+dep/libgtree.so : | dep/gtree-2.0-linux
+	@printf "symlink libgtree.so\n"
+	@ln -s -t dep/ gtree-2.0-linux/$(@F)
+
+dep/gtree-2.0-linux : | dep/archive/gtree-2.0-linux.tar
+	@printf "extract gtree-2.0-linux.tar\n"
+	@tar xvf dep/archive/gtree-2.0-linux.tar --one-top-level=dep/gtree-2.0-linux > /dev/null
+
+dep/archive/gtree-2.0-linux.tar :
+	@$(call get_tar,https://github.com/jamjpan/GTreeJNI/releases/download/2.0/gtree-2.0-linux.tar)
 
 ####### Dependencies for Jargo Desktop #########################################
 
@@ -108,9 +126,14 @@ dep/org-netbeans-modules-profiler-api-RELEASE139.jar :
 dep/org-openide-util-lookup-RELEASE139.jar :
 	@$(call get_jar,http://bits.netbeans.org/nexus/content/repositories/visualvm/com/sun/tools/visualvm/api/org-openide-util-lookup/RELEASE139/org-openide-util-lookup-RELEASE139.jar)
 
-$(JFX) : | dep/archive/openjfx-13.0.1_linux-x64_bin-sdk.zip
-	@mv dep/javafx-sdk-13.0.1/lib/$(@F) dep/.
+$(JFX) : | dep/javafx-sdk-13.0.1
+	@printf "symlink $(@F)\n"
+	@ln -s -t dep/ javafx-sdk-13.0.1/lib/$(@F)
+
+dep/javafx-sdk-13.0.1 : | dep/archive/openjfx-13.0.1_linux-x64_bin-sdk.zip
+	@printf "extract javafx-sdk-13.0.1\n"
+	@unzip dep/archive/openjfx-13.0.1_linux-x64_bin-sdk.zip -d dep/ > /dev/null
 
 dep/archive/openjfx-13.0.1_linux-x64_bin-sdk.zip :
-	@$(call get_zip,https://download2.gluonhq.com/openjfx/13.0.1/openjfx-13.0.1_linux-x64_bin-sdk.zip,openjfx-13.0.1_linux-x64_bin-sdk.zip)
+	@$(call get_zip,https://download2.gluonhq.com/openjfx/13.0.1/openjfx-13.0.1_linux-x64_bin-sdk.zip)
 
