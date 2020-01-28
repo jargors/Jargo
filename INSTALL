@@ -1,13 +1,11 @@
 Building and Installation
 
-Jargo must be installed before it can be used by other programs. To "install"
-Jargo means to simply build the jar archive and place it in a directory
-accessible by the `java` program.
+To "install" Jargo, build the jar and place it in a directory accessible by
+`java`. You can put it with your other Java libraries.
 
-A variety of free software programs are used to build Jargo. The build commands
-have been tested under Fedora 27 with the following software:
+These programs have been used to build Jargo, tested on Fedora 27:
 
-    GNU Make 4.2.1
+    GNU make 4.2.1
     GNU bash 4.4.23(1)-release (x86_64-redhat-linux-gnu)
     GNU coreutils 8.27 (cat, echo, printf, mv, rm)
     GNU Wget 1.19.5
@@ -19,37 +17,34 @@ have been tested under Fedora 27 with the following software:
     unzip 6.00
     noweb 2.12 (noweave, notangle) (optional) (https://github.com/nrnrnr/noweb)
 
-Ensure that these programs are in your PATH and accessible by the terminal.
-
 Running `make` in this directory will show a list of build commands. Running
 `make all` will fetch the third-party dependencies into the dep/ folder, create
 the pdf/jargo.pdf documentation, and create the jar/jargors-1.0.0.jar Java
-library. If you already have the dependencies (listed at the bottom), you may
-want to skip fetching them. In this case,
-  - to create the documentation, run `make pdf`; then
-  - to create the library, run `make jar`.
+library. If you already have the dependencies (listed below), you may want to
+skip fetching them. You can use `make pdf` to build the documentation followed
+by `make jar` to build the library.
 
 For those without the noweave and notangle programs, TeX and Java source files
-are included in the doc/ and java/ directories. Running `make purge` will
-delete these files, and you will have to fetch them again from the git repo.
-But if you do have the noweave and notangle programs, then
-  - to regenerate the TeX and Java source files, run `make src`.
+are included in the doc/ and java/ directories. Beware! Running `make purge`
+will delete these files, and you will have to fetch them again from the git
+repo.  But if you do have the noweave and notangle programs, then use `make src`
+to regenerate the TeX and Java source files.
 
 Jargo uses third-party dependencies for compiling and at runtime. If you use
-the make commands to build Jargo, the dependencies MUST be in the dep/ folder.
-This folder is specified as the classpath in makejar.mk. If you don't want to
-put dependencies into dep/ because you already have the dependencies located in
-some other folder on your machine, you could edit makejar.mk to use a different
-directory in the -cp option, or you could symlink the dependencies into the
-dep/ folder. If your dependencies are all in one directory, you could just
-symlink the entire directory,
-    ln -s /your/dependencies/directory dep
+the make commands to build Jargo, the dependencies MUST be in the dep/ folder
+because this folder is used as the classpath in makejar.mk. If you don't want
+to put dependencies into dep/ because you already have the dependencies in some
+other folder on your machine, then you could edit makejar.mk to use a different
+directory, or you could symlink the dependencies into the dep/ folder. If your
+dependencies are all in one directory, you could just symlink the whole
+directory, for example
+    ln -s /your/directory dep
 
-Here are the dependencies.
+Here are all the dependencies.
 
   JavaFX SDK - Jargo uses JavaFX for the graphical Desktop program. JavaFX
     includes some platform-specific compiled components. The `make dep` command
-    will fetch the Linux SDK. If you are on a different platform, you will need
+    will fetch the Linux SDK. IF YOU ARE ON A DIFFERENT PLATFORM, you will need
     to download JavaFX SDK manually from the JavaFX website:
         https://gluonhq.com/products/javafx/
 
@@ -103,7 +98,7 @@ Here are the dependencies.
 
     jamjpan/GTreeJNI - used to provide G-tree functionality for Java. GTreeJNI
       uses a compiled component. The `make dep` command will fetch the Linux
-      release. If you are on a different platform, you will need to compile the
+      release. IF YOU ARE ON A DIFFERENT PLATFORM, you will need to compile the
       component manually for your platform. Visit the website for more info:
         https://github.com/jamjpan/GTreeJNI
 
@@ -120,8 +115,8 @@ Here are the dependencies.
         org-netbeans-modules-profiler-api-RELEASE139.jar
         org-openide-util-lookup-RELEASE139.jar
 
-To run a Jargo-based application, you will additionally need the Apache Derby
-database software in your DERBY_PATH. See launcher.sh for an example of runtime
-parameters. You can also check out the example/ folder for run instructions.
-For more information about Apache Derby, visit https://db.apache.org/derby/.
+To run a Jargo-based application, you will also need the Apache Derby database
+derby.jar in your DERBY_PATH. See launcher.sh for example runtime parameters.
+You can also check out the example/ folder for run instructions. For more
+information about Apache Derby, visit https://db.apache.org/derby/.
 
