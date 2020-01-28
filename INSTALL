@@ -1,7 +1,9 @@
-Building and Installation
+INSTALLATION
 
 To "install" Jargo, build the jar and place it in a directory accessible by
 `java`. You can put it with your other Java libraries.
+
+BUILD TOOLS
 
 These programs have been used to build Jargo, tested on Fedora 27:
 
@@ -17,30 +19,29 @@ These programs have been used to build Jargo, tested on Fedora 27:
     unzip 6.00
     noweb 2.12 (noweave, notangle) (optional) (https://github.com/nrnrnr/noweb)
 
-Running `make` in this directory will show a list of build commands. Running
-`make all` will fetch the third-party dependencies into the dep/ folder, create
-the pdf/jargo.pdf documentation, and create the jar/jargors-1.0.0.jar Java
-library. If you already have the dependencies (listed below), you may want to
-skip fetching them. You can use `make pdf` to build the documentation followed
-by `make jar` to build the library.
+BUILD COMMANDS
 
-For those without the noweave and notangle programs, TeX and Java source files
-are included in the doc/ and java/ directories. Beware! Running `make purge`
-will delete these files, and you will have to fetch them again from the git
-repo.  But if you do have the noweave and notangle programs, then use `make src`
-to regenerate the TeX and Java source files.
+Running `make` in this directory will show a list of build commands.
+- `make dep` will download the dependencies into the dep/ folder.
+- `make jar` will build the library.
+- `make pdf` will build the documentation.
+- `make all` will execute `dep`, `jar`, and `pdf` targets.
+- `make clean` will delete the library, documentation, and java objects.
+- `make purge` will execute `clean` and also delete the Java and TeX sources.
+- `make src` will regenerate the Java and TeX sources from noweb files.
 
-Jargo uses third-party dependencies for compiling and at runtime. If you use
-the make commands to build Jargo, the dependencies MUST be in the dep/ folder
-because this folder is used as the classpath in makejar.mk. If you don't want
-to put dependencies into dep/ because you already have the dependencies in some
-other folder on your machine, then you could edit makejar.mk to use a different
-directory, or you could symlink the dependencies into the dep/ folder. If your
-dependencies are all in one directory, you could just symlink the whole
+BUILD PREREQUISITES
+
+Jargo uses third-party dependencies during compilation. These dependencies MUST
+be in the dep/ folder because this folder is used as the classpath in
+makejar.mk. If you don't want to put dependencies into dep/ because you have
+them in some other folder on your machine, you could edit makejar.mk to use a
+different directory, or you could symlink the dependencies into dep/. If your
+dependencies are all in one directory, you could simply symlink the whole
 directory, for example
     ln -s /your/directory dep
 
-Here are all the dependencies.
+Here are all the dependencies. PLATFORM-SPECIFIC COMPONENTS marked with *.
 
   JavaFX SDK - Jargo uses JavaFX for the graphical Desktop program. JavaFX
     includes some platform-specific compiled components. The `make dep` command
@@ -59,27 +60,27 @@ Here are all the dependencies.
         javafx.swing.jar
         javafx-swt.jar
         javafx.web.jar
-        libavplugin-54.so
-        libavplugin-56.so
-        libavplugin-57.so
-        libavplugin-ffmpeg-56.so
-        libavplugin-ffmpeg-57.so
-        libavplugin-ffmpeg-58.so
-        libdecora_sse.so
-        libfxplugins.so
-        libglassgtk2.so
-        libglassgtk3.so
-        libglass.so
-        libgstreamer-lite.so
-        libjavafx_font_freetype.so
-        libjavafx_font_pango.so
-        libjavafx_font.so
-        libjavafx_iio.so
-        libjfxmedia.so
-        libjfxwebkit.so
-        libprism_common.so
-        libprism_es2.so
-        libprism_sw.so
+        *libavplugin-54.so
+        *libavplugin-56.so
+        *libavplugin-57.so
+        *libavplugin-ffmpeg-56.so
+        *libavplugin-ffmpeg-57.so
+        *libavplugin-ffmpeg-58.so
+        *libdecora_sse.so
+        *libfxplugins.so
+        *libglassgtk2.so
+        *libglassgtk3.so
+        *libglass.so
+        *libgstreamer-lite.so
+        *libjavafx_font_freetype.so
+        *libjavafx_font_pango.so
+        *libjavafx_font.so
+        *libjavafx_iio.so
+        *libjfxmedia.so
+        *libjfxwebkit.so
+        *libprism_common.so
+        *libprism_es2.so
+        *libprism_sw.so
 
     Apache DBCP2 - to provide database connection pooling.
         http://commons.apache.org/proper/commons-dbcp/
@@ -103,7 +104,7 @@ Here are all the dependencies.
         https://github.com/jamjpan/GTreeJNI
 
         gtree-2.0.jar
-        libgtree.so
+        *libgtree.so
 
     VisualVM Charting Components - used to provide charting functionality.
         https://github.com/oracle/visualvm
