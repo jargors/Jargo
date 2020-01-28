@@ -5,41 +5,43 @@
 
 Jargo is developed using the
 Noweb\footnote{\url{https://www.cs.tufts.edu/~nr/noweb/}} literate
-programming\footnote{\url{http://literateprogramming.com/}} tool.  The files in
+programming\footnote{\url{http://literateprogramming.com/}} tool. The files in
 the {\tt{}src} directory are the source files for this document ({\tt{}jargo.pdf})
-and the Java code ({\tt{}java/*.java}, {\tt{}jar/jargors-1.0.0.jar}).  See the
-\texttt{Makefile} for build details. Yes, \textit{\texttt{Makefile}}. Some
-might wonder why I didn't use a build tool like Ant, Maven, or Gradle. The
-reason is that while those tools are great for managing dependencies, classes,
-and targets for large projects, I think Jargo is small enough ($<$ 3,500 lines
-of core code) and with only five (!) dependencies that a build tool would be
-overkill. Hence anybody with GNU \texttt{make}, the Java~11 JDK, and the
-dependencies can build and run Jargo. The dependencies can be easily obtained
-from the Internet by using the included \texttt{getdeps.sh} script.
+and the Java code ({\tt{}java/*.java}, {\tt{}jar/jargors-1.0.0.jar}).
 
-To anybody reading this document, keep in mind that ultimately it is
-\emph{source code}. Its main purpose is to produce a working Java library. The
-idea is that the flexibility of the chunks lets the code be reasoned about in
-an organized way to reduce the occurrence of bugs. The best way to read it is
-to put on your hacker hat. But if don't want to spare the energy, I
-am spending some effort to write a user manual to make up Part I. This effort
-is ongoing.
-
-At the end of the day, Jargo is basically a
-CRUD\footnote{\url{https://en.wikipedia.org/wiki/Create,_read,_update_and_delete}},
-albeit with a powerful data model for representing ridesharing systems. As
-such, organizing the class methods by functionality seems sensible.  Literate
-programming allows us to define chunks of code which we can reference anywhere
-we like. Here I've put all the CRUD chunks into Part II Chapters x--y and then
-referenced them in the appropriate classes in the remaining chapters. Methods
-specific to G-tree are located in Chapter x.  Non-CRUD methods specific to each
-of the Jargo classes are located in Chapters x--y. The actual data definition
-makes up Part III and comprises Chapters~\ref{tables}~and~\ref{views}.
+Part~I of this document is the user manual.
+\begin{itemize}
+\item Chapter~1 introduces the Jargo data model.
+\item Chapter~2--3 gives instructions for building and running Jargo programs.
+\end{itemize}
+Part~II contains the bulk of the production code. The Class Overview section
+lists the seven library classes and their methods. To see a method definition,
+turn to the page reference next to the method name. Methods are organized
+by functionality.
+\begin{itemize}
+\item Chapter~4 details read methods used to retrieve simulation state values,
+  for example the number of ridesharing customers.
+\item Chapter~5 details write methods used to add, remove, or update state
+  values.
+\item Chapter~6 details administrative methods for performing various tasks,
+  such as connecting to a database.
+\item Chapter~7 details methods used to interact with G-tree.
+\item Chapters~8--14 details the classes, including their member variables
+  and constructors.
+\item Chapter~15 details Jargo's support for Java Mangement Extensions (JMX).
+\end{itemize}
+Part~III contains SQL statements for the Jargo data model.
+\begin{itemize}
+\item Chapter~16 details the SQL tables.
+\item Chapter~17 details the SQL views.
+\end{itemize}
+Part~IV is the appendix and contains Noweb chunks and identifiers used
+throughout the document.
 
 \bigskip
 \begin{flushright}
 James\\
-December 4, 2019
+January 28, 2020
 \end{flushright}
 
 \nwfilename{src/tex/Preface.nw}\nwfilename{src/tex/Introduction.nw}\nwbegindocs{0}\part{User Manual}
