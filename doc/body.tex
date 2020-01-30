@@ -27,25 +27,25 @@ contain the imports, member variables, and constructors for each of the classes.
 Finally, Chapter~15 contains Beans for the Java Management Extension (JMX).
 \item Part~III contains SQL statements for the Jargo data model. Chapter~16
 lists the SQL tables, and Chapter~17 lists the SQL views.
-\item Part~IV is the appendix and contains Noweb chunks and identifiers used
+\item Part~IV is the appendix. It contains Noweb chunks and identifiers used
 throughout the document.
 \end{itemize}
 
 \section*{What is Jargo?}
 
 Jargo is a Java library that provides real-time ridesharing simulation. My
-goal is to help researchers evaluate the quality of ridesharing algorithms.
-Jargo offers:
+intention for developing this library is to help researchers evaluate the
+quality of ridesharing algorithms. Jargo offers:
 \begin{itemize}
 \item customizable real-time customers and vehicles;
 \item microscopic vehicle routing;
 \item modular algorithms and traffic conditions;
 \item various out-of-the-box quality-of-service metrics.
 \end{itemize}
-Due to these features, it can be used to:
+Thanks to these features, it can be used to:
 \begin{itemize}
 \item evaluate the effects of different customer and vehicle configurations,
-  including customer demand surges and spatial distributions;
+  such as customer demand surges and extreme spatial distributions;
 \item evaluate the effects of algorithm throughput, and observe how
   throughput changes over time;
 \item evaluate the effects of traffic;
@@ -55,12 +55,10 @@ Jargo is licensed under the GNU General Public License, Version 3.
 
 \section*{Why Literate Programming?}
 
-All programming languages impose restrictions on how code is structured. For
-Java, code must be organized into classes, with each class acting as a
-container for a set of related methods. Sometimes, code is better organized in
-other ways instead of by the structure imposed by the language. For example,
-suppose you have a \texttt{Cat} and \texttt{Dog} class, and each have a
-\texttt{speak} method:
+What I found particularly powerful about literate programming is that code can
+be structured in any way and not just in the way imposed by the programming
+language. For example, suppose you have a \texttt{Cat} and \texttt{Dog} class,
+and each have a \texttt{speak} method:
 \begin{verbatim}
 class Cat {
   public void speak() {
@@ -91,7 +89,7 @@ class Cat {
   <Cat speak>
 }
 class Dog {
-  <Dog speak}
+  <Dog speak>
 }
 \end{verbatim}
 Putting the \texttt{speak} methods together lets you reason about them as a
@@ -120,11 +118,14 @@ January 28, 2020
 \renewcommand{\thepage}{\arabic{page}}
 \setcounter{page}{1}
 
-\fbox{\parbox{\textwidth}{The information in this chapter is not necessary for
-using Jargo. Skip to \hyperref[ch:building]{Building Jargo from Source}
-or \hyperref[ch:getting]{Getting Started}.}}
+\begin{tikzpicture}[remember picture,overlay]
+\node[anchor=east,inner sep=0pt] at (current page text area.east|-0,3cm) {
+  \fbox{\parbox{.33\textwidth}{\small This chapter is not necessary for
+  using Jargo. Skip to \hyperref[ch:building]{Building Jargo from Source}
+  or \hyperref[ch:getting]{Getting Started}.}}
+};
+\end{tikzpicture}
 
-\vspace{2em}
 Ridesharing can be formulated as a decision problem where the objective is to
 determine the optimal customer-to-vehicle assignments. Optimizing a single
 assignment produces a local optima whereas optimizing the aggregated
@@ -216,7 +217,7 @@ equations. These operations will turn out to be useful for formalizing certain
 concepts such as pick-up and drop-off times for a customer or the cruising and
 service distance for a vehicle.
 
-\begin{mdframed}
+\begin{mdframed}[backgroundcolor=lightgray,hidealllines=true]
 \small
 \subsubsection*{Brief Primer on Relations}
 The following briefly overviews the concept of relations and introduces some
@@ -282,20 +283,16 @@ Type 1 & Single customer traveling alone \\
 Type 2 & Group of customers traveling together \\
 \hline
 Type 3 & Ridesharing vehicle with a predefined final
-    destination\footnote{For example a carpooling vehicle.} \\
+    destination \\
 Type 4 & Taxi-like vehicle continually serving customers without an
-    explicit destination of its own\footnote{A Type 4 vehicle could have an
-    eventual destination, for example a refueling station; but if the latest
-    acceptable arrival time is outside the time span of the ridesharing
-    scenario of interest, the destination is not considered. Otherwise, the
-    vehicle would be classified as Type 3.}. \\
+    explicit destination of its own \\
 \hline
 \end{tabular}
 \caption{Ridesharing user properties.}
 \label{tab:user-properties}
 \begin{tabular}{|c|p{140mm}|}
 \hline
-Label & Description \\
+Prop. & Description \\
 \hline
 P1 & \hi{Load.} Each user has a non-zero load, indicating a
 number of needed seats. For Type 1 users the load is 1, indicating they only
@@ -321,7 +318,7 @@ that service can end. The early time precedes the late time.\\
 \label{tab:user-rules}
 \begin{tabular}{|c|p{140mm}|}
 \hline
-Label & Description \\
+Prop. & Description \\
 \hline
 P4 & \hi{Motion.} Users are bound to a network of roads, for
 example the streets of a city. Only vehicles may directly travel along the
