@@ -12,8 +12,6 @@ JAVA1=$(addsuffix .java, $(subst src/core/,java/core/,$(basename $(wildcard src/
 JAVA2=$(addsuffix .java, $(subst src/cli/,java/cli/,$(basename $(wildcard src/cli/*.nw))))
 JAVA3=$(addsuffix .java, $(subst src/gui/,java/gui/,$(basename $(wildcard src/gui/*.nw))))
 
-.PHONY : _mod all dep src jar pdf purge clean
-
 # Check if the user has the required build tools (poor man's autoconf). The
 # 'command' command should work on all POSIX systems.
 bin_make:=$(shell command -v make 2> /dev/null)
@@ -26,6 +24,8 @@ bin_texfot:=$(shell command -v texfot 2> /dev/null)
 bin_unzip:=$(shell command -v unzip 2> /dev/null)
 bin_noweave:=$(shell command -v noweave 2> /dev/null)
 bin_notangle:=$(shell command -v notangle 2> /dev/null)
+
+.PHONY : _mod all dep src jar pdf purge clean
 
 # Print the message of the day.
 _mod :
