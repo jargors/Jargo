@@ -7,10 +7,9 @@
 VERSION = 1.0.0
 
 # Here I am getting the names of all the *.class files to be compiled.
-CLASS1=$(addsuffix .class, $(subst java/core/,com/github/jargors/core/,$(basename $(wildcard java/core/*.java))))
-CLASS2=$(addsuffix .class, $(subst java/gui/,com/github/jargors/gui/,$(basename $(wildcard java/gui/*.java))))
+CLASS1=$(addsuffix .class, $(subst java/class/,com/github/jargors/class/,$(basename $(wildcard java/class/*.java))))
+CLASS2=$(addsuffix .class, $(subst java/ui/,com/github/jargors/ui/,$(basename $(wildcard java/ui/*.java))))
 CLASS3=$(addsuffix .class, $(subst java/jmx/,com/github/jargors/jmx/,$(basename $(wildcard java/jmx/*.java))))
-CLASS4=$(addsuffix .class, $(subst java/cli/,com/github/jargors/cli/,$(basename $(wildcard java/cli/*.java))))
 
 .PHONY : all compile jar clean _prep
 
@@ -18,7 +17,7 @@ CLASS4=$(addsuffix .class, $(subst java/cli/,com/github/jargors/cli/,$(basename 
 all : compile jar _prep
 
 # This target produces all the Java bytecode in com/, along with build.log.
-compile : _prep $(CLASS1) $(CLASS2) $(CLASS3) $(CLASS4)
+compile : _prep $(CLASS1) $(CLASS2) $(CLASS3)
 
 # This target produces jar/jargors-VERSION.jar and build.log.
 jar : compile
@@ -52,20 +51,16 @@ endef
 ################################################################################
 # Some classes use code chunks from multiple *.java files, so I just pass all
 # the java files as arguments to javac.
-com/github/jargors/core/%.class : java/core/%.java
-	@printf "compile java/core sources...\n";
+com/github/jargors/class/%.class : java/class/%.java
+	@printf "compile java/class sources...\n";
 	@$(call run, javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:dep:dep/* java/*/*.java)
 
-com/github/jargors/gui/%.class : java/gui/%.java
-	@printf "compile java/gui sources...\n";
+com/github/jargors/ui/%.class : java/ui/%.java
+	@printf "compile java/ui sources...\n";
 	@$(call run, javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:dep:dep/* java/*/*.java)
 
 com/github/jargors/jmx/%.class : java/jmx/%.java
 	@printf "compile java/jmx sources...\n";
-	@$(call run, javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:dep:dep/* java/*/*.java)
-
-com/github/jargors/cli/%.class : java/cli/%.java
-	@printf "compile java/cli sources...\n";
 	@$(call run, javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:dep:dep/* java/*/*.java)
 
 # Delete any existing com/ and build.log so our outputs are clean.
