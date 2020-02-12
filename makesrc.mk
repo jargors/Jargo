@@ -1,20 +1,21 @@
 # Get names of *.java files to be tangled by looking through src/
 JAVA1=$(addsuffix .java, $(subst src/,java/,$(basename $(wildcard src/*.nw))))
 JAVA2=$(addsuffix .java, $(subst src/desktop/,java/desktop/,$(basename $(wildcard src/desktop/*.nw))))
+JAVA3=$(addsuffix .java, $(subst src/cli/,java/cli/,$(basename $(wildcard src/cli/*.nw))))
 
 .PHONY : all java tex clean
 
 all : java tex
 
 # Tangle the *.java files from the *.nw files
-java : $(JAVA1) $(JAVA2)
+java : $(JAVA1) $(JAVA2) $(JAVA3)
 
 # Weave body.tex from the *.nw files
 tex : doc/body.tex
 
 # Remove *.java and body.tex files
 clean :
-	@rm -f $(JAVA1) $(JAVA2)
+	@rm -f $(JAVA1) $(JAVA2) $(JAVA3)
 	@rm -f doc/body.tex
 
 ################################################################################
@@ -26,6 +27,10 @@ $(JAVA1) : src/*.nw src/*/*.nw
 $(JAVA2) : src/*.nw src/*/*.nw
 	@printf "tangle $@...\n"
 	@notangle -R$(subst java/desktop/,,$@) src/*.nw src/*/*.nw > $@
+
+$(JAVA3) : src/*.nw src/*/*.nw
+	@printf "tangle $@...\n"
+	@notangle -R$(subst java/cli/,,$@) src/*.nw src/*/*.nw > $@
 
 # Weave the *.nw files in the right order
 TEXSRCS = \
@@ -44,6 +49,7 @@ TEXSRCS = \
 	src/Client.nw \
 	src/Traffic.nw \
 	src/Tools.nw \
+	src/cli/Command.nw \
 	src/desktop/DesktopController.nw \
 	src/tex/JMX.nw \
 	src/tex/DataDefinition.nw

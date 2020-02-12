@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
-_CLASSPATH=.:../jar/*:../deps:../deps/*:./algo/*:./traffic/*
+## This script launches example/app
 
+
+_CLASSPATH=.:jar/*:deps:deps/*:example/algo/*:example/traffic/*
 if [ -z ${DERBY_PATH} ];
     then
         echo "Set DERBY_PATH before continuing!";
@@ -9,20 +11,19 @@ if [ -z ${DERBY_PATH} ];
     else
         echo "Using Derby directory '$DERBY_PATH'";
 fi
-
 java \
     -Xmx6g \
-    -Djava.library.path=../deps \
+    -Djava.library.path=dep \
     -Dderby.language.statementCacheSize=200 \
     -Dderby.locks.deadlockTrace=false \
-    -Dderby.locks.monitor=true \
+    -Dderby.locks.monitor=false \
     -Dderby.storage.pageCacheSize=8000 \
-    -Djargors.storage.debug=true \
-    -Djargors.controller.debug=true \
+    -Djargors.storage.debug=false \
+    -Djargors.controller.debug=false \
     -Djargors.controller.clock_start=0 \
     -Djargors.controller.clock_end=1800 \
     -Djargors.client.debug=false \
-    -Djargors.traffic.debug=true \
+    -Djargors.traffic.debug=false \
     -cp $_CLASSPATH:$DERBY_PATH/derby.jar \
 app $@
 
