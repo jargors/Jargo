@@ -1,38 +1,50 @@
-# Get names of *.java files to be tangled by looking through src/
-JAVA1=$(addsuffix .java, $(subst src/,java/,$(basename $(wildcard src/*.nw))))
-JAVA2=$(addsuffix .java, $(subst src/desktop/,java/desktop/,$(basename $(wildcard src/desktop/*.nw))))
+# This file describes how to compile the noweb files in the src/ directory into
+# Java and LaTeX code. The outputs of the make commands are the Java files in
+# the java/ directory and doc/body.tex. IMPORTANT: the 'all', 'java', and 'tex'
+# targets require noweb programs 'notangle' and 'noweave' in your PATH.
+# Additionally, noweb must be compiled using the icont option (instead of awk).
+
+# Here I am getting the names of the *.java files to be tangled by looking for
+# all the noweb files in src/. None of the files in tex/ produce Java classes,
+# so that subdirectory is omitted.
+JAVA1=$(addsuffix .java, $(subst src/core/,java/core/,$(basename $(wildcard src/core/*.nw))))
+JAVA2=$(addsuffix .java, $(subst src/gui/,java/gui/,$(basename $(wildcard src/gui/*.nw))))
 JAVA3=$(addsuffix .java, $(subst src/cli/,java/cli/,$(basename $(wildcard src/cli/*.nw))))
 
 .PHONY : all java tex clean
 
+# This target produces all the Java files in java/ and also doc/body.tex.
 all : java tex
 
-# Tangle the *.java files from the *.nw files
+# This target produces all the Java files in java/.
 java : $(JAVA1) $(JAVA2) $(JAVA3)
 
-# Weave body.tex from the *.nw files
+# This target produces doc/body.tex.
 tex : doc/body.tex
 
-# Remove *.java and body.tex files
+# Remove *.java and doc/body.tex files
 clean :
 	@rm -f $(JAVA1) $(JAVA2) $(JAVA3)
 	@rm -f doc/body.tex
 
+# The below instructions explain how to build Java files and doc/body.tex.
 ################################################################################
-# Just retangle all the noweb files for any java target
-$(JAVA1) : src/*.nw src/*/*.nw
+# Build Java files using 'notangle'. Some classes use code chunks from multiple
+# *.nw files, so I just pass all the noweb files as arguments to notangle.
+$(JAVA1) : src/*/*.nw
 	@printf "tangle $@...\n"
-	@notangle -R$(subst java/,,$@) src/*.nw src/*/*.nw > $@
+	@notangle -R$(subst java/core/,,$@) src/*/*.nw > $@
 
-$(JAVA2) : src/*.nw src/*/*.nw
+$(JAVA2) : src/*/*.nw
 	@printf "tangle $@...\n"
-	@notangle -R$(subst java/desktop/,,$@) src/*.nw src/*/*.nw > $@
+	@notangle -R$(subst java/gui/,,$@) src/*/*.nw > $@
 
-$(JAVA3) : src/*.nw src/*/*.nw
+$(JAVA3) : src/*/*.nw
 	@printf "tangle $@...\n"
-	@notangle -R$(subst java/cli/,,$@) src/*.nw src/*/*.nw > $@
+	@notangle -R$(subst java/cli/,,$@) src/*/*.nw > $@
 
-# Weave the *.nw files in the right order
+# Build doc/body.tex using 'noweave'. The order of the noweave arguments
+# matters, so I use a temporary variable TEXSRCS to establish the order.
 TEXSRCS = \
 	src/tex/Preface.nw \
 	src/tex/Introduction.nw \
@@ -43,18 +55,20 @@ TEXSRCS = \
 	src/tex/Writing.nw \
 	src/tex/Administration.nw \
 	src/tex/Gtree.nw \
-	src/Storage.nw \
-	src/Controller.nw \
-	src/Communicator.nw \
-	src/Client.nw \
-	src/Traffic.nw \
-	src/Tools.nw \
+	src/core/Storage.nw \
+	src/core/Controller.nw \
+	src/core/Communicator.nw \
+	src/core/Client.nw \
+	src/core/Traffic.nw \
+	src/core/Tools.nw \
 	src/cli/Command.nw \
-	src/desktop/DesktopController.nw \
+	src/gui/DesktopController.nw \
 	src/tex/JMX.nw \
 	src/tex/DataDefinition.nw
 
-doc/body.tex : src/*.nw src/*/*.nw
+# Here, the -delay option disables automatic preamble (I use doc/jargo.tex
+# instead), and the -index option creates hyperlink references to chunks.
+doc/body.tex : src/*/*.nw
 	@printf "weave $@...\n"
 	@noweave -delay -index $(TEXSRCS) > doc/body.tex
 

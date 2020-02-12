@@ -1,12 +1,21 @@
-# Get names of *.java files by looking through src/
-JAVA1=$(addsuffix .java, $(subst src/,java/,$(basename $(wildcard src/*.nw))))
-JAVA2=$(addsuffix .java, $(subst src/desktop/,java/desktop/,$(basename $(wildcard src/desktop/*.nw))))
+# This file describes the primary build targets. See the individual makefiles
+# 'makesrc.mk', 'makejar.mk', and 'makepdf.mk' for description of build outputs.
 
+# Make sure to update these variable for new releases.
 VERSION=1.0.0
+BUILD_DATE="January 20, 2020"
+
+# For the 'purge' target, I need to know the names of all the Java files that
+# were compiled from noweb sources. These can be safely deleted, as they can be
+# regenerated using the 'src' target.
+JAVA1=$(addsuffix .java, $(subst src/core/,java/core/,$(basename $(wildcard src/core/*.nw))))
+JAVA2=$(addsuffix .java, $(subst src/cli/,java/cli/,$(basename $(wildcard src/cli/*.nw))))
+JAVA3=$(addsuffix .java, $(subst src/gui/,java/gui/,$(basename $(wildcard src/gui/*.nw))))
 
 .PHONY : _mod all dep src jar pdf purge clean
 
-# Does the user have the required build tools?
+# Check if the user has the required build tools (poor man's autoconf). The
+# 'command' command should work on all POSIX systems.
 bin_make:=$(shell command -v make 2> /dev/null)
 bin_wget:=$(shell command -v wget 2> /dev/null)
 bin_latexmk:=$(shell command -v latexmk 2> /dev/null)
@@ -18,10 +27,11 @@ bin_unzip:=$(shell command -v unzip 2> /dev/null)
 bin_noweave:=$(shell command -v noweave 2> /dev/null)
 bin_notangle:=$(shell command -v notangle 2> /dev/null)
 
+# Print the message of the day.
 _mod :
 	@printf "_______________________________________________________________\n"
 	@printf "Jargo Build System\n"
-	@printf "  Jargo Version: $(VERSION) (January 20, 2020)\n"
+	@printf "  Jargo Version: $(VERSION) ($(BUILD_DATE))\n"
 	@printf "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
 	@printf "Required build tools:\n"
 ifndef bin_make
@@ -78,32 +88,36 @@ endif
 	@printf "Thank you!\n"
 	@printf "===============================================================\n"
 
+# This target produces pdf/jargo.pdf and jar/jargors-VERSION.jar, along with
+# intermediate build objects (dep/, com/, LaTeX objects).
 all : dep jar pdf
 	@printf "done all\n"
 
+# This target downloads dependencies into dep/.
 dep :
 	@printf "make dep\n"
 	@make -s -f makedep.mk
 	@printf "done dep\n"
 
-#jar : src
+# This target produces jar/jargors-VERSION.jar, along with com/.
 jar :
 	@printf "make jar\n"
 	@make -s -f makejar.mk
 	@printf "done jar\n"
 
-#pdf : src
+# This target produces pdf/jargo.pdf, along with LaTeX objects.
 pdf :
 	@printf "make pdf\n"
 	@make -s -f makepdf.mk
 	@printf "done pdf\n"
 
-#src : $(JAVA1) $(JAVA2)
+# This target produces all the Java files in java/ and doc/body.tex.
 src :
 	@printf "make src\n"
 	@make -s -f makesrc.mk
 	@printf "done src\n"
 
+# Remove jar/, pdf/, com/ (Java bytecode), build.log, and wget.log.
 clean :
 	@printf "make clean\n"
 	@if [ -d "jar" ]; then printf "remove jar/...\n"; rm -rf jar/ ; fi; \
@@ -113,13 +127,14 @@ clean :
 	 if [ -s "wget.log" ]; then printf "remove wget.log...\n"; rm -rf wget.log ; fi;
 	@printf "done clean\n"
 
+# In addition to 'clean', remove Java files in java/ and doc/body.tex.
 purge : clean
 	@printf "make purge\n"
-	@count=`ls -1 java/*.java 2>/dev/null | wc -l`; \
-	 if [ $$count != 0 ]; then printf "purge java/ srcs...\n"; rm -f $(JAVA1) $(JAVA2) ; fi; \
+	@printf "purge java/ srcs...\n"; rm -f $(JAVA1) $(JAVA2) $(JAVA3); \
 	 if [ -f "doc/body.tex" ]; then printf "purge doc/body.tex...\n"; rm -f doc/body.tex ; fi;
 	@printf "done purge\n"
 
+# Remove dep/.
 purgedep :
 	@printf "make purgedep\n"
 	@if [ -d "dep" ]; then printf "purge dep/...\n"; rm -rf dep/ ; fi;

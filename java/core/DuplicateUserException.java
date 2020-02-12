@@ -1,4 +1,4 @@
-package com.github.jargors.exceptions;
+package com.github.jargors.core;
 
 public class DuplicateUserException extends Exception {
   public DuplicateUserException() { }

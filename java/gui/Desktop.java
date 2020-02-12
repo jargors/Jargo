@@ -1,5 +1,5 @@
-package com.github.jargors.desktop;
-import com.github.jargors.desktop.DesktopController;
+package com.github.jargors.gui;
+import com.github.jargors.gui.DesktopController;
 import java.io.IOException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
