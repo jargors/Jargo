@@ -7,7 +7,7 @@
 # Here I am getting the names of the *.java files to be tangled by looking for
 # all the noweb files in src/. None of the files in tex/ produce Java classes,
 # so that subdirectory is omitted.
-JAVA1=$(addsuffix .java, $(subst src/class/,java/class/,$(basename $(wildcard src/class/*.nw))))
+JAVA1=$(addsuffix .java, $(subst src/core/,java/core/,$(basename $(wildcard src/core/*.nw))))
 JAVA2=$(addsuffix .java, $(subst src/ui/,java/ui/,$(basename $(wildcard src/ui/*.nw))))
 
 # Check if the user has the required build tools (poor man's autoconf). The
@@ -49,7 +49,7 @@ endif
 # *.nw files, so I just pass all the noweb files as arguments to notangle.
 $(JAVA1) : src/*/*.nw
 	@printf "tangle $@...\n"
-	@notangle -R$(subst java/class/,,$@) src/*/*.nw > $@
+	@notangle -R$(subst java/core/,,$@) src/*/*.nw > $@
 
 $(JAVA2) : src/*/*.nw
 	@printf "tangle $@...\n"
@@ -67,12 +67,12 @@ TEXSRCS = \
 	src/tex/Writing.nw \
 	src/tex/Administration.nw \
 	src/tex/Gtree.nw \
-	src/class/Storage.nw \
-	src/class/Controller.nw \
-	src/class/Communicator.nw \
-	src/class/Client.nw \
-	src/class/Traffic.nw \
-	src/class/Tools.nw \
+	src/core/Storage.nw \
+	src/core/Controller.nw \
+	src/core/Communicator.nw \
+	src/core/Client.nw \
+	src/core/Traffic.nw \
+	src/core/Tools.nw \
 	src/ui/Command.nw \
 	src/ui/DesktopController.nw \
 	src/tex/JMX.nw \

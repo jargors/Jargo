@@ -7,7 +7,7 @@
 VERSION = 1.0.0
 
 # Here I am getting the names of all the *.class files to be compiled.
-CLASS1=$(addsuffix .class, $(subst java/class/,com/github/jargors/class/,$(basename $(wildcard java/class/*.java))))
+CLASS1=$(addsuffix .class, $(subst java/core/,com/github/jargors/core/,$(basename $(wildcard java/core/*.java))))
 CLASS2=$(addsuffix .class, $(subst java/ui/,com/github/jargors/ui/,$(basename $(wildcard java/ui/*.java))))
 CLASS3=$(addsuffix .class, $(subst java/jmx/,com/github/jargors/jmx/,$(basename $(wildcard java/jmx/*.java))))
 
@@ -51,8 +51,8 @@ endef
 ################################################################################
 # Some classes use code chunks from multiple *.java files, so I just pass all
 # the java files as arguments to javac.
-com/github/jargors/class/%.class : java/class/%.java
-	@printf "compile java/class sources...\n";
+com/github/jargors/core/%.class : java/core/%.java
+	@printf "compile java/core sources...\n";
 	@$(call run, javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:dep:dep/* java/*/*.java)
 
 com/github/jargors/ui/%.class : java/ui/%.java

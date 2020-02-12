@@ -8,7 +8,7 @@ BUILD_DATE="January 20, 2020"
 # For the 'purge' target, I need to know the names of all the Java files that
 # were compiled from noweb sources. These can be safely deleted, as they can be
 # regenerated using the 'src' target.
-JAVA1=$(addsuffix .java, $(subst src/class/,java/class/,$(basename $(wildcard src/class/*.nw))))
+JAVA1=$(addsuffix .java, $(subst src/core/,java/core/,$(basename $(wildcard src/core/*.nw))))
 JAVA2=$(addsuffix .java, $(subst src/ui/,java/ui/,$(basename $(wildcard src/ui/*.nw))))
 
 # Check if the user has the required build tools (poor man's autoconf). The
