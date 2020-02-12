@@ -1,54 +1,54 @@
 INSTALLATION
 
 To "install" Jargo, build the jar and place it in a directory accessible by
-`java`. You can put it with your other Java libraries.
+'java'. You can put it with your other Java libraries.
 
 BUILD TOOLS
 
-These programs have been used to build Jargo, tested on Fedora 27:
+These programs have been used to build Jargo, tested on Fedora 27 and
+Debian 10 stable:
 
-    GNU make 4.2.1
-    GNU bash 4.4.23(1)-release (x86_64-redhat-linux-gnu)
-    GNU coreutils 8.27 (cat, echo, printf, mv, rm)
-    GNU Wget 1.19.5
-    latexmk 4.60
-    pdflatex 3.14159265-2.6-1.40.19 (TeX Live 2018)
-    javac 11.0.1
-    jar 11.0.1
-    texfot 1.37
-    unzip 6.00
-    noweb 2.12 (noweave, notangle) (optional) (https://github.com/nrnrnr/noweb)
+    GNU make (4.2.1)
+    GNU bash (4.4.23, 5.0.3)
+    GNU coreutils (8.27, 8.30)
+    GNU Wget (1.19.5, 1.20.1)
+    latexmk (4.60, 4.67)
+    pdflatex (3.14159265-2.6-1.40.19, ..-2.6-1.40.20) (TeX Live 2018, 2019)
+    javac (11.0.1, 13.0.2)
+    jar (11.0.1, 13.0.2)
+    texfot (1.37, 1.38)
+    unzip (6.00)
+    noweb (2.12 compiled with icont) (optional, https://github.com/nrnrnr/noweb)
 
 BUILD COMMANDS
 
-Running `make` in this directory will show a list of build commands.
-- `make dep` will download the dependencies into the dep/ folder.
-- `make jar` will build the library.
-- `make pdf` will build the documentation.
-- `make all` will execute `dep`, `jar`, and `pdf` targets.
-- `make clean` will delete the library, documentation, and java objects.
-- `make purge` will execute `clean` and also delete the Java and TeX sources.
-- `make src` will regenerate the Java and TeX sources from noweb files.
-For the documetation, you may need to run `make pdf` a few times in order to
-get the links resolved.
+Running 'make' in this directory will show a list of build commands.
+- 'make dep' will download the dependencies into the dep/ folder.
+- 'make jar' will build the library.
+- 'make pdf' will build the documentation.
+- 'make all' will execute 'dep', 'jar', and 'pdf' targets.
+- 'make clean' will delete the library, documentation, and java objects.
+- 'make purge' will execute 'clean' and also delete the Java and TeX sources.
+- 'make src' will regenerate the Java and TeX sources from noweb files.
+For the documetation, you may need to run 'make pdf' a few times in order to
+get the links resolved. See the FILES section for output files produced by make.
 
 BUILD PREREQUISITES
 
 Jargo uses third-party dependencies during compilation. These dependencies MUST
-be in the dep/ folder because this folder is used as the classpath in
-makejar.mk. If you don't want to put dependencies into dep/ because you have
-them in some other folder on your machine, you could edit makejar.mk to use a
-different directory, or you could symlink the dependencies into dep/. If your
-dependencies are all in one directory, you could simply symlink the whole
-directory, for example
-    ln -s /your/directory dep
+be in the dep/ folder as this folder is specified as the classpath in
+'makejar.mk'. If you already have the dependencies somewhere else on your
+computer, you could replace dep/ with a symlink to your dependencies folder, or
+you could edit 'makejar.mk' to use a different folder as the classpath.
 
-Here are all the dependencies. PLATFORM-SPECIFIC COMPONENTS marked with *.
+Here are all the dependencies. Beware, Jargo uses PLATFORM-SPECIFIC COMPONENTS.
+These have been marked with *.
 
   JavaFX SDK - Jargo uses JavaFX for the graphical Desktop program. JavaFX
-    includes some platform-specific compiled components. The `make dep` command
+    includes some platform-specific compiled components. The 'make dep' command
     will fetch the Linux SDK. IF YOU ARE ON A DIFFERENT PLATFORM, you will need
-    to download JavaFX SDK manually from the JavaFX website:
+    to download JavaFX SDK manually from the JavaFX website and extract it into
+    dep/. The website is:
         https://gluonhq.com/products/javafx/
 
     Jargo has been tested with version 13.0.1+1, but later versions will
@@ -100,7 +100,7 @@ Here are all the dependencies. PLATFORM-SPECIFIC COMPONENTS marked with *.
         commons-pool2-2.7.0.jar
 
     jamjpan/GTreeJNI - used to provide G-tree functionality for Java. GTreeJNI
-      uses a compiled component. The `make dep` command will fetch the Linux
+      uses a compiled component. The 'make dep' command will fetch the Linux
       release. IF YOU ARE ON A DIFFERENT PLATFORM, you will need to compile the
       component manually for your platform. Visit the website for more info:
         https://github.com/jamjpan/GTreeJNI
@@ -120,6 +120,6 @@ Here are all the dependencies. PLATFORM-SPECIFIC COMPONENTS marked with *.
 
 To run a Jargo-based application, you will also need the Apache Derby database
 derby.jar in your DERBY_PATH. See launcher.sh for example runtime parameters.
-You can also check out the example/ folder for run instructions. For more
+Check out the example/ folder for additionl run instructions. For more
 information about Apache Derby, visit https://db.apache.org/derby/.
 
