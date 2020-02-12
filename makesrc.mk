@@ -11,10 +11,18 @@ JAVA1=$(addsuffix .java, $(subst src/core/,java/core/,$(basename $(wildcard src/
 JAVA2=$(addsuffix .java, $(subst src/gui/,java/gui/,$(basename $(wildcard src/gui/*.nw))))
 JAVA3=$(addsuffix .java, $(subst src/cli/,java/cli/,$(basename $(wildcard src/cli/*.nw))))
 
-.PHONY : all java tex clean
+# Check if the user has the required build tools (poor man's autoconf). The
+# 'command' command should work on all POSIX systems.
+bin_noweave:=$(shell command -v noweave 2> /dev/null)
+bin_notangle:=$(shell command -v notangle 2> /dev/null)
+
+.PHONY : _precheck all java tex clean
 
 # This target produces all the Java files in java/ and also doc/body.tex.
-all : java tex
+# (most people are going to use 'src' target of Makefile, causing 'all' target
+# of this file to be built. The _precheck is added to this target. Running
+# 'make src java' or 'make src tex' will skip the _precheck.)
+all : _precheck java tex
 
 # This target produces all the Java files in java/.
 java : $(JAVA1) $(JAVA2) $(JAVA3)
@@ -29,6 +37,15 @@ clean :
 
 # The below instructions explain how to build Java files and doc/body.tex.
 ################################################################################
+# If the user doesn't have noweb, throw and error and stop.
+_precheck :
+ifndef bin_noweave
+	$(error "**ERROR: 'noweave' not found! target 'src' unavailable.")
+endif
+ifndef bin_notangle
+	$(error "**ERROR: 'notangle' not found! target 'src' unavailable.")
+endif
+
 # Build Java files using 'notangle'. Some classes use code chunks from multiple
 # *.nw files, so I just pass all the noweb files as arguments to notangle.
 $(JAVA1) : src/*/*.nw
