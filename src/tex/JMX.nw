@@ -8,6 +8,335 @@ call duration of the last invocation) and a \textit{Stats:} chunk that assigns
 values to the member variables. Each member variable must also have a
 corresponding \textit{get} method that returns the value of the variable.
 
+\section{Monitors and Beans}
+
+Clients (such as [[jconsole]] or VisualVM) call the ``Monitor'' methods to get
+and set variables during runtime via JMX. Each Monitor is its own class
+and implements an ``MBean'' that defines the interface.
+
+\subsection{\texttt{ClientMonitor} and \texttt{ClientMonitorMBean}}
+<<ClientMonitor.java>>=
+<<Package: [[jmx]]>>
+import com.github.jargors.core.Client;
+import com.github.jargors.jmx.ClientMonitorMBean;
+public class ClientMonitor implements ClientMonitorMBean {
+  private Client client = null;
+  public ClientMonitor(final Client client) {
+    this.client = client;
+  }
+  public int getStatClientQueueSize() {
+    return this.client.getStatClientQueueSize();
+  }
+  public long getStatClientHandleRequestDur() {
+    return this.client.getStatClientHandleRequestDur();
+  }
+}
+@
+<<ClientMonitorMBean.java>>=
+<<Package: [[jmx]]>>
+import com.github.jargors.core.Client;
+public interface ClientMonitorMBean {
+  public int getStatClientQueueSize();
+  public long getStatClientHandleRequestDur();
+}
+@
+
+\subsection{\texttt{CommunicatorMonitor} and \texttt{CommunicatorMonitorMBean}}
+<<CommunicatorMonitor.java>>=
+<<Package: [[jmx]]>>
+import com.github.jargors.core.Communicator;
+import com.github.jargors.jmx.CommunicatorMonitorMBean;
+public class CommunicatorMonitor implements CommunicatorMonitorMBean {
+  private Communicator communicator = null;
+  public CommunicatorMonitor(final Communicator communicator) {
+    this.communicator = communicator;
+  }
+  public long getStatQueryEdgeDur() {
+    return this.communicator.getStatQueryEdgeDur();
+  }
+  public long getStatQueryServerDistanceRemainingDur() {
+    return this.communicator.getStatQueryServerDistanceRemainingDur();
+  }
+  public long getStatQueryServerDurationRemainingDur() {
+    return this.communicator.getStatQueryServerDurationRemainingDur();
+  }
+  public long getStatQueryServerLoadMaxDur() {
+    return this.communicator.getStatQueryServerLoadMaxDur();
+  }
+  public long getStatQueryServerRouteRemainingDur() {
+    return this.communicator.getStatQueryServerRouteRemainingDur();
+  }
+  public long getStatQueryServerScheduleRemainingDur() {
+    return this.communicator.getStatQueryServerScheduleRemainingDur();
+  }
+  public long getStatQueryServersLocationsActiveDur() {
+    return this.communicator.getStatQueryServersLocationsActiveDur();
+  }
+  public long getStatQueryUserDur() {
+    return this.communicator.getStatQueryUserDur();
+  }
+  public long getStatQueryVertexDur() {
+    return this.communicator.getStatQueryVertexDur();
+  }
+}
+@
+<<CommunicatorMonitorMBean.java>>=
+<<Package: [[jmx]]>>
+import com.github.jargors.core.Communicator;
+public interface CommunicatorMonitorMBean {
+  public long getStatQueryEdgeDur();
+  public long getStatQueryServerDistanceRemainingDur();
+  public long getStatQueryServerDurationRemainingDur();
+  public long getStatQueryServerLoadMaxDur();
+  public long getStatQueryServerRouteRemainingDur();
+  public long getStatQueryServerScheduleRemainingDur();
+  public long getStatQueryServersLocationsActiveDur();
+  public long getStatQueryUserDur();
+  public long getStatQueryVertexDur();
+}
+@
+
+\subsection{\texttt{ControllerMonitor} and \texttt{ControllerMonitorMBean}}
+<<ControllerMonitor.java>>=
+<<Package: [[jmx]]>>
+import com.github.jargors.core.Controller;
+import com.github.jargors.jmx.ControllerMonitorMBean;
+public class ControllerMonitor implements ControllerMonitorMBean {
+  private Controller controller = null;
+  public ControllerMonitor(final Controller controller) {
+    this.controller = controller;
+  }
+  public int getStatControllerClock() {
+    return this.controller.getStatControllerClock();
+  }
+  public int getStatControllerClockReferenceDay() {
+    return this.controller.getStatControllerClockReferenceDay();
+  }
+  public int getStatControllerClockReferenceHour() {
+    return this.controller.getStatControllerClockReferenceHour();
+  }
+  public int getStatControllerClockReferenceMinute() {
+    return this.controller.getStatControllerClockReferenceMinute();
+  }
+  public int getStatControllerClockReferenceSecond() {
+    return this.controller.getStatControllerClockReferenceSecond();
+  }
+  public int getStatControllerRequestCollectionSize() {
+    return this.controller.getStatControllerRequestCollectionSize();
+  }
+  public int getStatControllerRequestCollectionDropped() {
+    return this.controller.getStatControllerRequestCollectionDropped();
+  }
+  public long getStatControllerRequestCollectionDur() {
+    return this.controller.getStatControllerRequestCollectionDur();
+  }
+  public long getStatQueryDur() {
+    return this.controller.getStatQueryDur();
+  }
+  public long getStatQueryEdgeDur() {
+    return this.controller.getStatQueryEdgeDur();
+  }
+  public long getStatQueryEdgeStatisticsDur() {
+    return this.controller.getStatQueryEdgeStatisticsDur();
+  }
+  public long getStatQueryEdgesCountDur() {
+    return this.controller.getStatQueryEdgesCountDur();
+  }
+  public long getStatQueryEdgesDur() {
+    return this.controller.getStatQueryEdgesDur();
+  }
+  public long getStatQueryMBRDur() {
+    return this.controller.getStatQueryMBRDur();
+  }
+  public long getStatQueryMetricRequestDistanceBaseTotalDur() {
+    return this.controller.getStatQueryMetricRequestDistanceBaseTotalDur();
+  }
+  public long getStatQueryMetricRequestDistanceBaseUnassignedTotalDur() {
+    return this.controller.getStatQueryMetricRequestDistanceBaseUnassignedTotalDur();
+  }
+  public long getStatQueryMetricRequestDistanceDetourTotalDur() {
+    return this.controller.getStatQueryMetricRequestDistanceDetourTotalDur();
+  }
+  public long getStatQueryMetricRequestDistanceTransitTotalDur() {
+    return this.controller.getStatQueryMetricRequestDistanceTransitTotalDur();
+  }
+  public long getStatQueryMetricRequestDurationPickupTotalDur() {
+    return this.controller.getStatQueryMetricRequestDurationPickupTotalDur();
+  }
+  public long getStatQueryMetricRequestDurationTransitTotalDur() {
+    return this.controller.getStatQueryMetricRequestDurationTransitTotalDur();
+  }
+  public long getStatQueryMetricRequestDurationTravelTotalDur() {
+    return this.controller.getStatQueryMetricRequestDurationTravelTotalDur();
+  }
+  public long getStatQueryMetricRequestTWViolationsTotalDur() {
+    return this.controller.getStatQueryMetricRequestTWViolationsTotalDur();
+  }
+  public long getStatQueryMetricServerDistanceBaseTotalDur() {
+    return this.controller.getStatQueryMetricServerDistanceBaseTotalDur();
+  }
+  public long getStatQueryMetricServerDistanceCruisingTotalDur() {
+    return this.controller.getStatQueryMetricServerDistanceCruisingTotalDur();
+  }
+  public long getStatQueryMetricServerDistanceServiceTotalDur() {
+    return this.controller.getStatQueryMetricServerDistanceServiceTotalDur();
+  }
+  public long getStatQueryMetricServerDistanceTotalDur() {
+    return this.controller.getStatQueryMetricServerDistanceTotalDur();
+  }
+  public long getStatQueryMetricServerDurationCruisingTotalDur() {
+    return this.controller.getStatQueryMetricServerDurationCruisingTotalDur();
+  }
+  public long getStatQueryMetricServerDurationServiceTotalDur() {
+    return this.controller.getStatQueryMetricServerDurationServiceTotalDur();
+  }
+  public long getStatQueryMetricServerDurationTravelTotalDur() {
+    return this.controller.getStatQueryMetricServerDurationTravelTotalDur();
+  }
+  public long getStatQueryMetricServerTWViolationsTotalDur() {
+    return this.controller.getStatQueryMetricServerTWViolationsTotalDur();
+  }
+  public long getStatQueryMetricServiceRateDur() {
+    return this.controller.getStatQueryMetricServiceRateDur();
+  }
+  public long getStatQueryMetricUserDistanceBaseTotalDur() {
+    return this.controller.getStatQueryMetricUserDistanceBaseTotalDur();
+  }
+  public long getStatQueryRequestTimeOfArrivalDur() {
+    return this.controller.getStatQueryRequestTimeOfArrivalDur();
+  }
+  public long getStatQueryRequestTimeOfDepartureDur() {
+    return this.controller.getStatQueryRequestTimeOfDepartureDur();
+  }
+  public long getStatQueryRequestsCountDur() {
+    return this.controller.getStatQueryRequestsCountDur();
+  }
+  public long getStatQueryRequestsCountActiveDur() {
+    return this.controller.getStatQueryRequestsCountActiveDur();
+  }
+  public long getStatQueryRequestsCountCompletedDur() {
+    return this.controller.getStatQueryRequestsCountCompletedDur();
+  }
+  public long getStatQueryRequestsQueuedDur() {
+    return this.controller.getStatQueryRequestsQueuedDur();
+  }
+  public long getStatQueryServerRouteActiveDur() {
+    return this.controller.getStatQueryServerRouteActiveDur();
+  }
+  public long getStatQueryServerRouteDur() {
+    return this.controller.getStatQueryServerRouteDur();
+  }
+  public long getStatQueryServerRouteRemainingDur() {
+    return this.controller.getStatQueryServerRouteRemainingDur();
+  }
+  public long getStatQueryServerScheduleDur() {
+    return this.controller.getStatQueryServerScheduleDur();
+  }
+  public long getStatQueryServerTimeOfDepartureDur() {
+    return this.controller.getStatQueryServerTimeOfDepartureDur();
+  }
+  public long getStatQueryServersActiveDur() {
+    return this.controller.getStatQueryServersActiveDur();
+  }
+  public long getStatQueryServersCountDur() {
+    return this.controller.getStatQueryServersCountDur();
+  }
+  public long getStatQueryServersCountActiveDur() {
+    return this.controller.getStatQueryServersCountActiveDur();
+  }
+  public long getStatQueryServersLocationsActiveDur() {
+    return this.controller.getStatQueryServersLocationsActiveDur();
+  }
+  public long getStatQueryUserDur() {
+    return this.controller.getStatQueryUserDur();
+  }
+  public long getStatQueryVertexDur() {
+    return this.controller.getStatQueryVertexDur();
+  }
+  public long getStatQueryVerticesCountDur() {
+    return this.controller.getStatQueryVerticesCountDur();
+  }
+  public long getStatQueryVerticesDur() {
+    return this.controller.getStatQueryVerticesDur();
+  }
+}
+@
+<<ControllerMonitorMBean.java>>=
+<<Package: [[jmx]]>>
+import com.github.jargors.core.Controller;
+public interface ControllerMonitorMBean {
+  public int  getStatControllerClock();
+  public int  getStatControllerClockReferenceDay();
+  public int  getStatControllerClockReferenceHour();
+  public int  getStatControllerClockReferenceMinute();
+  public int  getStatControllerClockReferenceSecond();
+  public int  getStatControllerRequestCollectionSize();
+  public int  getStatControllerRequestCollectionDropped();
+  public long getStatControllerRequestCollectionDur();
+  public long getStatQueryDur();
+  public long getStatQueryEdgeDur();
+  public long getStatQueryEdgeStatisticsDur();
+  public long getStatQueryEdgesCountDur();
+  public long getStatQueryEdgesDur();
+  public long getStatQueryMBRDur();
+  public long getStatQueryMetricRequestDistanceBaseTotalDur();
+  public long getStatQueryMetricRequestDistanceBaseUnassignedTotalDur();
+  public long getStatQueryMetricRequestDistanceDetourTotalDur();
+  public long getStatQueryMetricRequestDistanceTransitTotalDur();
+  public long getStatQueryMetricRequestDurationPickupTotalDur();
+  public long getStatQueryMetricRequestDurationTransitTotalDur();
+  public long getStatQueryMetricRequestDurationTravelTotalDur();
+  public long getStatQueryMetricRequestTWViolationsTotalDur();
+  public long getStatQueryMetricServerDistanceBaseTotalDur();
+  public long getStatQueryMetricServerDistanceCruisingTotalDur();
+  public long getStatQueryMetricServerDistanceServiceTotalDur();
+  public long getStatQueryMetricServerDistanceTotalDur();
+  public long getStatQueryMetricServerDurationCruisingTotalDur();
+  public long getStatQueryMetricServerDurationServiceTotalDur();
+  public long getStatQueryMetricServerDurationTravelTotalDur();
+  public long getStatQueryMetricServerTWViolationsTotalDur();
+  public long getStatQueryMetricServiceRateDur();
+  public long getStatQueryMetricUserDistanceBaseTotalDur();
+  public long getStatQueryRequestTimeOfArrivalDur();
+  public long getStatQueryRequestTimeOfDepartureDur();
+  public long getStatQueryRequestsCountDur();
+  public long getStatQueryRequestsCountActiveDur();
+  public long getStatQueryRequestsCountCompletedDur();
+  public long getStatQueryRequestsQueuedDur();
+  public long getStatQueryServerRouteActiveDur();
+  public long getStatQueryServerRouteDur();
+  public long getStatQueryServerRouteRemainingDur();
+  public long getStatQueryServerScheduleDur();
+  public long getStatQueryServerTimeOfDepartureDur();
+  public long getStatQueryServersActiveDur();
+  public long getStatQueryServersCountDur();
+  public long getStatQueryServersCountActiveDur();
+  public long getStatQueryServersLocationsActiveDur();
+  public long getStatQueryUserDur();
+  public long getStatQueryVertexDur();
+  public long getStatQueryVerticesCountDur();
+  public long getStatQueryVerticesDur();
+}
+@
+
+\subsection{\texttt{StorageMonitor} and \texttt{StorageMonitorMBean}}
+<<StorageMonitor.java>>=
+<<Package: [[jmx]]>>
+import com.github.jargors.core.Storage;
+import com.github.jargors.jmx.StorageMonitorMBean;
+public class StorageMonitor implements StorageMonitorMBean {
+  private Storage storage = null;
+  public StorageMonitor(final Storage storage) {
+    this.storage = storage;
+  }
+}
+@
+<<StorageMonitorMBean.java>>=
+<<Package: [[jmx]]>>
+import com.github.jargors.core.Storage;
+public interface StorageMonitorMBean { }
+@
+
 \section{Class Members}
 \subsection{Controller}
 <<[[Controller]] member variables>>=
@@ -214,7 +543,7 @@ try {
 
 \section{Chunks}
 \subsection{Import JMX dependencies}
-<<Import JMX dependences>>=
+<<Import JMX dependencies>>=
 import com.github.jargors.jmx.*;
 import java.lang.management.*;
 import javax.management.*;

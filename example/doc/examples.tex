@@ -1,0 +1,70 @@
+\documentclass{report}
+\usepackage{../res/noweb}
+\noweboptions{smallcode,longchunks}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[colorlinks=true]{hyperref}
+\usepackage{adjustbox}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{colortbl}
+\usepackage{enumitem}
+\usepackage{mdframed}
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage{tikz}
+\usepackage{tikzpagenodes}
+
+\newcommand{\hi}[1]{\noindent {\bf #1}}     % Define a handy paragraph opener
+
+\def\nwendcode{\endtrivlist \endgroup}      % Remove noweb page break penalty
+\let\nwdocspar=\par
+
+\theoremstyle{definition}                   % Define an "example" environment
+\newtheorem{example}{Example}
+
+\definecolor{TableTitle}{rgb}{0.900, 0.900, 0.900}  % Define colors for tables
+\definecolor{TableHeader}{rgb}{0.900, 0.900, 0.900}
+
+\captionsetup{labelfont={bf},textfont={bf,it}}
+\setlength{\abovecaptionskip}{1mm}
+\setlength{\belowcaptionskip}{1mm}
+
+\title{
+  $
+  \begin{array}{l}
+  \includegraphics[width=12mm]{../res/icon}
+  \end{array}
+  $
+  Jargo\footnote{\url{https://github.com/jargors}}:\\
+  \large{\textbf{\textit{Examples of Clients and Traffic Functions}}}\\
+  \vspace{2em}
+}
+\author{
+  \small{James J. Pan (\href{mailto:pan-j16@mails.tsinghua.edu.cn}{pan-j16@mails.tsinghua.edu.cn})}
+}
+
+\begin{document}
+\maketitle
+\pagestyle{noweb}
+
+\renewcommand{\thepage}{\roman{page}}
+\setcounter{page}{1}
+
+\addcontentsline{toc}{chapter}{Contents}
+\tableofcontents
+
+\input{doc/body.tex}
+
+\part{Appendices}
+\appendix
+
+\chapter{Appendix: List of Chunks}
+\nowebchunks
+
+\chapter{Appendix: List of Identifiers}
+\nowebindex
+
+\end{document}

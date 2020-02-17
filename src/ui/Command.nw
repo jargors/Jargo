@@ -5,253 +5,261 @@
 <<Package: [[ui]]>>
 <<Command.java preamble>>
 public class Command {
-  <<[[Command]] methods>>
+  <<[[Command]] main(1)>>
 }
 @
 
 \section{Preamble}
 <<Command.java preamble>>=
-import com.github.jargors.Client;
-import com.github.jargors.Controller;
-import com.github.jargors.Tools;
-import com.github.jargors.Traffic;
-import com.github.jargors.exceptions.DuplicateUserException;
-import com.github.jargors.exceptions.EdgeNotFoundException;
-import com.github.jargors.exceptions.GtreeIllegalSourceException;
-import com.github.jargors.exceptions.GtreeIllegalTargetException;
-import com.github.jargors.exceptions.GtreeNotLoadedException;
+import com.github.jargors.core.*;
 @
 
 <<Command.java preamble>>=
-import java.io.FileNotFoundException;
-import java.sql.SQLException;
+import java.lang.reflect.Constructor;
+import java.net.URL;
+import java.net.URLClassLoader;
 @
 
-\section{Member Variables}
 \section{Chunks}
-\section{Methods}
-\subsection{\texttt{main(1)}}
-<<main(1)>>=
-void main(String[] args) throws Exception {
-  Client client = null;
-  Traffic traffic = null;
-  boolean hasTraf = true;
-
-  if (args.length != 6) {
-    System.out.println("usage: ['seq' | 'real'] ['grins' | 'grins-d'] ['none', 'random', 'norm1'] [*.rnet] [*.gtree] [*.instance]");
-    System.exit(0);
-  }
-
-  // Initialize Jargo
+<<Simulation callback>>=
+(status) -> {
   try {
-    Controller controller = new Controller();
-    controller.instanceNew();
-    controller.instanceInitialize();
-    controller.setRefClient(client);
-    controller.forwardRefCommunicator(controller.getRefCommunicator());
-    client.forwardRefCacheVertices(controller.retrieveRefCacheVertices());
-    client.forwardRefCacheEdges(controller.retrieveRefCacheEdges());
-    client.forwardRefCacheUsers(controller.retrieveRefCacheUsers());
-    try {
-      controller.gtreeLoad(args[4]);
-      client.gtreeLoad(args[4]);
-    } catch (FileNotFoundException e) {
-      System.err.println("Gtree missing?");
-      e.printStackTrace();
-      System.exit(1);
-    }
-    try {
-      controller.loadRoadNetworkFromFile(args[3]);
-    } catch (FileNotFoundException e) {
-      System.err.println("Road network missing?");
-      e.printStackTrace();
-      System.exit(1);
-    }
-    try {
-      controller.loadProblem(args[5]);
-    } catch (FileNotFoundException e) {
-      System.err.println("Instance missing?");
-      e.printStackTrace();
-      System.exit(1);
-    } catch (DuplicateUserException e) {
-      System.err.println("Duplicate users?");
-      e.printStackTrace();
-      System.exit(1);
-    } catch (EdgeNotFoundException e) {
-      System.err.println("Corrupt gtree?");
-      e.printStackTrace();
-      System.exit(1);
-    } catch (GtreeNotLoadedException e) {
-      System.err.println("Gtree not loaded?");
-      e.printStackTrace();
-      System.exit(1);
-    } catch (GtreeIllegalSourceException e) {
-      System.err.println("Impossible origin?");
-      e.printStackTrace();
-      System.exit(1);
-    } catch (GtreeIllegalTargetException e) {
-      System.err.println("Impossible destination?");
-      e.printStackTrace();
-      System.exit(1);
+    ctrl.instanceExport("export");
+  } catch (Exception e) {
+    System.out.println("Export failed.");
+    e.printStackTrace();
+  }
+}
+@
+
+<<Help string: usage>>=
+String.join("\n",
+  "Jargo 1.0.0, a real-time stochastic ridesharing simulator.",
+  "Usage: ./launch-cli [OPTION...] MODE ROAD GTREE PROB CLIENT CLASSNAME",
+  "",
+  "Mandatory arguments:",
+  "  MODE       runtime mode, either 'seq' or 'real'",
+  "  ROAD       road network *.rnet file",
+  "  GTREE      gtree *.gtree file to the road network",
+  "  PROB       problem *.instance file (see FORMATS section)",
+  "  CLIENT     client *.jar file",
+  "  CLASSNAME  client classname",
+  "",
+  "Options:",
+  "  -h       show help",
+  "  -r       client *.gtree file (default: GTREE)",
+  "  -x       traffic *.jar file (default: none)",
+  "  -y       traffic classname (default: '')",
+  "  -s       start time (see TIME section)",
+  "  -e       end time (see TIME section)",
+  ""
+);
+@
+
+<<Help string: details>>=
+String.join("\n",
+  "FORMATS",
+  "",
+  "The ROAD file should be a plain-text file with seven *space-delimited*",
+  "numerical columns. The column values should be:",
+  "  Column 1: unique identifier for one edge of the road network",
+  "  Column 2: identifier of the from-vertex of the edge",
+  "  Column 3: identifier of the to-vertex of the edge",
+  "  Column 4: longitude coordinate of the from-vertex",
+  "  Column 5: latitude coordinate of the from-vertex",
+  "  Column 6: longitude coordinate of the to-verex",
+  "  Column 7: latitude coordinate of the to-vertex",
+  "",
+  "If the same value appears more than once in Column 1, then a",
+  "DuplicateEdgeException is thrown. If the same values appears in Columns 2 and",
+  "3, then a SQL exception is thrown because Jargo's data model does not allow",
+  "self-referencing edges. Directed edges are allowed, for example the values in",
+  "Columns 2 and 3 for one row are reversed are reversed in a different row of the",
+  "file. Columns 4--7 should be in WGS84 coordinate system because Jargo uses",
+  "haversine on the Earth's surface to calculate certain distances. Using WGS84",
+  "also facilitates offline visualization of vehicle routes and other spatial",
+  "items in geospatial software such as QGIS.",
+  "",
+  "The PROB file should be a plain-text file with three header rows and six",
+  "*tab-delimited* numerical columns. The first header row is unused and can",
+  "contain any text (e.g. notes to yourself). The second header row should have",
+  "three space-delimited numbers, indicating the number of vehicles, customers,",
+  "and the reference time, respectively. The reference time should be formatted as",
+  "a four-digit military time, e.g. 1835 for 6:35 PM, or 0013 for 12:13 AM. The",
+  "third header row is unused and can contain any text. I like to put the column",
+  "headers in this row. The remaining rows have the following format:",
+  "  Column 1: unique identifier of the vehicle or customer (the 'participant')",
+  "  Column 2: identifier of the participant's origin vertex",
+  "  Column 3: identifier of the participant's destination vertex",
+  "  Column 4: the participant's 'load', position to indicate seating requirement",
+  "            and negative to indicate seating capacity",
+  "  Column 5: 'early' time, or time the participant appears on the network",
+  "  Column 6: 'late' time, or latest acceptable time participant should arrive",
+  "            at destination",
+  "",
+  "The GTREE and client g-tree (-r) should be in g-tree format (see",
+  "https://github.com/jamjpan/GTree).",
+  "",
+  "The CLIENT and traffic (-x) should be Java jar archives containing a Client",
+  "or Traffic class, respectively.",
+  "",
+  "TIME",
+  "",
+  "The start (-s) and end (-e) times are in seconds, relative to the problem",
+  "reference time. For example, if the reference time is 0013 (12:13 AM) and the",
+  "options '-s 0 -e 1800' are passed, then Jargo will simulate the 30 minutes",
+  "between 12:13 AM and 12:43 AM. If no start and end times are passed, the",
+  "default start time is 0 and the default end time is maximum 'early' time",
+  "(Column 5 in the problem instance) plus 30.",
+  "",
+  "EXAMPLE",
+  "",
+  "  ./launch-cli \\",
+  "    -r broadway.gtree \\",
+  "    -x NormalTraffic.jar \\",
+  "    -y com.example.NormalTraffic \\",
+  "    -s 0 \\",
+  "    -e 3600 \\",
+  "    real \\",
+  "    manhattan.rnet \\",
+  "    manhattan.gtree \\",
+  "    manhattan.instance \\",
+  "    NearestNeighbor.jar \\",
+  "    com.example.NearestNeighbor",
+  "",
+  "See the manual for more detail https://github.com/jargors/Jargo",
+  ""
+);
+@
+
+\section{Main Routine}
+<<[[Command]] main(1)>>=
+void main(String[] args) throws Exception {
+  final int REQUIRED_ARGS = 6;
+  String arg1  = "";  // runtime mode
+  String arg2  = "";  // road network *.rnet file
+  String arg3  = "";  // gtree *.gtree file
+  String arg4  = "";  // problem *.instance file
+  String arg5  = "";  // client *.jar file
+  String arg6  = "";  // client *.class classname
+  String opt_r = "";  // client *.gtree file
+  String opt_x = "";  // traffic *.jar file
+  String opt_y = "";  // traffic *.class classname
+  String opt_s = "";  // start time in seconds, relative to problem time
+  String opt_e = "";  // end time in seconds, relative to problem time
+
+  String help1 = <<Help string: usage>>
+  String help2 = <<Help string: details>>
+
+  if (args.length == 1 && args[0].equals("-h")) {
+    System.out.print(help1);
+    System.out.print(help2);
+    System.exit(0);
+  } else if (args.length < REQUIRED_ARGS) {
+    System.out.print(help1);
+  } else {
+    // Extract required arguments
+    int j = (args.length - REQUIRED_ARGS);
+    arg1 = args[(j + 0)];
+    arg2 = args[(j + 1)];
+    arg3 = args[(j + 2)];
+    arg4 = args[(j + 3)];
+    arg5 = args[(j + 4)];
+    arg6 = args[(j + 5)];
+
+    // Extract optional arguments
+    int i = 0;
+    while (++i < j) {
+      if (args[i] == "-r") {
+        opt_r = args[(i + 1)];
+      } else if (args[i] == "-x") {
+        opt_x = args[(i + 1)];
+      } else if (args[i] == "-y") {
+        opt_y = args[(i + 1)];
+      } else if (args[i] == "-s") {
+        opt_s = args[(i + 1)];
+      } else if (args[i] == "-e") {
+        opt_e = args[(i + 1)];
+      }
     }
 
-    // Set algorithm
-    if (args[1].equals("grins")) {
-      client = new GreedyInsertion();
-      System.out.println("set client GreedyInsertion");
-    } else if (args[1].equals("grins-d")) {
-      client = new GreedyDelta();
-      System.out.println("set client GreedyDelta");
-    } else {
-      System.out.println("Unknown client '"+args[1]+"'");
-      System.exit(0);
+    // Initialize road, problem, g-tree
+    Controller ctrl = new Controller();
+    ctrl.instanceNew();
+    ctrl.instanceInitialize();
+    System.out.printf("set road '%s'\n", arg2);
+    ctrl.loadRoadNetworkFromFile(arg2);
+    System.out.printf("set gtree '%s'\n", arg3);
+    ctrl.gtreeLoad(arg3);
+    System.out.printf("set problem '%s'\n", arg4);
+    ctrl.loadProblem(arg4);
+
+    Client client = null;
+    Traffic traffic = null;
+
+    URLClassLoader tmploader = null;
+    Class<?> tmpclass = null;
+    Constructor<?> tmpcstor = null;
+
+    // Load Client
+    System.out.printf("set client '%s'\n", arg5);
+    System.out.printf("set client classname '%s'\n", arg6);
+    tmploader = new URLClassLoader(new URL[] { new URL("file://" + arg5) },
+        Class.forName("com.github.jargors.ui.Command").getClassLoader());
+    tmpclass = Class.forName(arg6, true, tmploader);
+    tmpcstor = tmpclass.getDeclaredConstructor();
+    client = (Client) tmpcstor.newInstance();
+    ctrl.forwardRefCommunicator(ctrl.getRefCommunicator());
+
+    // Load Traffic
+    System.out.printf("opt traffic '%s'\n", opt_x);
+    System.out.printf("opt traffic classname '%s'\n", opt_y);
+    if (!opt_x.equals("")) {
+      tmploader = new URLClassLoader(new URL[] { new URL("file://" + opt_x) },
+        Class.forName("com.github.jargors.ui.Command").getClassLoader());
+      tmpclass = Class.forName(opt_y, true, tmploader);
+      tmpcstor = tmpclass.getDeclaredConstructor();
+      traffic = (Traffic) tmpcstor.newInstance();
     }
+
+    // Initialize Client
+    ctrl.setRefClient(client);
+    client.forwardRefCacheVertices(ctrl.retrieveRefCacheVertices());
+    client.forwardRefCacheEdges(ctrl.retrieveRefCacheEdges());
+    client.forwardRefCacheUsers(ctrl.retrieveRefCacheUsers());
+    opt_r = (opt_r.equals("") ? arg3 : opt_r);
+    System.out.printf("opt client gtree '%s'\n", opt_r);
+    client.gtreeLoad(opt_r);
     client.init();
 
-    // Set traffic
-    if (args[2].equals("none")) {
-      hasTraf = false;
-    } else if (args[2].equals("random")) {
-      traffic = new RandomTraffic();
-    } else if (args[2].equals("norm1")) {
-      traffic = new Norm1();
-    } else {
-      System.out.println("Uknown traffic '"+args[2]+"'");
-      System.exit(0);
-    }
-
-    if (hasTraf) {
-      traffic.forwardRefCacheEdges(controller.retrieveRefCacheEdges());
-      traffic.forwardRefCacheVertices(controller.retrieveRefCacheVertices());
+    // Initialize Traffic
+    if (traffic != null) {
+      ctrl.forwardRefTraffic(traffic);
+      traffic.forwardRefCacheVertices(ctrl.retrieveRefCacheVertices());
+      traffic.forwardRefCacheEdges(ctrl.retrieveRefCacheEdges());
       traffic.init();
-      controller.forwardRefTraffic(traffic);
     }
 
-    // controller.instanceExport("db");
-    // System.exit(1);
+    // Set start time
+    opt_s = (opt_s.equals("") ? "0" : opt_s);
+    System.out.printf("opt start '%s'\n", opt_s);
 
-    if (args[0].equals("seq")) {
-      controller.startSequential((statuscode) -> {
-        try {
-          controller.instanceExport("results/"+args[1]);
-          int[] output = new int[] { };
+    // Set end time
+    opt_e = (opt_e.equals("")
+        ? Integer.toString(ctrl.query("select max (re) from R", 1)[0])
+        : opt_e);
+    System.out.printf("opt end '%s'\n", opt_e);
 
-          output = controller.queryMetricServiceRate();
-          final double sr = (output.length > 0 ? output[0] : 0);
-
-          output = controller.queryMetricUserDistanceBaseTotal();
-          final int bd = (output.length > 0  ? output[0] : 0);
-
-          output = controller.queryMetricServerDistanceTotal();
-          final int td = (output.length > 0 ? output[0] : 0);
-
-          output = controller.queryMetricRequestDistanceBaseUnassignedTotal();
-          final int rb = (output.length > 0 ? output[0] : 0);
-
-          output = controller.queryMetricServerTWViolationsTotal();
-          int stw_sum = 0;
-          int stw_count = 0;
-          if (output.length > 0) {
-            for (int i = 0; i < (output.length - 2); i += 2) {
-              stw_sum += output[(i + 1)];
-              stw_count++;
-            }
-          }
-          final double stw_avg = (double) stw_sum/stw_count;
-
-          output = controller.queryMetricRequestTWViolationsTotal();
-          int rtw_sum = 0;
-          int rtw_count = 0;
-          if (output.length > 0) {
-            for (int i = 0; i < (output.length - 2); i += 2) {
-              rtw_sum += output[(i + 1)];
-              rtw_count++;
-            }
-          }
-          final double rtw_avg = (double) rtw_sum/rtw_count;
-
-          System.out.printf("%-54s%10.2f\n", "Service rate (%):", sr);
-          System.out.printf("%-54s%10d\n", "Base dist. (total):", bd);
-          System.out.printf("%-54s%10d\n", "Server travel dist. (total):", td);
-          System.out.printf("%-54s%10d\n", "Request base dist. (unassigned):", rb);
-          System.out.printf("%-54s%10.2f\n", "Dist. savings (%):", (1-((float) (td+rb)/bd)));
-          System.out.printf("%-54s%10d\n", "Server time window violations (total sec.):", stw_sum);
-          System.out.printf("%-54s%10d\n", "Server time window violations (total #):", stw_count);
-          System.out.printf("%-54s%10.2f\n", "Server time window violations (avg sec./serv.):", stw_avg);
-          System.out.printf("%-54s%10d\n", "Request time window violations (total sec.):", rtw_sum);
-          System.out.printf("%-54s%10d\n", "Request time window violations (total #):", rtw_count);
-          System.out.printf("%-54s%10.2f\n", "Request time window violations (avg sec./req.):", rtw_avg);
-        } catch (SQLException e1) {
-          System.err.println("Something bad happened");
-          Tools.PrintSQLException(e1);
-          System.exit(1);
-        }
-      });
-    } else if (args[0].equals("real")) {
-      controller.startRealtime((statuscode) -> {
-        try {
-          controller.instanceExport("results/"+args[1]);
-          int[] output = new int[] { };
-
-          output = controller.queryMetricServiceRate();
-          final double sr = (output.length > 0 ? output[0] : 0);
-
-          output = controller.queryMetricUserDistanceBaseTotal();
-          final int bd = (output.length > 0  ? output[0] : 0);
-
-          output = controller.queryMetricServerDistanceTotal();
-          final int td = (output.length > 0 ? output[0] : 0);
-
-          output = controller.queryMetricRequestDistanceBaseUnassignedTotal();
-          final int rb = (output.length > 0 ? output[0] : 0);
-
-          output = controller.queryMetricServerTWViolationsTotal();
-          int stw_sum = 0;
-          int stw_count = 0;
-          if (output.length > 0) {
-            for (int i = 0; i < (output.length - 2); i += 2) {
-              stw_sum += output[(i + 1)];
-              stw_count++;
-            }
-          }
-          final double stw_avg = (double) stw_sum/stw_count;
-
-          output = controller.queryMetricRequestTWViolationsTotal();
-          int rtw_sum = 0;
-          int rtw_count = 0;
-          if (output.length > 0) {
-            for (int i = 0; i < (output.length - 2); i += 2) {
-              rtw_sum += output[(i + 1)];
-              rtw_count++;
-            }
-          }
-          final double rtw_avg = (double) rtw_sum/rtw_count;
-
-          System.out.printf("%-54s%10.2f\n", "Service rate (%):", sr);
-          System.out.printf("%-54s%10d\n", "Base dist. (total):", bd);
-          System.out.printf("%-54s%10d\n", "Server travel dist. (total):", td);
-          System.out.printf("%-54s%10d\n", "Request base dist. (unassigned):", rb);
-          System.out.printf("%-54s%10.2f\n", "Dist. savings (%):", (1-((float) (td+rb)/bd)));
-          System.out.printf("%-54s%10d\n", "Server time window violations (total sec.):", stw_sum);
-          System.out.printf("%-54s%10d\n", "Server time window violations (total #):", stw_count);
-          System.out.printf("%-54s%10.2f\n", "Server time window violations (avg sec./serv.):", stw_avg);
-          System.out.printf("%-54s%10d\n", "Request time window violations (total sec.):", rtw_sum);
-          System.out.printf("%-54s%10d\n", "Request time window violations (total #):", rtw_count);
-          System.out.printf("%-54s%10.2f\n", "Request time window violations (avg sec./req.):", rtw_avg);
-        } catch (Exception e1) {
-          System.err.println("Something bad happened");
-          e1.printStackTrace();
-          System.exit(1);
-        }
-      });
+    // Start simulation
+    System.out.printf("set mode '%s'\n", arg1);
+    if (arg1.equals("seq")) {
+      ctrl.startSequential(<<Simulation callback>>);
+    } else if (arg1.equals("real")) {
+      ctrl.startRealtime(<<Simulation callback>>);
     } else {
-      System.out.println("Unknown mode '"+args[0]+"'");
-      System.exit(0);
+      System.out.printf("Unrecognized mode; Exiting.\n");
+      System.exit(1);
     }
-  } catch (Exception e2) {
-    System.err.println("Something bad happened");
-    e2.printStackTrace();
-    System.exit(1);
   }
 }
 @ %def main

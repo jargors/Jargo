@@ -3,13 +3,7 @@
 
 # Make sure to update these variable for new releases.
 VERSION=1.0.0
-BUILD_DATE="January 20, 2020"
-
-# For the 'purge' target, I need to know the names of all the Java files that
-# were compiled from noweb sources. These can be safely deleted, as they can be
-# regenerated using the 'src' target.
-JAVA1=$(addsuffix .java, $(subst src/core/,java/core/,$(basename $(wildcard src/core/*.nw))))
-JAVA2=$(addsuffix .java, $(subst src/ui/,java/ui/,$(basename $(wildcard src/ui/*.nw))))
+BUILD_DATE="January\ 20,\ 2020"
 
 # Check if the user has the required build tools (poor man's autoconf). The
 # 'command' command should work on all POSIX systems.
@@ -24,7 +18,7 @@ bin_unzip:=$(shell command -v unzip 2> /dev/null)
 bin_noweave:=$(shell command -v noweave 2> /dev/null)
 bin_notangle:=$(shell command -v notangle 2> /dev/null)
 
-.PHONY : _mod all dep src jar pdf purge clean
+.PHONY : _mod all dep src jar pdf purge clean purgedep
 
 # Print the message of the day.
 _mod :
@@ -129,7 +123,7 @@ clean :
 # In addition to 'clean', remove Java files in java/ and doc/body.tex.
 purge : clean
 	@printf "make purge\n"
-	@printf "purge java/ srcs...\n"; rm -f $(JAVA1) $(JAVA2); \
+	@printf "purge java/ srcs...\n"; rm -f java/*/*.java; \
 	 if [ -f "doc/body.tex" ]; then printf "purge doc/body.tex...\n"; rm -f doc/body.tex ; fi;
 	@printf "done purge\n"
 

@@ -1,4 +1,3 @@
 package com.github.jargors.jmx;
-import com.github.jargors.Storage;
-public interface StorageMonitorMBean {
-}
+import com.github.jargors.core.Storage;
+public interface StorageMonitorMBean { }

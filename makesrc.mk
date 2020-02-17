@@ -5,10 +5,40 @@
 # Additionally, noweb must be compiled using the icont option (instead of awk).
 
 # Here I am getting the names of the *.java files to be tangled by looking for
-# all the noweb files in src/. None of the files in tex/ produce Java classes,
-# so that subdirectory is omitted.
+# all the noweb files in src/.
 JAVA1=$(addsuffix .java, $(subst src/core/,java/core/,$(basename $(wildcard src/core/*.nw))))
 JAVA2=$(addsuffix .java, $(subst src/ui/,java/ui/,$(basename $(wildcard src/ui/*.nw))))
+
+# The Exception classes are not written in their own noweb files, so I can't
+# look through the src/ directory for them. Instead I have to list them by hand.
+# I can search for them by using: 'grep "Exception.java" src/*/*'. All
+# exceptions belong to the core package, so they go into java/core/.
+JAVA3 = \
+	java/core/ClientException.java \
+	java/core/ClientFatalException.java \
+	java/core/DuplicateEdgeException.java \
+	java/core/DuplicateUserException.java \
+	java/core/DuplicateVertexException.java \
+	java/core/EdgeNotFoundException.java \
+	java/core/GtreeIllegalSourceException.java \
+	java/core/GtreeIllegalTargetException.java \
+	java/core/GtreeNotLoadedException.java \
+	java/core/RouteIllegalOverwriteException.java \
+	java/core/TimeWindowException.java \
+	java/core/UserNotFoundException.java \
+	java/core/VertexNotFoundException.java
+
+# Similarly, JMX classes are not written in their own noweb files. They
+# are located in tex/JMX.nw. These classes belong to the jmx package.
+JAVA4 = \
+	java/jmx/ClientMonitor.java \
+	java/jmx/ClientMonitorMBean.java \
+	java/jmx/CommunicatorMonitor.java \
+	java/jmx/CommunicatorMonitorMBean.java \
+	java/jmx/ControllerMonitor.java \
+	java/jmx/ControllerMonitorMBean.java \
+	java/jmx/StorageMonitor.java \
+	java/jmx/StorageMonitorMBean.java
 
 # Check if the user has the required build tools (poor man's autoconf). The
 # 'command' command should work on all POSIX systems.
@@ -24,14 +54,14 @@ bin_notangle:=$(shell command -v notangle 2> /dev/null)
 all : _precheck java tex
 
 # This target produces all the Java files in java/.
-java : $(JAVA1) $(JAVA2)
+java : $(JAVA1) $(JAVA2) $(JAVA3) $(JAVA4)
 
 # This target produces doc/body.tex.
 tex : doc/body.tex
 
 # Remove *.java and doc/body.tex files
 clean :
-	@rm -f $(JAVA1) $(JAVA2)
+	@rm -f $(JAVA1) $(JAVA2) $(JAVA3) $(JAVA4)
 	@rm -f doc/body.tex
 
 # The below instructions explain how to build Java files and doc/body.tex.
@@ -44,6 +74,7 @@ endif
 ifndef bin_notangle
 	$(error "**ERROR: 'notangle' not found! target 'src' unavailable.")
 endif
+	@mkdir -p java/core java/ui java/jmx
 
 # Build Java files using 'notangle'. Some classes use code chunks from multiple
 # *.nw files, so I just pass all the noweb files as arguments to notangle.
@@ -54,6 +85,14 @@ $(JAVA1) : src/*/*.nw
 $(JAVA2) : src/*/*.nw
 	@printf "tangle $@...\n"
 	@notangle -R$(subst java/ui/,,$@) src/*/*.nw > $@
+
+$(JAVA3) : src/*/*.nw
+	@printf "tangle $@...\n"
+	@notangle -R$(subst java/core/,,$@) src/*/*.nw > $@
+
+$(JAVA4) : src/*/*.nw
+	@printf "tangle $@...\n"
+	@notangle -R$(subst java/jmx/,,$@) src/*/*.nw > $@
 
 # Build doc/body.tex using 'noweave'. The order of the noweave arguments
 # matters, so I use a temporary variable TEXSRCS to establish the order.
@@ -74,6 +113,7 @@ TEXSRCS = \
 	src/core/Traffic.nw \
 	src/core/Tools.nw \
 	src/ui/Command.nw \
+	src/ui/Desktop.nw \
 	src/ui/DesktopController.nw \
 	src/tex/JMX.nw \
 	src/tex/DataDefinition.nw

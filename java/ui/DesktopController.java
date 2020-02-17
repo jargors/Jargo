@@ -1,9 +1,5 @@
-package com.github.jargors.gui;
-import com.github.jargors.Client;
-import com.github.jargors.Controller;
-import com.github.jargors.Tools;
-import com.github.jargors.Traffic;
-import com.github.jargors.exceptions.*;
+package com.github.jargors.ui;
+import com.github.jargors.core.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

@@ -2,8 +2,7 @@
 
 ## This script launches example/app
 
-
-_CLASSPATH=.:jar/*:deps:deps/*:example/algo/*:example/traffic/*
+_CLASSPATH=.:jar/*:dep:dep/*:example/algo/*:example/traffic/*
 if [ -z ${DERBY_PATH} ];
     then
         echo "Set DERBY_PATH before continuing!";
@@ -20,11 +19,9 @@ java \
     -Dderby.storage.pageCacheSize=8000 \
     -Djargors.storage.debug=false \
     -Djargors.controller.debug=false \
-    -Djargors.controller.clock_start=0 \
-    -Djargors.controller.clock_end=1800 \
     -Djargors.client.debug=false \
     -Djargors.traffic.debug=false \
     -cp $_CLASSPATH:$DERBY_PATH/derby.jar \
-app $@
+com.github.jargors.ui.Command $@
 
 

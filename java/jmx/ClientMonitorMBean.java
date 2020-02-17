@@ -1,7 +1,5 @@
-/* Call all the methods listed under <<[[Client]] methods>> in src/tex/JMX.nw
- */
 package com.github.jargors.jmx;
-import com.github.jargors.Client;
+import com.github.jargors.core.Client;
 public interface ClientMonitorMBean {
   public int getStatClientQueueSize();
   public long getStatClientHandleRequestDur();

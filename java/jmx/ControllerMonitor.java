@@ -1,6 +1,6 @@
 package com.github.jargors.jmx;
+import com.github.jargors.core.Controller;
 import com.github.jargors.jmx.ControllerMonitorMBean;
-import com.github.jargors.Controller;
 public class ControllerMonitor implements ControllerMonitorMBean {
   private Controller controller = null;
   public ControllerMonitor(final Controller controller) {
@@ -160,4 +160,3 @@ public class ControllerMonitor implements ControllerMonitorMBean {
     return this.controller.getStatQueryVerticesDur();
   }
 }
-

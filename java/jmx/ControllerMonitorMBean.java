@@ -1,5 +1,5 @@
 package com.github.jargors.jmx;
-import com.github.jargors.Controller;
+import com.github.jargors.core.Controller;
 public interface ControllerMonitorMBean {
   public int  getStatControllerClock();
   public int  getStatControllerClockReferenceDay();

@@ -1,5 +1,5 @@
-package com.github.jargors.gui;
-import com.github.jargors.gui.DesktopController;
+package com.github.jargors.ui;
+import com.github.jargors.ui.DesktopController;
 import java.io.IOException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -23,4 +23,3 @@ public class Desktop extends Application {
     stage.show();
   }
 }
-

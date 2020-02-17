@@ -12,19 +12,19 @@ public abstract class Client {
 @
 
 \section{Preamble}
+
 <<Client.java preamble>>=
-import com.github.jargors.Communicator;
-import com.github.jargors.Tools;
-import com.github.jargors.exceptions.ClientException;
-import com.github.jargors.exceptions.ClientFatalException;
+import com.github.jargors.core.Communicator;
+import com.github.jargors.core.Tools;
+import com.github.jargors.core.ClientException;
+import com.github.jargors.core.ClientFatalException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.io.FileNotFoundException;
 @
+
 <<Client.java preamble>>=
-import com.github.jargors.jmx.ClientMonitor;
-import java.lang.management.*;
-import javax.management.*;
+<<Import JMX dependencies>>
 @
 
 \section{Member Variables}
@@ -154,4 +154,40 @@ Array [[loc]] =
 <<handleServerLocation(1)>>=
 void handleServerLocation(final int[] loc) { }
 @ %def handleServerLocation
+
+\section{Exceptions}
+
+\subsection{\texttt{ClientException}}
+<<ClientException.java>>=
+<<Package: [[core]]>>
+public class ClientException extends Exception {
+  public ClientException() { }
+  public ClientException(String message) {
+    super(message);
+  }
+  public ClientException(Throwable cause) {
+    super(cause);
+  }
+  public ClientException(String message, Throwable cause) {
+    super(message, cause);
+  }
+}
+@
+
+\subsection{\texttt{ClientFatalException}}
+<<ClientFatalException.java>>=
+<<Package: [[core]]>>
+public class ClientFatalException extends Exception {
+  public ClientFatalException() { }
+  public ClientFatalException(String message) {
+    super(message);
+  }
+  public ClientFatalException(Throwable cause) {
+    super(cause);
+  }
+  public ClientFatalException(String message, Throwable cause) {
+    super(message, cause);
+  }
+}
+@
 
