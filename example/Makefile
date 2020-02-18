@@ -16,7 +16,6 @@ _mod :
 	@printf "_______________________________________________________________\n"
 	@printf "Jargo Examples\n"
 	@printf "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
-	@printf "\n"
 	@printf "Commands:\n"
 	@printf "  make all        build examples.jar + documentation\n"
 	@printf "  make jar        build examples.jar only\n"
@@ -24,7 +23,6 @@ _mod :
 	@printf "  make src        build Java sources from Noweb files\n"
 	@printf "  make clean      delete jar/, com/, pdf/, build.log\n"
 	@printf "  make purge      clean + delete Java sources, doc/body.tex\n"
-	@printf "\n"
 	@printf "===============================================================\n"
 
 ################################################################################
