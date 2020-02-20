@@ -848,7 +848,7 @@ public class DesktopController {
   public void actionAbout(final ActionEvent e) {
            Alert alert = new Alert(AlertType.INFORMATION, "https:github.com/jargors");
            alert.setTitle("About");
-           alert.setHeaderText("Jargo Desktop v1.0.0");
+           alert.setHeaderText("Jargo Desktop v0.9.0");
            alert.setGraphic(this.logo);
            alert.showAndWait();
          }

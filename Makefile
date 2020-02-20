@@ -2,8 +2,8 @@
 # 'makesrc.mk', 'makejar.mk', and 'makepdf.mk' for description of build outputs.
 
 # Make sure to update these variable for new releases.
-VERSION=1.0.0
-BUILD_DATE="January\ 20,\ 2020"
+VERSION=0.9.0
+BUILD_DATE="February\ 20,\ 2020"
 
 # Check if the user has the required build tools (poor man's autoconf). The
 # 'command' command should work on all POSIX systems.
