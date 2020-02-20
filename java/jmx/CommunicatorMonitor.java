@@ -1,5 +1,5 @@
 package com.github.jargors.jmx;
-import com.github.jargors.core.Communicator;
+import com.github.jargors.sim.Communicator;
 import com.github.jargors.jmx.CommunicatorMonitorMBean;
 public class CommunicatorMonitor implements CommunicatorMonitorMBean {
   private Communicator communicator = null;

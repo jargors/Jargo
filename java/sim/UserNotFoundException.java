@@ -1,4 +1,4 @@
-package com.github.jargors.core;
+package com.github.jargors.sim;
 public class UserNotFoundException extends Exception {
   public UserNotFoundException () { }
   public UserNotFoundException (String message) { super(message); }

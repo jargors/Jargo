@@ -1,5 +1,5 @@
 package com.github.jargors.jmx;
-import com.github.jargors.core.Controller;
+import com.github.jargors.sim.Controller;
 import com.github.jargors.jmx.ControllerMonitorMBean;
 public class ControllerMonitor implements ControllerMonitorMBean {
   private Controller controller = null;

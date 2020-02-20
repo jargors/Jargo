@@ -1,8 +1,8 @@
-package com.github.jargors.core;
-import com.github.jargors.core.Communicator;
-import com.github.jargors.core.Tools;
-import com.github.jargors.core.ClientException;
-import com.github.jargors.core.ClientFatalException;
+package com.github.jargors.sim;
+import com.github.jargors.sim.Communicator;
+import com.github.jargors.sim.Tools;
+import com.github.jargors.sim.ClientException;
+import com.github.jargors.sim.ClientFatalException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.io.FileNotFoundException;

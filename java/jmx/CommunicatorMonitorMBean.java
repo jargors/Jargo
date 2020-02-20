@@ -1,5 +1,5 @@
 package com.github.jargors.jmx;
-import com.github.jargors.core.Communicator;
+import com.github.jargors.sim.Communicator;
 public interface CommunicatorMonitorMBean {
   public long getStatQueryEdgeDur();
   public long getStatQueryServerDistanceRemainingDur();

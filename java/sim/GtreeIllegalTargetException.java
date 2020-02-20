@@ -1,4 +1,4 @@
-package com.github.jargors.core;
+package com.github.jargors.sim;
 public class GtreeIllegalTargetException extends Exception {
   public GtreeIllegalTargetException () { }
   public GtreeIllegalTargetException (String message) { super(message); }

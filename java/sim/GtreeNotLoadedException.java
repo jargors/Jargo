@@ -1,4 +1,4 @@
-package com.github.jargors.core;
+package com.github.jargors.sim;
 public class GtreeNotLoadedException extends Exception {
   public GtreeNotLoadedException () { }
   public GtreeNotLoadedException (String message) { super(message); }

@@ -1,4 +1,4 @@
-package com.github.jargors.core;
+package com.github.jargors.sim;
 public class ClientException extends Exception {
   public ClientException() { }
   public ClientException(String message) {

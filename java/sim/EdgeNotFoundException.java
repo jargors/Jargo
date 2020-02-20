@@ -1,4 +1,4 @@
-package com.github.jargors.core;
+package com.github.jargors.sim;
 public class EdgeNotFoundException extends Exception {
   public EdgeNotFoundException () { }
   public EdgeNotFoundException (String message) { super(message); }

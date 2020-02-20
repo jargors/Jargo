@@ -1,5 +1,5 @@
 package com.github.jargors.ui;
-import com.github.jargors.core.*;
+import com.github.jargors.sim.*;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;

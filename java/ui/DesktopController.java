@@ -1,5 +1,5 @@
 package com.github.jargors.ui;
-import com.github.jargors.core.*;
+import com.github.jargors.sim.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

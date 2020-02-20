@@ -1,4 +1,4 @@
-package com.github.jargors.core;
+package com.github.jargors.sim;
 public class DuplicateUserException extends Exception {
   public DuplicateUserException () { }
   public DuplicateUserException (String message) { super(message); }

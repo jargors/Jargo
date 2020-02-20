@@ -1,4 +1,4 @@
-package com.github.jargors.core;
+package com.github.jargors.sim;
 public class DuplicateEdgeException extends Exception {
   public DuplicateEdgeException () { }
   public DuplicateEdgeException (String message) { super(message); }

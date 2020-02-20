@@ -1,9 +1,9 @@
-package com.github.jargors.core;
-import com.github.jargors.core.EdgeNotFoundException;
-import com.github.jargors.core.VertexNotFoundException;
-import com.github.jargors.core.GtreeNotLoadedException;
-import com.github.jargors.core.GtreeIllegalSourceException;
-import com.github.jargors.core.GtreeIllegalTargetException;
+package com.github.jargors.sim;
+import com.github.jargors.sim.EdgeNotFoundException;
+import com.github.jargors.sim.VertexNotFoundException;
+import com.github.jargors.sim.GtreeNotLoadedException;
+import com.github.jargors.sim.GtreeIllegalSourceException;
+import com.github.jargors.sim.GtreeIllegalTargetException;
 import com.github.jamjpan.gtree.GTree;
 import com.github.jamjpan.gtree.gtreeJNI;
 import com.github.jamjpan.gtree.IntVector;

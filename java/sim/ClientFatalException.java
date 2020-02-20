@@ -1,4 +1,4 @@
-package com.github.jargors.core;
+package com.github.jargors.sim;
 public class ClientFatalException extends Exception {
   public ClientFatalException() { }
   public ClientFatalException(String message) {

@@ -1,4 +1,4 @@
-package com.github.jargors.core;
+package com.github.jargors.sim;
 public class DuplicateVertexException extends Exception {
   public DuplicateVertexException () { }
   public DuplicateVertexException (String message) { super(message); }

@@ -11,7 +11,8 @@ JAVA1 = \
 	java/sim/Controller.java \
 	java/sim/Communicator.java \
 	java/sim/Storage.java \
-	java/sim/Tools.java
+	java/sim/Tools.java \
+	java/sim/Traffic.java
 
 # The interface classes belong to the ui package.
 JAVA2 = \
