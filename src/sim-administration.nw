@@ -1265,28 +1265,28 @@ void init() {
 \section{Methods: Getters}
 
 \subsection{\texttt{getClock}(0)}
-<<Get: getClock(0)>>=
+<<Admin: getClock(0)>>=
 int getClock() {
   return this.statControllerClock;
 }
 @ %def getClock
 
 \subsection{\texttt{getClockStart}(0)}
-<<Get: getClockStart(0)>>=
+<<Admin: getClockStart(0)>>=
 int getClockStart() {
   return this.CLOCK_START;
 }
 @ %def getClockStart
 
 \subsection{\texttt{getClockReference}(0)}
-<<Get: getClockReference(0)>>=
+<<Admin: getClockReference(0)>>=
 String getClockReference() {
   return this.refTimeStr;
 }
 @ %def getClockReference
 
 \subsection{\texttt{getClockReferenceMs}(0)}
-<<Get: getClockReferenceMs(0)>>=
+<<Admin: getClockReferenceMs(0)>>=
 long getClockReferenceMs() {
   return this.refTimeMs;
 }
@@ -1305,7 +1305,7 @@ reference to [[lu_edges]].\\
 \textbf{Throws:} nothing.\\
 \bottomrule
 \end{tabular}
-<<Get: getRefCacheEdges(0)>>=
+<<Admin: getRefCacheEdges(0)>>=
 final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> getRefCacheEdges() {
   return this.lu_edges;
 }
@@ -1324,7 +1324,7 @@ reference to [[lu_users]].\\
 \textbf{Throws:} nothing.\\
 \bottomrule
 \end{tabular}
-<<Get: getRefCacheUsers(0)>>=
+<<Admin: getRefCacheUsers(0)>>=
 final ConcurrentHashMap<Integer, int[]> getRefCacheUsers() {
   return this.lu_users;
 }
@@ -1344,63 +1344,63 @@ reference to [[lu_vertices]].\\
 \textbf{Throws:} nothing.\\
 \bottomrule
 \end{tabular}
-<<Get: getRefCacheVertices(0)>>=
+<<Admin: getRefCacheVertices(0)>>=
 final ConcurrentHashMap<Integer, int[]> getRefCacheVertices() {
   return this.lu_vertices;
 }
 @ %def getRefCacheVertices
 
 \subsection{\texttt{getRefCommunicator}(0)}
-<<Get: getRefCommunicator(0)>>=
+<<Admin: getRefCommunicator(0)>>=
 Communicator getRefCommunicator() {
   return this.communicator;
 }
 @ %def getRefCommunicator
 
 \subsection{\texttt{getRefStorage}(0)}
-<<Get: getRefStorage(0)>>=
+<<Admin: getRefStorage(0)>>=
 Storage getRefStorage() {
   return this.storage;
 }
 @ %def getRefStorage
 
 \subsection{\texttt{retrieveQueueSize}(0)}
-<<Get: retrieveQueueSize(0)>>=
+<<Admin: retrieveQueueSize(0)>>=
 int retrieveQueueSize() {
   return this.client.getStatClientQueueSize();
 }
 @ %def retrieveQueueSize
 
 \subsection{\texttt{retrieveHandleRequestDur}(0)}
-<<Get: retrieveHandleRequestDur(0)>>=
+<<Admin: retrieveHandleRequestDur(0)>>=
 long retrieveHandleRequestDur() {
   return this.client.getStatClientHandleRequestDur();
 }
 @ %def retrieveHandleRequestDur
 
 \subsection{\texttt{retrieveClock}(0)}
-<<Get: retrieveClock(0)>>=
+<<Admin: retrieveClock(0)>>=
 int retrieveClock() {
   return this.controller.getClock();
 }
 @ %def retrieveClock
 
 \subsection{\texttt{retrieveRefCacheVertices}(0)}
-<<Get: retrieveRefCacheVertices(0)>>=
+<<Admin: retrieveRefCacheVertices(0)>>=
 final ConcurrentHashMap<Integer, int[]> retrieveRefCacheVertices() {
   return this.storage.getRefCacheVertices();
 }
 @ %def retrieveRefCacheVertices
 
 \subsection{\texttt{retrieveRefCacheEdges}(0)}
-<<Get: retrieveRefCacheEdges(0)>>=
+<<Admin: retrieveRefCacheEdges(0)>>=
 final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> retrieveRefCacheEdges() {
   return this.storage.getRefCacheEdges();
 }
 @ %def retrieveRefCacheEdges
 
 \subsection{\texttt{retrieveRefCacheUsers}(0)}
-<<Get: retrieveRefCacheUsers(0)>>=
+<<Admin: retrieveRefCacheUsers(0)>>=
 final ConcurrentHashMap<Integer, int[]> retrieveRefCacheUsers() {
   return this.storage.getRefCacheUsers();
 }
@@ -1410,7 +1410,7 @@ final ConcurrentHashMap<Integer, int[]> retrieveRefCacheUsers() {
 \section{Methods: Setters}
 
 \subsection{\texttt{setClockReference}(1)}
-<<Set: setClockReference(1)>>=
+<<Admin: setClockReference(1)>>=
 void setClockReference(final String clock_reference) throws IllegalArgumentException {
   int hour = Integer.parseInt(clock_reference.substring(0, 2));
   if (!(0 <= hour && hour <= 23)) {
@@ -1436,7 +1436,7 @@ void setClockReference(final String clock_reference) throws IllegalArgumentExcep
 @ %def setClockReference
 
 \subsection{\texttt{setClockStart}(1)}
-<<Set: setClockStart(1)>>=
+<<Admin: setClockStart(1)>>=
 void setClockStart(final int clock_start) {
   this.CLOCK_START = clock_start;
   this.statControllerClockReferenceSecond += clock_start;
@@ -1458,21 +1458,21 @@ void setClockStart(final int clock_start) {
 @ %def setClockStart
 
 \subsection{\texttt{setClockEnd}(1)}
-<<Set: setClockEnd(1)>>=
+<<Admin: setClockEnd(1)>>=
 void setClockEnd(final int clock_end) {
   this.CLOCK_END = clock_end;
 }
 @ %def setClockEnd
 
 \subsection{\texttt{setQueueTimeout}(1)}
-<<Set: setQueueTimeout(1)>>=
+<<Admin: setQueueTimeout(1)>>=
 void setQueueTimeout(final int queue_timeout) {
   this.QUEUE_TIMEOUT = queue_timeout;
 }
 @ %def setQueueTimeout
 
 \subsection{\texttt{setRequestTimeout}(1)}
-<<Set: setRequestTimeout(1)>>=
+<<Admin: setRequestTimeout(1)>>=
 void setRequestTimeout(final int request_timeout) {
   this.REQUEST_TIMEOUT = request_timeout;
 }
@@ -1480,56 +1480,56 @@ void setRequestTimeout(final int request_timeout) {
 
 
 \subsection{\texttt{setRefCacheVertices}(1)}
-<<Set: setRefCacheVertices(1)>>=
+<<Admin: setRefCacheVertices(1)>>=
 void setRefCacheVertices(final ConcurrentHashMap<Integer, int[]> lu_vertices) {
   this.lu_vertices = lu_vertices;
 }
 @ %def setRefCacheVertices
 
 \subsection{\texttt{setRefCacheEdges}(1)}
-<<Set: setRefCacheEdges(1)>>=
+<<Admin: setRefCacheEdges(1)>>=
 void setRefCacheEdges(final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> lu_edges) {
   this.lu_edges = lu_edges;
 }
 @ %def setRefCacheEdges
 
 \subsection{\texttt{setRefCacheUsers}(1)}
-<<Set: setRefCacheUsers(1)>>=
+<<Admin: setRefCacheUsers(1)>>=
 void setRefCacheUsers(final ConcurrentHashMap<Integer, int[]> lu_users) {
   this.lu_users = lu_users;
 }
 @ %def setRefCacheUsers
 
 \subsection{\texttt{setRefClient}(1)}
-<<Set: setRefClient(1)>>=
+<<Admin: setRefClient(1)>>=
 void setRefClient(final Client client) {
   this.client = client;
 }
 @ %def setRefClient
 
 \subsection{\texttt{setRefCommunicator}(1)}
-<<Set: setRefCommunicator(1)>>=
+<<Admin: setRefCommunicator(1)>>=
 void setRefCommunicator(final Communicator communicator) {
   this.communicator = communicator;
 }
 @ %def setRefCommunicator
 
 \subsection{\texttt{setRefController}(1)}
-<<Set: setRefController(1)>>=
+<<Admin: setRefController(1)>>=
 void setRefController(final Controller controller) {
   this.controller = controller;
 }
 @ %def setRefController
 
 \subsection{\texttt{setRefStorage}(1)}
-<<Set: setRefStorage(1)>>=
+<<Admin: setRefStorage(1)>>=
 void setRefStorage(final Storage storage) {
   this.storage = storage;
 }
 @ %def setRefStorage
 
 \subsection{\texttt{setRefTraffic}(1)}
-<<Set: setRefTraffic(1)>>=
+<<Admin: setRefTraffic(1)>>=
 void setRefTraffic (final Traffic traffic) {
   this.traffic = traffic;
   this.traffic.forwardRefCacheVertices(this.storage.getRefCacheVertices());
@@ -1538,35 +1538,35 @@ void setRefTraffic (final Traffic traffic) {
 @ %def setRefTraffic
 
 \subsection{\texttt{forwardRefTraffic}(1)}
-<<Set: forwardRefTraffic(1)>>=
+<<Admin: forwardRefTraffic(1)>>=
 void forwardRefTraffic(final Traffic traffic) {
   this.communicator.setRefTraffic(traffic);
 }
 @ %def forwardRefTraffic
 
 \subsection{\texttt{forwardRefCommunicator}(1)}
-<<Set: forwardRefCommunicator(1)>>=
+<<Admin: forwardRefCommunicator(1)>>=
 void forwardRefCommunicator(final Communicator communicator) {
   this.client.setRefCommunicator(communicator);
 }
 @ %def forwardRefCommunicator
 
 \subsection{\texttt{forwardRefCacheEdges}(1)}
-<<Set: forwardRefCacheEdges(1)>>=
+<<Admin: forwardRefCacheEdges(1)>>=
 void forwardRefCacheEdges(final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> lu_edges) {
   this.tools.setRefCacheEdges(lu_edges);
 }
 @ %def forwardRefCacheEdges
 
 \subsection{\texttt{forwardRefCacheUsers}(1)}
-<<Set: forwardRefCacheUsers(1)>>=
+<<Admin: forwardRefCacheUsers(1)>>=
 void forwardRefCacheUsers(final ConcurrentHashMap<Integer, int[]> lu_users) {
   this.tools.setRefCacheUsers(lu_users);
 }
 @ %def forwardRefCacheUsers
 
 \subsection{\texttt{forwardRefCacheVertices}(1)}
-<<Set: forwardRefCacheVertices(1)>>=
+<<Admin: forwardRefCacheVertices(1)>>=
 void forwardRefCacheVertices(final ConcurrentHashMap<Integer, int[]> lu_vertices) {
   this.tools.setRefCacheVertices(lu_vertices);
 }

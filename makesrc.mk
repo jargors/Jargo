@@ -114,9 +114,9 @@ TEXSRCS = \
 	src/mod-metrics.nw \
 	src/mod-schema.nw \
 	src/sim-overview.nw \
+	src/sim-administration.nw \
 	src/sim-reading.nw \
 	src/sim-writing.nw \
-	src/sim-administration.nw \
 	src/sim-gtree.nw \
 	src/sim-jmx.nw \
 	src/sim-client.nw \
