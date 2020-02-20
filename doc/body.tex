@@ -1314,21 +1314,31 @@ February 20, 2020
 \renewcommand{\thepage}{\arabic{page}}
 \setcounter{page}{1}
 
-Installation instructions.
-
 \begin{quote}
-If you are on Linux or Mac, you might be able to get away with:
+\textit{
+If you have an internet connection and are on Linux, Mac, or using
+Cygwin/MinGW, you might be able to get away with:}
 \begin{verbatim}
-> ./getdeps.sh
-> make jar
+> make all
 \end{verbatim}
-Otherwise, read on for details.
+\textit{
+Otherwise, read on for details.}
 \end{quote}
 
-\section{Prerequisites}
-\label{sec:prereqs}
+Jargo exists as a single Java archive (\texttt{jar}) file called
+\texttt{jargors-1.0.0.jar}. To ``install'' it means to compile the Java source
+files into the \texttt{jar}, and then place the \texttt{jar} file somewhere on
+your computer that is accessible by your Java runtime classpath
+(\texttt{-cp}) option. Jargo comes with its own Make-based build system. Type
+\texttt{make} in the Jargo root directory to see a list of build commands.
 
-\subsubsection*{For building Jargo:}
+\section{Prerequisites}
+\label{tut-install: prerequisites}
+
+Before you begin compiling Jargo, make sure you have the following
+prerequisites.
+
+\subsubsection*{For compiling Jargo:}
 \begin{itemize}
 \item Java JDK 11.0.1 or above. Latest Java Development Kits licensed under the
 GPL are available at \url{https://jdk.java.net}.
@@ -1337,21 +1347,36 @@ GPL are available at \url{https://jdk.java.net}.
 \item Apache Commons Pool 2.7.0 package, needed by DBCP and obtainable from
 \url{https://commons.apache.org/proper/commons-pool/}.
 \item Jargo GTreeJNI 1.0.0 native library and Java package, obtainable from
-\url{https://github.com/jargors/GTreeJNI}.
+\url{https://github.com/jamjpan/GTreeJNI}.
 \item JavaFX SDK 11 or above, obtainable from \url{https://openjfx.io/}.
+\item VisualVM charting components, obtainable from \url{
+http://bits.netbeans.org/nexus/content/repositories/visualvm}.
 \end{itemize}
+These prerequisites can be automatically obtained by typing \texttt{make dep}
+in the Jargo root directory. The obtained files are placed in the \texttt{dep/}
+folder. For GTreeJNI and JavaFX native components, the x64 Linux versions are
+downloaded. If you are on a different platform, you will need to obtain these
+native libraries by yourself.
 
-\subsubsection*{(Optional) For building the documentation (this document):}
+\subsubsection*{(Optional) For compiling the documentation (this document):}
 \begin{itemize}
 \item The \texttt{texfot} program, included in most distributions of LaTeX.
 \item The \texttt{pdflatex} program, included in most distributions of LaTeX.
 \end{itemize}
 
-\subsubsection*{(Optional) For building the Java and LaTeX sources:}
+\subsubsection*{(Optional) For compiling the Java and LaTeX sources:}
 \begin{itemize}
 \item The \texttt{notangle} and \texttt{noweave} programs, obtainable from
 \url{https://www.cs.tufts.edu/~nr/noweb/}.
 \end{itemize}
+If you are compiling noweb from source, use \texttt{icont} instead of
+\texttt{awk}. If you are on a Debian system, pre-packaged binaries compiled
+with \texttt{icont} should already be available.
+
+\section{Building the Documentation}
+
+To build the documentation (this file), type \texttt{make pdf} in the Jargo
+root directory.
 
 \section{For Users: Building the Library}
 
@@ -1366,7 +1391,9 @@ GPL are available at \url{https://jdk.java.net}.
 \item \texttt{commons-dbcp2-2.7.0.jar}
 \item \texttt{commons-logging-1.2.jar}
 \item \texttt{commons-pool2-2.7.0.jar}
-\item \texttt{jargors-GTreeJNI-1.0.0.jar}
+\item \texttt{com-sun-tools-visualvm-charts-RELEASE139.jar}
+\item \texttt{com-sun-tools-visualvm-uisupport-RELEASE139.jar}
+\item \texttt{gtree-2.0.jar}
 \item \texttt{libgtree.so}
 \item \textit{\texttt{javafx.base.jar}}
 \item \textit{\texttt{javafx.controls.jar}}
@@ -1397,6 +1424,10 @@ GPL are available at \url{https://jdk.java.net}.
 \item \textit{\texttt{libprism\_common.so}}
 \item \textit{\texttt{libprism\_es2.so}}
 \item \textit{\texttt{libprism\_sw.so}}
+\item \texttt{org-netbeans-lib-profiler-charts-RELEASE139.jar}
+\item \texttt{org-netbeans-lib-profiler-ui-RELEASE139.jar}
+\item \texttt{org-netbeans-modules-profiler-api-RELEASE139.jar}
+\item \texttt{org-openide-util-lookup-RELEASE139.jar}
 \end{itemize}\\
 \hline
 \end{tabular}
@@ -1405,30 +1436,42 @@ GPL are available at \url{https://jdk.java.net}.
 Follow these steps to build the \texttt{jargors-1.0.0.jar} library from the
 Java sources in the \texttt{java/} directory.
 \begin{enumerate}
-\item Verify the \texttt{deps/} folder contains the prerequisites listed in
-Table~\ref{tab:prereqs}.  The items in \textit{italics} are obtainable from the
-JavaFX SDK for your platform. The \texttt{libgtree.so} native library is
-obtainable from Jargo GTreeJNI and must be built for your platform beforehand.
-The remainig \texttt{*.jar} files are obtainable from the websites listed
-above.
-\item Launch a terminal (or command-line prompt if on Windows) and type
-\texttt{javac -version} to verify the Java compiler version is at least 11.0.1.
-\item Type the command \texttt{make jar}. The compiled library is outputted
+\item Verify the \texttt{dep/} folder contains the prerequisites listed in
+Table~\ref{tab:prereqs}. Typing \texttt{make dep} will automatically download
+the prerequisites and place them in the \texttt{dep/} folder. Otherwise, the
+items in \textit{italics} are obtainable from the JavaFX SDK for your platform.
+The \texttt{libgtree.so} native library is obtainable from Jargo GTreeJNI and
+must be built for your platform beforehand.  The remaining \texttt{*.jar} files
+are obtainable from the websites listed above.
+\item Type \texttt{javac -version} to verify the Java compiler version is at
+least 11.0.1.
+\item Type \texttt{make jar}. The compiled library is outputted
 to \texttt{jar/jargors-1.0.0.jar}.
 \end{enumerate}
-
-\section{Building the Documentation}
-
-To build the documentation, type \texttt{make pdf} from the terminal or
-command-line prompt.
 
 \section{For Developers: Building the Java and LaTeX Sources}
 
 The Jargo Java and LaTeX sources come from noweb files in the \texttt{src/}
-directory. To rebuild the Java and LaTeX sources from these files, install the
-\texttt{notangle} and \texttt{noweave} programs, obtainable from
-\url{https://www.cs.tufts.edu/~nr/noweb/}. Once the programs are installed,
-type \texttt{make src} to rebuild the sources.
+directory. To rebuild the Java and LaTeX sources from these files, type
+\texttt{make src} to rebuild the sources.
+
+\section{Summary}
+
+Here is a summary of build targets.
+\begin{itemize}
+\item \texttt{make all}: build the library, documentation, and fetch dependencies into
+the \texttt{dep} folder.
+\item \texttt{make jar}: build the \texttt{jar/jargors-1.0.0.jar} library only.
+\item \texttt{make pdf}: build the \texttt{doc/jargo.pdf} documentation only.
+\item \texttt{make src}: recompile the \texttt{java/*/*.java} source files from
+the \texttt{src/*.nw} noweb files.
+\item \texttt{make dep}: download the build prerequisites from the internet.
+\item \texttt{make clean}: delete build objects \texttt{jar/}, \texttt{com/},
+\texttt{pdf/}, \texttt{build.log}, and \texttt{wget.log}
+\item \texttt{make purge}: in addition to \texttt{clean}, also delete the
+Java source files and \texttt{doc/body.tex}.
+\item \texttt{make purgedep}: delete the \texttt{dep/} folder.
+\end{itemize}
 
 \nwenddocs{}\nwfilename{src/tut-example.nw}\nwbegindocs{0}\chapter{Two Simple Examples}
 \label{tut-example}
