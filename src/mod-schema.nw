@@ -1,10 +1,95 @@
 \chapter{SQL Schema}
 \label{mod-schema}
 
-\section{Property Tables}
+The simple constraints allowed by the SQL standard\footnote{ISO/IEC 9075}
+(\texttt{CHECK}, \texttt{UNIQUE}, \texttt{NOT NULL}, \texttt{FOREIGN KEY}) are
+unable to express the complex ridesharing properties and rules, and
+consequently a direct ``translation'' of the ridesharing relations into SQL is
+not possible without either making code extensions to SQL or reorganizing the
+relational ridesharing model.
 
-\subsection{Table V}
-Table V stores road network vertices.
+Jargo implements the following schema entirely in standard SQL without any code
+extensions while staying faithful to the model. In this schema, \textit{tables}
+capture the descriptive elements of the model and \textit{views} express the
+analytical measures. Tables are further organized into property, solution, and
+constraint tables. Property tables store the road network $\mathcal{G}$ and the
+user relation $\mathcal{U}$.  Solution tables store the server relation
+$\mathcal{X}$.  Constraint tables store copies of data from other tables for
+validation purposes.  The views are mostly defined on the constraint tables.
+
+Diagrams of the SQL tables are included in this chapter. In the diagrams,
+primary keys are indicated in italics. Elsewhere, column names are
+distinguished by \textsf{sans serif} script.  Parentheses are used to logically
+group together columns.  A parent table next to a group of columns indicates
+foreign key. In SQL, foreign keys must reference their values from the primary
+key of the parent table. Many of the table diagrams contain duplicate columns
+(for example, \textsf{sid} shows up three times in Table W).  These duplicates
+are included for illustrating the foreign key relationships, but in practice
+the duplicates are implemented as single columns participating in multiple
+foreign keys.
+
+This chapter also includes Java code chunks. Double-angle brackets enclose the
+chunk name, used to refer to the chunk in other parts of the document.
+Anything after the equals sign and before the ``at'' sign is live code. Noweb
+is used to compile the code chunks into correct Java source code.
+
+\section{Road Network Tables (Tables V and E)}
+\label{mod-schema: road}
+
+Each vertex $v\in\mathcal{V}$ is stored in Table V along with its coordinates
+$V(v)$ while each edge $(a,b)\in\mathcal{E}$ is stored in Table E along with
+its weight $d(a,b)$ and speed limit $\nu^\textrm{max}(a,b)$.  Table V thus has
+three columns, storing $v$ in primary key column \textsf{v} ([[P1]]) and its
+coordinates in column \textsf{lng} and \textsf{lat}.  Likewise, Table E has
+four columns, storing $a$ and $b$ in column \textsf{v1} and \textsf{v2},
+$d(a,b)$ in column \textsf{dd}, and $\nu^\textrm{max}(a,b)$ in column
+\textsf{nu}.  The four columns together form the primary key ([[P2]]) in order
+to be referenced by later tables.  Foreign keys on \textsf{v1} ([[F1]]) and
+\textsf{v2} ([[F2]]) referencing Table V validate that $a$ and $b$ are actual
+vertices.
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|c|l|}
+\hline
+\rowcolor{TableTitle}
+\multicolumn{2}{|c|}{Table V (Vertices)}\\
+\hline
+\rowcolor{TableHeader}
+Column & Description\\
+\hline
+\textit{v} & Vertex $v\in\mathcal{V}$\\
+\hline
+lng & \multirow{2}{*}{Vertex coordinate $V(v)$}\\
+lat & \\
+\hline
+\end{tabular}
+
+\begin{tabular}{|c|c|l|}
+\hline
+\rowcolor{TableTitle}
+\multicolumn{3}{|c|}{Table E (Edges)}\\
+\hline
+\rowcolor{TableHeader}
+Column & Parent & Description\\
+\hline
+\textit{v1} & Table V & \multirow{2}{*}{Edge $(a, b)\in\mathcal{E}$} \\
+\cline{2-2}
+\textit{v2} & Table V & \\
+\hline
+\textit{dd} & & Weight $d(a,b)$\\
+\hline
+\textit{nu} & & Max. speed $\nu^\textrm{max}(a,b)$\\
+\hline
+\end{tabular}
+\end{table}
+
+Jargo considers vertex 0 to be a dummy vertex where any edged formed by 0 has
+no weight. To implement the dummy vertex, constraint ([[C11]]) is added that
+states \textsf{dd} must be 0 if either \textsf{v1} or \textsf{v2} is 0.
+
+Here are the SQL statements to construct the tables.
+
 <<Create Table V statement>>=
 "CREATE TABLE V ("
   + "v   int  CONSTRAINT P1 PRIMARY KEY,"
@@ -15,8 +100,6 @@ Table V stores road network vertices.
   + ")"
 @
 
-\subsection{Table E}
-Table E stores road network edges.
 <<Create Table E statement>>=
 "CREATE TABLE E ("
   + "v1  int  CONSTRAINT C5 NOT NULL,"
@@ -37,8 +120,39 @@ Table E stores road network edges.
   + ")"
 @
 
-\subsection{Table UQ}
-Table UQ stores user loads.
+\section{User Tables (Table UQ, UE, UL, UO, UD, and UB)}
+\label{mod-schema: user}
+
+To allow other tables to reference specific user components, the user relation
+is partitioned into five 2-column tables, UQ, UE, UL, UO, and UD, by taking
+projections on the respective \texttt{q}, \texttt{e}, \texttt{l}, \texttt{o},
+and \texttt{d} components. Each row is a key-value pair, storing a unique
+\textsf{uid} for user identification as the key alongside the component value,
+and each row is also its own primary key.  A sixth table UB is introduced to
+store base costs for computing $D^\textrm{base}$ and $\rho^\textrm{distance}$.
+Table UO and UD can be referenced to Table V to validate against property P2
+and rule P4.
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|c|c|l|}
+\hline
+\rowcolor{TableTitle}
+\multicolumn{3}{|c|}{User Tables}\\
+\hline
+\rowcolor{TableHeader}
+Table & Columns & Description \\
+\hline
+UQ & \textit{uid}, \textit{val} & User load $u_\texttt{q}$ \\
+UE & \textit{uid}, \textit{val} & User early time $u_\texttt{e}$ \\
+UL & \textit{uid}, \textit{val} & User late time $u_\texttt{l}$ \\
+UO & \textit{uid}, \textit{val} & User origin $u_\texttt{o}$ \\
+UD & \textit{uid}, \textit{val} & User destination $u_\texttt{d}$ \\
+UB & \textit{uid}, \textit{val} & User base cost $d_u$ \\
+\hline
+\end{tabular}
+\end{table}
+
 <<Create Table UQ statement>>=
 "CREATE TABLE UQ ("
   + "uid int  CONSTRAINT C12 NOT NULL,"
@@ -49,8 +163,6 @@ Table UQ stores user loads.
   + ")"
 @
 
-\subsection{Table UE}
-Table UE stores user early times.
 <<Create Table UE statement>>=
 "CREATE TABLE UE ("
   + "uid int  CONSTRAINT C16 NOT NULL,"
@@ -61,8 +173,6 @@ Table UE stores user early times.
   + ")"
 @
 
-\subsection{Table UL}
-Table UL stores user late times.
 <<Create Table UL statement>>=
 "CREATE TABLE UL ("
   + "uid int  CONSTRAINT C20 NOT NULL,"
@@ -73,8 +183,6 @@ Table UL stores user late times.
   + ")"
 @
 
-\subsection{Table UO}
-Table UO stores user origins.
 <<Create Table UO statement>>=
 "CREATE TABLE UO ("
   + "uid int  CONSTRAINT C24 NOT NULL,"
@@ -85,8 +193,6 @@ Table UO stores user origins.
   + ")"
 @
 
-\subsection{Table UD}
-Table UD stores user destinations.
 <<Create Table UD statement>>=
 "CREATE TABLE UD ("
   + "uid int  CONSTRAINT C27 NOT NULL,"
@@ -96,9 +202,6 @@ Table UD stores user destinations.
   + "CONSTRAINT P7 PRIMARY KEY (uid, ud)"
   + ")"
 @
-
-\subsection{Table UB}
-Table UB stores user base distances.
 <<Create Table UB statement>>=
 "CREATE TABLE UB ("
   + "uid int  CONSTRAINT C30 NOT NULL,"
@@ -109,10 +212,78 @@ Table UB stores user base distances.
   + ")"
 @
 
-\section{Solution Tables}
+\section{Routes Table (Table W)}
+\label{mod-schema: routes}
 
-\subsection{Table W}
-Table W stores server routes.
+Table W has eight columns, \textsf{sid}, \textsf{se}, \textsf{t1}, \textsf{v1},
+\textsf{t2}, \textsf{v2}, \textsf{dd}, and \textsf{nu}.  The \texttt{s},
+\texttt{t}, and \texttt{v} components of $\mathcal{X}$ are stored in the
+(\textsf{sid}, \textsf{t2}, \textsf{v2}) columns.  By definition, the sequence
+of vertices in a route must form a path and the speed of adjacent waypoints
+cannot exceed the limit $\nu^\textrm{max}$.  To enforce these rules, the
+predecessor waypoint is stored in the (\textsf{sid}, \textsf{t1},
+\textsf{v1}) columns.  The (\textsf{v1}, \textsf{v2}) columns can thus identify
+an edge. Columns \textsf{dd} and \textsf{nu} are added to store the weight and
+speed limit on the edge, and (\textsf{v1}, \textsf{v2}, \textsf{dd},
+\textsf{nu}) is referenced by foreign key to Table E ([[F19]]) to validate the
+values. A row-level \texttt{CHECK} constraint ([[C56]]) validates that the
+speed $\textsf{dd}/(\textsf{t2}-\textsf{t1})$ is not greater than the maximum
+free-flow speed, \textsf{nu}.
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|c|c|l|}
+\hline
+\rowcolor{TableTitle}
+\multicolumn{3}{|c|}{Table W (Routes)} \\
+\hline
+\rowcolor{TableHeader}
+Col. & Parent & Description \\
+\hline
+\textit{sid} & Table S & Identification for server $s\in\mathcal{S}$ \\
+\hline
+sid & \multirow{2}{*}{Table UE} & \multirow{2}{*}{Server early time $s_\texttt{e}$} \\
+se & & \\
+\hline
+sid & \multirow{3}{*}{Table W} & \multirow{3}{*}{Predecessor waypoint $w_{i-1}$} \\
+t1 & & \\
+v1 & & \\
+\hline
+\textit{t2} & & \multirow{2}{*}{Waypoint $w_i$} \\
+\textit{v2} & & \\
+\hline
+v1 & \multirow{4}{*}{Table E} & \multirow{4}{*}{Properties of edge $(\pi_\texttt{v}(w_{i-1}),\pi_\texttt{v}(w_i))$} \\
+v2 & & \\
+dd & & \\
+nu & & \\
+\hline
+\end{tabular}
+\end{table}
+
+The below items are easily implemented in SQL and establish that each
+(\textsf{sid}, \textsf{t1}, \textsf{v1}) is indeed the predecessor to
+(\textsf{sid}, \textsf{t2}, \textsf{v2}) in the same row (refer to the SQL
+statements below):
+\begin{enumerate}
+\item The predecessor (\textsf{sid}, \textsf{t1}, \textsf{v1}) must reference
+an existing waypoint (\textsf{sid}, \textsf{t2}, \textsf{v2}) from the table
+([[F20]]);
+\item Out of all rows, (\textsf{sid}, \textsf{t1}) must be unique and
+(\textsf{sid}, \textsf{t2}) must be unique ([[C54]], [[C55]]);
+\item Column \textsf{t2} and \textsf{v2} cannot be null ([[C52]], [[C53]]);
+\item Unless \textsf{t2} is equal to the server's early time, \textsf{t1}
+cannot be null and it must be less than \textsf{t2}, otherwise \textsf{t1},
+\textsf{v1}, \textsf{dd}, and \textsf{nu} must all be null ([[C56]]).
+\end{enumerate}
+The (\textsf{sid}, \textsf{t2}, \textsf{v2}) columns are the primary key
+([[P11]]) in order to allow the self-referencing foreign key in the first item.
+The last item handles the case where the first waypoint in a server's route has
+no predecessor. Only in this case are \textsf{t1}, \textsf{v1}, \textsf{dd},
+and \textsf{nu} are allowed to be null.  From rule R1, the first waypoint is
+detected by checking if \textsf{t2} is equal to the server's early time, stored
+in column \textsf{se}. The (\textsf{sid}, \textsf{se}) columns are referenced
+to UE to validate the early time ([[F18]]).
+
 <<Create Table W statement>>=
 "CREATE TABLE W ("
   + "sid int  CONSTRAINT C50 NOT NULL,"
@@ -139,8 +310,36 @@ Table W stores server routes.
   + ")"
 @
 
-\subsection{Table PD}
-Table PD stores pick-up and drop-off labeled waypoints.
+\section{Labels Table (Table PD)}
+\label{mod-schema: labels}
+
+Table PD (for ``pick-ups and drop-offs'') contains four columns, \textsf{sid},
+\textsf{t2}, \textsf{v2}, and \textsf{rid}.  The (\textsf{sid}, \textsf{t2},
+\textsf{v2}) columns reference Table W ([[F23]]), and the \textsf{rid} column
+indicates the label on that waypoint.  Each row is its own primary key
+([[P12]]) in order to be referenced by the CPD constraint table.  A waypoint
+can have multiple labels simply by listing the waypoint multiple times with
+different values of \textsf{rid}.
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|c|c|l|}
+\hline
+\rowcolor{TableTitle}
+\multicolumn{3}{|c|}{Table PD (Pick-up and Drop-off Labels)}\\
+\hline
+\rowcolor{TableHeader}
+Col. & Parent & Description \\
+\hline
+\textit{sid} & \multirow{3}{*}{Table W} & \multirow{3}{*}{Waypoint $w_i$ (schedule element $b_j$)} \\
+\textit{t2} & & \\
+\textit{v2} & & \\
+\hline
+\textit{rid} & Table R & Identification for request $r\in\mathcal{R}$ \\
+\hline
+\end{tabular}
+\end{table}
+
 <<Create Table PD statement>>=
 "CREATE TABLE PD ("
   + "sid int  CONSTRAINT C57 NOT NULL,"
@@ -154,10 +353,43 @@ Table PD stores pick-up and drop-off labeled waypoints.
   + ")"
 @
 
-\section{Constraint Tables}
+\section{User Constraint Tables (Tables S and R)}
+\label{mod-schema: user-constraint}
 
-\subsection{Table S}
-Table S constrains server properties.
+Table S and Table R enforce the remaining user constraints.  Both tables have
+six columns, one for each of \textsf{uq}, \textsf{ue}, \textsf{ul},
+\textsf{uo}, \textsf{ud}, and \textsf{ub}, to store user data. A seventh column
+stores the user identifier as the primary key. The identifier is stored in the
+\textsf{sid} column for Table S and the \textsf{rid} column for Table R.  Each
+(\textsf{sid}, column) or (\textsf{rid}, column) pair references the
+corresponding user property table, for example (\textsf{sid}, \textsf{uq})
+references Table UQ.
+
+Properties P1 and P3 that could not be enforced in the user tables are now
+enforced through simple constraints on S and R.  A \texttt{CHECK} constraint
+validates that \textsf{uq} is less than 0 in Table S ([[C40]]), and another
+\texttt{CHECK} constraint validates it is greater than 0 in Table R ([[C48]]),
+corresponding to servers and requests (property P1). Likewise, a \texttt{CHECK}
+constraint validates that \textsf{ue} is less than \textsf{ul} ([[C41]],
+[[C49]]) (property P3). None of the columns can be null to prevent incomplete
+users.
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|c|l|}
+\hline
+\rowcolor{TableTitle}
+\multicolumn{2}{|c|}{User Constraint Tables}\\
+\hline
+\rowcolor{TableHeader}
+Table & Columns \\
+\hline
+Table S & \textit{sid}, sq, se, sl, so, sd, sb \\
+Table R & \textit{rid}, rq, re, rl, ro, rd, rb \\
+\hline
+\end{tabular}
+\end{table}
+
 <<Create Table S statement>>=
 "CREATE TABLE S ("
   + "sid int  CONSTRAINT P9 PRIMARY KEY,"
@@ -178,8 +410,6 @@ Table S constrains server properties.
   + ")"
 @
 
-\subsection{Table R}
-Table R constrains request properties.
 <<Create Table R statement>>=
 "CREATE TABLE R ("
   + "rid int  CONSTRAINT P10 PRIMARY KEY,"
@@ -200,8 +430,62 @@ Table R constrains request properties.
   + ")"
 @
 
-\subsection{Table CW}
-Table CW constrains route endpoints.
+\section{Route Endpoint Constraints Table (Table CW)}
+\label{mod-schema: route-endpoint}
+
+Table CW stores the start and end waypoints of each server route.  The table
+has nine columns, \textsf{sid}, \textsf{se}, \textsf{sl}, \textsf{so},
+\textsf{sd}, \textsf{ts}, \textsf{vs}, \textsf{te}, and \textsf{ve}.  The start
+waypoint is stored in (\textsf{sid}, \textsf{ts}, \textsf{vs}) and the end
+waypoint is stored in (\textsf{sid}, \textsf{te}, \textsf{ve}). Both of these
+groups reference the (\textsf{sid}, \textsf{t2}, \textsf{v2}) columns in Table
+W ([[F29]], [[F30]]).  The \textsf{sid} column is set to be \texttt{UNIQUE}
+([[C70]]) to prevent a server from being listed multiple times and having
+``multiple'' start and end waypoints.  Rule R1 is enforced by adding the
+server's early and late times into columns \textsf{se} and \textsf{sl},
+referencing (\textsf{sid}, \textsf{se}) to UE ([[F25]]) and (\textsf{sid},
+\textsf{sl}) to UL ([[F26]]).  A \texttt{CHECK} constraint validates the start
+time \textsf{ts} equals \textsf{se} ([[C71]]) and another one validates the end
+time \textsf{te} is not beyond \textsf{sl} ([[C72]]).  Rule 2 is enforced by
+adding the server's origin and destination into columns \textsf{so} and
+\textsf{sd}, referencing (\textsf{sid}, \textsf{so}) to UO ([[F27]]) and
+(\textsf{sid}, \textsf{sd}) to UD ([[F28]]).  Likewise, constraint [[C71]]
+validates the start location \textsf{vs} equals \textsf{so} and [[C72]]
+validates the end location \textsf{ve} equals \textsf{sd}.
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|c|c|l|}
+\hline
+\rowcolor{TableTitle}
+\multicolumn{3}{|c|}{Table CW (Route Endpoint Constraints)}\\
+\hline
+\rowcolor{TableHeader}
+Col. & Parent & Description\\
+\hline
+sid & \multirow{2}{*}{Table UE} & \multirow{2}{*}{Server early time $s_\texttt{e}$} \\
+se & & \\
+\hline
+sid & \multirow{2}{*}{Table UL} & \multirow{2}{*}{Server late time $s_\texttt{l}$} \\
+sl & & \\
+\hline
+sid & \multirow{2}{*}{Table UO} & \multirow{2}{*}{Server origin $s_\texttt{o}$} \\
+so & &\\
+\hline
+sid & \multirow{2}{*}{Table UD} & \multirow{2}{*}{Server destination $s_\texttt{d}$} \\
+sd & & \\
+\hline
+\textit{sid} & \multirow{3}{*}{Table W} & \multirow{3}{*}{Server $\textrm{pickup}(\mathcal{X},s)$}\\
+\textit{ts} & & \\
+vs & & \\
+\hline
+sid & \multirow{3}{*}{Table W} & \multirow{3}{*}{Server $\textrm{dropoff}(\mathcal{X},s)$}\\
+\textit{te} & & \\
+ve & & \\
+\hline
+\end{tabular}
+\end{table}
+
 <<Create Table CW statement>>=
 "CREATE TABLE CW ("
   + "sid int  CONSTRAINT C61 NOT NULL,"
@@ -230,8 +514,75 @@ Table CW constrains route endpoints.
   + ")"
 @
 
-\subsection{Table CPD}
-Table CPD constrains pick-ups and drop-offs.
+\section{Label Constraints Table (Table CPD)}
+\label{mod-schema: label-constraints}
+
+Table CPD enforces the pick-up and drop-off rules R5--R9. It contains twelve
+columns, \textsf{sid}, \textsf{ts}, \textsf{te}, \textsf{tp}, \textsf{vp},
+\textsf{td}, \textsf{vd}, \textsf{rid}, \textsf{re}, \textsf{rl}, \textsf{ro},
+and \textsf{rd}.  The (\textsf{sid}, \textsf{tp}, \textsf{vp}, \textsf{rid})
+and (\textsf{sid}, \textsf{td}, \textsf{vd}, \textsf{rid}) groups reference
+rows in Table PD ([[F34]], [[F35]]) and represent pick-up and drop-off
+waypoints, respectively.  Rules R5 and R9 are enforced by setting \textsf{rid}
+to \texttt{UNIQUE} ([[C86]]), in other words any request identified in
+\textsf{rid} has only one pick-up and drop-off pair.  Rule R6 is enforced by
+adding columns for the request origin \textsf{ro} and destination \textsf{rd}
+and validating that pick-up vertex \textsf{vp} equals \textsf{ro} ([[C89]]) and
+drop-off vertex \textsf{vd} equals \textsf{rd} ([[C90]]). The (\textsf{rid},
+\textsf{ro}) columns are referenced to UO ([[F38]]) and (\textsf{rid},
+\textsf{rd}) are referenced to UD ([[F39]]).  Rules R7 and R8 are enforced by
+simple \texttt{CHECK} constraints. Both \textsf{tp} and \textsf{td} are
+validated to be between request early time \textsf{re} and late time
+\textsf{rl} ([[C89]], [[C90]]). The (\textsf{rid}, \textsf{re}) and
+(\textsf{rid}, \textsf{rl}) columns are added and referenced to UE and UL
+([[F36]], [[F37]]) for this purpose.
+
+So far, nothing prevents \textsf{tp} and \textsf{td} from falling outside the
+server's start and end times. These times are thus added into (\textsf{sid},
+\textsf{ts}, \textsf{te}) columns, referenced to Table CW ([[F33]]).  Then,
+\texttt{CHECK} constraints can validate that \textsf{tp} and \textsf{td} are
+within the start time \textsf{ts} and the end time \textsf{te} ([[C87]],
+[[C88]]).
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{|c|c|l|}
+\hline
+\rowcolor{TableTitle}
+\multicolumn{3}{|c|}{Table CPD (Pick-up and Drop-off Constraints)}\\
+\hline
+\rowcolor{TableHeader}
+Col. & Parent & Description \\
+\hline
+sid & \multirow{3}{*}{Table CW} & \multirow{3}{48mm}{Server start and end times $\pi_\texttt{t}(\textrm{pickup}(\mathcal{X},s))$, $\pi_\texttt{t}(\textrm{dropoff}(\mathcal{X},s))$} \\
+ts & & \\
+te & & \\
+\hline
+\textit{sid} & \multirow{4}{*}{Table PD} & \multirow{4}{*}{Request $\textrm{pickup}(\mathcal{X},r)$} \\
+\textit{tp} & & \\
+vp & & \\
+rid & & \\
+\hline
+sid & \multirow{4}{*}{Table PD} & \multirow{4}{*}{Request $\textrm{dropoff}(\mathcal{X},r)$} \\
+\textit{td} & & \\
+vd & & \\
+\textit{rid} & & \\
+\hline
+rid & \multirow{2}{*}{Table UE} & \multirow{2}{*}{Request early time $r_\texttt{e}$} \\
+re & & \\
+\hline
+rid & \multirow{2}{*}{Table UL} & \multirow{2}{*}{Request late time $r_\texttt{l}$} \\
+rl & & \\
+\hline
+rid & \multirow{2}{*}{Table UO} & \multirow{2}{*}{Request origin $r_\texttt{o}$} \\
+ro & & \\
+\hline
+rid & \multirow{2}{*}{Table UD} & \multirow{2}{*}{Request destination $r_\texttt{d}$} \\
+rd & & \\
+\hline
+\end{tabular}
+\end{table}
+
 <<Create Table CPD statement>>=
 "CREATE TABLE CPD ("
   + "sid int  CONSTRAINT C76 NOT NULL,"
@@ -269,8 +620,86 @@ Table CPD constrains pick-ups and drop-offs.
   + ")"
 @
 
-\subsection{Table CQ}
-Table CQ constrains server loads.
+\section{Load Constraints Table (Table CQ)}
+\label{mod-schema: load-constraints}
+
+Table CQ enforces the load rule R11. It has fourteen columns, \textsf{sid},
+\textsf{sq}, \textsf{se}, \textsf{t1}, \textsf{t2}, \textsf{v2}, \textsf{q1},
+\textsf{q2}, \textsf{rid}, \textsf{rq}, \textsf{tp}, \textsf{td}, \textsf{o1},
+and \textsf{o2}.  From Eq.~\ref{eq:load}, the load burden only changes at the
+times of waypoints labeled with a request. It increases when a waypoint
+corresponds to a customer pick-up and decreases when the waypoint corresponds
+to a customer drop-off. Each load-changing waypoint is stored in (\textsf{sid},
+\textsf{t2}, \textsf{v2}, \textsf{rid}) and referenced to PD ([[F46]]).  To
+determine if the waypoint is a customer pick-up or drop-off, the pick-up and
+drop-off times for \textsf{rid} are stored in (\textsf{sid}, \textsf{tp},
+\textsf{td}, \textsf{rid}) and referenced to CPD ([[F47]]).  If
+$\textsf{t2}=\textsf{tp}$, then the waypoint represents a pick-up, otherwise it
+represents a drop-off. The load of the server and request are stored in
+(\textsf{sid}, \textsf{sq}) and (\textsf{rid}, \textsf{rq}), referenced to UQ
+([[F44]], [[F45]]).
+
+To validate if the load burden is always within a server's capacity, CQ must
+keep track of every load change. It does so by storing the predecessor
+load in columns (\textsf{sid}, \textsf{t1}, \textsf{q1}, \textsf{o1}) next to
+the current load in columns (\textsf{sid}, \textsf{t2}, \textsf{q2},
+\textsf{o2}).  If the waypoint in the row is a pick-up, CQ validates that
+$\textsf{q1}+\textsf{rq}=\textsf{q2}$, otherwise that
+$\textsf{q1}-\textsf{rq}=\textsf{q2}$ ([[C98]]). As repetitive load changes can
+occur at a single waypoint due to multiple pick-ups and drop-offs, the
+\textsf{o1} and \textsf{o2} columns are introduced to store a unique
+order number. This number increments by 1 for each pick-up or drop-off
+per server and can be handled by the application. Similar rules for
+establishing predecessor waypoints in Table W can be used to establish
+predecessor loads in CQ.  Subsequently, (\textsf{sid}, \textsf{t2},
+\textsf{q2}, \textsf{o2}) is set to be the primary key ([[P15]]) in order to
+allow a self-referencing foreign key on (\textsf{sid}, \textsf{t1},
+\textsf{q1}, \textsf{o1}) ([[F42]]), and the server early time is stored in
+(\textsf{sid}, \textsf{se}) and referenced to UE ([[F43]]) in order to detect
+the first load change.
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{|c|c|l|}
+\hline
+\rowcolor{TableTitle}
+\multicolumn{3}{|c|}{Table CQ (Load Constraints)}\\
+\hline
+\rowcolor{TableHeader}
+Col. & Parent & Description \\
+\hline
+sid & \multirow{2}{*}{Table UQ} & \multirow{2}{*}{Server load $s_q$} \\
+sq & & \\
+\hline
+sid & \multirow{2}{*}{Table UE} & \multirow{2}{*}{Server early time $s_e$} \\
+se & & \\
+\hline
+sid & \multirow{4}{*}{Table CQ} & \multirow{4}{48mm}{Load burden $\mathcal{Q}(\mathcal{X},s,\textrm{t1})$ up to order o1} \\
+t1 & & \\
+q1 & & \\
+o1 & & \\
+\hline
+\textit{sid}& & \multirow{3}{48mm}{Load burden $\mathcal{Q}(\mathcal{X},s,\textrm{t2})$ up to order o2} \\
+\textit{t2} & & \\
+\textit{q2} & & \\
+\textit{o2} & & \\
+\hline
+sid & \multirow{4}{*}{Table PD} & \multirow{4}{48mm}{Request pick-up or delivery waypoint} \\
+t2 & & \\
+v2 & & \\
+rid& & \\
+\hline
+sid & \multirow{4}{*}{Table CPD} & \multirow{4}{48mm}{Request pick-up and delivery times $\pi_\texttt{t}(\textrm{pickup}(\mathcal{X},r))$, $\pi_\texttt{t}(\textrm{dropoff}(\mathcal{X},r))$} \\
+tp & & \\
+td & & \\
+rid& & \\
+\hline
+rid & \multirow{2}{*}{Table UQ} & \multirow{2}{*}{Request load $r_q$} \\
+rq & & \\
+\hline
+\end{tabular}
+\end{table}
+
 <<Create Table CQ statement>>=
 "CREATE TABLE CQ ("
   + "sid int  CONSTRAINT C95 NOT NULL,"
@@ -311,8 +740,8 @@ Table CQ constrains server loads.
   + ")"
 @
 
-\chapter{Views}
-\label{views}
+\section{Views}
+\label{mod-schema: views}
 
 The user relation $\mathcal{U}$ can be formed by a union of Table S and R.
 <<Create View r\_user statement>>=
@@ -492,3 +921,4 @@ To list time window violations of all requests:
 "CREATE VIEW violations_t_r (rid, val) AS "
   + "SELECT rid, td - rl FROM CPD WHERE td - rl > 0"
 @
+

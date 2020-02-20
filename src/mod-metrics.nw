@@ -1,3 +1,166 @@
 \chapter{Ridesharing Metrics}
 \label{mod-metrics}
 
+A variety of metrics can now be measured by simple operations on $\mathcal{U}$
+and $\mathcal{X}$. This chapter lists metrics implemented in Jargo, but others
+may be possible.
+
+\section{Assignments}
+\label{mod-metrics: assignments}
+
+Server $s$ is said to be assigned to request $r$ at time $t$ only if
+$\textrm{status}(\mathcal{X},r,t)=2$. That is, the request's status is arrived
+at time $t$. The set of $(s,r)$ pairs where this property is true is called
+the set of assignments, formally
+\begin{equation}
+\label{eq:assignments}
+\textit{assignments }A(\mathcal{X},t)=
+\{(s,r)\in\mathcal{S}\times \mathcal{R} \mid \textrm{status}(\mathcal{X},r,t)=2\}.
+\end{equation}
+Using the assignments,
+\begin{align}
+\label{eq:assigned-requests}
+\textit{assigned requests }R^\textrm{ok}(\mathcal{X},t)&=\pi_\texttt{r}(A(\mathcal{X},t))\textrm{, and}\\
+\label{eq:unassigned-requests}
+\textit{unassigned requests }R^\textrm{ko}(\mathcal{X},t)&=\mathcal{R}\setminus\mathcal{R}^\textrm{ok}(\mathcal{X},t).
+\end{align}
+The server assigned to $r$ can be obtained with
+\begin{equation}
+S(\mathcal{X},r,t)=\{s\in\mathcal{S}\mid\textrm{status}(\mathcal{X},r,t)=2\},
+\end{equation}
+guaranteed to return only one server due to R5.
+Likewise, the set of requests assigned to $s$ can be obtained with
+\begin{equation}
+\label{eq:R(X,s,t)}
+R(\mathcal{X},s,t)=\{r\in\mathcal{R}\mid\textrm{status}(\mathcal{X},r,t)=2\}.
+\end{equation}
+
+\section{Service Rate}
+\label{mod-metrics: service-rate}
+The service rate is the number of assigned requests over the number of all requests, or
+\begin{equation}
+\label{eq:service-rate}
+\textit{service rate }\mu(\mathcal{X},t)=\frac{|R^\textrm{ok}(\mathcal{X},t)|}{|\mathcal{R}|}.
+\end{equation}
+
+\section{Distances}
+\label{mod-metrics: distances}
+
+The base distance is the sum of the shortest-path distances for all users, or
+\begin{equation}
+\label{eq:base-distance}
+\textit{base distance }D^\textrm{base}(\mathcal{U})=\sum_{u\in U}d_u.
+\end{equation}
+The travel distance for one server $s$ is the distance of its route,
+$D(W(\mathcal{X},s))$,
+and the travel duration can be found with
+$\delta(W(\mathcal{X},s))$.
+
+For a server with route $w$, travel distance $D(w)$ can be partitioned into
+cruising distance $D_0(w)$ and
+service distance $D_1(w)$.
+The cruising distance sums the distance along portions where the load burden is zero.
+The service distance sums the distance along portions of $w$ where the
+load burden is non-zero.
+Formally, partition $w$ into a set of substrings $\Omega(w)$ such that each waypoint
+in $w$ is a member of exactly one substring and that for all substrings $\omega\in \Omega$,
+\begin{align}
+\label{eq:slack}\textrm{either }Q(\mathcal{X},s,t)&=0\textrm{ is true for all }t\in \pi_\texttt{t}(\omega),\\
+\label{eq:block}\textrm{or }Q(\mathcal{X},s,t)&>0\textrm{ is true for all }t\in \pi_\texttt{t}(\omega).
+\end{align}
+The equations can be used to partition $\Omega(w)$ into two subsets,
+\begin{align*}
+\Omega_0(w)&=\{\omega\in \Omega(w)\mid \omega\textrm{ satisfies Eq.~\ref{eq:slack}}\}\textrm{ and }\\
+\Omega_1(w)&=\{\omega\in \Omega(w)\mid \omega\textrm{ satisfies Eq.~\ref{eq:block}}\}.
+\end{align*}
+The distances of each of the substrings in each subset can be summed
+to get
+$$D_0(w)=\sum_{\omega\in \Omega_0(w)} D(\omega)\quad\textrm{and}\quad
+  D_1(w)=\sum_{\omega\in \Omega_1(w)} D(\omega).$$
+These distances are written as
+\begin{align}
+\label{eq:cruising-distance}
+\textit{cruising distance }D^\textrm{cruise} (\mathcal{X},s)&=D_0(W(\mathcal{X},s)),\textrm{ and}\\
+\label{eq:service-distance}
+\textit{service distance } D^\textrm{service}(\mathcal{X},s)&=D_1(W(\mathcal{X},s)).
+\end{align}
+
+\section{Detours and Delays}
+\label{mod-metrics: delays}
+
+In physical terms, the detour route for a customer is the portion of a vehicle's
+route between when it visits the customer's origin and destination. Formally, let
+$w=W(\mathcal{X},S(\mathcal{X},r,H))$ be the route of the server assigned to $r$.
+The detour route $\Delta W(\mathcal{X},r)$ is an $m$-length substring of $w$ given by
+$\Delta W(\mathcal{X},r)=w_{1+k}..w_{m+k}$ such that for some $k$,
+\begin{itemize}
+\item $\Delta W(\mathcal{X},r)$ begins at $r_\texttt{o}$, or $\pi_\texttt{v}(w_{1+k})=r_\texttt{o}$,
+\item $\Delta W(\mathcal{X},r)$ ends at $r_\texttt{d}$, or $\pi_\texttt{v}(w_{m+k})=r_\texttt{d}$, and
+\item the first and last waypoints of $\Delta W(\mathcal{X},r)$ are labeled with $r$, or $r\in\pi_\texttt{L}(w_{1+k})\cap\pi_\texttt{L}(w_{m+k})$.
+\end{itemize}
+Observe that due to the labeling rules, only one value of $k$ can satisfy these
+conditions. The first and last waypoints $w_{1+k}$ and $w_{m+k}$ can be found by
+the equations on users,
+\begin{align}
+\label{eq:pickup}
+\textrm{pickup}(\mathcal{X},u)&=\pi_{\texttt{t},\texttt{v}}(\sigma_{\texttt{v}=u_\texttt{o}\land u\in\texttt{L}}(\mathcal{X}))\textrm{, and}\\
+\label{eq:dropoff}
+\textrm{dropoff}(\mathcal{X},u)&=\pi_{\texttt{t},\texttt{v}}(\sigma_{\texttt{v}=u_\texttt{d}\land u\in\texttt{L}}(\mathcal{X})),
+\end{align}
+by substituting $r$ for $u$.
+Note that if a server is substituted for $u$, these equations give the start and
+end waypoints of the server's route due to R3 and R10.
+These two equations can also be used to give two times for
+any user,
+\begin{align}
+\label{eq:departure-time}
+\textit{departure time }t^\textrm{depart}(\mathcal{X},u)&=\pi_\texttt{t}(\textrm{pickup}(\mathcal{X},u))\textrm{, and}\\
+\label{eq:arrival-time}
+\textit{arrival time }t^\textrm{arrive}(\mathcal{X},u)&=\pi_\texttt{t}(\textrm{dropoff}(\mathcal{X},u)).
+\end{align}
+In the real world, the time until a vehicle picks up a customer can be of interest.
+This pick-up delay can be found with
+\begin{equation}
+\label{eq:pick-up delay}
+\textit{pick-up delay }\delta^\textrm{pickup}(\mathcal{X},r)=\pi_\texttt{t}(\textrm{pickup}(\mathcal{X},r))-r_\texttt{e}.
+\end{equation}
+
+The detour route $\Delta W(\mathcal{X},r)$ can only apply to assigned requests. If
+a detour route exists, then
+the transit distance and duration are
+\begin{align}
+\label{eq:transit-distance}
+\textit{transit distance }D^\textrm{transit}(\mathcal{X},r)&=D(\Delta W(\mathcal{X},r))\textrm{, and}\\
+\label{eq:transit-duration}
+\textit{transit duration }\delta^\textrm{transit}(\mathcal{X},r)&=\delta(\Delta W(\mathcal{X},r)).
+\end{align}
+Similarly, the detour distance and duration are
+\begin{align}
+\label{eq:detour-distance}
+\textit{detour distance }D^\textrm{detour}(\mathcal{X},r)&=D^\textrm{transit}(\mathcal{X},r)-d_r\textrm{, and}\\
+\label{eq:detour-duration}
+\textit{detour duration }\delta^\textrm{detour}(\mathcal{X},r)&=\delta^\textrm{transit}(\mathcal{X},r)-\delta_r.
+\end{align}
+Finally, the travel duration is the sum of the pick-up and transit durations,
+\begin{equation}
+\label{eq:travel-duration}
+\textit{travel duration }\delta^\textrm{travel}(\mathcal{X},r)=\delta^\textrm{pickup}(\mathcal{X},r)+\delta^\textrm{transit}(\mathcal{X},r)
+=\pi_\texttt{t}(\textrm{dropoff}(\mathcal{X},r))-r_\texttt{e}.
+\end{equation}
+
+\section{Utilization}
+\label{mod-metrics: utilization}
+
+The percentage of servers that are assigned to at least one request is given by
+\begin{equation}
+\label{eq:server-utilization}
+\textit{server utilization }\rho^\textrm{server}(\mathcal{X})=\frac{|\pi_\texttt{s}(\mathcal{A}(\mathcal{X}))|}{|\mathcal{S}|}.
+\end{equation}
+The distance utilization is
+\begin{equation}
+\label{eq:distance-utilization}
+\textit{distance utilization }\rho^\textrm{distance}(\mathcal{X})=
+\frac{\sum_{s\in\mathcal{S}}D^\textrm{service}(\mathcal{X},s)}
+{\sum_{s\in\mathcal{S}}D(\mathcal{X},s)}.
+\end{equation}
+

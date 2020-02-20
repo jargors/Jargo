@@ -1,6 +1,22 @@
 \chapter{Ridesharing Users}
 \label{mod-users}
 
+\begin{quote}
+\textit{
+Feel free to skip this chapter if you are not interested in tinkering with
+Jargo's data model.}
+\end{quote}
+
+In Jargo, the basic entity representing a ridesharing participant is the user.
+Table~\ref{tab:user-types} describes the types of users recognized by Jargo.
+Table~\ref{tab:user-properties} describes their properties. Finally,
+Table~\ref{tab:user-rules} describes rules governing their behavior.  A user is
+classified as a \emph{request} if it represents a Type~1 or Type~2 customer, or
+classified as a \emph{server} if it represents a Type~3 or Type~4 vehicle. As
+only vehicles can move about (P4), only servers are associated with routes in
+order to describe the motions. Later, schedules describing pick-up and drop-off
+events are defined on the routes.
+
 \begin{table}[h]
 \centering
 \small
@@ -73,3 +89,187 @@ in-service or out-of-service.\\
 \hline
 \end{tabular}
 \end{table}
+
+\section{User Relation}
+\label{mod-users: user-relation}
+
+A user $u$ is a 5-tuple defined by
+${u:=(\texttt{q},\texttt{e},\texttt{l},\texttt{o},\texttt{d})}$.  The
+\texttt{q} component corresponds to the user load; the \texttt{e} and
+\texttt{l} components correspond to the user early and late times; the
+\texttt{o} and \texttt{d} components correspond to the user origin and
+destination.  From P1--P4, the domain of \texttt{q} is the non-zero integers;
+the domain of \texttt{e} is $1..(H-1)$ and the domain of \texttt{l} is
+$(u_\texttt{e}+1)..H$; the domains of \texttt{o} and \texttt{d} are both
+$\mathcal{V}$.  For a Type 4 vehicle, the destination can be set to a dummy
+vertex with edge weight equal to 0 to every other vertex in the road network.
+
+The set of all users forms the 5-ary relation $\mathcal{U}$, called the user
+relation.  The set $\mathcal{U}_\texttt{o}=\pi_\texttt{o}(\mathcal{U})$
+contains all origins and $\mathcal{U}_\texttt{d}=\pi_\texttt{d}(\mathcal{U})$
+contains all destinations.  From P1, a user can be classified as either a
+request or a server based on its load.
+
+As a convenience, the notation $d_u$ is used to denote the distance of the
+shortest path from $u_\texttt{o}$ to $u_\texttt{d}$ on graph $\mathcal{G}$, and
+the notation $\delta_u$ is used to denote the shortest travel duration along
+$d_u$ using the speed limits $\nu^\textrm{max}$ along the shortest-path edges.
+
+\section{Requests}
+\label{mod-users: requests}
+
+A request represents a Type 1 or Type 2 customer.  Relation
+$\mathcal{R}\subseteq\mathcal{U}$,
+$$\mathcal{R}=\sigma_{\texttt{q}>0}(\mathcal{U}),$$ forms the set of all
+requests by taking users with positive loads. The set
+$\mathcal{R}_\texttt{o}=\pi_\texttt{o}(\mathcal{R})$ is the set of all request
+origins and $\mathcal{R}_\texttt{d}=\pi_\texttt{d}(\mathcal{R})$ is the set of
+all request destinations.
+
+\section{Servers}
+\label{mod-users: servers}
+
+Likewise, a server represents a Type 3 or Type 4 vehicle.  Relation
+$\mathcal{S}=\mathcal{U}\setminus\mathcal{R}$, or
+$$\mathcal{S}=\sigma_{\texttt{q}<0}(\mathcal{U}),$$ forms the set of all
+servers. The set $\mathcal{S}_\texttt{o}=\pi_\texttt{o}(\mathcal{S})$ is the
+set of all server origins and
+$\mathcal{S}_\texttt{d}=\pi_\texttt{d}(\mathcal{S})$ is the set of all server
+destinations.
+
+\section{Routes}
+\label{mod-users: routes}
+
+To encode vehicle motions, Jargo associates each server $s\in\mathcal{S}$ with
+a route and a schedule. A server's route is a representation of the
+corresponding vehicle's motion through the road network while a server's
+schedule encodes the times and locations of customer pick-ups and drop-offs.
+
+Variable $w$ indicates the route for a server $s$. As time advances, the
+traveled route $w_{\leq t}$ encodes the server's past motion while the
+remaining route $w_{>t}$ encodes the future motion.  From P2 and P3, Jargo
+subjects all routes to two rules:
+\begin{enumerate}
+\item[R1.] The time component of the first waypoint equals the server's early
+time, and the time component of the last waypoint is not greater than the
+server's late time, or $\pi_\texttt{t}(w_1)=s_\texttt{e}$ and
+$\pi_\texttt{t}(w_{|w|})\leq s_\texttt{l}$;
+\item[R2.] The vertex components of the first and last waypoints equal the
+server's origin and destination respectively, or
+$\pi_\texttt{v}(w_1)=s_\texttt{o}$ and $\pi_\texttt{v}(w_{|w|})=s_\texttt{d}$.
+\end{enumerate}
+
+\section{Schedules}
+\label{mod-users: schedules}
+
+A server's schedule describes the events along the route and not any new
+motion. It is a subsequence of the server's route $w$
+$$b=(b_j)_{j\in 1..m}=(w_{i_j})_{j\in 1..m}=(t_{i_1},v_{i_1})..(t_{i_m},v_{i_m}),$$
+with $m\leq |w|$ waypoints. Schedules are subjected to a couple rules. First:
+\begin{enumerate}
+\item[R3.] The first and last waypoints $b_1$ and $b_m$ equal the first and last
+waypoints of $w$, or ${b_1=w_1}$ and ${b_m=w_{|w|}}$.
+\end{enumerate}
+This rule will help later when defining departure and arrival times.
+Second, from P5:
+\begin{enumerate}
+\item[R4.] For each waypoint $b_j$ for $j\in 2..(m-1)$, the vertex component is either a
+request origin or request destination, or $\pi_\texttt{v}(b_j)\in
+\mathcal{R}_\texttt{o}\cup\mathcal{R}_\texttt{d}$.
+\end{enumerate}
+In other words, each entry or exit must occur at a customer origin or
+destination.
+
+A schedule formalizes the notion of shared travel with other users, as multiple
+entries and exits can overlap within the same server route.  At time $t$, the
+traveled schedule denoted $b_{\leq t}$ encodes the past entries and exits and
+is given by $\sigma_{\texttt{t}\leq t}(b)$. Likewise, the remaining schedule
+denoted $b_{>t}$ encodes the future entries and exits and is given by
+$\sigma_{\texttt{t}>t}(b)$.
+
+\section{Schedule Labels}
+\label{mod-users: labels}
+
+Each waypoint in schedule $b$ has a set of labels in order to identify which
+customers are entering and exiting the vehicle at the waypoint's time and
+location.  A labeling scheme can be applied to $b$ to determine each of the
+labels. The set of all possible labels depends on the locations of the
+waypoints. Let
+$$\mathcal{R}'=\sigma_{\texttt{o}\in\pi_\texttt{v}(b)\lor \texttt{d}\in\pi_\texttt{v}(b)}(\mathcal{R})$$
+give the set of requests whose origin or destination is found in at least one
+waypoint in $b$. Conceptually, the labeling scheme
+\begin{equation*}
+L:b\rightarrow \mathbb{P}(\mathcal{R}'\cup\{s\})
+\end{equation*}
+maps elements of $b$ to elements of the power set of $\mathcal{R}'\cup\{s\}$.
+By using the power set $\mathbb{P}$, a waypoint can have multiple labels,
+representing the case where multiple customers enter or exit the vehicle at the
+waypoint.  The labeling scheme is subjected to the following labeling rules:
+\begin{enumerate}
+\item[R5.] No waypoint can be labeled with $r\in\mathcal{R}'$ if a schedule for
+another server already contains waypoints labeled with $r$;
+\item[R6.] A waypoint $b_j\in b$ can be labeled with $r$ only if
+$\pi_\texttt{v}(b_j)=r_\texttt{o}$ or $\pi_\texttt{v}(b_j)=r_\texttt{d}$;
+\item[R7.] If $b_j$ is to be labeled with $r$ and
+$\pi_\texttt{v}(b_j)=r_\texttt{o}$, then a second waypoint $b_{j'}$ such that
+$j'>j$ and $\pi_\texttt{v}(b_{j'})=r_\texttt{d}$ must also be labeled with $r$;
+\item[R8.] The time components of $b_j$ and $b_{j'}$ must be within request
+$r$'s time window, formally $r_\texttt{e}\leq \pi_\texttt{t}(b_j)$ and
+$\pi_\texttt{t}(b_{j'})\leq r_\texttt{l}$;
+\item[R9.] The number of waypoints labeled with $r$ must be exactly 0 or 2;
+\item[R10.] The first and last waypoints must contain the schedule's server $s$
+in their labels, and no other waypoint can be labeled with $s$.
+\end{enumerate}
+Rules R5--R9 express P5.  Rule R10 can be interpreted to mean that a vehicle
+must ``serve itself'' at its own origin and destination.  This last rule helps
+to define later concepts.
+
+\section{Server Relation}
+\label{user-mod: server-relation}
+
+By combining the routes, schedules, and labels into a set of
+$(\texttt{s},\texttt{t},\texttt{v},\texttt{L})$ tuples, a 4-ary relation
+$\mathcal{X}$ can be formed. Jargo calls this relation the server relation.
+Each tuple associates the waypoint in the \texttt{t} and \texttt{v} components
+with the server in the \texttt{s} component, along with the labels in the
+\texttt{L} component.
+
+A server's route can be recovered by extracting \texttt{t} and \texttt{v}
+components and sorting by time, or formally for a given server $s$, its route
+is given by
+$$W(\mathcal{X},s)=\textrm{sort}(\pi_{\texttt{t},\texttt{v}}(\sigma_{\texttt{s}=s}(\mathcal{X}))).$$
+Similarly, a server's schedule can be recovered by extracting only those
+waypoints that are labeled, formally
+$$B(\mathcal{X},s)=\textrm{sort}(\pi_{\texttt{t},\texttt{v}}(\sigma_{\texttt{s}=s\land |\texttt{L}|>0}(\mathcal{X}))).$$
+
+The server relation can be used to define the remaining physical concepts, P6 and P7.
+
+\section{Request Status}
+Given a request $r$, the function
+\begin{equation}
+\label{eq:status}
+\textrm{status}(\mathcal{X},r,t)=|\sigma_{\texttt{t}\leq t\land
+r\in\texttt{L}}(\mathcal{X})|
+\end{equation}
+gives the count of the tuples labeled with $r$ before or on a given time. From
+the labeling rules, the count can be only 0, 1, or 2. These counts correspond
+to request waiting, in-transit, and arrived states from P7, respectively.
+
+Given a server $s$, knowing the in-transit requests for $s$ can be useful for
+pricing and other rider-related
+metrics. %~\cite{DBLP:conf/sigmod/ChengX017,DBLP:conf/dexa/ShiLZG17,DBLP:conf/ijcai/SantosX13}.
+These requests can be found by
+$$\mathcal{Q}(\mathcal{X},s,t)=\{r\in\mathcal{R}\mid\textrm{status}(\mathcal{X},r,t)=1
+\land\pi_\texttt{s}(\sigma_{r\in\texttt{L}}(\mathcal{X}))=s\}.$$
+
+\section{Load Burden}
+The load burden on $s$ can be computed using the in-transit requests by
+\begin{equation}
+\label{eq:load}
+Q(\mathcal{X},s,t)=\sum_{r\in\mathcal{Q}(\mathcal{X},s,t)}r_\texttt{q}.
+\end{equation}
+From P6, server routes are subject to the additional rule:
+\begin{enumerate}
+\item[R11.] $Q(\mathcal{X},s,t)\leq -s_\texttt{q}$ must be true for all $s$ and $t$.
+\end{enumerate}
+
