@@ -4,32 +4,39 @@
 # targets require noweb programs 'notangle' and 'noweave' in your PATH.
 # Additionally, noweb must be compiled using the icont option (instead of awk).
 
-# Here I am getting the names of the *.java files to be tangled by looking for
-# all the noweb files in src/.
-JAVA1=$(addsuffix .java, $(subst src/core/,java/core/,$(basename $(wildcard src/core/*.nw))))
-JAVA2=$(addsuffix .java, $(subst src/ui/,java/ui/,$(basename $(wildcard src/ui/*.nw))))
+# Here I am getting the names of the *.java files to be tangled.  The main
+# simulation classes belong to the sim package.
+JAVA1 = \
+	java/sim/Client.java \
+	java/sim/Controller.java \
+	java/sim/Communicator.java \
+	java/sim/Storage.java \
+	java/sim/Tools.java
 
-# The Exception classes are not written in their own noweb files, so I can't
-# look through the src/ directory for them. Instead I have to list them by hand.
-# I can search for them by using: 'grep "Exception.java" src/*/*'. All
-# exceptions belong to the core package, so they go into java/core/.
+# The interface classes belong to the ui package.
+JAVA2 = \
+	java/ui/Command.java \
+	java/ui/Desktop.java \
+	java/ui/DesktopController.java
+
+# The Exceptions classes belong to the sim package.
 JAVA3 = \
-	java/core/ClientException.java \
-	java/core/ClientFatalException.java \
-	java/core/DuplicateEdgeException.java \
-	java/core/DuplicateUserException.java \
-	java/core/DuplicateVertexException.java \
-	java/core/EdgeNotFoundException.java \
-	java/core/GtreeIllegalSourceException.java \
-	java/core/GtreeIllegalTargetException.java \
-	java/core/GtreeNotLoadedException.java \
-	java/core/RouteIllegalOverwriteException.java \
-	java/core/TimeWindowException.java \
-	java/core/UserNotFoundException.java \
-	java/core/VertexNotFoundException.java
+	java/sim/ClientException.java \
+	java/sim/ClientFatalException.java \
+	java/sim/DuplicateEdgeException.java \
+	java/sim/DuplicateUserException.java \
+	java/sim/DuplicateVertexException.java \
+	java/sim/EdgeNotFoundException.java \
+	java/sim/GtreeIllegalSourceException.java \
+	java/sim/GtreeIllegalTargetException.java \
+	java/sim/GtreeNotLoadedException.java \
+	java/sim/RouteIllegalOverwriteException.java \
+	java/sim/TimeWindowException.java \
+	java/sim/UserNotFoundException.java \
+	java/sim/VertexNotFoundException.java
 
-# Similarly, JMX classes are not written in their own noweb files. They
-# are located in tex/JMX.nw. These classes belong to the jmx package.
+# The JMX classes are located in tex/JMX.nw. These classes belong to the jmx
+# package.
 JAVA4 = \
 	java/jmx/ClientMonitor.java \
 	java/jmx/ClientMonitorMBean.java \
@@ -74,53 +81,55 @@ endif
 ifndef bin_notangle
 	$(error "**ERROR: 'notangle' not found! target 'src' unavailable.")
 endif
-	@mkdir -p java/core java/ui java/jmx
+	@mkdir -p java/sim java/ui java/jmx
 
 # Build Java files using 'notangle'. Some classes use code chunks from multiple
 # *.nw files, so I just pass all the noweb files as arguments to notangle.
-$(JAVA1) : src/*/*.nw
+$(JAVA1) : src/*.nw
 	@printf "tangle $@...\n"
-	@notangle -R$(subst java/core/,,$@) src/*/*.nw > $@
+	@notangle -R$(subst java/sim/,,$@) src/*.nw > $@
 
-$(JAVA2) : src/*/*.nw
+$(JAVA2) : src/*.nw
 	@printf "tangle $@...\n"
-	@notangle -R$(subst java/ui/,,$@) src/*/*.nw > $@
+	@notangle -R$(subst java/ui/,,$@) src/*.nw > $@
 
-$(JAVA3) : src/*/*.nw
+$(JAVA3) : src/*.nw
 	@printf "tangle $@...\n"
-	@notangle -R$(subst java/core/,,$@) src/*/*.nw > $@
+	@notangle -R$(subst java/sim/,,$@) src/*.nw > $@
 
-$(JAVA4) : src/*/*.nw
+$(JAVA4) : src/*.nw
 	@printf "tangle $@...\n"
-	@notangle -R$(subst java/jmx/,,$@) src/*/*.nw > $@
+	@notangle -R$(subst java/jmx/,,$@) src/*.nw > $@
 
 # Build doc/body.tex using 'noweave'. The order of the noweave arguments
 # matters, so I use a temporary variable TEXSRCS to establish the order.
 TEXSRCS = \
-	src/tex/Preface.nw \
-	src/tex/Introduction.nw \
-	src/tex/Building.nw \
-	src/tex/GettingStarted.nw \
-	src/tex/Overview.nw \
-	src/tex/Reading.nw \
-	src/tex/Writing.nw \
-	src/tex/Administration.nw \
-	src/tex/Gtree.nw \
-	src/core/Storage.nw \
-	src/core/Controller.nw \
-	src/core/Communicator.nw \
-	src/core/Client.nw \
-	src/core/Traffic.nw \
-	src/core/Tools.nw \
-	src/ui/Command.nw \
-	src/ui/Desktop.nw \
-	src/ui/DesktopController.nw \
-	src/tex/JMX.nw \
-	src/tex/DataDefinition.nw
+	src/preface.nw \
+	src/tut-install.nw \
+	src/tut-example.nw \
+	src/tut-start.nw \
+	src/mod-setting.nw \
+	src/mod-users.nw \
+	src/mod-metrics.nw \
+	src/mod-schema.nw \
+	src/sim-overview.nw \
+	src/sim-reading.nw \
+	src/sim-writing.nw \
+	src/sim-administration.nw \
+	src/sim-gtree.nw \
+	src/sim-jmx.nw \
+	src/sim-client.nw \
+	src/sim-communicator.nw \
+	src/sim-controller.nw \
+	src/sim-storage.nw \
+	src/sim-tools.nw \
+	src/ui-command.nw \
+	src/ui-guiapp.nw \
+	src/ui-guicontroller.nw
 
 # Here, the -delay option disables automatic preamble (I use doc/jargo.tex
 # instead), and the -index option creates hyperlink references to chunks.
-doc/body.tex : src/*/*.nw
+doc/body.tex : src/*.nw
 	@printf "weave $@...\n"
 	@noweave -delay -index $(TEXSRCS) > doc/body.tex
 
