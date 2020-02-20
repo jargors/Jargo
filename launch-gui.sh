@@ -8,4 +8,5 @@ java \
     -Djargors.controller.debug=true \
     -Djargors.desktop.debug=false \
     -cp .:dep:dep/*:jar/*:$DERBY_PATH/derby.jar \
-com.github.jargors.desktop.Desktop
+com.github.jargors.ui.Desktop
+

@@ -4,3 +4,103 @@
 \chapter{Ridesharing Setting}
 \label{mod-setting}
 
+\begin{quote}
+\textit{
+Feel free to skip this chapter if you are not interested in tinkering with
+Jargo's data model.}
+\end{quote}
+
+In Jargo, ridesharing customers and vehicles are described by rows of data,
+organized into tables. Constraints on the tables define the valid ranges for
+the data values. Table operations read and manipulate the ridesharing state by
+reading or updating these data in particular ways. Physical concepts, such as
+ridesharing service-related metrics, are defined on the rows and columns
+through relational and set algebra. For a primer on relations and notes on
+notation used in this document, see Appendix~\ref{ap-primer}.
+
+Ridesharing takes place through time and space. This chapter describes Jargo's
+model for these physical concepts.
+
+\section{Time}
+\label{mod-setting: time}
+
+Time is modeled as a positive integer $1\leq t\leq H$. A time horizon $H$
+bounds the system.
+
+Time is occasionally operated on. Times cannot be added, and only a later
+(greater) time can subtract an earlier (lesser) time. The difference is called
+a duration, represented by the symbol $\delta$. Durations can add and subtract
+each other to get new durations, and times can also add and subtract durations
+to get new times.
+
+\section{Road Network}
+\label{mod-setting: road}
+
+The road network is modeled as a directed graph
+$\mathcal{G}(\mathcal{V},\mathcal{E})$. Vertices in $\mathcal{V}$ represent
+points along roads in the network.  Jargo assumes a function
+${V:\mathcal{V}\rightarrow \mathbb{R}^2}$ exists that maps vertices to
+$2$-dimensional latitude and longitude coordinates in the real world, and that
+an inverse function map-matches customers and vehicles to vertices.  Edges in
+$\mathcal{E}$ represent road segments. The pair $(a,b)\in \mathcal{V}^2, a\neq
+b$ exists in $\mathcal{E}$ only if physical traffic flows from $V(a)$ to
+$V(b)$, and for all $c\in \mathcal{V}\setminus\{a,b\}$ no traffic flows from
+$V(a)$ to $V(c)$ and from $V(c)$ to $V(b)$.  Jargo also assumes that a function
+${d:\mathcal{E}\rightarrow\mathbb{R}_{>0}}$ exists that maps edges to positive
+real weights corresponding to distance along the edge, and that the
+shortest-path distances between the pairs among any three vertices satisfies
+the triangle inequality. Figure~\ref{fig:road} shows an example road network,
+drawn in QGIS, that could be supported by Jargo's model.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{res/road}
+\caption{Portion of a road network graph showing edges (red lines) and vertices
+(blue circles) overlayed on top of Manhattan (QGIS 2.18.16, Bing Aerial).
+Vertices do not have to be at an intersection (orange circles, lower right).}
+\label{fig:road}
+\end{figure}
+
+\section{Paths}
+\label{mod-setting: paths}
+
+A path $p=(p_i)_{i\in 1..n}=p_1..p_n$ is defined as a sequence of $n$ vertices
+such that any two adjacent vertices are an edge, or $(p_i,p_{i+1})\in
+\mathcal{E}$ for $i\in 1..(n-1)$.  A vertex or edge can appear multiple times
+in a path.  The path distance is $$\sum_{i=1}^{n-1} d(p_i, p_{i+1}).$$ Path $p$
+is a shortest path only if it minimizes the distance out of all possible paths
+from $p_1$ to $p_n$.  Multiple shortest paths are possible.
+
+\section{Waypoints}
+\label{mod-setting: waypoints}
+
+Waypoints are used to describe points in time as well as space.  A waypoint is
+defined as a tuple $(\texttt{t},\texttt{v})$, with the domain of $\texttt{t}$
+as $1..H$ and the domain of $\texttt{v}$ as $\mathcal{V}$. Waypoints can be
+labeled in a way that will be discussed later.
+
+\section{Routes}
+\label{mod-setting: routes}
+
+Routes are formed by a sequence of waypoints. A route $w=(w_i)_{i\in
+1..n}=w_1..w_n=(t_1,v_1)..(t_n,v_n)$ is defined as a sequence of $n$ waypoints
+such that $t_1..t_n$ is strictly increasing and $v_1..v_n$ is a path.  In the
+spatial dimension, function
+$$D(w)=\sum_{i=1}^{n-1}d(\pi_\texttt{v}(w_i),\pi_\texttt{v}(w_{i+1}))$$ gives
+the route distance, analogous to path distance.  In the time dimension,
+function $$\delta(w)=\pi_\texttt{t}(w_n)-\pi_\texttt{t}(w_1)$$ gives the route
+duration.  Given a time $t$, \begin{align*} w_{\leq
+t}=\textrm{sort}(\sigma_{\texttt{t}\leq t}(w))\quad\textrm{and}\quad
+w_{>t}=\textrm{sort}(\sigma_{\texttt{t}>t}(w)) \end{align*} give the traveled
+route denoted $w_{\leq t}$, and the remaining route denoted $w_{>t}$. As the
+selection operator imposes no ordering on the resulting set, a
+$\textrm{sort}(...)$ function is introduced to sort a set of waypoints by time
+in ascending order, returning a sequence.  For two adjacent waypoints $w_i$
+and~$w_{i+1}$, function
+$$\nu(w_i,w_{i+1})=\frac{d(\pi_\texttt{v}(w_i),\pi_\texttt{v}(w_{i+1}))}
+{\pi_\texttt{t}(w_{i+1})-\pi_\texttt{t}(w_i)}$$ gives the waypoint rate, or
+more intuitively the speed.  As $d$ only applies to edges, $\nu$ only applies
+to adjacent waypoints.  Speeds can be bounded above by a value
+$\nu^\textrm{max}(v_i,v_{i+1})$ on each edge, for example to describe road
+speed limits.
+

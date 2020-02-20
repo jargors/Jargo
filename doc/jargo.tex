@@ -75,6 +75,57 @@
 
 \appendix
 
+\chapter{Appendix: Brief Primer on Relations}
+\label{ap-primer}
+
+The following briefly overviews the concept of relations and introduces some
+notation.  Relations can be defined in terms of sequences and tuples.  A
+sequence is an ordered list of elements.  We will write the integer sequence
+from $i$ to $j$ as $i..j$. We will write the sequence $$(a_i)_{i\in
+1..n}=a_1,a_2,...,a_{n-1},a_n$$ as $a_1..a_n$ or simply $a$ (without any
+subscript). The number of elements in $a$ is called the length of $a$ and is
+expressed as $|a|$.  A copy $b$ of sequence $a$ but with some elements removed
+is called a subsequence.  Sequence $b$ is called a substring of $a$ only if
+some $k$ exists such that $$b=a_{1+k}..a_{|b|+k},$$ in other words the elements
+in $b$ form a contiguous subsequence of $a$.  We call sequence $a$ a tuple if
+each element of $a$ is labeled. A labeled element is called a component.  A
+function mapping an element based on its position in the tuple to a label is
+called a labeling scheme.  Each component has a domain from which the component
+takes its value, for example the set of real numbers.  A tuple of length $m$ is
+called an $m$-tuple. A 2-tuple is called a pair.  A tuple definition will be
+written as its labels surrounded by parentheses with the domains given. Label
+names will be written in \texttt{typewriter} script to avoid confusion with
+positional indices.
+
+\begin{example}
+\label{ex:tuple}
+The sequence $a=a_\texttt{x},a_\texttt{y}$
+is a 2-tuple with components named \texttt{x} and \texttt{y}.
+The labeling
+scheme for $a$ maps $1\rightarrow \texttt{x}$ and $2\rightarrow \texttt{y}$, with the
+integers $1$ and $2$ referring to the position of the elements. A possible definition for
+$a$ could be $a:=(\texttt{x},\texttt{y}),
+a_\texttt{x}\in\mathbb{R}, a_\texttt{y}\in\{\textrm{pi},\textrm{Euler}\},$ and
+a possible value for $a$ could be $$a=3.14,\textrm{pi}.$$
+\end{example}
+
+A set of unique $m$-tuples with the same labeling scheme is called an $m$-ary
+relation, or simply relation.  Two operators can be applied onto
+relations\footnote{Our model is not concerned with joins.}.  The selection
+operator $\sigma_P(R)$ is a function that returns a subset $R'\subseteq R$ such
+that predicate $P(R'_i)$ is true for each tuple $R'_i\in R'$.  The projection
+operator $\pi_L(R)$ is a function that returns a copy $R'$ of $R$ such that
+each tuple $R'_i\in R'$ is distinct, and only components with a label in set
+$L$ are included.
+
+Observe that an $m$-tuple is an $m$-ary relation with one element.
+The projection operator thus naturally applies to tuples. For instance, see that for
+$R=R_\texttt{x},R_\texttt{y}:=(\texttt{x},\texttt{y}),$
+the $\texttt{x}$ component is extracted with
+$R_\texttt{x}=\pi_\texttt{x}(R)$
+and the $\texttt{y}$ component is extracted with
+$R_\texttt{y}=\pi_\texttt{y}(R)$.
+
 \chapter{Appendix: List of Chunks}
 \nowebchunks
 
