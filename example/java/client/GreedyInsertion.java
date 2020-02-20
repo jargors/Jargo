@@ -1,5 +1,5 @@
 package com.github.jargors.client;
-import com.github.jargors.core.*;
+import com.github.jargors.sim.*;
 import java.sql.SQLException;
 public class GreedyInsertion extends Client {
   final int PICKUP_THRESHOLD = 600;  // meters

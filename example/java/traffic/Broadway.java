@@ -1,5 +1,5 @@
 package com.github.jargors.traffic;
-import com.github.jargors.core.*;
+import com.github.jargors.sim.*;
 import java.util.Map;
 public class Broadway extends Traffic {
   private Map<Integer, Integer> lu_broadway = Map.ofEntries(
