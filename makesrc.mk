@@ -107,7 +107,8 @@ $(JAVA4) : src/*.nw
 TEXSRCS = \
 	src/preface.nw \
 	src/tut-install.nw \
-	src/tut-example.nw \
+	src/tut-example1.nw \
+	src/tut-example2.nw \
 	src/tut-start.nw \
 	src/mod-setting.nw \
 	src/mod-users.nw \
@@ -119,11 +120,13 @@ TEXSRCS = \
 	src/sim-writing.nw \
 	src/sim-gtree.nw \
 	src/sim-jmx.nw \
-	src/sim-client.nw \
-	src/sim-communicator.nw \
-	src/sim-controller.nw \
 	src/sim-storage.nw \
+	src/sim-controller.nw \
+	src/sim-communicator.nw \
+	src/sim-client.nw \
+	src/sim-traffic.nw \
 	src/sim-tools.nw \
+	src/ui-overview.nw \
 	src/ui-command.nw \
 	src/ui-guiapp.nw \
 	src/ui-guicontroller.nw

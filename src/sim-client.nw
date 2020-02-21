@@ -48,7 +48,7 @@ public Client() {
 \section{Methods}
 
 \subsection{\texttt{notifyNew}(0)}
-<<notifyNew(0)>>=
+<<Client: notifyNew(0)>>=
 void notifyNew() throws ClientException, ClientFatalException {
   while (!this.queue.isEmpty()) {
     long A0 = System.currentTimeMillis();
@@ -62,14 +62,14 @@ void notifyNew() throws ClientException, ClientFatalException {
 @ %def notifyNew
 
 \subsection{\texttt{addRequest}(1)}
-<<addRequest(1)>>=
+<<Client: addRequest(1)>>=
 void addRequest(final int[] r) {
   this.queue.add(r);
 }
 @ %def addRequest
 
 \subsection{\texttt{dropRequests}(1)}
-<<dropRequests(1)>>=
+<<Client: dropRequests(1)>>=
 int dropRequests(final int deadline) {
   final int temp = this.queue.size();
   this.queue.removeIf((r) -> { return r[2] < deadline; });
@@ -98,7 +98,7 @@ $w_{\leq t'}$ is the server's traveled route.  In other words the last location
 is the waypoint in the server's traveled route that is nearest $t'$.  After
 copying [[src]] into [[locations]], the [[endCollectServerLocations]](0) method
 is executed.
-<<collectServerLocations(1)>>=
+<<Client: collectServerLocations(1)>>=
 void collectServerLocations(final int[] src) {
   this.endCollectServerLocations(src.clone());
 }
@@ -106,7 +106,7 @@ void collectServerLocations(final int[] src) {
 
 
 \subsection{\texttt{endCollectServerLocations}(1)}
-<<endCollectServerLocations(1)>>=
+<<Client: endCollectServerLocations(1)>>=
 void endCollectServerLocations(final int[] locations) {
   for (int i = 0; i < (locations.length - 2); i += 3) {
     this.handleServerLocation(new int[] {
@@ -119,7 +119,7 @@ void endCollectServerLocations(final int[] locations) {
 @ %def endCollectServerLocations
 
 \subsection{\texttt{end}(0)}
-<<end(0)>>=
+<<Client: end(0)>>=
 void end() { }
 @ %def end
 
@@ -135,7 +135,7 @@ Array [[r]] =
 };
 \end{tikzpicture}
 
-<<handleRequest(1)>>=
+<<Client: handleRequest(1)>>=
 void handleRequest(final int[] r) throws ClientException, ClientFatalException { }
 @ %def handleRequest
 
@@ -151,9 +151,14 @@ Array [[loc]] =
 };
 \end{tikzpicture}
 
-<<handleServerLocation(1)>>=
+<<Client: handleServerLocation(1)>>=
 void handleServerLocation(final int[] loc) { }
 @ %def handleServerLocation
+
+\subsection{\texttt{init}(0)}
+<<Client: init(0)>>=
+void init() { }
+@
 
 \section{Exceptions}
 

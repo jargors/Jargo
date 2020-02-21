@@ -386,7 +386,7 @@ System.out.println(sc.next());
 \section{Methods}
 
 \subsection{\texttt{loadRoadNetworkFromFile}(1)}
-<<loadRoadNetworkFromFile(1)>>=
+<<Controller: loadRoadNetworkFromFile(1)>>=
 void loadRoadNetworkFromFile(final String f_rnet) throws FileNotFoundException, SQLException {
   if (DEBUG) {
     System.out.printf("loadRoadNetworkFileFile(1), arg1=%s\n", f_rnet);
@@ -397,7 +397,7 @@ void loadRoadNetworkFromFile(final String f_rnet) throws FileNotFoundException, 
 {\small If a vertex identifier is $0$, then we store its coordinates as $(0,0)$. We
 still call [[Scanner.nextDouble]](0) because we need to advance to the next
 token.}
-<<loadRoadNetworkFromFile(1)>>=
+<<Controller: loadRoadNetworkFromFile(1)>>=
 final int col0 = sc.nextInt();
 final int col1 = sc.nextInt();
 final int col2 = sc.nextInt();
@@ -407,7 +407,7 @@ final int col5 = (col2 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.ne
 final int col6 = (col2 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
 @
 {\small Now we insert the vertices into the database.}
-<<loadRoadNetworkFromFile(1)>>=
+<<Controller: loadRoadNetworkFromFile(1)>>=
 try {
   this.storage.DBInsertVertex(col1, col3, col4);
 } catch (DuplicateVertexException e) {
@@ -429,7 +429,7 @@ vertices in the edge is a dummy vertex, we set the weight to 0\footnote{The
 dummy vertex should only terminate and never begin an edge in the road network,
 otherwise a shortest path could take a shortcut through the dummy vertex to
 reach any other vertex with 0 weight!}.}
-<<loadRoadNetworkFromFile(1)>>=
+<<Controller: loadRoadNetworkFromFile(1)>>=
 final int dist = ((col1 != 0 && col2 != 0)
   ? this.tools.computeHaversine(
         col3/CSHIFT, col4/CSHIFT,
@@ -438,7 +438,7 @@ final int dist = ((col1 != 0 && col2 != 0)
 {\small The fifth parameter is the \textit{initial speed} on all the edges
 \footnote{In the future, the speed on each edge may be recorded directly in the
 road network file instead of hardcoded here.}.}
-<<loadRoadNetworkFromFile(1)>>=
+<<Controller: loadRoadNetworkFromFile(1)>>=
 try {
   this.storage.DBInsertEdge(col1, col2, dist, 10);
 } catch (DuplicateEdgeException e) {
@@ -448,7 +448,7 @@ try {
 }
 @
 {\small Now we close the [[while]] loop and register the caches to Tools.}
-<<loadRoadNetworkFromFile(1)>>=
+<<Controller: loadRoadNetworkFromFile(1)>>=
   }
   this.tools.setRefCacheVertices(this.storage.getRefCacheVertices());
   this.tools.setRefCacheEdges(this.storage.getRefCacheEdges());
@@ -456,7 +456,7 @@ try {
 @
 
 \subsection{\texttt{loadProblem(1)}}
-<<loadProblem(1)>>=
+<<Controller: loadProblem(1)>>=
 void loadProblem(String p)
 throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException, SQLException,
        GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException {
@@ -485,14 +485,14 @@ throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException, SQL
 @ %def loadProblem
 
 \subsection{\texttt{isKilled}(0)}
-<<isKilled(0)>>=
+<<Controller: isKilled(0)>>=
 final boolean isKilled() {
   return this.kill;
 }
 @ %def isKilled
 
 \subsection{\texttt{returnRequest}(1)}
-<<returnRequest(1)>>=
+<<Controller: returnRequest(1)>>=
 void returnRequest(final int[] r) {
   if (this.statControllerClock - r[2] < QUEUE_TIMEOUT) {
     this.lu_rseen.put(r[0], false);
@@ -501,7 +501,7 @@ void returnRequest(final int[] r) {
 @ %def returnRequest
 
 \subsection{\texttt{startRealtime}(1)}
-<<startRealtime(1)>>=
+<<Controller: startRealtime(1)>>=
 void startRealtime(final Consumer<Boolean> app_cb) {
   if (DEBUG) {
     System.out.printf("startRealtime(1)\n");
@@ -565,7 +565,7 @@ void startRealtime(final Consumer<Boolean> app_cb) {
 @ %def startRealtime
 
 \subsection{\texttt{startSequential}(1)}
-<<startSequential(1)>>=
+<<Controller: startSequential(1)>>=
 void startSequential(final Consumer<Boolean> app_cb) throws Exception {
   if (DEBUG) {
     System.out.printf("startSequuential(1)\n");
@@ -582,7 +582,7 @@ void startSequential(final Consumer<Boolean> app_cb) throws Exception {
 @ %def startSequential
 
 \subsection{\texttt{step}(0)}
-<<step(0)>>=
+<<Controller: step(0)>>=
 void step() {
   this.ClockLoop.run();
   this.ServerLoop.run();
@@ -592,7 +592,7 @@ void step() {
 @
 
 \subsection{\texttt{stop}(1)}
-<<stop(1)>>=
+<<Controller: stop(1)>>=
 void stop(final Consumer<Boolean> app_cb) {
   if (DEBUG) {
     System.out.printf("stop(1)\n");

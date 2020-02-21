@@ -779,84 +779,6 @@ public class Controller {
                 GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException {
            this.storage.DBInsertServer(u, this.tools.computeRoute(u[4], u[5], u[2]));
          }
-  public void loadProblem(String p)
-         throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException, SQLException,
-                GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException {
-           Scanner sc = new Scanner(new File(p));
-           System.out.println(sc.next());
-           System.out.println(sc.next());
-           System.out.println(sc.next());
-           System.out.println(sc.next());
-           System.out.println(sc.next());
-           this.setClockReference(sc.next());
-           System.out.println(sc.next());
-           System.out.println(sc.next());
-           System.out.println(sc.next());
-           System.out.println(sc.next());
-           System.out.println(sc.next());
-           System.out.println(sc.next());
-           if (DEBUG) {
-             System.out.printf("loadProblem(1), arg1=%s\n", p);
-             System.out.printf("Set reference string '%s'\n", this.refTimeStr);
-             System.out.printf("Set reference milliseconds from midnight '%d'\n", this.refTimeMs);
-           }
-           while (sc.hasNext()) {
-             final int uid = sc.nextInt();
-             final int  uo = sc.nextInt();
-             final int  ud = sc.nextInt();
-             final int  uq = sc.nextInt();
-             final int  ue = sc.nextInt();
-             final int  ul = sc.nextInt();
-             final int  ub = this.tools.computeShortestPathDistance(uo, ud);
-             if (uq < 0) {
-               this.insertServer(new int[] { uid, uq, ue, ul, uo, ud, ub });
-             } else {
-               this.insertRequest(new int[] { uid, uq, ue, ul, uo, ud, ub });
-             }
-           }
-         }
-  public void loadRoadNetworkFromFile(final String f_rnet) throws FileNotFoundException, SQLException {
-           if (DEBUG) {
-             System.out.printf("loadRoadNetworkFileFile(1), arg1=%s\n", f_rnet);
-           }
-           Scanner sc = new Scanner(new File(f_rnet));
-           while (sc.hasNext()) {
-         final int col0 = sc.nextInt();
-         final int col1 = sc.nextInt();
-         final int col2 = sc.nextInt();
-         final int col3 = (col1 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
-         final int col4 = (col1 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
-         final int col5 = (col2 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
-         final int col6 = (col2 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
-         try {
-           this.storage.DBInsertVertex(col1, col3, col4);
-         } catch (DuplicateVertexException e) {
-           if (DEBUG) {
-             // System.err.println("Warning! Duplicate vertex ignored.");
-           }
-         }
-         try {
-           this.storage.DBInsertVertex(col2, col5, col6);
-         } catch (DuplicateVertexException e) {
-           if (DEBUG) {
-             // System.err.println("Warning! Duplicate vertex ignored.");
-           }
-         }
-         final int dist = ((col1 != 0 && col2 != 0)
-           ? this.tools.computeHaversine(
-                 col3/CSHIFT, col4/CSHIFT,
-                 col5/CSHIFT, col6/CSHIFT) : 0);
-         try {
-           this.storage.DBInsertEdge(col1, col2, dist, 10);
-         } catch (DuplicateEdgeException e) {
-           if (DEBUG) {
-             // System.err.println("Warning! Duplicate edge ignored.");
-           }
-         }
-           }
-           this.tools.setRefCacheVertices(this.storage.getRefCacheVertices());
-           this.tools.setRefCacheEdges(this.storage.getRefCacheEdges());
-         }
   public void cacheRoadNetworkFromDB() throws SQLException {
            this.storage.JargoCacheRoadNetworkFromDB();
          }
@@ -880,12 +802,6 @@ public class Controller {
          }
   public void instanceNew() throws SQLException {
            this.storage.JargoInstanceNew();
-         }
-  public void gtreeClose() {
-           this.tools.GTGtreeClose();
-         }
-  public void gtreeLoad(String p) throws FileNotFoundException {
-           this.tools.GTGtreeLoad(p);
          }
   public int getClock() {
            return this.statControllerClock;
@@ -974,6 +890,90 @@ public class Controller {
          }
   public void setRefClient(final Client client) {
            this.client = client;
+         }
+  public void gtreeClose() {
+           this.tools.GTGtreeClose();
+         }
+  public void gtreeLoad(String p) throws FileNotFoundException {
+           this.tools.GTGtreeLoad(p);
+         }
+  public void loadProblem(String p)
+         throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException, SQLException,
+                GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException {
+           Scanner sc = new Scanner(new File(p));
+           System.out.println(sc.next());
+           System.out.println(sc.next());
+           System.out.println(sc.next());
+           System.out.println(sc.next());
+           System.out.println(sc.next());
+           this.setClockReference(sc.next());
+           System.out.println(sc.next());
+           System.out.println(sc.next());
+           System.out.println(sc.next());
+           System.out.println(sc.next());
+           System.out.println(sc.next());
+           System.out.println(sc.next());
+           if (DEBUG) {
+             System.out.printf("loadProblem(1), arg1=%s\n", p);
+             System.out.printf("Set reference string '%s'\n", this.refTimeStr);
+             System.out.printf("Set reference milliseconds from midnight '%d'\n", this.refTimeMs);
+           }
+           while (sc.hasNext()) {
+             final int uid = sc.nextInt();
+             final int  uo = sc.nextInt();
+             final int  ud = sc.nextInt();
+             final int  uq = sc.nextInt();
+             final int  ue = sc.nextInt();
+             final int  ul = sc.nextInt();
+             final int  ub = this.tools.computeShortestPathDistance(uo, ud);
+             if (uq < 0) {
+               this.insertServer(new int[] { uid, uq, ue, ul, uo, ud, ub });
+             } else {
+               this.insertRequest(new int[] { uid, uq, ue, ul, uo, ud, ub });
+             }
+           }
+         }
+  public void loadRoadNetworkFromFile(final String f_rnet) throws FileNotFoundException, SQLException {
+           if (DEBUG) {
+             System.out.printf("loadRoadNetworkFileFile(1), arg1=%s\n", f_rnet);
+           }
+           Scanner sc = new Scanner(new File(f_rnet));
+           while (sc.hasNext()) {
+         final int col0 = sc.nextInt();
+         final int col1 = sc.nextInt();
+         final int col2 = sc.nextInt();
+         final int col3 = (col1 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
+         final int col4 = (col1 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
+         final int col5 = (col2 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
+         final int col6 = (col2 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
+         try {
+           this.storage.DBInsertVertex(col1, col3, col4);
+         } catch (DuplicateVertexException e) {
+           if (DEBUG) {
+             // System.err.println("Warning! Duplicate vertex ignored.");
+           }
+         }
+         try {
+           this.storage.DBInsertVertex(col2, col5, col6);
+         } catch (DuplicateVertexException e) {
+           if (DEBUG) {
+             // System.err.println("Warning! Duplicate vertex ignored.");
+           }
+         }
+         final int dist = ((col1 != 0 && col2 != 0)
+           ? this.tools.computeHaversine(
+                 col3/CSHIFT, col4/CSHIFT,
+                 col5/CSHIFT, col6/CSHIFT) : 0);
+         try {
+           this.storage.DBInsertEdge(col1, col2, dist, 10);
+         } catch (DuplicateEdgeException e) {
+           if (DEBUG) {
+             // System.err.println("Warning! Duplicate edge ignored.");
+           }
+         }
+           }
+           this.tools.setRefCacheVertices(this.storage.getRefCacheVertices());
+           this.tools.setRefCacheEdges(this.storage.getRefCacheEdges());
          }
   public final boolean isKilled() {
            return this.kill;

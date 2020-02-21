@@ -46,6 +46,15 @@ public class Tools {
            int[] output = this.lu_vertices.get(v).clone();
            return new int[] { output[0], output[1], (int) Storage.CSHIFT };
          }
+  public void setRefCacheEdges(final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> lu_edges) {
+           this.lu_edges = lu_edges;
+         }
+  public void setRefCacheUsers(final ConcurrentHashMap<Integer, int[]> lu_users) {
+           this.lu_users = lu_users;
+         }
+  public void setRefCacheVertices(final ConcurrentHashMap<Integer, int[]> lu_vertices) {
+           this.lu_vertices = lu_vertices;
+         }
   public void GTGtreeLoad(final String p) throws FileNotFoundException {
            try {
              System.loadLibrary("gtree");
@@ -65,15 +74,6 @@ public class Tools {
   public void GTGtreeClose() {
            this.gtree = null;
            this.flag_gtree_loaded = false;
-         }
-  public void setRefCacheEdges(final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> lu_edges) {
-           this.lu_edges = lu_edges;
-         }
-  public void setRefCacheUsers(final ConcurrentHashMap<Integer, int[]> lu_users) {
-           this.lu_users = lu_users;
-         }
-  public void setRefCacheVertices(final ConcurrentHashMap<Integer, int[]> lu_vertices) {
-           this.lu_vertices = lu_vertices;
          }
   public int[] computeBoundingBox() {
            if (this.bbox.length == 0) {

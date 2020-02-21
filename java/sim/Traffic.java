@@ -20,7 +20,5 @@ public abstract class Traffic {
   public double apply(int v1, int v2, long t) {
            return 1.0;
          }
-  public void init() {
-           // Custom initialization procedures
-         }
+  public void init() { }
 }

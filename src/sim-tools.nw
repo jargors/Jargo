@@ -59,7 +59,7 @@ public Tools() {
 \subsection{\texttt{computeBoundingBox}(0)}
 Even though there is already DBQueryMBR(0), the Tools class doesn't have access
 to it. So computeBoundingBox(0) is kind of a filler method.
-<<computeBoundingBox(0)>>=
+<<Tools: computeBoundingBox(0)>>=
 int[] computeBoundingBox() {
   if (this.bbox.length == 0) {
     int x_min = Integer.MAX_VALUE;
@@ -83,7 +83,7 @@ int[] computeBoundingBox() {
 @ %def computeBoundingBox
 
 \subsection{\texttt{computeHaversine}(4)}
-<<computeHaversine(4)>>=
+<<Tools: computeHaversine(4)>>=
 int computeHaversine(
     final double lng1, final double lat1, final double lng2, final double lat2) {
   final double  dlat = Math.toRadians((lat2 - lat1));
@@ -107,7 +107,7 @@ if (d == 0 && (lng1 != lng2 || lat1 != lat2)) {
 @
 
 \subsection{\texttt{computeHaversine}(2)}
-<<computeHaversine(2)>>=
+<<Tools: computeHaversine(2)>>=
 int computeHaversine(final int u, final int v) throws VertexNotFoundException {
   if (!this.lu_vertices.containsKey(u)) {
     throw new VertexNotFoundException("Vertex "+u+" not found.");
@@ -122,7 +122,7 @@ int computeHaversine(final int u, final int v) throws VertexNotFoundException {
 @
 
 \subsection{\texttt{computeDuration}(2)}
-<<computeDuration(2)>>=
+<<Tools: computeDuration(2)>>=
 int computeDuration(final int dd, final int nu) {
   int d = (int) Math.ceil(dd/(float) nu);
   return (d == 0 ? 1 : d);
@@ -139,7 +139,7 @@ location [[L2]] we add 1 to the vertices returned in the path.
 from any other vertex $v$ is always $\{v, 0\}$. The path from 0 to any other
 vertex is undefined and throws a [[RuntimeException]].
 \end{itemize}
-<<computeShortestPath(2)>>=
+<<Tools: computeShortestPath(2)>>=
 int[] computeShortestPath(final int u, final int v)
 throws GtreeNotLoadedException, GtreeIllegalSourceException {
   int[] output = null;
@@ -175,7 +175,7 @@ To compensate, at we subtract 1 from [[u]] and [[v]] when calling
 \item We consider vertex 0 to be a dummy vertex. The distance to this vertex
 is always 0.
 \end{itemize}
-<<computeShortestPathDistance(2)>>=
+<<Tools: computeShortestPathDistance(2)>>=
 int computeShortestPathDistance(final int u, final int v)
 throws GtreeNotLoadedException, GtreeIllegalSourceException {
   int d = 0;
@@ -191,7 +191,7 @@ throws GtreeNotLoadedException, GtreeIllegalSourceException {
 @ %def computeShortestPathDistance
 
 \subsection{\texttt{computeRoute}(3)}
-<<computeRoute(3)>>=
+<<Tools: computeRoute(3)>>=
 int[] computeRoute(final int source, final int target, final int starttime)
 throws GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException {
   int[] output = null;
@@ -250,7 +250,7 @@ where $\pi_t(w_{|w_{\leq t}|})$ gives the time component of a server's
 last-visited waypoint, and $\pi_v(w_{|w_{\leq t}|})$ gives the vertex
 component.
 
-<<filterByHaversine(3)>>=
+<<Tools: filterByHaversine(3)>>=
 int[] filterByHaversine(final int ro, final int[] locs, final int threshold)
 throws VertexNotFoundException {
   final int n = (locs.length/3);
@@ -270,7 +270,7 @@ Given a time string in "hhmm" format, returns milliseconds since Epoch.  We
 force the year to 1971 so the return is always positive value. Due to timezone,
 if left default 1970, the return value can be negative if timezone is China
 and time is early in the morning.
-<<parseClockReference(1)>>=
+<<Tools: parseClockReference(1)>>=
 long parseClockReference (final String refTimeStr) throws ParseException {
   SimpleDateFormat sdf = new SimpleDateFormat("HHmmyyyy");
   Date d = sdf.parse(refTimeStr+"1971");
@@ -281,7 +281,7 @@ long parseClockReference (final String refTimeStr) throws ParseException {
 @
 
 \subsection{\texttt{printUser}(1)}
-<<printUser(1)>>=
+<<Tools: printUser(1)>>=
 void printUser(final int[] u) {
   System.out.println("User {uid="+u[0]+", q="+u[1]+", e="+u[2]+", l="+u[3]
     +", o="+u[4]+", d="+u[5]+", b="+u[6]+"}");
@@ -289,7 +289,7 @@ void printUser(final int[] u) {
 @ %def printUser
 
 \subsection{\texttt{printPath}(1)}
-<<printPath(1)>>=
+<<Tools: printPath(1)>>=
 void printPath(final int[] p) {
   for (Integer i : p) {
     System.out.print(i+" ");
@@ -299,7 +299,7 @@ void printPath(final int[] p) {
 @ %def printPath
 
 \subsection{\texttt{printRoute}(1)}
-<<printRoute(1)>>=
+<<Tools: printRoute(1)>>=
 void printRoute(final int[] w) {
   for (int i = 0; i < (w.length - 1); i += 2) {
     System.out.print("("+w[i]+", "+w[(i + 1)]+") ");
@@ -309,7 +309,7 @@ void printRoute(final int[] w) {
 @ %def printRoute
 
 \subsection{\texttt{printSchedule}(1)}
-<<printSchedule(1)>>=
+<<Tools: printSchedule(1)>>=
 void printSchedule(final int[] b) {
   for (int i = 0; i < (b.length - 3); i += 4) {
     System.out.print("("+b[i]+", "+b[(i + 1)]
@@ -321,21 +321,21 @@ void printSchedule(final int[] b) {
 
 
 \subsection{\texttt{Print}(2)}
-<<Print(2)>>=
+<<Tools: Print(2)>>=
 void Print(final String a, final String b) {
   System.out.println(String.format("[%s][%s] %s", a, LocalDateTime.now(), b));
 }
 @ %def Print
 
 \subsection{\texttt{Print}(1)}
-<<Print(1)>>=
+<<Tools: Print(1)>>=
 void Print(final String b) {
   System.out.println(String.format("[*][%s] %s", LocalDateTime.now(), b));
 }
 @
 
 \subsection{\texttt{PrintSQLException}(1)}
-<<PrintSQLException(1)>>=
+<<Tools: PrintSQLException(1)>>=
 void PrintSQLException(SQLException e) {
   while (e != null) {
     System.err.println("\n----- SQLException -----");

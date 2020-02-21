@@ -1,12 +1,57 @@
 \part{Jargo Simulator}
 \label{part-simulator}
 
-\chapter{Class Overview}
+\chapter{Methods Overview}
 \label{sim-overview}
 
-\section*{Class: Storage}
-\addcontentsline{toc}{section}{Class: Storage}
-\hi{Read Methods}
+This chapter presents an overview of all of Jargo's library methods, organized
+by class and function.
+Tables~\ref{tab:method-functions}~and~\ref{tab:class-descriptions} describe the
+class and functional groupings.  The number in parentheses next to each method
+indicates the number of parameters. Go to the page number next to a method
+to jump to the summary and source code.
+
+The following chapters serve as an API reference. Chapters~9--12 detail the
+methods arranged by their functional groupings. Chapter 13 describes Jargo's
+JMX functionality. Chapters 14--19 define the individual classes.
+
+\begin{table}[h]
+\begin{center}
+\small
+\caption{Method Functional Groupings}
+\label{tab:method-functions}
+\begin{tabular}{|l|l|p{100mm}|}
+\hline
+Ch. & Functional Group & Description \\
+\hline
+Ch.~\ref{sim-administration} & Administration & Manage classes and the simulation lifecycle \\
+Ch.~\ref{sim-reading} & Read Methods & Retrieve direct or derived values from the simulation state \\
+& Cached Read Methods & Retrieve values from cache instead of from Derby (overloads of normal read methods) \\
+Ch.~\ref{sim-writing} & Write Methods & Push new values into the simulation state \\
+Ch.~\ref{sim-gtree} & G-tree Methods & Interact with G-tree spatial index \\
+& Special Methods & Specific to a class (see individual chapters on classes)\\
+\hline
+\end{tabular}
+\caption{Class Descriptions}
+\label{tab:class-descriptions}
+\begin{tabular}{|l|l|p{120mm}|}
+\hline
+Ch. & Class & Description \\
+\hline
+Ch.~\ref{sim-storage} & Storage & Provides direct access to Jargo's underlying Derby database containing
+the ridesharing simulation state \\
+Ch.~\ref{sim-controller} & Controller & Manages the simulation lifecycle \\
+Ch.~\ref{sim-communicator} & Communicator & Provides a client-facing subset of Storage functionality \\
+Ch.~\ref{sim-client} & Client & Provides overrideable functionality for serving ridesharing requests \\
+Ch.~\ref{sim-traffic} & Traffic & Provides overrideable functionality for returning speeds in the road network \\
+Ch.~\ref{sim-tools} & Tools & Provides convenience methods \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\section{Storage}
+\subsection{Read Methods}
 <<[[Storage]] methods>>=
 public <<Read: DBQuery(2)>>
 public <<Read: DBQueryQuick(3)>>
@@ -80,7 +125,7 @@ public <<Read: DBQueryVertex(1)>>
 public <<Read: DBQueryVertices(0)>>
 public <<Read: DBQueryVerticesCount(0)>>
 @
-\hi{Cached Read Methods}
+\subsection{Cached Read Methods}
 <<[[Storage]] methods>>=
 public <<Read: DBQueryMetricRequestDistanceBaseUnassignedTotal(0)>>
 public <<Read: DBQueryMetricRequestDistanceDetourTotal(0)>>
@@ -97,7 +142,7 @@ public <<Read: DBQueryMetricServerDurationTravelTotal(0)>>
 public <<Read: DBQueryMetricServiceRate(0)>>
 public <<Read: DBQueryMetricUserDistanceBaseTotal(0)>>
 @
-\hi{Write Methods}
+\subsection{Write Methods}
 <<[[Storage]] methods>>=
 public <<Write: DBInsertEdge(4)>>
 public <<Write: DBInsertRequest(1)>>
@@ -106,7 +151,7 @@ public <<Write: DBInsertVertex(3)>>
 public <<Write: DBUpdateEdgeSpeed(3)>>
 public <<Write: DBUpdateServerService(5)>>
 @
-\hi{Administration}
+\subsection{Administration}
 <<[[Storage]] methods>>=
 public <<Admin: JargoCacheRoadNetworkFromDB(0)>>
 public <<Admin: JargoCacheUsersFromDB(0)>>
@@ -120,9 +165,6 @@ public <<Admin: getRefCacheEdges(0)>>
 public <<Admin: getRefCacheUsers(0)>>
 public <<Admin: getRefCacheVertices(0)>>
 public <<Admin: setRequestTimeout(1)>>
-@
-\hi{Private Methods}
-<<[[Storage]] methods>>=
 private <<Admin: JargoSetupDriver(0)>>
 private <<Admin: JargoSetupPreparedStatements(0)>>
 private <<Admin: PSAdd(2..)>>
@@ -131,9 +173,8 @@ private <<Admin: PSQuery(3..)>>
 private <<Admin: PSSubmit(1..)>>
 @
 
-\section*{Class: Controller}
-\addcontentsline{toc}{section}{Class: Controller}
-\hi{Read Methods}
+\section{Controller}
+\subsection{Read Methods}
 <<[[Controller]] methods>>=
 public <<Read: query(2)>>
 public <<Read: queryQuick(3)>>
@@ -189,7 +230,7 @@ public <<Read: queryVertex(1)>>
 public <<Read: queryVertices(0)>>
 public <<Read: queryVerticesCount(0)>>
 @
-\hi{Cached Read Methods}
+\subsection{Cached Read Methods}
 <<[[Controller]] methods>>=
 public <<Read: queryMetricRequestDistanceBaseUnassignedTotal(0)>>
 public <<Read: queryMetricRequestDistanceDetourTotal(0)>>
@@ -206,14 +247,12 @@ public <<Read: queryMetricServerDurationTravelTotal(0)>>
 public <<Read: queryMetricServiceRate(0)>>
 public <<Read: queryMetricUserDistanceBaseTotal(0)>>
 @
-\hi{Write Methods}
+\subsection{Write Methods}
 <<[[Controller]] methods>>=
 public <<Write: insertRequest(1)>>
 public <<Write: insertServer(2)>>
-public <<loadProblem(1)>>
-public <<loadRoadNetworkFromFile(1)>>
 @
-\hi{Utilities}
+\subsection{Administration}
 <<[[Controller]] methods>>=
 public <<Admin: cacheRoadNetworkFromDB(0)>>
 public <<Admin: cacheUsersFromDB(0)>>
@@ -223,8 +262,6 @@ public <<Admin: instanceInitialize(0)>>
 public <<Admin: instanceLoad(1)>>
 public <<Admin: instanceLoadInMem(1)>>
 public <<Admin: instanceNew(0)>>
-public <<Gtree: gtreeClose(0)>>
-public <<Gtree: gtreeLoad(1)>>
 public <<Admin: getClock(0)>>
 public <<Admin: getClockStart(0)>>
 public <<Admin: getClockReference(0)>>
@@ -243,17 +280,26 @@ public <<Admin: setClockReference(1)>>
 public <<Admin: setClockStart(1)>>
 public <<Admin: setQueueTimeout(1)>>
 public <<Admin: setRefClient(1)>>
-public <<isKilled(0)>>
-public <<returnRequest(1)>>
-public <<startRealtime(1)>>
-public <<startSequential(1)>>
-public <<step(0)>>
-public <<stop(1)>>
+@
+\subsection{G-tree Methods}
+<<[[Controller]] methods>>=
+public <<Gtree: gtreeClose(0)>>
+public <<Gtree: gtreeLoad(1)>>
+@
+\subsection{Special Methods}
+<<[[Controller]] methods>>=
+public <<Controller: loadProblem(1)>>
+public <<Controller: loadRoadNetworkFromFile(1)>>
+public <<Controller: isKilled(0)>>
+public <<Controller: returnRequest(1)>>
+public <<Controller: startRealtime(1)>>
+public <<Controller: startSequential(1)>>
+public <<Controller: step(0)>>
+public <<Controller: stop(1)>>
 @
 
-\section*{Class: Communicator}
-\addcontentsline{toc}{section}{Class: Communicator}
-\hi{Read Methods}
+\section{Communicator}
+\subsection{Read Methods}
 <<[[Communicator]] methods>>=
 public <<Read: queryEdge(2)>>
 public <<Read: queryServerDistanceRemaining(2)>>
@@ -265,11 +311,11 @@ public <<Read: queryServersLocationsActive(1)>>
 public <<Read: queryUser(1)>>
 public <<Read: queryVertex(1)>>
 @
-\hi{Write Methods}
+\subsection{Write Methods}
 <<[[Communicator]] methods>>=
 public <<Write: updateServerService(5)>>
 @
-\hi{Utilities}
+\subsection{Adminstration}
 <<[[Communicator]] methods>>=
 public <<Admin: retrieveClock(0)>>
 public <<Admin: retrieveRefCacheEdges(0)>>
@@ -278,131 +324,84 @@ public <<Admin: retrieveRefCacheVertices(0)>>
 public <<Admin: setRefController(1)>>
 public <<Admin: setRefStorage(1)>>
 public <<Admin: setRefTraffic(1)>>
-public <<forwardReturnRequest(1)>>
+@
+\subsection{Special Methods}
+<<[[Communicator]] methods>>=
+public <<Communicator: forwardReturnRequest(1)>>
 @
 
-\section*{Class: Client}
-\addcontentsline{toc}{section}{Class: Client}
-\hi{Read Methods}
+\section{Client}
+\subsection{Administration}
 <<[[Client]] methods>>=
+public <<Admin: forwardRefCacheEdges(1)>>
+public <<Admin: forwardRefCacheUsers(1)>>
+public <<Admin: forwardRefCacheVertices(1)>>
+public <<Admin: setRefCommunicator(1)>>
 @
-\hi{Write Methods}
+\subsection{G-tree Methods}
 <<[[Client]] methods>>=
+public <<Gtree: gtreeLoad(1)>>
+public <<Gtree: gtreeClose(0)>>
 @
-\hi{Utilities}
+\subsection{Special Methods}
 <<[[Client]] methods>>=
-public final <<Gtree: gtreeLoad(1)>>
-public final <<Gtree: gtreeClose(0)>>
-public final <<Admin: forwardRefCacheEdges(1)>>
-public final <<Admin: forwardRefCacheUsers(1)>>
-public final <<Admin: forwardRefCacheVertices(1)>>
-public final <<Admin: setRefCommunicator(1)>>
-public final <<addRequest(1)>>
-public final <<dropRequests(1)>>
-public final <<collectServerLocations(1)>>
-public final <<notifyNew(0)>>
-public <<init(0)>>
-protected <<end(0)>>
-protected <<endCollectServerLocations(1)>>
-protected <<handleRequest(1)>>
-protected <<handleServerLocation(1)>>
+public <<Client: addRequest(1)>>
+public <<Client: dropRequests(1)>>
+public <<Client: collectServerLocations(1)>>
+public <<Client: notifyNew(0)>>
+public <<Client: init(0)>>
+protected <<Client: end(0)>>
+protected <<Client: endCollectServerLocations(1)>>
+protected <<Client: handleRequest(1)>>
+protected <<Client: handleServerLocation(1)>>
 @
 
-\section*{Class: Traffic}
-\addcontentsline{toc}{section}{Class: Traffic}
-\hi{Read Methods}
-<<[[Traffic]] methods>>=
-@
-\hi{Write Methods}
-<<[[Traffic]] methods>>=
-@
-\hi{Utilities}
+\section{Traffic}
+\subsection{Administration}
 <<[[Traffic]] methods>>=
 public <<Admin: forwardRefCacheEdges(1)>>
 public <<Admin: forwardRefCacheVertices(1)>>
-public <<apply(3)>>
-public <<init(0)>>
+@
+\subsection{Special Methods}
+<<[[Traffic]] methods>>=
+public <<Traffic: apply(3)>>
+public <<Traffic: init(0)>>
 @
 
-\section*{Class: Tools}
-\addcontentsline{toc}{section}{Class: Tools}
-\hi{Read Methods}
+\section{Tools}
+\subsection{Read Methods}
 <<[[Tools]] methods>>=
 public <<Read: DBQueryEdge(2)>>
 public <<Read: DBQueryVertex(1)>>
 @
-\hi{Write Methods}
+\subsection{Administration}
 <<[[Tools]] methods>>=
-@
-\hi{Utilities}
-<<[[Tools]] methods>>=
-public <<Gtree: GTGtreeLoad(1)>>
-public <<Gtree: GTGtreeClose(0)>>
 public <<Admin: setRefCacheEdges(1)>>
 public <<Admin: setRefCacheUsers(1)>>
 public <<Admin: setRefCacheVertices(1)>>
-public <<computeBoundingBox(0)>>
-public <<computeDuration(2)>>
-public <<computeHaversine(2)>>
-public <<computeHaversine(4)>>
-public <<computeRoute(3)>>
-public <<computeShortestPath(2)>>
-public <<computeShortestPathDistance(2)>>
-public <<filterByHaversine(3)>>
-public <<parseClockReference(1)>>
-public <<printPath(1)>>
-public <<printRoute(1)>>
-public <<printSchedule(1)>>
-public <<printUser(1)>>
-public static <<Print(1)>>
-public static <<Print(2)>>
-public static <<PrintSQLException(1)>>
 @
-
-\section*{Class: DesktopController}
-\addcontentsline{toc}{section}{Class: DesktopController}
-\hi{Read Methods}
-<<[[DesktopController]] methods>>=
+\subsection{G-tree Methods}
+<<[[Tools]] methods>>=
+public <<Gtree: GTGtreeLoad(1)>>
+public <<Gtree: GTGtreeClose(0)>>
 @
-\hi{Write Methods}
-<<[[DesktopController]] methods>>=
-@
-\hi{Utilities}
-<<[[DesktopController]] methods>>=
-public <<actionAbout(1)>>
-public <<actionClient(1)>>
-public <<actionClientGtree(1)>>
-public <<actionGitHub(1)>>
-public <<actionGtree(1)>>
-public <<actionLoad(1)>>
-public <<actionNew(1)>>
-public <<actionProb(1)>>
-public <<actionQuery(1)>>
-public <<actionQueryContinuous(1)>>
-public <<actionQuit(1)>>
-public <<actionRoad(1)>>
-public <<actionStartRealtime(1)>>
-public <<actionStartSequential(1)>>
-public <<actionStop(1)>>
-public <<actionTraffic(1)>>
-public <<actionZoomCanvas(1)>>
-public <<setStage(1)>>
-public <<setWindowHeight(1)>>
-public <<setWindowWidth(1)>>
-public <<toggleMetric(1)>>
-private <<initializeCanvas(0)>>
-@
-
-\section*{Class: Command}
-\addcontentsline{toc}{section}{Class: Command}
-\hi{Read Methods}
-<<[[Command]] methods>>=
-@
-\hi{Write Methods}
-<<[[Command]] methods>>=
-@
-\hi{Utilities}
-<<[[Command]] methods>>=
-public static <<main(1)>>
+\subsection{Special Methods}
+<<[[Tools]] methods>>=
+public <<Tools: computeBoundingBox(0)>>
+public <<Tools: computeDuration(2)>>
+public <<Tools: computeHaversine(2)>>
+public <<Tools: computeHaversine(4)>>
+public <<Tools: computeRoute(3)>>
+public <<Tools: computeShortestPath(2)>>
+public <<Tools: computeShortestPathDistance(2)>>
+public <<Tools: filterByHaversine(3)>>
+public <<Tools: parseClockReference(1)>>
+public <<Tools: printPath(1)>>
+public <<Tools: printRoute(1)>>
+public <<Tools: printSchedule(1)>>
+public <<Tools: printUser(1)>>
+public static <<Tools: Print(1)>>
+public static <<Tools: Print(2)>>
+public static <<Tools: PrintSQLException(1)>>
 @
 

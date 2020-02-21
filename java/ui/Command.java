@@ -4,238 +4,238 @@ import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
 public class Command {
-  void main(String[] args) throws Exception {
-    final int REQUIRED_ARGS = 6;
-    String arg1  = "";  // runtime mode
-    String arg2  = "";  // road network *.rnet file
-    String arg3  = "";  // gtree *.gtree file
-    String arg4  = "";  // problem *.instance file
-    String arg5  = "";  // client *.jar file
-    String arg6  = "";  // client *.class classname
-    String opt_r = "";  // client *.gtree file
-    String opt_x = "";  // traffic *.jar file
-    String opt_y = "";  // traffic *.class classname
-    String opt_s = "";  // start time in seconds, relative to problem time
-    String opt_e = "";  // end time in seconds, relative to problem time
+  public static void main(String[] args) throws Exception {
+                  final int REQUIRED_ARGS = 6;
+                  String arg1  = "";  // runtime mode
+                  String arg2  = "";  // road network *.rnet file
+                  String arg3  = "";  // gtree *.gtree file
+                  String arg4  = "";  // problem *.instance file
+                  String arg5  = "";  // client *.jar file
+                  String arg6  = "";  // client *.class classname
+                  String opt_r = "";  // client *.gtree file
+                  String opt_x = "";  // traffic *.jar file
+                  String opt_y = "";  // traffic *.class classname
+                  String opt_s = "";  // start time in seconds, relative to problem time
+                  String opt_e = "";  // end time in seconds, relative to problem time
 
-    String help1 = String.join("\n",
-                     "Jargo 0.9.0, a real-time stochastic ridesharing simulator.",
-                     "Usage: ./launch-cli [OPTION...] MODE ROAD GTREE PROB CLIENT CLASSNAME",
-                     "",
-                     "Mandatory arguments:",
-                     "  MODE       runtime mode, either 'seq' or 'real'",
-                     "  ROAD       road network *.rnet file",
-                     "  GTREE      gtree *.gtree file to the road network",
-                     "  PROB       problem *.instance file (see FORMATS section)",
-                     "  CLIENT     client *.jar file",
-                     "  CLASSNAME  client classname",
-                     "",
-                     "Options:",
-                     "  -h       show help",
-                     "  -r       client *.gtree file (default: GTREE)",
-                     "  -x       traffic *.jar file (default: none)",
-                     "  -y       traffic classname (default: '')",
-                     "  -s       start time (see TIME section)",
-                     "  -e       end time (see TIME section)",
-                     ""
-                   );
-    String help2 = String.join("\n",
-                     "FORMATS",
-                     "",
-                     "The ROAD file should be a plain-text file with seven *space-delimited*",
-                     "numerical columns. The column values should be:",
-                     "  Column 1: unique identifier for one edge of the road network",
-                     "  Column 2: identifier of the from-vertex of the edge",
-                     "  Column 3: identifier of the to-vertex of the edge",
-                     "  Column 4: longitude coordinate of the from-vertex",
-                     "  Column 5: latitude coordinate of the from-vertex",
-                     "  Column 6: longitude coordinate of the to-verex",
-                     "  Column 7: latitude coordinate of the to-vertex",
-                     "",
-                     "If the same value appears more than once in Column 1, then a",
-                     "DuplicateEdgeException is thrown. If the same values appears in Columns 2 and",
-                     "3, then a SQL exception is thrown because Jargo's data model does not allow",
-                     "self-referencing edges. Directed edges are allowed, for example the values in",
-                     "Columns 2 and 3 for one row are reversed are reversed in a different row of the",
-                     "file. Columns 4--7 should be in WGS84 coordinate system because Jargo uses",
-                     "haversine on the Earth's surface to calculate certain distances. Using WGS84",
-                     "also facilitates offline visualization of vehicle routes and other spatial",
-                     "items in geospatial software such as QGIS.",
-                     "",
-                     "The PROB file should be a plain-text file with three header rows and six",
-                     "*tab-delimited* numerical columns. The first header row is unused and can",
-                     "contain any text (e.g. notes to yourself). The second header row should have",
-                     "three space-delimited numbers, indicating the number of vehicles, customers,",
-                     "and the reference time, respectively. The reference time should be formatted as",
-                     "a four-digit military time, e.g. 1835 for 6:35 PM, or 0013 for 12:13 AM. The",
-                     "third header row is unused and can contain any text. I like to put the column",
-                     "headers in this row. The remaining rows have the following format:",
-                     "  Column 1: unique identifier of the vehicle or customer (the 'participant')",
-                     "  Column 2: identifier of the participant's origin vertex",
-                     "  Column 3: identifier of the participant's destination vertex",
-                     "  Column 4: the participant's 'load', position to indicate seating requirement",
-                     "            and negative to indicate seating capacity",
-                     "  Column 5: 'early' time, or time the participant appears on the network",
-                     "  Column 6: 'late' time, or latest acceptable time participant should arrive",
-                     "            at destination",
-                     "",
-                     "The GTREE and client g-tree (-r) should be in g-tree format (see",
-                     "https://github.com/jamjpan/GTree).",
-                     "",
-                     "The CLIENT and traffic (-x) should be Java jar archives containing a Client",
-                     "or Traffic class, respectively.",
-                     "",
-                     "TIME",
-                     "",
-                     "The start (-s) and end (-e) times are in seconds, relative to the problem",
-                     "reference time. For example, if the reference time is 0013 (12:13 AM) and the",
-                     "options '-s 0 -e 1800' are passed, then Jargo will simulate the 30 minutes",
-                     "between 12:13 AM and 12:43 AM. If no start and end times are passed, the",
-                     "default start time is 0 and the default end time is maximum 'early' time",
-                     "(Column 5 in the problem instance) plus 30.",
-                     "",
-                     "EXAMPLE",
-                     "",
-                     "  ./launch-cli \\",
-                     "    -r broadway.gtree \\",
-                     "    -x NormalTraffic.jar \\",
-                     "    -y com.example.NormalTraffic \\",
-                     "    -s 0 \\",
-                     "    -e 3600 \\",
-                     "    real \\",
-                     "    manhattan.rnet \\",
-                     "    manhattan.gtree \\",
-                     "    manhattan.instance \\",
-                     "    NearestNeighbor.jar \\",
-                     "    com.example.NearestNeighbor",
-                     "",
-                     "See the manual for more detail https://github.com/jargors/Jargo",
-                     ""
-                   );
+                  String help1 = String.join("\n",
+                                   "Jargo 0.9.0, a real-time stochastic ridesharing simulator.",
+                                   "Usage: ./launch-cli [OPTION...] MODE ROAD GTREE PROB CLIENT CLASSNAME",
+                                   "",
+                                   "Mandatory arguments:",
+                                   "  MODE       runtime mode, either 'seq' or 'real'",
+                                   "  ROAD       road network *.rnet file",
+                                   "  GTREE      gtree *.gtree file to the road network",
+                                   "  PROB       problem *.instance file (see FORMATS section)",
+                                   "  CLIENT     client *.jar file",
+                                   "  CLASSNAME  client classname",
+                                   "",
+                                   "Options:",
+                                   "  -h       show help",
+                                   "  -r       client *.gtree file (default: GTREE)",
+                                   "  -x       traffic *.jar file (default: none)",
+                                   "  -y       traffic classname (default: '')",
+                                   "  -s       start time (see TIME section)",
+                                   "  -e       end time (see TIME section)",
+                                   ""
+                                 );
+                  String help2 = String.join("\n",
+                                   "FORMATS",
+                                   "",
+                                   "The ROAD file should be a plain-text file with seven *space-delimited*",
+                                   "numerical columns. The column values should be:",
+                                   "  Column 1: unique identifier for one edge of the road network",
+                                   "  Column 2: identifier of the from-vertex of the edge",
+                                   "  Column 3: identifier of the to-vertex of the edge",
+                                   "  Column 4: longitude coordinate of the from-vertex",
+                                   "  Column 5: latitude coordinate of the from-vertex",
+                                   "  Column 6: longitude coordinate of the to-verex",
+                                   "  Column 7: latitude coordinate of the to-vertex",
+                                   "",
+                                   "If the same value appears more than once in Column 1, then a",
+                                   "DuplicateEdgeException is thrown. If the same values appears in Columns 2 and",
+                                   "3, then a SQL exception is thrown because Jargo's data model does not allow",
+                                   "self-referencing edges. Directed edges are allowed, for example the values in",
+                                   "Columns 2 and 3 for one row are reversed are reversed in a different row of the",
+                                   "file. Columns 4--7 should be in WGS84 coordinate system because Jargo uses",
+                                   "haversine on the Earth's surface to calculate certain distances. Using WGS84",
+                                   "also facilitates offline visualization of vehicle routes and other spatial",
+                                   "items in geospatial software such as QGIS.",
+                                   "",
+                                   "The PROB file should be a plain-text file with three header rows and six",
+                                   "*tab-delimited* numerical columns. The first header row is unused and can",
+                                   "contain any text (e.g. notes to yourself). The second header row should have",
+                                   "three space-delimited numbers, indicating the number of vehicles, customers,",
+                                   "and the reference time, respectively. The reference time should be formatted as",
+                                   "a four-digit military time, e.g. 1835 for 6:35 PM, or 0013 for 12:13 AM. The",
+                                   "third header row is unused and can contain any text. I like to put the column",
+                                   "headers in this row. The remaining rows have the following format:",
+                                   "  Column 1: unique identifier of the vehicle or customer (the 'participant')",
+                                   "  Column 2: identifier of the participant's origin vertex",
+                                   "  Column 3: identifier of the participant's destination vertex",
+                                   "  Column 4: the participant's 'load', position to indicate seating requirement",
+                                   "            and negative to indicate seating capacity",
+                                   "  Column 5: 'early' time, or time the participant appears on the network",
+                                   "  Column 6: 'late' time, or latest acceptable time participant should arrive",
+                                   "            at destination",
+                                   "",
+                                   "The GTREE and client g-tree (-r) should be in g-tree format (see",
+                                   "https://github.com/jamjpan/GTree).",
+                                   "",
+                                   "The CLIENT and traffic (-x) should be Java jar archives containing a Client",
+                                   "or Traffic class, respectively.",
+                                   "",
+                                   "TIME",
+                                   "",
+                                   "The start (-s) and end (-e) times are in seconds, relative to the problem",
+                                   "reference time. For example, if the reference time is 0013 (12:13 AM) and the",
+                                   "options '-s 0 -e 1800' are passed, then Jargo will simulate the 30 minutes",
+                                   "between 12:13 AM and 12:43 AM. If no start and end times are passed, the",
+                                   "default start time is 0 and the default end time is maximum 'early' time",
+                                   "(Column 5 in the problem instance) plus 30.",
+                                   "",
+                                   "EXAMPLE",
+                                   "",
+                                   "  ./launch-cli \\",
+                                   "    -r broadway.gtree \\",
+                                   "    -x NormalTraffic.jar \\",
+                                   "    -y com.example.NormalTraffic \\",
+                                   "    -s 0 \\",
+                                   "    -e 3600 \\",
+                                   "    real \\",
+                                   "    manhattan.rnet \\",
+                                   "    manhattan.gtree \\",
+                                   "    manhattan.instance \\",
+                                   "    NearestNeighbor.jar \\",
+                                   "    com.example.NearestNeighbor",
+                                   "",
+                                   "See the manual for more detail https://github.com/jargors/Jargo",
+                                   ""
+                                 );
 
-    if (args.length == 1 && args[0].equals("-h")) {
-      System.out.print(help1);
-      System.out.print(help2);
-      System.exit(0);
-    } else if (args.length < REQUIRED_ARGS) {
-      System.out.print(help1);
-    } else {
-      // Extract required arguments
-      int j = (args.length - REQUIRED_ARGS);
-      arg1 = args[(j + 0)];
-      arg2 = args[(j + 1)];
-      arg3 = args[(j + 2)];
-      arg4 = args[(j + 3)];
-      arg5 = args[(j + 4)];
-      arg6 = args[(j + 5)];
+                  if (args.length == 1 && args[0].equals("-h")) {
+                    System.out.print(help1);
+                    System.out.print(help2);
+                    System.exit(0);
+                  } else if (args.length < REQUIRED_ARGS) {
+                    System.out.print(help1);
+                  } else {
+                    // Extract required arguments
+                    int j = (args.length - REQUIRED_ARGS);
+                    arg1 = args[(j + 0)];
+                    arg2 = args[(j + 1)];
+                    arg3 = args[(j + 2)];
+                    arg4 = args[(j + 3)];
+                    arg5 = args[(j + 4)];
+                    arg6 = args[(j + 5)];
 
-      // Extract optional arguments
-      int i = 0;
-      while (++i < j) {
-        if (args[i] == "-r") {
-          opt_r = args[(i + 1)];
-        } else if (args[i] == "-x") {
-          opt_x = args[(i + 1)];
-        } else if (args[i] == "-y") {
-          opt_y = args[(i + 1)];
-        } else if (args[i] == "-s") {
-          opt_s = args[(i + 1)];
-        } else if (args[i] == "-e") {
-          opt_e = args[(i + 1)];
-        }
-      }
+                    // Extract optional arguments
+                    int i = 0;
+                    while (++i < j) {
+                      if (args[i] == "-r") {
+                        opt_r = args[(i + 1)];
+                      } else if (args[i] == "-x") {
+                        opt_x = args[(i + 1)];
+                      } else if (args[i] == "-y") {
+                        opt_y = args[(i + 1)];
+                      } else if (args[i] == "-s") {
+                        opt_s = args[(i + 1)];
+                      } else if (args[i] == "-e") {
+                        opt_e = args[(i + 1)];
+                      }
+                    }
 
-      // Initialize road, problem, g-tree
-      Controller ctrl = new Controller();
-      ctrl.instanceNew();
-      ctrl.instanceInitialize();
-      System.out.printf("set road '%s'\n", arg2);
-      ctrl.loadRoadNetworkFromFile(arg2);
-      System.out.printf("set gtree '%s'\n", arg3);
-      ctrl.gtreeLoad(arg3);
-      System.out.printf("set problem '%s'\n", arg4);
-      ctrl.loadProblem(arg4);
+                    // Initialize road, problem, g-tree
+                    Controller ctrl = new Controller();
+                    ctrl.instanceNew();
+                    ctrl.instanceInitialize();
+                    System.out.printf("set road '%s'\n", arg2);
+                    ctrl.loadRoadNetworkFromFile(arg2);
+                    System.out.printf("set gtree '%s'\n", arg3);
+                    ctrl.gtreeLoad(arg3);
+                    System.out.printf("set problem '%s'\n", arg4);
+                    ctrl.loadProblem(arg4);
 
-      Client client = null;
-      Traffic traffic = null;
+                    Client client = null;
+                    Traffic traffic = null;
 
-      URLClassLoader tmploader = null;
-      Class<?> tmpclass = null;
-      Constructor<?> tmpcstor = null;
+                    URLClassLoader tmploader = null;
+                    Class<?> tmpclass = null;
+                    Constructor<?> tmpcstor = null;
 
-      // Load Client
-      System.out.printf("set client '%s'\n", arg5);
-      System.out.printf("set client classname '%s'\n", arg6);
-      tmploader = new URLClassLoader(new URL[] { new URL("file://" + arg5) },
-          Class.forName("com.github.jargors.ui.Command").getClassLoader());
-      tmpclass = Class.forName(arg6, true, tmploader);
-      tmpcstor = tmpclass.getDeclaredConstructor();
-      client = (Client) tmpcstor.newInstance();
-      ctrl.forwardRefCommunicator(ctrl.getRefCommunicator());
+                    // Load Client
+                    System.out.printf("set client '%s'\n", arg5);
+                    System.out.printf("set client classname '%s'\n", arg6);
+                    tmploader = new URLClassLoader(new URL[] { new URL("file://" + arg5) },
+                        Class.forName("com.github.jargors.ui.Command").getClassLoader());
+                    tmpclass = Class.forName(arg6, true, tmploader);
+                    tmpcstor = tmpclass.getDeclaredConstructor();
+                    client = (Client) tmpcstor.newInstance();
+                    ctrl.forwardRefCommunicator(ctrl.getRefCommunicator());
 
-      // Load Traffic
-      System.out.printf("opt traffic '%s'\n", opt_x);
-      System.out.printf("opt traffic classname '%s'\n", opt_y);
-      if (!opt_x.equals("")) {
-        tmploader = new URLClassLoader(new URL[] { new URL("file://" + opt_x) },
-          Class.forName("com.github.jargors.ui.Command").getClassLoader());
-        tmpclass = Class.forName(opt_y, true, tmploader);
-        tmpcstor = tmpclass.getDeclaredConstructor();
-        traffic = (Traffic) tmpcstor.newInstance();
-      }
+                    // Load Traffic
+                    System.out.printf("opt traffic '%s'\n", opt_x);
+                    System.out.printf("opt traffic classname '%s'\n", opt_y);
+                    if (!opt_x.equals("")) {
+                      tmploader = new URLClassLoader(new URL[] { new URL("file://" + opt_x) },
+                        Class.forName("com.github.jargors.ui.Command").getClassLoader());
+                      tmpclass = Class.forName(opt_y, true, tmploader);
+                      tmpcstor = tmpclass.getDeclaredConstructor();
+                      traffic = (Traffic) tmpcstor.newInstance();
+                    }
 
-      // Initialize Client
-      ctrl.setRefClient(client);
-      client.forwardRefCacheVertices(ctrl.retrieveRefCacheVertices());
-      client.forwardRefCacheEdges(ctrl.retrieveRefCacheEdges());
-      client.forwardRefCacheUsers(ctrl.retrieveRefCacheUsers());
-      opt_r = (opt_r.equals("") ? arg3 : opt_r);
-      System.out.printf("opt client gtree '%s'\n", opt_r);
-      client.gtreeLoad(opt_r);
-      client.init();
+                    // Initialize Client
+                    ctrl.setRefClient(client);
+                    client.forwardRefCacheVertices(ctrl.retrieveRefCacheVertices());
+                    client.forwardRefCacheEdges(ctrl.retrieveRefCacheEdges());
+                    client.forwardRefCacheUsers(ctrl.retrieveRefCacheUsers());
+                    opt_r = (opt_r.equals("") ? arg3 : opt_r);
+                    System.out.printf("opt client gtree '%s'\n", opt_r);
+                    client.gtreeLoad(opt_r);
+                    client.init();
 
-      // Initialize Traffic
-      if (traffic != null) {
-        ctrl.forwardRefTraffic(traffic);
-        traffic.forwardRefCacheVertices(ctrl.retrieveRefCacheVertices());
-        traffic.forwardRefCacheEdges(ctrl.retrieveRefCacheEdges());
-        traffic.init();
-      }
+                    // Initialize Traffic
+                    if (traffic != null) {
+                      ctrl.forwardRefTraffic(traffic);
+                      traffic.forwardRefCacheVertices(ctrl.retrieveRefCacheVertices());
+                      traffic.forwardRefCacheEdges(ctrl.retrieveRefCacheEdges());
+                      traffic.init();
+                    }
 
-      // Set start time
-      opt_s = (opt_s.equals("") ? "0" : opt_s);
-      System.out.printf("opt start '%s'\n", opt_s);
+                    // Set start time
+                    opt_s = (opt_s.equals("") ? "0" : opt_s);
+                    System.out.printf("opt start '%s'\n", opt_s);
 
-      // Set end time
-      opt_e = (opt_e.equals("")
-          ? Integer.toString(ctrl.query("select max (re) from R", 1)[0])
-          : opt_e);
-      System.out.printf("opt end '%s'\n", opt_e);
+                    // Set end time
+                    opt_e = (opt_e.equals("")
+                        ? Integer.toString(ctrl.query("select max (re) from R", 1)[0])
+                        : opt_e);
+                    System.out.printf("opt end '%s'\n", opt_e);
 
-      // Start simulation
-      System.out.printf("set mode '%s'\n", arg1);
-      if (arg1.equals("seq")) {
-        ctrl.startSequential((status) -> {
-                               try {
-                                 ctrl.instanceExport("export");
-                               } catch (Exception e) {
-                                 System.out.println("Export failed.");
-                                 e.printStackTrace();
-                               }
-                             });
-      } else if (arg1.equals("real")) {
-        ctrl.startRealtime((status) -> {
-                             try {
-                               ctrl.instanceExport("export");
-                             } catch (Exception e) {
-                               System.out.println("Export failed.");
-                               e.printStackTrace();
-                             }
-                           });
-      } else {
-        System.out.printf("Unrecognized mode; Exiting.\n");
-        System.exit(1);
-      }
-    }
-  }
+                    // Start simulation
+                    System.out.printf("set mode '%s'\n", arg1);
+                    if (arg1.equals("seq")) {
+                      ctrl.startSequential((status) -> {
+                                             try {
+                                               ctrl.instanceExport("export");
+                                             } catch (Exception e) {
+                                               System.out.println("Export failed.");
+                                               e.printStackTrace();
+                                             }
+                                           });
+                    } else if (arg1.equals("real")) {
+                      ctrl.startRealtime((status) -> {
+                                           try {
+                                             ctrl.instanceExport("export");
+                                           } catch (Exception e) {
+                                             System.out.println("Export failed.");
+                                             e.printStackTrace();
+                                           }
+                                         });
+                    } else {
+                      System.out.printf("Unrecognized mode; Exiting.\n");
+                      System.exit(1);
+                    }
+                  }
+                }
 }
