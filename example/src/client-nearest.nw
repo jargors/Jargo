@@ -1,6 +1,18 @@
 \chapter{Client: NearestNeighbor}
 \label{client-nearest}
 
+The nearest-neighbor algorithm aims to find the closest vehicle for a given
+customer request and assigns that vehicle to the request. This example uses the
+prepend-to-front scheduling strategy and the shortest-path routing strategy.
+
+This example implements a ``naive'' algorithm. It doesn't check the vehicle
+capacity or any time-window constraints when it submits assignments. If the
+vehicle that it submits doesn't have enough capacity to serve the customer,
+then Jargo automatically rejects the submission, just as a real-world driver
+might skip the new assignment. If a time-window violation occurs, Jargo will
+record the violation. Jargo treats time windows as soft constraints as they are
+difficult to guarantee to traffic.
+
 <<NearestNeighbor.java>>=
 <<NearestNeighbor.java preamble>>
 public class NearestNeighbor extends Client {
@@ -12,9 +24,13 @@ public class NearestNeighbor extends Client {
 \section{Preamble}
 \label{NearestNeighbor: preamble}
 
+All example algorithms belong to the [[com.github.jargors.client]] package.
+
 <<NearestNeighbor.java preamble>>=
 package com.github.jargors.client;
 @
+
+We import Jargo [[sim]] components and some standard Java utilities.
 
 <<NearestNeighbor.java preamble>>=
 import com.github.jargors.sim.*;
@@ -27,6 +43,11 @@ import java.util.concurrent.ConcurrentHashMap;
 \section{Member Variables}
 \label{client-nearest: member-variables}
 
+This example uses three filters to quickly narrow down the nearest vehicle.
+The thresholds for these filters are defined in the member variables. A map
+called [[locations]] is initialized. It will be used to store vehicle locations
+as the information becomes available.
+
 <<[[NearestNeighbor]] member variables>>=
 final int MAX_DELTA = 300;  // seconds from last vehicle location update
 final int MAX_RANGE = 600;  // meters from last vehicle position
@@ -37,6 +58,10 @@ final ConcurrentHashMap<Integer, int[]> locations =
 
 \section{Chunks}
 \label{NearestNeighbor: chunks}
+
+The current time is used to check how long ago was the last positional update
+for vehicles, to ask vehicles what their remaining schedules are from this time
+forward, and to compute a new route with specified time components.
 
 \subsection{Get Current Time}
 
@@ -109,11 +134,10 @@ for (final Entry<Integer, Integer> entry : candidates.entrySet()) {
 To submit the minimum-range candidate as the assiged vehicle, compute a new
 schedule for the vehicle that includes the request's pick-up and drop-off
 locations, and also compute a new route that passes through these locations.
-For this tutorial, we will use a simple ``push'' insertion strategy to compute
-the new schedule. In this strategy, the request's pick-up and drop-off
-locations are inserted into the front of the vehicle's existing schedule. For
-computing the new route, we will calculate the shortest-path through the
-schedule locations.
+Schedules and routes (and customers and vehicles) are simple integer arrays
+in Jargo. The following code reads from the existing schedule array,
+populates the new schedule array, and computes the new route array.
+The array formats are...
 
 <<Submit minimum-range candidate>>=
 if (min != null) {
@@ -217,6 +241,51 @@ if (min != null) {
   <<Debug: submit>>
 }
 @
+
+\section{Methods}
+\label{client-nearest: methods}
+
+\subsection{\texttt{handleRequest}(1)}
+
+Now we can write the body of [[handleRequest]](1).  The entire method is
+wrapped in try/catch because some method calls can throw exceptions. If an
+exception is caught, it gets bubbled up to Jargo via [[ClientException]]. This
+exception does not end the simulation, but [[ClientFatalException]] will.
+
+<<NearestNeighbor: handleRequest(1)>>=
+void handleRequest(int[] r) throws ClientException, ClientFatalException {
+  <<Debug: handle request>>
+  try {
+    <<Get current time>>
+    <<Initialize candidates container>>
+    <<Apply delta, range, and event filters>>
+    <<Find minimum-range candidate>>
+    <<Submit minimum-range candidate>>
+  } catch (Exception e) {
+    throw new ClientException(e);
+  }
+}
+@
+
+\subsection{\texttt{handleServerLocation}(1)}
+
+Jargo automatically calls [[handleServerLocation]](1) for each server with
+a position update. We will take the update and store it into our [[locations]]
+array.
+
+<<NearestNeighbor: handleServerLocation(1)>>=
+void handleServerLocation(int[] s) {
+  this.locations.put(s[0], new int[] { s[1], s[2] });
+  <<Debug: put server location>>
+}
+@
+
+\section{Debug}
+
+Debugging can be turned on by passing the [[-Djargors.client.debug=true]]
+runtime flag to the JVM when a Jargo simulation is started. If this flag is
+true, the the [[DEBUG]] member variable is true. The following sections print
+some helpful messages if debugging is turned on.
 
 \subsection{Debug: Handle Request}
 
@@ -431,40 +500,6 @@ if (DEBUG) {
 <<Debug: put server location>>=
 if (DEBUG) {
   System.out.printf("put locations[], key=%d, val=[ %d, %d ]\n", s[1], s[2]);
-}
-@
-
-\section{Methods}
-\label{client-nearest: methods}
-
-\subsection{\texttt{handleRequest}(1)}
-
-The entire method is wrapped in try/catch because some method calls can throw
-exceptions. If an exception is caught, it gets bubbled up to Jargo via
-[[ClientException]]. This exception does not end the simulation, but
-[[ClientFatalException]] will.
-
-<<NearestNeighbor: handleRequest(1)>>=
-void handleRequest(int[] r) throws ClientException, ClientFatalException {
-  <<Debug: handle request>>
-  try {
-    <<Get current time>>
-    <<Initialize candidates container>>
-    <<Apply delta, range, and event filters>>
-    <<Find minimum-range candidate>>
-    <<Submit minimum-range candidate>>
-  } catch (Exception e) {
-    throw new ClientException(e);
-  }
-}
-@
-
-\subsection{\texttt{handleServerLocation}(1)}
-
-<<NearestNeighbor: handleServerLocation(1)>>=
-void handleServerLocation(int[] s) {
-  this.locations.put(s[0], new int[] { s[1], s[2] });
-  <<Debug: put server location>>
 }
 @
 

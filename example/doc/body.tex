@@ -1,13 +1,80 @@
 \part{Client Algorithms}% ===> this file was generated automatically by noweave --- better not edit it
 \label{part-client}
 
-\chapter{Methods Overview}
+\chapter{Overview}
 \label{client-overview}
 
 \renewcommand{\thepage}{\arabic{page}}
 \setcounter{page}{1}
 
+This chapter lists an overview of each of the client algorithms. Go to the page
+next to each method name to go directly to the method definition.
+Tables~\ref{tab:search-algorithms}~and~\ref{tab:join-algorithms} summarize some
+features of the algorithms.
+
+\begin{table}[h]
+\begin{center}
+\caption{Summary of Search-Based Algorithms}
+\label{tab:search-algorithms}
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+Ch. & Algorithm & Selection Predicate & Scheduling Strategy & Routing Strategy \\
+\hline
+Ch.~\ref{client-nearest} & Nearest Neighbor & Minimum proximity & Prepend to front & Shortest-path \\
+Ch.~\ref{client-greedy} & Greedy Insertion & Minimum routing cost & Insertion heuristic & Shortest-path \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}[h]
+\begin{center}
+\caption{Summary of Join-Based Algorithms}
+\label{tab:join-algorithms}
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+Ch. & Algorithm & Join Predicate & Scheduling Strategy & Routing Strategy \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+Ridesharing algorithms can be classified as search-based or join-based.
+Search-based algorithms use a selection predicate to decide which vehicle
+should be assigned to a particular customer. Join-based algorithms aim to group
+vehicles and customers together, with each vehicle serving all the customers in
+its group. Both algorithms may use various schedule and routing strategies.  A
+scheduling strategy is a method of arranging the future pick-ups and drop-offs
+that a vehicle is assigned to complete. A routing strategy is a method of
+computing the route that a vehicle should follow in order to go to the pick-ups
+and drop-offs in the scheduled order.
+
+For search-based algorithms, usually the predicate aims to minimize some sort
+of cost. The minimum-proximity predicate finds the vehicle that minimizes
+Euclidean or Haversine distance. The minimum-routing-cost predicate aims to
+minimize the extra routing distance that becomes necessary due to assignment to
+the customer.
+
+For join-based algorithms...
+
+Several scheduling strategies exist. The prepend-to-front strategy
+simply arranges the customer's pick-up and drop-off at the front of the
+assigned vehicle's schedule. The insertion-heuristic strategy aims to
+find the best position to insert the pick-up and drop-off without
+rearranging the existing pick-ups and drop-offs in the schedule.
+
+For routing strategies, the most common is shortest-path. This strategy
+simply finds the shortest path through all the pick-ups and drop-offs in a
+vehicle's schedule.
+
 \section{NearestNeighbor}
+
+The nearest-neighbor algorithm is a search-based algorithm that uses
+minimum-proximity as its selection predicate. It can be implemented using two
+methods. The {\Tt{}handleRequest\nwendquote}(1) method will search for and assign the
+minimum-proximity vehicle to given customer requests. The
+{\Tt{}handleServerLocation\nwendquote}(1) method will store new vehicle locations as they are
+updated.
 
 \nwfilename{src/client-overview.nw}\nwbegincode{1}\sublabel{NW3eY1Ju-3yym9S-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3eY1Ju-3yym9S-1}}}\moddef{\code{}NearestNeighbor\edoc{} methods~{\nwtagstyle{}\subpageref{NW3eY1Ju-3yym9S-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-QNBZk-1}}\nwenddeflinemarkup
 protected \LA{}NearestNeighbor: handleRequest(1)~{\nwtagstyle{}\subpageref{NW2MZpIA-16KpI3-1}}\RA{}
@@ -35,14 +102,14 @@ protected \LA{}NearestNeighbor: handleServerLocation(1)~{\nwtagstyle{}\subpagere
 \nwixlogsorted{c}{{Debug: get current time}{NW2MZpIA-xqgdv-1}{\nwixu{NW2MZpIA-2qkQZx-1}\nwixd{NW2MZpIA-xqgdv-1}}}%
 \nwixlogsorted{c}{{Debug: get number of events}{NW2MZpIA-1TMdCp-1}{\nwixu{NW2MZpIA-3sZXk2-1}\nwixd{NW2MZpIA-1TMdCp-1}}}%
 \nwixlogsorted{c}{{Debug: get old schedule}{NW2MZpIA-3sG0PQ-1}{\nwixu{NW2MZpIA-3sZXk2-1}\nwixd{NW2MZpIA-3sG0PQ-1}}}%
-\nwixlogsorted{c}{{Debug: handle request}{NW2MZpIA-33A3UY-1}{\nwixd{NW2MZpIA-33A3UY-1}\nwixu{NW2MZpIA-16KpI3-1}}}%
+\nwixlogsorted{c}{{Debug: handle request}{NW2MZpIA-33A3UY-1}{\nwixu{NW2MZpIA-16KpI3-1}\nwixd{NW2MZpIA-33A3UY-1}}}%
 \nwixlogsorted{c}{{Debug: initialize candidates container}{NW2MZpIA-3LGRX7-1}{\nwixu{NW2MZpIA-3doegf-1}\nwixd{NW2MZpIA-3LGRX7-1}}}%
 \nwixlogsorted{c}{{Debug: initialize legs container}{NW2MZpIA-3R3yVH-1}{\nwixu{NW2MZpIA-3sZXk2-1}\nwixd{NW2MZpIA-3R3yVH-1}}}%
 \nwixlogsorted{c}{{Debug: initialize new schedule}{NW2MZpIA-GmK8M-1}{\nwixu{NW2MZpIA-3sZXk2-1}\nwixd{NW2MZpIA-GmK8M-1}}}%
 \nwixlogsorted{c}{{Debug: join route components}{NW2MZpIA-J6KjD-1}{\nwixu{NW2MZpIA-3sZXk2-1}\nwixd{NW2MZpIA-J6KjD-1}}}%
 \nwixlogsorted{c}{{Debug: join schedule components}{NW2MZpIA-qM9ER-1}{\nwixu{NW2MZpIA-3sZXk2-1}\nwixd{NW2MZpIA-qM9ER-1}}}%
 \nwixlogsorted{c}{{Debug: put candidate}{NW2MZpIA-1Lo26M-1}{\nwixu{NW2MZpIA-1w0JIl-1}\nwixd{NW2MZpIA-1Lo26M-1}}}%
-\nwixlogsorted{c}{{Debug: put server location}{NW2MZpIA-hcsfv-1}{\nwixd{NW2MZpIA-hcsfv-1}\nwixu{NW2MZpIA-fLFsG-1}}}%
+\nwixlogsorted{c}{{Debug: put server location}{NW2MZpIA-hcsfv-1}{\nwixu{NW2MZpIA-fLFsG-1}\nwixd{NW2MZpIA-hcsfv-1}}}%
 \nwixlogsorted{c}{{Debug: range filter}{NW2MZpIA-4aukgD-1}{\nwixu{NW2MZpIA-1w0JIl-1}\nwixd{NW2MZpIA-4aukgD-1}}}%
 \nwixlogsorted{c}{{Debug: set first leg}{NW2MZpIA-1F8aiy-1}{\nwixu{NW2MZpIA-3sZXk2-1}\nwixd{NW2MZpIA-1F8aiy-1}}}%
 \nwixlogsorted{c}{{Debug: set initial labels}{NW2MZpIA-1sURxT-1}{\nwixu{NW2MZpIA-3sZXk2-1}\nwixd{NW2MZpIA-1sURxT-1}}}%
@@ -74,6 +141,8 @@ protected \LA{}NearestNeighbor: handleServerLocation(1)~{\nwtagstyle{}\subpagere
 
 \section{GreedyInsertion}
 
+The greedy-insertion algorithm...
+
 \nwenddocs{}\nwbegincode{3}\sublabel{NW3eY1Ju-2B0O1t-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3eY1Ju-2B0O1t-1}}}\moddef{\code{}GreedyInsertion\edoc{} methods~{\nwtagstyle{}\subpageref{NW3eY1Ju-2B0O1t-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NWkwPRG-1Tuf6f-1}}\nwprevnextdefs{\relax}{NW3eY1Ju-2B0O1t-2}\nwenddeflinemarkup
 protected \LA{}GreedyInsertion: handleRequest(1)~{\nwtagstyle{}\subpageref{NWkwPRG-2OWvsM-1}}\RA{}
 protected \LA{}GreedyInsertion: endCollectServerLocations(1)~{\nwtagstyle{}\subpageref{NWkwPRG-1cMqeO-1}}\RA{}
@@ -87,6 +156,18 @@ private \LA{}GreedyInsertion: computeCost(6)~{\nwtagstyle{}\subpageref{NWkwPRG-2
 \nwenddocs{}\nwfilename{src/client-nearest.nw}\nwbegindocs{0}\chapter{Client: NearestNeighbor}
 \label{client-nearest}
 
+The nearest-neighbor algorithm aims to find the closest vehicle for a given
+customer request and assigns that vehicle to the request. This example uses the
+prepend-to-front scheduling strategy and the shortest-path routing strategy.
+
+This example implements a ``naive'' algorithm. It doesn't check the vehicle
+capacity or any time-window constraints when it submits assignments. If the
+vehicle that it submits doesn't have enough capacity to serve the customer,
+then Jargo automatically rejects the submission, just as a real-world driver
+might skip the new assignment. If a time-window violation occurs, Jargo will
+record the violation. Jargo treats time windows as soft constraints as they are
+difficult to guarantee to traffic.
+
 \nwenddocs{}\nwbegincode{1}\sublabel{NW2MZpIA-QNBZk-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-QNBZk-1}}}\moddef{NearestNeighbor.java~{\nwtagstyle{}\subpageref{NW2MZpIA-QNBZk-1}}}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
 \LA{}NearestNeighbor.java preamble~{\nwtagstyle{}\subpageref{NW2MZpIA-2sgckr-1}}\RA{}
 public class NearestNeighbor extends Client \{
@@ -98,9 +179,13 @@ public class NearestNeighbor extends Client \{
 \section{Preamble}
 \label{NearestNeighbor: preamble}
 
+All example algorithms belong to the {\Tt{}com.github.jargors.client\nwendquote} package.
+
 \nwenddocs{}\nwbegincode{3}\sublabel{NW2MZpIA-2sgckr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-2sgckr-1}}}\moddef{NearestNeighbor.java preamble~{\nwtagstyle{}\subpageref{NW2MZpIA-2sgckr-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-QNBZk-1}}\nwprevnextdefs{\relax}{NW2MZpIA-2sgckr-2}\nwenddeflinemarkup
 package com.github.jargors.client;
 \nwalsodefined{\\{NW2MZpIA-2sgckr-2}}\nwused{\\{NW2MZpIA-QNBZk-1}}\nwendcode{}\nwbegindocs{4}\nwdocspar
+
+We import Jargo {\Tt{}sim\nwendquote} components and some standard Java utilities.
 
 \nwenddocs{}\nwbegincode{5}\sublabel{NW2MZpIA-2sgckr-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-2sgckr-2}}}\moddef{NearestNeighbor.java preamble~{\nwtagstyle{}\subpageref{NW2MZpIA-2sgckr-1}}}\plusendmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-QNBZk-1}}\nwprevnextdefs{NW2MZpIA-2sgckr-1}{\relax}\nwenddeflinemarkup
 import com.github.jargors.sim.*;
@@ -113,6 +198,11 @@ import java.util.concurrent.ConcurrentHashMap;
 \section{Member Variables}
 \label{client-nearest: member-variables}
 
+This example uses three filters to quickly narrow down the nearest vehicle.
+The thresholds for these filters are defined in the member variables. A map
+called {\Tt{}locations\nwendquote} is initialized. It will be used to store vehicle locations
+as the information becomes available.
+
 \nwenddocs{}\nwbegincode{7}\sublabel{NW2MZpIA-4N5YZL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-4N5YZL-1}}}\moddef{\code{}NearestNeighbor\edoc{} member variables~{\nwtagstyle{}\subpageref{NW2MZpIA-4N5YZL-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-QNBZk-1}}\nwenddeflinemarkup
 final int MAX_DELTA = 300;  // seconds from last vehicle location update
 final int MAX_RANGE = 600;  // meters from last vehicle position
@@ -123,6 +213,10 @@ final ConcurrentHashMap<Integer, int[]> locations =
 
 \section{Chunks}
 \label{NearestNeighbor: chunks}
+
+The current time is used to check how long ago was the last positional update
+for vehicles, to ask vehicles what their remaining schedules are from this time
+forward, and to compute a new route with specified time components.
 
 \subsection{Get Current Time}
 
@@ -195,11 +289,10 @@ for (final Entry<Integer, Integer> entry : candidates.entrySet()) \{
 To submit the minimum-range candidate as the assiged vehicle, compute a new
 schedule for the vehicle that includes the request's pick-up and drop-off
 locations, and also compute a new route that passes through these locations.
-For this tutorial, we will use a simple ``push'' insertion strategy to compute
-the new schedule. In this strategy, the request's pick-up and drop-off
-locations are inserted into the front of the vehicle's existing schedule. For
-computing the new route, we will calculate the shortest-path through the
-schedule locations.
+Schedules and routes (and customers and vehicles) are simple integer arrays
+in Jargo. The following code reads from the existing schedule array,
+populates the new schedule array, and computes the new route array.
+The array formats are...
 
 \nwenddocs{}\nwbegincode{17}\sublabel{NW2MZpIA-3sZXk2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-3sZXk2-1}}}\moddef{Submit minimum-range candidate~{\nwtagstyle{}\subpageref{NW2MZpIA-3sZXk2-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-16KpI3-1}}\nwenddeflinemarkup
 if (min != null) \{
@@ -304,233 +397,17 @@ if (min != null) \{
 \}
 \nwused{\\{NW2MZpIA-16KpI3-1}}\nwendcode{}\nwbegindocs{18}\nwdocspar
 
-\subsection{Debug: Handle Request}
-
-\nwenddocs{}\nwbegincode{19}\sublabel{NW2MZpIA-33A3UY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-33A3UY-1}}}\moddef{Debug: handle request~{\nwtagstyle{}\subpageref{NW2MZpIA-33A3UY-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-16KpI3-1}}\nwenddeflinemarkup
-if (DEBUG) \{
-  System.out.printf("got request=\{ id=%d, q=%d, e=%d, l=%d, o=%d, d=%d, b=%d \}\\n",
-      r[0], r[1], r[2], r[3], r[4], r[5], r[6]);
-\}
-\nwused{\\{NW2MZpIA-16KpI3-1}}\nwendcode{}\nwbegindocs{20}\nwdocspar
-
-\subsection{Debug: Get Current Time}
-
-\nwenddocs{}\nwbegincode{21}\sublabel{NW2MZpIA-xqgdv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-xqgdv-1}}}\moddef{Debug: get current time~{\nwtagstyle{}\subpageref{NW2MZpIA-xqgdv-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-2qkQZx-1}}\nwenddeflinemarkup
-if (DEBUG) \{
-  System.out.printf("got now=%d\\n", now);
-\}
-\nwused{\\{NW2MZpIA-2qkQZx-1}}\nwendcode{}\nwbegindocs{22}\nwdocspar
-
-\subsection{Debug: Initialize Candidates Container}
-
-\nwenddocs{}\nwbegincode{23}\sublabel{NW2MZpIA-3LGRX7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-3LGRX7-1}}}\moddef{Debug: initialize candidates container~{\nwtagstyle{}\subpageref{NW2MZpIA-3LGRX7-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3doegf-1}}\nwenddeflinemarkup
-if (DEBUG) \{
-  System.out.printf("init candidates[]=\{ \}\\n");
-\}
-\nwused{\\{NW2MZpIA-3doegf-1}}\nwendcode{}\nwbegindocs{24}\nwdocspar
-
-\subsection{Debug: Delta Filter}
-
-\nwenddocs{}\nwbegincode{25}\sublabel{NW2MZpIA-2I20iB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-2I20iB-1}}}\moddef{Debug: delta filter~{\nwtagstyle{}\subpageref{NW2MZpIA-2I20iB-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-1w0JIl-1}}\nwenddeflinemarkup
-if (DEBUG) \{
-  System.out.printf("got %d in_delta=%s\\n", sid, (in_delta ? "true" : "false"));
-\}
-\nwused{\\{NW2MZpIA-1w0JIl-1}}\nwendcode{}\nwbegindocs{26}\nwdocspar
-
-\subsection{Debug: Range Filter}
-
-\nwenddocs{}\nwbegincode{27}\sublabel{NW2MZpIA-4aukgD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-4aukgD-1}}}\moddef{Debug: range filter~{\nwtagstyle{}\subpageref{NW2MZpIA-4aukgD-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-1w0JIl-1}}\nwenddeflinemarkup
-if (DEBUG) \{
-  System.out.printf("got %d in_range=%s\\n", sid, (in_range ? "true" : "false"));
-\}
-\nwused{\\{NW2MZpIA-1w0JIl-1}}\nwendcode{}\nwbegindocs{28}\nwdocspar
-
-\subsection{Debug: Event Filter}
-
-\nwenddocs{}\nwbegincode{29}\sublabel{NW2MZpIA-4OxIMR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-4OxIMR-1}}}\moddef{Debug: event filter~{\nwtagstyle{}\subpageref{NW2MZpIA-4OxIMR-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-1w0JIl-1}}\nwenddeflinemarkup
-if (DEBUG) \{
-  System.out.printf("got %d in_event=%s\\n", sid, (in_event ? "true" : "false"));
-\}
-\nwused{\\{NW2MZpIA-1w0JIl-1}}\nwendcode{}\nwbegindocs{30}\nwdocspar
-
-\subsection{Debug: Put Candidate}
-
-\nwenddocs{}\nwbegincode{31}\sublabel{NW2MZpIA-1Lo26M-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-1Lo26M-1}}}\moddef{Debug: put candidate~{\nwtagstyle{}\subpageref{NW2MZpIA-1Lo26M-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-1w0JIl-1}}\nwenddeflinemarkup
-if (DEBUG) \{
-  System.out.printf("put candidates[], key=%d, val=%d\\n", sid, range);
-\}
-\nwused{\\{NW2MZpIA-1w0JIl-1}}\nwendcode{}\nwbegindocs{32}\nwdocspar
-
-\subsection{Debug: Find Minimum-Range Candidate}
-
-\nwenddocs{}\nwbegincode{33}\sublabel{NW2MZpIA-3aXcFM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-3aXcFM-1}}}\moddef{Debug: find minimum-range candidate~{\nwtagstyle{}\subpageref{NW2MZpIA-3aXcFM-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-2TDXjw-1}}\nwenddeflinemarkup
-if (DEBUG) \{
-  System.out.printf("set min=\{ %d, %d \}\\n", min.getKey(), min.getValue());
-\}
-\nwused{\\{NW2MZpIA-2TDXjw-1}}\nwendcode{}\nwbegindocs{34}\nwdocspar
-
-\subsection{Debug: Get Old Schedule}
-
-\nwenddocs{}\nwbegincode{35}\sublabel{NW2MZpIA-3sG0PQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-3sG0PQ-1}}}\moddef{Debug: get old schedule~{\nwtagstyle{}\subpageref{NW2MZpIA-3sG0PQ-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
-if (DEBUG) \{
-  System.out.printf("got bold: \\n");
-  for (int i : bold) \{
-    System.out.printf("  %d\\n", i);
-  \}
-\}
-\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{36}\nwdocspar
-
-\subsection{Debug: Get Number of Events}
-
-\nwenddocs{}\nwbegincode{37}\sublabel{NW2MZpIA-1TMdCp-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-1TMdCp-1}}}\moddef{Debug: get number of events~{\nwtagstyle{}\subpageref{NW2MZpIA-1TMdCp-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
-if (DEBUG) \{
-  System.out.printf("got m=%d\\n", m);
-  System.out.printf("got p=%d\\n", p);
-\}
-\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{38}\nwdocspar
-
-\subsection{Debug: Initialize New Schedule}
-
-\nwenddocs{}\nwbegincode{39}\sublabel{NW2MZpIA-GmK8M-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-GmK8M-1}}}\moddef{Debug: initialize new schedule~{\nwtagstyle{}\subpageref{NW2MZpIA-GmK8M-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
-if (DEBUG) \{
-  System.out.printf("init bnew=\{ \}\\n");
-  System.out.printf("init bnew_t=\{ \}\\n");
-  System.out.printf("init bnew_v=\{ \}\\n");
-  System.out.printf("init bnew_l=\{ \}\\n");
-\}
-\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{40}\nwdocspar
-
-\subsection{Debug: Set Initial Vertices}
-
-\nwenddocs{}\nwbegincode{41}\sublabel{NW2MZpIA-1iZHLf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-1iZHLf-1}}}\moddef{Debug: set initial vertices~{\nwtagstyle{}\subpageref{NW2MZpIA-1iZHLf-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
-if (DEBUG) \{
-  System.out.printf("set bnew_v[0]=%d\\n", bnew_v[0]);
-  System.out.printf("set bnew_v[1]=%d\\n", bnew_v[1]);
-\}
-\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{42}\nwdocspar
-
-\subsection{Debug: Set Initial Labels}
-
-\nwenddocs{}\nwbegincode{43}\sublabel{NW2MZpIA-1sURxT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-1sURxT-1}}}\moddef{Debug: set initial labels~{\nwtagstyle{}\subpageref{NW2MZpIA-1sURxT-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
-if (DEBUG) \{
-  System.out.printf("set bnew_l[0]=%d\\n", bnew_l[0]);
-  System.out.printf("set bnew_l[1]=%d\\n", bnew_l[1]);
-\}
-\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{44}\nwdocspar
-
-\subsection{Debug: Set Schedule Vertex and Label}
-
-\nwenddocs{}\nwbegincode{45}\sublabel{NW2MZpIA-1lkGjK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-1lkGjK-1}}}\moddef{Debug: set schedule vertex and label~{\nwtagstyle{}\subpageref{NW2MZpIA-1lkGjK-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
-if (DEBUG) \{
-  System.out.printf("set bnew_v[%d]=%d\\n", (i + 2), bnew_v[(i + 2)]);
-  System.out.printf("set bnew_l[%d]=%d\\n", (i + 2), bnew_l[(i + 2)]);
-\}
-\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{46}\nwdocspar
-
-\subsection{Debug: Set Schedule Time}
-
-\nwenddocs{}\nwbegincode{47}\sublabel{NW2MZpIA-1EJRY4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-1EJRY4-1}}}\moddef{Debug: set schedule time~{\nwtagstyle{}\subpageref{NW2MZpIA-1EJRY4-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
-if (DEBUG) \{
-  System.out.printf("set bnew_t[%d]=%d\\n", (i - 1), bnew_t[(i - 1)]);
-\}
-\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{48}\nwdocspar
-
-\subsection{Debug: Set Vehicle End Time}
-
-\nwenddocs{}\nwbegincode{49}\sublabel{NW2MZpIA-3ZHBo5-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-3ZHBo5-1}}}\moddef{Debug: set vehicle end time~{\nwtagstyle{}\subpageref{NW2MZpIA-3ZHBo5-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
-if (DEBUG) \{
-  System.out.printf("set bnew_t[%d]=%d\\n", (p - 1), bnew_t[(p - 1)]);
-\}
-\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{50}\nwdocspar
-
-\subsection{Debug: Join Schedule Components}
-
-\nwenddocs{}\nwbegincode{51}\sublabel{NW2MZpIA-qM9ER-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-qM9ER-1}}}\moddef{Debug: join schedule components~{\nwtagstyle{}\subpageref{NW2MZpIA-qM9ER-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
-if (DEBUG) \{
-  System.out.printf("set bnew[%d]=%d\\n", (i + 0), bnew[(i + 0)]);
-  System.out.printf("set bnew[%d]=%d\\n", (i + 1), bnew[(i + 1)]);
-  System.out.printf("set bnew[%d]=%d\\n", (i + 2), bnew[(i + 2)]);
-\}
-\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{52}\nwdocspar
-
-\subsection{Debug: Initialize Legs Container}
-
-\nwenddocs{}\nwbegincode{53}\sublabel{NW2MZpIA-3R3yVH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-3R3yVH-1}}}\moddef{Debug: initialize legs container~{\nwtagstyle{}\subpageref{NW2MZpIA-3R3yVH-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
-if (DEBUG) \{
-  System.out.printf("init legs=\{ \}\\n");
-\}
-\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{54}\nwdocspar
-
-\subsection{Debug: Set First Leg}
-
-\nwenddocs{}\nwbegincode{55}\sublabel{NW2MZpIA-1F8aiy-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-1F8aiy-1}}}\moddef{Debug: set first leg~{\nwtagstyle{}\subpageref{NW2MZpIA-1F8aiy-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
-if (DEBUG) \{
-  System.out.printf("set legs[0]=\{ %d, %d, ..., %d, %d  \}\\n",
-      legs[0][0], legs[0][1], legs[0][legs[0].length - 2], legs[0][legs[0].length - 1]);
-\}
-\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{56}\nwdocspar
-
-\subsection{Debug: Set Remaining Legs}
-
-\nwenddocs{}\nwbegincode{57}\sublabel{NW2MZpIA-Zbf0J-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-Zbf0J-1}}}\moddef{Debug: set remaining legs~{\nwtagstyle{}\subpageref{NW2MZpIA-Zbf0J-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
-if (DEBUG) \{
-  System.out.printf("set legs[%d]=\{ %d, %d, ..., %d, %d  \}\\n", i,
-      legs[i][0], legs[i][1], legs[i][legs[i].length - 2], legs[i][legs[i].length - 1]);
-\}
-\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{58}\nwdocspar
-
-\subsection{Debug: Set Route Length and Time}
-
-\nwenddocs{}\nwbegincode{59}\sublabel{NW2MZpIA-3WOc2v-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-3WOc2v-1}}}\moddef{Debug: set route length and time~{\nwtagstyle{}\subpageref{NW2MZpIA-3WOc2v-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
-if (DEBUG) \{
-  System.out.printf("set n=%d\\n", n);
-  System.out.printf("set t=%d\\n", t);
-\}
-\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{60}\nwdocspar
-
-\subsection{Debug: Join Route Components}
-
-\nwenddocs{}\nwbegincode{61}\sublabel{NW2MZpIA-J6KjD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-J6KjD-1}}}\moddef{Debug: join route components~{\nwtagstyle{}\subpageref{NW2MZpIA-J6KjD-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
-if (DEBUG) \{
-  System.out.printf("set wnew[%d]=%d\\n", k, wnew[k]);
-\}
-\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{62}\nwdocspar
-
-\subsection{Debug: Submit}
-
-\nwenddocs{}\nwbegincode{63}\sublabel{NW2MZpIA-2e4BPs-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-2e4BPs-1}}}\moddef{Debug: submit~{\nwtagstyle{}\subpageref{NW2MZpIA-2e4BPs-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
-if (DEBUG) \{
-  System.out.printf("submit:\\n");
-  System.out.printf("  server=%d\\n", sid);
-  System.out.printf("  wnew=\{ %d, %d, ..., %d, %d \}\\n",
-      wnew[0], wnew[1], wnew[wnew.length - 2], wnew[wnew.length - 1]);
-  System.out.printf("  bnew=\{ %d, %d, %d, ..., %d, %d, %d \}\\n",
-      bnew[0], bnew[1], bnew[2],
-      bnew[bnew.length - 3], bnew[bnew.length - 2], bnew[bnew.length - 1]);
-  System.out.printf("  radd=\{ %d \}\\n", r[0]);
-  System.out.printf("  rsub=\{ \}\\n");
-\}
-\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{64}\nwdocspar
-
-\subsection{Debug: Put Server Location}
-
-\nwenddocs{}\nwbegincode{65}\sublabel{NW2MZpIA-hcsfv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-hcsfv-1}}}\moddef{Debug: put server location~{\nwtagstyle{}\subpageref{NW2MZpIA-hcsfv-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-fLFsG-1}}\nwenddeflinemarkup
-if (DEBUG) \{
-  System.out.printf("put locations[], key=%d, val=[ %d, %d ]\\n", s[1], s[2]);
-\}
-\nwused{\\{NW2MZpIA-fLFsG-1}}\nwendcode{}\nwbegindocs{66}\nwdocspar
-
 \section{Methods}
 \label{client-nearest: methods}
 
 \subsection{\texttt{handleRequest}(1)}
 
-The entire method is wrapped in try/catch because some method calls can throw
-exceptions. If an exception is caught, it gets bubbled up to Jargo via
-{\Tt{}ClientException\nwendquote}. This exception does not end the simulation, but
-{\Tt{}ClientFatalException\nwendquote} will.
+Now we can write the body of {\Tt{}handleRequest\nwendquote}(1).  The entire method is
+wrapped in try/catch because some method calls can throw exceptions. If an
+exception is caught, it gets bubbled up to Jargo via {\Tt{}ClientException\nwendquote}. This
+exception does not end the simulation, but {\Tt{}ClientFatalException\nwendquote} will.
 
-\nwenddocs{}\nwbegincode{67}\sublabel{NW2MZpIA-16KpI3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-16KpI3-1}}}\moddef{NearestNeighbor: handleRequest(1)~{\nwtagstyle{}\subpageref{NW2MZpIA-16KpI3-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3eY1Ju-3yym9S-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{19}\sublabel{NW2MZpIA-16KpI3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-16KpI3-1}}}\moddef{NearestNeighbor: handleRequest(1)~{\nwtagstyle{}\subpageref{NW2MZpIA-16KpI3-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3eY1Ju-3yym9S-1}}\nwenddeflinemarkup
 void handleRequest(int[] r) throws ClientException, ClientFatalException \{
   \LA{}Debug: handle request~{\nwtagstyle{}\subpageref{NW2MZpIA-33A3UY-1}}\RA{}
   try \{
@@ -543,18 +420,246 @@ void handleRequest(int[] r) throws ClientException, ClientFatalException \{
     throw new ClientException(e);
   \}
 \}
-\nwused{\\{NW3eY1Ju-3yym9S-1}}\nwendcode{}\nwbegindocs{68}\nwdocspar
+\nwused{\\{NW3eY1Ju-3yym9S-1}}\nwendcode{}\nwbegindocs{20}\nwdocspar
 
 \subsection{\texttt{handleServerLocation}(1)}
 
-\nwenddocs{}\nwbegincode{69}\sublabel{NW2MZpIA-fLFsG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-fLFsG-1}}}\moddef{NearestNeighbor: handleServerLocation(1)~{\nwtagstyle{}\subpageref{NW2MZpIA-fLFsG-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3eY1Ju-3yym9S-1}}\nwenddeflinemarkup
+Jargo automatically calls {\Tt{}handleServerLocation\nwendquote}(1) for each server with
+a position update. We will take the update and store it into our {\Tt{}locations\nwendquote}
+array.
+
+\nwenddocs{}\nwbegincode{21}\sublabel{NW2MZpIA-fLFsG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-fLFsG-1}}}\moddef{NearestNeighbor: handleServerLocation(1)~{\nwtagstyle{}\subpageref{NW2MZpIA-fLFsG-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3eY1Ju-3yym9S-1}}\nwenddeflinemarkup
 void handleServerLocation(int[] s) \{
   this.locations.put(s[0], new int[] \{ s[1], s[2] \});
   \LA{}Debug: put server location~{\nwtagstyle{}\subpageref{NW2MZpIA-hcsfv-1}}\RA{}
 \}
-\nwused{\\{NW3eY1Ju-3yym9S-1}}\nwendcode{}\nwbegindocs{70}\nwdocspar
+\nwused{\\{NW3eY1Ju-3yym9S-1}}\nwendcode{}\nwbegindocs{22}\nwdocspar
+
+\section{Debug}
+
+Debugging can be turned on by passing the {\Tt{}-Djargors.client.debug=true\nwendquote}
+runtime flag to the JVM when a Jargo simulation is started. If this flag is
+true, the the {\Tt{}DEBUG\nwendquote} member variable is true. The following sections print
+some helpful messages if debugging is turned on.
+
+\subsection{Debug: Handle Request}
+
+\nwenddocs{}\nwbegincode{23}\sublabel{NW2MZpIA-33A3UY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-33A3UY-1}}}\moddef{Debug: handle request~{\nwtagstyle{}\subpageref{NW2MZpIA-33A3UY-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-16KpI3-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("got request=\{ id=%d, q=%d, e=%d, l=%d, o=%d, d=%d, b=%d \}\\n",
+      r[0], r[1], r[2], r[3], r[4], r[5], r[6]);
+\}
+\nwused{\\{NW2MZpIA-16KpI3-1}}\nwendcode{}\nwbegindocs{24}\nwdocspar
+
+\subsection{Debug: Get Current Time}
+
+\nwenddocs{}\nwbegincode{25}\sublabel{NW2MZpIA-xqgdv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-xqgdv-1}}}\moddef{Debug: get current time~{\nwtagstyle{}\subpageref{NW2MZpIA-xqgdv-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-2qkQZx-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("got now=%d\\n", now);
+\}
+\nwused{\\{NW2MZpIA-2qkQZx-1}}\nwendcode{}\nwbegindocs{26}\nwdocspar
+
+\subsection{Debug: Initialize Candidates Container}
+
+\nwenddocs{}\nwbegincode{27}\sublabel{NW2MZpIA-3LGRX7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-3LGRX7-1}}}\moddef{Debug: initialize candidates container~{\nwtagstyle{}\subpageref{NW2MZpIA-3LGRX7-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3doegf-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("init candidates[]=\{ \}\\n");
+\}
+\nwused{\\{NW2MZpIA-3doegf-1}}\nwendcode{}\nwbegindocs{28}\nwdocspar
+
+\subsection{Debug: Delta Filter}
+
+\nwenddocs{}\nwbegincode{29}\sublabel{NW2MZpIA-2I20iB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-2I20iB-1}}}\moddef{Debug: delta filter~{\nwtagstyle{}\subpageref{NW2MZpIA-2I20iB-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-1w0JIl-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("got %d in_delta=%s\\n", sid, (in_delta ? "true" : "false"));
+\}
+\nwused{\\{NW2MZpIA-1w0JIl-1}}\nwendcode{}\nwbegindocs{30}\nwdocspar
+
+\subsection{Debug: Range Filter}
+
+\nwenddocs{}\nwbegincode{31}\sublabel{NW2MZpIA-4aukgD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-4aukgD-1}}}\moddef{Debug: range filter~{\nwtagstyle{}\subpageref{NW2MZpIA-4aukgD-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-1w0JIl-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("got %d in_range=%s\\n", sid, (in_range ? "true" : "false"));
+\}
+\nwused{\\{NW2MZpIA-1w0JIl-1}}\nwendcode{}\nwbegindocs{32}\nwdocspar
+
+\subsection{Debug: Event Filter}
+
+\nwenddocs{}\nwbegincode{33}\sublabel{NW2MZpIA-4OxIMR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-4OxIMR-1}}}\moddef{Debug: event filter~{\nwtagstyle{}\subpageref{NW2MZpIA-4OxIMR-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-1w0JIl-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("got %d in_event=%s\\n", sid, (in_event ? "true" : "false"));
+\}
+\nwused{\\{NW2MZpIA-1w0JIl-1}}\nwendcode{}\nwbegindocs{34}\nwdocspar
+
+\subsection{Debug: Put Candidate}
+
+\nwenddocs{}\nwbegincode{35}\sublabel{NW2MZpIA-1Lo26M-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-1Lo26M-1}}}\moddef{Debug: put candidate~{\nwtagstyle{}\subpageref{NW2MZpIA-1Lo26M-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-1w0JIl-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("put candidates[], key=%d, val=%d\\n", sid, range);
+\}
+\nwused{\\{NW2MZpIA-1w0JIl-1}}\nwendcode{}\nwbegindocs{36}\nwdocspar
+
+\subsection{Debug: Find Minimum-Range Candidate}
+
+\nwenddocs{}\nwbegincode{37}\sublabel{NW2MZpIA-3aXcFM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-3aXcFM-1}}}\moddef{Debug: find minimum-range candidate~{\nwtagstyle{}\subpageref{NW2MZpIA-3aXcFM-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-2TDXjw-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("set min=\{ %d, %d \}\\n", min.getKey(), min.getValue());
+\}
+\nwused{\\{NW2MZpIA-2TDXjw-1}}\nwendcode{}\nwbegindocs{38}\nwdocspar
+
+\subsection{Debug: Get Old Schedule}
+
+\nwenddocs{}\nwbegincode{39}\sublabel{NW2MZpIA-3sG0PQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-3sG0PQ-1}}}\moddef{Debug: get old schedule~{\nwtagstyle{}\subpageref{NW2MZpIA-3sG0PQ-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("got bold: \\n");
+  for (int i : bold) \{
+    System.out.printf("  %d\\n", i);
+  \}
+\}
+\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{40}\nwdocspar
+
+\subsection{Debug: Get Number of Events}
+
+\nwenddocs{}\nwbegincode{41}\sublabel{NW2MZpIA-1TMdCp-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-1TMdCp-1}}}\moddef{Debug: get number of events~{\nwtagstyle{}\subpageref{NW2MZpIA-1TMdCp-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("got m=%d\\n", m);
+  System.out.printf("got p=%d\\n", p);
+\}
+\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{42}\nwdocspar
+
+\subsection{Debug: Initialize New Schedule}
+
+\nwenddocs{}\nwbegincode{43}\sublabel{NW2MZpIA-GmK8M-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-GmK8M-1}}}\moddef{Debug: initialize new schedule~{\nwtagstyle{}\subpageref{NW2MZpIA-GmK8M-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("init bnew=\{ \}\\n");
+  System.out.printf("init bnew_t=\{ \}\\n");
+  System.out.printf("init bnew_v=\{ \}\\n");
+  System.out.printf("init bnew_l=\{ \}\\n");
+\}
+\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{44}\nwdocspar
+
+\subsection{Debug: Set Initial Vertices}
+
+\nwenddocs{}\nwbegincode{45}\sublabel{NW2MZpIA-1iZHLf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-1iZHLf-1}}}\moddef{Debug: set initial vertices~{\nwtagstyle{}\subpageref{NW2MZpIA-1iZHLf-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("set bnew_v[0]=%d\\n", bnew_v[0]);
+  System.out.printf("set bnew_v[1]=%d\\n", bnew_v[1]);
+\}
+\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{46}\nwdocspar
+
+\subsection{Debug: Set Initial Labels}
+
+\nwenddocs{}\nwbegincode{47}\sublabel{NW2MZpIA-1sURxT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-1sURxT-1}}}\moddef{Debug: set initial labels~{\nwtagstyle{}\subpageref{NW2MZpIA-1sURxT-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("set bnew_l[0]=%d\\n", bnew_l[0]);
+  System.out.printf("set bnew_l[1]=%d\\n", bnew_l[1]);
+\}
+\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{48}\nwdocspar
+
+\subsection{Debug: Set Schedule Vertex and Label}
+
+\nwenddocs{}\nwbegincode{49}\sublabel{NW2MZpIA-1lkGjK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-1lkGjK-1}}}\moddef{Debug: set schedule vertex and label~{\nwtagstyle{}\subpageref{NW2MZpIA-1lkGjK-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("set bnew_v[%d]=%d\\n", (i + 2), bnew_v[(i + 2)]);
+  System.out.printf("set bnew_l[%d]=%d\\n", (i + 2), bnew_l[(i + 2)]);
+\}
+\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{50}\nwdocspar
+
+\subsection{Debug: Set Schedule Time}
+
+\nwenddocs{}\nwbegincode{51}\sublabel{NW2MZpIA-1EJRY4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-1EJRY4-1}}}\moddef{Debug: set schedule time~{\nwtagstyle{}\subpageref{NW2MZpIA-1EJRY4-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("set bnew_t[%d]=%d\\n", (i - 1), bnew_t[(i - 1)]);
+\}
+\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{52}\nwdocspar
+
+\subsection{Debug: Set Vehicle End Time}
+
+\nwenddocs{}\nwbegincode{53}\sublabel{NW2MZpIA-3ZHBo5-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-3ZHBo5-1}}}\moddef{Debug: set vehicle end time~{\nwtagstyle{}\subpageref{NW2MZpIA-3ZHBo5-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("set bnew_t[%d]=%d\\n", (p - 1), bnew_t[(p - 1)]);
+\}
+\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{54}\nwdocspar
+
+\subsection{Debug: Join Schedule Components}
+
+\nwenddocs{}\nwbegincode{55}\sublabel{NW2MZpIA-qM9ER-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-qM9ER-1}}}\moddef{Debug: join schedule components~{\nwtagstyle{}\subpageref{NW2MZpIA-qM9ER-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("set bnew[%d]=%d\\n", (i + 0), bnew[(i + 0)]);
+  System.out.printf("set bnew[%d]=%d\\n", (i + 1), bnew[(i + 1)]);
+  System.out.printf("set bnew[%d]=%d\\n", (i + 2), bnew[(i + 2)]);
+\}
+\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{56}\nwdocspar
+
+\subsection{Debug: Initialize Legs Container}
+
+\nwenddocs{}\nwbegincode{57}\sublabel{NW2MZpIA-3R3yVH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-3R3yVH-1}}}\moddef{Debug: initialize legs container~{\nwtagstyle{}\subpageref{NW2MZpIA-3R3yVH-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("init legs=\{ \}\\n");
+\}
+\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{58}\nwdocspar
+
+\subsection{Debug: Set First Leg}
+
+\nwenddocs{}\nwbegincode{59}\sublabel{NW2MZpIA-1F8aiy-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-1F8aiy-1}}}\moddef{Debug: set first leg~{\nwtagstyle{}\subpageref{NW2MZpIA-1F8aiy-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("set legs[0]=\{ %d, %d, ..., %d, %d  \}\\n",
+      legs[0][0], legs[0][1], legs[0][legs[0].length - 2], legs[0][legs[0].length - 1]);
+\}
+\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{60}\nwdocspar
+
+\subsection{Debug: Set Remaining Legs}
+
+\nwenddocs{}\nwbegincode{61}\sublabel{NW2MZpIA-Zbf0J-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-Zbf0J-1}}}\moddef{Debug: set remaining legs~{\nwtagstyle{}\subpageref{NW2MZpIA-Zbf0J-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("set legs[%d]=\{ %d, %d, ..., %d, %d  \}\\n", i,
+      legs[i][0], legs[i][1], legs[i][legs[i].length - 2], legs[i][legs[i].length - 1]);
+\}
+\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{62}\nwdocspar
+
+\subsection{Debug: Set Route Length and Time}
+
+\nwenddocs{}\nwbegincode{63}\sublabel{NW2MZpIA-3WOc2v-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-3WOc2v-1}}}\moddef{Debug: set route length and time~{\nwtagstyle{}\subpageref{NW2MZpIA-3WOc2v-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("set n=%d\\n", n);
+  System.out.printf("set t=%d\\n", t);
+\}
+\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{64}\nwdocspar
+
+\subsection{Debug: Join Route Components}
+
+\nwenddocs{}\nwbegincode{65}\sublabel{NW2MZpIA-J6KjD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-J6KjD-1}}}\moddef{Debug: join route components~{\nwtagstyle{}\subpageref{NW2MZpIA-J6KjD-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("set wnew[%d]=%d\\n", k, wnew[k]);
+\}
+\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{66}\nwdocspar
+
+\subsection{Debug: Submit}
+
+\nwenddocs{}\nwbegincode{67}\sublabel{NW2MZpIA-2e4BPs-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-2e4BPs-1}}}\moddef{Debug: submit~{\nwtagstyle{}\subpageref{NW2MZpIA-2e4BPs-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("submit:\\n");
+  System.out.printf("  server=%d\\n", sid);
+  System.out.printf("  wnew=\{ %d, %d, ..., %d, %d \}\\n",
+      wnew[0], wnew[1], wnew[wnew.length - 2], wnew[wnew.length - 1]);
+  System.out.printf("  bnew=\{ %d, %d, %d, ..., %d, %d, %d \}\\n",
+      bnew[0], bnew[1], bnew[2],
+      bnew[bnew.length - 3], bnew[bnew.length - 2], bnew[bnew.length - 1]);
+  System.out.printf("  radd=\{ %d \}\\n", r[0]);
+  System.out.printf("  rsub=\{ \}\\n");
+\}
+\nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{68}\nwdocspar
+
+\subsection{Debug: Put Server Location}
+
+\nwenddocs{}\nwbegincode{69}\sublabel{NW2MZpIA-hcsfv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-hcsfv-1}}}\moddef{Debug: put server location~{\nwtagstyle{}\subpageref{NW2MZpIA-hcsfv-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-fLFsG-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("put locations[], key=%d, val=[ %d, %d ]\\n", s[1], s[2]);
+\}
+\nwused{\\{NW2MZpIA-fLFsG-1}}\nwendcode{}\nwbegindocs{70}\nwdocspar
 
 \nwenddocs{}\nwfilename{src/client-greedy.nw}\nwbegindocs{0}\chapter{Client: GreedyInsertion}
+\label{client-greedy}
 
 \nwenddocs{}\nwbegincode{1}\sublabel{NWkwPRG-1Tuf6f-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWkwPRG-1Tuf6f-1}}}\moddef{GreedyInsertion.java~{\nwtagstyle{}\subpageref{NWkwPRG-1Tuf6f-1}}}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
 \LA{}GreedyInsertion.java preamble~{\nwtagstyle{}\subpageref{NWkwPRG-1neuor-1}}\RA{}
