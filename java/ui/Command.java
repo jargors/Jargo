@@ -171,7 +171,6 @@ public class Command {
                     tmpclass = Class.forName(arg6, true, tmploader);
                     tmpcstor = tmpclass.getDeclaredConstructor();
                     client = (Client) tmpcstor.newInstance();
-                    ctrl.forwardRefCommunicator(ctrl.getRefCommunicator());
 
                     // Load Traffic
                     System.out.printf("opt traffic '%s'\n", opt_x);
@@ -186,6 +185,7 @@ public class Command {
 
                     // Initialize Client
                     ctrl.setRefClient(client);
+                    ctrl.forwardRefCommunicator(ctrl.getRefCommunicator());
                     client.forwardRefCacheVertices(ctrl.retrieveRefCacheVertices());
                     client.forwardRefCacheEdges(ctrl.retrieveRefCacheEdges());
                     client.forwardRefCacheUsers(ctrl.retrieveRefCacheUsers());
