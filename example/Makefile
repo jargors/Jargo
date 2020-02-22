@@ -2,8 +2,12 @@
 # functions.
 
 # Here I am getting the names of all the *.java files to be tangled.
-JAVA1=$(addsuffix .java, $(subst src/client/,java/client/,$(basename $(wildcard src/client/*.nw))))
-JAVA2=$(addsuffix .java, $(subst src/traffic/,java/traffic/,$(basename $(wildcard src/traffic/*.nw))))
+JAVA1 = \
+	java/client/NearestNeighbor.java \
+	java/client/GreedyInsertion.java
+
+JAVA2 = \
+	java/traffic/Broadway.java
 
 # Here I am getting the names of all the *.class files to be compiled.
 CLASS1=$(addsuffix .class, $(subst java/client/,com/github/jargors/client/,$(basename $(wildcard java/client/*.java))))
@@ -74,18 +78,25 @@ src : _precheck $(JAVA1) $(JAVA2) doc/body.tex
 
 ################################################################################
 # Build Java files using 'notangle'.
-java/client/%.java : src/client/%.nw
-	@printf "tangle $@ from $<...\n"
-	@notangle -R$(subst java/client/,,$@) $< > $@
+$(JAVA1) : src/*.nw
+	@printf "tangle $@...\n"
+	@notangle -R$(subst java/client/,,$@) src/*.nw > $@
 
-java/traffic/%.java : src/traffic/%.nw
-	@printf "tangle $@ from $<...\n"
-	@notangle -R$(subst java/traffic/,,$@) $< > $@
+$(JAVA2) : src/*.nw
+	@printf "tangle $@...\n"
+	@notangle -R$(subst java/traffic/,,$@) src/*.nw > $@
 
 # Build doc/body.tex.
-doc/body.tex : src/*/*.nw
+TEXSRCS= \
+	src/client-overview.nw \
+	src/client-nearest.nw \
+	src/client-greedy.nw \
+	src/traffic-overview.nw \
+	src/traffic-broadway.nw
+
+doc/body.tex : src/*.nw
 	@printf "weave $@...\n"
-	@noweave -delay -index src/*/*.nw > doc/body.tex
+	@noweave -delay -index $(TEXSRCS) > doc/body.tex
 
 # This target describes how to compile the client Java sources in java/ into bytecode.
 com/github/jargors/client/%.class : java/client/%.java

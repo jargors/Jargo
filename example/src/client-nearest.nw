@@ -1,12 +1,11 @@
 \chapter{Client: NearestNeighbor}
-\label{NearestNeighbor}
+\label{client-nearest}
 
 <<NearestNeighbor.java>>=
 <<NearestNeighbor.java preamble>>
 public class NearestNeighbor extends Client {
-  <<Member variables>>
-  protected <<Override handleRequest(1)>>
-  protected <<Override handleServerLocation(1)>>
+  <<[[NearestNeighbor]] member variables>>
+  <<[[NearestNeighbor]] methods>>
 }
 @
 
@@ -15,6 +14,9 @@ public class NearestNeighbor extends Client {
 
 <<NearestNeighbor.java preamble>>=
 package com.github.jargors.client;
+@
+
+<<NearestNeighbor.java preamble>>=
 import com.github.jargors.sim.*;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -23,15 +25,15 @@ import java.util.concurrent.ConcurrentHashMap;
 @
 
 \section{Member Variables}
-\label{NearestNeighor: member-variables}
+\label{client-nearest: member-variables}
 
-<<Member variables>>=
+<<[[NearestNeighbor]] member variables>>=
 final int MAX_DELTA = 300;  // seconds from last vehicle location update
 final int MAX_RANGE = 600;  // meters from last vehicle position
 final int MAX_EVENT = 8;    // remaining pick-up and drop-off events
 final ConcurrentHashMap<Integer, int[]> locations =
   new ConcurrentHashMap<Integer, int[]>();
-@ %def MAX_RANGE MAX_DELTA MAX_EVENT locations
+@
 
 \section{Chunks}
 \label{NearestNeighbor: chunks}
@@ -433,16 +435,16 @@ if (DEBUG) {
 @
 
 \section{Methods}
-\label{NearestNeighbor: methods}
+\label{client-nearest: methods}
 
-\subsection{Override \texttt{handleRequest}(1)}
+\subsection{\texttt{handleRequest}(1)}
 
 The entire method is wrapped in try/catch because some method calls can throw
 exceptions. If an exception is caught, it gets bubbled up to Jargo via
 [[ClientException]]. This exception does not end the simulation, but
 [[ClientFatalException]] will.
 
-<<Override handleRequest(1)>>=
+<<NearestNeighbor: handleRequest(1)>>=
 void handleRequest(int[] r) throws ClientException, ClientFatalException {
   <<Debug: handle request>>
   try {
@@ -455,14 +457,14 @@ void handleRequest(int[] r) throws ClientException, ClientFatalException {
     throw new ClientException(e);
   }
 }
-@ %def handleRequest
+@
 
-\subsection{Override \texttt{handleServerLocation}(1)}
+\subsection{\texttt{handleServerLocation}(1)}
 
-<<Override handleServerLocation(1)>>=
+<<NearestNeighbor: handleServerLocation(1)>>=
 void handleServerLocation(int[] s) {
   this.locations.put(s[0], new int[] { s[1], s[2] });
   <<Debug: put server location>>
 }
-@ %def handleServerLocation
+@
 

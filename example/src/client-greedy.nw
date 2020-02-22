@@ -3,11 +3,8 @@
 <<GreedyInsertion.java>>=
 <<GreedyInsertion.java preamble>>
 public class GreedyInsertion extends Client {
-  <<Member variables>>
-  protected <<Override handleRequest(1)>>
-  protected <<Override endCollectServerLocations(1)>>
-  protected <<Override end(0)>>
-  private <<computeCost(6)>>
+  <<[[GreedyInsertion]] member variables>>
+  <<[[GreedyInsertion]] methods>>
 }
 @
 
@@ -19,12 +16,12 @@ import java.sql.SQLException;
 @
 
 \section{Member Variables}
-<<Member variables>>=
+<<[[GreedyInsertion]] member variables>>=
 final int PICKUP_THRESHOLD = 600;  // meters
 final int MAX_SCHEDULE_LENGTH = 8;
 int[] locations = new int[] { };
 int count_rejections = 0;
-@ %def PICKUP_THRESHOLD MAX_SCHEDULE_LENGTH locations count_rejections
+@
 
 \section{Chunks}
 
@@ -47,7 +44,7 @@ final int[] C = tools.filterByHaversine(r[4], L, PICKUP_THRESHOLD);
 if (DEBUG) {
   tools.Print("Initialize T="+T+"; C.length="+C.length);
 }
-@ %def opt_k opt_c opt_b opt_cache_t opt_cache_v T C
+@
 
 \subsection{Initialize server vars}
 <<Initialize server vars>>=
@@ -71,7 +68,7 @@ final int   z = communicator.queryServerDistanceRemaining(sid, T)[0];
 if (DEBUG) {
   tools.Print("Initialize y.length="+y.length+"; n="+n+"; z="+z);
 }
-@ %def sid st sv s_k s_c s_b s_w y n z
+@
 
 \subsection{Case 1: server is idle or heading towards own destination}
 <<Case 1: server is idle or heading towards own destination>>=
@@ -378,8 +375,8 @@ if (d < u[2] || d > u[3]) {
 
 \section{Methods}
 
-\subsection{Override \texttt{handleRequest}(1)}
-<<Override handleRequest(1)>>=
+\subsection{GreedyInsertion: \texttt{handleRequest}(1)}
+<<GreedyInsertion: handleRequest(1)>>=
 void handleRequest(int[] r) throws ClientException, ClientFatalException {
   try {
     <<Initialize global vars>>
@@ -401,24 +398,24 @@ void handleRequest(int[] r) throws ClientException, ClientFatalException {
     throw new ClientException(e);
   }
 }
-@ %def handleRequest
+@
 
-\subsection{Override \texttt{endCollectServerLocations}(1)}
-<<Override endCollectServerLocations(1)>>=
+\subsection{GreedyInsertion: \texttt{endCollectServerLocations}(1)}
+<<GreedyInsertion: endCollectServerLocations(1)>>=
 void endCollectServerLocations(int[] src) {
   locations = src.clone();
 }
-@ %def endCollectServerLocations
+@
 
-\subsection{Override \texttt{end}(0)}
-<<Override end(0)>>=
+\subsection{GreedyInsertion:\texttt{end}(0)}
+<<GreedyInsertion: end(0)>>=
 void end() {
   tools.Print("Count rejections: "+count_rejections);
 }
-@ %def end
+@
 
-\subsection{\texttt{computeCost}(6)}
-<<computeCost(6)>>=
+\subsection{GreedyInsertion: \texttt{computeCost}(6)}
+<<GreedyInsertion: computeCost(6)>>=
 int computeCost(int[] b, int[][] cache_t, int[][] cache_v, int s_c, int z, int d_init)
 throws ClientException, ClientFatalException {
   try {
@@ -501,6 +498,4 @@ throws ClientException, ClientFatalException {
   }
 }
 @
-
-\appendix
 
