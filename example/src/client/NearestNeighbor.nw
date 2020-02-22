@@ -1,0 +1,468 @@
+\chapter{Client: NearestNeighbor}
+\label{NearestNeighbor}
+
+<<NearestNeighbor.java>>=
+<<NearestNeighbor.java preamble>>
+public class NearestNeighbor extends Client {
+  <<Member variables>>
+  protected <<Override handleRequest(1)>>
+  protected <<Override handleServerLocation(1)>>
+}
+@
+
+\section{Preamble}
+\label{NearestNeighbor: preamble}
+
+<<NearestNeighbor.java preamble>>=
+package com.github.jargors.client;
+import com.github.jargors.sim.*;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
+@
+
+\section{Member Variables}
+\label{NearestNeighor: member-variables}
+
+<<Member variables>>=
+final int MAX_DELTA = 300;  // seconds from last vehicle location update
+final int MAX_RANGE = 600;  // meters from last vehicle position
+final int MAX_EVENT = 8;    // remaining pick-up and drop-off events
+final ConcurrentHashMap<Integer, int[]> locations =
+  new ConcurrentHashMap<Integer, int[]>();
+@ %def MAX_RANGE MAX_DELTA MAX_EVENT locations
+
+\section{Chunks}
+\label{NearestNeighbor: chunks}
+
+\subsection{Get Current Time}
+
+<<Get current time>>=
+final int now = this.communicator.retrieveClock();
+<<Debug: get current time>>
+@
+
+\subsection{Initialize Candidates Container}
+
+Each request is associated with a set of candidate vehicles. We will store
+these candidates in a hash map called [[candidates]]. The key to the map will
+be the vehicle identifier and the values will be distance to last-known
+locations.
+
+<<Initialize candidates container>>=
+final Map<Integer, Integer> candidates = new HashMap<Integer, Integer>();
+<<Debug: initialize candidates container>>
+@
+
+\subsection{Apply Delta, Range, and Event Filters}
+
+We get the candidates by filtering the set of all vehicles based on last-update
+time, range, and schedule length.
+
+<<Apply delta, range, and event filters>>=
+for (final Integer sid : locations.keySet()) {
+  final Integer t = locations.get(sid)[0];
+  final Integer v = locations.get(sid)[1];
+
+  final boolean in_delta = (t >= now - MAX_DELTA);
+  <<Debug: delta filter>>
+  if (!in_delta)
+    continue;
+
+  final int range = this.tools.computeHaversine(v, r[4]);
+  final boolean in_range = (range <= MAX_RANGE);
+  <<Debug: range filter>>
+  if (!in_range)
+    continue;
+
+  final int event =
+    this.communicator.queryServerScheduleRemaining(sid, now).length/4;
+  final boolean in_event = (event <= MAX_EVENT);
+  <<Debug: event filter>>
+  if (!in_event)
+    continue;
+
+  candidates.put(sid, range);
+  <<Debug: put candidate>>
+}
+@
+
+\subsection{Find Minimum-Range Candidate}
+
+Iterate over the candidates to find the minimum-range candidate.
+
+<<Find minimum-range candidate>>=
+Entry<Integer, Integer> min = null;
+for (final Entry<Integer, Integer> entry : candidates.entrySet()) {
+  if (min == null || min.getValue() > entry.getValue()) {
+    min = entry;
+    <<Debug: find minimum-range candidate>>
+  }
+}
+@
+
+\subsection{Submit Minimum-Range Candidate}
+
+To submit the minimum-range candidate as the assiged vehicle, compute a new
+schedule for the vehicle that includes the request's pick-up and drop-off
+locations, and also compute a new route that passes through these locations.
+For this tutorial, we will use a simple ``push'' insertion strategy to compute
+the new schedule. In this strategy, the request's pick-up and drop-off
+locations are inserted into the front of the vehicle's existing schedule. For
+computing the new route, we will calculate the shortest-path through the
+schedule locations.
+
+<<Submit minimum-range candidate>>=
+if (min != null) {
+  // Get the old schedule
+  final int sid = min.getKey();
+  final int[] bold = this.communicator.queryServerScheduleRemaining(sid, now);
+  <<Debug: get old schedule>>
+
+  // m=number of events; p=new number of events
+  final int m = bold.length/4;
+  final int p = m + 2;
+  <<Debug: get number of events>>
+
+  // bnew contains the new schedule
+  final int[] bnew = new int[3*p];
+  final int[] bnew_t = new int[p];
+  final int[] bnew_v = new int[p];
+  final int[] bnew_l = new int[p];
+  <<Debug: initialize new schedule>>
+
+  // set the first, second vertices
+  bnew_v[0] = r[4];
+  bnew_v[1] = r[5];
+  <<Debug: set initial vertices>>
+
+  // and label them
+  bnew_l[0] = r[0];
+  bnew_l[1] = r[0];
+  <<Debug: set initial labels>>
+
+  // set the remaining vertices and labels
+  for (int i = 0; i < m; i++) {
+    final int bv = bold[(i + 1)];
+    final int ls = bold[(i + 2)];
+    final int lr = bold[(i + 3)];
+    bnew_v[(i + 2)] = bv;
+    bnew_l[(i + 2)] = (ls == 0 ? lr : ls);
+    <<Debug: set schedule vertex and label>>
+  }
+
+  // to get the times and route, create a 'legs' container
+  final int[][] legs = new int[p][];
+  int[] leg = null;
+  <<Debug: initialize legs container>>
+
+  // get the first leg, from last-known location to request origin
+  leg = this.tools.computeRoute(locations.get(sid)[1], r[4], now);
+  legs[0] = leg;
+  <<Debug: set first leg>>
+
+  // get the current route length and time after first leg
+  int n = leg.length;
+  int t = leg[n - 2];
+  <<Debug: set route length and time>>
+
+  // get the remaining legs while updating the route length n
+  for (int i = 1; i < p; i++) {
+    final int u = bnew_v[(i - 1)];
+    final int v = bnew_v[(i - 0)];
+    leg = this.tools.computeRoute(u, v, t);
+    legs[i] = leg;
+    <<Debug: set remaining legs>>
+
+    n += leg.length;
+    t = leg[leg.length - 2];
+    <<Debug: set route length and time>>
+  }
+
+  // set the times in bnew
+  for (int i = 1; i < legs.length; i++) {
+    bnew_t[(i - 1)] = legs[i][0];
+    <<Debug: set schedule time>>
+  }
+
+  // set the vehicle end time
+  bnew_t[(p - 1)] = t;
+  <<Debug: set vehicle end time>>
+
+  // join the bnew components
+  for (int i = 0; i < p; i++) {
+    bnew[(i + 0)] = bnew_t[i];
+    bnew[(i + 1)] = bnew_v[i];
+    bnew[(i + 2)] = bnew_l[i];
+    <<Debug: join schedule components>>
+  }
+
+  // join the legs into the new route
+  final int[] wnew = new int[n];
+  int k = 0;
+  for (int i = 0; i < legs.length; i++) {
+    for (int j = 0; j < legs[i].length; j++) {
+      wnew[k] = legs[i][j];
+      <<Debug: join route components>>
+      k++;
+    }
+  }
+
+  // submit
+  this.communicator.updateServerService(sid, wnew, bnew,
+      new int[] { r[0] }, new int[] { });
+  <<Debug: submit>>
+}
+@
+
+\subsection{Debug: Handle Request}
+
+<<Debug: handle request>>=
+if (DEBUG) {
+  System.out.printf("got request={ id=%d, q=%d, e=%d, l=%d, o=%d, d=%d, b=%d }\n",
+      r[0], r[1], r[2], r[3], r[4], r[5], r[6]);
+}
+@
+
+\subsection{Debug: Get Current Time}
+
+<<Debug: get current time>>=
+if (DEBUG) {
+  System.out.printf("got now=%d\n", now);
+}
+@
+
+\subsection{Debug: Initialize Candidates Container}
+
+<<Debug: initialize candidates container>>=
+if (DEBUG) {
+  System.out.printf("init candidates[]={ }\n");
+}
+@
+
+\subsection{Debug: Delta Filter}
+
+<<Debug: delta filter>>=
+if (DEBUG) {
+  System.out.printf("got %d in_delta=%s\n", sid, (in_delta ? "true" : "false"));
+}
+@
+
+\subsection{Debug: Range Filter}
+
+<<Debug: range filter>>=
+if (DEBUG) {
+  System.out.printf("got %d in_range=%s\n", sid, (in_range ? "true" : "false"));
+}
+@
+
+\subsection{Debug: Event Filter}
+
+<<Debug: event filter>>=
+if (DEBUG) {
+  System.out.printf("got %d in_event=%s\n", sid, (in_event ? "true" : "false"));
+}
+@
+
+\subsection{Debug: Put Candidate}
+
+<<Debug: put candidate>>=
+if (DEBUG) {
+  System.out.printf("put candidates[], key=%d, val=%d\n", sid, range);
+}
+@
+
+\subsection{Debug: Find Minimum-Range Candidate}
+
+<<Debug: find minimum-range candidate>>=
+if (DEBUG) {
+  System.out.printf("set min={ %d, %d }\n", min.getKey(), min.getValue());
+}
+@
+
+\subsection{Debug: Get Old Schedule}
+
+<<Debug: get old schedule>>=
+if (DEBUG) {
+  System.out.printf("got bold: \n");
+  for (int i : bold) {
+    System.out.printf("  %d\n", i);
+  }
+}
+@
+
+\subsection{Debug: Get Number of Events}
+
+<<Debug: get number of events>>=
+if (DEBUG) {
+  System.out.printf("got m=%d\n", m);
+  System.out.printf("got p=%d\n", p);
+}
+@
+
+\subsection{Debug: Initialize New Schedule}
+
+<<Debug: initialize new schedule>>=
+if (DEBUG) {
+  System.out.printf("init bnew={ }\n");
+  System.out.printf("init bnew_t={ }\n");
+  System.out.printf("init bnew_v={ }\n");
+  System.out.printf("init bnew_l={ }\n");
+}
+@
+
+\subsection{Debug: Set Initial Vertices}
+
+<<Debug: set initial vertices>>=
+if (DEBUG) {
+  System.out.printf("set bnew_v[0]=%d\n", bnew_v[0]);
+  System.out.printf("set bnew_v[1]=%d\n", bnew_v[1]);
+}
+@
+
+\subsection{Debug: Set Initial Labels}
+
+<<Debug: set initial labels>>=
+if (DEBUG) {
+  System.out.printf("set bnew_l[0]=%d\n", bnew_l[0]);
+  System.out.printf("set bnew_l[1]=%d\n", bnew_l[1]);
+}
+@
+
+\subsection{Debug: Set Schedule Vertex and Label}
+
+<<Debug: set schedule vertex and label>>=
+if (DEBUG) {
+  System.out.printf("set bnew_v[%d]=%d\n", (i + 2), bnew_v[(i + 2)]);
+  System.out.printf("set bnew_l[%d]=%d\n", (i + 2), bnew_l[(i + 2)]);
+}
+@
+
+\subsection{Debug: Set Schedule Time}
+
+<<Debug: set schedule time>>=
+if (DEBUG) {
+  System.out.printf("set bnew_t[%d]=%d\n", (i - 1), bnew_t[(i - 1)]);
+}
+@
+
+\subsection{Debug: Set Vehicle End Time}
+
+<<Debug: set vehicle end time>>=
+if (DEBUG) {
+  System.out.printf("set bnew_t[%d]=%d\n", (p - 1), bnew_t[(p - 1)]);
+}
+@
+
+\subsection{Debug: Join Schedule Components}
+
+<<Debug: join schedule components>>=
+if (DEBUG) {
+  System.out.printf("set bnew[%d]=%d\n", (i + 0), bnew[(i + 0)]);
+  System.out.printf("set bnew[%d]=%d\n", (i + 1), bnew[(i + 1)]);
+  System.out.printf("set bnew[%d]=%d\n", (i + 2), bnew[(i + 2)]);
+}
+@
+
+\subsection{Debug: Initialize Legs Container}
+
+<<Debug: initialize legs container>>=
+if (DEBUG) {
+  System.out.printf("init legs={ }\n");
+}
+@
+
+\subsection{Debug: Set First Leg}
+
+<<Debug: set first leg>>=
+if (DEBUG) {
+  System.out.printf("set legs[0]={ %d, %d, ..., %d, %d  }\n",
+      legs[0][0], legs[0][1], legs[0][legs[0].length - 2], legs[0][legs[0].length - 1]);
+}
+@
+
+\subsection{Debug: Set Remaining Legs}
+
+<<Debug: set remaining legs>>=
+if (DEBUG) {
+  System.out.printf("set legs[%d]={ %d, %d, ..., %d, %d  }\n", i,
+      legs[i][0], legs[i][1], legs[i][legs[i].length - 2], legs[i][legs[i].length - 1]);
+}
+@
+
+\subsection{Debug: Set Route Length and Time}
+
+<<Debug: set route length and time>>=
+if (DEBUG) {
+  System.out.printf("set n=%d\n", n);
+  System.out.printf("set t=%d\n", t);
+}
+@
+
+\subsection{Debug: Join Route Components}
+
+<<Debug: join route components>>=
+if (DEBUG) {
+  System.out.printf("set wnew[%d]=%d\n", k, wnew[k]);
+}
+@
+
+\subsection{Debug: Submit}
+
+<<Debug: submit>>=
+if (DEBUG) {
+  System.out.printf("submit:\n");
+  System.out.printf("  server=%d\n", sid);
+  System.out.printf("  wnew={ %d, %d, ..., %d, %d }\n",
+      wnew[0], wnew[1], wnew[wnew.length - 2], wnew[wnew.length - 1]);
+  System.out.printf("  bnew={ %d, %d, %d, ..., %d, %d, %d }\n",
+      bnew[0], bnew[1], bnew[2],
+      bnew[bnew.length - 3], bnew[bnew.length - 2], bnew[bnew.length - 1]);
+  System.out.printf("  radd={ %d }\n", r[0]);
+  System.out.printf("  rsub={ }\n");
+}
+@
+
+\subsection{Debug: Put Server Location}
+
+<<Debug: put server location>>=
+if (DEBUG) {
+  System.out.printf("put locations[], key=%d, val=[ %d, %d ]\n", s[1], s[2]);
+}
+@
+
+\section{Methods}
+\label{NearestNeighbor: methods}
+
+\subsection{Override \texttt{handleRequest}(1)}
+
+The entire method is wrapped in try/catch because some method calls can throw
+exceptions. If an exception is caught, it gets bubbled up to Jargo via
+[[ClientException]]. This exception does not end the simulation, but
+[[ClientFatalException]] will.
+
+<<Override handleRequest(1)>>=
+void handleRequest(int[] r) throws ClientException, ClientFatalException {
+  <<Debug: handle request>>
+  try {
+    <<Get current time>>
+    <<Initialize candidates container>>
+    <<Apply delta, range, and event filters>>
+    <<Find minimum-range candidate>>
+    <<Submit minimum-range candidate>>
+  } catch (Exception e) {
+    throw new ClientException(e);
+  }
+}
+@ %def handleRequest
+
+\subsection{Override \texttt{handleServerLocation}(1)}
+
+<<Override handleServerLocation(1)>>=
+void handleServerLocation(int[] s) {
+  this.locations.put(s[0], new int[] { s[1], s[2] });
+  <<Debug: put server location>>
+}
+@ %def handleServerLocation
+

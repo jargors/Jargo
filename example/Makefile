@@ -74,13 +74,13 @@ src : _precheck $(JAVA1) $(JAVA2) doc/body.tex
 
 ################################################################################
 # Build Java files using 'notangle'.
-$(JAVA1): src/client/*.nw
-	@printf "tangle $@...\n"
-	@notangle -R$(subst java/client/,,$@) src/client/*.nw > $@
+java/client/%.java : src/client/%.nw
+	@printf "tangle $@ from $<...\n"
+	@notangle -R$(subst java/client/,,$@) $< > $@
 
-$(JAVA2): src/traffic/*.nw
-	@printf "tangle $@...\n"
-	@notangle -R$(subst java/traffic/,,$@) src/traffic/*.nw > $@
+java/traffic/%.java : src/traffic/%.nw
+	@printf "tangle $@ from $<...\n"
+	@notangle -R$(subst java/traffic/,,$@) $< > $@
 
 # Build doc/body.tex.
 doc/body.tex : src/*/*.nw
