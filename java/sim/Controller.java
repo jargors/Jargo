@@ -160,6 +160,11 @@ public class Controller {
           this.statControllerClock, e.toString());
       e.printStackTrace();
       System.exit(1);
+    } catch (Exception e) {
+      System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a unspecified Exception: %s\n",
+          this.statControllerClock, e.toString());
+      e.printStackTrace();
+      System.exit(1);
     }
   };
   private Runnable ServerLoop = () -> {
@@ -184,6 +189,11 @@ public class Controller {
         e.printStackTrace();
         System.exit(1);
       }
+    } catch (Exception e) {
+      System.err.printf("[t=%d] Controller.ServerLoop caught a unspecified Exception: %s\n",
+          this.statControllerClock, e.toString());
+      e.printStackTrace();
+      System.exit(1);
     }
   };
   private int    statControllerClock;

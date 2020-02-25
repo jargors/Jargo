@@ -340,6 +340,17 @@ if (min != null) \{
 
   // get the first leg, from last-known location to request origin
   leg = this.tools.computeRoute(locations.get(sid)[1], r[4], now);
+
+  // The first waypoint MUST be the server's last-known location. The
+  // computeRoute function uses the third parameter as the time of the
+  // first waypoint in the computed route. Using 'now' means that the
+  // route begins from the current time. But the server's last-known location
+  // is likely not taken at the current time. So the time of the first waypoint
+  // in the computed route is manually set to the time of the last-known
+  // location.
+  leg[0] = locations.get(sid)[0];
+
+  // store the first leg
   legs[0] = leg;
   \LA{}Debug: set first leg~{\nwtagstyle{}\subpageref{NW2MZpIA-1F8aiy-1}}\RA{}
 
@@ -348,7 +359,7 @@ if (min != null) \{
   int t = leg[n - 2];
   \LA{}Debug: set route length and time~{\nwtagstyle{}\subpageref{NW2MZpIA-3WOc2v-1}}\RA{}
 
-  // get the remaining legs while updating the route length n
+  // get the remaining legs while updating the route length and time
   for (int i = 1; i < p; i++) \{
     final int u = bnew_v[(i - 1)];
     final int v = bnew_v[(i - 0)];
@@ -356,7 +367,7 @@ if (min != null) \{
     legs[i] = leg;
     \LA{}Debug: set remaining legs~{\nwtagstyle{}\subpageref{NW2MZpIA-Zbf0J-1}}\RA{}
 
-    n += leg.length;
+    n += (leg.length - 2);  // subtract 2 because endpoint
     t = leg[leg.length - 2];
     \LA{}Debug: set route length and time~{\nwtagstyle{}\subpageref{NW2MZpIA-3WOc2v-1}}\RA{}
   \}
@@ -373,9 +384,9 @@ if (min != null) \{
 
   // join the bnew components
   for (int i = 0; i < p; i++) \{
-    bnew[(i + 0)] = bnew_t[i];
-    bnew[(i + 1)] = bnew_v[i];
-    bnew[(i + 2)] = bnew_l[i];
+    bnew[(3*i + 0)] = bnew_t[i];
+    bnew[(3*i + 1)] = bnew_v[i];
+    bnew[(3*i + 2)] = bnew_l[i];
     \LA{}Debug: join schedule components~{\nwtagstyle{}\subpageref{NW2MZpIA-qM9ER-1}}\RA{}
   \}
 
@@ -383,7 +394,10 @@ if (min != null) \{
   final int[] wnew = new int[n];
   int k = 0;
   for (int i = 0; i < legs.length; i++) \{
-    for (int j = 0; j < legs[i].length; j++) \{
+    // skip the last waypoint, unless this is the last leg
+    // (prevents recording the waypoint twice)
+    int rend = (legs[i].length - (i == (legs.length - 1) ? 0 : 2));
+    for (int j = 0; j < rend; j++) \{
       wnew[k] = legs[i][j];
       \LA{}Debug: join route components~{\nwtagstyle{}\subpageref{NW2MZpIA-J6KjD-1}}\RA{}
       k++;
@@ -512,8 +526,9 @@ if (DEBUG) \{
 \nwenddocs{}\nwbegincode{39}\sublabel{NW2MZpIA-3sG0PQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-3sG0PQ-1}}}\moddef{Debug: get old schedule~{\nwtagstyle{}\subpageref{NW2MZpIA-3sG0PQ-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("got bold: \\n");
-  for (int i : bold) \{
-    System.out.printf("  %d\\n", i);
+  for (int i = 0; i < (bold.length - 3); i+=4) \{
+    System.out.printf("  \{ t=%d, v=%d, ls=%d, lr=%d \}\\n",
+        bold[i], bold[i+1], bold[i+2], bold[i+3]);
   \}
 \}
 \nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{40}\nwdocspar
@@ -585,9 +600,8 @@ if (DEBUG) \{
 
 \nwenddocs{}\nwbegincode{55}\sublabel{NW2MZpIA-qM9ER-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-qM9ER-1}}}\moddef{Debug: join schedule components~{\nwtagstyle{}\subpageref{NW2MZpIA-qM9ER-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-3sZXk2-1}}\nwenddeflinemarkup
 if (DEBUG) \{
-  System.out.printf("set bnew[%d]=%d\\n", (i + 0), bnew[(i + 0)]);
-  System.out.printf("set bnew[%d]=%d\\n", (i + 1), bnew[(i + 1)]);
-  System.out.printf("set bnew[%d]=%d\\n", (i + 2), bnew[(i + 2)]);
+  System.out.printf("set bnew[%d..%d]=\{ t=%d, v=%d, l=%d \}\\n",
+      (3*i), (3*i + 2), bnew[(3*i + 0)], bnew[(3*i + 1)], bnew[(3*i + 2)]);
 \}
 \nwused{\\{NW2MZpIA-3sZXk2-1}}\nwendcode{}\nwbegindocs{56}\nwdocspar
 
@@ -654,7 +668,7 @@ if (DEBUG) \{
 
 \nwenddocs{}\nwbegincode{69}\sublabel{NW2MZpIA-hcsfv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2MZpIA-hcsfv-1}}}\moddef{Debug: put server location~{\nwtagstyle{}\subpageref{NW2MZpIA-hcsfv-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2MZpIA-fLFsG-1}}\nwenddeflinemarkup
 if (DEBUG) \{
-  System.out.printf("put locations[], key=%d, val=[ %d, %d ]\\n", s[1], s[2]);
+  System.out.printf("put locations[%d]=[ %d, %d ]\\n", s[0], s[1], s[2]);
 \}
 \nwused{\\{NW2MZpIA-fLFsG-1}}\nwendcode{}\nwbegindocs{70}\nwdocspar
 

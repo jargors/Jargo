@@ -6118,6 +6118,11 @@ int[] \nwlinkedidentc{DBQueryServerTimeOfDeparture}{NW1Dx1yV-3pEbv2-1}(final int
 \nwixlogsorted{c}{{Create View t\_s\_depart statement (Eq.~\ref{eq:departure-time})}{NW1ryIo2-2riY0r-1}{\nwixd{NW1ryIo2-2riY0r-1}\nwixu{NW1ODIS0-RmKLy-1}}}%
 \nwixlogsorted{c}{{Create View violations\_t\_r}{NW1ryIo2-3kJouo-1}{\nwixd{NW1ryIo2-3kJouo-1}\nwixu{NW1ODIS0-RmKLy-1}}}%
 \nwixlogsorted{c}{{Create View violations\_t\_s}{NW1ryIo2-13PgQs-1}{\nwixd{NW1ryIo2-13PgQs-1}\nwixu{NW1ODIS0-RmKLy-1}}}%
+\nwixlogsorted{c}{{Debug: DBUpdateServerService parameters}{NW3mnZLd-3aElWm-1}{\nwixu{NW3mnZLd-1v536H-1}\nwixd{NW3mnZLd-3aElWm-1}}}%
+\nwixlogsorted{c}{{Debug: EdgeNotFoundException}{NW3mnZLd-1AKUgT-1}{\nwixu{NW3mnZLd-3NpaSw-1}\nwixd{NW3mnZLd-1AKUgT-1}}}%
+\nwixlogsorted{c}{{Debug: endCollectServerLocations parameters}{NW3VOC6-bPNU8-1}{\nwixu{NW3VOC6-1PUXQj-1}\nwixd{NW3VOC6-bPNU8-1}}}%
+\nwixlogsorted{c}{{Debug: RouteIllegalOverwriteException, missing branch point}{NW3mnZLd-3OSl0k-1}{\nwixu{NW3mnZLd-2QlrHv-1}\nwixd{NW3mnZLd-3OSl0k-1}}}%
+\nwixlogsorted{c}{{Debug: RouteIllegalOverwriteException, overwrite occurred}{NW3mnZLd-cjS9g-1}{\nwixu{NW3mnZLd-2QlrHv-1}\nwixd{NW3mnZLd-cjS9g-1}}}%
 \nwixlogsorted{c}{{Definition of clock loop}{NW3hMOhb-2lFPcZ-1}{\nwixu{NW3hMOhb-2e0Sfa-1}\nwixd{NW3hMOhb-2lFPcZ-1}}}%
 \nwixlogsorted{c}{{Definition of request collection loop}{NW3hMOhb-10L3rI-1}{\nwixu{NW3hMOhb-2e0Sfa-1}\nwixd{NW3hMOhb-10L3rI-1}}}%
 \nwixlogsorted{c}{{Definition of request handling loop}{NW3hMOhb-183plv-1}{\nwixu{NW3hMOhb-2e0Sfa-1}\nwixd{NW3hMOhb-183plv-1}}}%
@@ -9010,6 +9015,7 @@ for (int i = 0; i < (route.length - 3); i += 2) \{
   final int t2 = route[(i + 2)];
   final int v2 = route[(i + 3)];
   if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) \{
+    \LA{}Debug: EdgeNotFoundException~{\nwtagstyle{}\subpageref{NW3mnZLd-1AKUgT-1}}\RA{}
     throw new \nwlinkedidentc{EdgeNotFoundException}{NW1ODIS0-4YUrEC-1}("Edge ("+v1+", "+v2+") not found.");
   \}
   final int dd = this.lu_edges.get(v1).get(v2)[0];
@@ -9490,10 +9496,7 @@ throws \nwlinkedidentc{DuplicateUserException}{NW1ODIS0-rz4lR-1}, \nwlinkedident
 void \nwlinkedidentc{DBUpdateServerService}{NW3mnZLd-1v536H-1}(final int sid, final int[] route, final int[] sched,
     final int[] ridpos, final int[] ridneg)
 throws \nwlinkedidentc{UserNotFoundException}{NW1ODIS0-15irq2-1}, \nwlinkedidentc{EdgeNotFoundException}{NW1ODIS0-4YUrEC-1}, SQLException \{
-  if (DEBUG) \{
-    System.out.printf("\nwlinkedidentc{DBUpdateServerService}{NW3mnZLd-1v536H-1}(5), arg1=%d, arg2=[arr], arg3=[arr], arg4=[arr], arg5=[arr]\\n",
-        sid);
-  \}
+  \LA{}Debug: DBUpdateServerService parameters~{\nwtagstyle{}\subpageref{NW3mnZLd-3aElWm-1}}\RA{}
   if (!this.lu_users.containsKey(sid)) \{
     throw new \nwlinkedidentc{UserNotFoundException}{NW1ODIS0-15irq2-1}("User "+sid+" not found.");
   \}
@@ -9585,14 +9588,14 @@ throws \nwlinkedidentc{RouteIllegalOverwriteException}{NW1ODIS0-3HHaYS-1}, \nwli
     i += 2;
   \}
   if (i == current.length) \{
-    // branch point not found
-    throw new \nwlinkedidentc{RouteIllegalOverwriteException}{NW1ODIS0-3HHaYS-1}();
+    \LA{}Debug: RouteIllegalOverwriteException, missing branch point~{\nwtagstyle{}\subpageref{NW3mnZLd-3OSl0k-1}}\RA{}
+    throw new \nwlinkedidentc{RouteIllegalOverwriteException}{NW1ODIS0-3HHaYS-1}("Missing branch point!");
   \}
   int j = 0;
   while (i < current.length && (current[i] <= t_next && current[(i + 1)] != 0)) \{
     if (current[i] != route[j] || current[(i + 1)] != route[(j + 1)]) \{
-      // overwrite history occurred
-      throw new \nwlinkedidentc{RouteIllegalOverwriteException}{NW1ODIS0-3HHaYS-1}();
+      \LA{}Debug: RouteIllegalOverwriteException, overwrite occurred~{\nwtagstyle{}\subpageref{NW3mnZLd-cjS9g-1}}\RA{}
+      throw new \nwlinkedidentc{RouteIllegalOverwriteException}{NW1ODIS0-3HHaYS-1}("Overwrite occurred!");
     \}
     i += 2;
     j += 2;
@@ -9604,6 +9607,61 @@ throws \nwlinkedidentc{RouteIllegalOverwriteException}{NW1ODIS0-3HHaYS-1}, \nwli
 \}
 \nwindexdefn{\nwixident{updateServerAddToSchedule}}{updateServerAddToSchedule}{NW3mnZLd-2QlrHv-1}\eatline
 \nwused{\\{NW4QM9HE-2Rlctf-2}}\nwidentdefs{\\{{\nwixident{updateServerAddToSchedule}}{updateServerAddToSchedule}}}\nwidentuses{\\{{\nwixident{DBQueryServerRoute}}{DBQueryServerRoute}}\\{{\nwixident{DBUpdateServerService}}{DBUpdateServerService}}\\{{\nwixident{EdgeNotFoundException}}{EdgeNotFoundException}}\\{{\nwixident{retrieveClock}}{retrieveClock}}\\{{\nwixident{RouteIllegalOverwriteException}}{RouteIllegalOverwriteException}}\\{{\nwixident{TimeWindowException}}{TimeWindowException}}\\{{\nwixident{UserNotFoundException}}{UserNotFoundException}}}\nwindexuse{\nwixident{DBQueryServerRoute}}{DBQueryServerRoute}{NW3mnZLd-2QlrHv-1}\nwindexuse{\nwixident{DBUpdateServerService}}{DBUpdateServerService}{NW3mnZLd-2QlrHv-1}\nwindexuse{\nwixident{EdgeNotFoundException}}{EdgeNotFoundException}{NW3mnZLd-2QlrHv-1}\nwindexuse{\nwixident{retrieveClock}}{retrieveClock}{NW3mnZLd-2QlrHv-1}\nwindexuse{\nwixident{RouteIllegalOverwriteException}}{RouteIllegalOverwriteException}{NW3mnZLd-2QlrHv-1}\nwindexuse{\nwixident{TimeWindowException}}{TimeWindowException}{NW3mnZLd-2QlrHv-1}\nwindexuse{\nwixident{UserNotFoundException}}{UserNotFoundException}{NW3mnZLd-2QlrHv-1}\nwendcode{}\nwbegindocs{71}\nwdocspar
+\section{Debug}
+
+\subsection{Debug: DBUpdateServerService Parameters}
+
+\nwenddocs{}\nwbegincode{72}\sublabel{NW3mnZLd-3aElWm-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-3aElWm-1}}}\moddef{Debug: DBUpdateServerService parameters~{\nwtagstyle{}\subpageref{NW3mnZLd-3aElWm-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3mnZLd-1v536H-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("\nwlinkedidentc{DBUpdateServerService}{NW3mnZLd-1v536H-1}(5), sid=%d, route=[#=%d], sched=[#=%d], ridpos=[#=%d], ridneg=[#=%d]\\n",
+      sid, route.length, sched.length, ridpos.length, ridneg.length);
+\}
+\nwused{\\{NW3mnZLd-1v536H-1}}\nwidentuses{\\{{\nwixident{DBUpdateServerService}}{DBUpdateServerService}}}\nwindexuse{\nwixident{DBUpdateServerService}}{DBUpdateServerService}{NW3mnZLd-3aElWm-1}\nwendcode{}\nwbegindocs{73}\nwdocspar
+
+\subsection{Debug: RouteIllegalOverwriteException, Missing Branch Point}
+
+\nwenddocs{}\nwbegincode{74}\sublabel{NW3mnZLd-3OSl0k-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-3OSl0k-1}}}\moddef{Debug: RouteIllegalOverwriteException, missing branch point~{\nwtagstyle{}\subpageref{NW3mnZLd-3OSl0k-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3mnZLd-2QlrHv-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  for (i = 0; i < current.length - 1; i+=2) \{
+    System.out.printf("debug wold[%d..%d]=\{ %d, %d \}\\n", i, (i + 1),
+        current[i], current[i+1]);
+  \}
+  for (i = 0; i < route.length - 1; i+=2) \{
+    System.out.printf("debug wnew[%d..%d]=\{ %d, %d \}\\n", i, (i + 1),
+        route[i], route[i+1]);
+  \}
+\}
+\nwused{\\{NW3mnZLd-2QlrHv-1}}\nwendcode{}\nwbegindocs{75}\nwdocspar
+
+\subsection{Debug: RouteIllegalOverwriteException, Overwrite Occurred}
+
+\nwenddocs{}\nwbegincode{76}\sublabel{NW3mnZLd-cjS9g-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-cjS9g-1}}}\moddef{Debug: RouteIllegalOverwriteException, overwrite occurred~{\nwtagstyle{}\subpageref{NW3mnZLd-cjS9g-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3mnZLd-2QlrHv-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("overwrite, current[%d] != route[%d] or current[%d] != route[%d]\\n",
+      i, j, (i + 1), (j + 1));
+  for (i = 0; i < current.length - 1; i+=2) \{
+    System.out.printf("debug wold[%d..%d]=\{ %d, %d \}\\n", i, (i + 1),
+        current[i], current[i+1]);
+  \}
+  for (i = 0; i < route.length - 1; i+=2) \{
+    System.out.printf("debug wnew[%d..%d]=\{ %d, %d \}\\n", i, (i + 1),
+        route[i], route[i+1]);
+  \}
+\}
+\nwused{\\{NW3mnZLd-2QlrHv-1}}\nwendcode{}\nwbegindocs{77}\nwdocspar
+
+\subsection{Debug: EdgeNotFoundException}
+
+\nwenddocs{}\nwbegincode{78}\sublabel{NW3mnZLd-1AKUgT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-1AKUgT-1}}}\moddef{Debug: EdgeNotFoundException~{\nwtagstyle{}\subpageref{NW3mnZLd-1AKUgT-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3mnZLd-3NpaSw-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("edge (%d, %d) not found; print route until now\\n", v1, v2);
+  for (int j = 0; j <= i; j += 2) \{
+    System.out.printf("debug route[%d..%d]~>route[%d..%d]=\{ %d, %d \}~>\{ %d, %d \}\\n",
+      j, (j + 1), (j + 2), (j + 3), route[j], route[j+1], route[j+2], route[j+3]);
+  \}
+\}
+\nwused{\\{NW3mnZLd-3NpaSw-1}}\nwendcode{}\nwbegindocs{79}\nwdocspar
+
 \nwenddocs{}\nwfilename{src/sim-gtree.nw}\nwbegindocs{0}\chapter{G-tree Operations}
 \label{sim-gtree}
 
@@ -11599,6 +11657,11 @@ private Runnable RequestHandlingLoop = () -> \{
         this.statControllerClock, e.toString());
     e.printStackTrace();
     System.exit(1);
+  \} catch (Exception e) \{
+    System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a unspecified Exception: %s\\n",
+        this.statControllerClock, e.toString());
+    e.printStackTrace();
+    System.exit(1);
   \}
 \};
 \nwused{\\{NW3hMOhb-2e0Sfa-1}}\nwidentuses{\\{{\nwixident{notifyNew}}{notifyNew}}}\nwindexuse{\nwixident{notifyNew}}{notifyNew}{NW3hMOhb-183plv-1}\nwendcode{}\nwbegindocs{34}\nwdocspar
@@ -11649,6 +11712,11 @@ private Runnable ServerLoop = () -> \{
       e.printStackTrace();
       System.exit(1);
     \}
+  \} catch (Exception e) \{
+    System.err.printf("[t=%d] Controller.ServerLoop caught a unspecified Exception: %s\\n",
+        this.statControllerClock, e.toString());
+    e.printStackTrace();
+    System.exit(1);
   \}
 \};
 \nwused{\\{NW3hMOhb-2e0Sfa-1}}\nwidentuses{\\{{\nwixident{collectServerLocations}}{collectServerLocations}}\\{{\nwixident{DBQueryServersLocationsActive}}{DBQueryServersLocationsActive}}}\nwindexuse{\nwixident{collectServerLocations}}{collectServerLocations}{NW3hMOhb-1I3SnY-1}\nwindexuse{\nwixident{DBQueryServersLocationsActive}}{DBQueryServersLocationsActive}{NW3hMOhb-1I3SnY-1}\nwendcode{}\nwbegindocs{36}\nwdocspar
@@ -12103,12 +12171,10 @@ Array {\Tt{}src\nwendquote} =
 time, then formally the last location for server $s$ is defined as waypoint
 $(t,v)$ that satisfies $t=\textrm{argmin}_{(t,v)\in w_{\leq t'}} (t-t')$, where
 $w_{\leq t'}$ is the server's traveled route.  In other words the last location
-is the waypoint in the server's traveled route that is nearest $t'$.  After
-copying {\Tt{}src\nwendquote} into {\Tt{}locations\nwendquote}, the {\Tt{}\nwlinkedidentq{endCollectServerLocations}{NW3VOC6-1PUXQj-1}\nwendquote}(0) method
-is executed.
+is the waypoint in the server's traveled route that is nearest $t'$.
 \nwenddocs{}\nwbegincode{17}\sublabel{NW3VOC6-3SHcpo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3VOC6-3SHcpo-1}}}\moddef{Client: collectServerLocations(1)~{\nwtagstyle{}\subpageref{NW3VOC6-3SHcpo-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-1aFZ2n-3}}\nwenddeflinemarkup
 void \nwlinkedidentc{collectServerLocations}{NW3VOC6-3SHcpo-1}(final int[] src) \{
-  this.\nwlinkedidentc{endCollectServerLocations}{NW3VOC6-1PUXQj-1}(src.clone());
+  this.\nwlinkedidentc{endCollectServerLocations}{NW3VOC6-1PUXQj-1}(src);
 \}
 \nwindexdefn{\nwixident{collectServerLocations}}{collectServerLocations}{NW3VOC6-3SHcpo-1}\eatline
 \nwused{\\{NW4QM9HE-1aFZ2n-3}}\nwidentdefs{\\{{\nwixident{collectServerLocations}}{collectServerLocations}}}\nwidentuses{\\{{\nwixident{endCollectServerLocations}}{endCollectServerLocations}}}\nwindexuse{\nwixident{endCollectServerLocations}}{endCollectServerLocations}{NW3VOC6-3SHcpo-1}\nwendcode{}\nwbegindocs{18}\nwdocspar
@@ -12116,6 +12182,7 @@ void \nwlinkedidentc{collectServerLocations}{NW3VOC6-3SHcpo-1}(final int[] src) 
 \subsection{\texttt{endCollectServerLocations}(1)}
 \nwenddocs{}\nwbegincode{19}\sublabel{NW3VOC6-1PUXQj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3VOC6-1PUXQj-1}}}\moddef{Client: endCollectServerLocations(1)~{\nwtagstyle{}\subpageref{NW3VOC6-1PUXQj-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-1aFZ2n-3}}\nwenddeflinemarkup
 void \nwlinkedidentc{endCollectServerLocations}{NW3VOC6-1PUXQj-1}(final int[] locations) \{
+  \LA{}Debug: endCollectServerLocations parameters~{\nwtagstyle{}\subpageref{NW3VOC6-bPNU8-1}}\RA{}
   for (int i = 0; i < (locations.length - 2); i += 3) \{
     this.\nwlinkedidentc{handleServerLocation}{NW3VOC6-2d4qsD-1}(new int[] \{
       locations[i],
@@ -12203,6 +12270,17 @@ public class ClientFatalException extends Exception \{
   \}
 \}
 \nwnotused{ClientFatalException.java}\nwendcode{}\nwbegindocs{32}\nwdocspar
+
+\section{Debug}
+
+\subsection{Debug: endCollectServerLocations Parameters}
+
+\nwenddocs{}\nwbegincode{33}\sublabel{NW3VOC6-bPNU8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3VOC6-bPNU8-1}}}\moddef{Debug: endCollectServerLocations parameters~{\nwtagstyle{}\subpageref{NW3VOC6-bPNU8-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3VOC6-1PUXQj-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("\nwlinkedidentc{endCollectServerLocations}{NW3VOC6-1PUXQj-1}(1), locations=[#=%d]\\n",
+    locations.length);
+\}
+\nwused{\\{NW3VOC6-1PUXQj-1}}\nwidentuses{\\{{\nwixident{endCollectServerLocations}}{endCollectServerLocations}}}\nwindexuse{\nwixident{endCollectServerLocations}}{endCollectServerLocations}{NW3VOC6-bPNU8-1}\nwendcode{}\nwbegindocs{34}\nwdocspar
 
 \nwenddocs{}\nwfilename{src/sim-traffic.nw}\nwbegindocs{0}\chapter{Class: Traffic}
 \label{sim-traffic}

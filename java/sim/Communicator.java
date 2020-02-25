@@ -146,14 +146,34 @@ public class Communicator {
              i += 2;
            }
            if (i == current.length) {
-             // branch point not found
-             throw new RouteIllegalOverwriteException();
+             if (DEBUG) {
+               for (i = 0; i < current.length - 1; i+=2) {
+                 System.out.printf("debug wold[%d..%d]={ %d, %d }\n", i, (i + 1),
+                     current[i], current[i+1]);
+               }
+               for (i = 0; i < route.length - 1; i+=2) {
+                 System.out.printf("debug wnew[%d..%d]={ %d, %d }\n", i, (i + 1),
+                     route[i], route[i+1]);
+               }
+             }
+             throw new RouteIllegalOverwriteException("Missing branch point!");
            }
            int j = 0;
            while (i < current.length && (current[i] <= t_next && current[(i + 1)] != 0)) {
              if (current[i] != route[j] || current[(i + 1)] != route[(j + 1)]) {
-               // overwrite history occurred
-               throw new RouteIllegalOverwriteException();
+               if (DEBUG) {
+                 System.out.printf("overwrite, current[%d] != route[%d] or current[%d] != route[%d]\n",
+                     i, j, (i + 1), (j + 1));
+                 for (i = 0; i < current.length - 1; i+=2) {
+                   System.out.printf("debug wold[%d..%d]={ %d, %d }\n", i, (i + 1),
+                       current[i], current[i+1]);
+                 }
+                 for (i = 0; i < route.length - 1; i+=2) {
+                   System.out.printf("debug wnew[%d..%d]={ %d, %d }\n", i, (i + 1),
+                       route[i], route[i+1]);
+                 }
+               }
+               throw new RouteIllegalOverwriteException("Overwrite occurred!");
              }
              i += 2;
              j += 2;

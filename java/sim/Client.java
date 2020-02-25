@@ -64,7 +64,7 @@ public abstract class Client {
            return Math.max(0, temp - this.queue.size());
          }
   public void collectServerLocations(final int[] src) {
-           this.endCollectServerLocations(src.clone());
+           this.endCollectServerLocations(src);
          }
   public void notifyNew() throws ClientException, ClientFatalException {
            while (!this.queue.isEmpty()) {
@@ -79,6 +79,10 @@ public abstract class Client {
   public void init() { }
   protected void end() { }
   protected void endCollectServerLocations(final int[] locations) {
+              if (DEBUG) {
+                System.out.printf("endCollectServerLocations(1), locations=[#=%d]\n",
+                  locations.length);
+              }
               for (int i = 0; i < (locations.length - 2); i += 3) {
                 this.handleServerLocation(new int[] {
                   locations[i],

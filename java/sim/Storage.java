@@ -977,6 +977,13 @@ public class Storage {
                  final int t2 = route[(i + 2)];
                  final int v2 = route[(i + 3)];
                  if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
+                   if (DEBUG) {
+                     System.out.printf("edge (%d, %d) not found; print route until now\n", v1, v2);
+                     for (int j = 0; j <= i; j += 2) {
+                       System.out.printf("debug route[%d..%d]~>route[%d..%d]={ %d, %d }~>{ %d, %d }\n",
+                         j, (j + 1), (j + 2), (j + 3), route[j], route[j+1], route[j+2], route[j+3]);
+                     }
+                   }
                    throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
                  }
                  final int dd = this.lu_edges.get(v1).get(v2)[0];
@@ -1057,8 +1064,8 @@ public class Storage {
              final int[] ridpos, final int[] ridneg)
          throws UserNotFoundException, EdgeNotFoundException, SQLException {
            if (DEBUG) {
-             System.out.printf("DBUpdateServerService(5), arg1=%d, arg2=[arr], arg3=[arr], arg4=[arr], arg5=[arr]\n",
-                 sid);
+             System.out.printf("DBUpdateServerService(5), sid=%d, route=[#=%d], sched=[#=%d], ridpos=[#=%d], ridneg=[#=%d]\n",
+                 sid, route.length, sched.length, ridpos.length, ridneg.length);
            }
            if (!this.lu_users.containsKey(sid)) {
              throw new UserNotFoundException("User "+sid+" not found.");
@@ -1108,6 +1115,13 @@ public class Storage {
                  final int t2 = route[(i + 2)];
                  final int v2 = route[(i + 3)];
                  if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
+                   if (DEBUG) {
+                     System.out.printf("edge (%d, %d) not found; print route until now\n", v1, v2);
+                     for (int j = 0; j <= i; j += 2) {
+                       System.out.printf("debug route[%d..%d]~>route[%d..%d]={ %d, %d }~>{ %d, %d }\n",
+                         j, (j + 1), (j + 2), (j + 3), route[j], route[j+1], route[j+2], route[j+3]);
+                     }
+                   }
                    throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
                  }
                  final int dd = this.lu_edges.get(v1).get(v2)[0];

@@ -72,8 +72,9 @@ public class NearestNeighbor extends Client {
                   final int[] bold = this.communicator.queryServerScheduleRemaining(sid, now);
                   if (DEBUG) {
                     System.out.printf("got bold: \n");
-                    for (int i : bold) {
-                      System.out.printf("  %d\n", i);
+                    for (int i = 0; i < (bold.length - 3); i+=4) {
+                      System.out.printf("  { t=%d, v=%d, ls=%d, lr=%d }\n",
+                          bold[i], bold[i+1], bold[i+2], bold[i+3]);
                     }
                   }
 
@@ -135,6 +136,17 @@ public class NearestNeighbor extends Client {
 
                   // get the first leg, from last-known location to request origin
                   leg = this.tools.computeRoute(locations.get(sid)[1], r[4], now);
+
+                  // The first waypoint MUST be the server's last-known location. The
+                  // computeRoute function uses the third parameter as the time of the
+                  // first waypoint in the computed route. Using 'now' means that the
+                  // route begins from the current time. But the server's last-known location
+                  // is likely not taken at the current time. So the time of the first waypoint
+                  // in the computed route is manually set to the time of the last-known
+                  // location.
+                  leg[0] = locations.get(sid)[0];
+
+                  // store the first leg
                   legs[0] = leg;
                   if (DEBUG) {
                     System.out.printf("set legs[0]={ %d, %d, ..., %d, %d  }\n",
@@ -149,7 +161,7 @@ public class NearestNeighbor extends Client {
                     System.out.printf("set t=%d\n", t);
                   }
 
-                  // get the remaining legs while updating the route length n
+                  // get the remaining legs while updating the route length and time
                   for (int i = 1; i < p; i++) {
                     final int u = bnew_v[(i - 1)];
                     final int v = bnew_v[(i - 0)];
@@ -160,7 +172,7 @@ public class NearestNeighbor extends Client {
                           legs[i][0], legs[i][1], legs[i][legs[i].length - 2], legs[i][legs[i].length - 1]);
                     }
 
-                    n += leg.length;
+                    n += (leg.length - 2);  // subtract 2 because endpoint
                     t = leg[leg.length - 2];
                     if (DEBUG) {
                       System.out.printf("set n=%d\n", n);
@@ -184,13 +196,12 @@ public class NearestNeighbor extends Client {
 
                   // join the bnew components
                   for (int i = 0; i < p; i++) {
-                    bnew[(i + 0)] = bnew_t[i];
-                    bnew[(i + 1)] = bnew_v[i];
-                    bnew[(i + 2)] = bnew_l[i];
+                    bnew[(3*i + 0)] = bnew_t[i];
+                    bnew[(3*i + 1)] = bnew_v[i];
+                    bnew[(3*i + 2)] = bnew_l[i];
                     if (DEBUG) {
-                      System.out.printf("set bnew[%d]=%d\n", (i + 0), bnew[(i + 0)]);
-                      System.out.printf("set bnew[%d]=%d\n", (i + 1), bnew[(i + 1)]);
-                      System.out.printf("set bnew[%d]=%d\n", (i + 2), bnew[(i + 2)]);
+                      System.out.printf("set bnew[%d..%d]={ t=%d, v=%d, l=%d }\n",
+                          (3*i), (3*i + 2), bnew[(3*i + 0)], bnew[(3*i + 1)], bnew[(3*i + 2)]);
                     }
                   }
 
@@ -198,7 +209,10 @@ public class NearestNeighbor extends Client {
                   final int[] wnew = new int[n];
                   int k = 0;
                   for (int i = 0; i < legs.length; i++) {
-                    for (int j = 0; j < legs[i].length; j++) {
+                    // skip the last waypoint, unless this is the last leg
+                    // (prevents recording the waypoint twice)
+                    int rend = (legs[i].length - (i == (legs.length - 1) ? 0 : 2));
+                    for (int j = 0; j < rend; j++) {
                       wnew[k] = legs[i][j];
                       if (DEBUG) {
                         System.out.printf("set wnew[%d]=%d\n", k, wnew[k]);
@@ -229,7 +243,7 @@ public class NearestNeighbor extends Client {
   protected void handleServerLocation(int[] s) {
               this.locations.put(s[0], new int[] { s[1], s[2] });
               if (DEBUG) {
-                System.out.printf("put locations[], key=%d, val=[ %d, %d ]\n", s[1], s[2]);
+                System.out.printf("put locations[%d]=[ %d, %d ]\n", s[0], s[1], s[2]);
               }
             }
 }

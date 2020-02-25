@@ -196,6 +196,7 @@ for (int i = 0; i < (route.length - 3); i += 2) {
   final int t2 = route[(i + 2)];
   final int v2 = route[(i + 3)];
   if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) {
+    <<Debug: EdgeNotFoundException>>
     throw new EdgeNotFoundException("Edge ("+v1+", "+v2+") not found.");
   }
   final int dd = this.lu_edges.get(v1).get(v2)[0];
@@ -676,10 +677,7 @@ throws DuplicateUserException, EdgeNotFoundException, SQLException,
 void DBUpdateServerService(final int sid, final int[] route, final int[] sched,
     final int[] ridpos, final int[] ridneg)
 throws UserNotFoundException, EdgeNotFoundException, SQLException {
-  if (DEBUG) {
-    System.out.printf("DBUpdateServerService(5), arg1=%d, arg2=[arr], arg3=[arr], arg4=[arr], arg5=[arr]\n",
-        sid);
-  }
+  <<Debug: DBUpdateServerService parameters>>
   if (!this.lu_users.containsKey(sid)) {
     throw new UserNotFoundException("User "+sid+" not found.");
   }
@@ -771,14 +769,14 @@ throws RouteIllegalOverwriteException, UserNotFoundException,
     i += 2;
   }
   if (i == current.length) {
-    // branch point not found
-    throw new RouteIllegalOverwriteException();
+    <<Debug: RouteIllegalOverwriteException, missing branch point>>
+    throw new RouteIllegalOverwriteException("Missing branch point!");
   }
   int j = 0;
   while (i < current.length && (current[i] <= t_next && current[(i + 1)] != 0)) {
     if (current[i] != route[j] || current[(i + 1)] != route[(j + 1)]) {
-      // overwrite history occurred
-      throw new RouteIllegalOverwriteException();
+      <<Debug: RouteIllegalOverwriteException, overwrite occurred>>
+      throw new RouteIllegalOverwriteException("Overwrite occurred!");
     }
     i += 2;
     j += 2;
@@ -789,4 +787,59 @@ throws RouteIllegalOverwriteException, UserNotFoundException,
   /*<Stats: updateServerService(5)>*/
 }
 @ %def updateServerAddToSchedule
+
+\section{Debug}
+
+\subsection{Debug: DBUpdateServerService Parameters}
+
+<<Debug: DBUpdateServerService parameters>>=
+if (DEBUG) {
+  System.out.printf("DBUpdateServerService(5), sid=%d, route=[#=%d], sched=[#=%d], ridpos=[#=%d], ridneg=[#=%d]\n",
+      sid, route.length, sched.length, ridpos.length, ridneg.length);
+}
+@
+
+\subsection{Debug: RouteIllegalOverwriteException, Missing Branch Point}
+
+<<Debug: RouteIllegalOverwriteException, missing branch point>>=
+if (DEBUG) {
+  for (i = 0; i < current.length - 1; i+=2) {
+    System.out.printf("debug wold[%d..%d]={ %d, %d }\n", i, (i + 1),
+        current[i], current[i+1]);
+  }
+  for (i = 0; i < route.length - 1; i+=2) {
+    System.out.printf("debug wnew[%d..%d]={ %d, %d }\n", i, (i + 1),
+        route[i], route[i+1]);
+  }
+}
+@
+
+\subsection{Debug: RouteIllegalOverwriteException, Overwrite Occurred}
+
+<<Debug: RouteIllegalOverwriteException, overwrite occurred>>=
+if (DEBUG) {
+  System.out.printf("overwrite, current[%d] != route[%d] or current[%d] != route[%d]\n",
+      i, j, (i + 1), (j + 1));
+  for (i = 0; i < current.length - 1; i+=2) {
+    System.out.printf("debug wold[%d..%d]={ %d, %d }\n", i, (i + 1),
+        current[i], current[i+1]);
+  }
+  for (i = 0; i < route.length - 1; i+=2) {
+    System.out.printf("debug wnew[%d..%d]={ %d, %d }\n", i, (i + 1),
+        route[i], route[i+1]);
+  }
+}
+@
+
+\subsection{Debug: EdgeNotFoundException}
+
+<<Debug: EdgeNotFoundException>>=
+if (DEBUG) {
+  System.out.printf("edge (%d, %d) not found; print route until now\n", v1, v2);
+  for (int j = 0; j <= i; j += 2) {
+    System.out.printf("debug route[%d..%d]~>route[%d..%d]={ %d, %d }~>{ %d, %d }\n",
+      j, (j + 1), (j + 2), (j + 3), route[j], route[j+1], route[j+2], route[j+3]);
+  }
+}
+@
 

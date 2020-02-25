@@ -102,12 +102,10 @@ Array [[src]] =
 time, then formally the last location for server $s$ is defined as waypoint
 $(t,v)$ that satisfies $t=\textrm{argmin}_{(t,v)\in w_{\leq t'}} (t-t')$, where
 $w_{\leq t'}$ is the server's traveled route.  In other words the last location
-is the waypoint in the server's traveled route that is nearest $t'$.  After
-copying [[src]] into [[locations]], the [[endCollectServerLocations]](0) method
-is executed.
+is the waypoint in the server's traveled route that is nearest $t'$.
 <<Client: collectServerLocations(1)>>=
 void collectServerLocations(final int[] src) {
-  this.endCollectServerLocations(src.clone());
+  this.endCollectServerLocations(src);
 }
 @ %def collectServerLocations
 
@@ -115,6 +113,7 @@ void collectServerLocations(final int[] src) {
 \subsection{\texttt{endCollectServerLocations}(1)}
 <<Client: endCollectServerLocations(1)>>=
 void endCollectServerLocations(final int[] locations) {
+  <<Debug: endCollectServerLocations parameters>>
   for (int i = 0; i < (locations.length - 2); i += 3) {
     this.handleServerLocation(new int[] {
       locations[i],
@@ -200,6 +199,17 @@ public class ClientFatalException extends Exception {
   public ClientFatalException(String message, Throwable cause) {
     super(message, cause);
   }
+}
+@
+
+\section{Debug}
+
+\subsection{Debug: endCollectServerLocations Parameters}
+
+<<Debug: endCollectServerLocations parameters>>=
+if (DEBUG) {
+  System.out.printf("endCollectServerLocations(1), locations=[#=%d]\n",
+    locations.length);
 }
 @
 
