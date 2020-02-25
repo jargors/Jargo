@@ -7,8 +7,8 @@
 \renewcommand{\thepage}{\arabic{page}}
 \setcounter{page}{1}
 
-This chapter lists an overview of each of the client algorithms. Go to the page
-next to each method name to go directly to the method definition.
+This chapter lists an overview of the example client algorithms. Go to
+the page next to each method name to go directly to the method definition.
 Tables~\ref{tab:search-algorithms}~and~\ref{tab:join-algorithms} summarize some
 features of the algorithms.
 
@@ -29,52 +29,52 @@ Ch.~\ref{client-greedy} & Greedy Insertion & Minimum routing cost & Insertion he
 
 \begin{table}[h]
 \begin{center}
-\caption{Summary of Join-Based Algorithms}
+\caption{Summary of Join-Based Algorithms (TODO: Implement some join algorithms)}
 \label{tab:join-algorithms}
 \begin{tabular}{|l|l|l|l|l|}
 \hline
-Ch. & Algorithm & Join Predicate & Scheduling Strategy & Routing Strategy \\
+Ch. & Algorithm & Join Strategy & Scheduling Strategy & Routing Strategy \\
 \hline
 \end{tabular}
 \end{center}
 \end{table}
 
 Ridesharing algorithms can be classified as search-based or join-based.
-Search-based algorithms use a selection predicate to decide which vehicle
-should be assigned to a particular customer. Join-based algorithms aim to group
-vehicles and customers together, with each vehicle serving all the customers in
-its group. Both algorithms may use various schedule and routing strategies.  A
-scheduling strategy is a method of arranging the future pick-ups and drop-offs
-that a vehicle is assigned to complete. A routing strategy is a method of
-computing the route that a vehicle should follow in order to go to the pick-ups
-and drop-offs in the scheduled order.
+Search-based algorithms use selection predicates to decide which vehicles to
+assign to which customers. Join-based algorithms aim to group vehicles and
+customers together, with each vehicle serving all the customers in its group.
+Both types perform scheduling and routing.  Scheduling means to arrange the
+future pick-ups and drop-offs that a vehicle is assigned to complete. Routing
+means to compute the route that a vehicle should follow in order to go to the
+pick-ups and drop-offs in the scheduled order.
 
-For search-based algorithms, usually the predicate aims to minimize some sort
-of cost. The minimum-proximity predicate finds the vehicle that minimizes
-Euclidean or Haversine distance. The minimum-routing-cost predicate aims to
-minimize the extra routing distance that becomes necessary due to assignment to
-the customer.
+For search-based algorithms, the predicate usually minimizes a cost. The
+minimum-proximity predicate finds the vehicle that minimizes Euclidean or
+Haversine distance. The minimum-routing-cost predicate minimizes the extra
+routing distance from assignment to the customer.
 
-For join-based algorithms...
+For join-based algorithms... TODO
 
-Several scheduling strategies exist. The prepend-to-front strategy
-simply arranges the customer's pick-up and drop-off at the front of the
-assigned vehicle's schedule. The insertion-heuristic strategy aims to
-find the best position to insert the pick-up and drop-off without
-rearranging the existing pick-ups and drop-offs in the schedule.
+Several scheduling strategies exist. The prepend-to-front strategy simply
+arranges the customer's pick-up and drop-off at the front of the assigned
+vehicle's schedule. The insertion-heuristic strategy finds the best position to
+insert the pick-up and drop-off without rearranging the existing pick-ups and
+drop-offs in the schedule.
 
 For routing strategies, the most common is shortest-path. This strategy
 simply finds the shortest path through all the pick-ups and drop-offs in a
 vehicle's schedule.
 
 \section{NearestNeighbor}
+\label{client-overview: nearest}
 
 The nearest-neighbor algorithm is a search-based algorithm that uses
-minimum-proximity as its selection predicate. It can be implemented using two
-methods. The [[handleRequest]](1) method will search for and assign the
-minimum-proximity vehicle to given customer requests. The
-[[handleServerLocation]](1) method will store new vehicle locations as they are
-updated.
+minimum-proximity as its selection predicate. It is implemented with two Jargo
+methods. Method [[handleRequest]](1) searches for and assigns the
+minimum-proximity vehicle to a given customer request. Method
+[[handleServerLocation]](1) stores new vehicle locations in the algorithm's
+local cache as they are updated. Turn to the page next to the method name
+to see details.
 
 <<[[NearestNeighbor]] methods>>=
 protected <<NearestNeighbor: handleRequest(1)>>
@@ -82,6 +82,7 @@ protected <<NearestNeighbor: handleServerLocation(1)>>
 @
 
 \section{GreedyInsertion}
+\label{client-overview: greedy}
 
 The greedy-insertion algorithm...
 

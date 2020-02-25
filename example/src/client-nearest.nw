@@ -1,17 +1,19 @@
 \chapter{Client: NearestNeighbor}
 \label{client-nearest}
 
-The nearest-neighbor algorithm aims to find the closest vehicle for a given
-customer request and assigns that vehicle to the request. This example uses the
-prepend-to-front scheduling strategy and the shortest-path routing strategy.
+Here is a basic implmenetation of the nearest-neighbor algorithm. See
+Chapter~\ref{client-overview: nearest} for an overview of the methods.  This
+implementation doesn't check capacity or time-window constraints If capacity is
+violated, Jargo automatically rejects the submission. If a time window is
+violated, Jargo records the violation. Time windows are considered to be
+``soft'' constraints because they are hard to guarantee due to traffic.
 
-This example implements a ``naive'' algorithm. It doesn't check the vehicle
-capacity or any time-window constraints when it submits assignments. If the
-vehicle that it submits doesn't have enough capacity to serve the customer,
-then Jargo automatically rejects the submission, just as a real-world driver
-might skip the new assignment. If a time-window violation occurs, Jargo will
-record the violation. Jargo treats time windows as soft constraints as they are
-difficult to guarantee to traffic.
+Let's start. We'll write a [[NearestNeighbor]] class extending Jargo's base
+[[Client]] class. Angle brackets indicate a code chunk. Go to the page number
+next to the chunk to see the code body. A triple bar ($\equiv$) after angle
+brackets means we're defining a new chunk. Here, we're defining the
+NearestNeighbor.java chunk. This is a special ``root'' chunk that gets written
+to disk as Java source.
 
 <<NearestNeighbor.java>>=
 <<NearestNeighbor.java preamble>>
@@ -24,13 +26,16 @@ public class NearestNeighbor extends Client {
 \section{Preamble}
 \label{NearestNeighbor: preamble}
 
-All example algorithms belong to the [[com.github.jargors.client]] package.
+
+First we'll tell Java which package to put our class.
 
 <<NearestNeighbor.java preamble>>=
 package com.github.jargors.client;
 @
 
-We import Jargo [[sim]] components and some standard Java utilities.
+Next we'll import Jargo [[sim]] components and some standard Java utilities.
+The $+\equiv$ symbol after the angle brackets means we're adding to an existing
+chunk.
 
 <<NearestNeighbor.java preamble>>=
 import com.github.jargors.sim.*;
@@ -43,15 +48,17 @@ import java.util.concurrent.ConcurrentHashMap;
 \section{Member Variables}
 \label{client-nearest: member-variables}
 
-This example uses three filters to quickly narrow down the nearest vehicle.
-The thresholds for these filters are defined in the member variables. A map
-called [[locations]] is initialized. It will be used to store vehicle locations
-as the information becomes available.
+Now we'll define the member variables. This implementation uses two filters to
+narrow down the nearest vehicle. We'll set their thresholds as member
+variables. For each vehicle, integer [[MAX_DELTA]] gives the maximum seconds
+from the vehicle's last update for the vehicle to be considered a candidate.
+Integer [[MAX_RANGE]] gives the maximum proximity, in meters, from the
+vehicle's last-known location. We'll also initialize a [[locations]] map for
+storing vehicle locations.
 
 <<[[NearestNeighbor]] member variables>>=
 final int MAX_DELTA = 300;  // seconds from last vehicle location update
 final int MAX_RANGE = 600;  // meters from last vehicle position
-final int MAX_EVENT = 8;    // remaining pick-up and drop-off events
 final ConcurrentHashMap<Integer, int[]> locations =
   new ConcurrentHashMap<Integer, int[]>();
 @
@@ -59,11 +66,18 @@ final ConcurrentHashMap<Integer, int[]> locations =
 \section{Chunks}
 \label{NearestNeighbor: chunks}
 
-The current time is used to check how long ago was the last positional update
-for vehicles, to ask vehicles what their remaining schedules are from this time
-forward, and to compute a new route with specified time components.
+Before writing the methods, we'll divide the functionality into easily
+understood code chunks. The first chunk gets the current simulation world time.
+This time is used to check how long ago was the last positional update for a
+vehicle, to ask a vehicle what is its remaining schedule from this time
+forward, and to compute future routes. Jargo routes have both time and vertex
+components.
 
 \subsection{Get Current Time}
+
+The base [[Client]] class has a [[Communicator]] member object called
+[[communicator]]. This object has methods for reading and writing the
+simulation state. See the Jargo User Manual for more details.
 
 <<Get current time>>=
 final int now = this.communicator.retrieveClock();
@@ -72,25 +86,31 @@ final int now = this.communicator.retrieveClock();
 
 \subsection{Initialize Candidates Container}
 
-Each request is associated with a set of candidate vehicles. We will store
-these candidates in a hash map called [[candidates]]. The key to the map will
-be the vehicle identifier and the values will be distance to last-known
-locations.
+For each incoming request, we'll initialize an empty map of candidate vehicles
+called [[candidates]]. The map key will be the vehicle's identifier and the
+value will be distance to its last-known location.
 
 <<Initialize candidates container>>=
 final Map<Integer, Integer> candidates = new HashMap<Integer, Integer>();
 <<Debug: initialize candidates container>>
 @
 
-\subsection{Apply Delta, Range, and Event Filters}
+\subsection{Apply Delta and Range Filters}
 
-We get the candidates by filtering the set of all vehicles based on last-update
-time, range, and schedule length.
+We'll apply the delta and range filters to narrow down the candidates. The
+[[locations]] map maps vehicle identifiers to last-known location waypoints. A
+Jargo waypoint is a $(t,v)$ pair. The $t$ component is a time and the $v$
+component is a road network vertex. The stored last-known location waypoints
+indicate the time and location of the last update.
 
-<<Apply delta, range, and event filters>>=
+The base [[Client]] class has a [[Tools]] member object called [[tools]] with
+some convenience methods. Here we will use [[tools]] to compute Haversine.  See
+the Jargo User Manual for more details.
+
+<<Apply delta and range filters>>=
 for (final Integer sid : locations.keySet()) {
-  final Integer t = locations.get(sid)[0];
-  final Integer v = locations.get(sid)[1];
+  final int t = locations.get(sid)[0];
+  final int v = locations.get(sid)[1];
 
   final boolean in_delta = (t >= now - MAX_DELTA);
   <<Debug: delta filter>>
@@ -103,13 +123,6 @@ for (final Integer sid : locations.keySet()) {
   if (!in_range)
     continue;
 
-  final int event =
-    this.communicator.queryServerScheduleRemaining(sid, now).length/4;
-  final boolean in_event = (event <= MAX_EVENT);
-  <<Debug: event filter>>
-  if (!in_event)
-    continue;
-
   candidates.put(sid, range);
   <<Debug: put candidate>>
 }
@@ -117,7 +130,8 @@ for (final Integer sid : locations.keySet()) {
 
 \subsection{Find Minimum-Range Candidate}
 
-Iterate over the candidates to find the minimum-range candidate.
+To find the minimum-range candidate, we'll iterate over the candidates while
+keeping the one with smaller range.
 
 <<Find minimum-range candidate>>=
 Entry<Integer, Integer> min = null;
@@ -131,130 +145,328 @@ for (final Entry<Integer, Integer> entry : candidates.entrySet()) {
 
 \subsection{Submit Minimum-Range Candidate}
 
-To submit the minimum-range candidate as the assiged vehicle, compute a new
-schedule for the vehicle that includes the request's pick-up and drop-off
-locations, and also compute a new route that passes through these locations.
-Schedules and routes (and customers and vehicles) are simple integer arrays
-in Jargo. The following code reads from the existing schedule array,
-populates the new schedule array, and computes the new route array.
-The array formats are...
+After we've found the minimum-range candidate, we'll use [[Communicator]]'s
+[[updateServerService]](5) method to submit the assignment into the Jargo
+simulator. This method mimics the functionality of a service provider sending a
+job update to a ridesharing vehicle. To update the job, the vehicle needs to
+know the new schedule and the new route. The below chunk will compute these two
+things. It's the most complicated chunk, so we'll divide it into several
+sub-chunks.
+
+To begin, we'll only submit something if a minimum-range candidate [[min]] was
+found.
 
 <<Submit minimum-range candidate>>=
 if (min != null) {
-  // Get the old schedule
-  final int sid = min.getKey();
-  final int[] bold = this.communicator.queryServerScheduleRemaining(sid, now);
-  <<Debug: get old schedule>>
+@
 
-  // m=number of events; p=new number of events
-  final int m = bold.length/4;
-  final int p = m + 2;
-  <<Debug: get number of events>>
+If so, then we'll perform the following steps.
 
-  // bnew contains the new schedule
-  final int[] bnew = new int[3*p];
-  final int[] bnew_t = new int[p];
-  final int[] bnew_v = new int[p];
-  final int[] bnew_l = new int[p];
-  <<Debug: initialize new schedule>>
+\begin{enumerate}
 
-  // set the first, second vertices
-  bnew_v[0] = r[4];
-  bnew_v[1] = r[5];
-  <<Debug: set initial vertices>>
+\item First we'll get [[min]]'s remaining schedule, count the number of
+pick-up and drop-off events in the schedule, and use the number to initialize
+a new schedule.
 
-  // and label them
-  bnew_l[0] = r[0];
-  bnew_l[1] = r[0];
-  <<Debug: set initial labels>>
+<<Submit minimum-range candidate>>=
+  <<Get remaining schedule>>
+  <<Get number of events>>
+  <<Initialize new schedule>>
+@ %
+%
+\item Next we'll populate the new schedule with vertices and labels. In a Jargo
+schedule, each customer pick-up or drop-off event is labeled with a request
+identifier to indicate which customer is getting picked up or dropped off.
+As we're using the prepend-to-front scheduling strategy, we'll
+put the request's pick-up and drop-off to the front of the new schedule.
 
-  // set the remaining vertices and labels
-  for (int i = 0; i < m; i++) {
-    final int bv = bold[(i + 1)];
-    final int ls = bold[(i + 2)];
-    final int lr = bold[(i + 3)];
-    bnew_v[(i + 2)] = bv;
-    bnew_l[(i + 2)] = (ls == 0 ? lr : ls);
-    <<Debug: set schedule vertex and label>>
-  }
+<<Submit minimum-range candidate>>=
+  <<Initialize new schedule>>
+  <<Prepend request vertices>>
+  <<Set initial labels>>
+  <<Set remaining vertices and labels>>
+@ %
+%
+\item Then we'll compute the shortest paths through the pick-up and drop-off
+events in sequence in order to get the new route. First we'll compute the first
+``leg'' of the route, from [[min]]'s last-known location to the request's
+pick-up location. We'll record this leg, along with the length of the leg and
+the duration of the leg.
 
-  // to get the times and route, create a 'legs' container
-  final int[][] legs = new int[p][];
-  int[] leg = null;
-  <<Debug: initialize legs container>>
+<<Submit minimum-range candidate>>=
+  <<Initialize legs container>>
+  <<Set first leg>>
+  <<Initialize route length and time>>
+@ %
+%
+\item We'll then compute the remaining legs of the route. Once we've got all
+the legs, we can go set the time components of the new schedule. The
+times correspond to when each leg begins and ends.
 
-  // get the first leg, from last-known location to request origin
-  leg = this.tools.computeRoute(locations.get(sid)[1], r[4], now);
+<<Submit minimum-range candidate>>=
+  <<Set remaining legs>>=
+  <<Set schedule times>>
+  <<Set vehicle end time>>
+@ %
+%
+\item We'll join all the schedule components and route legs into single
+flattened arrays for submission.
 
-  // The first waypoint MUST be the server's last-known location. The
-  // computeRoute function uses the third parameter as the time of the
-  // first waypoint in the computed route. Using 'now' means that the
-  // route begins from the current time. But the server's last-known location
-  // is likely not taken at the current time. So the time of the first waypoint
-  // in the computed route is manually set to the time of the last-known
-  // location.
-  leg[0] = locations.get(sid)[0];
+<<Submit minimum-range candidate>>=
+  <<Join schedule components>>
+  <<Join route components>>
+@ %
+%
+\item Finally, we'll submit our work.
 
-  // store the first leg
-  legs[0] = leg;
-  <<Debug: set first leg>>
-
-  // get the current route length and time after first leg
-  int n = leg.length;
-  int t = leg[n - 2];
-  <<Debug: set route length and time>>
-
-  // get the remaining legs while updating the route length and time
-  for (int i = 1; i < p; i++) {
-    final int u = bnew_v[(i - 1)];
-    final int v = bnew_v[(i - 0)];
-    leg = this.tools.computeRoute(u, v, t);
-    legs[i] = leg;
-    <<Debug: set remaining legs>>
-
-    n += (leg.length - 2);  // subtract 2 because endpoint
-    t = leg[leg.length - 2];
-    <<Debug: set route length and time>>
-  }
-
-  // set the times in bnew
-  for (int i = 1; i < legs.length; i++) {
-    bnew_t[(i - 1)] = legs[i][0];
-    <<Debug: set schedule time>>
-  }
-
-  // set the vehicle end time
-  bnew_t[(p - 1)] = t;
-  <<Debug: set vehicle end time>>
-
-  // join the bnew components
-  for (int i = 0; i < p; i++) {
-    bnew[(3*i + 0)] = bnew_t[i];
-    bnew[(3*i + 1)] = bnew_v[i];
-    bnew[(3*i + 2)] = bnew_l[i];
-    <<Debug: join schedule components>>
-  }
-
-  // join the legs into the new route
-  final int[] wnew = new int[n];
-  int k = 0;
-  for (int i = 0; i < legs.length; i++) {
-    // skip the last waypoint, unless this is the last leg
-    // (prevents recording the waypoint twice)
-    int rend = (legs[i].length - (i == (legs.length - 1) ? 0 : 2));
-    for (int j = 0; j < rend; j++) {
-      wnew[k] = legs[i][j];
-      <<Debug: join route components>>
-      k++;
-    }
-  }
-
-  // submit
-  this.communicator.updateServerService(sid, wnew, bnew,
-      new int[] { r[0] }, new int[] { });
-  <<Debug: submit>>
+<<Submit minimum-range candidate>>=
+  <<Submit>>
 }
 @
+\end{enumerate}
+
+Now here are the details.
+
+\subsubsection{Get Remaining Schedule}
+
+We'll ask [[Communicator]] for [[min]]'s remaining schedule. Here, [[min]] is
+actually a map entry of [[candidates]], so we'll use [[getKey]](0) to extract
+the candidate's identifier. We'll store the remaining schedule into
+variable [[brem]].
+
+<<Get remaining schedule>>=
+final int sid = min.getKey();
+final int[] brem = this.communicator.queryServerScheduleRemaining(sid, now);
+<<Debug: get remaining schedule>>
+@
+
+\subsubsection{Get Number of Events}
+
+The returned schedule is a flattened 4-tuple array. The $i$th element is an
+event's time; the $(i+1)$th element is the event's location vertex; the
+$(i+2)$th element is the event's server label or 0 if it's not a server event;
+and the $(i+3)$th element is the event's request label or 0 if it's not a
+request event. The total number of events is the length of the schedule divided
+by four. The number of events that will be in the new schedule is this number
+plus two, one for the new pick-up and one for the new drop-off. Variable
+[[p]] will store the number of events in the new schedule.
+
+<<Get number of events>>=
+final int m = brem.length/4;
+final int p = m + 2;
+<<Debug: get number of events>>
+@
+
+\subsubsection{Initialize New Schedule}
+
+We'll initialize the new schedule [[bnew]] and also initialize its individual
+components. The new-schedule parameter to [[updateServerService]](5) expects
+the new schedule to be a flattened 3-tuple array. The $i$th element is a time,
+the $(i+1)$th element is a vertex, and the $(i+2)th$ element is a server or
+request label. We'll create arrays to store each of these three components.
+Later, we'll join the arrays into [[bnew]]. Recall that [[p]] is the number
+of events in the new schedule.
+
+<<Initialize new schedule>>=
+final int[] bnew = new int[3*p];
+final int[] bnew_t = new int[p];
+final int[] bnew_v = new int[p];
+final int[] bnew_l = new int[p];
+<<Debug: initialize new schedule>>
+@
+
+\subsubsection{Prepend Request Vertices}
+
+As we're using the prepend-to-front scheduling strategy, we can add the request
+pick-up and drop-off location vertices to [[bnew_v]] right off the bat. The
+request is passed as argument [[r]] to [[handleRequest]](1) as an array. The
+4th and 5th elements of the [[r]] array are the request pick-up and drop-off
+location vertices, respectively.
+
+<<Prepend request vertices>>=
+bnew_v[0] = r[4];
+bnew_v[1] = r[5];
+<<Debug: prepend request vertices>>
+@
+
+\subsubsection{Set Initial Labels}
+
+We can also label them with the request identifier. The 0th element of the
+[[r]] array is the identifier.
+
+<<Set initial labels>>=
+bnew_l[0] = r[0];
+bnew_l[1] = r[0];
+<<Debug: set initial labels>>
+@
+
+\subsubsection{Set Remaining Vertices and Labels}
+
+Now we'll loop over and add vertices and labels from [[brem]] events into
+[[bnew_v]] and [[bnew_l]]. We can't add time components yet because we
+don't know the new event times
+
+<<Set remaining vertices and labels>>=
+for (int i = 0; i < m; i++) {
+  final int bv = brem[(i + 1)];
+  final int ls = brem[(i + 2)];
+  final int lr = brem[(i + 3)];
+  bnew_v[(i + 2)] = bv;
+  bnew_l[(i + 2)] = (ls == 0 ? lr : ls);
+  <<Debug: set schedule vertex and label>>
+}
+@
+
+\subsubsection{Initialize Legs Container}
+
+We'll compute each leg of the route through the new schedule. We'll store
+each leg into the [[legs]] multi-array.
+
+<<Initialize legs container>>=
+final int[][] legs = new int[p][];
+int[] leg = null;
+<<Debug: initialize legs container>>
+@
+
+\subsubsection{Set First Leg}
+
+The first leg goes from [[min]]'s last-known location to the request pick-up
+location. The [[tools]] object can be used to compute the shortest-path route
+that makes up the leg.
+
+The [[computeRoute]](3) methods takes the route start location, route end
+location, and departure time from start as its three arguments. For the
+departure time, we'll use the current time. That way, the arrival time at
+[[r[4]]] is guaranteed to be sometime in the future.  If we used [[min]]'s last
+update time, this arrival time could have already passed if the distance from
+[[min]] to [[r[4]]] is very short!
+
+When we go to submit the new route, Jargo searches for the first waypoint of
+the new route in the vehicle's existing route in order to know where to start
+splicing in the new route. The location of this waypoint in the existing route
+is called the ``branch point''. As we've used [[now]] as the departure time of
+the first leg, the first waypoint will differ from [[min]]'s last-known
+location! We have to manually reset the time of the first waypoint to be the
+time of the last-known location so that Jargo can find the branch point. Recall
+that the last-known location is stored in the [[locations]] map, and that the
+time component is the 0th element of the map value.
+
+Once we're done, we'll store the leg in the [[legs]] multi-array.
+
+<<Set first leg>>=
+leg = this.tools.computeRoute(locations.get(sid)[1], r[4], now);
+leg[0] = locations.get(sid)[0];
+legs[0] = leg;
+<<Debug: set first leg>>
+@
+
+\subsubsection{Initialize Route Length and Time}
+
+We'll keep a running sum [[n]] of the leg lengths so that we can initialize the
+new route to the correct size. We'll also accumulate the arrival times [[t]] at
+the end of each leg so that we can set the correct departure times for
+subsequent legs in calls to [[computeRoute]](3).
+
+<<Initialize route length and time>>=
+int n = leg.length;
+int t = leg[n - 2];
+<<Debug: set route length and time>>
+@
+
+\subsubsection{Set Remaining Legs}
+
+Now we'll iterate over the remaining vertices in the new schedule and compute
+the legs as we go. When we update [[n]], we subtract 2 from it because we don't
+want to double count the leg endpoints. The endpoint of one leg is the starting
+point of the next leg.
+
+<<Set remaining legs>>=
+for (int i = 1; i < p; i++) {
+  final int u = bnew_v[(i - 1)];
+  final int v = bnew_v[(i - 0)];
+  leg = this.tools.computeRoute(u, v, t);
+  legs[i] = leg;
+  <<Debug: set remaining legs>>
+
+  n += (leg.length - 2);
+  t = leg[leg.length - 2];
+  <<Debug: set route length and time>>
+}
+@
+
+\subsubsection{Set Schedule Times}
+
+After all the legs have been computed, we can go to update the schedule event
+times. We'll put in all the departure times for all the events. Remember that
+each leg is the route between two events, so we'll get just the first element
+of each leg.
+
+<<Set schedule times>>=
+for (int i = 1; i < legs.length; i++) {
+  bnew_t[(i - 1)] = legs[i][0];
+  <<Debug: set schedule time>>
+}
+@
+
+\subsubsection{Set Vehicle End Time}
+
+Now we'll get the arrival time of the last leg, in other words the time of
+the last event of the last leg. This event corresponds to the server's
+own arrival.
+
+<<Set vehicle end time>>=
+bnew_t[(p - 1)] = t;
+<<Debug: set vehicle end time>>
+@
+
+\subsubsection{Join Schedule Components}
+
+We'll simply iterate through the schedule component arrays to join them
+into [[bnew]].
+
+<<Join schedule components>>=
+for (int i = 0; i < p; i++) {
+  bnew[(3*i + 0)] = bnew_t[i];
+  bnew[(3*i + 1)] = bnew_v[i];
+  bnew[(3*i + 2)] = bnew_l[i];
+  <<Debug: join schedule components>>
+}
+@
+
+\subsubsection{Join Route Components}
+
+Simlarly, we'll join all the legs together to form the new route
+[[wnew]]. We'll use [[n]] here to size the new route. To avoid doubling
+up the events, we'll skip the last event of each leg, unless it is the last
+leg.
+
+<<Join route components>>=
+final int[] wnew = new int[n];
+int k = 0;
+for (int i = 0; i < legs.length; i++) {
+  int rend = (legs[i].length - (i == (legs.length - 1) ? 0 : 2));
+  for (int j = 0; j < rend; j++) {
+    wnew[k] = legs[i][j];
+    <<Debug: join route components>>
+    k++;
+  }
+}
+@
+
+\subsubsection{Submit}
+
+Finally, we're ready to submit. The first argument to [[updateServerService]](5)
+is [[min]]'s identifier; the next two are the new route and schedule. Following
+that is an array containing identifiers of new requests to be serviced.
+The last argument is an array containing identifiers of existing requests
+that should be removed from the remaining schedule.
+
+<<Submit>>=
+this.communicator.updateServerService(sid, wnew, bnew,
+    new int[] { r[0] }, new int[] { });
+<<Debug: submit>>
+@
+
 
 \section{Methods}
 \label{client-nearest: methods}
@@ -263,8 +475,7 @@ if (min != null) {
 
 Now we can write the body of [[handleRequest]](1).  The entire method is
 wrapped in try/catch because some method calls can throw exceptions. If an
-exception is caught, it gets bubbled up to Jargo via [[ClientException]]. This
-exception does not end the simulation, but [[ClientFatalException]] will.
+exception is caught, it gets bubbled up to Jargo via [[ClientException]].
 
 <<NearestNeighbor: handleRequest(1)>>=
 void handleRequest(int[] r) throws ClientException, ClientFatalException {
@@ -272,7 +483,7 @@ void handleRequest(int[] r) throws ClientException, ClientFatalException {
   try {
     <<Get current time>>
     <<Initialize candidates container>>
-    <<Apply delta, range, and event filters>>
+    <<Apply delta and range filters>>
     <<Find minimum-range candidate>>
     <<Submit minimum-range candidate>>
   } catch (Exception e) {
@@ -342,14 +553,6 @@ if (DEBUG) {
 }
 @
 
-\subsection{Debug: Event Filter}
-
-<<Debug: event filter>>=
-if (DEBUG) {
-  System.out.printf("got %d in_event=%s\n", sid, (in_event ? "true" : "false"));
-}
-@
-
 \subsection{Debug: Put Candidate}
 
 <<Debug: put candidate>>=
@@ -366,14 +569,14 @@ if (DEBUG) {
 }
 @
 
-\subsection{Debug: Get Old Schedule}
+\subsection{Debug: Get Remaining Schedule}
 
-<<Debug: get old schedule>>=
+<<Debug: get remaining schedule>>=
 if (DEBUG) {
-  System.out.printf("got bold: \n");
-  for (int i = 0; i < (bold.length - 3); i+=4) {
+  System.out.printf("got brem: \n");
+  for (int i = 0; i < (brem.length - 3); i+=4) {
     System.out.printf("  { t=%d, v=%d, ls=%d, lr=%d }\n",
-        bold[i], bold[i+1], bold[i+2], bold[i+3]);
+        brem[i], brem[i+1], brem[i+2], brem[i+3]);
   }
 }
 @
@@ -398,9 +601,9 @@ if (DEBUG) {
 }
 @
 
-\subsection{Debug: Set Initial Vertices}
+\subsection{Debug: Prepend Request Vertices}
 
-<<Debug: set initial vertices>>=
+<<Debug: prepend request vertices>>=
 if (DEBUG) {
   System.out.printf("set bnew_v[0]=%d\n", bnew_v[0]);
   System.out.printf("set bnew_v[1]=%d\n", bnew_v[1]);
