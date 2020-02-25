@@ -69,7 +69,7 @@ jar : _prep $(CLASS1) $(CLASS2)
 pdf : _prep doc/examples.tex doc/body.tex
 	@printf "make pdf\n"
 	@mkdir -p pdf
-	@printf "compile examples.pdf...\n"
+	@printf "compile pdf/examples.pdf...\n"
 	@$(call run1, texfot pdflatex -output-directory pdf -halt-on-error doc/examples.tex)
 	@printf "done pdf\n"
 

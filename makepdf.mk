@@ -20,7 +20,7 @@ endef
 # This target produces pdf/jargo.pdf.
 pdf : _prep doc/jargo.tex doc/body.tex
 	@mkdir -p pdf
-	@printf "compile jargo.pdf...\n"
+	@printf "compile pdf/jargo.pdf...\n"
 	@$(call run, texfot pdflatex -output-directory pdf -halt-on-error doc/jargo.tex)
 
 # Remove pdf/jargo.pdf and LaTeX build objects.

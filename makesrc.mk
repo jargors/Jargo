@@ -107,8 +107,7 @@ $(JAVA4) : src/*.nw
 TEXSRCS = \
 	src/preface.nw \
 	src/tut-install.nw \
-	src/tut-example1.nw \
-	src/tut-example2.nw \
+	src/tut-example.nw \
 	src/tut-start.nw \
 	src/mod-setting.nw \
 	src/mod-users.nw \
