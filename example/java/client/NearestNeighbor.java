@@ -82,16 +82,6 @@ public class NearestNeighbor extends Client {
                     System.out.printf("init bnew_v={ }\n");
                     System.out.printf("init bnew_l={ }\n");
                   }
-                  final int[] bnew = new int[3*p];
-                  final int[] bnew_t = new int[p];
-                  final int[] bnew_v = new int[p];
-                  final int[] bnew_l = new int[p];
-                  if (DEBUG) {
-                    System.out.printf("init bnew={ }\n");
-                    System.out.printf("init bnew_t={ }\n");
-                    System.out.printf("init bnew_v={ }\n");
-                    System.out.printf("init bnew_l={ }\n");
-                  }
                   bnew_v[0] = r[4];
                   bnew_v[1] = r[5];
                   if (DEBUG) {
@@ -149,7 +139,7 @@ public class NearestNeighbor extends Client {
                       System.out.printf("set n=%d\n", n);
                       System.out.printf("set t=%d\n", t);
                     }
-                  }=
+                  }
                   for (int i = 1; i < legs.length; i++) {
                     bnew_t[(i - 1)] = legs[i][0];
                     if (DEBUG) {

@@ -1,7 +1,7 @@
 \chapter{Client: NearestNeighbor}
 \label{client-nearest}
 
-Here is a basic implmenetation of the nearest-neighbor algorithm. See
+Here is a basic implementation of the nearest-neighbor algorithm. See
 Chapter~\ref{client-overview: nearest} for an overview of the methods.  This
 implementation doesn't check capacity or time-window constraints If capacity is
 violated, Jargo automatically rejects the submission. If a time window is
@@ -181,7 +181,6 @@ As we're using the prepend-to-front scheduling strategy, we'll
 put the request's pick-up and drop-off to the front of the new schedule.
 
 <<Submit minimum-range candidate>>=
-  <<Initialize new schedule>>
   <<Prepend request vertices>>
   <<Set initial labels>>
   <<Set remaining vertices and labels>>
@@ -204,7 +203,7 @@ the legs, we can go set the time components of the new schedule. The
 times correspond to when each leg begins and ends.
 
 <<Submit minimum-range candidate>>=
-  <<Set remaining legs>>=
+  <<Set remaining legs>>
   <<Set schedule times>>
   <<Set vehicle end time>>
 @ %
@@ -719,4 +718,115 @@ if (DEBUG) {
   System.out.printf("put locations[%d]=[ %d, %d ]\n", s[0], s[1], s[2]);
 }
 @
+
+\section{Reference Code}
+
+Here is the full NearestNeighbor.java code, with debug sections removed.
+
+{
+\small
+\begin{verbatim}
+package com.github.jargors.client;
+import com.github.jargors.sim.*;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
+public class NearestNeighbor extends Client {
+  final int MAX_DELTA = 300;  // seconds from last vehicle location update
+  final int MAX_RANGE = 600;  // meters from last vehicle position
+  final ConcurrentHashMap<Integer, int[]> locations =
+    new ConcurrentHashMap<Integer, int[]>();
+  protected void handleRequest(int[] r) throws ClientException, ClientFatalException {
+    try {
+      final int now = this.communicator.retrieveClock();
+      final Map<Integer, Integer> candidates = new HashMap<Integer, Integer>();
+      for (final Integer sid : locations.keySet()) {
+        final int t = locations.get(sid)[0];
+        final int v = locations.get(sid)[1];
+
+        final boolean in_delta = (t >= now - MAX_DELTA);
+        if (!in_delta)
+          continue;
+
+        final int range = this.tools.computeHaversine(v, r[4]);
+        final boolean in_range = (range <= MAX_RANGE);
+        if (!in_range)
+          continue;
+
+        candidates.put(sid, range);
+      }
+      Entry<Integer, Integer> min = null;
+      for (final Entry<Integer, Integer> entry : candidates.entrySet()) {
+        if (min == null || min.getValue() > entry.getValue()) {
+          min = entry;
+        }
+      }
+      if (min != null) {
+        final int sid = min.getKey();
+        final int[] brem = this.communicator.queryServerScheduleRemaining(sid, now);
+        final int m = brem.length/4;
+        final int p = m + 2;
+        final int[] bnew = new int[3*p];
+        final int[] bnew_t = new int[p];
+        final int[] bnew_v = new int[p];
+        final int[] bnew_l = new int[p];
+        bnew_v[0] = r[4];
+        bnew_v[1] = r[5];
+        bnew_l[0] = r[0];
+        bnew_l[1] = r[0];
+        for (int i = 0; i < m; i++) {
+          final int bv = brem[(i + 1)];
+          final int ls = brem[(i + 2)];
+          final int lr = brem[(i + 3)];
+          bnew_v[(i + 2)] = bv;
+          bnew_l[(i + 2)] = (ls == 0 ? lr : ls);
+        }
+        final int[][] legs = new int[p][];
+        int[] leg = null;
+        leg = this.tools.computeRoute(locations.get(sid)[1], r[4], now);
+        leg[0] = locations.get(sid)[0];
+        legs[0] = leg;
+        int n = leg.length;
+        int t = leg[n - 2];
+        for (int i = 1; i < p; i++) {
+          final int u = bnew_v[(i - 1)];
+          final int v = bnew_v[(i - 0)];
+          leg = this.tools.computeRoute(u, v, t);
+          legs[i] = leg;
+
+          n += (leg.length - 2);
+          t = leg[leg.length - 2];
+        }
+        for (int i = 1; i < legs.length; i++) {
+          bnew_t[(i - 1)] = legs[i][0];
+        }
+        bnew_t[(p - 1)] = t;
+        for (int i = 0; i < p; i++) {
+          bnew[(3*i + 0)] = bnew_t[i];
+          bnew[(3*i + 1)] = bnew_v[i];
+          bnew[(3*i + 2)] = bnew_l[i];
+        }
+        final int[] wnew = new int[n];
+        int k = 0;
+        for (int i = 0; i < legs.length; i++) {
+          int rend = (legs[i].length - (i == (legs.length - 1) ? 0 : 2));
+          for (int j = 0; j < rend; j++) {
+            wnew[k] = legs[i][j];
+            k++;
+          }
+        }
+        this.communicator.updateServerService(sid, wnew, bnew,
+            new int[] { r[0] }, new int[] { });
+      }
+    } catch (Exception e) {
+      throw new ClientException(e);
+    }
+  }
+  protected void handleServerLocation(int[] s) {
+    this.locations.put(s[0], new int[] { s[1], s[2] });
+  }
+}
+\end{verbatim}
+}
 
