@@ -95,9 +95,9 @@ public class NearestNeighbor extends Client {
                     System.out.printf("set bnew_l[1]=%d\n", bnew_l[1]);
                   }
                   for (int i = 0; i < m; i++) {
-                    final int bv = brem[(i + 1)];
-                    final int ls = brem[(i + 2)];
-                    final int lr = brem[(i + 3)];
+                    final int bv = brem[(4*i + 1)];
+                    final int ls = brem[(4*i + 2)];
+                    final int lr = brem[(4*i + 3)];
                     bnew_v[(i + 2)] = bv;
                     bnew_l[(i + 2)] = (ls == 0 ? lr : ls);
                     if (DEBUG) {
