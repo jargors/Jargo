@@ -178,13 +178,13 @@ public class Communicator {
              i += 2;
              j += 2;
            }
-           for (int k = 0; k < (sched.length - 2); k += 3) {
-             final int tl = this.storage.DBQueryUser(sched[(k + 2)])[3];
-             if (sched[k] > tl) {
-               throw new TimeWindowException("Waypoint time (t="+sched[k]+") "
-                   +"after late window (t="+tl+", uid="+sched[(k + 2)]+")");
-             }
-           }
+           /*for (int k = 0; k < (sched.length - 2); k += 3) {
+               final int tl = this.storage.DBQueryUser(sched[(k + 2)])[3];
+               if (sched[k] > tl) {
+                 throw new TimeWindowException("Waypoint time (t="+sched[k]+") "
+                     +"after late window (t="+tl+", uid="+sched[(k + 2)]+")");
+               }
+             }*/
            int[] mutroute = route.clone();
            int[] mutsched = sched.clone();
            if (this.traffic != null) {
