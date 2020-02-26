@@ -271,7 +271,8 @@ We'll apply the delta and range filters to narrow down the candidates. The
 {\Tt{}locations\nwendquote} map maps vehicle identifiers to last-known location waypoints. A
 Jargo waypoint is a $(t,v)$ pair. The $t$ component is a time and the $v$
 component is a road network vertex. The stored last-known location waypoints
-indicate the time and location of the last update.
+indicate the time and location of the last update. Due to Jargo Known Issue \#1,
+we'll also set a non-zero criteria in the range filter.
 
 The base {\Tt{}Client\nwendquote} class has a {\Tt{}Tools\nwendquote} member object called {\Tt{}tools\nwendquote} with
 some convenience methods. Here we will use {\Tt{}tools\nwendquote} to compute Haversine.  See
@@ -288,7 +289,7 @@ for (final Integer sid : locations.keySet()) \{
     continue;
 
   final int range = this.tools.computeHaversine(v, r[4]);
-  final boolean in_range = (range <= MAX_RANGE);
+  final boolean in_range = (0 != range && range <= MAX_RANGE);
   \LA{}Debug: range filter~{\nwtagstyle{}\subpageref{NW2MZpIA-4aukgD-1}}\RA{}
   if (!in_range)
     continue;
@@ -920,7 +921,7 @@ public class NearestNeighbor extends Client {
           continue;
 
         final int range = this.tools.computeHaversine(v, r[4]);
-        final boolean in_range = (range <= MAX_RANGE);
+        final boolean in_range = (0 != range && range <= MAX_RANGE);
         if (!in_range)
           continue;
 

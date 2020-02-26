@@ -1,0 +1,32 @@
+\part{Troubleshooting}
+\label{part-troubleshooting}
+
+\chapter{Known Issues}
+\label{bug-knownissues}
+
+Check this list of known issues if you run into any problems.
+
+\begin{enumerate}
+
+\item \textbf{The check constraint 'C91' was violated while performing an
+INSERT or UPDATE on table '"APP"."CPD"'.}
+
+This error can occur when assigning a server to a request where the server's
+last-known location is the same as the request's origin. The error arises
+because (1) route history must be preserved, and (2) self-referencing edges
+aren't allowed. A client algorithm might try to construct a schedule by
+labeling the server's last-known location with the request identifier. Doing
+so would cause this error to appear if the time of the last-known location
+is before the request early time.
+
+Consider the following example. Suppose a server's last-known location is $\{0,
+1001\}$. At $t=5$, request $1$ appears with origin at $1001$. If a client
+algorithm tries to submit schedule $\{0, 1001, 1\}$, then this error occurs
+because the time of the last-known location $0$ is less than the time the
+request appeared $5$. On the other hand if a client tries to submit route
+$\{0, 1001\}, \{5, 1001\}$ with schedule $\{5, 1001, 1\}$, then constraint C10
+on Table E would be violated due to the $1001, 1001$ self-referencing edge
+in the route.
+
+\end{enumerate}
+

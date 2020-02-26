@@ -128,7 +128,8 @@ TEXSRCS = \
 	src/ui-overview.nw \
 	src/ui-command.nw \
 	src/ui-guiapp.nw \
-	src/ui-guicontroller.nw
+	src/ui-guicontroller.nw \
+	src/bug-knownissues.nw
 
 # Here, the -delay option disables automatic preamble (I use doc/jargo.tex
 # instead), and the -index option creates hyperlink references to chunks.

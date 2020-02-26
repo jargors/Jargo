@@ -35,7 +35,7 @@ public class NearestNeighbor extends Client {
                     continue;
 
                   final int range = this.tools.computeHaversine(v, r[4]);
-                  final boolean in_range = (range <= MAX_RANGE);
+                  final boolean in_range = (0 != range && range <= MAX_RANGE);
                   if (DEBUG) {
                     System.out.printf("got %d in_range=%s\n", sid, (in_range ? "true" : "false"));
                   }
