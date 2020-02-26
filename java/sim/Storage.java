@@ -1688,8 +1688,8 @@ public class Storage {
                              + "CONSTRAINT F37 FOREIGN KEY (rid, rl) REFERENCES UL (uid, ul),"
                              + "CONSTRAINT F38 FOREIGN KEY (rid, ro) REFERENCES UO (uid, uo),"
                              + "CONSTRAINT F39 FOREIGN KEY (rid, rd) REFERENCES UD (uid, ud),"
-                             + "CONSTRAINT C89 CHECK (tp BETWEEN ts AND td),"
-                             + "CONSTRAINT C90 CHECK (td BETWEEN tp AND te),"
+                             + "CONSTRAINT C89 CHECK (tp BETWEEN ts AND td) INITIALLY DEFERRED,"
+                             + "CONSTRAINT C90 CHECK (td BETWEEN tp AND te) INITIALLY DEFERRED,"
                              + "CONSTRAINT C91 CHECK (tp >= re),"
                              + "CONSTRAINT C92 CHECK (vp  = ro),"
                            //+ "CONSTRAINT C93 CHECK (td <= rl)",
