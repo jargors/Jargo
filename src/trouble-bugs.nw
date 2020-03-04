@@ -1,0 +1,20 @@
+\chapter{Bugs}
+\label{trouble-bugs}
+
+\begin{enumerate}
+
+\item \textbf{java.sql.SQLException: The external routine is not allowed to
+execute SQL statements.}
+
+If \texttt{-Dderby.stream.error.extendedDiagSeverityLevel=0} is set, the Derby
+error log may additionally contain a statement such as \texttt{Error compiling
+prepared statement: SELECT 1 FROM "APP"."CPD" ...
+validateCheckConstraint=e2cdc...}. The cause of the error is unknown.  The
+error sometimes appears when using sequential mode.  Increasing Derby's
+statement cache size using [[-Derby.language.statementCacheSize=2000]] might
+avoid the issue because the erroring statement could be compiled and cached
+from the beginning, avoiding a faulty recompile later on. No bug report has
+been filed with Derby yet because no minimum-reproducible example is available.
+
+\end{enumerate}
+

@@ -763,6 +763,7 @@ void JargoSetupPreparedStatements() {
   <<S160>>
   <<S161>>
   <<S162>>
+  <<S163>>
 }
 @ %def JargoSetupPreparedStatements
 <<S0>>=
@@ -1108,6 +1109,10 @@ this.lu_pstr.put("S161", SEL+"(a.val - b.val) FROM "
 this.lu_pstr.put("S162", SEL+"r.rid, r.ro FROM R LEFT JOIN CPD ON R.rid = CPD.rid "
     + "WHERE R.re <= ? AND ? < (R.re + ?) AND (? < CPD.tp OR CPD.tp IS NULL)");
 @ %def S162
+<<S163>>=
+this.lu_pstr.put("S163", SEL+"COUNT (*) FROM CQ "
+    + "WHERE sid=? AND q2+?>0 AND t2>=? AND t2<?");
+@ %def S163
 
 \subsection{\texttt{PSCreate}(2)}
 \begin{tabular}{p{\textwidth}}

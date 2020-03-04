@@ -1,0 +1,132 @@
+\part{Troubleshooting}
+\label{part-troubleshooting}
+
+\chapter{Limitations}
+\label{trouble-limitations}
+
+Check this list of limitations if you run into any problems.
+
+\begin{enumerate}
+
+\item \textbf{The check constraint 'C91' was violated while performing an
+INSERT or UPDATE on table '"APP"."CPD"'.}
+
+This violation occurs because a request pick-up time in the submitted schedule
+is earlier than the request early time. This violation might unexpectedly
+appear in the following scenario:
+
+\begin{example}
+Server 1 has schedule $(0, 29247, 1, 0), (1, 0, 1, 0)$, in other words the
+server is idling at vertex 29247. The time is $t=15$. At this time, Request 2
+appears, with origin 29247 and destination 11353. A client algorithm produces
+the following new route for Server 1:
+$$(0, 29247), ..., (218, 11353), (219, 0)$$
+and the following new schedule:
+$$(0, 29247, 1, 0), (0, 29247, 0, 2), (218, 11353, 0, 2), (219, 0, 1, 0).$$
+The labeled waypoint $(0, 29247, 0, 2)$ indicating pick-up of Request 2
+occurs at time $0 < 15$, producing the error.
+\end{example}
+
+If the pick-up was changed from time $0$ to a later time, then the error
+would be avoided. But be careful here, as Jargo does not allow
+self-referencing edges. Thus the next example would produce a C10 violation:
+
+\begin{example}
+Let the new schedule be
+$$(0, 29247, 1, 0), (20, 29247, 0, 2), ...$$
+and the new route be
+$$(0, 29247), (20, 29247), ...$$
+The pick-up time of 20 is safely later than the early time of 15. But
+as self-referencing edges are not allowed, edge $(29247, 29247)$ in the route
+produces a C10 violation.
+\end{example}
+
+To avoid the limitation, insert a vertex in the route:
+$$(0, 29247), (10, 29248), (20, 29247)$$
+Now there is no self-referencing edge.
+
+\item \textbf{The transaction was aborted because of a deferred constraint
+violation: Foreign key 'F20' defined on ``APP''.``W'' referencing constraint
+'P11' defined on ``APP''.``W'', key ''.}
+
+This error can occur when trying to update a server's route, and the new route
+does not contain any waypoint in the server's existing route. The error arises
+because Jargo puts the first waypoint in the new route into the [[t1]], [[v1]]
+columns of the route table, W, and these two columns have foreign key
+constraint F20 on columns [[t2]], [[v2]] in the same table. Constraint F20
+helps to enforce that [[v1]], [[v2]] form an edge.
+
+The reason for putting the first waypoint into [[t1]], [[v1]] is because the
+new and existing routes must align somewhere, otherwise the server will seem to
+``teleport'' to the new route. By using [[t1]], [[v1]] and F20, alignment is
+guaranteed to be possible.
+
+\item \textbf{com.github.jargors.sim.RouteIllegalOverwriteException: Overwrite occurred!}
+
+This error can occur when trying to update a server's route, and the
+waypoints in the new route before the world time at time of update do not match
+the waypoints in the existing route up until this time. The reason for this
+error is to prevent altering the historical traveled routes. Here is an
+example.
+
+\begin{example}
+\begin{tabular}{ll}
+Time: & 35 \\
+Old route: & $(0,4815), (16,4814), (23,13872), (30,13870), (37,30028), ...$ \\
+New route: & $(30,13870), (42,13872), ...$
+\end{tabular}
+
+At $t=35$, the server is traveling toward vertex 30028. But the new route
+tells it to go to vertex 13872. If the server could teleport, then the
+new route would be feasible. Otherwise, the new route is infeasible because
+the server must first visit 30028, turn back to 13870, only then visit 13872.
+A correct new route could be
+$(30,13870), (37,30028), (44, 13870), (56, 13872), ...$.
+\end{example}
+
+\item \textbf{The transaction was aborted because of a deferred constraint
+violation: Foreign key 'F46' defined on "APP"."PD" referencing constraint 'P12'
+defined on "APP"."PD", key ''.}
+
+This violation occurs because a pick-up or drop-off listed in Table CQ
+cannot be found in Table PD. This violiation might unexpectedly appear in the
+following scenario:
+
+\begin{example}
+Server 1 has schedule
+$$(30, 20763, 0, 5142), (1141, 19903, 0, 5142), (1142, 0, 1, 0).$$
+A client algorithm prepends a new pick-up and drop-off to the front of the
+schedule, create a new schedule
+$$(30, 20763, 0, 2151), (1018, 14209, 0, 2151), (2006, 19903, 0, 5142),
+(3117, 19903, 0, 5142), (3118, 0, 1, 0).$$
+The client submits the new schedule, along with a new route
+$$(30, 20763), (34, 20764), ..., (3118, 0).$$
+When Jargo goes to update the schedule, it looks for the time in the first
+waypoint of the new route, in this case 30, to determine where to start
+overwriting the old schedule. Then, it deletes all pick-up and drop-off events
+from the old schedule where the event time is \textit{greater than} this time
+from Table CQ. As the existing event $(30, 20763, 0, 5142)$ does not occur
+after the time 30, it does not get deleted from CQ. Later when Jargo goes to
+update Table PD with the new pick-up time for request 5142, this undeleted
+event in CQ produces F46 violation as it cannot find the event time in PD.
+\end{example}
+
+If \textit{greater-than-or-equals} was used instead, then the common case of
+computing a new route from a vehicle's origin would break because the vehicle's
+own ``pick-up'' event would be deleted!
+
+To avoid this limitation, do not change any existing schedule events on the
+first waypoint of the new route to be submitted.
+
+\item \textbf{The statement was aborted because it would have caused a
+duplicate key value in a unique or primary key constraint or unique index
+identified by 'C105' defined on 'CQ'.}
+
+This violation occurs because a schedule event is inserted twice into CQ.
+This violation can unexpectedly occur if the first waypoint in a submitted
+route has existing schedule events, and those events are also found in the
+submitted schedule. To avoid this issue, do not include existing events on
+this waypoint in the submitted schedule.
+
+\end{enumerate}
+

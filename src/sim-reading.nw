@@ -1528,6 +1528,54 @@ int[] queryServerLoadMax(final int sid, final int t) throws SQLException {
 }
 @ %def queryServerLoadMax
 
+\subsection{\texttt{DBQueryServerCapacityViolations}(4)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryServerCapacityViolations]]}(4) returns the
+number of schedule events in excess of server capacity within a given time
+range if a new load were applied during that range.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Integer [[sid]] (param. 1):&server identifier.\\
+Integer [[rq]] (param. 2):&additional load to apply.\\
+Integer [[tp]] (param. 3):&start time.\\
+Integer [[td]] (param. 4):&end time.\\
+\end{tabular}\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:count$};\\
+};
+\end{tikzpicture}
+
+where $count$ is the number of events in exceeding server capacity.\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryServerCapacityViolations(4)>>=
+int[] DBQueryServerCapacityViolations(final int sid,
+    final int rq, final int tp, final int td) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    return PSQuery(conn, "S163", 1, sid, rq, tp, td);
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def DBQueryServerCapacityViolations
+<<Read: queryServerCapacityViolations(4)>>=
+int[] queryServerCapacityViolations(final int sid,
+    final int rq, final int tp, final int td) throws SQLException {
+  return this.storage.DBQueryServerCapacityViolations(sid, rq, tp, td);
+}
+@ %def queryServerCapacityViolations
+
 \subsection{\texttt{DBQueryServerDistance}(2)}
 \begin{tabular}{p{\textwidth}}
 \toprule

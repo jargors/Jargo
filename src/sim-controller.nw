@@ -247,10 +247,16 @@ private Runnable RequestCollectionLoop = () -> {
       System.err.println("Warning: database connection interrupted");
     } else {
       System.err.println("Encountered fatal error");
-      System.err.println(e.toString());
-      System.err.println(e.getErrorCode());
-      e.printStackTrace();
-      System.exit(1);
+      try {
+        instanceExport("crash-db");
+        System.err.println(e.toString());
+        System.err.println(e.getErrorCode());
+        e.printStackTrace();
+      } catch (Exception ee) {
+        // ..
+      } finally {
+        System.exit(1);
+      }
     }
   }
   <<Stats: controllerRequestCollection>>
