@@ -1563,7 +1563,7 @@ where $count$ is the number of events in exceeding server capacity.\\
 int[] DBQueryServerCapacityViolations(final int sid,
     final int rq, final int tp, final int td) throws SQLException {
   try (<<Open [[conn]]>>) {
-    return PSQuery(conn, "S163", 1, sid, rq, tp, td);
+    return PSQuery(conn, "S163", 1, sid, rq, td, td, tp, td);
   } catch (SQLException e) {
     throw e;
   }

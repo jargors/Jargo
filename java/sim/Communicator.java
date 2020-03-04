@@ -80,6 +80,10 @@ public class Communicator {
            this.statQueryEdgeDur = (System.currentTimeMillis() - A0);
            return output;
          }
+  public int[] queryServerCapacityViolations(final int sid,
+             final int rq, final int tp, final int td) throws SQLException {
+           return this.storage.DBQueryServerCapacityViolations(sid, rq, tp, td);
+         }
   public int[] queryServerDistanceRemaining(final int sid, final int t) throws SQLException {
            long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryServerDistanceRemaining(sid, t);
@@ -96,6 +100,12 @@ public class Communicator {
            long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryServerLoadMax(sid, t);
            this.statQueryServerLoadMaxDur = (System.currentTimeMillis() - A0);
+           return output;
+         }
+  public int[] queryServerRouteActive(final int sid) throws SQLException {
+           long A0 = System.currentTimeMillis();
+           int[] output = this.storage.DBQueryServerRouteActive(sid);
+           /*this.statQueryServerRouteActiveDur = (System.currentTimeMillis() - A0);*/
            return output;
          }
   public int[] queryServerRouteRemaining(final int sid, final int t) throws SQLException {
@@ -134,7 +144,8 @@ public class Communicator {
                 EdgeNotFoundException, TimeWindowException, SQLException {
            long A0 = System.currentTimeMillis();
            final int[] current = this.storage.DBQueryServerRoute(sid);
-           int t_next = this.retrieveClock();
+           int t_now  = this.retrieveClock();
+           int t_next = t_now;
            for (int i = 0; i < (current.length - 1); i += 2) {
              if (current[i] > t_next) {
                t_next = current[i];
@@ -160,7 +171,8 @@ public class Communicator {
            }
            int j = 0;
            while (i < current.length && (current[i] <= t_next && current[(i + 1)] != 0)) {
-             if (current[i] != route[j] || current[(i + 1)] != route[(j + 1)]) {
+             if ((current[(i + 1)] != route[(j + 1)])
+              || (current[i] != route[j] && current[i] <= t_now)) {
                if (DEBUG) {
                  System.out.printf("overwrite, current[%d] != route[%d] or current[%d] != route[%d]\n",
                      i, j, (i + 1), (j + 1));

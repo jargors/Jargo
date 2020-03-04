@@ -287,6 +287,9 @@ private Runnable RequestHandlingLoop = () -> {
   } catch (ClientException e) {
     System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientException: %s\n",
         this.statControllerClock, e.toString());
+    // try {
+    //   instanceExport("debug-db");
+    // } catch (Exception ee) { }
     e.printStackTrace();
   } catch (ClientFatalException e) {
     System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientFatalException: %s\n",

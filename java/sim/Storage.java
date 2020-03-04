@@ -573,6 +573,14 @@ public class Storage {
              throw e;
            }
          }
+  public int[] DBQueryServerCapacityViolations(final int sid,
+             final int rq, final int tp, final int td) throws SQLException {
+           try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+             return PSQuery(conn, "S163", 1, sid, rq, td, td, tp, td);
+           } catch (SQLException e) {
+             throw e;
+           }
+         }
   public int[] DBQueryServerDistance(final int sid, boolean flag_usecache) throws SQLException {
            if (flag_usecache) {
              return new int[] { this.distance_servers.get(sid) };
@@ -1149,7 +1157,7 @@ public class Storage {
                    this.PSAdd(pS84, tj, vj, Lj);
                  }
                }
-               this.PSSubmit(pS82, pS83, pS84);
+               this.PSSubmit(pS83, pS82, pS84);
                PreparedStatement pS140 = this.PSCreate(conn, "S140");
                for (int j = 0; j < (sched.length - 2); j += 3) {
                  final int Lj = sched[(j + 2)];
@@ -1688,8 +1696,9 @@ public class Storage {
                              + "CONSTRAINT F37 FOREIGN KEY (rid, rl) REFERENCES UL (uid, ul),"
                              + "CONSTRAINT F38 FOREIGN KEY (rid, ro) REFERENCES UO (uid, uo),"
                              + "CONSTRAINT F39 FOREIGN KEY (rid, rd) REFERENCES UD (uid, ud),"
-                             + "CONSTRAINT C89 CHECK (tp BETWEEN ts AND td) INITIALLY DEFERRED,"
-                             + "CONSTRAINT C90 CHECK (td BETWEEN tp AND te) INITIALLY DEFERRED,"
+                             + "CONSTRAINT C89a CHECK (tp >= ts),"
+                             + "CONSTRAINT C89b CHECK (td <= te),"
+                             + "CONSTRAINT C89c CHECK (tp < td),"
                              + "CONSTRAINT C91 CHECK (tp >= re),"
                              + "CONSTRAINT C92 CHECK (vp  = ro),"
                            //+ "CONSTRAINT C93 CHECK (td <= rl)",
@@ -1721,13 +1730,17 @@ public class Storage {
                              + "CONSTRAINT F45 FOREIGN KEY (rid, rq) REFERENCES UQ (uid, uq),"
                              + "CONSTRAINT F46 FOREIGN KEY (sid, t2, v2, rid) REFERENCES PD INITIALLY DEFERRED,"
                              + "CONSTRAINT F47 FOREIGN KEY (sid, tp, td, rid) REFERENCES CPD INITIALLY DEFERRED,"
-                             + "CONSTRAINT C102 CHECK ("
-                             + "  CASE WHEN t1 IS NULL"
-                             + "    THEN t2 = se AND q1 IS NULL AND q2 = sq AND o1 IS NULL AND o2 = 1"
-                             + "        AND rid IS NULL AND rq IS NULL AND tp IS NULL AND td IS NULL"
-                             + "    ELSE q2 <= 0 AND o2 = o1 + 1"
-                             + "  END"
-                             + ") INITIALLY DEFERRED,"
+                             + "CONSTRAINT C102a CHECK (CASE WHEN t1 IS NULL THEN t2 = se END),"
+                             + "CONSTRAINT C102b CHECK (CASE WHEN t1 IS NULL THEN q2 = sq END),"
+                             + "CONSTRAINT C102c CHECK (CASE WHEN t1 IS NULL THEN o2 = 1 END),"
+                             + "CONSTRAINT C102d CHECK (CASE WHEN t1 IS NULL THEN q1 IS NULL END),"
+                             + "CONSTRAINT C102e CHECK (CASE WHEN t1 IS NULL THEN o1 IS NULL END),"
+                             + "CONSTRAINT C102f CHECK (CASE WHEN t1 IS NULL THEN rid IS NULL END),"
+                             + "CONSTRAINT C102g CHECK (CASE WHEN t1 IS NULL THEN rq IS NULL END),"
+                             + "CONSTRAINT C102h CHECK (CASE WHEN t1 IS NULL THEN tp IS NULL END),"
+                             + "CONSTRAINT C102i CHECK (CASE WHEN t1 IS NULL THEN td IS NULL END),"
+                             + "CONSTRAINT C102j CHECK (CASE WHEN t1 IS NOT NULL THEN q2 <= 0 END),"
+                             + "CONSTRAINT C102k CHECK (CASE WHEN t1 IS NOT NULL THEN o2 = o1 + 1 END),"
                              + "CONSTRAINT C103 CHECK (CASE WHEN t2 = tp THEN q2 = q1 + rq END) INITIALLY DEFERRED,"
                              + "CONSTRAINT C104 CHECK (CASE WHEN t2 = td THEN q2 = q1 - rq END) INITIALLY DEFERRED,"
                              + "CONSTRAINT C105 UNIQUE (t2, v2, rid)"
@@ -2024,6 +2037,8 @@ public class Storage {
                 + "(SELECT COUNT (*) as val FROM assignments_r WHERE t <= ?) as b");
             this.lu_pstr.put("S162", SEL+"r.rid, r.ro FROM R LEFT JOIN CPD ON R.rid = CPD.rid "
                 + "WHERE R.re <= ? AND ? < (R.re + ?) AND (? < CPD.tp OR CPD.tp IS NULL)");
+            this.lu_pstr.put("S163", SEL+"COUNT (*) FROM CQ WHERE sid=? AND q1+? > 0"
+                + "AND ( (t1 < ? AND t2 > ?) OR (? < t2 AND t2 <= ?) )");
           }
   private void PSAdd(PreparedStatement p, final Integer... values) throws SQLException {
             p.clearParameters();

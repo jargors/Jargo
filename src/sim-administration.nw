@@ -1110,8 +1110,8 @@ this.lu_pstr.put("S162", SEL+"r.rid, r.ro FROM R LEFT JOIN CPD ON R.rid = CPD.ri
     + "WHERE R.re <= ? AND ? < (R.re + ?) AND (? < CPD.tp OR CPD.tp IS NULL)");
 @ %def S162
 <<S163>>=
-this.lu_pstr.put("S163", SEL+"COUNT (*) FROM CQ "
-    + "WHERE sid=? AND q2+?>0 AND t2>=? AND t2<?");
+this.lu_pstr.put("S163", SEL+"COUNT (*) FROM CQ WHERE sid=? AND q1+? > 0"
+    + "AND ( (t1 < ? AND t2 > ?) OR (? < t2 AND t2 <= ?) )");
 @ %def S163
 
 \subsection{\texttt{PSCreate}(2)}

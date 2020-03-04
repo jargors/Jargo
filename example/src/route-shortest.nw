@@ -1,0 +1,185 @@
+\part{Routing}
+\label{part-routing}
+
+\chapter{Shortest Path}
+\label{route-shortest}
+
+In the previous chapters, we saw some scheduling procedures for ridesharing
+algorithms. Now we will take a look at routing procedures. We'll start Shortest
+Path. This procedure calculates consecutive shortest paths between events in a
+schedule in sequence. We will use the [[Tools]] class to quickly calculate
+shortest paths using a G-tree index of the road network graph.
+
+We will need some other memory objects. We will need the schedule to route
+through, [[bnew]], produced using some scheduling procedure such as Prepend or
+Prepend After. We will also a container to store the computed route, [[wnew]].
+Finally, we need an \textit{initial waypoint} [[wbeg]] to start off the route.
+Recall that scheduling procedures do not fill in event times because these
+times depend on the routing. After we find the route here, we'll be able to
+update [[bnew]] by filling in the event times.
+
+\begin{center}
+\begin{tabular}{|p{74mm}|p{74mm}|}
+\hline
+\textbf{Required Memory Values} & \textbf{Side Effects} \\
+\hline
+\begin{itemize}[leftmargin=*]
+\item [[Tools this.tools]]: Jargo utility functions
+\item [[int[] bnew]]: schedule to route through, with empty time components
+\item [[int[] wbeg]]: first $(t,v)$ waypoint in the new route
+\item [[int[] wnew]]: (empty)
+\end{itemize} &
+\begin{itemize}[leftmargin=*]
+\item [[int[] bnew]]: time components added
+\item [[int[] wnew]]: the computed route
+\end{itemize} \\
+\hline
+\end{tabular}
+\end{center}
+
+The procedure takes four steps. In the first step, we'll initialize some memory
+structures. In the second step, we'll compute shortest paths between adjacent
+events. In the third step, we'll join the paths into a single route. In the
+last step, we'll fill in the event times into [[bnew]].
+
+<<Routing: Shortest Path>>=
+{
+  <<Debug: echo shortest path>>
+  <<Shortest: Step 1: Initialize>>
+  <<Shortest: Step 2: Compute>>
+  <<Shortest: Step 3: Join>>
+  <<Shortest: Step 4: Fill>>
+}
+@
+
+\section{Step 1: Initialize}
+
+<<Shortest: Step 1: Initialize>>=
+final int p = (bnew.length/3);
+
+final int[][] legs = new int[(bnew.length/3)][];
+<<Debug: initialize legs container>>
+
+int[] leg = this.tools.computeRoute(wbeg[1], bnew[1], wbeg[0]);
+int n = leg.length;
+int t = leg[n - 2];
+<<Debug: set route length and time>>
+
+legs[0] = leg;
+<<Debug: set first leg>>
+@
+
+\section{Step 2: Compute}
+
+<<Shortest: Step 2: Compute>>=
+for (int i = 1; i < p; i++) {
+  final int u = bnew[(3*i - 2)];
+  final int v = bnew[(3*i + 1)];
+  leg = this.tools.computeRoute(u, v, t);
+  legs[i] = leg;
+  <<Debug: set leg>>
+
+  n += (leg.length - 2);
+  t = leg[leg.length - 2];
+  <<Debug: set route length and time>>
+}
+@
+
+\section{Step 3: Join}
+
+<<Shortest: Step 3: Join>>=
+wnew = new int[n];
+{
+  int k = 0;
+  for (int i = 0; i < legs.length; i++) {
+    int rend = (legs[i].length - (i == (legs.length - 1) ? 0 : 2));
+    for (int j = 0; j < rend; j++) {
+      wnew[k] = legs[i][j];
+      <<Debug: join route components>>
+      k++;
+    }
+  }
+}
+@
+
+\section{Step 4: Fill}
+
+<<Shortest: Step 4: Fill>>=
+for (int i = 1; i < legs.length; i++) {
+  bnew[(3*i - 3)] = legs[i][0];
+  <<Debug: set schedule time>>
+}
+
+bnew[(3*p - 3)] = t;
+<<Debug: set vehicle end time>>
+@
+
+\section{Debug}
+
+\subsection{Debug: Echo Shortest Path}
+
+<<Debug: echo shortest path>>=
+if (DEBUG) {
+  System.out.printf("shortest path\n");
+}
+@
+
+\subsection{Debug: Initialize Legs Container}
+
+<<Debug: initialize legs container>>=
+if (DEBUG) {
+  System.out.printf("init legs={ }\n");
+}
+@
+
+\subsection{Debug: Set Route Length and Time}
+
+<<Debug: set route length and time>>=
+if (DEBUG) {
+  System.out.printf("set n=%d\n", n);
+  System.out.printf("set t=%d\n", t);
+}
+@
+
+\subsection{Debug: Set First Leg}
+
+<<Debug: set first leg>>=
+if (DEBUG) {
+  System.out.printf("set legs[0]={ %d, %d, ..., %d, %d  }\n",
+      legs[0][0], legs[0][1], legs[0][legs[0].length - 2], legs[0][legs[0].length - 1]);
+}
+@
+
+\subsection{Debug: Set Leg}
+
+<<Debug: set leg>>=
+if (DEBUG) {
+  System.out.printf("set legs[%d]={ %d, %d, ..., %d, %d  }\n", i,
+      legs[i][0], legs[i][1], legs[i][legs[i].length - 2], legs[i][legs[i].length - 1]);
+}
+@
+
+\subsection{Debug: Join Route Components}
+
+<<Debug: join route components>>=
+if (DEBUG) {
+  System.out.printf("set wnew[%d]=%d\n", k, wnew[k]);
+}
+@
+
+\subsection{Debug: Set Schedule Time}
+
+<<Debug: set schedule time>>=
+if (DEBUG) {
+  System.out.printf("set bnew[%d]=%d\n", (3*i - 3), bnew[(3*i - 3)]);
+}
+@
+
+\subsection{Debug: Set Vehicle End Time}
+
+<<Debug: set vehicle end time>>=
+if (DEBUG) {
+  System.out.printf("set bnew[%d]=%d\n", (3*p - 3), bnew[(3*p - 3)]);
+}
+@
+

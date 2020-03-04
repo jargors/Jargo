@@ -1,0 +1,178 @@
+\part{Scheduling}
+\label{part-scheduling}
+
+\chapter{Prepend}
+\label{sched-prepend}
+
+\renewcommand{\thepage}{\arabic{page}}
+\setcounter{page}{1}
+
+The following chapters implement several scheduling procedures for ridesharing
+algorithms. Each procedure is written here as a ``chunk'' of code. A table
+appearing at the beginning of each procedure lists the required memory values
+for using the chunk and the side effects on these structures after execution.
+
+Here is the ``memory table'' for the first example, called Prepend.
+
+\begin{center}
+\begin{tabular}{|p{74mm}|p{74mm}|}
+\hline
+\textbf{Required Memory Values} & \textbf{Side Effects} \\
+\hline
+\begin{itemize}[leftmargin=*]
+\item [[int[] brem]]: server's remaining schedule
+\item [[int[] bnew]]: (empty)
+\item [[int rid]]: request identifier
+\item [[int ro]]: request origin vertex
+\item [[int rd]]: request destination vertex
+\end{itemize} &
+\begin{itemize}[leftmargin=*]
+\item [[int[] bnew]]: schedule after prepend
+\end{itemize} \\
+\hline
+\end{tabular}
+\end{center}
+
+The Prepend procedure copies schedule [[brem]] into schedule [[bnew]],
+\textit{but with request [[rid]]'s pick-up and drop-off events prepended to the
+front}. An ``event'' in [[bnew]] is a 3-tuple, $(t,v,L)$, where $t$ is the time
+of the event, $v$ is the location, and $L$ is the label describing the event.
+As event times cannot be known until the route is constructed through the
+schedule, [[bnew]] has empty time components (the 0th, 3rd, 6th, ... indices).
+
+The procedure has three steps. We don't want to pollute the memory space, so
+we'll wrap the entire procedure in braces.
+
+<<Scheduling: Prepend>>=
+{
+  <<Debug: echo prepend>>
+  <<Prepend: Step 1: Initialize>>
+  <<Prepend: Step 2: Prepend>>
+  <<Prepend: Step 3: Copy>>
+}
+@
+
+\section{Step 1: Initialize}
+
+First we'll initialize [[bnew]] to the correct size. The correct size is
+calculated as follows. In Jargo, a server's remaining schedule is returned as a
+4-tuple flattened array of $(t,v,Ls,Lr)$ components. Each 4-tuple is one event.
+To get the number of events, we divide the length of the remaining schedule
+[[brem]] by four. Then we add two to this number because the new schedule will
+have two additional events, one pick-up and one drop-off. Finally we multiply
+this sum by three. (TODO: change remaining-schedule and submitted-schedule to
+be in the same format!)
+
+<<Prepend: Step 1: Initialize>>=
+final int m = (brem.length/4);
+bnew = new int[(3*(m + 2))];
+<<Debug: initialize>>
+@
+
+\section{Step 2: Prepend}
+
+Now we'll do the prepend by populating the first six elements in [[bnew]].
+Elements [[bnew[0..2]]] represent the request pick-up event, and elements
+[[bnew[3..5]]] represent the request drop-off event. As event times are
+unknown, we'll leave out the 0th and 3rd indices.
+
+<<Prepend: Step 2: Prepend>>=
+bnew[1] = ro;
+bnew[2] = rid;
+bnew[4] = rd;
+bnew[5] = rid;
+<<Debug: prepend>>
+@
+
+\section{Step 3: Copy}
+
+Just like that, we're almost done. In the third step, we'll simply copy over
+[[brem]] into [[bnew]] while shifting the destination indice by six. We shift
+by six to account for the two 3-tuples we inserted in Step 2. (We have to
+``squeeze'' the label in [[brem]] into [[bnew]]. The label in [[brem]] takes
+two elements while it only takes one element in [[bnew]]. I'll fix this
+inconsistency in a later version!)
+
+<<Prepend: Step 3: Copy>>=
+for (int i = 0; i < m; i++) {
+  // Extract vertex and labels
+  final int bv = brem[(4*i + 1)];
+  final int ls = brem[(4*i + 2)];
+  final int lr = brem[(4*i + 3)];
+  // Copy into bnew
+  bnew[(3*i + 7)] = bv;
+  bnew[(3*i + 8)] = (ls == 0 ? lr : ls);  // <-- squeeze the label
+  <<Debug: copy>>
+}
+@
+
+\section{Example}
+
+Here is an example of the procedure in action. (TODO)
+
+\section{Full Code}
+
+Here is the full code.
+
+\begin{verbatim}
+{
+  final int m = (brem.length/4);
+  bnew = new int[(3*(m + 2))];
+  bnew[1] = ro;
+  bnew[2] = rid;
+  bnew[4] = rd;
+  bnew[5] = rid;
+  for (int i = 0; i < m; i++) {
+    // Extract vertex and labels
+    final int bv = brem[(4*i + 1)];
+    final int ls = brem[(4*i + 2)];
+    final int lr = brem[(4*i + 3)];
+    // Copy into bnew
+    bnew[(3*i + 7)] = bv;
+    bnew[(3*i + 8)] = (ls == 0 ? lr : ls);  // <-- squeeze the label
+  }
+}
+\end{verbatim}
+
+\section{Debug}
+
+Printing debugging messages to screen can be useful for tracking execution of
+the procedure. The below print statements can be used to inspect [[bnew]] as
+its contents change.
+
+\subsection{Debug: Echo Prepend}
+
+<<Debug: echo prepend>>=
+if (DEBUG) {
+  System.out.printf("prepend\n");
+}
+@
+
+\subsection{Debug: Initialize}
+
+<<Debug: initialize>>=
+if (DEBUG) {
+  System.out.printf("init bnew={ }, length=%d\n", bnew.length);
+}
+@
+
+\subsection{Debug: Prepend}
+
+<<Debug: prepend>>=
+if (DEBUG) {
+  System.out.printf("set bnew[1]=%d\n", bnew[1]);
+  System.out.printf("set bnew[2]=%d\n", bnew[2]);
+  System.out.printf("set bnew[4]=%d\n", bnew[4]);
+  System.out.printf("set bnew[5]=%d\n", bnew[5]);
+}
+@
+
+\subsection{Debug: Copy}
+
+<<Debug: copy>>=
+if (DEBUG) {
+  System.out.printf("set bnew[%d]=%d\n", (3*i + 7), bnew[(3*i + 7)]);
+  System.out.printf("set bnew[%d]=%d\n", (3*i + 8), bnew[(3*i + 8)]);
+}
+@
+

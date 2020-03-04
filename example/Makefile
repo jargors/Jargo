@@ -3,8 +3,9 @@
 
 # Here I am getting the names of all the *.java files to be tangled.
 JAVA1 = \
-	java/client/NearestNeighbor.java \
-	java/client/GreedyInsertion.java
+	java/client/NearestA.java
+	#java/client/NearestB.java 
+	#java/client/GreedyInsertion.java
 
 JAVA2 = \
 	java/traffic/Broadway.java
@@ -88,8 +89,12 @@ $(JAVA2) : src/*.nw
 
 # Build doc/body.tex.
 TEXSRCS= \
+	src/sched-prepend.nw \
+	src/sched-prepend-after.nw \
+	src/route-shortest.nw \
 	src/client-overview.nw \
-	src/client-nearest.nw \
+	src/client-nearest-a.nw \
+	src/client-nearest-b.nw \
 	src/client-greedy.nw \
 	src/traffic-overview.nw \
 	src/traffic-broadway.nw
@@ -100,12 +105,12 @@ doc/body.tex : src/*.nw
 
 # This target describes how to compile the client Java sources in java/ into bytecode.
 com/github/jargors/client/%.class : java/client/%.java
-	@printf "compile java/client sources...\n";
+	@printf "compile $@...\n";
 	@$(call run2, javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:../jar/* $<)
 #
 # This target describes how to compile the traffic Java sources in java/ into bytecode.
 com/github/jargors/traffic/%.class : java/traffic/%.java
-	@printf "compile java/traffic sources...\n";
+	@printf "compile $@...\n";
 	@$(call run2, javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:../jar/* $<)
 
 clean :

@@ -138,10 +138,16 @@ public class Controller {
         System.err.println("Warning: database connection interrupted");
       } else {
         System.err.println("Encountered fatal error");
-        System.err.println(e.toString());
-        System.err.println(e.getErrorCode());
-        e.printStackTrace();
-        System.exit(1);
+        try {
+          instanceExport("crash-db");
+          System.err.println(e.toString());
+          System.err.println(e.getErrorCode());
+          e.printStackTrace();
+        } catch (Exception ee) {
+          // ..
+        } finally {
+          System.exit(1);
+        }
       }
     }
     this.statControllerRequestCollectionSize = A1;
@@ -154,6 +160,9 @@ public class Controller {
     } catch (ClientException e) {
       System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientException: %s\n",
           this.statControllerClock, e.toString());
+      // try {
+      //   instanceExport("debug-db");
+      // } catch (Exception ee) { }
       e.printStackTrace();
     } catch (ClientFatalException e) {
       System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientFatalException: %s\n",
@@ -661,7 +670,7 @@ public class Controller {
   public int[] queryServerRouteActive(final int sid) throws SQLException {
            long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryServerRouteActive(sid);
-           this.statQueryServerRouteActiveDur = (System.currentTimeMillis() - A0);
+           /*this.statQueryServerRouteActiveDur = (System.currentTimeMillis() - A0);*/
            return output;
          }
   public int[] queryServerRouteRemaining(final int sid, final int t) throws SQLException {
