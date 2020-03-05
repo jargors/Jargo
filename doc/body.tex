@@ -297,7 +297,6 @@
 \nwixlogsorted{c}{{Package: \code{}jmx\edoc{}}{NW1ODIS0-4eAI9s-1}{\nwixd{NW1ODIS0-4eAI9s-1}\nwixu{NW3tzVoI-3GORvk-1}\nwixu{NW3tzVoI-4XqbqQ-1}\nwixu{NW3tzVoI-4Nl9bP-1}\nwixu{NW3tzVoI-2VRqhl-1}\nwixu{NW3tzVoI-2KSuiD-1}\nwixu{NW3tzVoI-3obt5w-1}\nwixu{NW3tzVoI-3Rql7V-1}\nwixu{NW3tzVoI-1jjsOF-1}}}%
 \nwixlogsorted{c}{{Package: \code{}sim\edoc{}}{NW1ODIS0-3dgLDt-1}{\nwixd{NW1ODIS0-3dgLDt-1}\nwixu{NW1ODIS0-3mhF1c-1}\nwixu{NW1ODIS0-rz4lR-1}\nwixu{NW1ODIS0-2dvIEX-1}\nwixu{NW1ODIS0-4YUrEC-1}\nwixu{NW1ODIS0-3gapB1-1}\nwixu{NW1ODIS0-MwlKC-1}\nwixu{NW1ODIS0-1fDCHF-1}\nwixu{NW1ODIS0-3HHaYS-1}\nwixu{NW1ODIS0-VaiO0-1}\nwixu{NW1ODIS0-15irq2-1}\nwixu{NW1ODIS0-2ZrcAK-1}\nwixu{NW46kjAM-203Bbj-1}\nwixu{NW3hMOhb-34QoYM-1}\nwixu{NW1y1NkR-1uGZre-1}\nwixu{NW3VOC6-bpC9O-1}\nwixu{NW3VOC6-4V6p1c-1}\nwixu{NW3VOC6-1dhUeW-1}\nwixu{NW49fzdE-2eR0nK-1}\nwixu{NW4SYVd2-2Vh5vZ-1}}}%
 \nwixlogsorted{c}{{Package: \code{}ui\edoc{}}{NW1ODIS0-16wCKN-1}{\nwixd{NW1ODIS0-16wCKN-1}\nwixu{NW13QX3X-Yvu8p-1}\nwixu{NW4bKnyB-aTRGs-1}\nwixu{NW4fhK2e-4ScqTl-1}}}%
-\nwixlogsorted{c}{{Populate the tp, td cache and update CQ}{NW3mnZLd-2B99VS-1}{\nwixd{NW3mnZLd-2B99VS-1}}}%
 \nwixlogsorted{c}{{Populate the tp, td cache and vp, vd cache and update CQ}{NW3mnZLd-1O0X6W-1}{\nwixu{NW3mnZLd-4JHoKM-1}\nwixd{NW3mnZLd-1O0X6W-1}}}%
 \nwixlogsorted{c}{{Procedure to insert route}{NW3mnZLd-3NpaSw-1}{\nwixu{NW3mnZLd-2yYgTY-1}\nwixu{NW3mnZLd-2U1TR0-1}\nwixd{NW3mnZLd-3NpaSw-1}}}%
 \nwixlogsorted{c}{{Procedure to update and add to schedule}{NW3mnZLd-4JHoKM-1}{\nwixd{NW3mnZLd-4JHoKM-1}\nwixu{NW3mnZLd-1v536H-1}}}%
@@ -8833,7 +8832,7 @@ if (this.traffic != null) \{
         ? ((int) Math.ceil((dd/(float) nu_new + t1))) - t2
         : 0);
     if (diff != 0) \{
-      for (int p = 0; p < (mutsched.length - 2); p += 3) \{
+      for (int p = 0; p < (mutsched.length - 3); p += 4) \{
         if (mutsched[p] >= mutroute[(k + 2)]) \{
           mutsched[p] += diff;
         \}
@@ -8946,25 +8945,23 @@ this.\nwlinkedidentc{PSSubmit}{NW1ODIS0-1S1xBT-1}(pS14);
 \subsection{Insert into CQ new remaining schedule}
 \nwenddocs{}\nwbegincode{25}\sublabel{NW3mnZLd-4P25Zx-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-4P25Zx-1}}}\moddef{Insert into CQ new remaining schedule~{\nwtagstyle{}\subpageref{NW3mnZLd-4P25Zx-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3mnZLd-4JHoKM-1}}\nwenddeflinemarkup
 PreparedStatement pS14 = \nwlinkedidentc{PSCreate}{NW1ODIS0-47iuYD-1}(conn, "\nwlinkedidentc{S14}{NW1ODIS0-yU48q-1}");
-for (int j = 0; j < (sched.length - 2); j += 3) \{
+for (int j = 0; j < (sched.length - 3); j += 4) \{
   final int t2 = sched[(j + 0)];
   final int v2 = sched[(j + 1)];
-  final int Lj = sched[(j + 2)];
-  if (Lj != sid) \{
-    // if only origin or only destination is in sched, cache will
-    // not contain key Lj.
-    if (cache.containsKey(Lj)) \{
-      final int[] qpd = cache.get(Lj);
-      final int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
-      final int o2 = o1 + 1;
-      this.\nwlinkedidentc{PSAdd}{NW1ODIS0-1X4ymL-1}(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
-            qpd[0], qpd[1], qpd[2], o1, o2);
-      t1 = t2;
-      q1 = q2;
-      o1 = o2;
-    \} else \{
-      throw new \nwlinkedidentc{UserNotFoundException}{NW1ODIS0-15irq2-1}("User "+Lj+" not found in schedule!");
-    \}
+  final int Lj = sched[(j + 3)];
+  // if only origin or only destination is in sched, cache will
+  // not contain key Lj.
+  if (cache.containsKey(Lj)) \{
+    final int[] qpd = cache.get(Lj);
+    final int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
+    final int o2 = o1 + 1;
+    this.\nwlinkedidentc{PSAdd}{NW1ODIS0-1X4ymL-1}(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
+          qpd[0], qpd[1], qpd[2], o1, o2);
+    t1 = t2;
+    q1 = q2;
+    o1 = o2;
+  \} else \{
+    throw new \nwlinkedidentc{UserNotFoundException}{NW1ODIS0-15irq2-1}("User "+Lj+" not found in schedule!");
   \}
 \}
 this.\nwlinkedidentc{PSSubmit}{NW1ODIS0-1S1xBT-1}(pS14);
@@ -9032,34 +9029,12 @@ this.\nwlinkedidentc{PSSubmit}{NW1ODIS0-1S1xBT-1}(pS10);
 \LA{}Insert into PD, CPD new jobs~{\nwtagstyle{}\subpageref{NW3mnZLd-2WswqS-1}}\RA{}
 \nwused{\\{NW3mnZLd-1v536H-1}}\nwendcode{}\nwbegindocs{34}\nwdocspar
 
-\subsection{Populate the tp, td cache and update CQ}
-\nwenddocs{}\nwbegincode{35}\sublabel{NW3mnZLd-2B99VS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-2B99VS-1}}}\moddef{Populate the tp, td cache and update CQ~{\nwtagstyle{}\subpageref{NW3mnZLd-2B99VS-1}}}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
-PreparedStatement pS140 = this.\nwlinkedidentc{PSCreate}{NW1ODIS0-47iuYD-1}(conn, "\nwlinkedidentc{S140}{NW1ODIS0-yno67-1}");
-for (int j = 0; j < (sched.length - 2); j += 3) \{
-  final int Lj = sched[(j + 2)];
-  if (Lj != sid) \{
-    if (!cache.containsKey(Lj)) \{
-      final int[] output = \nwlinkedidentc{PSQuery}{NW1ODIS0-yHOIP-1}(conn, "\nwlinkedidentc{S86}{NW1ODIS0-1Ru7wC-1}", 2, Lj);
-      if (output.length == 0) \{
-        throw new \nwlinkedidentc{UserNotFoundException}{NW1ODIS0-15irq2-1}("Request "+Lj+" not in pickups/dropoffs!");
-      \}
-      final int tp = output[0];
-      final int td = output[1];
-      final int rq = this.lu_users.get(Lj)[1];
-      cache.put(Lj, new int[] \{ rq, tp, td \});
-      this.\nwlinkedidentc{PSAdd}{NW1ODIS0-1X4ymL-1}(pS140, tp, td, Lj);
-    \}
-  \}
-\}
-this.\nwlinkedidentc{PSSubmit}{NW1ODIS0-1S1xBT-1}(pS140);
-\nwnotused{Populate the tp, td cache and update CQ}\nwidentuses{\\{{\nwixident{PSAdd}}{PSAdd}}\\{{\nwixident{PSCreate}}{PSCreate}}\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{PSSubmit}}{PSSubmit}}\\{{\nwixident{S140}}{S140}}\\{{\nwixident{S86}}{S86}}\\{{\nwixident{UserNotFoundException}}{UserNotFoundException}}}\nwindexuse{\nwixident{PSAdd}}{PSAdd}{NW3mnZLd-2B99VS-1}\nwindexuse{\nwixident{PSCreate}}{PSCreate}{NW3mnZLd-2B99VS-1}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW3mnZLd-2B99VS-1}\nwindexuse{\nwixident{PSSubmit}}{PSSubmit}{NW3mnZLd-2B99VS-1}\nwindexuse{\nwixident{S140}}{S140}{NW3mnZLd-2B99VS-1}\nwindexuse{\nwixident{S86}}{S86}{NW3mnZLd-2B99VS-1}\nwindexuse{\nwixident{UserNotFoundException}}{UserNotFoundException}{NW3mnZLd-2B99VS-1}\nwendcode{}\nwbegindocs{36}\nwdocspar
-
 \subsection{Populate the tp, td cache and vp, vd cache and update CQ}
-\nwenddocs{}\nwbegincode{37}\sublabel{NW3mnZLd-1O0X6W-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-1O0X6W-1}}}\moddef{Populate the tp, td cache and vp, vd cache and update CQ~{\nwtagstyle{}\subpageref{NW3mnZLd-1O0X6W-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3mnZLd-4JHoKM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{35}\sublabel{NW3mnZLd-1O0X6W-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-1O0X6W-1}}}\moddef{Populate the tp, td cache and vp, vd cache and update CQ~{\nwtagstyle{}\subpageref{NW3mnZLd-1O0X6W-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3mnZLd-4JHoKM-1}}\nwenddeflinemarkup
 PreparedStatement pS140 = this.\nwlinkedidentc{PSCreate}{NW1ODIS0-47iuYD-1}(conn, "\nwlinkedidentc{S140}{NW1ODIS0-yno67-1}");
-for (int j = 0; j < (sched.length - 2); j += 3) \{
-  final int Lj = sched[(j + 2)];
-  if (Lj != sid && !cache.containsKey(Lj)) \{
+for (int j = 0; j < (sched.length - 3); j += 4) \{
+  final int Lj = sched[(j + 3)];
+  if (!cache.containsKey(Lj)) \{
     final int rq = lu_users.get(Lj)[1];
     boolean flagged = false;
     for (final int r : ridpos) \{
@@ -9071,8 +9046,8 @@ for (int j = 0; j < (sched.length - 2); j += 3) \{
     if (flagged) \{
       final int tp = sched[(j + 0)];
       final int vp = sched[(j + 1)];
-      for (int k = (j + 3); k < (sched.length - 2); k += 3) \{
-        if (Lj == sched[(k + 2)]) \{
+      for (int k = (j + 4); k < (sched.length - 3); k += 4) \{
+        if (Lj == sched[(k + 3)]) \{
           final int td = sched[(k + 0)];
           final int vd = sched[(k + 1)];
           cache. put(Lj, new int[] \{ rq, tp, td \});
@@ -9093,8 +9068,8 @@ for (int j = 0; j < (sched.length - 2); j += 3) \{
       // Lj is "dangling".
       if (tp > route[0] && td > route[0]) \{
         boolean dangling = true;
-        for (int k = (j + 3); k < (sched.length - 2); k += 3) \{
-          if (Lj == sched[(k + 2)]) \{
+        for (int k = (j + 4); k < (sched.length - 3); k += 4) \{
+          if (Lj == sched[(k + 3)]) \{
             dangling = false;
             break;
           \}
@@ -9109,44 +9084,42 @@ for (int j = 0; j < (sched.length - 2); j += 3) \{
   \}
 \}
 this.\nwlinkedidentc{PSSubmit}{NW1ODIS0-1S1xBT-1}(pS140);
-\nwused{\\{NW3mnZLd-4JHoKM-1}}\nwidentuses{\\{{\nwixident{PSAdd}}{PSAdd}}\\{{\nwixident{PSCreate}}{PSCreate}}\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{PSSubmit}}{PSSubmit}}\\{{\nwixident{S140}}{S140}}\\{{\nwixident{S86}}{S86}}\\{{\nwixident{UserNotFoundException}}{UserNotFoundException}}}\nwindexuse{\nwixident{PSAdd}}{PSAdd}{NW3mnZLd-1O0X6W-1}\nwindexuse{\nwixident{PSCreate}}{PSCreate}{NW3mnZLd-1O0X6W-1}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW3mnZLd-1O0X6W-1}\nwindexuse{\nwixident{PSSubmit}}{PSSubmit}{NW3mnZLd-1O0X6W-1}\nwindexuse{\nwixident{S140}}{S140}{NW3mnZLd-1O0X6W-1}\nwindexuse{\nwixident{S86}}{S86}{NW3mnZLd-1O0X6W-1}\nwindexuse{\nwixident{UserNotFoundException}}{UserNotFoundException}{NW3mnZLd-1O0X6W-1}\nwendcode{}\nwbegindocs{38}\nwdocspar
+\nwused{\\{NW3mnZLd-4JHoKM-1}}\nwidentuses{\\{{\nwixident{PSAdd}}{PSAdd}}\\{{\nwixident{PSCreate}}{PSCreate}}\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{PSSubmit}}{PSSubmit}}\\{{\nwixident{S140}}{S140}}\\{{\nwixident{S86}}{S86}}\\{{\nwixident{UserNotFoundException}}{UserNotFoundException}}}\nwindexuse{\nwixident{PSAdd}}{PSAdd}{NW3mnZLd-1O0X6W-1}\nwindexuse{\nwixident{PSCreate}}{PSCreate}{NW3mnZLd-1O0X6W-1}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW3mnZLd-1O0X6W-1}\nwindexuse{\nwixident{PSSubmit}}{PSSubmit}{NW3mnZLd-1O0X6W-1}\nwindexuse{\nwixident{S140}}{S140}{NW3mnZLd-1O0X6W-1}\nwindexuse{\nwixident{S86}}{S86}{NW3mnZLd-1O0X6W-1}\nwindexuse{\nwixident{UserNotFoundException}}{UserNotFoundException}{NW3mnZLd-1O0X6W-1}\nwendcode{}\nwbegindocs{36}\nwdocspar
 
 \subsection{Select from CQ latest order number}
-\nwenddocs{}\nwbegincode{39}\sublabel{NW3mnZLd-i1RXX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-i1RXX-1}}}\moddef{Select from CQ latest order number~{\nwtagstyle{}\subpageref{NW3mnZLd-i1RXX-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3mnZLd-4JHoKM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{37}\sublabel{NW3mnZLd-i1RXX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-i1RXX-1}}}\moddef{Select from CQ latest order number~{\nwtagstyle{}\subpageref{NW3mnZLd-i1RXX-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3mnZLd-4JHoKM-1}}\nwenddeflinemarkup
 final int[] output = (route[0] == 0 ? null : this.\nwlinkedidentc{PSQuery}{NW1ODIS0-yHOIP-1}(conn, "\nwlinkedidentc{S87}{NW1ODIS0-3PORbo-1}", 3, sid, route[0]));
 int t1 = (route[0] == 0 ?  0 : output[0]);
 int q1 = (route[0] == 0 ? sq : output[1]);
 int o1 = (route[0] == 0 ?  1 : output[2]);
-\nwused{\\{NW3mnZLd-4JHoKM-1}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S87}}{S87}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW3mnZLd-i1RXX-1}\nwindexuse{\nwixident{S87}}{S87}{NW3mnZLd-i1RXX-1}\nwendcode{}\nwbegindocs{40}\nwdocspar
+\nwused{\\{NW3mnZLd-4JHoKM-1}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S87}}{S87}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW3mnZLd-i1RXX-1}\nwindexuse{\nwixident{S87}}{S87}{NW3mnZLd-i1RXX-1}\nwendcode{}\nwbegindocs{38}\nwdocspar
 
 \subsection{Update CW, CPD route endpoint}
-\nwenddocs{}\nwbegincode{41}\sublabel{NW3mnZLd-4RHgRh-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-4RHgRh-1}}}\moddef{Update CW, CPD route endpoint~{\nwtagstyle{}\subpageref{NW3mnZLd-4RHgRh-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3mnZLd-3RBwFo-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{39}\sublabel{NW3mnZLd-4RHgRh-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-4RHgRh-1}}}\moddef{Update CW, CPD route endpoint~{\nwtagstyle{}\subpageref{NW3mnZLd-4RHgRh-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3mnZLd-3RBwFo-1}}\nwenddeflinemarkup
 PreparedStatement pS77 = this.\nwlinkedidentc{PSCreate}{NW1ODIS0-47iuYD-1}(conn, "\nwlinkedidentc{S77}{NW1ODIS0-3PlVaO-1}");
 PreparedStatement pS139 = this.\nwlinkedidentc{PSCreate}{NW1ODIS0-47iuYD-1}(conn, "\nwlinkedidentc{S139}{NW1ODIS0-44lfAZ-1}");
-final int te = sched[(sched.length - 3)];
-final int ve = sched[(sched.length - 2)];
+final int te = sched[(sched.length - 4)];
+final int ve = sched[(sched.length - 3)];
 this.\nwlinkedidentc{PSAdd}{NW1ODIS0-1X4ymL-1}(pS77, te, ve, sid);
 this.\nwlinkedidentc{PSAdd}{NW1ODIS0-1X4ymL-1}(pS139, te, sid);
 this.\nwlinkedidentc{PSSubmit}{NW1ODIS0-1S1xBT-1}(pS77, pS139);
-\nwused{\\{NW3mnZLd-3RBwFo-1}}\nwidentuses{\\{{\nwixident{PSAdd}}{PSAdd}}\\{{\nwixident{PSCreate}}{PSCreate}}\\{{\nwixident{PSSubmit}}{PSSubmit}}\\{{\nwixident{S139}}{S139}}\\{{\nwixident{S77}}{S77}}}\nwindexuse{\nwixident{PSAdd}}{PSAdd}{NW3mnZLd-4RHgRh-1}\nwindexuse{\nwixident{PSCreate}}{PSCreate}{NW3mnZLd-4RHgRh-1}\nwindexuse{\nwixident{PSSubmit}}{PSSubmit}{NW3mnZLd-4RHgRh-1}\nwindexuse{\nwixident{S139}}{S139}{NW3mnZLd-4RHgRh-1}\nwindexuse{\nwixident{S77}}{S77}{NW3mnZLd-4RHgRh-1}\nwendcode{}\nwbegindocs{42}\nwdocspar
+\nwused{\\{NW3mnZLd-3RBwFo-1}}\nwidentuses{\\{{\nwixident{PSAdd}}{PSAdd}}\\{{\nwixident{PSCreate}}{PSCreate}}\\{{\nwixident{PSSubmit}}{PSSubmit}}\\{{\nwixident{S139}}{S139}}\\{{\nwixident{S77}}{S77}}}\nwindexuse{\nwixident{PSAdd}}{PSAdd}{NW3mnZLd-4RHgRh-1}\nwindexuse{\nwixident{PSCreate}}{PSCreate}{NW3mnZLd-4RHgRh-1}\nwindexuse{\nwixident{PSSubmit}}{PSSubmit}{NW3mnZLd-4RHgRh-1}\nwindexuse{\nwixident{S139}}{S139}{NW3mnZLd-4RHgRh-1}\nwindexuse{\nwixident{S77}}{S77}{NW3mnZLd-4RHgRh-1}\nwendcode{}\nwbegindocs{40}\nwdocspar
 
 \subsection{Update PD, CPD arrival and departure times}
-\nwenddocs{}\nwbegincode{43}\sublabel{NW3mnZLd-2K0zzi-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-2K0zzi-1}}}\moddef{Update PD, CPD arrival and departure times~{\nwtagstyle{}\subpageref{NW3mnZLd-2K0zzi-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3mnZLd-4JHoKM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{41}\sublabel{NW3mnZLd-2K0zzi-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-2K0zzi-1}}}\moddef{Update PD, CPD arrival and departure times~{\nwtagstyle{}\subpageref{NW3mnZLd-2K0zzi-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3mnZLd-4JHoKM-1}}\nwenddeflinemarkup
 PreparedStatement pS82 = this.\nwlinkedidentc{PSCreate}{NW1ODIS0-47iuYD-1}(conn, "\nwlinkedidentc{S82}{NW1ODIS0-25vZHI-1}");
 PreparedStatement pS83 = this.\nwlinkedidentc{PSCreate}{NW1ODIS0-47iuYD-1}(conn, "\nwlinkedidentc{S83}{NW1ODIS0-2TlsCi-1}");
 PreparedStatement pS84 = this.\nwlinkedidentc{PSCreate}{NW1ODIS0-47iuYD-1}(conn, "\nwlinkedidentc{S84}{NW1ODIS0-yx2fc-1}");
-for (int j = 0; j < (sched.length - 2); j += 3) \{
+for (int j = 0; j < (sched.length - 3); j += 4) \{
   final int tj = sched[(j + 0)];
   final int vj = sched[(j + 1)];
-  final int Lj = sched[(j + 2)];
-  if (Lj != sid) \{
-    this.\nwlinkedidentc{PSAdd}{NW1ODIS0-1X4ymL-1}(pS82, tj, vj, Lj);
-    this.\nwlinkedidentc{PSAdd}{NW1ODIS0-1X4ymL-1}(pS83, tj, vj, Lj);
-    this.\nwlinkedidentc{PSAdd}{NW1ODIS0-1X4ymL-1}(pS84, tj, vj, Lj);
-  \}
+  final int Lj = sched[(j + 3)];
+  this.\nwlinkedidentc{PSAdd}{NW1ODIS0-1X4ymL-1}(pS82, tj, vj, Lj);
+  this.\nwlinkedidentc{PSAdd}{NW1ODIS0-1X4ymL-1}(pS83, tj, vj, Lj);
+  this.\nwlinkedidentc{PSAdd}{NW1ODIS0-1X4ymL-1}(pS84, tj, vj, Lj);
 \}
 this.\nwlinkedidentc{PSSubmit}{NW1ODIS0-1S1xBT-1}(pS83, pS82, pS84);
-\nwused{\\{NW3mnZLd-4JHoKM-1}}\nwidentuses{\\{{\nwixident{PSAdd}}{PSAdd}}\\{{\nwixident{PSCreate}}{PSCreate}}\\{{\nwixident{PSSubmit}}{PSSubmit}}\\{{\nwixident{S82}}{S82}}\\{{\nwixident{S83}}{S83}}\\{{\nwixident{S84}}{S84}}}\nwindexuse{\nwixident{PSAdd}}{PSAdd}{NW3mnZLd-2K0zzi-1}\nwindexuse{\nwixident{PSCreate}}{PSCreate}{NW3mnZLd-2K0zzi-1}\nwindexuse{\nwixident{PSSubmit}}{PSSubmit}{NW3mnZLd-2K0zzi-1}\nwindexuse{\nwixident{S82}}{S82}{NW3mnZLd-2K0zzi-1}\nwindexuse{\nwixident{S83}}{S83}{NW3mnZLd-2K0zzi-1}\nwindexuse{\nwixident{S84}}{S84}{NW3mnZLd-2K0zzi-1}\nwendcode{}\nwbegindocs{44}\nwdocspar
+\nwused{\\{NW3mnZLd-4JHoKM-1}}\nwidentuses{\\{{\nwixident{PSAdd}}{PSAdd}}\\{{\nwixident{PSCreate}}{PSCreate}}\\{{\nwixident{PSSubmit}}{PSSubmit}}\\{{\nwixident{S82}}{S82}}\\{{\nwixident{S83}}{S83}}\\{{\nwixident{S84}}{S84}}}\nwindexuse{\nwixident{PSAdd}}{PSAdd}{NW3mnZLd-2K0zzi-1}\nwindexuse{\nwixident{PSCreate}}{PSCreate}{NW3mnZLd-2K0zzi-1}\nwindexuse{\nwixident{PSSubmit}}{PSSubmit}{NW3mnZLd-2K0zzi-1}\nwindexuse{\nwixident{S82}}{S82}{NW3mnZLd-2K0zzi-1}\nwindexuse{\nwixident{S83}}{S83}{NW3mnZLd-2K0zzi-1}\nwindexuse{\nwixident{S84}}{S84}{NW3mnZLd-2K0zzi-1}\nwendcode{}\nwbegindocs{42}\nwdocspar
 
 \section{Methods: Write Road Network}
 
@@ -9176,25 +9149,25 @@ precision} as above.
 or {\Tt{}SQLException\nwendquote} for other database failures.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{45}\sublabel{NW3mnZLd-3leoJR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-3leoJR-1}}}\moddef{Write: DBInsertVertex(3)~{\nwtagstyle{}\subpageref{NW3mnZLd-3leoJR-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-3}}\nwprevnextdefs{\relax}{NW3mnZLd-3leoJR-2}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{43}\sublabel{NW3mnZLd-3leoJR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-3leoJR-1}}}\moddef{Write: DBInsertVertex(3)~{\nwtagstyle{}\subpageref{NW3mnZLd-3leoJR-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-3}}\nwprevnextdefs{\relax}{NW3mnZLd-3leoJR-2}\nwenddeflinemarkup
 void \nwlinkedidentc{DBInsertVertex}{NW3mnZLd-3leoJR-1}(final int v, final int lng, final int lat)
 throws \nwlinkedidentc{DuplicateVertexException}{NW1ODIS0-2dvIEX-1}, SQLException \{
 \nwindexdefn{\nwixident{DBInsertVertex}}{DBInsertVertex}{NW3mnZLd-3leoJR-1}\eatline
-\nwalsodefined{\\{NW3mnZLd-3leoJR-2}\\{NW3mnZLd-3leoJR-3}}\nwused{\\{NW4QM9HE-Oyob-3}}\nwidentdefs{\\{{\nwixident{DBInsertVertex}}{DBInsertVertex}}}\nwidentuses{\\{{\nwixident{DuplicateVertexException}}{DuplicateVertexException}}}\nwindexuse{\nwixident{DuplicateVertexException}}{DuplicateVertexException}{NW3mnZLd-3leoJR-1}\nwendcode{}\nwbegindocs{46}{\small If only {\Tt{}\nwlinkedidentq{DBInsertVertex}{NW3mnZLd-3leoJR-1}\nwendquote}(3) is ever used to write vertices into Table
+\nwalsodefined{\\{NW3mnZLd-3leoJR-2}\\{NW3mnZLd-3leoJR-3}}\nwused{\\{NW4QM9HE-Oyob-3}}\nwidentdefs{\\{{\nwixident{DBInsertVertex}}{DBInsertVertex}}}\nwidentuses{\\{{\nwixident{DuplicateVertexException}}{DuplicateVertexException}}}\nwindexuse{\nwixident{DuplicateVertexException}}{DuplicateVertexException}{NW3mnZLd-3leoJR-1}\nwendcode{}\nwbegindocs{44}{\small If only {\Tt{}\nwlinkedidentq{DBInsertVertex}{NW3mnZLd-3leoJR-1}\nwendquote}(3) is ever used to write vertices into Table
 V, we can be sure that any vertex appearing in Table V also appears in
 {\Tt{}lu{\_}vertices\nwendquote}.  To check if the vertex in param. 1 is a duplicate entry, it
 is sufficient to check {\Tt{}lu{\_}vertices\nwendquote}.}
-\nwenddocs{}\nwbegincode{47}\sublabel{NW3mnZLd-3leoJR-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-3leoJR-2}}}\moddef{Write: DBInsertVertex(3)~{\nwtagstyle{}\subpageref{NW3mnZLd-3leoJR-1}}}\plusendmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-3}}\nwprevnextdefs{NW3mnZLd-3leoJR-1}{NW3mnZLd-3leoJR-3}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{45}\sublabel{NW3mnZLd-3leoJR-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-3leoJR-2}}}\moddef{Write: DBInsertVertex(3)~{\nwtagstyle{}\subpageref{NW3mnZLd-3leoJR-1}}}\plusendmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-3}}\nwprevnextdefs{NW3mnZLd-3leoJR-1}{NW3mnZLd-3leoJR-3}\nwenddeflinemarkup
   if (this.lu_vertices.containsKey(v)) \{
     throw new \nwlinkedidentc{DuplicateVertexException}{NW1ODIS0-2dvIEX-1}("Vertex "+v+" already exists.");
   \}
-\nwused{\\{NW4QM9HE-Oyob-3}}\nwidentuses{\\{{\nwixident{DuplicateVertexException}}{DuplicateVertexException}}}\nwindexuse{\nwixident{DuplicateVertexException}}{DuplicateVertexException}{NW3mnZLd-3leoJR-2}\nwendcode{}\nwbegindocs{48}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-3}}\nwidentuses{\\{{\nwixident{DuplicateVertexException}}{DuplicateVertexException}}}\nwindexuse{\nwixident{DuplicateVertexException}}{DuplicateVertexException}{NW3mnZLd-3leoJR-2}\nwendcode{}\nwbegindocs{46}\nwdocspar
 {\small All we do is use statement {\Tt{}\nwlinkedidentq{S0}{NW1ODIS0-9czRY-1}\nwendquote} to submit the insert statement
 against Table V. By putting {\Tt{}conn\nwendquote} in the resources of the outer try, we
 ensure {\Tt{}conn\nwendquote} gets closed in the end no matter what happens. This pattern
 will appear in other write methods. If all succeeds, we put the vertex into
 {\Tt{}lu{\_}vertices\nwendquote}.}
-\nwenddocs{}\nwbegincode{49}\sublabel{NW3mnZLd-3leoJR-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-3leoJR-3}}}\moddef{Write: DBInsertVertex(3)~{\nwtagstyle{}\subpageref{NW3mnZLd-3leoJR-1}}}\plusendmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-3}}\nwprevnextdefs{NW3mnZLd-3leoJR-2}{\relax}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{47}\sublabel{NW3mnZLd-3leoJR-3}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-3leoJR-3}}}\moddef{Write: DBInsertVertex(3)~{\nwtagstyle{}\subpageref{NW3mnZLd-3leoJR-1}}}\plusendmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-3}}\nwprevnextdefs{NW3mnZLd-3leoJR-2}{\relax}\nwenddeflinemarkup
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1ODIS0-JT1v9-1}}\RA{}) \{
     try \{
       PreparedStatement pS0 = this.\nwlinkedidentc{PSCreate}{NW1ODIS0-47iuYD-1}(conn, "\nwlinkedidentc{S0}{NW1ODIS0-9czRY-1}");
@@ -9210,7 +9183,7 @@ will appear in other write methods. If all succeeds, we put the vertex into
   \}
   this.lu_vertices.put(v, new int[] \{ lng, lat \});
 \}
-\nwused{\\{NW4QM9HE-Oyob-3}}\nwidentuses{\\{{\nwixident{PSAdd}}{PSAdd}}\\{{\nwixident{PSCreate}}{PSCreate}}\\{{\nwixident{PSSubmit}}{PSSubmit}}\\{{\nwixident{S0}}{S0}}}\nwindexuse{\nwixident{PSAdd}}{PSAdd}{NW3mnZLd-3leoJR-3}\nwindexuse{\nwixident{PSCreate}}{PSCreate}{NW3mnZLd-3leoJR-3}\nwindexuse{\nwixident{PSSubmit}}{PSSubmit}{NW3mnZLd-3leoJR-3}\nwindexuse{\nwixident{S0}}{S0}{NW3mnZLd-3leoJR-3}\nwendcode{}\nwbegindocs{50}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-3}}\nwidentuses{\\{{\nwixident{PSAdd}}{PSAdd}}\\{{\nwixident{PSCreate}}{PSCreate}}\\{{\nwixident{PSSubmit}}{PSSubmit}}\\{{\nwixident{S0}}{S0}}}\nwindexuse{\nwixident{PSAdd}}{PSAdd}{NW3mnZLd-3leoJR-3}\nwindexuse{\nwixident{PSCreate}}{PSCreate}{NW3mnZLd-3leoJR-3}\nwindexuse{\nwixident{PSSubmit}}{PSSubmit}{NW3mnZLd-3leoJR-3}\nwindexuse{\nwixident{S0}}{S0}{NW3mnZLd-3leoJR-3}\nwendcode{}\nwbegindocs{48}\nwdocspar
 
 \subsection{\texttt{DBInsertEdge}(4)}
 \begin{tabular}{p{\textwidth}}
@@ -9235,7 +9208,7 @@ Integer {\Tt{}nu\nwendquote} (param. 4):&maximum free-flow speed along the edge,
 {\Tt{}SQLException\nwendquote} for other database failures.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{51}\sublabel{NW3mnZLd-14ASIs-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-14ASIs-1}}}\moddef{Write: DBInsertEdge(4)~{\nwtagstyle{}\subpageref{NW3mnZLd-14ASIs-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-3}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{49}\sublabel{NW3mnZLd-14ASIs-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-14ASIs-1}}}\moddef{Write: DBInsertEdge(4)~{\nwtagstyle{}\subpageref{NW3mnZLd-14ASIs-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-3}}\nwenddeflinemarkup
 void \nwlinkedidentc{DBInsertEdge}{NW3mnZLd-14ASIs-1}(final int v1, final int v2, final int dd, final int nu)
 throws \nwlinkedidentc{DuplicateEdgeException}{NW1ODIS0-3mhF1c-1}, SQLException \{
   if (this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2)) \{
@@ -9260,7 +9233,7 @@ throws \nwlinkedidentc{DuplicateEdgeException}{NW1ODIS0-3mhF1c-1}, SQLException 
   this.lu_edges.get(v1).put(v2, new int[] \{ dd, nu \});
 \}
 \nwindexdefn{\nwixident{DBInsertEdge}}{DBInsertEdge}{NW3mnZLd-14ASIs-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-3}}\nwidentdefs{\\{{\nwixident{DBInsertEdge}}{DBInsertEdge}}}\nwidentuses{\\{{\nwixident{DuplicateEdgeException}}{DuplicateEdgeException}}\\{{\nwixident{PSAdd}}{PSAdd}}\\{{\nwixident{PSCreate}}{PSCreate}}\\{{\nwixident{PSSubmit}}{PSSubmit}}\\{{\nwixident{S1}}{S1}}}\nwindexuse{\nwixident{DuplicateEdgeException}}{DuplicateEdgeException}{NW3mnZLd-14ASIs-1}\nwindexuse{\nwixident{PSAdd}}{PSAdd}{NW3mnZLd-14ASIs-1}\nwindexuse{\nwixident{PSCreate}}{PSCreate}{NW3mnZLd-14ASIs-1}\nwindexuse{\nwixident{PSSubmit}}{PSSubmit}{NW3mnZLd-14ASIs-1}\nwindexuse{\nwixident{S1}}{S1}{NW3mnZLd-14ASIs-1}\nwendcode{}\nwbegindocs{52}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-3}}\nwidentdefs{\\{{\nwixident{DBInsertEdge}}{DBInsertEdge}}}\nwidentuses{\\{{\nwixident{DuplicateEdgeException}}{DuplicateEdgeException}}\\{{\nwixident{PSAdd}}{PSAdd}}\\{{\nwixident{PSCreate}}{PSCreate}}\\{{\nwixident{PSSubmit}}{PSSubmit}}\\{{\nwixident{S1}}{S1}}}\nwindexuse{\nwixident{DuplicateEdgeException}}{DuplicateEdgeException}{NW3mnZLd-14ASIs-1}\nwindexuse{\nwixident{PSAdd}}{PSAdd}{NW3mnZLd-14ASIs-1}\nwindexuse{\nwixident{PSCreate}}{PSCreate}{NW3mnZLd-14ASIs-1}\nwindexuse{\nwixident{PSSubmit}}{PSSubmit}{NW3mnZLd-14ASIs-1}\nwindexuse{\nwixident{S1}}{S1}{NW3mnZLd-14ASIs-1}\nwendcode{}\nwbegindocs{50}\nwdocspar
 \subsection{\texttt{DBUpdateEdgeSpeed}(3)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -9285,7 +9258,7 @@ any server route. This update may cause C56 violations if waypoint times
 or {\Tt{}SQLException\nwendquote} for other database failures.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{53}\sublabel{NW3mnZLd-4RKqny-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-4RKqny-1}}}\moddef{Write: DBUpdateEdgeSpeed(3)~{\nwtagstyle{}\subpageref{NW3mnZLd-4RKqny-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-3}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{51}\sublabel{NW3mnZLd-4RKqny-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-4RKqny-1}}}\moddef{Write: DBUpdateEdgeSpeed(3)~{\nwtagstyle{}\subpageref{NW3mnZLd-4RKqny-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-3}}\nwenddeflinemarkup
 void \nwlinkedidentc{DBUpdateEdgeSpeed}{NW3mnZLd-4RKqny-1}(final int v1, final int v2, final int nu)
 throws \nwlinkedidentc{EdgeNotFoundException}{NW1ODIS0-4YUrEC-1}, SQLException \{
   if (!(this.lu_edges.containsKey(v1) && this.lu_edges.get(v1).containsKey(v2))) \{
@@ -9309,7 +9282,7 @@ throws \nwlinkedidentc{EdgeNotFoundException}{NW1ODIS0-4YUrEC-1}, SQLException \
   this.lu_edges.get(v1).get(v2)[1] = nu;
 \}
 \nwindexdefn{\nwixident{DBUpdateEdgeSpeed}}{DBUpdateEdgeSpeed}{NW3mnZLd-4RKqny-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-3}}\nwidentdefs{\\{{\nwixident{DBUpdateEdgeSpeed}}{DBUpdateEdgeSpeed}}}\nwidentuses{\\{{\nwixident{EdgeNotFoundException}}{EdgeNotFoundException}}\\{{\nwixident{PSAdd}}{PSAdd}}\\{{\nwixident{PSCreate}}{PSCreate}}\\{{\nwixident{PSSubmit}}{PSSubmit}}\\{{\nwixident{S131}}{S131}}\\{{\nwixident{S15}}{S15}}}\nwindexuse{\nwixident{EdgeNotFoundException}}{EdgeNotFoundException}{NW3mnZLd-4RKqny-1}\nwindexuse{\nwixident{PSAdd}}{PSAdd}{NW3mnZLd-4RKqny-1}\nwindexuse{\nwixident{PSCreate}}{PSCreate}{NW3mnZLd-4RKqny-1}\nwindexuse{\nwixident{PSSubmit}}{PSSubmit}{NW3mnZLd-4RKqny-1}\nwindexuse{\nwixident{S131}}{S131}{NW3mnZLd-4RKqny-1}\nwindexuse{\nwixident{S15}}{S15}{NW3mnZLd-4RKqny-1}\nwendcode{}\nwbegindocs{54}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-3}}\nwidentdefs{\\{{\nwixident{DBUpdateEdgeSpeed}}{DBUpdateEdgeSpeed}}}\nwidentuses{\\{{\nwixident{EdgeNotFoundException}}{EdgeNotFoundException}}\\{{\nwixident{PSAdd}}{PSAdd}}\\{{\nwixident{PSCreate}}{PSCreate}}\\{{\nwixident{PSSubmit}}{PSSubmit}}\\{{\nwixident{S131}}{S131}}\\{{\nwixident{S15}}{S15}}}\nwindexuse{\nwixident{EdgeNotFoundException}}{EdgeNotFoundException}{NW3mnZLd-4RKqny-1}\nwindexuse{\nwixident{PSAdd}}{PSAdd}{NW3mnZLd-4RKqny-1}\nwindexuse{\nwixident{PSCreate}}{PSCreate}{NW3mnZLd-4RKqny-1}\nwindexuse{\nwixident{PSSubmit}}{PSSubmit}{NW3mnZLd-4RKqny-1}\nwindexuse{\nwixident{S131}}{S131}{NW3mnZLd-4RKqny-1}\nwindexuse{\nwixident{S15}}{S15}{NW3mnZLd-4RKqny-1}\nwendcode{}\nwbegindocs{52}\nwdocspar
 \section{Methods: Write Users}
 
 \subsection{\texttt{DBInsertRequest}(1)}
@@ -9341,7 +9314,7 @@ row into Table R, puts an entry into {\Tt{}lu{\_}users\nwendquote} and into {\Tt
 {\Tt{}SQLException\nwendquote} for other database failures.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{55}\sublabel{NW3mnZLd-xsVjY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-xsVjY-1}}}\moddef{Write: DBInsertRequest(1)~{\nwtagstyle{}\subpageref{NW3mnZLd-xsVjY-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-3}}\nwprevnextdefs{\relax}{NW3mnZLd-xsVjY-2}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{53}\sublabel{NW3mnZLd-xsVjY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-xsVjY-1}}}\moddef{Write: DBInsertRequest(1)~{\nwtagstyle{}\subpageref{NW3mnZLd-xsVjY-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-3}}\nwprevnextdefs{\relax}{NW3mnZLd-xsVjY-2}\nwenddeflinemarkup
 void \nwlinkedidentc{DBInsertRequest}{NW3mnZLd-xsVjY-1}(final int[] u)
 throws \nwlinkedidentc{DuplicateUserException}{NW1ODIS0-rz4lR-1}, SQLException \{
   final int uid = u[0];
@@ -9361,31 +9334,31 @@ throws \nwlinkedidentc{DuplicateUserException}{NW1ODIS0-rz4lR-1}, SQLException \
     throw e;
   \}
 \nwindexdefn{\nwixident{DBInsertRequest}}{DBInsertRequest}{NW3mnZLd-xsVjY-1}\eatline
-\nwalsodefined{\\{NW3mnZLd-xsVjY-2}}\nwused{\\{NW4QM9HE-Oyob-3}}\nwidentdefs{\\{{\nwixident{DBInsertRequest}}{DBInsertRequest}}}\nwidentuses{\\{{\nwixident{DuplicateUserException}}{DuplicateUserException}}}\nwindexuse{\nwixident{DuplicateUserException}}{DuplicateUserException}{NW3mnZLd-xsVjY-1}\nwendcode{}\nwbegindocs{56}{\small In the last step, we put $r$ into {\Tt{}lu{\_}users\nwendquote} and put it into
+\nwalsodefined{\\{NW3mnZLd-xsVjY-2}}\nwused{\\{NW4QM9HE-Oyob-3}}\nwidentdefs{\\{{\nwixident{DBInsertRequest}}{DBInsertRequest}}}\nwidentuses{\\{{\nwixident{DuplicateUserException}}{DuplicateUserException}}}\nwindexuse{\nwixident{DuplicateUserException}}{DuplicateUserException}{NW3mnZLd-xsVjY-1}\nwendcode{}\nwbegindocs{54}{\small In the last step, we put $r$ into {\Tt{}lu{\_}users\nwendquote} and put it into
 {\Tt{}lu{\_}rstatus\nwendquote} with the value set to {\Tt{}false\nwendquote} to indicate that it is
 unassigned. When we put it into {\Tt{}lu{\_}users\nwendquote}, we store a cloned array {\Tt{}u\nwendquote} as
 the value because we don't want any changes to {\Tt{}u\nwendquote} on the caller side showing
 up in our cache (we are considering users to be immutable).}
-\nwenddocs{}\nwbegincode{57}\sublabel{NW3mnZLd-xsVjY-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-xsVjY-2}}}\moddef{Write: DBInsertRequest(1)~{\nwtagstyle{}\subpageref{NW3mnZLd-xsVjY-1}}}\plusendmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-3}}\nwprevnextdefs{NW3mnZLd-xsVjY-1}{\relax}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{55}\sublabel{NW3mnZLd-xsVjY-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-xsVjY-2}}}\moddef{Write: DBInsertRequest(1)~{\nwtagstyle{}\subpageref{NW3mnZLd-xsVjY-1}}}\plusendmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-3}}\nwprevnextdefs{NW3mnZLd-xsVjY-1}{\relax}\nwenddeflinemarkup
   this.lu_users.put(u[0], u.clone());
   this.lu_rstatus.put(u[0], false);
   this.count_requests++;
   this.sum_distance_unassigned += u[6];
   this.sum_distance_base_requests += u[6];
 \}
-\nwused{\\{NW4QM9HE-Oyob-3}}\nwendcode{}\nwbegindocs{58}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-3}}\nwendcode{}\nwbegindocs{56}\nwdocspar
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{insertRequest}{NW3mnZLd-dzRRs-1}\nwendquote}}(1) wraps {\Tt{}\nwlinkedidentq{DBInsertRequest}{NW3mnZLd-xsVjY-1}\nwendquote}(1).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{59}\sublabel{NW3mnZLd-dzRRs-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-dzRRs-1}}}\moddef{Write: insertRequest(1)~{\nwtagstyle{}\subpageref{NW3mnZLd-dzRRs-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-3}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{57}\sublabel{NW3mnZLd-dzRRs-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-dzRRs-1}}}\moddef{Write: insertRequest(1)~{\nwtagstyle{}\subpageref{NW3mnZLd-dzRRs-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-3}}\nwenddeflinemarkup
 void \nwlinkedidentc{insertRequest}{NW3mnZLd-dzRRs-1}(final int[] u) throws \nwlinkedidentc{DuplicateUserException}{NW1ODIS0-rz4lR-1}, SQLException \{
   this.storage.\nwlinkedidentc{DBInsertRequest}{NW3mnZLd-xsVjY-1}(u);
 \}
 \nwindexdefn{\nwixident{insertRequest}}{insertRequest}{NW3mnZLd-dzRRs-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-3}}\nwidentdefs{\\{{\nwixident{insertRequest}}{insertRequest}}}\nwidentuses{\\{{\nwixident{DBInsertRequest}}{DBInsertRequest}}\\{{\nwixident{DuplicateUserException}}{DuplicateUserException}}}\nwindexuse{\nwixident{DBInsertRequest}}{DBInsertRequest}{NW3mnZLd-dzRRs-1}\nwindexuse{\nwixident{DuplicateUserException}}{DuplicateUserException}{NW3mnZLd-dzRRs-1}\nwendcode{}\nwbegindocs{60}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-3}}\nwidentdefs{\\{{\nwixident{insertRequest}}{insertRequest}}}\nwidentuses{\\{{\nwixident{DBInsertRequest}}{DBInsertRequest}}\\{{\nwixident{DuplicateUserException}}{DuplicateUserException}}}\nwindexuse{\nwixident{DBInsertRequest}}{DBInsertRequest}{NW3mnZLd-dzRRs-1}\nwindexuse{\nwixident{DuplicateUserException}}{DuplicateUserException}{NW3mnZLd-dzRRs-1}\nwendcode{}\nwbegindocs{58}\nwdocspar
 \subsection{\texttt{DBInsertServer}(2)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -9430,7 +9403,7 @@ inserts a row into Table CQ, puts an entry into {\Tt{}lu{\_}users\nwendquote}.\\
 in Table E, or {\Tt{}SQLException\nwendquote} for other database failures.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{61}\sublabel{NW3mnZLd-4Dmn3V-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-4Dmn3V-1}}}\moddef{Write: DBInsertServer(2)~{\nwtagstyle{}\subpageref{NW3mnZLd-4Dmn3V-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-3}}\nwprevnextdefs{\relax}{NW3mnZLd-4Dmn3V-2}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{59}\sublabel{NW3mnZLd-4Dmn3V-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-4Dmn3V-1}}}\moddef{Write: DBInsertServer(2)~{\nwtagstyle{}\subpageref{NW3mnZLd-4Dmn3V-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-3}}\nwprevnextdefs{\relax}{NW3mnZLd-4Dmn3V-2}\nwenddeflinemarkup
 void DBInsertServer(final int[] u, final int[] route)
 throws \nwlinkedidentc{DuplicateUserException}{NW1ODIS0-rz4lR-1}, \nwlinkedidentc{EdgeNotFoundException}{NW1ODIS0-4YUrEC-1}, SQLException \{
   final int uid = u[0];
@@ -9453,9 +9426,9 @@ throws \nwlinkedidentc{DuplicateUserException}{NW1ODIS0-rz4lR-1}, \nwlinkedident
   \} catch (SQLException e) \{
     throw e;
   \}
-\nwalsodefined{\\{NW3mnZLd-4Dmn3V-2}}\nwused{\\{NW4QM9HE-Oyob-3}}\nwidentuses{\\{{\nwixident{DuplicateUserException}}{DuplicateUserException}}\\{{\nwixident{EdgeNotFoundException}}{EdgeNotFoundException}}}\nwindexuse{\nwixident{DuplicateUserException}}{DuplicateUserException}{NW3mnZLd-4Dmn3V-1}\nwindexuse{\nwixident{EdgeNotFoundException}}{EdgeNotFoundException}{NW3mnZLd-4Dmn3V-1}\nwendcode{}\nwbegindocs{62}\nwdocspar
+\nwalsodefined{\\{NW3mnZLd-4Dmn3V-2}}\nwused{\\{NW4QM9HE-Oyob-3}}\nwidentuses{\\{{\nwixident{DuplicateUserException}}{DuplicateUserException}}\\{{\nwixident{EdgeNotFoundException}}{EdgeNotFoundException}}}\nwindexuse{\nwixident{DuplicateUserException}}{DuplicateUserException}{NW3mnZLd-4Dmn3V-1}\nwindexuse{\nwixident{EdgeNotFoundException}}{EdgeNotFoundException}{NW3mnZLd-4Dmn3V-1}\nwendcode{}\nwbegindocs{60}\nwdocspar
 {\small In the last step, we put $s$ into {\Tt{}lu{\_}users\nwendquote}.}
-\nwenddocs{}\nwbegincode{63}\sublabel{NW3mnZLd-4Dmn3V-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-4Dmn3V-2}}}\moddef{Write: DBInsertServer(2)~{\nwtagstyle{}\subpageref{NW3mnZLd-4Dmn3V-1}}}\plusendmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-3}}\nwprevnextdefs{NW3mnZLd-4Dmn3V-1}{\relax}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{61}\sublabel{NW3mnZLd-4Dmn3V-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-4Dmn3V-2}}}\moddef{Write: DBInsertServer(2)~{\nwtagstyle{}\subpageref{NW3mnZLd-4Dmn3V-1}}}\plusendmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-3}}\nwprevnextdefs{NW3mnZLd-4Dmn3V-1}{\relax}\nwenddeflinemarkup
   this.lu_users.put(uid, u.clone());
   this.lu_lvt.put(uid, 0);
   this.sum_distance_base_servers += u[6];
@@ -9464,25 +9437,25 @@ throws \nwlinkedidentc{DuplicateUserException}{NW1ODIS0-rz4lR-1}, \nwlinkedident
   this.duration_servers.put(uid, (route[(route.length - 2)] - route[0]));
   this.duration_servers_cruising.put(uid, (route[(route.length - 2)] - route[0]));
 \}
-\nwused{\\{NW4QM9HE-Oyob-3}}\nwendcode{}\nwbegindocs{64}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-3}}\nwendcode{}\nwbegindocs{62}\nwdocspar
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{insertServer}{NW3mnZLd-3p28CD-1}\nwendquote}}(2) wraps {\Tt{}\nwlinkedidentq{insertServer}{NW3mnZLd-3p28CD-1}\nwendquote}(2).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{65}\sublabel{NW3mnZLd-3p28CD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-3p28CD-1}}}\moddef{Write: insertServer(2)~{\nwtagstyle{}\subpageref{NW3mnZLd-3p28CD-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-3}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{63}\sublabel{NW3mnZLd-3p28CD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-3p28CD-1}}}\moddef{Write: insertServer(2)~{\nwtagstyle{}\subpageref{NW3mnZLd-3p28CD-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-3}}\nwenddeflinemarkup
 void \nwlinkedidentc{insertServer}{NW3mnZLd-3p28CD-1}(final int[] u)
 throws \nwlinkedidentc{DuplicateUserException}{NW1ODIS0-rz4lR-1}, \nwlinkedidentc{EdgeNotFoundException}{NW1ODIS0-4YUrEC-1}, SQLException,
        \nwlinkedidentc{GtreeNotLoadedException}{NW1ODIS0-1fDCHF-1}, \nwlinkedidentc{GtreeIllegalSourceException}{NW1ODIS0-3gapB1-1}, \nwlinkedidentc{GtreeIllegalTargetException}{NW1ODIS0-MwlKC-1} \{
   this.storage.DBInsertServer(u, this.tools.\nwlinkedidentc{computeRoute}{NW4SYVd2-2jzBp7-1}(u[4], u[5], u[2]));
 \}
 \nwindexdefn{\nwixident{insertServer}}{insertServer}{NW3mnZLd-3p28CD-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-3}}\nwidentdefs{\\{{\nwixident{insertServer}}{insertServer}}}\nwidentuses{\\{{\nwixident{computeRoute}}{computeRoute}}\\{{\nwixident{DuplicateUserException}}{DuplicateUserException}}\\{{\nwixident{EdgeNotFoundException}}{EdgeNotFoundException}}\\{{\nwixident{GtreeIllegalSourceException}}{GtreeIllegalSourceException}}\\{{\nwixident{GtreeIllegalTargetException}}{GtreeIllegalTargetException}}\\{{\nwixident{GtreeNotLoadedException}}{GtreeNotLoadedException}}}\nwindexuse{\nwixident{computeRoute}}{computeRoute}{NW3mnZLd-3p28CD-1}\nwindexuse{\nwixident{DuplicateUserException}}{DuplicateUserException}{NW3mnZLd-3p28CD-1}\nwindexuse{\nwixident{EdgeNotFoundException}}{EdgeNotFoundException}{NW3mnZLd-3p28CD-1}\nwindexuse{\nwixident{GtreeIllegalSourceException}}{GtreeIllegalSourceException}{NW3mnZLd-3p28CD-1}\nwindexuse{\nwixident{GtreeIllegalTargetException}}{GtreeIllegalTargetException}{NW3mnZLd-3p28CD-1}\nwindexuse{\nwixident{GtreeNotLoadedException}}{GtreeNotLoadedException}{NW3mnZLd-3p28CD-1}\nwendcode{}\nwbegindocs{66}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-3}}\nwidentdefs{\\{{\nwixident{insertServer}}{insertServer}}}\nwidentuses{\\{{\nwixident{computeRoute}}{computeRoute}}\\{{\nwixident{DuplicateUserException}}{DuplicateUserException}}\\{{\nwixident{EdgeNotFoundException}}{EdgeNotFoundException}}\\{{\nwixident{GtreeIllegalSourceException}}{GtreeIllegalSourceException}}\\{{\nwixident{GtreeIllegalTargetException}}{GtreeIllegalTargetException}}\\{{\nwixident{GtreeNotLoadedException}}{GtreeNotLoadedException}}}\nwindexuse{\nwixident{computeRoute}}{computeRoute}{NW3mnZLd-3p28CD-1}\nwindexuse{\nwixident{DuplicateUserException}}{DuplicateUserException}{NW3mnZLd-3p28CD-1}\nwindexuse{\nwixident{EdgeNotFoundException}}{EdgeNotFoundException}{NW3mnZLd-3p28CD-1}\nwindexuse{\nwixident{GtreeIllegalSourceException}}{GtreeIllegalSourceException}{NW3mnZLd-3p28CD-1}\nwindexuse{\nwixident{GtreeIllegalTargetException}}{GtreeIllegalTargetException}{NW3mnZLd-3p28CD-1}\nwindexuse{\nwixident{GtreeNotLoadedException}}{GtreeNotLoadedException}{NW3mnZLd-3p28CD-1}\nwendcode{}\nwbegindocs{64}\nwdocspar
 \section{Methods: Write Server Properties}
 
 \subsection{\texttt{DBUpdateServerService}(5)}
-\nwenddocs{}\nwbegincode{67}\sublabel{NW3mnZLd-1v536H-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-1v536H-1}}}\moddef{Write: DBUpdateServerService(5)~{\nwtagstyle{}\subpageref{NW3mnZLd-1v536H-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-3}}\nwprevnextdefs{\relax}{NW3mnZLd-1v536H-2}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{65}\sublabel{NW3mnZLd-1v536H-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-1v536H-1}}}\moddef{Write: DBUpdateServerService(5)~{\nwtagstyle{}\subpageref{NW3mnZLd-1v536H-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-3}}\nwprevnextdefs{\relax}{NW3mnZLd-1v536H-2}\nwenddeflinemarkup
 void \nwlinkedidentc{DBUpdateServerService}{NW3mnZLd-1v536H-1}(final int sid, final int[] route, final int[] sched,
     final int[] ridpos, final int[] ridneg)
 throws \nwlinkedidentc{UserNotFoundException}{NW1ODIS0-15irq2-1}, \nwlinkedidentc{EdgeNotFoundException}{NW1ODIS0-4YUrEC-1}, SQLException \{
@@ -9502,7 +9475,7 @@ throws \nwlinkedidentc{UserNotFoundException}{NW1ODIS0-15irq2-1}, \nwlinkedident
   \}
   \{
     int count = 0;
-    for (int i = 0; i < (sched.length - 2); i += 3) \{
+    for (int i = 0; i < (sched.length - 3); i += 4) \{
       if (sched[(i + 2)] == sid) \{
         count++;
       \}
@@ -9536,12 +9509,10 @@ throws \nwlinkedidentc{UserNotFoundException}{NW1ODIS0-15irq2-1}, \nwlinkedident
     throw e;
   \}
 \nwindexdefn{\nwixident{DBUpdateServerService}}{DBUpdateServerService}{NW3mnZLd-1v536H-1}\eatline
-\nwalsodefined{\\{NW3mnZLd-1v536H-2}}\nwused{\\{NW4QM9HE-Oyob-3}}\nwidentdefs{\\{{\nwixident{DBUpdateServerService}}{DBUpdateServerService}}}\nwidentuses{\\{{\nwixident{EdgeNotFoundException}}{EdgeNotFoundException}}\\{{\nwixident{UserNotFoundException}}{UserNotFoundException}}}\nwindexuse{\nwixident{EdgeNotFoundException}}{EdgeNotFoundException}{NW3mnZLd-1v536H-1}\nwindexuse{\nwixident{UserNotFoundException}}{UserNotFoundException}{NW3mnZLd-1v536H-1}\nwendcode{}\nwbegincode{68}\sublabel{NW3mnZLd-1v536H-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-1v536H-2}}}\moddef{Write: DBUpdateServerService(5)~{\nwtagstyle{}\subpageref{NW3mnZLd-1v536H-1}}}\plusendmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-3}}\nwprevnextdefs{NW3mnZLd-1v536H-1}{\relax}\nwenddeflinemarkup
-  for (int i = 0; i < sched.length - 2; i += 3) \{
-    final int r = sched[(i + 2)];
-    if (r != sid) \{
-      \LA{}Cache request transit distance and duration~{\nwtagstyle{}\subpageref{NW1ODIS0-ONjMX-1}}\RA{}
-    \}
+\nwalsodefined{\\{NW3mnZLd-1v536H-2}}\nwused{\\{NW4QM9HE-Oyob-3}}\nwidentdefs{\\{{\nwixident{DBUpdateServerService}}{DBUpdateServerService}}}\nwidentuses{\\{{\nwixident{EdgeNotFoundException}}{EdgeNotFoundException}}\\{{\nwixident{UserNotFoundException}}{UserNotFoundException}}}\nwindexuse{\nwixident{EdgeNotFoundException}}{EdgeNotFoundException}{NW3mnZLd-1v536H-1}\nwindexuse{\nwixident{UserNotFoundException}}{UserNotFoundException}{NW3mnZLd-1v536H-1}\nwendcode{}\nwbegincode{66}\sublabel{NW3mnZLd-1v536H-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-1v536H-2}}}\moddef{Write: DBUpdateServerService(5)~{\nwtagstyle{}\subpageref{NW3mnZLd-1v536H-1}}}\plusendmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-3}}\nwprevnextdefs{NW3mnZLd-1v536H-1}{\relax}\nwenddeflinemarkup
+  for (int i = 0; i < (sched.length - 3); i += 4) \{
+    final int r = sched[(i + 3)];
+    \LA{}Cache request transit distance and duration~{\nwtagstyle{}\subpageref{NW1ODIS0-ONjMX-1}}\RA{}
   \}
   for (final int r : ridpos) \{
     this.lu_rstatus.put(r, true);
@@ -9558,8 +9529,8 @@ throws \nwlinkedidentc{UserNotFoundException}{NW1ODIS0-15irq2-1}, \nwlinkedident
   \LA{}Cache server distance~{\nwtagstyle{}\subpageref{NW1ODIS0-10eJSR-1}}\RA{}
   \LA{}Cache cruising distance and duration~{\nwtagstyle{}\subpageref{NW1ODIS0-1XE7RK-1}}\RA{}
 \}
-\nwused{\\{NW4QM9HE-Oyob-3}}\nwendcode{}\nwbegindocs{69}\nwdocspar
-\nwenddocs{}\nwbegincode{70}\sublabel{NW3mnZLd-2QlrHv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-2QlrHv-1}}}\moddef{Write: updateServerService(5)~{\nwtagstyle{}\subpageref{NW3mnZLd-2QlrHv-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2Rlctf-2}}\nwenddeflinemarkup
+\nwused{\\{NW4QM9HE-Oyob-3}}\nwendcode{}\nwbegindocs{67}\nwdocspar
+\nwenddocs{}\nwbegincode{68}\sublabel{NW3mnZLd-2QlrHv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-2QlrHv-1}}}\moddef{Write: updateServerService(5)~{\nwtagstyle{}\subpageref{NW3mnZLd-2QlrHv-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2Rlctf-2}}\nwenddeflinemarkup
 void updateServerService(final int sid, final int[] route, final int[] sched,
     final int[] ridpos, final int[] ridneg)
 throws \nwlinkedidentc{RouteIllegalOverwriteException}{NW1ODIS0-3HHaYS-1}, \nwlinkedidentc{UserNotFoundException}{NW1ODIS0-15irq2-1},
@@ -9598,21 +9569,21 @@ throws \nwlinkedidentc{RouteIllegalOverwriteException}{NW1ODIS0-3HHaYS-1}, \nwli
   /*<Stats: updateServerService(5)>*/
 \}
 \nwindexdefn{\nwixident{updateServerAddToSchedule}}{updateServerAddToSchedule}{NW3mnZLd-2QlrHv-1}\eatline
-\nwused{\\{NW4QM9HE-2Rlctf-2}}\nwidentdefs{\\{{\nwixident{updateServerAddToSchedule}}{updateServerAddToSchedule}}}\nwidentuses{\\{{\nwixident{DBQueryServerRoute}}{DBQueryServerRoute}}\\{{\nwixident{DBUpdateServerService}}{DBUpdateServerService}}\\{{\nwixident{EdgeNotFoundException}}{EdgeNotFoundException}}\\{{\nwixident{retrieveClock}}{retrieveClock}}\\{{\nwixident{RouteIllegalOverwriteException}}{RouteIllegalOverwriteException}}\\{{\nwixident{TimeWindowException}}{TimeWindowException}}\\{{\nwixident{UserNotFoundException}}{UserNotFoundException}}}\nwindexuse{\nwixident{DBQueryServerRoute}}{DBQueryServerRoute}{NW3mnZLd-2QlrHv-1}\nwindexuse{\nwixident{DBUpdateServerService}}{DBUpdateServerService}{NW3mnZLd-2QlrHv-1}\nwindexuse{\nwixident{EdgeNotFoundException}}{EdgeNotFoundException}{NW3mnZLd-2QlrHv-1}\nwindexuse{\nwixident{retrieveClock}}{retrieveClock}{NW3mnZLd-2QlrHv-1}\nwindexuse{\nwixident{RouteIllegalOverwriteException}}{RouteIllegalOverwriteException}{NW3mnZLd-2QlrHv-1}\nwindexuse{\nwixident{TimeWindowException}}{TimeWindowException}{NW3mnZLd-2QlrHv-1}\nwindexuse{\nwixident{UserNotFoundException}}{UserNotFoundException}{NW3mnZLd-2QlrHv-1}\nwendcode{}\nwbegindocs{71}\nwdocspar
+\nwused{\\{NW4QM9HE-2Rlctf-2}}\nwidentdefs{\\{{\nwixident{updateServerAddToSchedule}}{updateServerAddToSchedule}}}\nwidentuses{\\{{\nwixident{DBQueryServerRoute}}{DBQueryServerRoute}}\\{{\nwixident{DBUpdateServerService}}{DBUpdateServerService}}\\{{\nwixident{EdgeNotFoundException}}{EdgeNotFoundException}}\\{{\nwixident{retrieveClock}}{retrieveClock}}\\{{\nwixident{RouteIllegalOverwriteException}}{RouteIllegalOverwriteException}}\\{{\nwixident{TimeWindowException}}{TimeWindowException}}\\{{\nwixident{UserNotFoundException}}{UserNotFoundException}}}\nwindexuse{\nwixident{DBQueryServerRoute}}{DBQueryServerRoute}{NW3mnZLd-2QlrHv-1}\nwindexuse{\nwixident{DBUpdateServerService}}{DBUpdateServerService}{NW3mnZLd-2QlrHv-1}\nwindexuse{\nwixident{EdgeNotFoundException}}{EdgeNotFoundException}{NW3mnZLd-2QlrHv-1}\nwindexuse{\nwixident{retrieveClock}}{retrieveClock}{NW3mnZLd-2QlrHv-1}\nwindexuse{\nwixident{RouteIllegalOverwriteException}}{RouteIllegalOverwriteException}{NW3mnZLd-2QlrHv-1}\nwindexuse{\nwixident{TimeWindowException}}{TimeWindowException}{NW3mnZLd-2QlrHv-1}\nwindexuse{\nwixident{UserNotFoundException}}{UserNotFoundException}{NW3mnZLd-2QlrHv-1}\nwendcode{}\nwbegindocs{69}\nwdocspar
 \section{Debug}
 
 \subsection{Debug: DBUpdateServerService Parameters}
 
-\nwenddocs{}\nwbegincode{72}\sublabel{NW3mnZLd-3aElWm-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-3aElWm-1}}}\moddef{Debug: DBUpdateServerService parameters~{\nwtagstyle{}\subpageref{NW3mnZLd-3aElWm-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3mnZLd-1v536H-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{70}\sublabel{NW3mnZLd-3aElWm-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-3aElWm-1}}}\moddef{Debug: DBUpdateServerService parameters~{\nwtagstyle{}\subpageref{NW3mnZLd-3aElWm-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3mnZLd-1v536H-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("\nwlinkedidentc{DBUpdateServerService}{NW3mnZLd-1v536H-1}(5), sid=%d, route=[#=%d], sched=[#=%d], ridpos=[#=%d], ridneg=[#=%d]\\n",
       sid, route.length, sched.length, ridpos.length, ridneg.length);
 \}
-\nwused{\\{NW3mnZLd-1v536H-1}}\nwidentuses{\\{{\nwixident{DBUpdateServerService}}{DBUpdateServerService}}}\nwindexuse{\nwixident{DBUpdateServerService}}{DBUpdateServerService}{NW3mnZLd-3aElWm-1}\nwendcode{}\nwbegindocs{73}\nwdocspar
+\nwused{\\{NW3mnZLd-1v536H-1}}\nwidentuses{\\{{\nwixident{DBUpdateServerService}}{DBUpdateServerService}}}\nwindexuse{\nwixident{DBUpdateServerService}}{DBUpdateServerService}{NW3mnZLd-3aElWm-1}\nwendcode{}\nwbegindocs{71}\nwdocspar
 
 \subsection{Debug: RouteIllegalOverwriteException, Missing Branch Point}
 
-\nwenddocs{}\nwbegincode{74}\sublabel{NW3mnZLd-3OSl0k-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-3OSl0k-1}}}\moddef{Debug: RouteIllegalOverwriteException, missing branch point~{\nwtagstyle{}\subpageref{NW3mnZLd-3OSl0k-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3mnZLd-2QlrHv-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{72}\sublabel{NW3mnZLd-3OSl0k-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-3OSl0k-1}}}\moddef{Debug: RouteIllegalOverwriteException, missing branch point~{\nwtagstyle{}\subpageref{NW3mnZLd-3OSl0k-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3mnZLd-2QlrHv-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   for (i = 0; i < current.length - 1; i+=2) \{
     System.out.printf("debug wold[%d..%d]=\{ %d, %d \}\\n", i, (i + 1),
@@ -9623,11 +9594,11 @@ if (DEBUG) \{
         route[i], route[i+1]);
   \}
 \}
-\nwused{\\{NW3mnZLd-2QlrHv-1}}\nwendcode{}\nwbegindocs{75}\nwdocspar
+\nwused{\\{NW3mnZLd-2QlrHv-1}}\nwendcode{}\nwbegindocs{73}\nwdocspar
 
 \subsection{Debug: RouteIllegalOverwriteException, Overwrite Occurred}
 
-\nwenddocs{}\nwbegincode{76}\sublabel{NW3mnZLd-cjS9g-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-cjS9g-1}}}\moddef{Debug: RouteIllegalOverwriteException, overwrite occurred~{\nwtagstyle{}\subpageref{NW3mnZLd-cjS9g-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3mnZLd-2QlrHv-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{74}\sublabel{NW3mnZLd-cjS9g-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-cjS9g-1}}}\moddef{Debug: RouteIllegalOverwriteException, overwrite occurred~{\nwtagstyle{}\subpageref{NW3mnZLd-cjS9g-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3mnZLd-2QlrHv-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("overwrite, current[%d] != route[%d] or current[%d] != route[%d]\\n",
       i, j, (i + 1), (j + 1));
@@ -9640,11 +9611,11 @@ if (DEBUG) \{
         route[i], route[i+1]);
   \}
 \}
-\nwused{\\{NW3mnZLd-2QlrHv-1}}\nwendcode{}\nwbegindocs{77}\nwdocspar
+\nwused{\\{NW3mnZLd-2QlrHv-1}}\nwendcode{}\nwbegindocs{75}\nwdocspar
 
 \subsection{Debug: EdgeNotFoundException}
 
-\nwenddocs{}\nwbegincode{78}\sublabel{NW3mnZLd-1AKUgT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-1AKUgT-1}}}\moddef{Debug: EdgeNotFoundException~{\nwtagstyle{}\subpageref{NW3mnZLd-1AKUgT-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3mnZLd-3NpaSw-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{76}\sublabel{NW3mnZLd-1AKUgT-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-1AKUgT-1}}}\moddef{Debug: EdgeNotFoundException~{\nwtagstyle{}\subpageref{NW3mnZLd-1AKUgT-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3mnZLd-3NpaSw-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("edge (%d, %d) not found; print route until now\\n", v1, v2);
   for (int j = 0; j <= i; j += 2) \{
@@ -9652,7 +9623,7 @@ if (DEBUG) \{
       j, (j + 1), (j + 2), (j + 3), route[j], route[j+1], route[j+2], route[j+3]);
   \}
 \}
-\nwused{\\{NW3mnZLd-3NpaSw-1}}\nwendcode{}\nwbegindocs{79}\nwdocspar
+\nwused{\\{NW3mnZLd-3NpaSw-1}}\nwendcode{}\nwbegindocs{77}\nwdocspar
 
 \nwenddocs{}\nwfilename{src/sim-gtree.nw}\nwbegindocs{0}\chapter{G-tree Operations}
 \label{sim-gtree}

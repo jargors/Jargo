@@ -1090,7 +1090,7 @@ public class Storage {
            }
            {
              int count = 0;
-             for (int i = 0; i < (sched.length - 2); i += 3) {
+             for (int i = 0; i < (sched.length - 3); i += 4) {
                if (sched[(i + 2)] == sid) {
                  count++;
                }
@@ -1139,29 +1139,27 @@ public class Storage {
                this.PSSubmit(pS10);
                PreparedStatement pS77 = this.PSCreate(conn, "S77");
                PreparedStatement pS139 = this.PSCreate(conn, "S139");
-               final int te = sched[(sched.length - 3)];
-               final int ve = sched[(sched.length - 2)];
+               final int te = sched[(sched.length - 4)];
+               final int ve = sched[(sched.length - 3)];
                this.PSAdd(pS77, te, ve, sid);
                this.PSAdd(pS139, te, sid);
                this.PSSubmit(pS77, pS139);
                PreparedStatement pS82 = this.PSCreate(conn, "S82");
                PreparedStatement pS83 = this.PSCreate(conn, "S83");
                PreparedStatement pS84 = this.PSCreate(conn, "S84");
-               for (int j = 0; j < (sched.length - 2); j += 3) {
+               for (int j = 0; j < (sched.length - 3); j += 4) {
                  final int tj = sched[(j + 0)];
                  final int vj = sched[(j + 1)];
-                 final int Lj = sched[(j + 2)];
-                 if (Lj != sid) {
-                   this.PSAdd(pS82, tj, vj, Lj);
-                   this.PSAdd(pS83, tj, vj, Lj);
-                   this.PSAdd(pS84, tj, vj, Lj);
-                 }
+                 final int Lj = sched[(j + 3)];
+                 this.PSAdd(pS82, tj, vj, Lj);
+                 this.PSAdd(pS83, tj, vj, Lj);
+                 this.PSAdd(pS84, tj, vj, Lj);
                }
                this.PSSubmit(pS83, pS82, pS84);
                PreparedStatement pS140 = this.PSCreate(conn, "S140");
-               for (int j = 0; j < (sched.length - 2); j += 3) {
-                 final int Lj = sched[(j + 2)];
-                 if (Lj != sid && !cache.containsKey(Lj)) {
+               for (int j = 0; j < (sched.length - 3); j += 4) {
+                 final int Lj = sched[(j + 3)];
+                 if (!cache.containsKey(Lj)) {
                    final int rq = lu_users.get(Lj)[1];
                    boolean flagged = false;
                    for (final int r : ridpos) {
@@ -1173,8 +1171,8 @@ public class Storage {
                    if (flagged) {
                      final int tp = sched[(j + 0)];
                      final int vp = sched[(j + 1)];
-                     for (int k = (j + 3); k < (sched.length - 2); k += 3) {
-                       if (Lj == sched[(k + 2)]) {
+                     for (int k = (j + 4); k < (sched.length - 3); k += 4) {
+                       if (Lj == sched[(k + 3)]) {
                          final int td = sched[(k + 0)];
                          final int vd = sched[(k + 1)];
                          cache. put(Lj, new int[] { rq, tp, td });
@@ -1195,8 +1193,8 @@ public class Storage {
                      // Lj is "dangling".
                      if (tp > route[0] && td > route[0]) {
                        boolean dangling = true;
-                       for (int k = (j + 3); k < (sched.length - 2); k += 3) {
-                         if (Lj == sched[(k + 2)]) {
+                       for (int k = (j + 4); k < (sched.length - 3); k += 4) {
+                         if (Lj == sched[(k + 3)]) {
                            dangling = false;
                            break;
                          }
@@ -1219,25 +1217,23 @@ public class Storage {
                this.PSAdd(pS80, sid, route[0]);
                this.PSSubmit(pS80);
                PreparedStatement pS14 = PSCreate(conn, "S14");
-               for (int j = 0; j < (sched.length - 2); j += 3) {
+               for (int j = 0; j < (sched.length - 3); j += 4) {
                  final int t2 = sched[(j + 0)];
                  final int v2 = sched[(j + 1)];
-                 final int Lj = sched[(j + 2)];
-                 if (Lj != sid) {
-                   // if only origin or only destination is in sched, cache will
-                   // not contain key Lj.
-                   if (cache.containsKey(Lj)) {
-                     final int[] qpd = cache.get(Lj);
-                     final int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
-                     final int o2 = o1 + 1;
-                     this.PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
-                           qpd[0], qpd[1], qpd[2], o1, o2);
-                     t1 = t2;
-                     q1 = q2;
-                     o1 = o2;
-                   } else {
-                     throw new UserNotFoundException("User "+Lj+" not found in schedule!");
-                   }
+                 final int Lj = sched[(j + 3)];
+                 // if only origin or only destination is in sched, cache will
+                 // not contain key Lj.
+                 if (cache.containsKey(Lj)) {
+                   final int[] qpd = cache.get(Lj);
+                   final int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
+                   final int o2 = o1 + 1;
+                   this.PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
+                         qpd[0], qpd[1], qpd[2], o1, o2);
+                   t1 = t2;
+                   q1 = q2;
+                   o1 = o2;
+                 } else {
+                   throw new UserNotFoundException("User "+Lj+" not found in schedule!");
                  }
                }
                this.PSSubmit(pS14);
@@ -1278,17 +1274,15 @@ public class Storage {
            } catch (SQLException e) {
              throw e;
            }
-           for (int i = 0; i < sched.length - 2; i += 3) {
-             final int r = sched[(i + 2)];
-             if (r != sid) {
-               try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-                 this.distance_requests_transit.put(r, this.DBQueryRequestDistanceTransit(r, false)[0]);
-                 this.duration_requests_transit.put(r, this.DBQueryRequestDurationTransit(r, false)[0]);
-                 this.duration_requests_travel .put(r, this.DBQueryRequestDurationTravel (r, false)[0]);
-                 this.duration_requests_pickup .put(r, this.DBQueryRequestDurationPickup (r, false)[0]);
-               } catch (SQLException e) {
-                 throw e;
-               }
+           for (int i = 0; i < (sched.length - 3); i += 4) {
+             final int r = sched[(i + 3)];
+             try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+               this.distance_requests_transit.put(r, this.DBQueryRequestDistanceTransit(r, false)[0]);
+               this.duration_requests_transit.put(r, this.DBQueryRequestDurationTransit(r, false)[0]);
+               this.duration_requests_travel .put(r, this.DBQueryRequestDurationTravel (r, false)[0]);
+               this.duration_requests_pickup .put(r, this.DBQueryRequestDurationPickup (r, false)[0]);
+             } catch (SQLException e) {
+               throw e;
              }
            }
            for (final int r : ridpos) {

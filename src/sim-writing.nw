@@ -24,7 +24,7 @@ if (this.traffic != null) {
         ? ((int) Math.ceil((dd/(float) nu_new + t1))) - t2
         : 0);
     if (diff != 0) {
-      for (int p = 0; p < (mutsched.length - 2); p += 3) {
+      for (int p = 0; p < (mutsched.length - 3); p += 4) {
         if (mutsched[p] >= mutroute[(k + 2)]) {
           mutsched[p] += diff;
         }
@@ -137,25 +137,23 @@ this.PSSubmit(pS14);
 \subsection{Insert into CQ new remaining schedule}
 <<Insert into CQ new remaining schedule>>=
 PreparedStatement pS14 = PSCreate(conn, "S14");
-for (int j = 0; j < (sched.length - 2); j += 3) {
+for (int j = 0; j < (sched.length - 3); j += 4) {
   final int t2 = sched[(j + 0)];
   final int v2 = sched[(j + 1)];
-  final int Lj = sched[(j + 2)];
-  if (Lj != sid) {
-    // if only origin or only destination is in sched, cache will
-    // not contain key Lj.
-    if (cache.containsKey(Lj)) {
-      final int[] qpd = cache.get(Lj);
-      final int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
-      final int o2 = o1 + 1;
-      this.PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
-            qpd[0], qpd[1], qpd[2], o1, o2);
-      t1 = t2;
-      q1 = q2;
-      o1 = o2;
-    } else {
-      throw new UserNotFoundException("User "+Lj+" not found in schedule!");
-    }
+  final int Lj = sched[(j + 3)];
+  // if only origin or only destination is in sched, cache will
+  // not contain key Lj.
+  if (cache.containsKey(Lj)) {
+    final int[] qpd = cache.get(Lj);
+    final int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
+    final int o2 = o1 + 1;
+    this.PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
+          qpd[0], qpd[1], qpd[2], o1, o2);
+    t1 = t2;
+    q1 = q2;
+    o1 = o2;
+  } else {
+    throw new UserNotFoundException("User "+Lj+" not found in schedule!");
   }
 }
 this.PSSubmit(pS14);
@@ -223,34 +221,12 @@ this.PSSubmit(pS10);
 <<Insert into PD, CPD new jobs>>
 @
 
-\subsection{Populate the tp, td cache and update CQ}
-<<Populate the tp, td cache and update CQ>>=
-PreparedStatement pS140 = this.PSCreate(conn, "S140");
-for (int j = 0; j < (sched.length - 2); j += 3) {
-  final int Lj = sched[(j + 2)];
-  if (Lj != sid) {
-    if (!cache.containsKey(Lj)) {
-      final int[] output = PSQuery(conn, "S86", 2, Lj);
-      if (output.length == 0) {
-        throw new UserNotFoundException("Request "+Lj+" not in pickups/dropoffs!");
-      }
-      final int tp = output[0];
-      final int td = output[1];
-      final int rq = this.lu_users.get(Lj)[1];
-      cache.put(Lj, new int[] { rq, tp, td });
-      this.PSAdd(pS140, tp, td, Lj);
-    }
-  }
-}
-this.PSSubmit(pS140);
-@
-
 \subsection{Populate the tp, td cache and vp, vd cache and update CQ}
 <<Populate the tp, td cache and vp, vd cache and update CQ>>=
 PreparedStatement pS140 = this.PSCreate(conn, "S140");
-for (int j = 0; j < (sched.length - 2); j += 3) {
-  final int Lj = sched[(j + 2)];
-  if (Lj != sid && !cache.containsKey(Lj)) {
+for (int j = 0; j < (sched.length - 3); j += 4) {
+  final int Lj = sched[(j + 3)];
+  if (!cache.containsKey(Lj)) {
     final int rq = lu_users.get(Lj)[1];
     boolean flagged = false;
     for (final int r : ridpos) {
@@ -262,8 +238,8 @@ for (int j = 0; j < (sched.length - 2); j += 3) {
     if (flagged) {
       final int tp = sched[(j + 0)];
       final int vp = sched[(j + 1)];
-      for (int k = (j + 3); k < (sched.length - 2); k += 3) {
-        if (Lj == sched[(k + 2)]) {
+      for (int k = (j + 4); k < (sched.length - 3); k += 4) {
+        if (Lj == sched[(k + 3)]) {
           final int td = sched[(k + 0)];
           final int vd = sched[(k + 1)];
           cache. put(Lj, new int[] { rq, tp, td });
@@ -284,8 +260,8 @@ for (int j = 0; j < (sched.length - 2); j += 3) {
       // Lj is "dangling".
       if (tp > route[0] && td > route[0]) {
         boolean dangling = true;
-        for (int k = (j + 3); k < (sched.length - 2); k += 3) {
-          if (Lj == sched[(k + 2)]) {
+        for (int k = (j + 4); k < (sched.length - 3); k += 4) {
+          if (Lj == sched[(k + 3)]) {
             dangling = false;
             break;
           }
@@ -314,8 +290,8 @@ int o1 = (route[0] == 0 ?  1 : output[2]);
 <<Update CW, CPD route endpoint>>=
 PreparedStatement pS77 = this.PSCreate(conn, "S77");
 PreparedStatement pS139 = this.PSCreate(conn, "S139");
-final int te = sched[(sched.length - 3)];
-final int ve = sched[(sched.length - 2)];
+final int te = sched[(sched.length - 4)];
+final int ve = sched[(sched.length - 3)];
 this.PSAdd(pS77, te, ve, sid);
 this.PSAdd(pS139, te, sid);
 this.PSSubmit(pS77, pS139);
@@ -326,15 +302,13 @@ this.PSSubmit(pS77, pS139);
 PreparedStatement pS82 = this.PSCreate(conn, "S82");
 PreparedStatement pS83 = this.PSCreate(conn, "S83");
 PreparedStatement pS84 = this.PSCreate(conn, "S84");
-for (int j = 0; j < (sched.length - 2); j += 3) {
+for (int j = 0; j < (sched.length - 3); j += 4) {
   final int tj = sched[(j + 0)];
   final int vj = sched[(j + 1)];
-  final int Lj = sched[(j + 2)];
-  if (Lj != sid) {
-    this.PSAdd(pS82, tj, vj, Lj);
-    this.PSAdd(pS83, tj, vj, Lj);
-    this.PSAdd(pS84, tj, vj, Lj);
-  }
+  final int Lj = sched[(j + 3)];
+  this.PSAdd(pS82, tj, vj, Lj);
+  this.PSAdd(pS83, tj, vj, Lj);
+  this.PSAdd(pS84, tj, vj, Lj);
 }
 this.PSSubmit(pS83, pS82, pS84);
 @
@@ -693,7 +667,7 @@ throws UserNotFoundException, EdgeNotFoundException, SQLException {
   }
   {
     int count = 0;
-    for (int i = 0; i < (sched.length - 2); i += 3) {
+    for (int i = 0; i < (sched.length - 3); i += 4) {
       if (sched[(i + 2)] == sid) {
         count++;
       }
@@ -728,11 +702,9 @@ throws UserNotFoundException, EdgeNotFoundException, SQLException {
   }
 @ %def DBUpdateServerService
 <<Write: DBUpdateServerService(5)>>=
-  for (int i = 0; i < sched.length - 2; i += 3) {
-    final int r = sched[(i + 2)];
-    if (r != sid) {
-      <<Cache request transit distance and duration>>
-    }
+  for (int i = 0; i < (sched.length - 3); i += 4) {
+    final int r = sched[(i + 3)];
+    <<Cache request transit distance and duration>>
   }
   for (final int r : ridpos) {
     this.lu_rstatus.put(r, true);

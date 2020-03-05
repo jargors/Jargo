@@ -216,7 +216,7 @@ public class Communicator {
                    ? ((int) Math.ceil((dd/(float) nu_new + t1))) - t2
                    : 0);
                if (diff != 0) {
-                 for (int p = 0; p < (mutsched.length - 2); p += 3) {
+                 for (int p = 0; p < (mutsched.length - 3); p += 4) {
                    if (mutsched[p] >= mutroute[(k + 2)]) {
                      mutsched[p] += diff;
                    }
