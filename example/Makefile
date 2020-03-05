@@ -89,6 +89,7 @@ $(JAVA2) : src/*.nw
 
 # Build doc/body.tex.
 TEXSRCS= \
+	src/sched-introduction.nw \
 	src/sched-prepend.nw \
 	src/sched-prepend-after.nw \
 	src/route-shortest.nw \

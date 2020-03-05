@@ -1,18 +1,37 @@
 \part{Scheduling}% ===> this file was generated automatically by noweave --- better not edit it
 \label{part-scheduling}
 
-\chapter{Prepend}
-\label{sched-prepend}
+\chapter{Introduction}
+\label{sched-introduction}
 
 \renewcommand{\thepage}{\arabic{page}}
 \setcounter{page}{1}
 
-The following chapters implement several scheduling procedures for ridesharing
-algorithms. Each procedure is written here as a ``chunk'' of code. A table
-appearing at the beginning of each procedure lists the required memory values
-for using the chunk and the side effects on these structures after execution.
+Given a vehicle in progress of servicing customers that have been assigned to
+it, how should the vehicle move if a new customer is added to its assignments?
+One way to solve this problem is to view it as two sub-problems,
+\emph{scheduling} and \emph{routing}. Scheduling is the first sub-problem. The
+goal of scheduling is to determine the order that the customer pick-up and
+drop-off events should be attended. Then in the routing problem, the goal is to
+construct a path through the road network for the vehicle to follow so that it
+will attend the events in the determined order. In this part of the examples,
+we'll see some methods for solving the scheduling sub-problem. Then in the next
+part, we'll see some methods for routing.
 
-Here is the ``memory table'' for the first example, called Prepend.
+Before we begin, take note that no one knows which solutions to the scheduling
+sub-problem are good for any particular situation (by using Jargo, maybe we can
+find out!), thus we won't aim at satisfying an objective. Instead we'll
+brainstorm a few methods and go over some that appear in the literature, and
+our attention will be on \emph{how to implement these methods in Jargo}. You
+will find each method described in its own chapter. At the top of each chapter,
+a table will appear showing the required memory objects and side effects of the
+method.
+
+We'd be wise to define the problem \emph{in terms of Jargo data structures} so
+that low-level implementation can be understood.
+
+\nwfilename{src/sched-introduction.nw}\nwfilename{src/sched-prepend.nw}\nwbegindocs{0}\chapter{Prepend}
+\label{sched-prepend}
 
 \begin{center}
 \begin{tabular}{|p{74mm}|p{74mm}|}
@@ -43,7 +62,7 @@ schedule, {\Tt{}bnew\nwendquote} has empty time components (the 0th, 3rd, 6th, .
 The procedure has three steps. We don't want to pollute the memory space, so
 we'll wrap the entire procedure in braces.
 
-\nwfilename{src/sched-prepend.nw}\nwbegincode{1}\sublabel{NW31whEh-3w7K97-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW31whEh-3w7K97-1}}}\moddef{Scheduling: Prepend~{\nwtagstyle{}\subpageref{NW31whEh-3w7K97-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2surku-154Axj-1}\\{NW2surku-1CRkLP-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{1}\sublabel{NW31whEh-3w7K97-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW31whEh-3w7K97-1}}}\moddef{Scheduling: Prepend~{\nwtagstyle{}\subpageref{NW31whEh-3w7K97-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2surku-154Axj-1}\\{NW2surku-1CRkLP-1}}\nwenddeflinemarkup
 \{
   \LA{}Debug: echo prepend~{\nwtagstyle{}\subpageref{NW31whEh-2pE9cy-1}}\RA{}
   \LA{}Prepend: Step 1: Initialize~{\nwtagstyle{}\subpageref{NW31whEh-4UoZD7-1}}\RA{}
@@ -409,14 +428,15 @@ if (DEBUG) \{
 \label{route-shortest}
 
 In the previous chapters, we saw some scheduling procedures for ridesharing
-algorithms. Now we will take a look at routing procedures. We'll start Shortest
-Path. This procedure calculates consecutive shortest paths between events in a
-schedule in sequence. We will use the {\Tt{}Tools\nwendquote} class to quickly calculate
-shortest paths using a G-tree index of the road network graph.
+algorithms. Now we will take a look at routing procedures. We'll start with
+Shortest Path. This procedure calculates \textit{consecutive shortest paths
+between events in a schedule in sequence}. We will use the {\Tt{}Tools\nwendquote} class to
+quickly calculate shortest paths using a G-tree index of the road network
+graph.
 
 We will need some other memory objects. We will need the schedule to route
-through, {\Tt{}bnew\nwendquote}, produced using some scheduling procedure such as Prepend or
-Prepend After. We will also a container to store the computed route, {\Tt{}wnew\nwendquote}.
+through, {\Tt{}bnew\nwendquote}, produced using some scheduling procedure such as Prepend.
+We will also need a container to store the computed route, {\Tt{}wnew\nwendquote}.
 Finally, we need an \textit{initial waypoint} {\Tt{}wbeg\nwendquote} to start off the route.
 Recall that scheduling procedures do not fill in event times because these
 times depend on the routing. After we find the route here, we'll be able to
@@ -458,15 +478,37 @@ last step, we'll fill in the event times into {\Tt{}bnew\nwendquote}.
 
 \section{Step 1: Initialize}
 
+Let's initialize the memory.  We'll need some place to store the individual
+paths as they are computed, call it {\Tt{}legs\nwendquote}. A path by itself is an array of
+integer vertices, so {\Tt{}legs\nwendquote} will be an array of integer arrays. For each
+event, there is a path traveling to the event. The first path travels from
+{\Tt{}wbeg\nwendquote} to the first event, the second path travels from the first event to
+the second event, and so on. The number of events in {\Tt{}bnew\nwendquote} is its length
+divided by three. The {\Tt{}legs\nwendquote} array will need to hold this many paths. We'll
+store the number into {\Tt{}p\nwendquote} and use {\Tt{}p\nwendquote} to initialize {\Tt{}legs\nwendquote}.
+
+The first path is slightly different then the rest because it starts from
+{\Tt{}wbeg\nwendquote}. We'll go ahead and compute the first path now. We'll use the
+{\Tt{}computeRoute\nwendquote} method on the {\Tt{}Tools\nwendquote} class to find the shortest path.  The
+arguments in order are: starting vertex, ending vertex, and \textit{initial
+time}. The time is needed because {\Tt{}computeRoute\nwendquote} returns a sequence of
+waypoints, with time components next to each vertex. The duration between each
+adjacent vertex pair is the shortest duration needed to travel between the two
+vertices. This duration is computed using the maximum free-flow speed
+information in the road network. (TODO! Right now the speed is hard-coded to be
+10 m/s for all edges.)
+
+After we get the first path, we'll remember its length {\Tt{}n\nwendquote} and ending time
+{\Tt{}t\nwendquote} and then store it into {\Tt{}legs\nwendquote}. We will need {\Tt{}n\nwendquote} and {\Tt{}t\nwendquote} later.
+
 \nwenddocs{}\nwbegincode{3}\sublabel{NW8tIqu-3lMPNM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW8tIqu-3lMPNM-1}}}\moddef{Shortest: Step 1: Initialize~{\nwtagstyle{}\subpageref{NW8tIqu-3lMPNM-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW8tIqu-QuaVZ-1}}\nwenddeflinemarkup
 final int p = (bnew.length/3);
-
-final int[][] legs = new int[(bnew.length/3)][];
+final int[][] legs = new int[p][];
 \LA{}Debug: initialize legs container~{\nwtagstyle{}\subpageref{NW8tIqu-3R3yVH-1}}\RA{}
 
 int[] leg = this.tools.computeRoute(wbeg[1], bnew[1], wbeg[0]);
 int n = leg.length;
-int t = leg[n - 2];
+int t = leg[(n - 2)];
 \LA{}Debug: set route length and time~{\nwtagstyle{}\subpageref{NW8tIqu-3WOc2v-1}}\RA{}
 
 legs[0] = leg;
@@ -475,14 +517,21 @@ legs[0] = leg;
 
 \section{Step 2: Compute}
 
+Now we can compute each of the paths. For each event in {\Tt{}bnew\nwendquote}, we'll compute
+the path to the event traveling from the previous event. The starting time of
+each path is the ending time of the previous path. We'll store each path into
+{\Tt{}legs\nwendquote} and update {\Tt{}n\nwendquote} and {\Tt{}t\nwendquote} as we go along.
+
 \nwenddocs{}\nwbegincode{5}\sublabel{NW8tIqu-2EZ2CY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW8tIqu-2EZ2CY-1}}}\moddef{Shortest: Step 2: Compute~{\nwtagstyle{}\subpageref{NW8tIqu-2EZ2CY-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW8tIqu-QuaVZ-1}}\nwenddeflinemarkup
 for (int i = 1; i < p; i++) \{
+  // Extract vertices
   final int u = bnew[(3*i - 2)];
   final int v = bnew[(3*i + 1)];
+  // Compute path and store into legs
   leg = this.tools.computeRoute(u, v, t);
   legs[i] = leg;
   \LA{}Debug: set leg~{\nwtagstyle{}\subpageref{NW8tIqu-2dVika-1}}\RA{}
-
+  // Update n and t
   n += (leg.length - 2);
   t = leg[leg.length - 2];
   \LA{}Debug: set route length and time~{\nwtagstyle{}\subpageref{NW8tIqu-3WOc2v-1}}\RA{}
@@ -491,32 +540,91 @@ for (int i = 1; i < p; i++) \{
 
 \section{Step 3: Join}
 
+After the paths have been computed, we can join them together into {\Tt{}wnew\nwendquote}.
+Until now, we've added to {\Tt{}n\nwendquote} each path length as each path is computed.
+When we updated {\Tt{}n\nwendquote}, we left out one waypoint to prevent double-counting,
+for example paths $A\rightarrow B$ and $B\rightarrow C$ have a joined length
+of three, not four. We can use {\Tt{}n\nwendquote} now to initialize the size of {\Tt{}wnew\nwendquote}.
+
+Next, we simply loop through each of the paths in {\Tt{}legs\nwendquote}, copying each
+element into {\Tt{}wnew\nwendquote}. We'll remember the last copy position using {\Tt{}k\nwendquote}.
+Then we'll use {\Tt{}i\nwendquote} to slide over {\Tt{}legs\nwendquote} and {\Tt{}j\nwendquote} to slide through each
+path, copying into {\Tt{}wnew[k]\nwendquote} as we go along. To avoid double-counting the
+ends, we'll skip the last waypoint in each path, except if it is the last
+path in {\Tt{}legs\nwendquote}.
+
 \nwenddocs{}\nwbegincode{7}\sublabel{NW8tIqu-1OT4xQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW8tIqu-1OT4xQ-1}}}\moddef{Shortest: Step 3: Join~{\nwtagstyle{}\subpageref{NW8tIqu-1OT4xQ-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW8tIqu-QuaVZ-1}}\nwenddeflinemarkup
 wnew = new int[n];
-\{
-  int k = 0;
-  for (int i = 0; i < legs.length; i++) \{
-    int rend = (legs[i].length - (i == (legs.length - 1) ? 0 : 2));
-    for (int j = 0; j < rend; j++) \{
-      wnew[k] = legs[i][j];
-      \LA{}Debug: join route components~{\nwtagstyle{}\subpageref{NW8tIqu-J6KjD-1}}\RA{}
-      k++;
-    \}
+int k = 0;
+for (int i = 0; i < legs.length; i++) \{
+  int rend = (legs[i].length - (i == (legs.length - 1) ? 0 : 2));
+  for (int j = 0; j < rend; j++) \{
+    wnew[k] = legs[i][j];
+    \LA{}Debug: join route components~{\nwtagstyle{}\subpageref{NW8tIqu-J6KjD-1}}\RA{}
+    k++;
   \}
 \}
 \nwused{\\{NW8tIqu-QuaVZ-1}}\nwendcode{}\nwbegindocs{8}\nwdocspar
 
 \section{Step 4: Fill}
 
+Finally, we can go back and fill in the event times into {\Tt{}bnew\nwendquote}. As each path
+travels from one event to the next, all we need to do is extract the time
+component of the first waypoint of each path, located in the 0th position of
+the path, and copy it into {\Tt{}bnew\nwendquote}. The second path in {\Tt{}legs\nwendquote} starts from
+the first event, so we'll initialize our {\Tt{}i\nwendquote} counter to one instead of zero.
+Then when we copy into {\Tt{}bnew\nwendquote}, we'll shift the position to the left by three
+elements because the first event in {\Tt{}bnew\nwendquote} starts from position 0.
+
 \nwenddocs{}\nwbegincode{9}\sublabel{NW8tIqu-1nl6rv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW8tIqu-1nl6rv-1}}}\moddef{Shortest: Step 4: Fill~{\nwtagstyle{}\subpageref{NW8tIqu-1nl6rv-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW8tIqu-QuaVZ-1}}\nwenddeflinemarkup
 for (int i = 1; i < legs.length; i++) \{
   bnew[(3*i - 3)] = legs[i][0];
   \LA{}Debug: set schedule time~{\nwtagstyle{}\subpageref{NW8tIqu-1EJRY4-1}}\RA{}
 \}
-
 bnew[(3*p - 3)] = t;
 \LA{}Debug: set vehicle end time~{\nwtagstyle{}\subpageref{NW8tIqu-3ZHBo5-1}}\RA{}
 \nwused{\\{NW8tIqu-QuaVZ-1}}\nwendcode{}\nwbegindocs{10}\nwdocspar
+
+\section{Full Code}
+
+Here is the full code.
+
+\begin{verbatim}
+{
+  final int p = (bnew.length/3);
+  final int[][] legs = new int[p][];
+
+  int[] leg = this.tools.computeRoute(wbeg[1], bnew[1], wbeg[0]);
+  int n = leg.length;
+  int t = leg[(n - 2)];
+
+  legs[0] = leg;
+  for (int i = 1; i < p; i++) {
+    // Extract vertices
+    final int u = bnew[(3*i - 2)];
+    final int v = bnew[(3*i + 1)];
+    // Compute path and store into legs
+    leg = this.tools.computeRoute(u, v, t);
+    legs[i] = leg;
+    // Update n and t
+    n += (leg.length - 2);
+    t = leg[leg.length - 2];
+  }
+  wnew = new int[n];
+  int k = 0;
+  for (int i = 0; i < legs.length; i++) {
+    int rend = (legs[i].length - (i == (legs.length - 1) ? 0 : 2));
+    for (int j = 0; j < rend; j++) {
+      wnew[k] = legs[i][j];
+      k++;
+    }
+  }
+  for (int i = 1; i < legs.length; i++) {
+    bnew[(3*i - 3)] = legs[i][0];
+  }
+  bnew[(3*p - 3)] = t;
+}
+\end{verbatim}
 
 \section{Debug}
 

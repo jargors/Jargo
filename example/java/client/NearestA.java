@@ -237,15 +237,14 @@ public class NearestA extends Client {
                         System.out.printf("shortest path\n");
                       }
                       final int p = (bnew.length/3);
-
-                      final int[][] legs = new int[(bnew.length/3)][];
+                      final int[][] legs = new int[p][];
                       if (DEBUG) {
                         System.out.printf("init legs={ }\n");
                       }
 
                       int[] leg = this.tools.computeRoute(wbeg[1], bnew[1], wbeg[0]);
                       int n = leg.length;
-                      int t = leg[n - 2];
+                      int t = leg[(n - 2)];
                       if (DEBUG) {
                         System.out.printf("set n=%d\n", n);
                         System.out.printf("set t=%d\n", t);
@@ -257,15 +256,17 @@ public class NearestA extends Client {
                             legs[0][0], legs[0][1], legs[0][legs[0].length - 2], legs[0][legs[0].length - 1]);
                       }
                       for (int i = 1; i < p; i++) {
+                        // Extract vertices
                         final int u = bnew[(3*i - 2)];
                         final int v = bnew[(3*i + 1)];
+                        // Compute path and store into legs
                         leg = this.tools.computeRoute(u, v, t);
                         legs[i] = leg;
                         if (DEBUG) {
                           System.out.printf("set legs[%d]={ %d, %d, ..., %d, %d  }\n", i,
                               legs[i][0], legs[i][1], legs[i][legs[i].length - 2], legs[i][legs[i].length - 1]);
                         }
-
+                        // Update n and t
                         n += (leg.length - 2);
                         t = leg[leg.length - 2];
                         if (DEBUG) {
@@ -274,17 +275,15 @@ public class NearestA extends Client {
                         }
                       }
                       wnew = new int[n];
-                      {
-                        int k = 0;
-                        for (int i = 0; i < legs.length; i++) {
-                          int rend = (legs[i].length - (i == (legs.length - 1) ? 0 : 2));
-                          for (int j = 0; j < rend; j++) {
-                            wnew[k] = legs[i][j];
-                            if (DEBUG) {
-                              System.out.printf("set wnew[%d]=%d\n", k, wnew[k]);
-                            }
-                            k++;
+                      int k = 0;
+                      for (int i = 0; i < legs.length; i++) {
+                        int rend = (legs[i].length - (i == (legs.length - 1) ? 0 : 2));
+                        for (int j = 0; j < rend; j++) {
+                          wnew[k] = legs[i][j];
+                          if (DEBUG) {
+                            System.out.printf("set wnew[%d]=%d\n", k, wnew[k]);
                           }
+                          k++;
                         }
                       }
                       for (int i = 1; i < legs.length; i++) {
@@ -293,7 +292,6 @@ public class NearestA extends Client {
                           System.out.printf("set bnew[%d]=%d\n", (3*i - 3), bnew[(3*i - 3)]);
                         }
                       }
-
                       bnew[(3*p - 3)] = t;
                       if (DEBUG) {
                         System.out.printf("set bnew[%d]=%d\n", (3*p - 3), bnew[(3*p - 3)]);
