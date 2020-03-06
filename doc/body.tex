@@ -8949,19 +8949,21 @@ for (int j = 0; j < (sched.length - 3); j += 4) \{
   final int t2 = sched[(j + 0)];
   final int v2 = sched[(j + 1)];
   final int Lj = sched[(j + 3)];
-  // if only origin or only destination is in sched, cache will
-  // not contain key Lj.
-  if (cache.containsKey(Lj)) \{
-    final int[] qpd = cache.get(Lj);
-    final int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
-    final int o2 = o1 + 1;
-    this.\nwlinkedidentc{PSAdd}{NW1ODIS0-1X4ymL-1}(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
-          qpd[0], qpd[1], qpd[2], o1, o2);
-    t1 = t2;
-    q1 = q2;
-    o1 = o2;
-  \} else \{
-    throw new \nwlinkedidentc{UserNotFoundException}{NW1ODIS0-15irq2-1}("User "+Lj+" not found in schedule!");
+  if (Lj != 0) \{
+    // if only origin or only destination is in sched, cache will
+    // not contain key Lj.
+    if (cache.containsKey(Lj)) \{
+      final int[] qpd = cache.get(Lj);
+      final int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
+      final int o2 = o1 + 1;
+      this.\nwlinkedidentc{PSAdd}{NW1ODIS0-1X4ymL-1}(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
+            qpd[0], qpd[1], qpd[2], o1, o2);
+      t1 = t2;
+      q1 = q2;
+      o1 = o2;
+    \} else \{
+      throw new \nwlinkedidentc{UserNotFoundException}{NW1ODIS0-15irq2-1}("User "+Lj+" not found in schedule!");
+    \}
   \}
 \}
 this.\nwlinkedidentc{PSSubmit}{NW1ODIS0-1S1xBT-1}(pS14);
@@ -9034,7 +9036,7 @@ this.\nwlinkedidentc{PSSubmit}{NW1ODIS0-1S1xBT-1}(pS10);
 PreparedStatement pS140 = this.\nwlinkedidentc{PSCreate}{NW1ODIS0-47iuYD-1}(conn, "\nwlinkedidentc{S140}{NW1ODIS0-yno67-1}");
 for (int j = 0; j < (sched.length - 3); j += 4) \{
   final int Lj = sched[(j + 3)];
-  if (!cache.containsKey(Lj)) \{
+  if (Lj != 0 && !cache.containsKey(Lj)) \{
     final int rq = lu_users.get(Lj)[1];
     boolean flagged = false;
     for (final int r : ridpos) \{
@@ -9114,9 +9116,11 @@ for (int j = 0; j < (sched.length - 3); j += 4) \{
   final int tj = sched[(j + 0)];
   final int vj = sched[(j + 1)];
   final int Lj = sched[(j + 3)];
-  this.\nwlinkedidentc{PSAdd}{NW1ODIS0-1X4ymL-1}(pS82, tj, vj, Lj);
-  this.\nwlinkedidentc{PSAdd}{NW1ODIS0-1X4ymL-1}(pS83, tj, vj, Lj);
-  this.\nwlinkedidentc{PSAdd}{NW1ODIS0-1X4ymL-1}(pS84, tj, vj, Lj);
+  if (Lj != 0) \{
+    this.\nwlinkedidentc{PSAdd}{NW1ODIS0-1X4ymL-1}(pS82, tj, vj, Lj);
+    this.\nwlinkedidentc{PSAdd}{NW1ODIS0-1X4ymL-1}(pS83, tj, vj, Lj);
+    this.\nwlinkedidentc{PSAdd}{NW1ODIS0-1X4ymL-1}(pS84, tj, vj, Lj);
+  \}
 \}
 this.\nwlinkedidentc{PSSubmit}{NW1ODIS0-1S1xBT-1}(pS83, pS82, pS84);
 \nwused{\\{NW3mnZLd-4JHoKM-1}}\nwidentuses{\\{{\nwixident{PSAdd}}{PSAdd}}\\{{\nwixident{PSCreate}}{PSCreate}}\\{{\nwixident{PSSubmit}}{PSSubmit}}\\{{\nwixident{S82}}{S82}}\\{{\nwixident{S83}}{S83}}\\{{\nwixident{S84}}{S84}}}\nwindexuse{\nwixident{PSAdd}}{PSAdd}{NW3mnZLd-2K0zzi-1}\nwindexuse{\nwixident{PSCreate}}{PSCreate}{NW3mnZLd-2K0zzi-1}\nwindexuse{\nwixident{PSSubmit}}{PSSubmit}{NW3mnZLd-2K0zzi-1}\nwindexuse{\nwixident{S82}}{S82}{NW3mnZLd-2K0zzi-1}\nwindexuse{\nwixident{S83}}{S83}{NW3mnZLd-2K0zzi-1}\nwindexuse{\nwixident{S84}}{S84}{NW3mnZLd-2K0zzi-1}\nwendcode{}\nwbegindocs{42}\nwdocspar
@@ -9512,7 +9516,9 @@ throws \nwlinkedidentc{UserNotFoundException}{NW1ODIS0-15irq2-1}, \nwlinkedident
 \nwalsodefined{\\{NW3mnZLd-1v536H-2}}\nwused{\\{NW4QM9HE-Oyob-3}}\nwidentdefs{\\{{\nwixident{DBUpdateServerService}}{DBUpdateServerService}}}\nwidentuses{\\{{\nwixident{EdgeNotFoundException}}{EdgeNotFoundException}}\\{{\nwixident{UserNotFoundException}}{UserNotFoundException}}}\nwindexuse{\nwixident{EdgeNotFoundException}}{EdgeNotFoundException}{NW3mnZLd-1v536H-1}\nwindexuse{\nwixident{UserNotFoundException}}{UserNotFoundException}{NW3mnZLd-1v536H-1}\nwendcode{}\nwbegincode{66}\sublabel{NW3mnZLd-1v536H-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW3mnZLd-1v536H-2}}}\moddef{Write: DBUpdateServerService(5)~{\nwtagstyle{}\subpageref{NW3mnZLd-1v536H-1}}}\plusendmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-3}}\nwprevnextdefs{NW3mnZLd-1v536H-1}{\relax}\nwenddeflinemarkup
   for (int i = 0; i < (sched.length - 3); i += 4) \{
     final int r = sched[(i + 3)];
-    \LA{}Cache request transit distance and duration~{\nwtagstyle{}\subpageref{NW1ODIS0-ONjMX-1}}\RA{}
+    if (r != 0) \{
+      \LA{}Cache request transit distance and duration~{\nwtagstyle{}\subpageref{NW1ODIS0-ONjMX-1}}\RA{}
+    \}
   \}
   for (final int r : ridpos) \{
     this.lu_rstatus.put(r, true);

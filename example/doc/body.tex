@@ -28,7 +28,8 @@ a table will appear showing the required memory objects and side effects of the
 method.
 
 We'd be wise to define the problem \emph{in terms of Jargo data structures} so
-that low-level implementation can be understood.
+that low-level implementation can be understood. In Jargo, a \emph{schedule} is
+an integer array with a special physical meaning for each of the elements.
 
 \nwfilename{src/sched-introduction.nw}\nwfilename{src/sched-prepend.nw}\nwbegindocs{0}\chapter{Prepend}
 \label{sched-prepend}
@@ -54,9 +55,7 @@ that low-level implementation can be understood.
 
 The Prepend procedure copies schedule {\Tt{}brem\nwendquote} into schedule {\Tt{}bnew\nwendquote},
 \textit{but with request {\Tt{}rid\nwendquote}'s pick-up and drop-off events prepended to the
-front}. An ``event'' in {\Tt{}bnew\nwendquote} is a 3-tuple, $(t,v,L)$, where $t$ is the time
-of the event, $v$ is the location, and $L$ is the label describing the event.
-As event times cannot be known until the route is constructed through the
+front}. As event times cannot be known until the route is constructed through the
 schedule, {\Tt{}bnew\nwendquote} has empty time components (the 0th, 3rd, 6th, ... indices).
 
 The procedure has three steps. We don't want to pollute the memory space, so
@@ -164,40 +163,34 @@ First we'll initialize {\Tt{}bnew\nwendquote} to the correct size. The correct s
 calculated as follows. In Jargo, a server's remaining schedule is returned as a
 4-tuple flattened array of $(t,v,Ls,Lr)$ components. Each 4-tuple is one event.
 To get the number of events, we divide the length of the remaining schedule
-{\Tt{}brem\nwendquote} by four. Then we add two to this number because the new schedule will
-have two additional events, one pick-up and one drop-off. Finally we multiply
-this sum by three. (TODO: change remaining-schedule and submitted-schedule to
-be in the same format!)
+{\Tt{}brem\nwendquote} by four...
 
 \nwenddocs{}\nwbegincode{3}\sublabel{NW31whEh-4UoZD7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW31whEh-4UoZD7-1}}}\moddef{Prepend: Step 1: Initialize~{\nwtagstyle{}\subpageref{NW31whEh-4UoZD7-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW31whEh-3w7K97-1}\\{NW1UKIGb-3ujU2A-1}}\nwenddeflinemarkup
 final int m = (brem.length/4);
-bnew = new int[(3*(m + 2))];
+bnew = new int[(4*(m + 2))];
 \LA{}Debug: initialize~{\nwtagstyle{}\subpageref{NW31whEh-CxuR0-1}}\RA{}
 \nwused{\\{NW31whEh-3w7K97-1}\\{NW1UKIGb-3ujU2A-1}}\nwendcode{}\nwbegindocs{4}\nwdocspar
 
 \section{Step 2: Prepend}
 
 Now we'll do the prepend by populating the first six elements in {\Tt{}bnew\nwendquote}.
-Elements {\Tt{}bnew[0..2]\nwendquote} represent the request pick-up event, and elements
-{\Tt{}bnew[3..5]\nwendquote} represent the request drop-off event. As event times are
-unknown, we'll leave out the 0th and 3rd indices.
+Elements {\Tt{}bnew[0..3]\nwendquote} represent the request pick-up event, and elements
+{\Tt{}bnew[4..7]\nwendquote} represent the request drop-off event. As event times are
+unknown, we'll leave out the 0th and 4th indices.
 
 \nwenddocs{}\nwbegincode{5}\sublabel{NW31whEh-1EOgrK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW31whEh-1EOgrK-1}}}\moddef{Prepend: Step 2: Prepend~{\nwtagstyle{}\subpageref{NW31whEh-1EOgrK-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW31whEh-3w7K97-1}}\nwenddeflinemarkup
 bnew[1] = ro;
-bnew[2] = rid;
-bnew[4] = rd;
-bnew[5] = rid;
+bnew[3] = rid;
+bnew[5] = rd;
+bnew[7] = rid;
 \LA{}Debug: prepend~{\nwtagstyle{}\subpageref{NW31whEh-oDZcr-1}}\RA{}
 \nwused{\\{NW31whEh-3w7K97-1}}\nwendcode{}\nwbegindocs{6}\nwdocspar
 
 \section{Step 3: Copy}
 
 Just like that, we're almost done. In the third step, we'll simply copy over
-{\Tt{}brem\nwendquote} into {\Tt{}bnew\nwendquote} while shifting the destination indice by six. We shift
-by six to account for the two 3-tuples we inserted in Step 2. (We have to
-``squeeze'' the label in {\Tt{}brem\nwendquote} into {\Tt{}bnew\nwendquote}. The label in {\Tt{}brem\nwendquote} takes
-two elements while it only takes one element in {\Tt{}bnew\nwendquote}. I'll fix this
-inconsistency in a later version!)
+{\Tt{}brem\nwendquote} into {\Tt{}bnew\nwendquote} while shifting the destination indice by eight. We shift
+by eight to account for the two 4-tuples we inserted in Step 2.
 
 \nwenddocs{}\nwbegincode{7}\sublabel{NW31whEh-2CIafx-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW31whEh-2CIafx-1}}}\moddef{Prepend: Step 3: Copy~{\nwtagstyle{}\subpageref{NW31whEh-2CIafx-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW31whEh-3w7K97-1}}\nwenddeflinemarkup
 for (int i = 0; i < m; i++) \{
@@ -206,8 +199,9 @@ for (int i = 0; i < m; i++) \{
   final int ls = brem[(4*i + 2)];
   final int lr = brem[(4*i + 3)];
   // Copy into bnew
-  bnew[(3*i + 7)] = bv;
-  bnew[(3*i + 8)] = (ls == 0 ? lr : ls);  // <-- squeeze the label
+  bnew[(4*i +  9)] = bv;
+  bnew[(4*i + 10)] = ls;
+  bnew[(4*i + 11)] = lr;
   \LA{}Debug: copy~{\nwtagstyle{}\subpageref{NW31whEh-3FT9CC-1}}\RA{}
 \}
 \nwused{\\{NW31whEh-3w7K97-1}}\nwendcode{}\nwbegindocs{8}\nwdocspar
@@ -222,21 +216,6 @@ Here is the full code.
 
 \begin{verbatim}
 {
-  final int m = (brem.length/4);
-  bnew = new int[(3*(m + 2))];
-  bnew[1] = ro;
-  bnew[2] = rid;
-  bnew[4] = rd;
-  bnew[5] = rid;
-  for (int i = 0; i < m; i++) {
-    // Extract vertex and labels
-    final int bv = brem[(4*i + 1)];
-    final int ls = brem[(4*i + 2)];
-    final int lr = brem[(4*i + 3)];
-    // Copy into bnew
-    bnew[(3*i + 7)] = bv;
-    bnew[(3*i + 8)] = (ls == 0 ? lr : ls);  // <-- squeeze the label
-  }
 }
 \end{verbatim}
 
@@ -267,9 +246,9 @@ if (DEBUG) \{
 \nwenddocs{}\nwbegincode{13}\sublabel{NW31whEh-oDZcr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW31whEh-oDZcr-1}}}\moddef{Debug: prepend~{\nwtagstyle{}\subpageref{NW31whEh-oDZcr-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW31whEh-1EOgrK-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("set bnew[1]=%d\\n", bnew[1]);
-  System.out.printf("set bnew[2]=%d\\n", bnew[2]);
-  System.out.printf("set bnew[4]=%d\\n", bnew[4]);
+  System.out.printf("set bnew[3]=%d\\n", bnew[3]);
   System.out.printf("set bnew[5]=%d\\n", bnew[5]);
+  System.out.printf("set bnew[7]=%d\\n", bnew[7]);
 \}
 \nwused{\\{NW31whEh-1EOgrK-1}}\nwendcode{}\nwbegindocs{14}\nwdocspar
 
@@ -277,8 +256,9 @@ if (DEBUG) \{
 
 \nwenddocs{}\nwbegincode{15}\sublabel{NW31whEh-3FT9CC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW31whEh-3FT9CC-1}}}\moddef{Debug: copy~{\nwtagstyle{}\subpageref{NW31whEh-3FT9CC-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW31whEh-2CIafx-1}}\nwenddeflinemarkup
 if (DEBUG) \{
-  System.out.printf("set bnew[%d]=%d\\n", (3*i + 7), bnew[(3*i + 7)]);
-  System.out.printf("set bnew[%d]=%d\\n", (3*i + 8), bnew[(3*i + 8)]);
+  System.out.printf("set bnew[%d]=%d\\n", (4*i +  9), bnew[(4*i +  9)]);
+  System.out.printf("set bnew[%d]=%d\\n", (4*i + 10), bnew[(4*i + 10)]);
+  System.out.printf("set bnew[%d]=%d\\n", (4*i + 11), bnew[(4*i + 11)]);
 \}
 \nwused{\\{NW31whEh-2CIafx-1}}\nwendcode{}\nwbegindocs{16}\nwdocspar
 
@@ -323,16 +303,11 @@ The first step, initialization, is the same here as in Prepend.
 
 \section{Step 2: Prepend After}
 
-In the second step, the request pick-up and drop-off events are placed in
-elements {\Tt{}bnew[3..5]\nwendquote} and {\Tt{}bnew[6..8]\nwendquote}, respectively. Again, as event
-times are not known until routing, we'll leave out the time components
-at the 3rd and 6th indices.
-
 \nwenddocs{}\nwbegincode{3}\sublabel{NW1UKIGb-12A6K9-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1UKIGb-12A6K9-1}}}\moddef{Prepend: Step 2: Prepend After~{\nwtagstyle{}\subpageref{NW1UKIGb-12A6K9-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW1UKIGb-3ujU2A-1}}\nwenddeflinemarkup
-bnew[4] = ro;
-bnew[5] = rid;
-bnew[7] = rd;
-bnew[8] = rid;
+bnew[5] = ro;
+bnew[7] = rid;
+bnew[9] = rd;
+bnew[11] = rid;
 \LA{}Debug: prepend after~{\nwtagstyle{}\subpageref{NW1UKIGb-1muoY7-1}}\RA{}
 \nwused{\\{NW1UKIGb-3ujU2A-1}}\nwendcode{}\nwbegindocs{4}\nwdocspar
 
@@ -340,7 +315,7 @@ bnew[8] = rid;
 
 In the third step, we'll once again copy events in {\Tt{}brem\nwendquote} into {\Tt{}bnew\nwendquote}.
 This time, the first event is copied without any positional shift, while later
-events are shifted again by six positions.
+events are shifted again by eight positions.
 
 \nwenddocs{}\nwbegincode{5}\sublabel{NW1UKIGb-4QuDwc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1UKIGb-4QuDwc-1}}}\moddef{Prepend: Step 3: Copy After~{\nwtagstyle{}\subpageref{NW1UKIGb-4QuDwc-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW1UKIGb-3ujU2A-1}}\nwenddeflinemarkup
 for (int i = 0; i < m; i++) \{
@@ -349,8 +324,9 @@ for (int i = 0; i < m; i++) \{
   final int ls = brem[(4*i + 2)];
   final int lr = brem[(4*i + 3)];
   // Copy into bnew and shift if not first event
-  bnew[(3*i + (i < 1 ? 1 : 7))] = bv;
-  bnew[(3*i + (i < 1 ? 2 : 8))] = (ls == 0 ? lr : ls);
+  bnew[(4*i + (i < 1 ? 1 :  9))] = bv;
+  bnew[(4*i + (i < 1 ? 2 : 10))] = ls;
+  bnew[(4*i + (i < 1 ? 3 : 11))] = lr;
   \LA{}Debug: copy after~{\nwtagstyle{}\subpageref{NW1UKIGb-3pgnQf-1}}\RA{}
 \}
 \nwused{\\{NW1UKIGb-3ujU2A-1}}\nwendcode{}\nwbegindocs{6}\nwdocspar
@@ -365,21 +341,6 @@ Here is the full code.
 
 \begin{verbatim}
 {
-  final int m = (brem.length/4);
-  bnew = new int[(3*(m + 2))];
-  bnew[4] = ro;
-  bnew[5] = rid;
-  bnew[7] = rd;
-  bnew[8] = rid;
-  for (int i = 0; i < m; i++) {
-    // Extract vertex and labels
-    final int bv = brem[(4*i + 1)];
-    final int ls = brem[(4*i + 2)];
-    final int lr = brem[(4*i + 3)];
-    // Copy into bnew and shift if not first event
-    bnew[(3*i + (i < 1 ? 1 : 7))] = bv;
-    bnew[(3*i + (i < 1 ? 2 : 8))] = (ls == 0 ? lr : ls);
-  }
 }
 \end{verbatim}
 
@@ -400,10 +361,10 @@ if (DEBUG) \{
 
 \nwenddocs{}\nwbegincode{9}\sublabel{NW1UKIGb-1muoY7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1UKIGb-1muoY7-1}}}\moddef{Debug: prepend after~{\nwtagstyle{}\subpageref{NW1UKIGb-1muoY7-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW1UKIGb-12A6K9-1}}\nwenddeflinemarkup
 if (DEBUG) \{
-  System.out.printf("set bnew[4]=%d\\n", bnew[4]);
   System.out.printf("set bnew[5]=%d\\n", bnew[5]);
   System.out.printf("set bnew[7]=%d\\n", bnew[7]);
-  System.out.printf("set bnew[8]=%d\\n", bnew[8]);
+  System.out.printf("set bnew[9]=%d\\n", bnew[9]);
+  System.out.printf("set bnew[11]=%d\\n", bnew[11]);
 \}
 \nwused{\\{NW1UKIGb-12A6K9-1}}\nwendcode{}\nwbegindocs{10}\nwdocspar
 
@@ -412,11 +373,13 @@ if (DEBUG) \{
 \nwenddocs{}\nwbegincode{11}\sublabel{NW1UKIGb-3pgnQf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1UKIGb-3pgnQf-1}}}\moddef{Debug: copy after~{\nwtagstyle{}\subpageref{NW1UKIGb-3pgnQf-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW1UKIGb-4QuDwc-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   if (i < 1) \{
-    System.out.printf("set bnew[%d]=%d\\n", (3*i + 1), bnew[(3*i + 1)]);
-    System.out.printf("set bnew[%d]=%d\\n", (3*i + 2), bnew[(3*i + 2)]);
+    System.out.printf("set bnew[%d]=%d\\n", (4*i + 1), bnew[(4*i + 1)]);
+    System.out.printf("set bnew[%d]=%d\\n", (4*i + 2), bnew[(4*i + 2)]);
+    System.out.printf("set bnew[%d]=%d\\n", (4*i + 3), bnew[(4*i + 3)]);
   \} else \{
-    System.out.printf("set bnew[%d]=%d\\n", (3*i + 7), bnew[(3*i + 7)]);
-    System.out.printf("set bnew[%d]=%d\\n", (3*i + 8), bnew[(3*i + 8)]);
+    System.out.printf("set bnew[%d]=%d\\n", (4*i +  9), bnew[(4*i +  9)]);
+    System.out.printf("set bnew[%d]=%d\\n", (4*i + 10), bnew[(4*i + 10)]);
+    System.out.printf("set bnew[%d]=%d\\n", (4*i + 11), bnew[(4*i + 11)]);
   \}
 \}
 \nwused{\\{NW1UKIGb-4QuDwc-1}}\nwendcode{}\nwbegindocs{12}\nwdocspar
@@ -502,7 +465,7 @@ After we get the first path, we'll remember its length {\Tt{}n\nwendquote} and e
 {\Tt{}t\nwendquote} and then store it into {\Tt{}legs\nwendquote}. We will need {\Tt{}n\nwendquote} and {\Tt{}t\nwendquote} later.
 
 \nwenddocs{}\nwbegincode{3}\sublabel{NW8tIqu-3lMPNM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW8tIqu-3lMPNM-1}}}\moddef{Shortest: Step 1: Initialize~{\nwtagstyle{}\subpageref{NW8tIqu-3lMPNM-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW8tIqu-QuaVZ-1}}\nwenddeflinemarkup
-final int p = (bnew.length/3);
+final int p = (bnew.length/4);
 final int[][] legs = new int[p][];
 \LA{}Debug: initialize legs container~{\nwtagstyle{}\subpageref{NW8tIqu-3R3yVH-1}}\RA{}
 
@@ -525,8 +488,8 @@ each path is the ending time of the previous path. We'll store each path into
 \nwenddocs{}\nwbegincode{5}\sublabel{NW8tIqu-2EZ2CY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW8tIqu-2EZ2CY-1}}}\moddef{Shortest: Step 2: Compute~{\nwtagstyle{}\subpageref{NW8tIqu-2EZ2CY-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW8tIqu-QuaVZ-1}}\nwenddeflinemarkup
 for (int i = 1; i < p; i++) \{
   // Extract vertices
-  final int u = bnew[(3*i - 2)];
-  final int v = bnew[(3*i + 1)];
+  final int u = bnew[(4*i - 3)];
+  final int v = bnew[(4*i + 1)];
   // Compute path and store into legs
   leg = this.tools.computeRoute(u, v, t);
   legs[i] = leg;
@@ -578,10 +541,10 @@ elements because the first event in {\Tt{}bnew\nwendquote} starts from position 
 
 \nwenddocs{}\nwbegincode{9}\sublabel{NW8tIqu-1nl6rv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW8tIqu-1nl6rv-1}}}\moddef{Shortest: Step 4: Fill~{\nwtagstyle{}\subpageref{NW8tIqu-1nl6rv-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW8tIqu-QuaVZ-1}}\nwenddeflinemarkup
 for (int i = 1; i < legs.length; i++) \{
-  bnew[(3*i - 3)] = legs[i][0];
+  bnew[(4*i - 4)] = legs[i][0];
   \LA{}Debug: set schedule time~{\nwtagstyle{}\subpageref{NW8tIqu-1EJRY4-1}}\RA{}
 \}
-bnew[(3*p - 3)] = t;
+bnew[(4*p - 4)] = t;
 \LA{}Debug: set vehicle end time~{\nwtagstyle{}\subpageref{NW8tIqu-3ZHBo5-1}}\RA{}
 \nwused{\\{NW8tIqu-QuaVZ-1}}\nwendcode{}\nwbegindocs{10}\nwdocspar
 
@@ -591,38 +554,6 @@ Here is the full code.
 
 \begin{verbatim}
 {
-  final int p = (bnew.length/3);
-  final int[][] legs = new int[p][];
-
-  int[] leg = this.tools.computeRoute(wbeg[1], bnew[1], wbeg[0]);
-  int n = leg.length;
-  int t = leg[(n - 2)];
-
-  legs[0] = leg;
-  for (int i = 1; i < p; i++) {
-    // Extract vertices
-    final int u = bnew[(3*i - 2)];
-    final int v = bnew[(3*i + 1)];
-    // Compute path and store into legs
-    leg = this.tools.computeRoute(u, v, t);
-    legs[i] = leg;
-    // Update n and t
-    n += (leg.length - 2);
-    t = leg[leg.length - 2];
-  }
-  wnew = new int[n];
-  int k = 0;
-  for (int i = 0; i < legs.length; i++) {
-    int rend = (legs[i].length - (i == (legs.length - 1) ? 0 : 2));
-    for (int j = 0; j < rend; j++) {
-      wnew[k] = legs[i][j];
-      k++;
-    }
-  }
-  for (int i = 1; i < legs.length; i++) {
-    bnew[(3*i - 3)] = legs[i][0];
-  }
-  bnew[(3*p - 3)] = t;
 }
 \end{verbatim}
 
@@ -683,7 +614,7 @@ if (DEBUG) \{
 
 \nwenddocs{}\nwbegincode{23}\sublabel{NW8tIqu-1EJRY4-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW8tIqu-1EJRY4-1}}}\moddef{Debug: set schedule time~{\nwtagstyle{}\subpageref{NW8tIqu-1EJRY4-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW8tIqu-1nl6rv-1}}\nwenddeflinemarkup
 if (DEBUG) \{
-  System.out.printf("set bnew[%d]=%d\\n", (3*i - 3), bnew[(3*i - 3)]);
+  System.out.printf("set bnew[%d]=%d\\n", (4*i - 4), bnew[(4*i - 4)]);
 \}
 \nwused{\\{NW8tIqu-1nl6rv-1}}\nwendcode{}\nwbegindocs{24}\nwdocspar
 
@@ -691,7 +622,7 @@ if (DEBUG) \{
 
 \nwenddocs{}\nwbegincode{25}\sublabel{NW8tIqu-3ZHBo5-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW8tIqu-3ZHBo5-1}}}\moddef{Debug: set vehicle end time~{\nwtagstyle{}\subpageref{NW8tIqu-3ZHBo5-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW8tIqu-1nl6rv-1}}\nwenddeflinemarkup
 if (DEBUG) \{
-  System.out.printf("set bnew[%d]=%d\\n", (3*p - 3), bnew[(3*p - 3)]);
+  System.out.printf("set bnew[%d]=%d\\n", (4*p - 4), bnew[(4*p - 4)]);
 \}
 \nwused{\\{NW8tIqu-1nl6rv-1}}\nwendcode{}\nwbegindocs{26}\nwdocspar
 
@@ -923,9 +854,9 @@ ok = (this.communicator.queryServerCapacityViolations(
 \LA{}Debug: set ok~{\nwtagstyle{}\subpageref{NW2surku-2embq0-1}}\RA{}
 if (ok) \{
   \LA{}Scheduling: Prepend After~{\nwtagstyle{}\subpageref{NW1UKIGb-3ujU2A-1}}\RA{}
-  int[] temp = new int[(bnew.length - 3)];
+  int[] temp = new int[(bnew.length - 4)];
   for (int i = 0; i < temp.length; i++) \{
-    temp[i] = bnew[(i + 3)];
+    temp[i] = bnew[(i + 4)];
   \}
   bnew = temp;
 \}
@@ -1116,9 +1047,9 @@ if (DEBUG) \{
   System.out.printf("  server=%d\\n", sid);
   System.out.printf("  wnew=\{ %d, %d, ..., %d, %d \}\\n",
       wnew[0], wnew[1], wnew[wnew.length - 2], wnew[wnew.length - 1]);
-  System.out.printf("  bnew=\{ %d, %d, %d, ..., %d, %d, %d \}\\n",
-      bnew[0], bnew[1], bnew[2],
-      bnew[bnew.length - 3], bnew[bnew.length - 2], bnew[bnew.length - 1]);
+  System.out.printf("  bnew=\{ %d, %d, %d, %d, ..., %d, %d, %d %d \}\\n",
+      bnew[0], bnew[1], bnew[2], bnew[3],
+      bnew[bnew.length - 4], bnew[bnew.length - 3], bnew[bnew.length - 2], bnew[bnew.length - 1]);
   System.out.printf("  radd=\{ %d \}\\n", r[0]);
   System.out.printf("  rsub=\{ \}\\n");
 \}
@@ -1143,114 +1074,6 @@ if (DEBUG) \{
 \section{Reference}
 
 Here is the full NearestA.java code, with debug sections removed.
-
-{
-\small
-\begin{verbatim}
-package com.github.jargors.client;
-import com.github.jargors.sim.*;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
-public class NearestA extends Client {
-  final int MAX_DELTA = 300;  // seconds from last vehicle location update
-  final int MAX_RANGE = 600;  // meters from last vehicle position
-  final ConcurrentHashMap<Integer, int[]> locations =
-    new ConcurrentHashMap<Integer, int[]>();
-  protected void handleRequest(int[] r) throws ClientException, ClientFatalException {
-    final int rid = r[0];
-    final int ro  = r[4];
-    final int rd  = r[5];
-    try {
-      final int now = this.communicator.retrieveClock();
-
-      final Map<Integer, Integer> candidates = new HashMap<Integer, Integer>();
-      for (final Integer sid : locations.keySet()) {
-        final int t = locations.get(sid)[0];
-        final int v = locations.get(sid)[1];
-
-        final boolean in_delta = (t >= now - MAX_DELTA);
-        if (!in_delta)
-          continue;
-
-        final int range = this.tools.computeHaversine(v, ro);
-        final boolean in_range = (0 != range && range <= MAX_RANGE);
-        if (!in_range)
-          continue;
-
-        candidates.put(sid, range);
-      }
-      Entry<Integer, Integer> min = null;
-      for (final Entry<Integer, Integer> entry : candidates.entrySet()) {
-        if (min == null || min.getValue() > entry.getValue()) {
-          min = entry;
-        }
-      }
-      if (min != null) {
-        final int sid = min.getKey();
-        final int[] brem = this.communicator.queryServerScheduleRemaining(sid, now);
-        final int m = (brem.length/4);
-        final int p = (m + 2);
-
-        final int[] bnew = new int[(3*p)];
-        bnew[1] = ro;
-        bnew[2] = rid;
-        bnew[4] = rd;
-        bnew[5] = rid;
-        for (int i = 0; i < m; i++) {
-          final int bv = brem[(4*i + 1)];
-          final int ls = brem[(4*i + 2)];
-          final int lr = brem[(4*i + 3)];
-          bnew[(3*i + 7)] = bv;
-          bnew[(3*i + 8)] = (ls == 0 ? lr : ls);
-        }
-        final int[][] legs = new int[p][];
-
-        int[] leg = this.tools.computeRoute(locations.get(sid)[1], ro, now);
-        int n = leg.length;
-        int t = leg[n - 2];
-
-        leg[0] = locations.get(sid)[0];
-        legs[0] = leg;
-        for (int i = 1; i < p; i++) {
-          final int u = bnew[(3*i - 2)];
-          final int v = bnew[(3*i + 1)];
-          leg = this.tools.computeRoute(u, v, t);
-          legs[i] = leg;
-
-          n += (leg.length - 2);
-          t = leg[leg.length - 2];
-        }
-        final int[] wnew = new int[n];
-        {
-          int k = 0;
-          for (int i = 0; i < legs.length; i++) {
-            int rend = (legs[i].length - (i == (legs.length - 1) ? 0 : 2));
-            for (int j = 0; j < rend; j++) {
-              wnew[k] = legs[i][j];
-              k++;
-            }
-          }
-        }
-        for (int i = 1; i < legs.length; i++) {
-          bnew[(3*i - 3)] = legs[i][0];
-        }
-
-        bnew[(3*p - 3)] = t;
-        this.communicator.updateServerService(sid, wnew, bnew,
-            new int[] { rid }, new int[] { });
-      }
-    } catch (Exception e) {
-      throw new ClientException(e);
-    }
-  }
-  protected void handleServerLocation(int[] s) {
-    this.locations.put(s[0], new int[] { s[1], s[2] });
-  }
-}
-\end{verbatim}
-}
 
 \nwenddocs{}\nwfilename{src/client-nearest-b.nw}\nwbegindocs{0}\chapter{Client: Nearest B}
 \label{client-nearest-b}
@@ -1304,129 +1127,6 @@ if (m > 1) \{
 \nwnotused{NearestB: Step 5: Prepare Routing}\nwendcode{}\nwbegindocs{6}\nwdocspar
 
 \section{Reference}
-
-{
-\small
-\begin{verbatim}
-package com.github.jargors.client;
-import com.github.jargors.sim.*;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
-public class NearestB extends Client {
-  final int MAX_DELTA = 300;  // seconds from last vehicle location update
-  final int MAX_RANGE = 600;  // meters from last vehicle position
-  final ConcurrentHashMap<Integer, int[]> locations =
-    new ConcurrentHashMap<Integer, int[]>();
-  protected void handleRequest(int[] r) throws ClientException, ClientFatalException {
-    final int rid = r[0];
-    final int ro  = r[4];
-    final int rd  = r[5];
-    try {
-      final int now = this.communicator.retrieveClock();
-
-      final Map<Integer, Integer> candidates = new HashMap<Integer, Integer>();
-      for (final Integer sid : locations.keySet()) {
-        final int t = locations.get(sid)[0];
-        final int v = locations.get(sid)[1];
-
-        final boolean in_delta = (t >= now - MAX_DELTA);
-        if (!in_delta)
-          continue;
-
-        final int range = this.tools.computeHaversine(v, ro);
-        final boolean in_range = (0 != range && range <= MAX_RANGE);
-        if (!in_range)
-          continue;
-
-        candidates.put(sid, range);
-      }
-      Entry<Integer, Integer> min = null;
-      for (final Entry<Integer, Integer> entry : candidates.entrySet()) {
-        if (min == null || min.getValue() > entry.getValue()) {
-          min = entry;
-        }
-      }
-      if (min != null) {
-        final int sid = min.getKey();
-        final int[] brem = this.communicator.queryServerScheduleRemaining(sid, now);
-        final int m = (brem.length/4);
-        final int p = (m + 2);
-
-        final int[] bnew = new int[(3*p)];
-        if (m == 1) {
-          bnew[1] = ro;
-          bnew[2] = rid;
-          bnew[4] = rd;
-          bnew[5] = rid;
-          for (int i = 0; i < m; i++) {
-            final int bv = brem[(4*i + 1)];
-            final int ls = brem[(4*i + 2)];
-            final int lr = brem[(4*i + 3)];
-            bnew[(3*i + 7)] = bv;
-            bnew[(3*i + 8)] = (ls == 0 ? lr : ls);
-          }
-        } else {
-          bnew[4] = ro;
-          bnew[5] = rid;
-          bnew[7] = rd;
-          bnew[8] = rid;
-          for (int i = 0; i < m; i++) {
-            final int bv = brem[(4*i + 1)];
-            final int ls = brem[(4*i + 2)];
-            final int lr = brem[(4*i + 3)];
-            bnew[(3*i + (i < 1 ? 1 : 7))] = bv;
-            bnew[(3*i + (i < 1 ? 2 : 8))] = (ls == 0 ? lr : ls);
-          }
-        }
-        final int[][] legs = new int[p][];
-
-        int[] leg = this.tools.computeRoute(locations.get(sid)[1], ro, now);
-        int n = leg.length;
-        int t = leg[n - 2];
-
-        leg[0] = locations.get(sid)[0];
-        legs[0] = leg;
-        for (int i = 1; i < p; i++) {
-          final int u = bnew[(3*i - 2)];
-          final int v = bnew[(3*i + 1)];
-          leg = this.tools.computeRoute(u, v, t);
-          legs[i] = leg;
-
-          n += (leg.length - 2);
-          t = leg[leg.length - 2];
-        }
-        final int[] wnew = new int[n];
-        {
-          int k = 0;
-          for (int i = 0; i < legs.length; i++) {
-            int rend = (legs[i].length - (i == (legs.length - 1) ? 0 : 2));
-            for (int j = 0; j < rend; j++) {
-              wnew[k] = legs[i][j];
-              k++;
-            }
-          }
-        }
-        for (int i = 1; i < legs.length; i++) {
-          bnew[(3*i - 3)] = legs[i][0];
-        }
-
-        bnew[(3*p - 3)] = t;
-        this.communicator.updateServerService(sid, wnew, bnew,
-            new int[] { rid }, new int[] { });
-      }
-    } catch (Exception e) {
-      throw new ClientException(e);
-    }
-  }
-  protected void handleServerLocation(int[] s) {
-    this.locations.put(s[0], new int[] { s[1], s[2] });
-  }
-}
-\end{verbatim}
-}
-
 
 \nwenddocs{}\nwfilename{src/client-greedy.nw}\nwbegindocs{0}\chapter{Client: GreedyInsertion}
 \label{client-greedy}

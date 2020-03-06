@@ -1151,15 +1151,17 @@ public class Storage {
                  final int tj = sched[(j + 0)];
                  final int vj = sched[(j + 1)];
                  final int Lj = sched[(j + 3)];
-                 this.PSAdd(pS82, tj, vj, Lj);
-                 this.PSAdd(pS83, tj, vj, Lj);
-                 this.PSAdd(pS84, tj, vj, Lj);
+                 if (Lj != 0) {
+                   this.PSAdd(pS82, tj, vj, Lj);
+                   this.PSAdd(pS83, tj, vj, Lj);
+                   this.PSAdd(pS84, tj, vj, Lj);
+                 }
                }
                this.PSSubmit(pS83, pS82, pS84);
                PreparedStatement pS140 = this.PSCreate(conn, "S140");
                for (int j = 0; j < (sched.length - 3); j += 4) {
                  final int Lj = sched[(j + 3)];
-                 if (!cache.containsKey(Lj)) {
+                 if (Lj != 0 && !cache.containsKey(Lj)) {
                    final int rq = lu_users.get(Lj)[1];
                    boolean flagged = false;
                    for (final int r : ridpos) {
@@ -1221,19 +1223,21 @@ public class Storage {
                  final int t2 = sched[(j + 0)];
                  final int v2 = sched[(j + 1)];
                  final int Lj = sched[(j + 3)];
-                 // if only origin or only destination is in sched, cache will
-                 // not contain key Lj.
-                 if (cache.containsKey(Lj)) {
-                   final int[] qpd = cache.get(Lj);
-                   final int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
-                   final int o2 = o1 + 1;
-                   this.PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
-                         qpd[0], qpd[1], qpd[2], o1, o2);
-                   t1 = t2;
-                   q1 = q2;
-                   o1 = o2;
-                 } else {
-                   throw new UserNotFoundException("User "+Lj+" not found in schedule!");
+                 if (Lj != 0) {
+                   // if only origin or only destination is in sched, cache will
+                   // not contain key Lj.
+                   if (cache.containsKey(Lj)) {
+                     final int[] qpd = cache.get(Lj);
+                     final int q2 = (t2 == qpd[1] ? q1 + qpd[0] : q1 - qpd[0]);
+                     final int o2 = o1 + 1;
+                     this.PSAdd(pS14, sid, sq, se, t1, t2, v2, q1, q2, Lj,
+                           qpd[0], qpd[1], qpd[2], o1, o2);
+                     t1 = t2;
+                     q1 = q2;
+                     o1 = o2;
+                   } else {
+                     throw new UserNotFoundException("User "+Lj+" not found in schedule!");
+                   }
                  }
                }
                this.PSSubmit(pS14);
@@ -1276,13 +1280,15 @@ public class Storage {
            }
            for (int i = 0; i < (sched.length - 3); i += 4) {
              final int r = sched[(i + 3)];
-             try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
-               this.distance_requests_transit.put(r, this.DBQueryRequestDistanceTransit(r, false)[0]);
-               this.duration_requests_transit.put(r, this.DBQueryRequestDurationTransit(r, false)[0]);
-               this.duration_requests_travel .put(r, this.DBQueryRequestDurationTravel (r, false)[0]);
-               this.duration_requests_pickup .put(r, this.DBQueryRequestDurationPickup (r, false)[0]);
-             } catch (SQLException e) {
-               throw e;
+             if (r != 0) {
+               try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+                 this.distance_requests_transit.put(r, this.DBQueryRequestDistanceTransit(r, false)[0]);
+                 this.duration_requests_transit.put(r, this.DBQueryRequestDurationTransit(r, false)[0]);
+                 this.duration_requests_travel .put(r, this.DBQueryRequestDurationTravel (r, false)[0]);
+                 this.duration_requests_pickup .put(r, this.DBQueryRequestDurationPickup (r, false)[0]);
+               } catch (SQLException e) {
+                 throw e;
+               }
              }
            }
            for (final int r : ridpos) {

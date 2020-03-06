@@ -22,9 +22,7 @@
 
 The Prepend procedure copies schedule [[brem]] into schedule [[bnew]],
 \textit{but with request [[rid]]'s pick-up and drop-off events prepended to the
-front}. An ``event'' in [[bnew]] is a 3-tuple, $(t,v,L)$, where $t$ is the time
-of the event, $v$ is the location, and $L$ is the label describing the event.
-As event times cannot be known until the route is constructed through the
+front}. As event times cannot be known until the route is constructed through the
 schedule, [[bnew]] has empty time components (the 0th, 3rd, 6th, ... indices).
 
 The procedure has three steps. We don't want to pollute the memory space, so
@@ -45,40 +43,36 @@ First we'll initialize [[bnew]] to the correct size. The correct size is
 calculated as follows. In Jargo, a server's remaining schedule is returned as a
 4-tuple flattened array of $(t,v,Ls,Lr)$ components. Each 4-tuple is one event.
 To get the number of events, we divide the length of the remaining schedule
-[[brem]] by four. Then we add two to this number because the new schedule will
-have two additional events, one pick-up and one drop-off. Finally we multiply
-this sum by three. (TODO: change remaining-schedule and submitted-schedule to
-be in the same format!)
+[[brem]] by four...
 
 <<Prepend: Step 1: Initialize>>=
 final int m = (brem.length/4);
-bnew = new int[(3*(m + 2))];
+bnew = new int[(4*(m + 2))];
 <<Debug: initialize>>
 @
 
 \section{Step 2: Prepend}
 
 Now we'll do the prepend by populating the first six elements in [[bnew]].
-Elements [[bnew[0..2]]] represent the request pick-up event, and elements
-[[bnew[3..5]]] represent the request drop-off event. As event times are
-unknown, we'll leave out the 0th and 3rd indices.
+Elements [[bnew[0..3]]] represent the request pick-up event, and elements
+[[bnew[4..7]]] represent the request drop-off event. As event times are
+unknown, we'll leave out the 0th and 4th indices.
 
 <<Prepend: Step 2: Prepend>>=
 bnew[1] = ro;
-bnew[2] = rid;
-bnew[4] = rd;
-bnew[5] = rid;
+bnew[2] = 0;
+bnew[3] = rid;
+bnew[5] = rd;
+bnew[6] = 0;
+bnew[7] = rid;
 <<Debug: prepend>>
 @
 
 \section{Step 3: Copy}
 
 Just like that, we're almost done. In the third step, we'll simply copy over
-[[brem]] into [[bnew]] while shifting the destination indice by six. We shift
-by six to account for the two 3-tuples we inserted in Step 2. (We have to
-``squeeze'' the label in [[brem]] into [[bnew]]. The label in [[brem]] takes
-two elements while it only takes one element in [[bnew]]. I'll fix this
-inconsistency in a later version!)
+[[brem]] into [[bnew]] while shifting the destination indice by eight. We shift
+by eight to account for the two 4-tuples we inserted in Step 2.
 
 <<Prepend: Step 3: Copy>>=
 for (int i = 0; i < m; i++) {
@@ -87,8 +81,9 @@ for (int i = 0; i < m; i++) {
   final int ls = brem[(4*i + 2)];
   final int lr = brem[(4*i + 3)];
   // Copy into bnew
-  bnew[(3*i + 7)] = bv;
-  bnew[(3*i + 8)] = (ls == 0 ? lr : ls);  // <-- squeeze the label
+  bnew[(4*i +  9)] = bv;
+  bnew[(4*i + 10)] = ls;
+  bnew[(4*i + 11)] = lr;
   <<Debug: copy>>
 }
 @
@@ -103,21 +98,6 @@ Here is the full code.
 
 \begin{verbatim}
 {
-  final int m = (brem.length/4);
-  bnew = new int[(3*(m + 2))];
-  bnew[1] = ro;
-  bnew[2] = rid;
-  bnew[4] = rd;
-  bnew[5] = rid;
-  for (int i = 0; i < m; i++) {
-    // Extract vertex and labels
-    final int bv = brem[(4*i + 1)];
-    final int ls = brem[(4*i + 2)];
-    final int lr = brem[(4*i + 3)];
-    // Copy into bnew
-    bnew[(3*i + 7)] = bv;
-    bnew[(3*i + 8)] = (ls == 0 ? lr : ls);  // <-- squeeze the label
-  }
 }
 \end{verbatim}
 
@@ -148,9 +128,9 @@ if (DEBUG) {
 <<Debug: prepend>>=
 if (DEBUG) {
   System.out.printf("set bnew[1]=%d\n", bnew[1]);
-  System.out.printf("set bnew[2]=%d\n", bnew[2]);
-  System.out.printf("set bnew[4]=%d\n", bnew[4]);
+  System.out.printf("set bnew[3]=%d\n", bnew[3]);
   System.out.printf("set bnew[5]=%d\n", bnew[5]);
+  System.out.printf("set bnew[7]=%d\n", bnew[7]);
 }
 @
 
@@ -158,8 +138,9 @@ if (DEBUG) {
 
 <<Debug: copy>>=
 if (DEBUG) {
-  System.out.printf("set bnew[%d]=%d\n", (3*i + 7), bnew[(3*i + 7)]);
-  System.out.printf("set bnew[%d]=%d\n", (3*i + 8), bnew[(3*i + 8)]);
+  System.out.printf("set bnew[%d]=%d\n", (4*i +  9), bnew[(4*i +  9)]);
+  System.out.printf("set bnew[%d]=%d\n", (4*i + 10), bnew[(4*i + 10)]);
+  System.out.printf("set bnew[%d]=%d\n", (4*i + 11), bnew[(4*i + 11)]);
 }
 @
 

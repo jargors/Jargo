@@ -92,19 +92,19 @@ public class NearestA extends Client {
                         System.out.printf("prepend\n");
                       }
                       final int m = (brem.length/4);
-                      bnew = new int[(3*(m + 2))];
+                      bnew = new int[(4*(m + 2))];
                       if (DEBUG) {
                         System.out.printf("init bnew={ }, length=%d\n", bnew.length);
                       }
                       bnew[1] = ro;
-                      bnew[2] = rid;
-                      bnew[4] = rd;
-                      bnew[5] = rid;
+                      bnew[3] = rid;
+                      bnew[5] = rd;
+                      bnew[7] = rid;
                       if (DEBUG) {
                         System.out.printf("set bnew[1]=%d\n", bnew[1]);
-                        System.out.printf("set bnew[2]=%d\n", bnew[2]);
-                        System.out.printf("set bnew[4]=%d\n", bnew[4]);
+                        System.out.printf("set bnew[3]=%d\n", bnew[3]);
                         System.out.printf("set bnew[5]=%d\n", bnew[5]);
+                        System.out.printf("set bnew[7]=%d\n", bnew[7]);
                       }
                       for (int i = 0; i < m; i++) {
                         // Extract vertex and labels
@@ -112,11 +112,13 @@ public class NearestA extends Client {
                         final int ls = brem[(4*i + 2)];
                         final int lr = brem[(4*i + 3)];
                         // Copy into bnew
-                        bnew[(3*i + 7)] = bv;
-                        bnew[(3*i + 8)] = (ls == 0 ? lr : ls);  // <-- squeeze the label
+                        bnew[(4*i +  9)] = bv;
+                        bnew[(4*i + 10)] = ls;
+                        bnew[(4*i + 11)] = lr;
                         if (DEBUG) {
-                          System.out.printf("set bnew[%d]=%d\n", (3*i + 7), bnew[(3*i + 7)]);
-                          System.out.printf("set bnew[%d]=%d\n", (3*i + 8), bnew[(3*i + 8)]);
+                          System.out.printf("set bnew[%d]=%d\n", (4*i +  9), bnew[(4*i +  9)]);
+                          System.out.printf("set bnew[%d]=%d\n", (4*i + 10), bnew[(4*i + 10)]);
+                          System.out.printf("set bnew[%d]=%d\n", (4*i + 11), bnew[(4*i + 11)]);
                         }
                       }
                     }
@@ -136,19 +138,19 @@ public class NearestA extends Client {
                             System.out.printf("prepend after\n");
                           }
                           final int m = (brem.length/4);
-                          bnew = new int[(3*(m + 2))];
+                          bnew = new int[(4*(m + 2))];
                           if (DEBUG) {
                             System.out.printf("init bnew={ }, length=%d\n", bnew.length);
                           }
-                          bnew[4] = ro;
-                          bnew[5] = rid;
-                          bnew[7] = rd;
-                          bnew[8] = rid;
+                          bnew[5] = ro;
+                          bnew[7] = rid;
+                          bnew[9] = rd;
+                          bnew[11] = rid;
                           if (DEBUG) {
-                            System.out.printf("set bnew[4]=%d\n", bnew[4]);
                             System.out.printf("set bnew[5]=%d\n", bnew[5]);
                             System.out.printf("set bnew[7]=%d\n", bnew[7]);
-                            System.out.printf("set bnew[8]=%d\n", bnew[8]);
+                            System.out.printf("set bnew[9]=%d\n", bnew[9]);
+                            System.out.printf("set bnew[11]=%d\n", bnew[11]);
                           }
                           for (int i = 0; i < m; i++) {
                             // Extract vertex and labels
@@ -156,22 +158,25 @@ public class NearestA extends Client {
                             final int ls = brem[(4*i + 2)];
                             final int lr = brem[(4*i + 3)];
                             // Copy into bnew and shift if not first event
-                            bnew[(3*i + (i < 1 ? 1 : 7))] = bv;
-                            bnew[(3*i + (i < 1 ? 2 : 8))] = (ls == 0 ? lr : ls);
+                            bnew[(4*i + (i < 1 ? 1 :  9))] = bv;
+                            bnew[(4*i + (i < 1 ? 2 : 10))] = ls;
+                            bnew[(4*i + (i < 1 ? 3 : 11))] = lr;
                             if (DEBUG) {
                               if (i < 1) {
-                                System.out.printf("set bnew[%d]=%d\n", (3*i + 1), bnew[(3*i + 1)]);
-                                System.out.printf("set bnew[%d]=%d\n", (3*i + 2), bnew[(3*i + 2)]);
+                                System.out.printf("set bnew[%d]=%d\n", (4*i + 1), bnew[(4*i + 1)]);
+                                System.out.printf("set bnew[%d]=%d\n", (4*i + 2), bnew[(4*i + 2)]);
+                                System.out.printf("set bnew[%d]=%d\n", (4*i + 3), bnew[(4*i + 3)]);
                               } else {
-                                System.out.printf("set bnew[%d]=%d\n", (3*i + 7), bnew[(3*i + 7)]);
-                                System.out.printf("set bnew[%d]=%d\n", (3*i + 8), bnew[(3*i + 8)]);
+                                System.out.printf("set bnew[%d]=%d\n", (4*i +  9), bnew[(4*i +  9)]);
+                                System.out.printf("set bnew[%d]=%d\n", (4*i + 10), bnew[(4*i + 10)]);
+                                System.out.printf("set bnew[%d]=%d\n", (4*i + 11), bnew[(4*i + 11)]);
                               }
                             }
                           }
                         }
-                        int[] temp = new int[(bnew.length - 3)];
+                        int[] temp = new int[(bnew.length - 4)];
                         for (int i = 0; i < temp.length; i++) {
-                          temp[i] = bnew[(i + 3)];
+                          temp[i] = bnew[(i + 4)];
                         }
                         bnew = temp;
                       }
@@ -190,19 +195,19 @@ public class NearestA extends Client {
                             System.out.printf("prepend\n");
                           }
                           final int m = (brem.length/4);
-                          bnew = new int[(3*(m + 2))];
+                          bnew = new int[(4*(m + 2))];
                           if (DEBUG) {
                             System.out.printf("init bnew={ }, length=%d\n", bnew.length);
                           }
                           bnew[1] = ro;
-                          bnew[2] = rid;
-                          bnew[4] = rd;
-                          bnew[5] = rid;
+                          bnew[3] = rid;
+                          bnew[5] = rd;
+                          bnew[7] = rid;
                           if (DEBUG) {
                             System.out.printf("set bnew[1]=%d\n", bnew[1]);
-                            System.out.printf("set bnew[2]=%d\n", bnew[2]);
-                            System.out.printf("set bnew[4]=%d\n", bnew[4]);
+                            System.out.printf("set bnew[3]=%d\n", bnew[3]);
                             System.out.printf("set bnew[5]=%d\n", bnew[5]);
+                            System.out.printf("set bnew[7]=%d\n", bnew[7]);
                           }
                           for (int i = 0; i < m; i++) {
                             // Extract vertex and labels
@@ -210,11 +215,13 @@ public class NearestA extends Client {
                             final int ls = brem[(4*i + 2)];
                             final int lr = brem[(4*i + 3)];
                             // Copy into bnew
-                            bnew[(3*i + 7)] = bv;
-                            bnew[(3*i + 8)] = (ls == 0 ? lr : ls);  // <-- squeeze the label
+                            bnew[(4*i +  9)] = bv;
+                            bnew[(4*i + 10)] = ls;
+                            bnew[(4*i + 11)] = lr;
                             if (DEBUG) {
-                              System.out.printf("set bnew[%d]=%d\n", (3*i + 7), bnew[(3*i + 7)]);
-                              System.out.printf("set bnew[%d]=%d\n", (3*i + 8), bnew[(3*i + 8)]);
+                              System.out.printf("set bnew[%d]=%d\n", (4*i +  9), bnew[(4*i +  9)]);
+                              System.out.printf("set bnew[%d]=%d\n", (4*i + 10), bnew[(4*i + 10)]);
+                              System.out.printf("set bnew[%d]=%d\n", (4*i + 11), bnew[(4*i + 11)]);
                             }
                           }
                         }
@@ -236,7 +243,7 @@ public class NearestA extends Client {
                       if (DEBUG) {
                         System.out.printf("shortest path\n");
                       }
-                      final int p = (bnew.length/3);
+                      final int p = (bnew.length/4);
                       final int[][] legs = new int[p][];
                       if (DEBUG) {
                         System.out.printf("init legs={ }\n");
@@ -257,8 +264,8 @@ public class NearestA extends Client {
                       }
                       for (int i = 1; i < p; i++) {
                         // Extract vertices
-                        final int u = bnew[(3*i - 2)];
-                        final int v = bnew[(3*i + 1)];
+                        final int u = bnew[(4*i - 3)];
+                        final int v = bnew[(4*i + 1)];
                         // Compute path and store into legs
                         leg = this.tools.computeRoute(u, v, t);
                         legs[i] = leg;
@@ -287,14 +294,14 @@ public class NearestA extends Client {
                         }
                       }
                       for (int i = 1; i < legs.length; i++) {
-                        bnew[(3*i - 3)] = legs[i][0];
+                        bnew[(4*i - 4)] = legs[i][0];
                         if (DEBUG) {
-                          System.out.printf("set bnew[%d]=%d\n", (3*i - 3), bnew[(3*i - 3)]);
+                          System.out.printf("set bnew[%d]=%d\n", (4*i - 4), bnew[(4*i - 4)]);
                         }
                       }
-                      bnew[(3*p - 3)] = t;
+                      bnew[(4*p - 4)] = t;
                       if (DEBUG) {
-                        System.out.printf("set bnew[%d]=%d\n", (3*p - 3), bnew[(3*p - 3)]);
+                        System.out.printf("set bnew[%d]=%d\n", (4*p - 4), bnew[(4*p - 4)]);
                       }
                     }
                     if (wact[3] == 0) {
@@ -311,9 +318,9 @@ public class NearestA extends Client {
                       System.out.printf("  server=%d\n", sid);
                       System.out.printf("  wnew={ %d, %d, ..., %d, %d }\n",
                           wnew[0], wnew[1], wnew[wnew.length - 2], wnew[wnew.length - 1]);
-                      System.out.printf("  bnew={ %d, %d, %d, ..., %d, %d, %d }\n",
-                          bnew[0], bnew[1], bnew[2],
-                          bnew[bnew.length - 3], bnew[bnew.length - 2], bnew[bnew.length - 1]);
+                      System.out.printf("  bnew={ %d, %d, %d, %d, ..., %d, %d, %d %d }\n",
+                          bnew[0], bnew[1], bnew[2], bnew[3],
+                          bnew[bnew.length - 4], bnew[bnew.length - 3], bnew[bnew.length - 2], bnew[bnew.length - 1]);
                       System.out.printf("  radd={ %d }\n", r[0]);
                       System.out.printf("  rsub={ }\n");
                     }
