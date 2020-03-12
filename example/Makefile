@@ -1,10 +1,9 @@
-# This file describes how to build the Jargo example clients and traffic
+# This file describes how to build the Jargo example examples and traffic
 # functions.
 
 # Here I am getting the names of all the *.java files to be tangled.
 JAVA1 = \
-	java/client/NearestA.java
-	#java/client/NearestB.java 
+	java/client/NearestNeighbor.java
 	#java/client/GreedyInsertion.java
 
 JAVA2 = \
@@ -19,7 +18,7 @@ CLASS2=$(addsuffix .class, $(subst java/traffic/,com/github/jargors/traffic/,$(b
 # Print the menu.
 _mod :
 	@printf "_______________________________________________________________\n"
-	@printf "Jargo Examples\n"
+	@printf "Jargo Clients\n"
 	@printf "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
 	@printf "Commands:\n"
 	@printf "  make all        build examples.jar + documentation\n"
@@ -89,16 +88,21 @@ $(JAVA2) : src/*.nw
 
 # Build doc/body.tex.
 TEXSRCS= \
-	src/sched-introduction.nw \
-	src/sched-prepend.nw \
-	src/sched-prepend-after.nw \
-	src/route-shortest.nw \
-	src/client-overview.nw \
-	src/client-nearest-a.nw \
-	src/client-nearest-b.nw \
-	src/client-greedy.nw \
+	src/intro-tsp.nw \
+	src/intro-pdp.nw \
+	src/intro-rsp.nw \
+	src/search-overview.nw \
+	src/search-filters.nw \
+	src/search-reductions.nw \
+	src/search-scheduling.nw \
+	src/search-schedules.nw \
+	src/search-routing.nw \
+	src/search-routes.nw \
+	src/search-algorithms.nw \
+	src/join-overview.nw \
 	src/traffic-overview.nw \
-	src/traffic-broadway.nw
+	src/traffic-broadway.nw \
+	src/debug.nw
 
 doc/body.tex : src/*.nw
 	@printf "weave $@...\n"
@@ -125,7 +129,7 @@ clean :
 # In addition to 'clean', remove Java files in java/ and doc/body.tex.
 purge : clean
 	@printf "make purge\n"
-	@printf "purge java/ srcs...\n"; rm -f java/*/*.java; \
+	@printf "purge java...\n"; rm -rf java/; \
 	 if [ -f "doc/body.tex" ]; then printf "purge doc/body.tex...\n"; rm -f doc/body.tex ; fi;
 	@printf "done purge\n"
 

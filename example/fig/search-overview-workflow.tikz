@@ -1,0 +1,39 @@
+\begin{tikzpicture}
+
+  \node[verb](v1){map \& filter};
+  \node[noun, left  of=v1, node distance=45mm](n1){set of vehicles};
+  \node[noun, right of=v1, node distance=45mm](n2){single customer};
+  \node[noun, below of=v1, node distance=10mm](n3){set of candidates};
+  \node[fork, below of=n3, node distance=18mm](f1){has candidates?};
+  \node[verb, below of=f1, node distance=18mm](v2){reduce};
+  \node[noun, below of=v2, node distance=10mm](n4){single candidate};
+  \node[verb, below of=n4, node distance=10mm](v3){schedule};
+  \node[noun, below of=v3, node distance=10mm](n5){single schedule};
+  \node[fork, below of=n5, node distance=18mm](f2){accept schedule?};
+  \node[fork, left  of=f2, node distance=45mm](f3){has other schedules?};
+  \node[verb, below of=f2, node distance=18mm](v4){route};
+  \node[noun, below of=v4, node distance=10mm](n6){single route};
+  \node[fork, below of=n6, node distance=18mm](f4){accept route?};
+  \node[noun, below of=f4, node distance=18mm](v5){success};
+  \node[noun, right of=f1, node distance=45mm](v6){failure};
+
+  \path[line] (n1) -- (v1);
+  \path[line] (n2) -- (v1);
+  \path[line] (v1) -- (n3);
+  \path[line] (n3) -- (f1);
+  \path[line] (f1) -- node[right=2mm]{yes}(v2);
+  \path[line] (v2) -- (n4);
+  \path[line] (n4) -- (v3);
+  \path[line] (v3) -- (n5);
+  \path[line] (n5) -- (f2);
+  \path[line] (f2) -- node[above=1mm]{no}(f3);
+  \path[line] (f2) -- node[above=1mm, right=2mm]{yes}(v4);
+  \path[line] (f3) |- node[above=1mm, near end]{yes}(v3);
+  \path[line] (f3) |- node[above=1mm, near end]{no}(f1);
+  \path[line] (v4) -- (n6);
+  \path[line] (n6) -- (f4);
+  \path[line] (f4) -- node[right=2mm]{yes}(v5);
+  \path[line] (f4) -| node[above=1mm, near start]{no}(f3);
+  \path[line] (f1) -- node[above=1mm]{no}(v6);
+
+\end{tikzpicture}

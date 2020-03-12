@@ -1,0 +1,138 @@
+\chapter{Example Algorithms}
+\label{search-algorithms}
+
+\section{Nearest Neighbor}
+
+<<NearestNeighbor.java>>=
+package com.github.jargors.client;
+<<NearestNeighbor: preamble>>
+public class NearestNeighbor extends Client {
+  final int MAX_LAST_UPDATE_TIME = 300;
+  final int MAX_PROXIMITY = 600;
+  protected <<NearestNeighbor: handleRequest(1)>>
+}
+@
+
+<<NearestNeighbor: preamble>>=
+import com.github.jargors.sim.*;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.HashMap;
+@
+
+<<NearestNeighbor: handleRequest(1)>>=
+void handleRequest(int[] r) throws ClientException, ClientFatalException {
+  <<Debug: print request>>
+  try {
+    final int rid = r[0];
+    final int rq  = r[1];
+    final int ro  = r[4];
+    final int rd  = r[5];
+
+    Map<Integer, Integer> candidates = new HashMap<Integer, Integer>(lut);
+    Map<Integer, Integer> results = new HashMap<Integer, Integer>();
+    <<Debug: print candidates>>
+
+    <<Map/Filter: Last Update Time>>
+    candidates = new HashMap<Integer, Integer>(results);
+    <<Debug: map/filter: last update time>>
+    <<Debug: print candidates>>
+
+    results.clear();
+    <<Map/Filter: Proximity>>
+    candidates = new HashMap<Integer, Integer>(results);
+    <<Debug: map/filter: proximity>>
+    <<Debug: print candidates>>
+
+    while (!candidates.isEmpty()) {
+
+      Entry<Integer, Integer> min = null;
+      <<Reduce: Minimum Value>>
+      <<Debug: print min candidate>>
+
+      final int sid = min.getKey();
+      final int now = this.communicator.retrieveClock();
+
+      int[] bnew = new int[] { };
+      int[] brem = this.communicator.queryServerScheduleRemaining(sid, now);
+      <<Debug: print brem>>
+
+      int tbeg = now;
+      int tend = brem[0];
+      <<Debug: print tbeg, tend>>
+
+      final int[] wact = this.communicator.queryServerRouteActive(sid);
+      <<Debug: print wact>>
+
+      // if next events occurs at next waypoint and is not server's own
+      // destination, then delete these events from schedule (limitation #4).
+      if (brem[2] != sid && brem[0] == wact[2]) {
+        <<Debug: echo limitation 4>>
+        tbeg = brem[0];
+        tend = brem[4];
+        <<Debug: print tbeg, tend>>
+        while (brem[0] == wact[2]) {
+          brem = Arrays.copyOfRange(brem, 4, brem.length);
+          <<Debug: echo remove event>>
+          <<Debug: print brem>>
+        }
+      }
+
+      boolean ok = false;
+
+      <<Schedule Selection: Check Capacity>>
+      <<Debug: print ok>>
+
+      if (ok) {
+        int[] stop = new int[] { 0, ro, 0, rid };
+        int ipos = 0;
+        <<Debug: print stop>>
+        <<Debug: print ipos>>
+        <<Schedule: Insert>>
+        <<Debug: print bnew>>
+
+        brem = bnew;
+
+        stop[1] = rd;
+        ipos = 1;
+        <<Debug: print stop>>
+        <<Debug: print ipos>>
+        <<Schedule: Insert>>
+        <<Debug: print bnew>>
+
+        int[] wnew = null;
+        int[] wbeg = new int[] { 0, 0 };
+
+        wbeg[0] = (wact[3] == 0 ? now : wact[2]);
+        wbeg[1] = (wact[3] == 0 ? wact[1] : wact[3]);
+        <<Debug: print wbeg>>
+
+        <<Route: Shortest Path>>
+
+        // if next waypoint is vehicle destination,
+        // reset route start time to last-visited time
+        if (wact[3] == 0) {
+          wnew[0] = lut.get(sid);
+        }
+
+        <<Debug: print wnew>>
+
+        this.communicator.updateServerService(sid, wnew, bnew,
+            new int[] { rid }, new int[] { });
+
+        break;
+
+      } else {
+        candidates.remove(sid);
+        <<Debug: print remove candidate>>
+      }
+    }
+  } catch (Exception e) {
+    throw new ClientException(e);
+  }
+}
+@
+
+\section{Greedy Insertion}
+

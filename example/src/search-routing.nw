@@ -1,0 +1,61 @@
+\chapter{Routing Operations}
+\label{search-routing}
+
+\section{Shortest Path}
+
+<<Route: Shortest Path>>=
+{
+  <<Shortest: Step 1: Initialize>>
+  <<Shortest: Step 2: Compute>>
+  <<Shortest: Step 3: Join>>
+  <<Shortest: Step 4: Fill>>
+}
+@
+
+<<Shortest: Step 1: Initialize>>=
+final int p = (bnew.length/4);
+final int[][] legs = new int[p][];
+
+int[] leg = this.tools.computeRoute(wbeg[1], bnew[1], wbeg[0]);
+int n = leg.length;
+int t = leg[(n - 2)];
+
+legs[0] = leg;
+@
+
+<<Shortest: Step 2: Compute>>=
+for (int i = 1; i < p; i++) {
+  // Extract vertices
+  final int u = bnew[(4*i - 3)];
+  final int v = bnew[(4*i + 1)];
+  // Compute path and store into legs
+  leg = this.tools.computeRoute(u, v, t);
+  legs[i] = leg;
+  // Update n and t
+  n += (leg.length - 2);
+  t = leg[leg.length - 2];
+}
+@
+
+<<Shortest: Step 3: Join>>=
+wnew = new int[n];
+int k = 0;
+for (int i = 0; i < legs.length; i++) {
+  final int rend = (legs[i].length - (i == (legs.length - 1) ? 0 : 2));
+  for (int j = 0; j < rend; j++) {
+    wnew[k] = legs[i][j];
+    k++;
+  }
+}
+@
+
+<<Shortest: Step 4: Fill>>=
+for (int i = 1; i < legs.length; i++) {
+  bnew[(4*i - 4)] = legs[i][0];
+}
+bnew[(4*p - 4)] = t;
+@
+
+% \section{Longest Path}
+% \section{Average Path}
+

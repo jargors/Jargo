@@ -36,6 +36,8 @@ protected Communicator communicator;
 protected Tools tools = new Tools();
 protected final boolean DEBUG =
     "true".equals(System.getProperty("jargors.client.debug"));
+protected ConcurrentHashMap<Integer, Integer> lut = new ConcurrentHashMap<Integer, Integer>();
+protected ConcurrentHashMap<Integer, Integer> luv = new ConcurrentHashMap<Integer, Integer>();
 @
 
 \section{Constructor}
@@ -97,32 +99,17 @@ Array [[src]] =
  &\node[minimum width=12mm] {...};\\
 };
 \end{tikzpicture}
-
-\noindent If locations are polled for and stored into [[src]] at $t'$ world
-time, then formally the last location for server $s$ is defined as waypoint
-$(t,v)$ that satisfies $t=\textrm{argmin}_{(t,v)\in w_{\leq t'}} (t-t')$, where
-$w_{\leq t'}$ is the server's traveled route.  In other words the last location
-is the waypoint in the server's traveled route that is nearest $t'$.
 <<Client: collectServerLocations(1)>>=
 void collectServerLocations(final int[] src) {
-  this.endCollectServerLocations(src);
-}
-@ %def collectServerLocations
-
-
-\subsection{\texttt{endCollectServerLocations}(1)}
-<<Client: endCollectServerLocations(1)>>=
-void endCollectServerLocations(final int[] locations) {
-  <<Debug: endCollectServerLocations parameters>>
-  for (int i = 0; i < (locations.length - 2); i += 3) {
+  for (int i = 0; i < (src.length - 2); i += 3) {
     this.handleServerLocation(new int[] {
-      locations[i],
-      locations[(i + 1)],
-      locations[(i + 2)]
+      src[i],
+      src[(i + 1)],
+      src[(i + 2)]
     });
   }
 }
-@ %def endCollectServerLocations
+@ %def collectServerLocations
 
 \subsection{\texttt{end}(0)}
 <<Client: end(0)>>=
@@ -158,7 +145,10 @@ Array [[loc]] =
 \end{tikzpicture}
 
 <<Client: handleServerLocation(1)>>=
-void handleServerLocation(final int[] loc) { }
+void handleServerLocation(final int[] loc) {
+  lut.put(loc[0], loc[1]);
+  luv.put(loc[0], loc[2]);
+}
 @ %def handleServerLocation
 
 \subsection{\texttt{init}(0)}
@@ -203,13 +193,4 @@ public class ClientFatalException extends Exception {
 @
 
 \section{Debug}
-
-\subsection{Debug: endCollectServerLocations Parameters}
-
-<<Debug: endCollectServerLocations parameters>>=
-if (DEBUG) {
-  System.out.printf("endCollectServerLocations(1), locations=[#=%d]\n",
-    locations.length);
-}
-@
 

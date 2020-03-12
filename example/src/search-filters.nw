@@ -1,0 +1,51 @@
+\chapter{Maps and Filters}
+\label{search-filters}
+
+Each server can be mapped to a quantitative value indicating its ``fitness''
+for a given request.  If the fitness is low, the server can be removed
+immediately from further consideration. This chapter implements some example
+map and filter functions for determining fitness and whether or not to keep a
+server.
+
+\section{Last Update Time}
+
+If a server hasn't been updated recently, its location known by the client can
+be stale. We can use [[Communicator.retrieveClock]](0) and [[Client]]'s [[lut]]
+array to map servers to their last update times, and then check if the value
+is less than a threshold [[MAX_LAST_UPDATE_TIME]].
+
+<<Map/Filter: Last Update Time>>=
+for (final int sid : candidates.keySet()) {
+  final int val = (this.communicator.retrieveClock() - lut.get(sid));
+  if (val <= MAX_LAST_UPDATE_TIME)
+    results.put(sid, val);
+}
+@
+
+% \section{Last Event Time}
+% \section{Upcoming Event Time}
+% \section{Upcoming Event Distance}
+% \section{Total Travel Duration}
+% \section{Total Travel Distance}
+% \section{Total Cruising Duration}
+% \section{Total Cruising Distance}
+% \section{Total Service Duration}
+% \section{Total Service Distance}
+
+\section{Proximity}
+
+Proximity is easy to compute and can be used to approximate actual pick-up
+distance. In the filter, we disregard zero proximities due to Limitation \#4.
+
+<<Map/Filter: Proximity>>=
+for (final int sid : candidates.keySet()) {
+  final int val = this.tools.computeHaversine(luv.get(sid), ro);
+  if (0 < val && val <= MAX_PROXIMITY)
+    results.put(sid, val);
+}
+@
+
+% \section{Road Proximity}
+% \section{Number of Assignments}
+% \section{Profit}
+

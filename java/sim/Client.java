@@ -15,6 +15,8 @@ public abstract class Client {
   protected Tools tools = new Tools();
   protected final boolean DEBUG =
       "true".equals(System.getProperty("jargors.client.debug"));
+  protected ConcurrentHashMap<Integer, Integer> lut = new ConcurrentHashMap<Integer, Integer>();
+  protected ConcurrentHashMap<Integer, Integer> luv = new ConcurrentHashMap<Integer, Integer>();
   private long   statClientHandleRequestDur = 0;
   public Client() {
     try {
@@ -64,7 +66,13 @@ public abstract class Client {
            return Math.max(0, temp - this.queue.size());
          }
   public void collectServerLocations(final int[] src) {
-           this.endCollectServerLocations(src);
+           for (int i = 0; i < (src.length - 2); i += 3) {
+             this.handleServerLocation(new int[] {
+               src[i],
+               src[(i + 1)],
+               src[(i + 2)]
+             });
+           }
          }
   public void notifyNew() throws ClientException, ClientFatalException {
            while (!this.queue.isEmpty()) {
@@ -78,19 +86,9 @@ public abstract class Client {
          }
   public void init() { }
   protected void end() { }
-  protected void endCollectServerLocations(final int[] locations) {
-              if (DEBUG) {
-                System.out.printf("endCollectServerLocations(1), locations=[#=%d]\n",
-                  locations.length);
-              }
-              for (int i = 0; i < (locations.length - 2); i += 3) {
-                this.handleServerLocation(new int[] {
-                  locations[i],
-                  locations[(i + 1)],
-                  locations[(i + 2)]
-                });
-              }
-            }
   protected void handleRequest(final int[] r) throws ClientException, ClientFatalException { }
-  protected void handleServerLocation(final int[] loc) { }
+  protected void handleServerLocation(final int[] loc) {
+              lut.put(loc[0], loc[1]);
+              luv.put(loc[0], loc[2]);
+            }
 }

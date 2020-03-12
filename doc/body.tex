@@ -111,7 +111,6 @@
 \nwixlogsorted{c}{{Client: collectServerLocations(1)}{NW3VOC6-3SHcpo-1}{\nwixu{NW4QM9HE-1aFZ2n-3}\nwixd{NW3VOC6-3SHcpo-1}}}%
 \nwixlogsorted{c}{{Client: dropRequests(1)}{NW3VOC6-hvYwx-1}{\nwixu{NW4QM9HE-1aFZ2n-3}\nwixd{NW3VOC6-hvYwx-1}}}%
 \nwixlogsorted{c}{{Client: end(0)}{NW3VOC6-4D9GRo-1}{\nwixu{NW4QM9HE-1aFZ2n-3}\nwixd{NW3VOC6-4D9GRo-1}}}%
-\nwixlogsorted{c}{{Client: endCollectServerLocations(1)}{NW3VOC6-1PUXQj-1}{\nwixu{NW4QM9HE-1aFZ2n-3}\nwixd{NW3VOC6-1PUXQj-1}}}%
 \nwixlogsorted{c}{{Client: handleRequest(1)}{NW3VOC6-3XHcbe-1}{\nwixu{NW4QM9HE-1aFZ2n-3}\nwixd{NW3VOC6-3XHcbe-1}}}%
 \nwixlogsorted{c}{{Client: handleServerLocation(1)}{NW3VOC6-2d4qsD-1}{\nwixu{NW4QM9HE-1aFZ2n-3}\nwixd{NW3VOC6-2d4qsD-1}}}%
 \nwixlogsorted{c}{{Client: init(0)}{NW3VOC6-4JZ8PY-1}{\nwixu{NW4QM9HE-1aFZ2n-3}\nwixd{NW3VOC6-4JZ8PY-1}}}%
@@ -189,7 +188,6 @@
 \nwixlogsorted{c}{{Create View violations\_t\_s}{NW1ryIo2-13PgQs-1}{\nwixd{NW1ryIo2-13PgQs-1}\nwixu{NW1ODIS0-RmKLy-1}}}%
 \nwixlogsorted{c}{{Debug: DBUpdateServerService parameters}{NW3mnZLd-3aElWm-1}{\nwixu{NW3mnZLd-1v536H-1}\nwixd{NW3mnZLd-3aElWm-1}}}%
 \nwixlogsorted{c}{{Debug: EdgeNotFoundException}{NW3mnZLd-1AKUgT-1}{\nwixu{NW3mnZLd-3NpaSw-1}\nwixd{NW3mnZLd-1AKUgT-1}}}%
-\nwixlogsorted{c}{{Debug: endCollectServerLocations parameters}{NW3VOC6-bPNU8-1}{\nwixu{NW3VOC6-1PUXQj-1}\nwixd{NW3VOC6-bPNU8-1}}}%
 \nwixlogsorted{c}{{Debug: RouteIllegalOverwriteException, missing branch point}{NW3mnZLd-3OSl0k-1}{\nwixu{NW3mnZLd-2QlrHv-1}\nwixd{NW3mnZLd-3OSl0k-1}}}%
 \nwixlogsorted{c}{{Debug: RouteIllegalOverwriteException, overwrite occurred}{NW3mnZLd-cjS9g-1}{\nwixu{NW3mnZLd-2QlrHv-1}\nwixd{NW3mnZLd-cjS9g-1}}}%
 \nwixlogsorted{c}{{Definition of clock loop}{NW3hMOhb-2lFPcZ-1}{\nwixu{NW3hMOhb-2e0Sfa-1}\nwixd{NW3hMOhb-2lFPcZ-1}}}%
@@ -861,7 +859,6 @@
 \nwixlogsorted{i}{{\nwixident{DuplicateVertexException}}{DuplicateVertexException}}%
 \nwixlogsorted{i}{{\nwixident{EdgeNotFoundException}}{EdgeNotFoundException}}%
 \nwixlogsorted{i}{{\nwixident{end}}{end}}%
-\nwixlogsorted{i}{{\nwixident{endCollectServerLocations}}{endCollectServerLocations}}%
 \nwixlogsorted{i}{{\nwixident{filterByHaversine}}{filterByHaversine}}%
 \nwixlogsorted{i}{{\nwixident{forwardRefCacheEdges}}{forwardRefCacheEdges}}%
 \nwixlogsorted{i}{{\nwixident{forwardRefCacheUsers}}{forwardRefCacheUsers}}%
@@ -3401,7 +3398,6 @@ public \LA{}Client: collectServerLocations(1)~{\nwtagstyle{}\subpageref{NW3VOC6-
 public \LA{}Client: notifyNew(0)~{\nwtagstyle{}\subpageref{NW3VOC6-1Q8bzj-1}}\RA{}
 public \LA{}Client: init(0)~{\nwtagstyle{}\subpageref{NW3VOC6-4JZ8PY-1}}\RA{}
 protected \LA{}Client: end(0)~{\nwtagstyle{}\subpageref{NW3VOC6-4D9GRo-1}}\RA{}
-protected \LA{}Client: endCollectServerLocations(1)~{\nwtagstyle{}\subpageref{NW3VOC6-1PUXQj-1}}\RA{}
 protected \LA{}Client: handleRequest(1)~{\nwtagstyle{}\subpageref{NW3VOC6-3XHcbe-1}}\RA{}
 protected \LA{}Client: handleServerLocation(1)~{\nwtagstyle{}\subpageref{NW3VOC6-2d4qsD-1}}\RA{}
 \nwused{\\{NW3VOC6-bpC9O-1}}\nwendcode{}\nwbegindocs{34}\nwdocspar
@@ -12083,6 +12079,8 @@ protected Communicator communicator;
 protected Tools tools = new Tools();
 protected final boolean DEBUG =
     "true".equals(System.getProperty("jargors.client.debug"));
+protected ConcurrentHashMap<Integer, Integer> lut = new ConcurrentHashMap<Integer, Integer>();
+protected ConcurrentHashMap<Integer, Integer> luv = new ConcurrentHashMap<Integer, Integer>();
 \nwused{\\{NW3VOC6-bpC9O-1}}\nwendcode{}\nwbegindocs{8}\nwdocspar
 
 \section{Constructor}
@@ -12144,38 +12142,23 @@ Array {\Tt{}src\nwendquote} =
  &\node[minimum width=12mm] {...};\\
 };
 \end{tikzpicture}
-
-\noindent If locations are polled for and stored into {\Tt{}src\nwendquote} at $t'$ world
-time, then formally the last location for server $s$ is defined as waypoint
-$(t,v)$ that satisfies $t=\textrm{argmin}_{(t,v)\in w_{\leq t'}} (t-t')$, where
-$w_{\leq t'}$ is the server's traveled route.  In other words the last location
-is the waypoint in the server's traveled route that is nearest $t'$.
 \nwenddocs{}\nwbegincode{17}\sublabel{NW3VOC6-3SHcpo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3VOC6-3SHcpo-1}}}\moddef{Client: collectServerLocations(1)~{\nwtagstyle{}\subpageref{NW3VOC6-3SHcpo-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-1aFZ2n-3}}\nwenddeflinemarkup
 void \nwlinkedidentc{collectServerLocations}{NW3VOC6-3SHcpo-1}(final int[] src) \{
-  this.\nwlinkedidentc{endCollectServerLocations}{NW3VOC6-1PUXQj-1}(src);
-\}
-\nwindexdefn{\nwixident{collectServerLocations}}{collectServerLocations}{NW3VOC6-3SHcpo-1}\eatline
-\nwused{\\{NW4QM9HE-1aFZ2n-3}}\nwidentdefs{\\{{\nwixident{collectServerLocations}}{collectServerLocations}}}\nwidentuses{\\{{\nwixident{endCollectServerLocations}}{endCollectServerLocations}}}\nwindexuse{\nwixident{endCollectServerLocations}}{endCollectServerLocations}{NW3VOC6-3SHcpo-1}\nwendcode{}\nwbegindocs{18}\nwdocspar
-
-\subsection{\texttt{endCollectServerLocations}(1)}
-\nwenddocs{}\nwbegincode{19}\sublabel{NW3VOC6-1PUXQj-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3VOC6-1PUXQj-1}}}\moddef{Client: endCollectServerLocations(1)~{\nwtagstyle{}\subpageref{NW3VOC6-1PUXQj-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-1aFZ2n-3}}\nwenddeflinemarkup
-void \nwlinkedidentc{endCollectServerLocations}{NW3VOC6-1PUXQj-1}(final int[] locations) \{
-  \LA{}Debug: endCollectServerLocations parameters~{\nwtagstyle{}\subpageref{NW3VOC6-bPNU8-1}}\RA{}
-  for (int i = 0; i < (locations.length - 2); i += 3) \{
+  for (int i = 0; i < (src.length - 2); i += 3) \{
     this.\nwlinkedidentc{handleServerLocation}{NW3VOC6-2d4qsD-1}(new int[] \{
-      locations[i],
-      locations[(i + 1)],
-      locations[(i + 2)]
+      src[i],
+      src[(i + 1)],
+      src[(i + 2)]
     \});
   \}
 \}
-\nwindexdefn{\nwixident{endCollectServerLocations}}{endCollectServerLocations}{NW3VOC6-1PUXQj-1}\eatline
-\nwused{\\{NW4QM9HE-1aFZ2n-3}}\nwidentdefs{\\{{\nwixident{endCollectServerLocations}}{endCollectServerLocations}}}\nwidentuses{\\{{\nwixident{handleServerLocation}}{handleServerLocation}}}\nwindexuse{\nwixident{handleServerLocation}}{handleServerLocation}{NW3VOC6-1PUXQj-1}\nwendcode{}\nwbegindocs{20}\nwdocspar
+\nwindexdefn{\nwixident{collectServerLocations}}{collectServerLocations}{NW3VOC6-3SHcpo-1}\eatline
+\nwused{\\{NW4QM9HE-1aFZ2n-3}}\nwidentdefs{\\{{\nwixident{collectServerLocations}}{collectServerLocations}}}\nwidentuses{\\{{\nwixident{handleServerLocation}}{handleServerLocation}}}\nwindexuse{\nwixident{handleServerLocation}}{handleServerLocation}{NW3VOC6-3SHcpo-1}\nwendcode{}\nwbegindocs{18}\nwdocspar
 \subsection{\texttt{end}(0)}
-\nwenddocs{}\nwbegincode{21}\sublabel{NW3VOC6-4D9GRo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3VOC6-4D9GRo-1}}}\moddef{Client: end(0)~{\nwtagstyle{}\subpageref{NW3VOC6-4D9GRo-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-1aFZ2n-3}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{19}\sublabel{NW3VOC6-4D9GRo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3VOC6-4D9GRo-1}}}\moddef{Client: end(0)~{\nwtagstyle{}\subpageref{NW3VOC6-4D9GRo-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-1aFZ2n-3}}\nwenddeflinemarkup
 void \nwlinkedidentc{end}{NW3VOC6-4D9GRo-1}() \{ \}
 \nwindexdefn{\nwixident{end}}{end}{NW3VOC6-4D9GRo-1}\eatline
-\nwused{\\{NW4QM9HE-1aFZ2n-3}}\nwidentdefs{\\{{\nwixident{end}}{end}}}\nwendcode{}\nwbegindocs{22}\nwdocspar
+\nwused{\\{NW4QM9HE-1aFZ2n-3}}\nwidentdefs{\\{{\nwixident{end}}{end}}}\nwendcode{}\nwbegindocs{20}\nwdocspar
 \subsection{\texttt{handleRequest}(1)}
 Array {\Tt{}r\nwendquote} =
 
@@ -12188,10 +12171,10 @@ Array {\Tt{}r\nwendquote} =
 };
 \end{tikzpicture}
 
-\nwenddocs{}\nwbegincode{23}\sublabel{NW3VOC6-3XHcbe-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3VOC6-3XHcbe-1}}}\moddef{Client: handleRequest(1)~{\nwtagstyle{}\subpageref{NW3VOC6-3XHcbe-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-1aFZ2n-3}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{21}\sublabel{NW3VOC6-3XHcbe-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3VOC6-3XHcbe-1}}}\moddef{Client: handleRequest(1)~{\nwtagstyle{}\subpageref{NW3VOC6-3XHcbe-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-1aFZ2n-3}}\nwenddeflinemarkup
 void \nwlinkedidentc{handleRequest}{NW3VOC6-3XHcbe-1}(final int[] r) throws ClientException, ClientFatalException \{ \}
 \nwindexdefn{\nwixident{handleRequest}}{handleRequest}{NW3VOC6-3XHcbe-1}\eatline
-\nwused{\\{NW4QM9HE-1aFZ2n-3}}\nwidentdefs{\\{{\nwixident{handleRequest}}{handleRequest}}}\nwendcode{}\nwbegindocs{24}\nwdocspar
+\nwused{\\{NW4QM9HE-1aFZ2n-3}}\nwidentdefs{\\{{\nwixident{handleRequest}}{handleRequest}}}\nwendcode{}\nwbegindocs{22}\nwdocspar
 \subsection{\texttt{handleServerLocation}(1)}
 Array {\Tt{}loc\nwendquote} =
 
@@ -12204,19 +12187,22 @@ Array {\Tt{}loc\nwendquote} =
 };
 \end{tikzpicture}
 
-\nwenddocs{}\nwbegincode{25}\sublabel{NW3VOC6-2d4qsD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3VOC6-2d4qsD-1}}}\moddef{Client: handleServerLocation(1)~{\nwtagstyle{}\subpageref{NW3VOC6-2d4qsD-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-1aFZ2n-3}}\nwenddeflinemarkup
-void \nwlinkedidentc{handleServerLocation}{NW3VOC6-2d4qsD-1}(final int[] loc) \{ \}
+\nwenddocs{}\nwbegincode{23}\sublabel{NW3VOC6-2d4qsD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3VOC6-2d4qsD-1}}}\moddef{Client: handleServerLocation(1)~{\nwtagstyle{}\subpageref{NW3VOC6-2d4qsD-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-1aFZ2n-3}}\nwenddeflinemarkup
+void \nwlinkedidentc{handleServerLocation}{NW3VOC6-2d4qsD-1}(final int[] loc) \{
+  lut.put(loc[0], loc[1]);
+  luv.put(loc[0], loc[2]);
+\}
 \nwindexdefn{\nwixident{handleServerLocation}}{handleServerLocation}{NW3VOC6-2d4qsD-1}\eatline
-\nwused{\\{NW4QM9HE-1aFZ2n-3}}\nwidentdefs{\\{{\nwixident{handleServerLocation}}{handleServerLocation}}}\nwendcode{}\nwbegindocs{26}\nwdocspar
+\nwused{\\{NW4QM9HE-1aFZ2n-3}}\nwidentdefs{\\{{\nwixident{handleServerLocation}}{handleServerLocation}}}\nwendcode{}\nwbegindocs{24}\nwdocspar
 \subsection{\texttt{init}(0)}
-\nwenddocs{}\nwbegincode{27}\sublabel{NW3VOC6-4JZ8PY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3VOC6-4JZ8PY-1}}}\moddef{Client: init(0)~{\nwtagstyle{}\subpageref{NW3VOC6-4JZ8PY-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-1aFZ2n-3}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{25}\sublabel{NW3VOC6-4JZ8PY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3VOC6-4JZ8PY-1}}}\moddef{Client: init(0)~{\nwtagstyle{}\subpageref{NW3VOC6-4JZ8PY-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-1aFZ2n-3}}\nwenddeflinemarkup
 void init() \{ \}
-\nwused{\\{NW4QM9HE-1aFZ2n-3}}\nwendcode{}\nwbegindocs{28}\nwdocspar
+\nwused{\\{NW4QM9HE-1aFZ2n-3}}\nwendcode{}\nwbegindocs{26}\nwdocspar
 
 \section{Exceptions}
 
 \subsection{\texttt{ClientException}}
-\nwenddocs{}\nwbegincode{29}\sublabel{NW3VOC6-4V6p1c-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3VOC6-4V6p1c-1}}}\moddef{ClientException.java~{\nwtagstyle{}\subpageref{NW3VOC6-4V6p1c-1}}}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{27}\sublabel{NW3VOC6-4V6p1c-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3VOC6-4V6p1c-1}}}\moddef{ClientException.java~{\nwtagstyle{}\subpageref{NW3VOC6-4V6p1c-1}}}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
 \LA{}Package: \code{}sim\edoc{}~{\nwtagstyle{}\subpageref{NW1ODIS0-3dgLDt-1}}\RA{}
 public class ClientException extends Exception \{
   public ClientException() \{ \}
@@ -12230,10 +12216,10 @@ public class ClientException extends Exception \{
     super(message, cause);
   \}
 \}
-\nwnotused{ClientException.java}\nwendcode{}\nwbegindocs{30}\nwdocspar
+\nwnotused{ClientException.java}\nwendcode{}\nwbegindocs{28}\nwdocspar
 
 \subsection{\texttt{ClientFatalException}}
-\nwenddocs{}\nwbegincode{31}\sublabel{NW3VOC6-1dhUeW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3VOC6-1dhUeW-1}}}\moddef{ClientFatalException.java~{\nwtagstyle{}\subpageref{NW3VOC6-1dhUeW-1}}}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{29}\sublabel{NW3VOC6-1dhUeW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3VOC6-1dhUeW-1}}}\moddef{ClientFatalException.java~{\nwtagstyle{}\subpageref{NW3VOC6-1dhUeW-1}}}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
 \LA{}Package: \code{}sim\edoc{}~{\nwtagstyle{}\subpageref{NW1ODIS0-3dgLDt-1}}\RA{}
 public class ClientFatalException extends Exception \{
   public ClientFatalException() \{ \}
@@ -12247,18 +12233,9 @@ public class ClientFatalException extends Exception \{
     super(message, cause);
   \}
 \}
-\nwnotused{ClientFatalException.java}\nwendcode{}\nwbegindocs{32}\nwdocspar
+\nwnotused{ClientFatalException.java}\nwendcode{}\nwbegindocs{30}\nwdocspar
 
 \section{Debug}
-
-\subsection{Debug: endCollectServerLocations Parameters}
-
-\nwenddocs{}\nwbegincode{33}\sublabel{NW3VOC6-bPNU8-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3VOC6-bPNU8-1}}}\moddef{Debug: endCollectServerLocations parameters~{\nwtagstyle{}\subpageref{NW3VOC6-bPNU8-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3VOC6-1PUXQj-1}}\nwenddeflinemarkup
-if (DEBUG) \{
-  System.out.printf("\nwlinkedidentc{endCollectServerLocations}{NW3VOC6-1PUXQj-1}(1), locations=[#=%d]\\n",
-    locations.length);
-\}
-\nwused{\\{NW3VOC6-1PUXQj-1}}\nwidentuses{\\{{\nwixident{endCollectServerLocations}}{endCollectServerLocations}}}\nwindexuse{\nwixident{endCollectServerLocations}}{endCollectServerLocations}{NW3VOC6-bPNU8-1}\nwendcode{}\nwbegindocs{34}\nwdocspar
 
 \nwenddocs{}\nwfilename{src/sim-traffic.nw}\nwbegindocs{0}\chapter{Class: Traffic}
 \label{sim-traffic}

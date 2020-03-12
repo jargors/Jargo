@@ -1,0 +1,23 @@
+\chapter{Scheduling Operations}
+\label{search-scheduling}
+
+\section{Insert New Event}
+
+Insert the new event into the given schedule at the indicated position.
+
+brem is given (remaining) schedule
+bnew is new schedule
+ipos is insertion position
+stop is new event [ t, v, ls, lr ]
+
+Three arraycopy: put event, put before ipos, put after ipos
+
+<<Schedule: Insert>>=
+bnew = new int[(brem.length + 4)];
+System.arraycopy(stop, 0, bnew, 4*ipos, 4);
+System.arraycopy(brem, 0, bnew, 0, 4*ipos);
+System.arraycopy(brem, 4*ipos, bnew, 4*(ipos + 1), brem.length - 4*ipos);
+@
+
+%\section{Rearrange Existing Events}
+
