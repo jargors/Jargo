@@ -20,7 +20,7 @@
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="768.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.jargors.ui.DesktopController">
+<VBox prefHeight="768.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.jargors.ui.DesktopController">
   <children>
     <MenuBar VBox.vgrow="NEVER">
       <menus>
@@ -36,13 +36,13 @@
         </Menu>
       </menus>
     </MenuBar>
-      <ToolBar prefHeight="40.0" prefWidth="200.0">
+      <ToolBar prefHeight="40.0" prefWidth="293.0">
         <items>
           <Button fx:id="btn_new" mnemonicParsing="false" onAction="#actionNew" text="New..." />
-            <Button fx:id="btn_load" layoutX="10.0" layoutY="11.0" mnemonicParsing="false" onAction="#actionLoad" text="Load..." />
             <Button fx:id="btn_road" disable="true" layoutX="366.0" layoutY="11.0" mnemonicParsing="false" onAction="#actionRoad" text="(empty road network)" />
             <Button fx:id="btn_gtree" disable="true" layoutX="558.0" layoutY="11.0" mnemonicParsing="false" onAction="#actionGtree" text="(empty G-tree)" />
             <Button fx:id="btn_prob" disable="true" layoutX="185.0" layoutY="11.0" mnemonicParsing="false" onAction="#actionProb" text="(empty problem instance)" />
+            <Button fx:id="btn_load" layoutX="10.0" layoutY="11.0" mnemonicParsing="false" onAction="#actionLoad" text="Load..." visible="false" />
         </items>
       </ToolBar>
       <ToolBar prefHeight="40.0" prefWidth="200.0">
@@ -67,113 +67,105 @@
             <Button fx:id="btn_stop" layoutX="945.0" layoutY="11.0" mnemonicParsing="false" onAction="#actionStop" text="Stop &amp; Reset" />
          </items>
       </ToolBar>
-      <TabPane fx:id="tabpane" VBox.vgrow="ALWAYS">
-         <tabs>
-            <Tab fx:id="tab_map" closable="false" text="Live Map">
-               <content>
-                  <AnchorPane>
-                     <children>
-                        <ScrollPane fx:id="container_canvas" hbarPolicy="ALWAYS" pannable="true" prefHeight="200.0" prefWidth="200.0" vbarPolicy="ALWAYS" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                        <VBox fx:id="pane_info" fillWidth="false" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="200.0" prefWidth="250.0" spacing="6.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <padding>
-                              <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
-                           </padding>
-                        </VBox>
-                     </children>
-                  </AnchorPane>
-               </content>
-            </Tab>
-            <Tab fx:id="tab_metrics" closable="false" text="Metrics">
-               <content>
-                  <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
-                     <items>
-                        <TabPane minHeight="40.0" prefHeight="100.0" tabClosingPolicy="UNAVAILABLE">
-                           <tabs>
-                              <Tab text="Rates">
-                                 <content>
-                                    <HBox>
-                                       <children>
-                                          <AnchorPane fx:id="container_lc_rates" minHeight="0.0" minWidth="0.0" HBox.hgrow="ALWAYS" />
-                                       </children>
-                                    </HBox>
-                                 </content>
-                              </Tab>
-                              <Tab text="Distances">
-                                 <content>
-                                    <HBox>
-                                       <children>
-                                          <AnchorPane fx:id="container_lc_distances" minHeight="0.0" minWidth="0.0" HBox.hgrow="ALWAYS" />
-                                       </children>
-                                    </HBox>
-                                 </content>
-                              </Tab>
-                              <Tab text="Durations">
-                                 <content>
-                                    <HBox>
-                                       <children>
-                                          <AnchorPane fx:id="container_lc_durations" minHeight="0.0" minWidth="0.0" HBox.hgrow="ALWAYS" />
-                                       </children>
-                                    </HBox>
-                                 </content>
-                              </Tab>
-                              <Tab text="Custom Queries...">
-                                 <content>
-                                    <VBox>
-                                       <children>
-                                          <ToolBar prefHeight="40.0" prefWidth="200.0">
-                                             <items>
-                                                <Button fx:id="btn_query" mnemonicParsing="false" onAction="#actionQuery" text="Submit" />
-                                                <CheckBox fx:id="chk_continuous" mnemonicParsing="false" onAction="#actionQueryContinuous" text="Continuous" />
-                                             </items>
-                                          </ToolBar>
-                                          <SplitPane dividerPositions="0.29797979797979796" prefHeight="160.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
-                                             <items>
-                                                <TextArea fx:id="txt_query" prefHeight="200.0" prefWidth="200.0" promptText="Custom query..." />
-                                                <ScrollPane fitToHeight="true" fitToWidth="true" vbarPolicy="ALWAYS">
-                                                   <content>
-                                                      <TextArea fx:id="txt_result" prefHeight="200.0" prefWidth="200.0">
-                                                         <font>
-                                                            <Font name="FreeMono" size="13.0" />
-                                                         </font>
-                                                      </TextArea>
-                                                   </content>
-                                                </ScrollPane>
-                                             </items>
-                                          </SplitPane>
-                                       </children>
-                                    </VBox>
-                                 </content>
-                              </Tab>
-                           </tabs>
-                        </TabPane>
-                        <TabPane minHeight="40.0" prefHeight="100.0" tabClosingPolicy="UNAVAILABLE">
-                           <tabs>
-                              <Tab text="Counts">
-                                 <content>
-                                    <HBox minHeight="40.0" prefHeight="100.0">
-                                       <children>
-                                          <AnchorPane fx:id="container_lc_counts" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
-                                       </children>
-                                    </HBox>
-                                 </content>
-                              </Tab>
-                              <Tab text="Execution Times">
-                                 <content>
-                                    <HBox>
-                                       <children>
-                                          <AnchorPane fx:id="container_lc_times" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
-                                       </children>
-                                    </HBox>
-                                 </content>
-                              </Tab>
-                           </tabs>
-                        </TabPane>
-                     </items>
-                  </SplitPane>
-               </content>
-            </Tab>
-         </tabs>
-      </TabPane>
+      <SplitPane dividerPositions="0.29797979797979796" prefHeight="489.0" prefWidth="1280.0" VBox.vgrow="ALWAYS">
+        <items>
+            <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+               <items>
+                  <TabPane minHeight="40.0" prefHeight="100.0" tabClosingPolicy="UNAVAILABLE">
+                     <tabs>
+                        <Tab text="Rates">
+                           <content>
+                              <HBox>
+                                 <children>
+                                    <AnchorPane fx:id="container_lc_rates" minHeight="0.0" minWidth="0.0" HBox.hgrow="ALWAYS" />
+                                 </children>
+                              </HBox>
+                           </content>
+                        </Tab>
+                        <Tab text="Distances">
+                           <content>
+                              <HBox>
+                                 <children>
+                                    <AnchorPane fx:id="container_lc_distances" minHeight="0.0" minWidth="0.0" HBox.hgrow="ALWAYS" />
+                                 </children>
+                              </HBox>
+                           </content>
+                        </Tab>
+                        <Tab text="Durations">
+                           <content>
+                              <HBox>
+                                 <children>
+                                    <AnchorPane fx:id="container_lc_durations" minHeight="0.0" minWidth="0.0" HBox.hgrow="ALWAYS" />
+                                 </children>
+                              </HBox>
+                           </content>
+                        </Tab>
+                        <Tab text="Custom Queries...">
+                           <content>
+                              <VBox>
+                                 <children>
+                                    <ToolBar prefHeight="40.0" prefWidth="200.0">
+                                       <items>
+                                          <Button fx:id="btn_query" mnemonicParsing="false" onAction="#actionQuery" text="Submit" />
+                                          <CheckBox fx:id="chk_continuous" mnemonicParsing="false" onAction="#actionQueryContinuous" text="Continuous" />
+                                       </items>
+                                    </ToolBar>
+                                    <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" VBox.vgrow="ALWAYS">
+                                      <items>
+                                          <TextArea fx:id="txt_query" prefHeight="200.0" prefWidth="200.0" promptText="Custom query..." />
+                                          <ScrollPane fitToHeight="true" fitToWidth="true" vbarPolicy="ALWAYS">
+                                             <content>
+                                                <TextArea fx:id="txt_result" prefHeight="200.0" prefWidth="200.0">
+                                                   <font>
+                                                      <Font name="FreeMono" size="13.0" />
+                                                   </font>
+                                                </TextArea>
+                                             </content>
+                                          </ScrollPane>
+                                      </items>
+                                    </SplitPane>
+                                 </children>
+                              </VBox>
+                           </content>
+                        </Tab>
+                     </tabs>
+                  </TabPane>
+                  <TabPane minHeight="40.0" prefHeight="100.0" tabClosingPolicy="UNAVAILABLE">
+                     <tabs>
+                        <Tab text="Counts">
+                           <content>
+                              <HBox minHeight="40.0" prefHeight="100.0">
+                                 <children>
+                                    <AnchorPane fx:id="container_lc_counts" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+                                 </children>
+                              </HBox>
+                           </content>
+                        </Tab>
+                        <Tab text="Execution Times">
+                           <content>
+                              <HBox>
+                                 <children>
+                                    <AnchorPane fx:id="container_lc_times" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+                                 </children>
+                              </HBox>
+                           </content>
+                        </Tab>
+                     </tabs>
+                  </TabPane>
+               </items>
+            </SplitPane>
+            <AnchorPane>
+               <children>
+                  <ScrollPane fx:id="container_canvas" hbarPolicy="ALWAYS" pannable="true" prefHeight="200.0" prefWidth="200.0" vbarPolicy="ALWAYS" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                  <VBox fx:id="pane_info" fillWidth="false" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="200.0" prefWidth="250.0" spacing="6.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <padding>
+                        <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+                     </padding>
+                  </VBox>
+               </children>
+            </AnchorPane>
+        </items>
+      </SplitPane>
       <HBox alignment="CENTER_LEFT" spacing="6.0" VBox.vgrow="NEVER">
          <children>
             <Circle fx:id="circ_status" fill="GREEN" radius="6.0" stroke="BLACK" strokeType="INSIDE" />

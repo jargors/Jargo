@@ -96,6 +96,9 @@ public class Communicator {
            this.statQueryServerDurationRemainingDur = (System.currentTimeMillis() - A0);
            return output;
          }
+  public int[] queryServerDurationTravel(final int sid, boolean flag_usecache) throws SQLException {
+           return storage.DBQueryServerDurationTravel(sid, flag_usecache);
+         }
   public int[] queryServerLoadMax(final int sid, final int t) throws SQLException {
            long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryServerLoadMax(sid, t);

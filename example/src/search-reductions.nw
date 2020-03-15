@@ -1,12 +1,23 @@
 \chapter{Candidate Reductions}
 \label{search-reductions}
 
+\section{Random Reduction}
+
+<<Reduce: Random>>=
+{
+  Random random = new Random();
+  List<Integer> keys = new ArrayList<Integer>(candidates.keySet());
+  int randomKey = keys.get(random.nextInt(keys.size()));
+  cand = Map.entry(randomKey, candidates.get(randomKey));
+}
+@
+
 \section{Minimum Reduction}
 
 <<Reduce: Minimum Value>>=
 for (final Entry<Integer, Integer> entry : candidates.entrySet()) {
-  if (min == null || min.getValue() > entry.getValue()) {
-    min = entry;
+  if (cand == null || cand.getValue() > entry.getValue()) {
+    cand = entry;
   }
 }
 @
@@ -15,8 +26,8 @@ for (final Entry<Integer, Integer> entry : candidates.entrySet()) {
 
 <<Reduce: Maximum Value>>=
 for (final Entry<Integer, Integer> entry : candidates.entrySet()) {
-  if (min == null || min.getValue() < entry.getValue()) {
-    min = entry;
+  if (cand == null || cand.getValue() < entry.getValue()) {
+    cand = entry;
   }
 }
 @

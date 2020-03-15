@@ -612,7 +612,7 @@ rd & & \\
   + "CONSTRAINT F38 FOREIGN KEY (rid, ro) REFERENCES UO (uid, uo),"
   + "CONSTRAINT F39 FOREIGN KEY (rid, rd) REFERENCES UD (uid, ud),"
   + "CONSTRAINT C89a CHECK (tp >= ts),"
-  + "CONSTRAINT C89b CHECK (td <= te),"
+  + "CONSTRAINT C89b CHECK (td <= te) INITIALLY DEFERRED,"
   + "CONSTRAINT C89c CHECK (tp < td),"
   + "CONSTRAINT C91 CHECK (tp >= re),"
   + "CONSTRAINT C92 CHECK (vp  = ro),"
@@ -620,6 +620,14 @@ rd & & \\
   + "CONSTRAINT C94 CHECK (vd  = rd)"
   + ")"
 @
+
+% Q: Why is C89B deferred?
+% A: During service update, the route is first to be updated and it's possible
+% for vehicle end time (te) to go down. Some events might get caught exceeding
+% the new end time, so we defer C89B to give the subsequent schedule update a
+% chance to correct.
+%   To avoid deferring, we may try to do the end time update last in the next
+% version.
 
 \section{Load Constraints Table (Table CQ)}
 \label{mod-schema: load-constraints}

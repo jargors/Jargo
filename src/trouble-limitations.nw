@@ -128,5 +128,22 @@ route has existing schedule events, and those events are also found in the
 submitted schedule. To avoid this issue, do not include existing events on
 this waypoint in the submitted schedule.
 
+\item \textbf{The check constraint 'C102J' was violated while performing an
+INSERT or UPDATE on table '``APP''.``CQ'''.} occurs when submitting a schedule
+with multiple events on a waypoint and capacity is not violated.
+
+If the events on the waypoint are ordered in a way that capacity violation
+occurs, then this error will occur, even if other events on the waypoint
+``balance out'' the violation. For example, consider a server with 3-capacity
+that has two prior pick-up events and no drop-off events. As it approaches
+waypoint $w_i$, it has a load of $q=-3 + 2 = -1$. Now on this waypoint, there
+are two more pick-ups and one drop-off. The total load after the waypoint is
+$q=-1+2-1=0$, causing no violation. However, if the pick-ups both occur before
+the drop-off, Jargo will detect that a violation did occur and throw the error.
+Considering only the two pick-ups, the load becomes $q=-1+2=+1$, which is
+a violation. The way to avoid this violation is to order the drop-offs in
+front of the pick-ups.
+% I have found no good way to do that so far.
+
 \end{enumerate}
 

@@ -1860,6 +1860,11 @@ int[] DBQueryServerDurationTravel(final int sid, boolean flag_usecache) throws S
   }
 }
 @ %def DBQueryServerDurationTravel
+<<Read: queryServerDurationTravel(2)>>=
+int[] queryServerDurationTravel(final int sid, boolean flag_usecache) throws SQLException {
+  return storage.DBQueryServerDurationTravel(sid, flag_usecache);
+}
+@ %def queryServerDurationTravel
 
 \subsection{\texttt{DBQueryServerDurationCruising}(2)}
 <<Read: DBQueryServerDurationCruising(2)>>=
@@ -2913,17 +2918,6 @@ int[] DBQueryMetricServerDurationTravelTotal(boolean flag_usecache) throws SQLEx
   if (flag_usecache) {
     final int[] output = new int[] { 0 };
     this.duration_servers.forEach((sid, val) -> output[0] += val);
-/***/
-    this.duration_servers.forEach((sid, val) -> {
-        if (val > 80000) {
-          System.out.printf("sid %d dur=%d\n", sid, val);
-          try {
-          JargoInstanceExport("debug");
-          System.exit(1);
-          } catch (Exception ee) {}
-        }
-    });
-/***/
     return output;
   } else {
     try (<<Open [[conn]]>>) {
@@ -3647,3 +3641,4 @@ int[] queryMetricRequestTWViolationsTotal() throws SQLException {
   return output;
 }
 @ %def queryMetricRequestTWViolationsTotal
+

@@ -102,7 +102,6 @@ public class DesktopController {
   @FXML private ScrollPane container_canvas;
   @FXML private Tab tab_map;
   @FXML private Tab tab_metrics;
-  @FXML private TabPane tabpane;
   @FXML private TextArea txt_query;
   @FXML private TextArea txt_result;
   @FXML private TextField tf_client;
@@ -384,7 +383,7 @@ public class DesktopController {
     private FetcherOfMapUnits muf = null;
     private Traffic traffic = null;
     private int[] edges = null;
-    private final Color DEFAULT = Color.BLUE;
+    private final Color DEFAULT = Color.web("#BDBDBD");
     private final Color BG = Color.web("0xD7FFFF");
     private final Color SPEED1 = Color.web("#FF0000");
     private final Color SPEED2 = Color.web("#FF2B00");
@@ -856,7 +855,6 @@ public class DesktopController {
            this.btn_client   .setDisable(true);
            this.tf_client    .setDisable(true);
            this.btn_stop     .setDisable(true);
-           this.tabpane      .setDisable(true);
            this.circ_status  .setFill(C_WARN);
            this.lbl_status   .setText("Select *.jar...");
            FileChooser fc = new FileChooser();
@@ -888,7 +886,6 @@ public class DesktopController {
                    this.btn_client   .setDisable(false);
                    this.tf_client    .setDisable(false);
                    this.btn_stop     .setDisable(false);
-                   this.tabpane      .setDisable(false);
                    this.circ_status  .setFill(C_SUCCESS);
                    this.lbl_status   .setText("Ready.");
                  });
@@ -909,7 +906,6 @@ public class DesktopController {
                  this.btn_startseq .setDisable(false);
                  this.btn_startreal.setDisable(false);
                  this.btn_stop     .setDisable(false);
-                 this.tabpane      .setDisable(false);
                  this.circ_status  .setFill(C_SUCCESS);
                  this.lbl_status   .setText("Loaded "+cj.getName());
                });
@@ -926,7 +922,6 @@ public class DesktopController {
                  this.btn_client_gtree.setDisable(false);
                  this.tf_client    .setDisable(false);
                  this.btn_stop     .setDisable(false);
-                 this.tabpane      .setDisable(false);
                  this.circ_status  .setFill(C_SUCCESS);
                  this.lbl_status   .setText("Ready.");
                });
@@ -939,7 +934,6 @@ public class DesktopController {
              this.btn_client   .setDisable(false);
              this.tf_client    .setDisable(false);
              this.btn_stop     .setDisable(false);
-             this.tabpane      .setDisable(false);
              this.circ_status  .setFill(C_SUCCESS);
              this.lbl_status   .setText("Ready.");
            }
@@ -947,7 +941,6 @@ public class DesktopController {
   public void actionClientGtree(final ActionEvent e) {
            this.btn_client_gtree.setDisable(true);
            this.btn_stop     .setDisable(true);
-           this.tabpane      .setDisable(true);
            this.circ_status  .setFill(C_WARN);
            this.lbl_status   .setText("Select *.gtree...");
            FileChooser fc = new FileChooser();
@@ -963,7 +956,6 @@ public class DesktopController {
              this.lbl_status.setText("Load '"+this.gtree_client+"'...");
              Platform.runLater(() -> {
                this.btn_stop     .setDisable(false);
-               this.tabpane      .setDisable(false);
                this.circ_status  .setFill(C_SUCCESS);
                this.lbl_status   .setText("Loaded "+gt.getName());
              });
@@ -974,7 +966,6 @@ public class DesktopController {
              // FD cancelled
              this.btn_client_gtree.setDisable(false);
              this.btn_stop     .setDisable(false);
-             this.tabpane      .setDisable(false);
              this.circ_status  .setFill(C_SUCCESS);
              this.lbl_status   .setText("Ready.");
            }
@@ -985,7 +976,6 @@ public class DesktopController {
   public void actionGtree(final ActionEvent e) {
            this.btn_gtree    .setDisable(true);
            this.btn_stop     .setDisable(true);
-           this.tabpane      .setDisable(true);
            this.circ_status  .setFill(C_WARN);
            this.lbl_status   .setText("Select *.gtree...");
            FileChooser fc = new FileChooser();
@@ -1011,7 +1001,6 @@ public class DesktopController {
                    }
                    this.btn_gtree    .setText(gt.getName());
                    this.btn_stop     .setDisable(false);
-                   this.tabpane      .setDisable(false);
                    this.circ_status  .setFill(C_SUCCESS);
                    this.lbl_status   .setText("Loaded "+gt.getName());
                  });
@@ -1029,7 +1018,6 @@ public class DesktopController {
                    alert.showAndWait();
                    this.btn_gtree    .setDisable(false);
                    this.btn_stop     .setDisable(false);
-                   this.tabpane      .setDisable(false);
                    this.circ_status  .setFill(C_SUCCESS);
                    this.lbl_status   .setText("Ready.");
                  });
@@ -1042,7 +1030,6 @@ public class DesktopController {
              // FD cancelled
              this.btn_gtree    .setDisable(false);
              this.btn_stop     .setDisable(false);
-             this.tabpane      .setDisable(false);
              this.circ_status  .setFill(C_SUCCESS);
              this.lbl_status   .setText("Ready.");
            }
@@ -1051,7 +1038,6 @@ public class DesktopController {
            this.btn_new      .setDisable(true);
            this.btn_load     .setDisable(true);
            this.btn_stop     .setDisable(true);
-           this.tabpane      .setDisable(true);
            DirectoryChooser dc = new DirectoryChooser();
            File db = dc.showDialog(this.stage);
            if (db != null) {
@@ -1079,7 +1065,6 @@ public class DesktopController {
                    this.road = "*in-instance road network*";
                    this.btn_gtree    .setDisable(false);
                    this.btn_stop     .setDisable(false);
-                   this.tabpane      .setDisable(false);
                    this.circ_status  .setFill(C_SUCCESS);
                    this.lbl_status   .setText("Loaded Jargo instance (#vertices="+nv+"; #edges="+ne+") (#servers="+ns+"; #requests="+nr+")");
                    this.container_canvas.setContent(null);
@@ -1105,7 +1090,6 @@ public class DesktopController {
                    this.btn_new      .setDisable(false);
                    this.btn_load     .setDisable(false);
                    this.btn_stop     .setDisable(false);
-                   this.tabpane      .setDisable(false);
                    this.circ_status  .setFill(C_SUCCESS);
                    this.lbl_status   .setText("Ready.");
                  });
@@ -1119,7 +1103,6 @@ public class DesktopController {
              this.btn_new      .setDisable(false);
              this.btn_load     .setDisable(false);
              this.btn_stop     .setDisable(false);
-             this.tabpane      .setDisable(false);
              this.circ_status  .setFill(C_SUCCESS);
              this.lbl_status   .setText("Ready.");
            }
@@ -1131,7 +1114,6 @@ public class DesktopController {
            this.btn_new      .setDisable(true);
            this.btn_load     .setDisable(true);
            this.btn_stop     .setDisable(true);
-           this.tabpane      .setDisable(true);
            this.circ_status.setFill(C_WARN);
            this.lbl_status.setText("Create new Jargo instance...");
            CompletableFuture.runAsync(() -> {
@@ -1149,7 +1131,6 @@ public class DesktopController {
                this.access_path = 1;
                this.btn_road     .setDisable(false);
                this.btn_stop     .setDisable(false);
-               this.tabpane      .setDisable(false);
                this.container_canvas.setContent(null);
                this.container_lc_rates.getChildren().clear();
                this.container_lc_distances.getChildren().clear();
@@ -1165,7 +1146,6 @@ public class DesktopController {
   public void actionProb(final ActionEvent e) {
            this.btn_prob     .setDisable(true);
            this.btn_stop     .setDisable(true);
-           this.tabpane      .setDisable(true);
            this.circ_status  .setFill(C_WARN);
            this.lbl_status   .setText("Select *.instance...");
            FileChooser fc = new FileChooser();
@@ -1192,7 +1172,6 @@ public class DesktopController {
                    this.tf_t0        .setText(Integer.toString(t0));
                    this.tf_t1        .setText(Integer.toString(t1));
                    this.btn_stop     .setDisable(false);
-                   this.tabpane      .setDisable(false);
                    this.circ_status  .setFill(C_SUCCESS);
                    this.lbl_status   .setText("Loaded "+pb.getName()+"(#servers="+ns+"; #requests="+nr+")");
                  });
@@ -1210,7 +1189,6 @@ public class DesktopController {
                    alert.showAndWait();
                    this.btn_prob     .setDisable(false);
                    this.btn_stop     .setDisable(false);
-                   this.tabpane      .setDisable(false);
                    this.circ_status  .setFill(C_SUCCESS);
                    this.lbl_status   .setText("Ready.");
                  });
@@ -1223,7 +1201,6 @@ public class DesktopController {
              // FD cancelled
              this.btn_prob     .setDisable(false);
              this.btn_stop     .setDisable(false);
-             this.tabpane      .setDisable(false);
              this.circ_status  .setFill(C_SUCCESS);
              this.lbl_status   .setText("Ready.");
            }
@@ -1286,7 +1263,6 @@ public class DesktopController {
   public void actionRoad(final ActionEvent e) {
            this.btn_road     .setDisable(true);
            this.btn_stop     .setDisable(true);
-           this.tabpane      .setDisable(true);
            this.circ_status  .setFill(C_WARN);
            this.lbl_status   .setText("Select *.rnet...");
            FileChooser fc = new FileChooser();
@@ -1307,7 +1283,6 @@ public class DesktopController {
                    this.btn_road     .setText(road.getName());
                    this.btn_stop     .setDisable(false);
                    this.btn_gtree    .setDisable(false);
-                   this.tabpane      .setDisable(false);
                    this.circ_status  .setFill(C_SUCCESS);
                    this.lbl_status   .setText("Loaded "+road.getName()+" (#vertices="+nv+"; #edges="+ne+")");
                    this.initializeCanvas();
@@ -1328,7 +1303,6 @@ public class DesktopController {
                  alert.showAndWait();
                  this.btn_road     .setDisable(false);
                  this.btn_stop     .setDisable(false);
-                 this.tabpane      .setDisable(false);
                  this.circ_status  .setFill(C_SUCCESS);
                  this.lbl_status   .setText("Ready.");
                  Platform.runLater(() -> {
@@ -1340,7 +1314,6 @@ public class DesktopController {
              // FD cancelled
              this.btn_road     .setDisable(false);
              this.btn_stop     .setDisable(false);
-             this.tabpane      .setDisable(false);
              this.circ_status  .setFill(C_SUCCESS);
              this.lbl_status   .setText("Ready.");
            }
@@ -1766,7 +1739,6 @@ public class DesktopController {
            this.tf_traffic   .setDisable(true);
            this.tf_client    .setDisable(true);
            this.btn_stop     .setDisable(true);
-           this.tabpane      .setDisable(true);
            this.tf_t0        .setDisable(true);
            this.tf_t1        .setDisable(true);
            this.btn_startseq .setDisable(true);
@@ -1803,7 +1775,6 @@ public class DesktopController {
                    this.tf_traffic   .setDisable(false);
                    this.tf_client    .setDisable(false);
                    this.btn_stop     .setDisable(false);
-                   this.tabpane      .setDisable(false);
                    this.tf_t0        .setDisable(false);
                    this.tf_t1        .setDisable(false);
                    this.btn_startseq .setDisable(false);
@@ -1823,7 +1794,6 @@ public class DesktopController {
                  this.tf_traffic   .setDisable(false);
                  this.tf_client    .setDisable(false);
                  this.btn_stop     .setDisable(false);
-                 this.tabpane      .setDisable(false);
                  this.tf_t0        .setDisable(false);
                  this.tf_t1        .setDisable(false);
                  this.btn_startseq .setDisable(false);
@@ -1844,7 +1814,6 @@ public class DesktopController {
                  this.tf_traffic   .setDisable(false);
                  this.tf_client    .setDisable(false);
                  this.btn_stop     .setDisable(false);
-                 this.tabpane      .setDisable(false);
                  this.tf_t0        .setDisable(false);
                  this.tf_t1        .setDisable(false);
                  this.btn_startseq .setDisable(false);
@@ -1862,7 +1831,6 @@ public class DesktopController {
              this.tf_traffic   .setDisable(false);
              this.tf_client    .setDisable(false);
              this.btn_stop     .setDisable(false);
-             this.tabpane      .setDisable(false);
              this.tf_t0        .setDisable(false);
              this.tf_t1        .setDisable(false);
              this.btn_startseq .setDisable(false);
@@ -1945,12 +1913,6 @@ public class DesktopController {
             }
           }
   public void initialize() {
-    this.tabpane.getSelectionModel().selectedIndexProperty().addListener(
-        (ov, oldTab, newTab) -> {
-      if (this.muf != null) {
-        this.muf.setMapVisible((newTab.intValue() == 0 ? true : false));
-      }
-    });
     Image image = new Image("res/icon.gif");
     this.logo = new ImageView();
     this.logo.setImage(image);

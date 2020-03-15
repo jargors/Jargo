@@ -11,7 +11,7 @@ java \
     -Djargors.controller.debug=false \
     -Djargors.client.debug=true \
     -Djargors.traffic.debug=false \
-    -cp $_CLASSPATH:$DERBY_PATH/derby.jar \
+    -cp $_CLASSPATH:$DERBY_HOME/lib/derby.jar \
 com.github.jargors.ui.Command $@
 
 

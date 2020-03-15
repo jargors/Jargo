@@ -5,8 +5,8 @@ java \
     -Xmx6g \
     -Djava.library.path=dep \
     -Dderby.storage.pageCacheSize=8000 \
-    -Djargors.controller.debug=true \
+    -Djargors.controller.debug=false \
     -Djargors.desktop.debug=false \
-    -cp .:dep:dep/*:jar/*:$DERBY_PATH/derby.jar \
+    -cp .:dep:dep/*:jar/*:$DERBY_HOME/lib/derby.jar \
 com.github.jargors.ui.Desktop
 

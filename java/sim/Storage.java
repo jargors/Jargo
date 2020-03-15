@@ -345,17 +345,6 @@ public class Storage {
            if (flag_usecache) {
              final int[] output = new int[] { 0 };
              this.duration_servers.forEach((sid, val) -> output[0] += val);
-         /***/
-             this.duration_servers.forEach((sid, val) -> {
-                 if (val > 80000) {
-                   System.out.printf("sid %d dur=%d\n", sid, val);
-                   try {
-                   JargoInstanceExport("debug");
-                   System.exit(1);
-                   } catch (Exception ee) {}
-                 }
-             });
-         /***/
              return output;
            } else {
              try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
@@ -1697,7 +1686,7 @@ public class Storage {
                              + "CONSTRAINT F38 FOREIGN KEY (rid, ro) REFERENCES UO (uid, uo),"
                              + "CONSTRAINT F39 FOREIGN KEY (rid, rd) REFERENCES UD (uid, ud),"
                              + "CONSTRAINT C89a CHECK (tp >= ts),"
-                             + "CONSTRAINT C89b CHECK (td <= te),"
+                             + "CONSTRAINT C89b CHECK (td <= te) INITIALLY DEFERRED,"
                              + "CONSTRAINT C89c CHECK (tp < td),"
                              + "CONSTRAINT C91 CHECK (tp >= re),"
                              + "CONSTRAINT C92 CHECK (vp  = ro),"
@@ -1944,7 +1933,7 @@ public class Storage {
                   + "SELECT sid, MIN(ABS(t2-?)) as tdiff FROM W WHERE t2<=? AND v2<>0 "
                   + "GROUP BY sid"
                   + ") as b ON a.sid=b.sid AND ABS(a.t2-?)=b.tdiff AND a.t2<=?");
-            this.lu_pstr.put("S60", SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC");
+            this.lu_pstr.put("S60", SEL+"DISTINCT t, v FROM r_server WHERE sid=? ORDER BY t ASC");
             this.lu_pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server LEFT JOIN CQ ON t=t2 and lr=rid WHERE r_server.sid=?"
                   + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t, o2 ASC");
             this.lu_pstr.put("S62", SEL+"COUNT (*) FROM V WHERE v<>0");

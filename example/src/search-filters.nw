@@ -7,24 +7,25 @@ immediately from further consideration. This chapter implements some example
 map and filter functions for determining fitness and whether or not to keep a
 server.
 
-\section{Last Update Time}
+% \section{Last Event Time}
+% \section{Upcoming Event Time}
+% \section{Upcoming Event Distance}
 
-If a server hasn't been updated recently, its location known by the client can
-be stale. We can use [[Communicator.retrieveClock]](0) and [[Client]]'s [[lut]]
-array to map servers to their last update times, and then check if the value
-is less than a threshold [[MAX_LAST_UPDATE_TIME]].
+\section{Schedule Length}
 
-<<Map/Filter: Last Update Time>>=
+A server with a very long schedule can be difficult to evaluate because there
+will be more scheduling possibilities. Filtering these servers out may improve
+the speed performance.
+
+<<Map/Filter: Schedule Length>>=
 for (final int sid : candidates.keySet()) {
-  final int val = (this.communicator.retrieveClock() - lut.get(sid));
-  if (val <= MAX_LAST_UPDATE_TIME)
+  final int val = this.communicator.queryServerScheduleRemaining(sid,
+      this.communicator.retrieveClock()).length / 4;
+  if (val <= MAX_SCHEDULE_LENGTH)
     results.put(sid, val);
 }
 @
 
-% \section{Last Event Time}
-% \section{Upcoming Event Time}
-% \section{Upcoming Event Distance}
 % \section{Total Travel Duration}
 % \section{Total Travel Distance}
 % \section{Total Cruising Duration}
@@ -46,6 +47,9 @@ for (final int sid : candidates.keySet()) {
 @
 
 % \section{Road Proximity}
+
+\section{Routing Cost}
+
 % \section{Number of Assignments}
 % \section{Profit}
 

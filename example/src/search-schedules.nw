@@ -1,7 +1,7 @@
 \chapter{Schedule Selection}
 \label{search-schedules}
 
-\section{Applying Constraints}
+\section{Check Capacity}
 
 tbeg is time to start applying pick-up load, tend is time to end the load.
 
@@ -9,6 +9,23 @@ tbeg is time to start applying pick-up load, tend is time to end the load.
 ok = (this.communicator.queryServerCapacityViolations(sid, rq, tbeg, tend)[0] == 0);
 @
 
+\section{Check Time Window}
 
-\section{Cost-Based Selection}
+<<Schedule Selection: Check Time Window>>=
+for (int _i = 0; _i < (bnew.length - 3); _i += 4) {
+  int _rid = bnew[(_i + 3)];
+  int _rt  = bnew[(_i)];
+  if (_rid != 0) {
+    int[] _u = this.communicator.queryUser(_rid);
+    int _ue = _u[2];
+    int _ul = _u[3];
+    if (_rt < _ue || _rt > _ul) {
+      ok = false;
+      break;
+    }
+  }
+}
+@
+
+% \section{Cost-Based Selection}
 

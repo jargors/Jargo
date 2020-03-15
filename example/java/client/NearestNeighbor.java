@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.HashMap;
 public class NearestNeighbor extends Client {
-  final int MAX_LAST_UPDATE_TIME = 300;
   final int MAX_PROXIMITY = 600;
   protected void handleRequest(int[] r) throws ClientException, ClientFatalException {
               if (DEBUG) {
@@ -25,20 +24,6 @@ public class NearestNeighbor extends Client {
                 }
 
                 for (final int sid : candidates.keySet()) {
-                  final int val = (this.communicator.retrieveClock() - lut.get(sid));
-                  if (val <= MAX_LAST_UPDATE_TIME)
-                    results.put(sid, val);
-                }
-                candidates = new HashMap<Integer, Integer>(results);
-                if (DEBUG) {
-                  System.out.printf("do map/filter: last update time\n");
-                }
-                if (DEBUG) {
-                  System.out.printf("got candidates={ #%d }\n", candidates.size());
-                }
-
-                results.clear();
-                for (final int sid : candidates.keySet()) {
                   final int val = this.tools.computeHaversine(luv.get(sid), ro);
                   if (0 < val && val <= MAX_PROXIMITY)
                     results.put(sid, val);
@@ -53,26 +38,26 @@ public class NearestNeighbor extends Client {
 
                 while (!candidates.isEmpty()) {
 
-                  Entry<Integer, Integer> min = null;
+                  Entry<Integer, Integer> cand = null;
                   for (final Entry<Integer, Integer> entry : candidates.entrySet()) {
-                    if (min == null || min.getValue() > entry.getValue()) {
-                      min = entry;
+                    if (cand == null || cand.getValue() > entry.getValue()) {
+                      cand = entry;
                     }
                   }
                   if (DEBUG) {
-                    System.out.printf("got min={ %d, %d }\n", min.getKey(), min.getValue());
+                    System.out.printf("got cand={ %d, %d }\n", cand.getKey(), cand.getValue());
                   }
 
-                  final int sid = min.getKey();
+                  final int sid = cand.getKey();
                   final int now = this.communicator.retrieveClock();
 
                   int[] bnew = new int[] { };
                   int[] brem = this.communicator.queryServerScheduleRemaining(sid, now);
                   if (DEBUG) {
                     System.out.printf("got brem=\n");
-                    for (int _i = 0; _i < (brem.length - 3); _i += 4) {
+                    for (int __i = 0; __i < (brem.length - 3); __i += 4) {
                       System.out.printf("  { %d, %d, %d, %d }\n",
-                          brem[_i], brem[_i+1], brem[_i+2], brem[_i+3]);
+                          brem[__i], brem[__i+1], brem[__i+2], brem[__i+3]);
                     }
                   }
 
@@ -85,9 +70,9 @@ public class NearestNeighbor extends Client {
                   final int[] wact = this.communicator.queryServerRouteActive(sid);
                   if (DEBUG) {
                     System.out.printf("got wact=\n");
-                    for (int _i = 0; _i < (wact.length - 1); _i += 2) {
+                    for (int __i = 0; __i < (wact.length - 1); __i += 2) {
                       System.out.printf("  { %d, %d }\n",
-                          wact[_i], wact[_i+1]);
+                          wact[__i], wact[(__i + 1)]);
                     }
                   }
 
@@ -109,9 +94,9 @@ public class NearestNeighbor extends Client {
                       }
                       if (DEBUG) {
                         System.out.printf("got brem=\n");
-                        for (int _i = 0; _i < (brem.length - 3); _i += 4) {
+                        for (int __i = 0; __i < (brem.length - 3); __i += 4) {
                           System.out.printf("  { %d, %d, %d, %d }\n",
-                              brem[_i], brem[_i+1], brem[_i+2], brem[_i+3]);
+                              brem[__i], brem[__i+1], brem[__i+2], brem[__i+3]);
                         }
                       }
                     }
@@ -140,9 +125,9 @@ public class NearestNeighbor extends Client {
                     System.arraycopy(brem, 4*ipos, bnew, 4*(ipos + 1), brem.length - 4*ipos);
                     if (DEBUG) {
                       System.out.printf("got bnew=\n");
-                      for (int _i = 0; _i < (bnew.length - 3); _i += 4) {
+                      for (int __i = 0; __i < (bnew.length - 3); __i += 4) {
                         System.out.printf("  { %d, %d, %d, %d }\n",
-                            bnew[_i], bnew[_i+1], bnew[_i+2], bnew[_i+3]);
+                            bnew[__i], bnew[__i+1], bnew[__i+2], bnew[__i+3]);
                       }
                     }
 
@@ -163,54 +148,53 @@ public class NearestNeighbor extends Client {
                     System.arraycopy(brem, 4*ipos, bnew, 4*(ipos + 1), brem.length - 4*ipos);
                     if (DEBUG) {
                       System.out.printf("got bnew=\n");
-                      for (int _i = 0; _i < (bnew.length - 3); _i += 4) {
+                      for (int __i = 0; __i < (bnew.length - 3); __i += 4) {
                         System.out.printf("  { %d, %d, %d, %d }\n",
-                            bnew[_i], bnew[_i+1], bnew[_i+2], bnew[_i+3]);
+                            bnew[__i], bnew[__i+1], bnew[__i+2], bnew[__i+3]);
                       }
                     }
 
                     int[] wnew = null;
-                    int[] wbeg = new int[] { 0, 0 };
-
-                    wbeg[0] = (wact[3] == 0 ? now : wact[2]);
-                    wbeg[1] = (wact[3] == 0 ? wact[1] : wact[3]);
+                    int[] wbeg = (wact[3] == 0
+                        ? new int[] { now    , wact[1] }
+                        : new int[] { wact[2], wact[3] });
                     if (DEBUG) {
                       System.out.printf("set wbeg={ %d, %d }\n", wbeg[0], wbeg[1]);
                     }
 
                     {
-                      final int p = (bnew.length/4);
-                      final int[][] legs = new int[p][];
+                      final int _p = (bnew.length/4);
+                      final int[][] _legs = new int[_p][];
 
-                      int[] leg = this.tools.computeRoute(wbeg[1], bnew[1], wbeg[0]);
-                      int n = leg.length;
-                      int t = leg[(n - 2)];
+                      int[] _leg = this.tools.computeRoute(wbeg[1], bnew[1], wbeg[0]);
+                      int _n = _leg.length;
+                      int _t = _leg[(_n - 2)];
 
-                      legs[0] = leg;
-                      for (int i = 1; i < p; i++) {
+                      _legs[0] = _leg;
+                      for (int _i = 1; _i < _p; _i++) {
                         // Extract vertices
-                        final int u = bnew[(4*i - 3)];
-                        final int v = bnew[(4*i + 1)];
-                        // Compute path and store into legs
-                        leg = this.tools.computeRoute(u, v, t);
-                        legs[i] = leg;
-                        // Update n and t
-                        n += (leg.length - 2);
-                        t = leg[leg.length - 2];
+                        final int _u = bnew[(4*_i - 3)];
+                        final int _v = bnew[(4*_i + 1)];
+                        // Compute path and store into _legs
+                        _leg = this.tools.computeRoute(_u, _v, _t);
+                        _legs[_i] = _leg;
+                        // Update _n and _t
+                        _n += (_leg.length - 2);
+                        _t = _leg[_leg.length - 2];
                       }
-                      wnew = new int[n];
-                      int k = 0;
-                      for (int i = 0; i < legs.length; i++) {
-                        final int rend = (legs[i].length - (i == (legs.length - 1) ? 0 : 2));
-                        for (int j = 0; j < rend; j++) {
-                          wnew[k] = legs[i][j];
-                          k++;
+                      wnew = new int[_n];
+                      int _k = 0;
+                      for (int _i = 0; _i < _legs.length; _i++) {
+                        final int _rend = (_legs[_i].length - (_i == (_legs.length - 1) ? 0 : 2));
+                        for (int _j = 0; _j < _rend; _j++) {
+                          wnew[_k] = _legs[_i][_j];
+                          _k++;
                         }
                       }
-                      for (int i = 1; i < legs.length; i++) {
-                        bnew[(4*i - 4)] = legs[i][0];
+                      for (int _i = 1; _i < _legs.length; _i++) {
+                        bnew[(4*_i - 4)] = _legs[_i][0];
                       }
-                      bnew[(4*p - 4)] = t;
+                      bnew[(4*_p - 4)] = _t;
                     }
 
                     // if next waypoint is vehicle destination,
@@ -221,9 +205,9 @@ public class NearestNeighbor extends Client {
 
                     if (DEBUG) {
                       System.out.printf("set wnew=\n");
-                      for (int _i = 0; _i < (wnew.length - 1); _i += 2) {
+                      for (int __i = 0; __i < (wnew.length - 1); __i += 2) {
                         System.out.printf("  { %d, %d }\n",
-                            wnew[_i], wnew[_i+1]);
+                            wnew[__i], wnew[(__i + 1)]);
                       }
                     }
 

@@ -445,6 +445,7 @@
 \nwixlogsorted{c}{{Read: queryServerDistance(2)}{NW1Dx1yV-3NhJSl-1}{\nwixu{NW4QM9HE-2u8vSA-1}\nwixd{NW1Dx1yV-3NhJSl-1}}}%
 \nwixlogsorted{c}{{Read: queryServerDistanceRemaining(2)}{NW1Dx1yV-6TJm1-1}{\nwixu{NW4QM9HE-2Rlctf-1}\nwixd{NW1Dx1yV-6TJm1-1}}}%
 \nwixlogsorted{c}{{Read: queryServerDurationRemaining(2)}{NW1Dx1yV-e3rqH-1}{\nwixu{NW4QM9HE-2Rlctf-1}\nwixd{NW1Dx1yV-e3rqH-1}}}%
+\nwixlogsorted{c}{{Read: queryServerDurationTravel(2)}{NW1Dx1yV-1DqiB9-1}{\nwixu{NW4QM9HE-2Rlctf-1}\nwixd{NW1Dx1yV-1DqiB9-1}}}%
 \nwixlogsorted{c}{{Read: queryServerLoadMax(2)}{NW1Dx1yV-7Mvmo-1}{\nwixu{NW4QM9HE-2Rlctf-1}\nwixd{NW1Dx1yV-7Mvmo-1}}}%
 \nwixlogsorted{c}{{Read: queryServerRoute(1)}{NW1Dx1yV-3INKD2-1}{\nwixu{NW4QM9HE-2u8vSA-1}\nwixd{NW1Dx1yV-3INKD2-1}}}%
 \nwixlogsorted{c}{{Read: queryServerRouteActive(1)}{NW1Dx1yV-oGnJX-1}{\nwixu{NW4QM9HE-2u8vSA-1}\nwixu{NW4QM9HE-2Rlctf-1}\nwixd{NW1Dx1yV-oGnJX-1}}}%
@@ -1016,6 +1017,7 @@
 \nwixlogsorted{i}{{\nwixident{queryServerDistance}}{queryServerDistance}}%
 \nwixlogsorted{i}{{\nwixident{queryServerDistanceRemaining}}{queryServerDistanceRemaining}}%
 \nwixlogsorted{i}{{\nwixident{queryServerDurationRemaining}}{queryServerDurationRemaining}}%
+\nwixlogsorted{i}{{\nwixident{queryServerDurationTravel}}{queryServerDurationTravel}}%
 \nwixlogsorted{i}{{\nwixident{queryServerLoadMax}}{queryServerLoadMax}}%
 \nwixlogsorted{i}{{\nwixident{queryServerRoute}}{queryServerRoute}}%
 \nwixlogsorted{i}{{\nwixident{queryServerRouteActive}}{queryServerRouteActive}}%
@@ -2727,7 +2729,7 @@ rd & & \\
   + "CONSTRAINT F38 FOREIGN KEY (rid, ro) REFERENCES UO (uid, uo),"
   + "CONSTRAINT F39 FOREIGN KEY (rid, rd) REFERENCES UD (uid, ud),"
   + "CONSTRAINT C89a CHECK (tp >= ts),"
-  + "CONSTRAINT C89b CHECK (td <= te),"
+  + "CONSTRAINT C89b CHECK (td <= te) INITIALLY DEFERRED,"
   + "CONSTRAINT C89c CHECK (tp < td),"
   + "CONSTRAINT C91 CHECK (tp >= re),"
   + "CONSTRAINT C92 CHECK (vp  = ro),"
@@ -2735,6 +2737,14 @@ rd & & \\
   + "CONSTRAINT C94 CHECK (vd  = rd)"
   + ")"
 \nwused{\\{NW1ODIS0-RmKLy-1}}\nwendcode{}\nwbegindocs{28}\nwdocspar
+
+% Q: Why is C89B deferred?
+% A: During service update, the route is first to be updated and it's possible
+% for vehicle end time (te) to go down. Some events might get caught exceeding
+% the new end time, so we defer C89B to give the subsequent schedule update a
+% chance to correct.
+%   To avoid deferring, we may try to do the end time update last in the next
+% version.
 
 \section{Load Constraints Table (Table CQ)}
 \label{mod-schema: load-constraints}
@@ -3350,6 +3360,7 @@ public \LA{}Read: queryEdge(2)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1H3Dhp-1}}\RA{
 public \LA{}Read: queryServerCapacityViolations(4)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3b4wOq-1}}\RA{}
 public \LA{}Read: queryServerDistanceRemaining(2)~{\nwtagstyle{}\subpageref{NW1Dx1yV-6TJm1-1}}\RA{}
 public \LA{}Read: queryServerDurationRemaining(2)~{\nwtagstyle{}\subpageref{NW1Dx1yV-e3rqH-1}}\RA{}
+public \LA{}Read: queryServerDurationTravel(2)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1DqiB9-1}}\RA{}
 public \LA{}Read: queryServerLoadMax(2)~{\nwtagstyle{}\subpageref{NW1Dx1yV-7Mvmo-1}}\RA{}
 public \LA{}Read: queryServerRouteActive(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-oGnJX-1}}\RA{}
 public \LA{}Read: queryServerRouteRemaining(2)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3EQWyS-1}}\RA{}
@@ -4348,7 +4359,7 @@ this.lu_pstr.put("\nwlinkedidentc{S128}{NW1ODIS0-nIIRf-1}", SEL+"a.sid, a.t2, a.
       + ") as c ON a.sid=c.sid AND ABS(a.t2-?)=c.tdiff AND a.t2<=?");
 \nwindexdefn{\nwixident{S128}}{S128}{NW1ODIS0-nIIRf-1}\eatline
 \nwused{\\{NW1ODIS0-1dEGs4-1}}\nwidentdefs{\\{{\nwixident{S128}}{S128}}}\nwendcode{}\nwbegincode{114}\sublabel{NW1ODIS0-9tgZA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1ODIS0-9tgZA-1}}}\moddef{S60~{\nwtagstyle{}\subpageref{NW1ODIS0-9tgZA-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW1ODIS0-1dEGs4-1}}\nwenddeflinemarkup
-this.lu_pstr.put("\nwlinkedidentc{S60}{NW1ODIS0-9tgZA-1}", SEL+"t, v FROM r_server WHERE sid=? ORDER BY t ASC");
+this.lu_pstr.put("\nwlinkedidentc{S60}{NW1ODIS0-9tgZA-1}", SEL+"DISTINCT t, v FROM r_server WHERE sid=? ORDER BY t ASC");
 \nwindexdefn{\nwixident{S60}}{S60}{NW1ODIS0-9tgZA-1}\eatline
 \nwused{\\{NW1ODIS0-1dEGs4-1}}\nwidentdefs{\\{{\nwixident{S60}}{S60}}}\nwendcode{}\nwbegincode{115}\sublabel{NW1ODIS0-44X5Zr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1ODIS0-44X5Zr-1}}}\moddef{S129~{\nwtagstyle{}\subpageref{NW1ODIS0-44X5Zr-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW1ODIS0-1dEGs4-1}}\nwenddeflinemarkup
 this.lu_pstr.put("\nwlinkedidentc{S129}{NW1ODIS0-44X5Zr-1}", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC");
@@ -7015,9 +7026,14 @@ int[] \nwlinkedidentc{DBQueryServerDurationTravel}{NW1Dx1yV-TNQQF-1}(final int s
   \}
 \}
 \nwindexdefn{\nwixident{DBQueryServerDurationTravel}}{DBQueryServerDurationTravel}{NW1Dx1yV-TNQQF-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryServerDurationTravel}}{DBQueryServerDurationTravel}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S116}}{S116}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-TNQQF-1}\nwindexuse{\nwixident{S116}}{S116}{NW1Dx1yV-TNQQF-1}\nwendcode{}\nwbegindocs{139}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryServerDurationTravel}}{DBQueryServerDurationTravel}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S116}}{S116}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-TNQQF-1}\nwindexuse{\nwixident{S116}}{S116}{NW1Dx1yV-TNQQF-1}\nwendcode{}\nwbegincode{139}\sublabel{NW1Dx1yV-1DqiB9-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-1DqiB9-1}}}\moddef{Read: queryServerDurationTravel(2)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1DqiB9-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2Rlctf-1}}\nwenddeflinemarkup
+int[] \nwlinkedidentc{queryServerDurationTravel}{NW1Dx1yV-1DqiB9-1}(final int sid, boolean flag_usecache) throws SQLException \{
+  return storage.\nwlinkedidentc{DBQueryServerDurationTravel}{NW1Dx1yV-TNQQF-1}(sid, flag_usecache);
+\}
+\nwindexdefn{\nwixident{queryServerDurationTravel}}{queryServerDurationTravel}{NW1Dx1yV-1DqiB9-1}\eatline
+\nwused{\\{NW4QM9HE-2Rlctf-1}}\nwidentdefs{\\{{\nwixident{queryServerDurationTravel}}{queryServerDurationTravel}}}\nwidentuses{\\{{\nwixident{DBQueryServerDurationTravel}}{DBQueryServerDurationTravel}}}\nwindexuse{\nwixident{DBQueryServerDurationTravel}}{DBQueryServerDurationTravel}{NW1Dx1yV-1DqiB9-1}\nwendcode{}\nwbegindocs{140}\nwdocspar
 \subsection{\texttt{DBQueryServerDurationCruising}(2)}
-\nwenddocs{}\nwbegincode{140}\sublabel{NW1Dx1yV-1p4hKh-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-1p4hKh-1}}}\moddef{Read: DBQueryServerDurationCruising(2)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1p4hKh-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{141}\sublabel{NW1Dx1yV-1p4hKh-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-1p4hKh-1}}}\moddef{Read: DBQueryServerDurationCruising(2)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1p4hKh-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryServerDurationCruising}{NW1Dx1yV-1p4hKh-1}(final int sid, boolean flag_usecache) throws SQLException \{
   if (flag_usecache) \{
     return new int[] \{ this.duration_servers_cruising.get(sid) \};
@@ -7030,9 +7046,9 @@ int[] \nwlinkedidentc{DBQueryServerDurationCruising}{NW1Dx1yV-1p4hKh-1}(final in
   \}
 \}
 \nwindexdefn{\nwixident{DBQueryServerDurationCruising}}{DBQueryServerDurationCruising}{NW1Dx1yV-1p4hKh-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryServerDurationCruising}}{DBQueryServerDurationCruising}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S158}}{S158}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-1p4hKh-1}\nwindexuse{\nwixident{S158}}{S158}{NW1Dx1yV-1p4hKh-1}\nwendcode{}\nwbegindocs{141}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryServerDurationCruising}}{DBQueryServerDurationCruising}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S158}}{S158}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-1p4hKh-1}\nwindexuse{\nwixident{S158}}{S158}{NW1Dx1yV-1p4hKh-1}\nwendcode{}\nwbegindocs{142}\nwdocspar
 \subsection{\texttt{DBQueryServerDurationService}(2)}
-\nwenddocs{}\nwbegincode{142}\sublabel{NW1Dx1yV-1spPfd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-1spPfd-1}}}\moddef{Read: DBQueryServerDurationService(2)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1spPfd-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{143}\sublabel{NW1Dx1yV-1spPfd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-1spPfd-1}}}\moddef{Read: DBQueryServerDurationService(2)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1spPfd-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryServerDurationService}{NW1Dx1yV-1spPfd-1}(final int sid, boolean flag_usecache) throws SQLException \{
   if (flag_usecache) \{
     return new int[] \{ (this.duration_servers.get(sid)
@@ -7046,7 +7062,7 @@ int[] \nwlinkedidentc{DBQueryServerDurationService}{NW1Dx1yV-1spPfd-1}(final int
   \}
 \}
 \nwindexdefn{\nwixident{DBQueryServerDurationService}}{DBQueryServerDurationService}{NW1Dx1yV-1spPfd-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryServerDurationService}}{DBQueryServerDurationService}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S157}}{S157}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-1spPfd-1}\nwindexuse{\nwixident{S157}}{S157}{NW1Dx1yV-1spPfd-1}\nwendcode{}\nwbegindocs{143}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryServerDurationService}}{DBQueryServerDurationService}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S157}}{S157}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-1spPfd-1}\nwindexuse{\nwixident{S157}}{S157}{NW1Dx1yV-1spPfd-1}\nwendcode{}\nwbegindocs{144}\nwdocspar
 \subsection{\texttt{DBQueryServerTimeOfDeparture}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -7075,7 +7091,7 @@ where $s$ is the server identified by {\Tt{}sid\nwendquote} (param. 1).\\
 \textbf{Throws:} {\Tt{}SQLException\nwendquote} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{144}\sublabel{NW1Dx1yV-3pEbv2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3pEbv2-1}}}\moddef{Read: DBQueryServerTimeOfDeparture(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3pEbv2-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{145}\sublabel{NW1Dx1yV-3pEbv2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3pEbv2-1}}}\moddef{Read: DBQueryServerTimeOfDeparture(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3pEbv2-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryServerTimeOfDeparture}{NW1Dx1yV-3pEbv2-1}(final int sid) throws SQLException \{
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1ODIS0-JT1v9-1}}\RA{}) \{
     return \nwlinkedidentc{PSQuery}{NW1ODIS0-yHOIP-1}(conn, "\nwlinkedidentc{S125}{NW1ODIS0-4ds9Gt-1}", 1, sid);
@@ -7084,13 +7100,13 @@ int[] \nwlinkedidentc{DBQueryServerTimeOfDeparture}{NW1Dx1yV-3pEbv2-1}(final int
   \}
 \}
 \nwindexdefn{\nwixident{DBQueryServerTimeOfDeparture}}{DBQueryServerTimeOfDeparture}{NW1Dx1yV-3pEbv2-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryServerTimeOfDeparture}}{DBQueryServerTimeOfDeparture}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S125}}{S125}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-3pEbv2-1}\nwindexuse{\nwixident{S125}}{S125}{NW1Dx1yV-3pEbv2-1}\nwendcode{}\nwbegindocs{145}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryServerTimeOfDeparture}}{DBQueryServerTimeOfDeparture}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S125}}{S125}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-3pEbv2-1}\nwindexuse{\nwixident{S125}}{S125}{NW1Dx1yV-3pEbv2-1}\nwendcode{}\nwbegindocs{146}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryServerTimeOfDeparture}{NW1Dx1yV-3fOzh2-1}\nwendquote}}(1) wraps {\Tt{}\nwlinkedidentq{DBQueryServerTimeOfDeparture}{NW1Dx1yV-3pEbv2-1}\nwendquote}(1).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{146}\sublabel{NW1Dx1yV-3fOzh2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3fOzh2-1}}}\moddef{Read: queryServerTimeOfDeparture(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3fOzh2-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{147}\sublabel{NW1Dx1yV-3fOzh2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3fOzh2-1}}}\moddef{Read: queryServerTimeOfDeparture(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3fOzh2-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryServerTimeOfDeparture}{NW1Dx1yV-3fOzh2-1}(final int sid) throws SQLException \{
   long A0 = System.currentTimeMillis();
   int[] output = storage.\nwlinkedidentc{DBQueryServerTimeOfDeparture}{NW1Dx1yV-3pEbv2-1}(sid);
@@ -7098,7 +7114,7 @@ int[] \nwlinkedidentc{queryServerTimeOfDeparture}{NW1Dx1yV-3fOzh2-1}(final int s
   return output;
 \}
 \nwindexdefn{\nwixident{queryServerTimeOfDeparture}}{queryServerTimeOfDeparture}{NW1Dx1yV-3fOzh2-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryServerTimeOfDeparture}}{queryServerTimeOfDeparture}}}\nwidentuses{\\{{\nwixident{DBQueryServerTimeOfDeparture}}{DBQueryServerTimeOfDeparture}}}\nwindexuse{\nwixident{DBQueryServerTimeOfDeparture}}{DBQueryServerTimeOfDeparture}{NW1Dx1yV-3fOzh2-1}\nwendcode{}\nwbegindocs{147}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryServerTimeOfDeparture}}{queryServerTimeOfDeparture}}}\nwidentuses{\\{{\nwixident{DBQueryServerTimeOfDeparture}}{DBQueryServerTimeOfDeparture}}}\nwindexuse{\nwixident{DBQueryServerTimeOfDeparture}}{DBQueryServerTimeOfDeparture}{NW1Dx1yV-3fOzh2-1}\nwendcode{}\nwbegindocs{148}\nwdocspar
 
 \subsection{\texttt{DBQueryServerTimeOfArrival}(1)}
 \begin{tabular}{p{\textwidth}}
@@ -7128,7 +7144,7 @@ where $s$ is the request identified by {\Tt{}sid\nwendquote} (param. 1).\\
 \textbf{Throws:} {\Tt{}SQLException\nwendquote} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{148}\sublabel{NW1Dx1yV-4OXq2M-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-4OXq2M-1}}}\moddef{Read: DBQueryServerTimeOfArrival(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-4OXq2M-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{149}\sublabel{NW1Dx1yV-4OXq2M-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-4OXq2M-1}}}\moddef{Read: DBQueryServerTimeOfArrival(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-4OXq2M-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryServerTimeOfArrival}{NW1Dx1yV-4OXq2M-1}(final int sid) throws SQLException \{
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1ODIS0-JT1v9-1}}\RA{}) \{
     return \nwlinkedidentc{PSQuery}{NW1ODIS0-yHOIP-1}(conn, "\nwlinkedidentc{S127}{NW1ODIS0-2TKHcJ-1}", 1, sid);
@@ -7137,13 +7153,13 @@ int[] \nwlinkedidentc{DBQueryServerTimeOfArrival}{NW1Dx1yV-4OXq2M-1}(final int s
   \}
 \}
 \nwindexdefn{\nwixident{DBQueryServerTimeOfArrival}}{DBQueryServerTimeOfArrival}{NW1Dx1yV-4OXq2M-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryServerTimeOfArrival}}{DBQueryServerTimeOfArrival}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S127}}{S127}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-4OXq2M-1}\nwindexuse{\nwixident{S127}}{S127}{NW1Dx1yV-4OXq2M-1}\nwendcode{}\nwbegindocs{149}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryServerTimeOfArrival}}{DBQueryServerTimeOfArrival}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S127}}{S127}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-4OXq2M-1}\nwindexuse{\nwixident{S127}}{S127}{NW1Dx1yV-4OXq2M-1}\nwendcode{}\nwbegindocs{150}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryServerTimeOfArrival}{NW1Dx1yV-3Rabqu-1}\nwendquote}}(1) wraps {\Tt{}\nwlinkedidentq{DBQueryServerTimeOfArrival}{NW1Dx1yV-4OXq2M-1}\nwendquote}(1).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{150}\sublabel{NW1Dx1yV-3Rabqu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3Rabqu-1}}}\moddef{Read: queryServerTimeOfArrival(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3Rabqu-1}}}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{151}\sublabel{NW1Dx1yV-3Rabqu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3Rabqu-1}}}\moddef{Read: queryServerTimeOfArrival(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3Rabqu-1}}}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryServerTimeOfArrival}{NW1Dx1yV-3Rabqu-1}(final int sid) throws SQLException \{
   long A0 = System.currentTimeMillis();
   int[] output = storage.\nwlinkedidentc{DBQueryServerTimeOfArrival}{NW1Dx1yV-4OXq2M-1}(sid);
@@ -7151,7 +7167,7 @@ int[] \nwlinkedidentc{queryServerTimeOfArrival}{NW1Dx1yV-3Rabqu-1}(final int sid
   return output;
 \}
 \nwindexdefn{\nwixident{queryServerTimeOfArrival}}{queryServerTimeOfArrival}{NW1Dx1yV-3Rabqu-1}\eatline
-\nwnotused{Read: queryServerTimeOfArrival(1)}\nwidentdefs{\\{{\nwixident{queryServerTimeOfArrival}}{queryServerTimeOfArrival}}}\nwidentuses{\\{{\nwixident{DBQueryServerTimeOfArrival}}{DBQueryServerTimeOfArrival}}}\nwindexuse{\nwixident{DBQueryServerTimeOfArrival}}{DBQueryServerTimeOfArrival}{NW1Dx1yV-3Rabqu-1}\nwendcode{}\nwbegindocs{151}\nwdocspar
+\nwnotused{Read: queryServerTimeOfArrival(1)}\nwidentdefs{\\{{\nwixident{queryServerTimeOfArrival}}{queryServerTimeOfArrival}}}\nwidentuses{\\{{\nwixident{DBQueryServerTimeOfArrival}}{DBQueryServerTimeOfArrival}}}\nwindexuse{\nwixident{DBQueryServerTimeOfArrival}}{DBQueryServerTimeOfArrival}{NW1Dx1yV-3Rabqu-1}\nwendcode{}\nwbegindocs{152}\nwdocspar
 \subsection{\texttt{DBQueryServerAssignmentsPending}(2)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -7185,7 +7201,7 @@ time horizon $H$, server $s$ identified by {\Tt{}sid\nwendquote} (param. 1), and
 \textbf{Throws:} {\Tt{}SQLException\nwendquote} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{152}\sublabel{NW1Dx1yV-2nZ1VB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2nZ1VB-1}}}\moddef{Read: DBQueryServerAssignmentsPending(2)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2nZ1VB-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{153}\sublabel{NW1Dx1yV-2nZ1VB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2nZ1VB-1}}}\moddef{Read: DBQueryServerAssignmentsPending(2)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2nZ1VB-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryServerAssignmentsPending}{NW1Dx1yV-2nZ1VB-1}(final int sid, final int t)
 throws SQLException \{
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1ODIS0-JT1v9-1}}\RA{}) \{
@@ -7195,7 +7211,7 @@ throws SQLException \{
   \}
 \}
 \nwindexdefn{\nwixident{DBQueryServerAssignmentsPending}}{DBQueryServerAssignmentsPending}{NW1Dx1yV-2nZ1VB-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryServerAssignmentsPending}}{DBQueryServerAssignmentsPending}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S100}}{S100}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-2nZ1VB-1}\nwindexuse{\nwixident{S100}}{S100}{NW1Dx1yV-2nZ1VB-1}\nwendcode{}\nwbegindocs{153}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryServerAssignmentsPending}}{DBQueryServerAssignmentsPending}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S100}}{S100}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-2nZ1VB-1}\nwindexuse{\nwixident{S100}}{S100}{NW1Dx1yV-2nZ1VB-1}\nwendcode{}\nwbegindocs{154}\nwdocspar
 \subsection{\texttt{DBQueryServerAssignmentsCompleted}(2)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -7229,7 +7245,7 @@ at time $t$ given by param. 2.\\
 \textbf{Throws:} {\Tt{}SQLException\nwendquote} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{154}\sublabel{NW1Dx1yV-31osvi-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-31osvi-1}}}\moddef{Read: DBQueryServerAssignmentsCompleted(2)~{\nwtagstyle{}\subpageref{NW1Dx1yV-31osvi-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{155}\sublabel{NW1Dx1yV-31osvi-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-31osvi-1}}}\moddef{Read: DBQueryServerAssignmentsCompleted(2)~{\nwtagstyle{}\subpageref{NW1Dx1yV-31osvi-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryServerAssignmentsCompleted}{NW1Dx1yV-31osvi-1}(final int sid, final int t)
 throws SQLException \{
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1ODIS0-JT1v9-1}}\RA{}) \{
@@ -7239,7 +7255,7 @@ throws SQLException \{
   \}
 \}
 \nwindexdefn{\nwixident{DBQueryServerAssignmentsCompleted}}{DBQueryServerAssignmentsCompleted}{NW1Dx1yV-31osvi-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryServerAssignmentsCompleted}}{DBQueryServerAssignmentsCompleted}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S101}}{S101}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-31osvi-1}\nwindexuse{\nwixident{S101}}{S101}{NW1Dx1yV-31osvi-1}\nwendcode{}\nwbegindocs{155}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryServerAssignmentsCompleted}}{DBQueryServerAssignmentsCompleted}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S101}}{S101}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-31osvi-1}\nwindexuse{\nwixident{S101}}{S101}{NW1Dx1yV-31osvi-1}\nwendcode{}\nwbegindocs{156}\nwdocspar
 \subsection{\texttt{DBQueryServersActive}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -7267,7 +7283,7 @@ Integer {\Tt{}t\nwendquote} (param. 1):&a time
 \textbf{Throws:} {\Tt{}SQLException\nwendquote} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{156}\sublabel{NW1Dx1yV-3NWzRo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3NWzRo-1}}}\moddef{Read: DBQueryServersActive(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3NWzRo-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{157}\sublabel{NW1Dx1yV-3NWzRo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3NWzRo-1}}}\moddef{Read: DBQueryServersActive(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3NWzRo-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryServersActive}{NW1Dx1yV-3NWzRo-1}(final int t) throws SQLException \{
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1ODIS0-JT1v9-1}}\RA{}) \{
     return this.\nwlinkedidentc{PSQuery}{NW1ODIS0-yHOIP-1}(conn, "\nwlinkedidentc{S134}{NW1ODIS0-9eEGJ-1}", 1, t, t, t);
@@ -7276,7 +7292,7 @@ int[] \nwlinkedidentc{DBQueryServersActive}{NW1Dx1yV-3NWzRo-1}(final int t) thro
   \}
 \}
 \nwindexdefn{\nwixident{DBQueryServersActive}}{DBQueryServersActive}{NW1Dx1yV-3NWzRo-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryServersActive}}{DBQueryServersActive}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S134}}{S134}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-3NWzRo-1}\nwindexuse{\nwixident{S134}}{S134}{NW1Dx1yV-3NWzRo-1}\nwendcode{}\nwbegincode{157}\sublabel{NW1Dx1yV-4USAYN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-4USAYN-1}}}\moddef{Read: queryServersActive(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-4USAYN-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryServersActive}}{DBQueryServersActive}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S134}}{S134}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-3NWzRo-1}\nwindexuse{\nwixident{S134}}{S134}{NW1Dx1yV-3NWzRo-1}\nwendcode{}\nwbegincode{158}\sublabel{NW1Dx1yV-4USAYN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-4USAYN-1}}}\moddef{Read: queryServersActive(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-4USAYN-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryServersActive}{NW1Dx1yV-4USAYN-1}(final int t) throws SQLException \{
   long A0 = System.currentTimeMillis();
   int[] output = this.storage.\nwlinkedidentc{DBQueryServersActive}{NW1Dx1yV-3NWzRo-1}(t);
@@ -7284,7 +7300,7 @@ int[] \nwlinkedidentc{queryServersActive}{NW1Dx1yV-4USAYN-1}(final int t) throws
   return output;
 \}
 \nwindexdefn{\nwixident{queryServersActive}}{queryServersActive}{NW1Dx1yV-4USAYN-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryServersActive}}{queryServersActive}}}\nwidentuses{\\{{\nwixident{DBQueryServersActive}}{DBQueryServersActive}}}\nwindexuse{\nwixident{DBQueryServersActive}}{DBQueryServersActive}{NW1Dx1yV-4USAYN-1}\nwendcode{}\nwbegindocs{158}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryServersActive}}{queryServersActive}}}\nwidentuses{\\{{\nwixident{DBQueryServersActive}}{DBQueryServersActive}}}\nwindexuse{\nwixident{DBQueryServersActive}}{DBQueryServersActive}{NW1Dx1yV-4USAYN-1}\nwendcode{}\nwbegindocs{159}\nwdocspar
 \subsection{\texttt{DBQueryServersCount}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -7307,7 +7323,7 @@ A {\Tt{}SQLException\nwendquote} is thrown in case of database failure.\\
 \textbf{Throws:} {\Tt{}SQLException\nwendquote} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{159}\sublabel{NW1Dx1yV-23ZhQ2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-23ZhQ2-1}}}\moddef{Read: DBQueryServersCount(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-23ZhQ2-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{160}\sublabel{NW1Dx1yV-23ZhQ2-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-23ZhQ2-1}}}\moddef{Read: DBQueryServersCount(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-23ZhQ2-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryServersCount}{NW1Dx1yV-23ZhQ2-1}() throws SQLException \{
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1ODIS0-JT1v9-1}}\RA{}) \{
     return this.\nwlinkedidentc{PSQuery}{NW1ODIS0-yHOIP-1}(conn, "\nwlinkedidentc{S66}{NW1ODIS0-1SEANQ-1}", 1);
@@ -7316,13 +7332,13 @@ int[] \nwlinkedidentc{DBQueryServersCount}{NW1Dx1yV-23ZhQ2-1}() throws SQLExcept
   \}
 \}
 \nwindexdefn{\nwixident{DBQueryServersCount}}{DBQueryServersCount}{NW1Dx1yV-23ZhQ2-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryServersCount}}{DBQueryServersCount}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S66}}{S66}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-23ZhQ2-1}\nwindexuse{\nwixident{S66}}{S66}{NW1Dx1yV-23ZhQ2-1}\nwendcode{}\nwbegindocs{160}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryServersCount}}{DBQueryServersCount}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S66}}{S66}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-23ZhQ2-1}\nwindexuse{\nwixident{S66}}{S66}{NW1Dx1yV-23ZhQ2-1}\nwendcode{}\nwbegindocs{161}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryServersCount}{NW1Dx1yV-3YlcHc-1}\nwendquote}}(0) wraps {\Tt{}\nwlinkedidentq{DBQueryServersCount}{NW1Dx1yV-23ZhQ2-1}\nwendquote}(0).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{161}\sublabel{NW1Dx1yV-3YlcHc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3YlcHc-1}}}\moddef{Read: queryServersCount(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3YlcHc-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{162}\sublabel{NW1Dx1yV-3YlcHc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3YlcHc-1}}}\moddef{Read: queryServersCount(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3YlcHc-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryServersCount}{NW1Dx1yV-3YlcHc-1}() throws SQLException \{
   long A0 = System.currentTimeMillis();
   int[] output = storage.\nwlinkedidentc{DBQueryServersCount}{NW1Dx1yV-23ZhQ2-1}();
@@ -7330,7 +7346,7 @@ int[] \nwlinkedidentc{queryServersCount}{NW1Dx1yV-3YlcHc-1}() throws SQLExceptio
   return output;
 \}
 \nwindexdefn{\nwixident{queryServersCount}}{queryServersCount}{NW1Dx1yV-3YlcHc-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryServersCount}}{queryServersCount}}}\nwidentuses{\\{{\nwixident{DBQueryServersCount}}{DBQueryServersCount}}}\nwindexuse{\nwixident{DBQueryServersCount}}{DBQueryServersCount}{NW1Dx1yV-3YlcHc-1}\nwendcode{}\nwbegindocs{162}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryServersCount}}{queryServersCount}}}\nwidentuses{\\{{\nwixident{DBQueryServersCount}}{DBQueryServersCount}}}\nwindexuse{\nwixident{DBQueryServersCount}}{DBQueryServersCount}{NW1Dx1yV-3YlcHc-1}\nwendcode{}\nwbegindocs{163}\nwdocspar
 \subsection{\texttt{DBQueryServersCountActive}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -7358,7 +7374,7 @@ Integer {\Tt{}t\nwendquote} (param. 1):&a time
 \textbf{Throws:} {\Tt{}SQLException\nwendquote} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{163}\sublabel{NW1Dx1yV-1014SS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-1014SS-1}}}\moddef{Read: DBQueryServersCountActive(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1014SS-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{164}\sublabel{NW1Dx1yV-1014SS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-1014SS-1}}}\moddef{Read: DBQueryServersCountActive(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1014SS-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryServersCountActive}{NW1Dx1yV-1014SS-1}(final int t) throws SQLException \{
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1ODIS0-JT1v9-1}}\RA{}) \{
     return new int[] \{ this.\nwlinkedidentc{PSQuery}{NW1ODIS0-yHOIP-1}(conn, "\nwlinkedidentc{S134}{NW1ODIS0-9eEGJ-1}", 1, t, t, t).length/2 \};
@@ -7367,7 +7383,7 @@ int[] \nwlinkedidentc{DBQueryServersCountActive}{NW1Dx1yV-1014SS-1}(final int t)
   \}
 \}
 \nwindexdefn{\nwixident{DBQueryServersCountActive}}{DBQueryServersCountActive}{NW1Dx1yV-1014SS-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryServersCountActive}}{DBQueryServersCountActive}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S134}}{S134}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-1014SS-1}\nwindexuse{\nwixident{S134}}{S134}{NW1Dx1yV-1014SS-1}\nwendcode{}\nwbegincode{164}\sublabel{NW1Dx1yV-3m8NX0-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3m8NX0-1}}}\moddef{Read: queryServersCountActive(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3m8NX0-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryServersCountActive}}{DBQueryServersCountActive}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S134}}{S134}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-1014SS-1}\nwindexuse{\nwixident{S134}}{S134}{NW1Dx1yV-1014SS-1}\nwendcode{}\nwbegincode{165}\sublabel{NW1Dx1yV-3m8NX0-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3m8NX0-1}}}\moddef{Read: queryServersCountActive(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3m8NX0-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryServersCountActive}{NW1Dx1yV-3m8NX0-1}(final int t) throws SQLException \{
   long A0 = System.currentTimeMillis();
   int[] output = this.storage.\nwlinkedidentc{DBQueryServersCountActive}{NW1Dx1yV-1014SS-1}(t);
@@ -7375,19 +7391,19 @@ int[] \nwlinkedidentc{queryServersCountActive}{NW1Dx1yV-3m8NX0-1}(final int t) t
   return output;
 \}
 \nwindexdefn{\nwixident{queryServersCountActive}}{queryServersCountActive}{NW1Dx1yV-3m8NX0-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryServersCountActive}}{queryServersCountActive}}}\nwidentuses{\\{{\nwixident{DBQueryServersCountActive}}{DBQueryServersCountActive}}}\nwindexuse{\nwixident{DBQueryServersCountActive}}{DBQueryServersCountActive}{NW1Dx1yV-3m8NX0-1}\nwendcode{}\nwbegindocs{165}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryServersCountActive}}{queryServersCountActive}}}\nwidentuses{\\{{\nwixident{DBQueryServersCountActive}}{DBQueryServersCountActive}}}\nwindexuse{\nwixident{DBQueryServersCountActive}}{DBQueryServersCountActive}{NW1Dx1yV-3m8NX0-1}\nwendcode{}\nwbegindocs{166}\nwdocspar
 \subsection{\texttt{DBQueryServersCountAppeared}(0)}
 TODO. Very bad method name. A server counts as "appeared" only if its route
 distance is greater than 0. For example, a taxi that is idling and has never
 moved does not count as "appeared".
-\nwenddocs{}\nwbegincode{166}\sublabel{NW1Dx1yV-w1r5F-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-w1r5F-1}}}\moddef{Read: DBQueryServersCountAppeared(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-w1r5F-1}}}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{167}\sublabel{NW1Dx1yV-w1r5F-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-w1r5F-1}}}\moddef{Read: DBQueryServersCountAppeared(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-w1r5F-1}}}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryServersCountAppeared}{NW1Dx1yV-w1r5F-1}() throws SQLException \{
   int[] output = new int[] \{ \};
   // ...
   return output;
 \}
 \nwindexdefn{\nwixident{DBQueryServersCountAppeared}}{DBQueryServersCountAppeared}{NW1Dx1yV-w1r5F-1}\eatline
-\nwnotused{Read: DBQueryServersCountAppeared(0)}\nwidentdefs{\\{{\nwixident{DBQueryServersCountAppeared}}{DBQueryServersCountAppeared}}}\nwendcode{}\nwbegincode{167}\sublabel{NW1Dx1yV-1u7qwL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-1u7qwL-1}}}\moddef{Read: queryServersCountAppeared(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1u7qwL-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwnotused{Read: DBQueryServersCountAppeared(0)}\nwidentdefs{\\{{\nwixident{DBQueryServersCountAppeared}}{DBQueryServersCountAppeared}}}\nwendcode{}\nwbegincode{168}\sublabel{NW1Dx1yV-1u7qwL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-1u7qwL-1}}}\moddef{Read: queryServersCountAppeared(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1u7qwL-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryServersCountAppeared}{NW1Dx1yV-1u7qwL-1}() throws SQLException \{
   int[] output = new int[] \{ 0 \};
   for (int sid : this.lu_sseen.keySet()) \{
@@ -7398,7 +7414,7 @@ int[] \nwlinkedidentc{queryServersCountAppeared}{NW1Dx1yV-1u7qwL-1}() throws SQL
   return output;
 \}
 \nwindexdefn{\nwixident{queryServersCountAppeared}}{queryServersCountAppeared}{NW1Dx1yV-1u7qwL-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryServersCountAppeared}}{queryServersCountAppeared}}}\nwidentuses{\\{{\nwixident{DBQueryServerDistance}}{DBQueryServerDistance}}}\nwindexuse{\nwixident{DBQueryServerDistance}}{DBQueryServerDistance}{NW1Dx1yV-1u7qwL-1}\nwendcode{}\nwbegindocs{168}\subsection{\texttt{DBQueryServersLocations}(1)}
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryServersCountAppeared}}{queryServersCountAppeared}}}\nwidentuses{\\{{\nwixident{DBQueryServerDistance}}{DBQueryServerDistance}}}\nwindexuse{\nwixident{DBQueryServerDistance}}{DBQueryServerDistance}{NW1Dx1yV-1u7qwL-1}\nwendcode{}\nwbegindocs{169}\subsection{\texttt{DBQueryServersLocations}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -7429,7 +7445,7 @@ Integer {\Tt{}t\nwendquote} (param. 1):&a time
 \textbf{Throws:} {\Tt{}SQLException\nwendquote} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{169}\sublabel{NW1Dx1yV-1zUdrf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-1zUdrf-1}}}\moddef{Read: DBQueryServersLocations(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1zUdrf-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{170}\sublabel{NW1Dx1yV-1zUdrf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-1zUdrf-1}}}\moddef{Read: DBQueryServersLocations(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1zUdrf-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryServersLocations}{NW1Dx1yV-1zUdrf-1}(final int t) throws SQLException \{
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1ODIS0-JT1v9-1}}\RA{}) \{
     return this.\nwlinkedidentc{PSQuery}{NW1ODIS0-yHOIP-1}(conn, "\nwlinkedidentc{S59}{NW1ODIS0-4APdTA-1}", 3, t, t, t, t);
@@ -7438,7 +7454,7 @@ int[] \nwlinkedidentc{DBQueryServersLocations}{NW1Dx1yV-1zUdrf-1}(final int t) t
   \}
 \}
 \nwindexdefn{\nwixident{DBQueryServersLocations}}{DBQueryServersLocations}{NW1Dx1yV-1zUdrf-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryServersLocations}}{DBQueryServersLocations}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S59}}{S59}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-1zUdrf-1}\nwindexuse{\nwixident{S59}}{S59}{NW1Dx1yV-1zUdrf-1}\nwendcode{}\nwbegindocs{170}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryServersLocations}}{DBQueryServersLocations}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S59}}{S59}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-1zUdrf-1}\nwindexuse{\nwixident{S59}}{S59}{NW1Dx1yV-1zUdrf-1}\nwendcode{}\nwbegindocs{171}\nwdocspar
 \subsection{\texttt{DBQueryServersLocationsActive}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -7478,16 +7494,16 @@ for $t$ given by param. 1.\\
 \textbf{Throws:} {\Tt{}SQLException\nwendquote} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{171}\sublabel{NW1Dx1yV-2tWQc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2tWQc-1}}}\moddef{Read: DBQueryServersLocationsActive(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2tWQc-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwprevnextdefs{\relax}{NW1Dx1yV-2tWQc-2}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{172}\sublabel{NW1Dx1yV-2tWQc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2tWQc-1}}}\moddef{Read: DBQueryServersLocationsActive(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2tWQc-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwprevnextdefs{\relax}{NW1Dx1yV-2tWQc-2}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryServersLocationsActive}{NW1Dx1yV-2tWQc-1}(final int t) throws SQLException \{
   int[] output = new int[] \{ \};
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1ODIS0-JT1v9-1}}\RA{}) \{
     int j = 0;
 \nwindexdefn{\nwixident{DBQueryServersLocationsActive}}{DBQueryServersLocationsActive}{NW1Dx1yV-2tWQc-1}\eatline
-\nwalsodefined{\\{NW1Dx1yV-2tWQc-2}}\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryServersLocationsActive}}{DBQueryServersLocationsActive}}}\nwendcode{}\nwbegindocs{172}{\small Our approach is to first use statement {\Tt{}\nwlinkedidentq{S134}{NW1ODIS0-9eEGJ-1}\nwendquote} to get the active
+\nwalsodefined{\\{NW1Dx1yV-2tWQc-2}}\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryServersLocationsActive}}{DBQueryServersLocationsActive}}}\nwendcode{}\nwbegindocs{173}{\small Our approach is to first use statement {\Tt{}\nwlinkedidentq{S134}{NW1ODIS0-9eEGJ-1}\nwendquote} to get the active
 servers. Then for each active server, we use either statement {\Tt{}\nwlinkedidentq{S135}{NW1ODIS0-4dp7jX-1}\nwendquote} or
 {\Tt{}\nwlinkedidentq{S147}{NW1ODIS0-2TcddD-1}\nwendquote} to get its last-known location.}
-\nwenddocs{}\nwbegincode{173}\sublabel{NW1Dx1yV-2tWQc-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2tWQc-2}}}\moddef{Read: DBQueryServersLocationsActive(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2tWQc-1}}}\plusendmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwprevnextdefs{NW1Dx1yV-2tWQc-1}{\relax}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{174}\sublabel{NW1Dx1yV-2tWQc-2}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2tWQc-2}}}\moddef{Read: DBQueryServersLocationsActive(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2tWQc-1}}}\plusendmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwprevnextdefs{NW1Dx1yV-2tWQc-1}{\relax}\nwenddeflinemarkup
     // Query \nwlinkedidentc{S134}{NW1ODIS0-9eEGJ-1} selects from CW. The \nwlinkedidentc{query}{NW1Dx1yV-47dtTX-1} time is not expected to grow
     // because Table CW does not grow as we pre-load all the servers when we
     // load the problem instance.
@@ -7528,14 +7544,14 @@ servers. Then for each active server, we use either statement {\Tt{}\nwlinkedide
   \}
   return output;
 \}
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentuses{\\{{\nwixident{DBQueryUser}}{DBQueryUser}}\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{query}}{query}}\\{{\nwixident{S134}}{S134}}\\{{\nwixident{S135}}{S135}}\\{{\nwixident{S147}}{S147}}\\{{\nwixident{UserNotFoundException}}{UserNotFoundException}}}\nwindexuse{\nwixident{DBQueryUser}}{DBQueryUser}{NW1Dx1yV-2tWQc-2}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-2tWQc-2}\nwindexuse{\nwixident{query}}{query}{NW1Dx1yV-2tWQc-2}\nwindexuse{\nwixident{S134}}{S134}{NW1Dx1yV-2tWQc-2}\nwindexuse{\nwixident{S135}}{S135}{NW1Dx1yV-2tWQc-2}\nwindexuse{\nwixident{S147}}{S147}{NW1Dx1yV-2tWQc-2}\nwindexuse{\nwixident{UserNotFoundException}}{UserNotFoundException}{NW1Dx1yV-2tWQc-2}\nwendcode{}\nwbegindocs{174}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentuses{\\{{\nwixident{DBQueryUser}}{DBQueryUser}}\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{query}}{query}}\\{{\nwixident{S134}}{S134}}\\{{\nwixident{S135}}{S135}}\\{{\nwixident{S147}}{S147}}\\{{\nwixident{UserNotFoundException}}{UserNotFoundException}}}\nwindexuse{\nwixident{DBQueryUser}}{DBQueryUser}{NW1Dx1yV-2tWQc-2}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-2tWQc-2}\nwindexuse{\nwixident{query}}{query}{NW1Dx1yV-2tWQc-2}\nwindexuse{\nwixident{S134}}{S134}{NW1Dx1yV-2tWQc-2}\nwindexuse{\nwixident{S135}}{S135}{NW1Dx1yV-2tWQc-2}\nwindexuse{\nwixident{S147}}{S147}{NW1Dx1yV-2tWQc-2}\nwindexuse{\nwixident{UserNotFoundException}}{UserNotFoundException}{NW1Dx1yV-2tWQc-2}\nwendcode{}\nwbegindocs{175}\nwdocspar
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryServersLocationsActive}{NW1Dx1yV-t5O2a-1}\nwendquote}}(1) wraps {\Tt{}\nwlinkedidentq{DBQueryServersLocationsActive}{NW1Dx1yV-2tWQc-1}\nwendquote}(1).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{175}\sublabel{NW1Dx1yV-t5O2a-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-t5O2a-1}}}\moddef{Read: queryServersLocationsActive(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-t5O2a-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}\\{NW4QM9HE-2Rlctf-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{176}\sublabel{NW1Dx1yV-t5O2a-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-t5O2a-1}}}\moddef{Read: queryServersLocationsActive(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-t5O2a-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}\\{NW4QM9HE-2Rlctf-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryServersLocationsActive}{NW1Dx1yV-t5O2a-1}(final int t) throws SQLException \{
   long A0 = System.currentTimeMillis();
   int[] output = this.storage.\nwlinkedidentc{DBQueryServersLocationsActive}{NW1Dx1yV-2tWQc-1}(t);
@@ -7543,7 +7559,7 @@ int[] \nwlinkedidentc{queryServersLocationsActive}{NW1Dx1yV-t5O2a-1}(final int t
   return output;
 \}
 \nwindexdefn{\nwixident{queryServersLocationsActive}}{queryServersLocationsActive}{NW1Dx1yV-t5O2a-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}\\{NW4QM9HE-2Rlctf-1}}\nwidentdefs{\\{{\nwixident{queryServersLocationsActive}}{queryServersLocationsActive}}}\nwidentuses{\\{{\nwixident{DBQueryServersLocationsActive}}{DBQueryServersLocationsActive}}}\nwindexuse{\nwixident{DBQueryServersLocationsActive}}{DBQueryServersLocationsActive}{NW1Dx1yV-t5O2a-1}\nwendcode{}\nwbegindocs{176}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-1}\\{NW4QM9HE-2Rlctf-1}}\nwidentdefs{\\{{\nwixident{queryServersLocationsActive}}{queryServersLocationsActive}}}\nwidentuses{\\{{\nwixident{DBQueryServersLocationsActive}}{DBQueryServersLocationsActive}}}\nwindexuse{\nwixident{DBQueryServersLocationsActive}}{DBQueryServersLocationsActive}{NW1Dx1yV-t5O2a-1}\nwendcode{}\nwbegindocs{177}\nwdocspar
 \section{Methods: Read Metrics}
 
 \subsection{\texttt{DBQueryMetricServiceRate}(1)}
@@ -7575,7 +7591,7 @@ $\mu=.1234$, then {\Tt{}\nwlinkedidentq{DBQueryMetricServiceRate}{NW1Dx1yV-48hNG
 \textbf{Throws:} {\Tt{}SQLException\nwendquote} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{177}\sublabel{NW1Dx1yV-48hNGo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-48hNGo-1}}}\moddef{Read: DBQueryMetricServiceRate(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-48hNGo-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{178}\sublabel{NW1Dx1yV-48hNGo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-48hNGo-1}}}\moddef{Read: DBQueryMetricServiceRate(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-48hNGo-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricServiceRate}{NW1Dx1yV-48hNGo-1}(boolean flag_usecache) throws SQLException \{
   int[] output = new int[] \{ \};
   if (flag_usecache) \{
@@ -7591,18 +7607,18 @@ int[] \nwlinkedidentc{DBQueryMetricServiceRate}{NW1Dx1yV-48hNGo-1}(boolean flag_
   return output;
 \}
 \nwindexdefn{\nwixident{DBQueryMetricServiceRate}}{DBQueryMetricServiceRate}{NW1Dx1yV-48hNGo-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricServiceRate}}{DBQueryMetricServiceRate}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S102}}{S102}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-48hNGo-1}\nwindexuse{\nwixident{S102}}{S102}{NW1Dx1yV-48hNGo-1}\nwendcode{}\nwbegindocs{178}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricServiceRate}}{DBQueryMetricServiceRate}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S102}}{S102}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-48hNGo-1}\nwindexuse{\nwixident{S102}}{S102}{NW1Dx1yV-48hNGo-1}\nwendcode{}\nwbegindocs{179}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{DBQueryMetricServiceRate}{NW1Dx1yV-48hNGo-1}\nwendquote}}(0) calls {\Tt{}\nwlinkedidentq{DBQueryMetricServiceRate}{NW1Dx1yV-48hNGo-1}\nwendquote}(1)
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{179}\sublabel{NW1Dx1yV-49bCCM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-49bCCM-1}}}\moddef{Read: DBQueryMetricServiceRate(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-49bCCM-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{180}\sublabel{NW1Dx1yV-49bCCM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-49bCCM-1}}}\moddef{Read: DBQueryMetricServiceRate(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-49bCCM-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricServiceRate}{NW1Dx1yV-48hNGo-1}() throws SQLException \{
   return \nwlinkedidentc{DBQueryMetricServiceRate}{NW1Dx1yV-48hNGo-1}(true);
 \}
-\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricServiceRate}}{DBQueryMetricServiceRate}}}\nwindexuse{\nwixident{DBQueryMetricServiceRate}}{DBQueryMetricServiceRate}{NW1Dx1yV-49bCCM-1}\nwendcode{}\nwbegindocs{180}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricServiceRate}}{DBQueryMetricServiceRate}}}\nwindexuse{\nwixident{DBQueryMetricServiceRate}}{DBQueryMetricServiceRate}{NW1Dx1yV-49bCCM-1}\nwendcode{}\nwbegindocs{181}\nwdocspar
 \noindent
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -7610,7 +7626,7 @@ int[] \nwlinkedidentc{DBQueryMetricServiceRate}{NW1Dx1yV-48hNGo-1}() throws SQLE
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricServiceRate}{NW1Dx1yV-fqewh-1}\nwendquote}}(1) wraps {\Tt{}\nwlinkedidentq{DBQueryMetricServiceRate}{NW1Dx1yV-48hNGo-1}\nwendquote}(1).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{181}\sublabel{NW1Dx1yV-fqewh-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-fqewh-1}}}\moddef{Read: queryMetricServiceRate(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-fqewh-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{182}\sublabel{NW1Dx1yV-fqewh-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-fqewh-1}}}\moddef{Read: queryMetricServiceRate(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-fqewh-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricServiceRate}{NW1Dx1yV-fqewh-1}(boolean flag_usecache) throws SQLException \{
   long A0 = System.currentTimeMillis();
   int[] output = storage.\nwlinkedidentc{DBQueryMetricServiceRate}{NW1Dx1yV-48hNGo-1}(flag_usecache);
@@ -7618,28 +7634,28 @@ int[] \nwlinkedidentc{queryMetricServiceRate}{NW1Dx1yV-fqewh-1}(boolean flag_use
   return output;
 \}
 \nwindexdefn{\nwixident{queryMetricServiceRate}}{queryMetricServiceRate}{NW1Dx1yV-fqewh-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricServiceRate}}{queryMetricServiceRate}}}\nwidentuses{\\{{\nwixident{DBQueryMetricServiceRate}}{DBQueryMetricServiceRate}}}\nwindexuse{\nwixident{DBQueryMetricServiceRate}}{DBQueryMetricServiceRate}{NW1Dx1yV-fqewh-1}\nwendcode{}\nwbegindocs{182}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricServiceRate}}{queryMetricServiceRate}}}\nwidentuses{\\{{\nwixident{DBQueryMetricServiceRate}}{DBQueryMetricServiceRate}}}\nwindexuse{\nwixident{DBQueryMetricServiceRate}}{DBQueryMetricServiceRate}{NW1Dx1yV-fqewh-1}\nwendcode{}\nwbegindocs{183}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricServiceRate}{NW1Dx1yV-fqewh-1}\nwendquote}}(0) calls {\Tt{}\nwlinkedidentq{queryMetricServiceRate}{NW1Dx1yV-fqewh-1}\nwendquote}(1)
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{183}\sublabel{NW1Dx1yV-f55U7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-f55U7-1}}}\moddef{Read: queryMetricServiceRate(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-f55U7-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{184}\sublabel{NW1Dx1yV-f55U7-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-f55U7-1}}}\moddef{Read: queryMetricServiceRate(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-f55U7-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricServiceRate}{NW1Dx1yV-fqewh-1}() throws SQLException \{
   return \nwlinkedidentc{queryMetricServiceRate}{NW1Dx1yV-fqewh-1}(true);
 \}
-\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricServiceRate}}{queryMetricServiceRate}}}\nwindexuse{\nwixident{queryMetricServiceRate}}{queryMetricServiceRate}{NW1Dx1yV-f55U7-1}\nwendcode{}\nwbegindocs{184}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricServiceRate}}{queryMetricServiceRate}}}\nwindexuse{\nwixident{queryMetricServiceRate}}{queryMetricServiceRate}{NW1Dx1yV-f55U7-1}\nwendcode{}\nwbegindocs{185}\nwdocspar
 
 \subsection{\texttt{DBQueryMetricServiceRateRunning}(0)}
-\nwenddocs{}\nwbegincode{185}\sublabel{NW1Dx1yV-11FNsC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-11FNsC-1}}}\moddef{Read: DBQueryMetricServiceRateRunning(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-11FNsC-1}}}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{186}\sublabel{NW1Dx1yV-11FNsC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-11FNsC-1}}}\moddef{Read: DBQueryMetricServiceRateRunning(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-11FNsC-1}}}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricServiceRateRunning}{NW1Dx1yV-11FNsC-1}() throws SQLException \{
   int[] output = new int[] \{ \};
   // ...
   return output;
 \}
 \nwindexdefn{\nwixident{DBQueryMetricServiceRateRunning}}{DBQueryMetricServiceRateRunning}{NW1Dx1yV-11FNsC-1}\eatline
-\nwnotused{Read: DBQueryMetricServiceRateRunning(0)}\nwidentdefs{\\{{\nwixident{DBQueryMetricServiceRateRunning}}{DBQueryMetricServiceRateRunning}}}\nwendcode{}\nwbegincode{186}\sublabel{NW1Dx1yV-3uM1ts-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3uM1ts-1}}}\moddef{Read: queryMetricServiceRateRunning(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3uM1ts-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwnotused{Read: DBQueryMetricServiceRateRunning(0)}\nwidentdefs{\\{{\nwixident{DBQueryMetricServiceRateRunning}}{DBQueryMetricServiceRateRunning}}}\nwendcode{}\nwbegincode{187}\sublabel{NW1Dx1yV-3uM1ts-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3uM1ts-1}}}\moddef{Read: queryMetricServiceRateRunning(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3uM1ts-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricServiceRateRunning}{NW1Dx1yV-3uM1ts-1}() throws SQLException \{
   int[] output = new int[] \{
       Math.min((int) (10000*(this.storage.\nwlinkedidentc{DBQueryRequestsCountAssigned}{NW1Dx1yV-2r5hKL-1}()[0]
@@ -7647,7 +7663,7 @@ int[] \nwlinkedidentc{queryMetricServiceRateRunning}{NW1Dx1yV-3uM1ts-1}() throws
   return output;
 \}
 \nwindexdefn{\nwixident{queryMetricServiceRateRunning}}{queryMetricServiceRateRunning}{NW1Dx1yV-3uM1ts-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricServiceRateRunning}}{queryMetricServiceRateRunning}}}\nwidentuses{\\{{\nwixident{DBQueryRequestsCountAssigned}}{DBQueryRequestsCountAssigned}}}\nwindexuse{\nwixident{DBQueryRequestsCountAssigned}}{DBQueryRequestsCountAssigned}{NW1Dx1yV-3uM1ts-1}\nwendcode{}\nwbegindocs{187}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricServiceRateRunning}}{queryMetricServiceRateRunning}}}\nwidentuses{\\{{\nwixident{DBQueryRequestsCountAssigned}}{DBQueryRequestsCountAssigned}}}\nwindexuse{\nwixident{DBQueryRequestsCountAssigned}}{DBQueryRequestsCountAssigned}{NW1Dx1yV-3uM1ts-1}\nwendcode{}\nwbegindocs{188}\nwdocspar
 \subsection{\texttt{DBQueryMetricUserDistanceBaseTotal}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -7670,7 +7686,7 @@ or {\Tt{}null\nwendquote} if no results.
 \textbf{Throws:} {\Tt{}SQLException\nwendquote} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{188}\sublabel{NW1Dx1yV-1YwEBe-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-1YwEBe-1}}}\moddef{Read: DBQueryMetricUserDistanceBaseTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1YwEBe-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{189}\sublabel{NW1Dx1yV-1YwEBe-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-1YwEBe-1}}}\moddef{Read: DBQueryMetricUserDistanceBaseTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1YwEBe-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricUserDistanceBaseTotal}{NW1Dx1yV-1YwEBe-1}(boolean flag_usecache) throws SQLException \{
   if (flag_usecache) \{
     return new int[] \{ this.sum_distance_base_requests + this.sum_distance_base_servers \};
@@ -7683,18 +7699,18 @@ int[] \nwlinkedidentc{DBQueryMetricUserDistanceBaseTotal}{NW1Dx1yV-1YwEBe-1}(boo
   \}
 \}
 \nwindexdefn{\nwixident{DBQueryMetricUserDistanceBaseTotal}}{DBQueryMetricUserDistanceBaseTotal}{NW1Dx1yV-1YwEBe-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricUserDistanceBaseTotal}}{DBQueryMetricUserDistanceBaseTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S103}}{S103}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-1YwEBe-1}\nwindexuse{\nwixident{S103}}{S103}{NW1Dx1yV-1YwEBe-1}\nwendcode{}\nwbegindocs{189}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricUserDistanceBaseTotal}}{DBQueryMetricUserDistanceBaseTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S103}}{S103}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-1YwEBe-1}\nwindexuse{\nwixident{S103}}{S103}{NW1Dx1yV-1YwEBe-1}\nwendcode{}\nwbegindocs{190}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{DBQueryMetricUserDistanceBaseTotal}{NW1Dx1yV-1YwEBe-1}\nwendquote}}(0) calls {\Tt{}\nwlinkedidentq{DBQueryMetricUserDistanceBaseTotal}{NW1Dx1yV-1YwEBe-1}\nwendquote}(1)
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{190}\sublabel{NW1Dx1yV-1ZAnmM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-1ZAnmM-1}}}\moddef{Read: DBQueryMetricUserDistanceBaseTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1ZAnmM-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{191}\sublabel{NW1Dx1yV-1ZAnmM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-1ZAnmM-1}}}\moddef{Read: DBQueryMetricUserDistanceBaseTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1ZAnmM-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricUserDistanceBaseTotal}{NW1Dx1yV-1YwEBe-1}() throws SQLException \{
   return \nwlinkedidentc{DBQueryMetricUserDistanceBaseTotal}{NW1Dx1yV-1YwEBe-1}(true);
 \}
-\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricUserDistanceBaseTotal}}{DBQueryMetricUserDistanceBaseTotal}}}\nwindexuse{\nwixident{DBQueryMetricUserDistanceBaseTotal}}{DBQueryMetricUserDistanceBaseTotal}{NW1Dx1yV-1ZAnmM-1}\nwendcode{}\nwbegindocs{191}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricUserDistanceBaseTotal}}{DBQueryMetricUserDistanceBaseTotal}}}\nwindexuse{\nwixident{DBQueryMetricUserDistanceBaseTotal}}{DBQueryMetricUserDistanceBaseTotal}{NW1Dx1yV-1ZAnmM-1}\nwendcode{}\nwbegindocs{192}\nwdocspar
 \noindent
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -7702,7 +7718,7 @@ int[] \nwlinkedidentc{DBQueryMetricUserDistanceBaseTotal}{NW1Dx1yV-1YwEBe-1}() t
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricUserDistanceBaseTotal}{NW1Dx1yV-4D0ey0-1}\nwendquote}}(1) wraps {\Tt{}\nwlinkedidentq{DBQueryMetricUserDistanceBaseTotal}{NW1Dx1yV-1YwEBe-1}\nwendquote}(1).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{192}\sublabel{NW1Dx1yV-4D0ey0-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-4D0ey0-1}}}\moddef{Read: queryMetricUserDistanceBaseTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-4D0ey0-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{193}\sublabel{NW1Dx1yV-4D0ey0-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-4D0ey0-1}}}\moddef{Read: queryMetricUserDistanceBaseTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-4D0ey0-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricUserDistanceBaseTotal}{NW1Dx1yV-4D0ey0-1}(boolean flag_usecache) throws SQLException \{
   long A0 = System.currentTimeMillis();
   int[] output = storage.\nwlinkedidentc{DBQueryMetricUserDistanceBaseTotal}{NW1Dx1yV-1YwEBe-1}(flag_usecache);
@@ -7710,28 +7726,28 @@ int[] \nwlinkedidentc{queryMetricUserDistanceBaseTotal}{NW1Dx1yV-4D0ey0-1}(boole
   return output;
 \}
 \nwindexdefn{\nwixident{queryMetricUserDistanceBaseTotal}}{queryMetricUserDistanceBaseTotal}{NW1Dx1yV-4D0ey0-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricUserDistanceBaseTotal}}{queryMetricUserDistanceBaseTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricUserDistanceBaseTotal}}{DBQueryMetricUserDistanceBaseTotal}}}\nwindexuse{\nwixident{DBQueryMetricUserDistanceBaseTotal}}{DBQueryMetricUserDistanceBaseTotal}{NW1Dx1yV-4D0ey0-1}\nwendcode{}\nwbegindocs{193}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricUserDistanceBaseTotal}}{queryMetricUserDistanceBaseTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricUserDistanceBaseTotal}}{DBQueryMetricUserDistanceBaseTotal}}}\nwindexuse{\nwixident{DBQueryMetricUserDistanceBaseTotal}}{DBQueryMetricUserDistanceBaseTotal}{NW1Dx1yV-4D0ey0-1}\nwendcode{}\nwbegindocs{194}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricUserDistanceBaseTotal}{NW1Dx1yV-4D0ey0-1}\nwendquote}}(0) calls {\Tt{}\nwlinkedidentq{queryMetricUserDistanceBaseTotal}{NW1Dx1yV-4D0ey0-1}\nwendquote}(1)
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{194}\sublabel{NW1Dx1yV-4C6HwO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-4C6HwO-1}}}\moddef{Read: queryMetricUserDistanceBaseTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-4C6HwO-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{195}\sublabel{NW1Dx1yV-4C6HwO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-4C6HwO-1}}}\moddef{Read: queryMetricUserDistanceBaseTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-4C6HwO-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricUserDistanceBaseTotal}{NW1Dx1yV-4D0ey0-1}() throws SQLException \{
   return \nwlinkedidentc{queryMetricUserDistanceBaseTotal}{NW1Dx1yV-4D0ey0-1}(true);
 \}
-\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricUserDistanceBaseTotal}}{queryMetricUserDistanceBaseTotal}}}\nwindexuse{\nwixident{queryMetricUserDistanceBaseTotal}}{queryMetricUserDistanceBaseTotal}{NW1Dx1yV-4C6HwO-1}\nwendcode{}\nwbegindocs{195}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricUserDistanceBaseTotal}}{queryMetricUserDistanceBaseTotal}}}\nwindexuse{\nwixident{queryMetricUserDistanceBaseTotal}}{queryMetricUserDistanceBaseTotal}{NW1Dx1yV-4C6HwO-1}\nwendcode{}\nwbegindocs{196}\nwdocspar
 
 \subsection{\texttt{DBQueryMetricUserDistanceBaseRunning}(0)}
-\nwenddocs{}\nwbegincode{196}\sublabel{NW1Dx1yV-Wa7Hh-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-Wa7Hh-1}}}\moddef{Read: DBQueryMetricUserDistanceBaseRunning(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-Wa7Hh-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{197}\sublabel{NW1Dx1yV-Wa7Hh-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-Wa7Hh-1}}}\moddef{Read: DBQueryMetricUserDistanceBaseRunning(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-Wa7Hh-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricUserDistanceBaseRunning}{NW1Dx1yV-Wa7Hh-1}() throws SQLException \{
   int[] output = new int[] \{ \};
   // ...
   return output;
 \}
 \nwindexdefn{\nwixident{DBQueryMetricUserDistanceBaseRunning}}{DBQueryMetricUserDistanceBaseRunning}{NW1Dx1yV-Wa7Hh-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricUserDistanceBaseRunning}}{DBQueryMetricUserDistanceBaseRunning}}}\nwendcode{}\nwbegincode{197}\sublabel{NW1Dx1yV-2kPye-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2kPye-1}}}\moddef{Read: queryMetricUserDistanceBaseRunning(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2kPye-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricUserDistanceBaseRunning}}{DBQueryMetricUserDistanceBaseRunning}}}\nwendcode{}\nwbegincode{198}\sublabel{NW1Dx1yV-2kPye-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2kPye-1}}}\moddef{Read: queryMetricUserDistanceBaseRunning(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2kPye-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricUserDistanceBaseRunning}{NW1Dx1yV-2kPye-1}()
 throws SQLException, \nwlinkedidentc{UserNotFoundException}{NW1ODIS0-15irq2-1} \{
   int[] output = new int[] \{ 0 \};
@@ -7744,7 +7760,7 @@ throws SQLException, \nwlinkedidentc{UserNotFoundException}{NW1ODIS0-15irq2-1} \
   return output;
 \}
 \nwindexdefn{\nwixident{queryMetricUserDistanceBaseRunning}}{queryMetricUserDistanceBaseRunning}{NW1Dx1yV-2kPye-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricUserDistanceBaseRunning}}{queryMetricUserDistanceBaseRunning}}}\nwidentuses{\\{{\nwixident{DBQueryUser}}{DBQueryUser}}\\{{\nwixident{UserNotFoundException}}{UserNotFoundException}}}\nwindexuse{\nwixident{DBQueryUser}}{DBQueryUser}{NW1Dx1yV-2kPye-1}\nwindexuse{\nwixident{UserNotFoundException}}{UserNotFoundException}{NW1Dx1yV-2kPye-1}\nwendcode{}\nwbegindocs{198}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricUserDistanceBaseRunning}}{queryMetricUserDistanceBaseRunning}}}\nwidentuses{\\{{\nwixident{DBQueryUser}}{DBQueryUser}}\\{{\nwixident{UserNotFoundException}}{UserNotFoundException}}}\nwindexuse{\nwixident{DBQueryUser}}{DBQueryUser}{NW1Dx1yV-2kPye-1}\nwindexuse{\nwixident{UserNotFoundException}}{UserNotFoundException}{NW1Dx1yV-2kPye-1}\nwendcode{}\nwbegindocs{199}\nwdocspar
 \subsection{\texttt{DBQueryMetricServerDistanceTotal}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -7767,7 +7783,7 @@ or {\Tt{}null\nwendquote} if no results.
 \textbf{Throws:} {\Tt{}SQLException\nwendquote} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{199}\sublabel{NW1Dx1yV-46RFWc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-46RFWc-1}}}\moddef{Read: DBQueryMetricServerDistanceTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-46RFWc-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{200}\sublabel{NW1Dx1yV-46RFWc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-46RFWc-1}}}\moddef{Read: DBQueryMetricServerDistanceTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-46RFWc-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricServerDistanceTotal}{NW1Dx1yV-46RFWc-1}(boolean flag_usecache) throws SQLException \{
   if (flag_usecache) \{
     final int[] output = new int[] \{ 0 \};
@@ -7782,18 +7798,18 @@ int[] \nwlinkedidentc{DBQueryMetricServerDistanceTotal}{NW1Dx1yV-46RFWc-1}(boole
   \}
 \}
 \nwindexdefn{\nwixident{DBQueryMetricServerDistanceTotal}}{DBQueryMetricServerDistanceTotal}{NW1Dx1yV-46RFWc-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricServerDistanceTotal}}{DBQueryMetricServerDistanceTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S105}}{S105}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-46RFWc-1}\nwindexuse{\nwixident{S105}}{S105}{NW1Dx1yV-46RFWc-1}\nwendcode{}\nwbegindocs{200}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricServerDistanceTotal}}{DBQueryMetricServerDistanceTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S105}}{S105}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-46RFWc-1}\nwindexuse{\nwixident{S105}}{S105}{NW1Dx1yV-46RFWc-1}\nwendcode{}\nwbegindocs{201}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{DBQueryMetricServerDistanceTotal}{NW1Dx1yV-46RFWc-1}\nwendquote}}(0) calls {\Tt{}\nwlinkedidentq{DBQueryMetricServerDistanceTotal}{NW1Dx1yV-46RFWc-1}\nwendquote}(1)
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{201}\sublabel{NW1Dx1yV-47NowU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-47NowU-1}}}\moddef{Read: DBQueryMetricServerDistanceTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-47NowU-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{202}\sublabel{NW1Dx1yV-47NowU-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-47NowU-1}}}\moddef{Read: DBQueryMetricServerDistanceTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-47NowU-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricServerDistanceTotal}{NW1Dx1yV-46RFWc-1}() throws SQLException \{
   return \nwlinkedidentc{DBQueryMetricServerDistanceTotal}{NW1Dx1yV-46RFWc-1}(true);
 \}
-\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerDistanceTotal}}{DBQueryMetricServerDistanceTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerDistanceTotal}}{DBQueryMetricServerDistanceTotal}{NW1Dx1yV-47NowU-1}\nwendcode{}\nwbegindocs{202}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerDistanceTotal}}{DBQueryMetricServerDistanceTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerDistanceTotal}}{DBQueryMetricServerDistanceTotal}{NW1Dx1yV-47NowU-1}\nwendcode{}\nwbegindocs{203}\nwdocspar
 \noindent
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -7801,7 +7817,7 @@ int[] \nwlinkedidentc{DBQueryMetricServerDistanceTotal}{NW1Dx1yV-46RFWc-1}() thr
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricServerDistanceTotal}{NW1Dx1yV-4enTWS-1}\nwendquote}}(1) wraps {\Tt{}\nwlinkedidentq{DBQueryMetricServerDistanceTotal}{NW1Dx1yV-46RFWc-1}\nwendquote}(1).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{203}\sublabel{NW1Dx1yV-4enTWS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-4enTWS-1}}}\moddef{Read: queryMetricServerDistanceTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-4enTWS-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{204}\sublabel{NW1Dx1yV-4enTWS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-4enTWS-1}}}\moddef{Read: queryMetricServerDistanceTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-4enTWS-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricServerDistanceTotal}{NW1Dx1yV-4enTWS-1}(boolean flag_usecache) throws SQLException \{
   long A0 = System.currentTimeMillis();
   int[] output = storage.\nwlinkedidentc{DBQueryMetricServerDistanceTotal}{NW1Dx1yV-46RFWc-1}(flag_usecache);
@@ -7809,28 +7825,28 @@ int[] \nwlinkedidentc{queryMetricServerDistanceTotal}{NW1Dx1yV-4enTWS-1}(boolean
   return output;
 \}
 \nwindexdefn{\nwixident{queryMetricServerDistanceTotal}}{queryMetricServerDistanceTotal}{NW1Dx1yV-4enTWS-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricServerDistanceTotal}}{queryMetricServerDistanceTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerDistanceTotal}}{DBQueryMetricServerDistanceTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerDistanceTotal}}{DBQueryMetricServerDistanceTotal}{NW1Dx1yV-4enTWS-1}\nwendcode{}\nwbegindocs{204}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricServerDistanceTotal}}{queryMetricServerDistanceTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerDistanceTotal}}{DBQueryMetricServerDistanceTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerDistanceTotal}}{DBQueryMetricServerDistanceTotal}{NW1Dx1yV-4enTWS-1}\nwendcode{}\nwbegindocs{205}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricServerDistanceTotal}{NW1Dx1yV-4enTWS-1}\nwendquote}}(0) calls {\Tt{}\nwlinkedidentq{queryMetricServerDistanceTotal}{NW1Dx1yV-4enTWS-1}\nwendquote}(1)
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{205}\sublabel{NW1Dx1yV-4fAqgC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-4fAqgC-1}}}\moddef{Read: queryMetricServerDistanceTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-4fAqgC-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{206}\sublabel{NW1Dx1yV-4fAqgC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-4fAqgC-1}}}\moddef{Read: queryMetricServerDistanceTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-4fAqgC-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricServerDistanceTotal}{NW1Dx1yV-4enTWS-1}() throws SQLException \{
   return \nwlinkedidentc{queryMetricServerDistanceTotal}{NW1Dx1yV-4enTWS-1}(true);
 \}
-\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricServerDistanceTotal}}{queryMetricServerDistanceTotal}}}\nwindexuse{\nwixident{queryMetricServerDistanceTotal}}{queryMetricServerDistanceTotal}{NW1Dx1yV-4fAqgC-1}\nwendcode{}\nwbegindocs{206}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricServerDistanceTotal}}{queryMetricServerDistanceTotal}}}\nwindexuse{\nwixident{queryMetricServerDistanceTotal}}{queryMetricServerDistanceTotal}{NW1Dx1yV-4fAqgC-1}\nwendcode{}\nwbegindocs{207}\nwdocspar
 
 \subsection{\texttt{DBQueryMetricServerDistanceRunning}(0)}
-\nwenddocs{}\nwbegincode{207}\sublabel{NW1Dx1yV-1Ros9t-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-1Ros9t-1}}}\moddef{Read: DBQueryMetricServerDistanceRunning(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1Ros9t-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{208}\sublabel{NW1Dx1yV-1Ros9t-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-1Ros9t-1}}}\moddef{Read: DBQueryMetricServerDistanceRunning(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1Ros9t-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricServerDistanceRunning}{NW1Dx1yV-1Ros9t-1}() throws SQLException \{
   int[] output = new int[] \{ \};
   // ...
   return output;
 \}
 \nwindexdefn{\nwixident{DBQueryMetricServerDistanceRunning}}{DBQueryMetricServerDistanceRunning}{NW1Dx1yV-1Ros9t-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricServerDistanceRunning}}{DBQueryMetricServerDistanceRunning}}}\nwendcode{}\nwbegincode{208}\sublabel{NW1Dx1yV-4gDOQR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-4gDOQR-1}}}\moddef{Read: queryMetricServerDistanceRunning(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-4gDOQR-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricServerDistanceRunning}}{DBQueryMetricServerDistanceRunning}}}\nwendcode{}\nwbegincode{209}\sublabel{NW1Dx1yV-4gDOQR-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-4gDOQR-1}}}\moddef{Read: queryMetricServerDistanceRunning(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-4gDOQR-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricServerDistanceRunning}{NW1Dx1yV-4gDOQR-1}() throws SQLException \{
   int[] output = new int[] \{ 0 \};
   for (int sid : this.lu_sseen.keySet()) \{
@@ -7839,7 +7855,7 @@ int[] \nwlinkedidentc{queryMetricServerDistanceRunning}{NW1Dx1yV-4gDOQR-1}() thr
   return output;
 \}
 \nwindexdefn{\nwixident{queryMetricServerDistanceRunning}}{queryMetricServerDistanceRunning}{NW1Dx1yV-4gDOQR-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricServerDistanceRunning}}{queryMetricServerDistanceRunning}}}\nwidentuses{\\{{\nwixident{DBQueryServerDistance}}{DBQueryServerDistance}}}\nwindexuse{\nwixident{DBQueryServerDistance}}{DBQueryServerDistance}{NW1Dx1yV-4gDOQR-1}\nwendcode{}\nwbegindocs{209}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricServerDistanceRunning}}{queryMetricServerDistanceRunning}}}\nwidentuses{\\{{\nwixident{DBQueryServerDistance}}{DBQueryServerDistance}}}\nwindexuse{\nwixident{DBQueryServerDistance}}{DBQueryServerDistance}{NW1Dx1yV-4gDOQR-1}\nwendcode{}\nwbegindocs{210}\nwdocspar
 \subsection{\texttt{DBQueryMetricServerDistanceBaseTotal}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -7862,7 +7878,7 @@ or {\Tt{}null\nwendquote} if no results.
 \textbf{Throws:} {\Tt{}SQLException\nwendquote} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{210}\sublabel{NW1Dx1yV-2gaNGt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2gaNGt-1}}}\moddef{Read: DBQueryMetricServerDistanceBaseTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2gaNGt-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{211}\sublabel{NW1Dx1yV-2gaNGt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2gaNGt-1}}}\moddef{Read: DBQueryMetricServerDistanceBaseTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2gaNGt-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricServerDistanceBaseTotal}{NW1Dx1yV-2gaNGt-1}() throws SQLException \{
   // try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1ODIS0-JT1v9-1}}\RA{}) \{
   //   return \nwlinkedidentc{PSQuery}{NW1ODIS0-yHOIP-1}(conn, "\nwlinkedidentc{S110}{NW1ODIS0-yTwJX-1}", 1);
@@ -7872,13 +7888,13 @@ int[] \nwlinkedidentc{DBQueryMetricServerDistanceBaseTotal}{NW1Dx1yV-2gaNGt-1}()
   return new int[] \{ this.sum_distance_base_servers \};
 \}
 \nwindexdefn{\nwixident{DBQueryMetricServerDistanceBaseTotal}}{DBQueryMetricServerDistanceBaseTotal}{NW1Dx1yV-2gaNGt-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricServerDistanceBaseTotal}}{DBQueryMetricServerDistanceBaseTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S110}}{S110}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-2gaNGt-1}\nwindexuse{\nwixident{S110}}{S110}{NW1Dx1yV-2gaNGt-1}\nwendcode{}\nwbegindocs{211}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricServerDistanceBaseTotal}}{DBQueryMetricServerDistanceBaseTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S110}}{S110}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-2gaNGt-1}\nwindexuse{\nwixident{S110}}{S110}{NW1Dx1yV-2gaNGt-1}\nwendcode{}\nwbegindocs{212}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricServerDistanceBaseTotal}{NW1Dx1yV-2ZOFmc-1}\nwendquote}}(0) wraps {\Tt{}\nwlinkedidentq{DBQueryMetricServerDistanceBaseTotal}{NW1Dx1yV-2gaNGt-1}\nwendquote}(0).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{212}\sublabel{NW1Dx1yV-2ZOFmc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2ZOFmc-1}}}\moddef{Read: queryMetricServerDistanceBaseTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2ZOFmc-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{213}\sublabel{NW1Dx1yV-2ZOFmc-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2ZOFmc-1}}}\moddef{Read: queryMetricServerDistanceBaseTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2ZOFmc-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricServerDistanceBaseTotal}{NW1Dx1yV-2ZOFmc-1}() throws SQLException \{
   long A0 = System.currentTimeMillis();
   int[] output = storage.\nwlinkedidentc{DBQueryMetricServerDistanceBaseTotal}{NW1Dx1yV-2gaNGt-1}();
@@ -7886,7 +7902,7 @@ int[] \nwlinkedidentc{queryMetricServerDistanceBaseTotal}{NW1Dx1yV-2ZOFmc-1}() t
   return output;
 \}
 \nwindexdefn{\nwixident{queryMetricServerDistanceBaseTotal}}{queryMetricServerDistanceBaseTotal}{NW1Dx1yV-2ZOFmc-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricServerDistanceBaseTotal}}{queryMetricServerDistanceBaseTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerDistanceBaseTotal}}{DBQueryMetricServerDistanceBaseTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerDistanceBaseTotal}}{DBQueryMetricServerDistanceBaseTotal}{NW1Dx1yV-2ZOFmc-1}\nwendcode{}\nwbegindocs{213}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricServerDistanceBaseTotal}}{queryMetricServerDistanceBaseTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerDistanceBaseTotal}}{DBQueryMetricServerDistanceBaseTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerDistanceBaseTotal}}{DBQueryMetricServerDistanceBaseTotal}{NW1Dx1yV-2ZOFmc-1}\nwendcode{}\nwbegindocs{214}\nwdocspar
 \subsection{\texttt{DBQueryMetricServerDistanceCruisingTotal}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -7909,7 +7925,7 @@ or {\Tt{}null\nwendquote} if no results.
 \textbf{Throws:} {\Tt{}SQLException\nwendquote} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{214}\sublabel{NW1Dx1yV-3ERM24-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3ERM24-1}}}\moddef{Read: DBQueryMetricServerDistanceCruisingTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3ERM24-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{215}\sublabel{NW1Dx1yV-3ERM24-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3ERM24-1}}}\moddef{Read: DBQueryMetricServerDistanceCruisingTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3ERM24-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricServerDistanceCruisingTotal}{NW1Dx1yV-3ERM24-1}(boolean flag_usecache) throws SQLException \{
   if (flag_usecache) \{
     final int[] output = new int[] \{ 0 \};
@@ -7924,18 +7940,18 @@ int[] \nwlinkedidentc{DBQueryMetricServerDistanceCruisingTotal}{NW1Dx1yV-3ERM24-
   \}
 \}
 \nwindexdefn{\nwixident{DBQueryMetricServerDistanceCruisingTotal}}{DBQueryMetricServerDistanceCruisingTotal}{NW1Dx1yV-3ERM24-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricServerDistanceCruisingTotal}}{DBQueryMetricServerDistanceCruisingTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S107}}{S107}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-3ERM24-1}\nwindexuse{\nwixident{S107}}{S107}{NW1Dx1yV-3ERM24-1}\nwendcode{}\nwbegindocs{215}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricServerDistanceCruisingTotal}}{DBQueryMetricServerDistanceCruisingTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S107}}{S107}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-3ERM24-1}\nwindexuse{\nwixident{S107}}{S107}{NW1Dx1yV-3ERM24-1}\nwendcode{}\nwbegindocs{216}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{DBQueryMetricServerDistanceCruisingTotal}{NW1Dx1yV-3ERM24-1}\nwendquote}}(0) calls {\Tt{}\nwlinkedidentq{DBQueryMetricServerDistanceCruisingTotal}{NW1Dx1yV-3ERM24-1}\nwendquote}(1)
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{216}\sublabel{NW1Dx1yV-3ENmOe-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3ENmOe-1}}}\moddef{Read: DBQueryMetricServerDistanceCruisingTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3ENmOe-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{217}\sublabel{NW1Dx1yV-3ENmOe-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3ENmOe-1}}}\moddef{Read: DBQueryMetricServerDistanceCruisingTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3ENmOe-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricServerDistanceCruisingTotal}{NW1Dx1yV-3ERM24-1}() throws SQLException \{
   return \nwlinkedidentc{DBQueryMetricServerDistanceCruisingTotal}{NW1Dx1yV-3ERM24-1}(true);
 \}
-\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerDistanceCruisingTotal}}{DBQueryMetricServerDistanceCruisingTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerDistanceCruisingTotal}}{DBQueryMetricServerDistanceCruisingTotal}{NW1Dx1yV-3ENmOe-1}\nwendcode{}\nwbegindocs{217}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerDistanceCruisingTotal}}{DBQueryMetricServerDistanceCruisingTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerDistanceCruisingTotal}}{DBQueryMetricServerDistanceCruisingTotal}{NW1Dx1yV-3ENmOe-1}\nwendcode{}\nwbegindocs{218}\nwdocspar
 \noindent
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -7943,7 +7959,7 @@ int[] \nwlinkedidentc{DBQueryMetricServerDistanceCruisingTotal}{NW1Dx1yV-3ERM24-
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricServerDistanceCruisingTotal}{NW1Dx1yV-2UJeSo-1}\nwendquote}}(1) wraps {\Tt{}\nwlinkedidentq{DBQueryMetricServerDistanceCruisingTotal}{NW1Dx1yV-3ERM24-1}\nwendquote}(1).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{218}\sublabel{NW1Dx1yV-2UJeSo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2UJeSo-1}}}\moddef{Read: queryMetricServerDistanceCruisingTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2UJeSo-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{219}\sublabel{NW1Dx1yV-2UJeSo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2UJeSo-1}}}\moddef{Read: queryMetricServerDistanceCruisingTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2UJeSo-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricServerDistanceCruisingTotal}{NW1Dx1yV-2UJeSo-1}(boolean flag_usecache) throws SQLException \{
   long A0 = System.currentTimeMillis();
   int[] output = storage.\nwlinkedidentc{DBQueryMetricServerDistanceCruisingTotal}{NW1Dx1yV-3ERM24-1}(flag_usecache);
@@ -7951,18 +7967,18 @@ int[] \nwlinkedidentc{queryMetricServerDistanceCruisingTotal}{NW1Dx1yV-2UJeSo-1}
   return output;
 \}
 \nwindexdefn{\nwixident{queryMetricServerDistanceCruisingTotal}}{queryMetricServerDistanceCruisingTotal}{NW1Dx1yV-2UJeSo-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricServerDistanceCruisingTotal}}{queryMetricServerDistanceCruisingTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerDistanceCruisingTotal}}{DBQueryMetricServerDistanceCruisingTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerDistanceCruisingTotal}}{DBQueryMetricServerDistanceCruisingTotal}{NW1Dx1yV-2UJeSo-1}\nwendcode{}\nwbegindocs{219}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricServerDistanceCruisingTotal}}{queryMetricServerDistanceCruisingTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerDistanceCruisingTotal}}{DBQueryMetricServerDistanceCruisingTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerDistanceCruisingTotal}}{DBQueryMetricServerDistanceCruisingTotal}{NW1Dx1yV-2UJeSo-1}\nwendcode{}\nwbegindocs{220}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricServerDistanceCruisingTotal}{NW1Dx1yV-2UJeSo-1}\nwendquote}}(0) calls {\Tt{}\nwlinkedidentq{queryMetricServerDistanceCruisingTotal}{NW1Dx1yV-2UJeSo-1}\nwendquote}(1)
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{220}\sublabel{NW1Dx1yV-2TPHRC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2TPHRC-1}}}\moddef{Read: queryMetricServerDistanceCruisingTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2TPHRC-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{221}\sublabel{NW1Dx1yV-2TPHRC-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2TPHRC-1}}}\moddef{Read: queryMetricServerDistanceCruisingTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2TPHRC-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricServerDistanceCruisingTotal}{NW1Dx1yV-2UJeSo-1}() throws SQLException \{
   return \nwlinkedidentc{queryMetricServerDistanceCruisingTotal}{NW1Dx1yV-2UJeSo-1}(true);
 \}
-\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricServerDistanceCruisingTotal}}{queryMetricServerDistanceCruisingTotal}}}\nwindexuse{\nwixident{queryMetricServerDistanceCruisingTotal}}{queryMetricServerDistanceCruisingTotal}{NW1Dx1yV-2TPHRC-1}\nwendcode{}\nwbegindocs{221}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricServerDistanceCruisingTotal}}{queryMetricServerDistanceCruisingTotal}}}\nwindexuse{\nwixident{queryMetricServerDistanceCruisingTotal}}{queryMetricServerDistanceCruisingTotal}{NW1Dx1yV-2TPHRC-1}\nwendcode{}\nwbegindocs{222}\nwdocspar
 
 \subsection{\texttt{DBQueryMetricServerDistanceServiceTotal}(1)}
 \begin{tabular}{p{\textwidth}}
@@ -7986,7 +8002,7 @@ or {\Tt{}null\nwendquote} if no results.
 \textbf{Throws:} {\Tt{}SQLException\nwendquote} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{222}\sublabel{NW1Dx1yV-42gXBD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-42gXBD-1}}}\moddef{Read: DBQueryMetricServerDistanceServiceTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-42gXBD-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{223}\sublabel{NW1Dx1yV-42gXBD-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-42gXBD-1}}}\moddef{Read: DBQueryMetricServerDistanceServiceTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-42gXBD-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricServerDistanceServiceTotal}{NW1Dx1yV-42gXBD-1}(boolean flag_usecache) throws SQLException \{
   if (flag_usecache) \{
     final int[] output = new int[] \{ 0 \};
@@ -8001,18 +8017,18 @@ int[] \nwlinkedidentc{DBQueryMetricServerDistanceServiceTotal}{NW1Dx1yV-42gXBD-1
   \}
 \}
 \nwindexdefn{\nwixident{DBQueryMetricServerDistanceServiceTotal}}{DBQueryMetricServerDistanceServiceTotal}{NW1Dx1yV-42gXBD-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricServerDistanceServiceTotal}}{DBQueryMetricServerDistanceServiceTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S109}}{S109}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-42gXBD-1}\nwindexuse{\nwixident{S109}}{S109}{NW1Dx1yV-42gXBD-1}\nwendcode{}\nwbegindocs{223}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricServerDistanceServiceTotal}}{DBQueryMetricServerDistanceServiceTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S109}}{S109}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-42gXBD-1}\nwindexuse{\nwixident{S109}}{S109}{NW1Dx1yV-42gXBD-1}\nwendcode{}\nwbegindocs{224}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{DBQueryMetricServerDistanceServiceTotal}{NW1Dx1yV-42gXBD-1}\nwendquote}}(0) calls {\Tt{}\nwlinkedidentq{DBQueryMetricServerDistanceServiceTotal}{NW1Dx1yV-42gXBD-1}\nwendquote}(1)
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{224}\sublabel{NW1Dx1yV-423lHf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-423lHf-1}}}\moddef{Read: DBQueryMetricServerDistanceServiceTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-423lHf-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{225}\sublabel{NW1Dx1yV-423lHf-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-423lHf-1}}}\moddef{Read: DBQueryMetricServerDistanceServiceTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-423lHf-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricServerDistanceServiceTotal}{NW1Dx1yV-42gXBD-1}() throws SQLException \{
   return \nwlinkedidentc{DBQueryMetricServerDistanceServiceTotal}{NW1Dx1yV-42gXBD-1}(true);
 \}
-\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerDistanceServiceTotal}}{DBQueryMetricServerDistanceServiceTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerDistanceServiceTotal}}{DBQueryMetricServerDistanceServiceTotal}{NW1Dx1yV-423lHf-1}\nwendcode{}\nwbegindocs{225}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerDistanceServiceTotal}}{DBQueryMetricServerDistanceServiceTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerDistanceServiceTotal}}{DBQueryMetricServerDistanceServiceTotal}{NW1Dx1yV-423lHf-1}\nwendcode{}\nwbegindocs{226}\nwdocspar
 \noindent
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -8020,7 +8036,7 @@ int[] \nwlinkedidentc{DBQueryMetricServerDistanceServiceTotal}{NW1Dx1yV-42gXBD-1
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricServerDistanceServiceTotal}{NW1Dx1yV-148TsN-1}\nwendquote}}(1) wraps {\Tt{}\nwlinkedidentq{DBQueryMetricServerDistanceServiceTotal}{NW1Dx1yV-42gXBD-1}\nwendquote}(1).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{226}\sublabel{NW1Dx1yV-148TsN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-148TsN-1}}}\moddef{Read: queryMetricServerDistanceServiceTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-148TsN-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{227}\sublabel{NW1Dx1yV-148TsN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-148TsN-1}}}\moddef{Read: queryMetricServerDistanceServiceTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-148TsN-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricServerDistanceServiceTotal}{NW1Dx1yV-148TsN-1}(boolean flag_usecache) throws SQLException \{
   long A0 = System.currentTimeMillis();
   int[] output = storage.\nwlinkedidentc{DBQueryMetricServerDistanceServiceTotal}{NW1Dx1yV-42gXBD-1}(flag_usecache);
@@ -8028,18 +8044,18 @@ int[] \nwlinkedidentc{queryMetricServerDistanceServiceTotal}{NW1Dx1yV-148TsN-1}(
   return output;
 \}
 \nwindexdefn{\nwixident{queryMetricServerDistanceServiceTotal}}{queryMetricServerDistanceServiceTotal}{NW1Dx1yV-148TsN-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricServerDistanceServiceTotal}}{queryMetricServerDistanceServiceTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerDistanceServiceTotal}}{DBQueryMetricServerDistanceServiceTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerDistanceServiceTotal}}{DBQueryMetricServerDistanceServiceTotal}{NW1Dx1yV-148TsN-1}\nwendcode{}\nwbegindocs{227}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricServerDistanceServiceTotal}}{queryMetricServerDistanceServiceTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerDistanceServiceTotal}}{DBQueryMetricServerDistanceServiceTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerDistanceServiceTotal}}{DBQueryMetricServerDistanceServiceTotal}{NW1Dx1yV-148TsN-1}\nwendcode{}\nwbegindocs{228}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricServerDistanceServiceTotal}{NW1Dx1yV-148TsN-1}\nwendquote}}(0) calls {\Tt{}\nwlinkedidentq{queryMetricServerDistanceServiceTotal}{NW1Dx1yV-148TsN-1}\nwendquote}(1)
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{228}\sublabel{NW1Dx1yV-14khfr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-14khfr-1}}}\moddef{Read: queryMetricServerDistanceServiceTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-14khfr-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{229}\sublabel{NW1Dx1yV-14khfr-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-14khfr-1}}}\moddef{Read: queryMetricServerDistanceServiceTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-14khfr-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricServerDistanceServiceTotal}{NW1Dx1yV-148TsN-1}() throws SQLException \{
   return \nwlinkedidentc{queryMetricServerDistanceServiceTotal}{NW1Dx1yV-148TsN-1}(true);
 \}
-\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricServerDistanceServiceTotal}}{queryMetricServerDistanceServiceTotal}}}\nwindexuse{\nwixident{queryMetricServerDistanceServiceTotal}}{queryMetricServerDistanceServiceTotal}{NW1Dx1yV-14khfr-1}\nwendcode{}\nwbegindocs{229}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricServerDistanceServiceTotal}}{queryMetricServerDistanceServiceTotal}}}\nwindexuse{\nwixident{queryMetricServerDistanceServiceTotal}}{queryMetricServerDistanceServiceTotal}{NW1Dx1yV-14khfr-1}\nwendcode{}\nwbegindocs{230}\nwdocspar
 
 \subsection{\texttt{DBQueryMetricServerDurationTravelTotal}(1)}
 \begin{tabular}{p{\textwidth}}
@@ -8063,22 +8079,11 @@ or {\Tt{}null\nwendquote} if no results.
 \textbf{Throws:} {\Tt{}SQLException\nwendquote} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{230}\sublabel{NW1Dx1yV-4T5Zjo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-4T5Zjo-1}}}\moddef{Read: DBQueryMetricServerDurationTravelTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-4T5Zjo-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{231}\sublabel{NW1Dx1yV-4T5Zjo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-4T5Zjo-1}}}\moddef{Read: DBQueryMetricServerDurationTravelTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-4T5Zjo-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricServerDurationTravelTotal}{NW1Dx1yV-4T5Zjo-1}(boolean flag_usecache) throws SQLException \{
   if (flag_usecache) \{
     final int[] output = new int[] \{ 0 \};
     this.duration_servers.forEach((sid, val) -> output[0] += val);
-/***/
-    this.duration_servers.forEach((sid, val) -> \{
-        if (val > 80000) \{
-          System.out.printf("sid %d dur=%d\\n", sid, val);
-          try \{
-          \nwlinkedidentc{JargoInstanceExport}{NW1ODIS0-4UssFH-1}("debug");
-          System.exit(1);
-          \} catch (Exception ee) \{\}
-        \}
-    \});
-/***/
     return output;
   \} else \{
     try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1ODIS0-JT1v9-1}}\RA{}) \{
@@ -8089,18 +8094,18 @@ int[] \nwlinkedidentc{DBQueryMetricServerDurationTravelTotal}{NW1Dx1yV-4T5Zjo-1}
   \}
 \}
 \nwindexdefn{\nwixident{DBQueryMetricServerDurationTravelTotal}}{DBQueryMetricServerDurationTravelTotal}{NW1Dx1yV-4T5Zjo-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricServerDurationTravelTotal}}{DBQueryMetricServerDurationTravelTotal}}}\nwidentuses{\\{{\nwixident{JargoInstanceExport}}{JargoInstanceExport}}\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S117}}{S117}}}\nwindexuse{\nwixident{JargoInstanceExport}}{JargoInstanceExport}{NW1Dx1yV-4T5Zjo-1}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-4T5Zjo-1}\nwindexuse{\nwixident{S117}}{S117}{NW1Dx1yV-4T5Zjo-1}\nwendcode{}\nwbegindocs{231}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricServerDurationTravelTotal}}{DBQueryMetricServerDurationTravelTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S117}}{S117}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-4T5Zjo-1}\nwindexuse{\nwixident{S117}}{S117}{NW1Dx1yV-4T5Zjo-1}\nwendcode{}\nwbegindocs{232}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{DBQueryMetricServerDurationTravelTotal}{NW1Dx1yV-4T5Zjo-1}\nwendquote}}(0) calls {\Tt{}\nwlinkedidentq{DBQueryMetricServerDurationTravelTotal}{NW1Dx1yV-4T5Zjo-1}\nwendquote}(1)
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{232}\sublabel{NW1Dx1yV-4UAOce-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-4UAOce-1}}}\moddef{Read: DBQueryMetricServerDurationTravelTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-4UAOce-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{233}\sublabel{NW1Dx1yV-4UAOce-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-4UAOce-1}}}\moddef{Read: DBQueryMetricServerDurationTravelTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-4UAOce-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricServerDurationTravelTotal}{NW1Dx1yV-4T5Zjo-1}() throws SQLException \{
   return \nwlinkedidentc{DBQueryMetricServerDurationTravelTotal}{NW1Dx1yV-4T5Zjo-1}(true);
 \}
-\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerDurationTravelTotal}}{DBQueryMetricServerDurationTravelTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerDurationTravelTotal}}{DBQueryMetricServerDurationTravelTotal}{NW1Dx1yV-4UAOce-1}\nwendcode{}\nwbegindocs{233}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerDurationTravelTotal}}{DBQueryMetricServerDurationTravelTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerDurationTravelTotal}}{DBQueryMetricServerDurationTravelTotal}{NW1Dx1yV-4UAOce-1}\nwendcode{}\nwbegindocs{234}\nwdocspar
 \noindent
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -8108,7 +8113,7 @@ int[] \nwlinkedidentc{DBQueryMetricServerDurationTravelTotal}{NW1Dx1yV-4T5Zjo-1}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricServerDurationTravelTotal}{NW1Dx1yV-3joACb-1}\nwendquote}}(1) wraps {\Tt{}\nwlinkedidentq{DBQueryMetricServerDurationTravelTotal}{NW1Dx1yV-4T5Zjo-1}\nwendquote}(1).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{234}\sublabel{NW1Dx1yV-3joACb-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3joACb-1}}}\moddef{Read: queryMetricServerDurationTravelTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3joACb-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{235}\sublabel{NW1Dx1yV-3joACb-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3joACb-1}}}\moddef{Read: queryMetricServerDurationTravelTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3joACb-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricServerDurationTravelTotal}{NW1Dx1yV-3joACb-1}(boolean flag_usecache) throws SQLException \{
   long A0 = System.currentTimeMillis();
   int[] output = storage.\nwlinkedidentc{DBQueryMetricServerDurationTravelTotal}{NW1Dx1yV-4T5Zjo-1}(flag_usecache);
@@ -8116,21 +8121,21 @@ int[] \nwlinkedidentc{queryMetricServerDurationTravelTotal}{NW1Dx1yV-3joACb-1}(b
   return output;
 \}
 \nwindexdefn{\nwixident{queryMetricServerDurationTravelTotal}}{queryMetricServerDurationTravelTotal}{NW1Dx1yV-3joACb-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricServerDurationTravelTotal}}{queryMetricServerDurationTravelTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerDurationTravelTotal}}{DBQueryMetricServerDurationTravelTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerDurationTravelTotal}}{DBQueryMetricServerDurationTravelTotal}{NW1Dx1yV-3joACb-1}\nwendcode{}\nwbegindocs{235}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricServerDurationTravelTotal}}{queryMetricServerDurationTravelTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerDurationTravelTotal}}{DBQueryMetricServerDurationTravelTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerDurationTravelTotal}}{DBQueryMetricServerDurationTravelTotal}{NW1Dx1yV-3joACb-1}\nwendcode{}\nwbegindocs{236}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricServerDurationTravelTotal}{NW1Dx1yV-3joACb-1}\nwendquote}}(0) calls {\Tt{}\nwlinkedidentq{queryMetricServerDurationTravelTotal}{NW1Dx1yV-3joACb-1}\nwendquote}(1)
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{236}\sublabel{NW1Dx1yV-3kbNxN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3kbNxN-1}}}\moddef{Read: queryMetricServerDurationTravelTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3kbNxN-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{237}\sublabel{NW1Dx1yV-3kbNxN-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3kbNxN-1}}}\moddef{Read: queryMetricServerDurationTravelTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3kbNxN-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricServerDurationTravelTotal}{NW1Dx1yV-3joACb-1}() throws SQLException \{
   return \nwlinkedidentc{queryMetricServerDurationTravelTotal}{NW1Dx1yV-3joACb-1}(true);
 \}
-\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricServerDurationTravelTotal}}{queryMetricServerDurationTravelTotal}}}\nwindexuse{\nwixident{queryMetricServerDurationTravelTotal}}{queryMetricServerDurationTravelTotal}{NW1Dx1yV-3kbNxN-1}\nwendcode{}\nwbegindocs{237}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricServerDurationTravelTotal}}{queryMetricServerDurationTravelTotal}}}\nwindexuse{\nwixident{queryMetricServerDurationTravelTotal}}{queryMetricServerDurationTravelTotal}{NW1Dx1yV-3kbNxN-1}\nwendcode{}\nwbegindocs{238}\nwdocspar
 
 \subsection{\texttt{DBQueryMetricServerDurationCruisingTotal}(1)}
-\nwenddocs{}\nwbegincode{238}\sublabel{NW1Dx1yV-2fXahn-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2fXahn-1}}}\moddef{Read: DBQueryMetricServerDurationCruisingTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2fXahn-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{239}\sublabel{NW1Dx1yV-2fXahn-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2fXahn-1}}}\moddef{Read: DBQueryMetricServerDurationCruisingTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2fXahn-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricServerDurationCruisingTotal}{NW1Dx1yV-2fXahn-1}(boolean flag_usecache) throws SQLException \{
   if (flag_usecache) \{
     final int[] output = new int[] \{ 0 \};
@@ -8145,20 +8150,20 @@ int[] \nwlinkedidentc{DBQueryMetricServerDurationCruisingTotal}{NW1Dx1yV-2fXahn-
   \}
 \}
 \nwindexdefn{\nwixident{DBQueryMetricServerDurationCruisingTotal}}{DBQueryMetricServerDurationCruisingTotal}{NW1Dx1yV-2fXahn-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricServerDurationCruisingTotal}}{DBQueryMetricServerDurationCruisingTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S160}}{S160}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-2fXahn-1}\nwindexuse{\nwixident{S160}}{S160}{NW1Dx1yV-2fXahn-1}\nwendcode{}\nwbegindocs{239}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricServerDurationCruisingTotal}}{DBQueryMetricServerDurationCruisingTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S160}}{S160}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-2fXahn-1}\nwindexuse{\nwixident{S160}}{S160}{NW1Dx1yV-2fXahn-1}\nwendcode{}\nwbegindocs{240}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{DBQueryMetricServerDurationCruisingTotal}{NW1Dx1yV-2fXahn-1}\nwendquote}}(0) calls {\Tt{}\nwlinkedidentq{DBQueryMetricServerDurationCruisingTotal}{NW1Dx1yV-2fXahn-1}\nwendquote}(1)
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{240}\sublabel{NW1Dx1yV-2etAW3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2etAW3-1}}}\moddef{Read: DBQueryMetricServerDurationCruisingTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2etAW3-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{241}\sublabel{NW1Dx1yV-2etAW3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2etAW3-1}}}\moddef{Read: DBQueryMetricServerDurationCruisingTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2etAW3-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricServerDurationCruisingTotal}{NW1Dx1yV-2fXahn-1}() throws SQLException \{
   return \nwlinkedidentc{DBQueryMetricServerDurationCruisingTotal}{NW1Dx1yV-2fXahn-1}(true);
 \}
-\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerDurationCruisingTotal}}{DBQueryMetricServerDurationCruisingTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerDurationCruisingTotal}}{DBQueryMetricServerDurationCruisingTotal}{NW1Dx1yV-2etAW3-1}\nwendcode{}\nwbegindocs{241}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerDurationCruisingTotal}}{DBQueryMetricServerDurationCruisingTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerDurationCruisingTotal}}{DBQueryMetricServerDurationCruisingTotal}{NW1Dx1yV-2etAW3-1}\nwendcode{}\nwbegindocs{242}\nwdocspar
 \noindent
-\nwenddocs{}\nwbegincode{242}\sublabel{NW1Dx1yV-33F57p-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-33F57p-1}}}\moddef{Read: queryMetricServerDurationCruisingTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-33F57p-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{243}\sublabel{NW1Dx1yV-33F57p-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-33F57p-1}}}\moddef{Read: queryMetricServerDurationCruisingTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-33F57p-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricServerDurationCruisingTotal}{NW1Dx1yV-33F57p-1}(boolean flag_usecache) throws SQLException \{
   long A0 = System.currentTimeMillis();
   int[] output = storage.\nwlinkedidentc{DBQueryMetricServerDurationCruisingTotal}{NW1Dx1yV-2fXahn-1}(flag_usecache);
@@ -8166,21 +8171,21 @@ int[] \nwlinkedidentc{queryMetricServerDurationCruisingTotal}{NW1Dx1yV-33F57p-1}
   return output;
 \}
 \nwindexdefn{\nwixident{queryMetricServerDurationCruisingTotal}}{queryMetricServerDurationCruisingTotal}{NW1Dx1yV-33F57p-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricServerDurationCruisingTotal}}{queryMetricServerDurationCruisingTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerDurationCruisingTotal}}{DBQueryMetricServerDurationCruisingTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerDurationCruisingTotal}}{DBQueryMetricServerDurationCruisingTotal}{NW1Dx1yV-33F57p-1}\nwendcode{}\nwbegindocs{243}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricServerDurationCruisingTotal}}{queryMetricServerDurationCruisingTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerDurationCruisingTotal}}{DBQueryMetricServerDurationCruisingTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerDurationCruisingTotal}}{DBQueryMetricServerDurationCruisingTotal}{NW1Dx1yV-33F57p-1}\nwendcode{}\nwbegindocs{244}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricServerDurationCruisingTotal}{NW1Dx1yV-33F57p-1}\nwendquote}}(0) calls {\Tt{}\nwlinkedidentq{queryMetricServerDurationCruisingTotal}{NW1Dx1yV-33F57p-1}\nwendquote}(1)
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{244}\sublabel{NW1Dx1yV-32sG49-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-32sG49-1}}}\moddef{Read: queryMetricServerDurationCruisingTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-32sG49-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{245}\sublabel{NW1Dx1yV-32sG49-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-32sG49-1}}}\moddef{Read: queryMetricServerDurationCruisingTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-32sG49-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricServerDurationCruisingTotal}{NW1Dx1yV-33F57p-1}() throws SQLException \{
   return \nwlinkedidentc{queryMetricServerDurationCruisingTotal}{NW1Dx1yV-33F57p-1}(true);
 \}
-\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricServerDurationCruisingTotal}}{queryMetricServerDurationCruisingTotal}}}\nwindexuse{\nwixident{queryMetricServerDurationCruisingTotal}}{queryMetricServerDurationCruisingTotal}{NW1Dx1yV-32sG49-1}\nwendcode{}\nwbegindocs{245}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricServerDurationCruisingTotal}}{queryMetricServerDurationCruisingTotal}}}\nwindexuse{\nwixident{queryMetricServerDurationCruisingTotal}}{queryMetricServerDurationCruisingTotal}{NW1Dx1yV-32sG49-1}\nwendcode{}\nwbegindocs{246}\nwdocspar
 
 \subsection{\texttt{DBQueryMetricServerDurationServiceTotal}(1)}
-\nwenddocs{}\nwbegincode{246}\sublabel{NW1Dx1yV-1IdU8N-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-1IdU8N-1}}}\moddef{Read: DBQueryMetricServerDurationServiceTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1IdU8N-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{247}\sublabel{NW1Dx1yV-1IdU8N-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-1IdU8N-1}}}\moddef{Read: DBQueryMetricServerDurationServiceTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1IdU8N-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricServerDurationServiceTotal}{NW1Dx1yV-1IdU8N-1}(boolean flag_usecache) throws SQLException \{
   if (flag_usecache) \{
     final int[] output = new int[] \{ 0 \};
@@ -8197,20 +8202,20 @@ int[] \nwlinkedidentc{DBQueryMetricServerDurationServiceTotal}{NW1Dx1yV-1IdU8N-1
   \}
 \}
 \nwindexdefn{\nwixident{DBQueryMetricServerDurationServiceTotal}}{DBQueryMetricServerDurationServiceTotal}{NW1Dx1yV-1IdU8N-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricServerDurationServiceTotal}}{DBQueryMetricServerDurationServiceTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S158}}{S158}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-1IdU8N-1}\nwindexuse{\nwixident{S158}}{S158}{NW1Dx1yV-1IdU8N-1}\nwendcode{}\nwbegindocs{247}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricServerDurationServiceTotal}}{DBQueryMetricServerDurationServiceTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S158}}{S158}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-1IdU8N-1}\nwindexuse{\nwixident{S158}}{S158}{NW1Dx1yV-1IdU8N-1}\nwendcode{}\nwbegindocs{248}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{DBQueryMetricServerDurationServiceTotal}{NW1Dx1yV-1IdU8N-1}\nwendquote}}(0) calls {\Tt{}\nwlinkedidentq{DBQueryMetricServerDurationServiceTotal}{NW1Dx1yV-1IdU8N-1}\nwendquote}(1)
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{248}\sublabel{NW1Dx1yV-1Jg6cx-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-1Jg6cx-1}}}\moddef{Read: DBQueryMetricServerDurationServiceTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1Jg6cx-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{249}\sublabel{NW1Dx1yV-1Jg6cx-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-1Jg6cx-1}}}\moddef{Read: DBQueryMetricServerDurationServiceTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1Jg6cx-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricServerDurationServiceTotal}{NW1Dx1yV-1IdU8N-1}() throws SQLException \{
   return \nwlinkedidentc{DBQueryMetricServerDurationServiceTotal}{NW1Dx1yV-1IdU8N-1}(true);
 \}
-\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerDurationServiceTotal}}{DBQueryMetricServerDurationServiceTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerDurationServiceTotal}}{DBQueryMetricServerDurationServiceTotal}{NW1Dx1yV-1Jg6cx-1}\nwendcode{}\nwbegindocs{249}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerDurationServiceTotal}}{DBQueryMetricServerDurationServiceTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerDurationServiceTotal}}{DBQueryMetricServerDurationServiceTotal}{NW1Dx1yV-1Jg6cx-1}\nwendcode{}\nwbegindocs{250}\nwdocspar
 \noindent
-\nwenddocs{}\nwbegincode{250}\sublabel{NW1Dx1yV-2xsYtP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2xsYtP-1}}}\moddef{Read: queryMetricServerDurationServiceTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2xsYtP-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{251}\sublabel{NW1Dx1yV-2xsYtP-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2xsYtP-1}}}\moddef{Read: queryMetricServerDurationServiceTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2xsYtP-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricServerDurationServiceTotal}{NW1Dx1yV-2xsYtP-1}(boolean flag_usecache) throws SQLException \{
   long A0 = System.currentTimeMillis();
   int[] output = storage.\nwlinkedidentc{DBQueryMetricServerDurationServiceTotal}{NW1Dx1yV-1IdU8N-1}(flag_usecache);
@@ -8218,21 +8223,21 @@ int[] \nwlinkedidentc{queryMetricServerDurationServiceTotal}{NW1Dx1yV-2xsYtP-1}(
   return output;
 \}
 \nwindexdefn{\nwixident{queryMetricServerDurationServiceTotal}}{queryMetricServerDurationServiceTotal}{NW1Dx1yV-2xsYtP-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricServerDurationServiceTotal}}{queryMetricServerDurationServiceTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerDurationServiceTotal}}{DBQueryMetricServerDurationServiceTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerDurationServiceTotal}}{DBQueryMetricServerDurationServiceTotal}{NW1Dx1yV-2xsYtP-1}\nwendcode{}\nwbegindocs{251}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricServerDurationServiceTotal}}{queryMetricServerDurationServiceTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerDurationServiceTotal}}{DBQueryMetricServerDurationServiceTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerDurationServiceTotal}}{DBQueryMetricServerDurationServiceTotal}{NW1Dx1yV-2xsYtP-1}\nwendcode{}\nwbegindocs{252}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricServerDurationServiceTotal}{NW1Dx1yV-2xsYtP-1}\nwendquote}}(0) calls {\Tt{}\nwlinkedidentq{queryMetricServerDurationServiceTotal}{NW1Dx1yV-2xsYtP-1}\nwendquote}(1)
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{252}\sublabel{NW1Dx1yV-2wpOIl-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2wpOIl-1}}}\moddef{Read: queryMetricServerDurationServiceTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2wpOIl-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{253}\sublabel{NW1Dx1yV-2wpOIl-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2wpOIl-1}}}\moddef{Read: queryMetricServerDurationServiceTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2wpOIl-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricServerDurationServiceTotal}{NW1Dx1yV-2xsYtP-1}() throws SQLException \{
   return \nwlinkedidentc{queryMetricServerDurationServiceTotal}{NW1Dx1yV-2xsYtP-1}(true);
 \}
-\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricServerDurationServiceTotal}}{queryMetricServerDurationServiceTotal}}}\nwindexuse{\nwixident{queryMetricServerDurationServiceTotal}}{queryMetricServerDurationServiceTotal}{NW1Dx1yV-2wpOIl-1}\nwendcode{}\nwbegindocs{253}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricServerDurationServiceTotal}}{queryMetricServerDurationServiceTotal}}}\nwindexuse{\nwixident{queryMetricServerDurationServiceTotal}}{queryMetricServerDurationServiceTotal}{NW1Dx1yV-2wpOIl-1}\nwendcode{}\nwbegindocs{254}\nwdocspar
 
 \subsection{\texttt{DBQueryMetricServerTWViolationsTotal}(0)}
-\nwenddocs{}\nwbegincode{254}\sublabel{NW1Dx1yV-31p3Hv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-31p3Hv-1}}}\moddef{Read: DBQueryMetricServerTWViolationsTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-31p3Hv-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{255}\sublabel{NW1Dx1yV-31p3Hv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-31p3Hv-1}}}\moddef{Read: DBQueryMetricServerTWViolationsTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-31p3Hv-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricServerTWViolationsTotal}{NW1Dx1yV-31p3Hv-1}() throws SQLException \{
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1ODIS0-JT1v9-1}}\RA{}) \{
     return \nwlinkedidentc{PSQuery}{NW1ODIS0-yHOIP-1}(conn, "\nwlinkedidentc{S150}{NW1ODIS0-yi24R-1}", 1);
@@ -8241,7 +8246,7 @@ int[] \nwlinkedidentc{DBQueryMetricServerTWViolationsTotal}{NW1Dx1yV-31p3Hv-1}()
   \}
 \}
 \nwindexdefn{\nwixident{DBQueryMetricServerTWViolationsTotal}}{DBQueryMetricServerTWViolationsTotal}{NW1Dx1yV-31p3Hv-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricServerTWViolationsTotal}}{DBQueryMetricServerTWViolationsTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S150}}{S150}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-31p3Hv-1}\nwindexuse{\nwixident{S150}}{S150}{NW1Dx1yV-31p3Hv-1}\nwendcode{}\nwbegincode{255}\sublabel{NW1Dx1yV-3R7vSs-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3R7vSs-1}}}\moddef{Read: queryMetricServerTWViolationsTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3R7vSs-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricServerTWViolationsTotal}}{DBQueryMetricServerTWViolationsTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S150}}{S150}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-31p3Hv-1}\nwindexuse{\nwixident{S150}}{S150}{NW1Dx1yV-31p3Hv-1}\nwendcode{}\nwbegincode{256}\sublabel{NW1Dx1yV-3R7vSs-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3R7vSs-1}}}\moddef{Read: queryMetricServerTWViolationsTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3R7vSs-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricServerTWViolationsTotal}{NW1Dx1yV-3R7vSs-1}() throws SQLException \{
   long A0 = System.currentTimeMillis();
   int[] output = storage.\nwlinkedidentc{DBQueryMetricServerTWViolationsTotal}{NW1Dx1yV-31p3Hv-1}();
@@ -8249,7 +8254,7 @@ int[] \nwlinkedidentc{queryMetricServerTWViolationsTotal}{NW1Dx1yV-3R7vSs-1}() t
   return output;
 \}
 \nwindexdefn{\nwixident{queryMetricServerTWViolationsTotal}}{queryMetricServerTWViolationsTotal}{NW1Dx1yV-3R7vSs-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricServerTWViolationsTotal}}{queryMetricServerTWViolationsTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerTWViolationsTotal}}{DBQueryMetricServerTWViolationsTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerTWViolationsTotal}}{DBQueryMetricServerTWViolationsTotal}{NW1Dx1yV-3R7vSs-1}\nwendcode{}\nwbegindocs{256}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricServerTWViolationsTotal}}{queryMetricServerTWViolationsTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricServerTWViolationsTotal}}{DBQueryMetricServerTWViolationsTotal}}}\nwindexuse{\nwixident{DBQueryMetricServerTWViolationsTotal}}{DBQueryMetricServerTWViolationsTotal}{NW1Dx1yV-3R7vSs-1}\nwendcode{}\nwbegindocs{257}\nwdocspar
 \subsection{\texttt{DBQueryMetricRequestDistanceBaseTotal}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -8272,7 +8277,7 @@ or {\Tt{}null\nwendquote} if no results.
 \textbf{Throws:} {\Tt{}SQLException\nwendquote} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{257}\sublabel{NW1Dx1yV-3ddWJ0-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3ddWJ0-1}}}\moddef{Read: DBQueryMetricRequestDistanceBaseTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3ddWJ0-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{258}\sublabel{NW1Dx1yV-3ddWJ0-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3ddWJ0-1}}}\moddef{Read: DBQueryMetricRequestDistanceBaseTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3ddWJ0-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricRequestDistanceBaseTotal}{NW1Dx1yV-3ddWJ0-1}() throws SQLException \{
   // try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1ODIS0-JT1v9-1}}\RA{}) \{
   //   return \nwlinkedidentc{PSQuery}{NW1ODIS0-yHOIP-1}(conn, "\nwlinkedidentc{S111}{NW1ODIS0-3WIudP-1}", 1);
@@ -8282,13 +8287,13 @@ int[] \nwlinkedidentc{DBQueryMetricRequestDistanceBaseTotal}{NW1Dx1yV-3ddWJ0-1}(
   return new int[] \{ this.sum_distance_base_requests \};
 \}
 \nwindexdefn{\nwixident{DBQueryMetricRequestDistanceBaseTotal}}{DBQueryMetricRequestDistanceBaseTotal}{NW1Dx1yV-3ddWJ0-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricRequestDistanceBaseTotal}}{DBQueryMetricRequestDistanceBaseTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S111}}{S111}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-3ddWJ0-1}\nwindexuse{\nwixident{S111}}{S111}{NW1Dx1yV-3ddWJ0-1}\nwendcode{}\nwbegindocs{258}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricRequestDistanceBaseTotal}}{DBQueryMetricRequestDistanceBaseTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S111}}{S111}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-3ddWJ0-1}\nwindexuse{\nwixident{S111}}{S111}{NW1Dx1yV-3ddWJ0-1}\nwendcode{}\nwbegindocs{259}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricRequestDistanceBaseTotal}{NW1Dx1yV-v7TDa-1}\nwendquote}}(0) wraps {\Tt{}\nwlinkedidentq{DBQueryMetricRequestDistanceBaseTotal}{NW1Dx1yV-3ddWJ0-1}\nwendquote}(0).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{259}\sublabel{NW1Dx1yV-v7TDa-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-v7TDa-1}}}\moddef{Read: queryMetricRequestDistanceBaseTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-v7TDa-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{260}\sublabel{NW1Dx1yV-v7TDa-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-v7TDa-1}}}\moddef{Read: queryMetricRequestDistanceBaseTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-v7TDa-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricRequestDistanceBaseTotal}{NW1Dx1yV-v7TDa-1}() throws SQLException \{
   long A0 = System.currentTimeMillis();
   int[] output = storage.\nwlinkedidentc{DBQueryMetricRequestDistanceBaseTotal}{NW1Dx1yV-3ddWJ0-1}();
@@ -8296,7 +8301,7 @@ int[] \nwlinkedidentc{queryMetricRequestDistanceBaseTotal}{NW1Dx1yV-v7TDa-1}() t
   return output;
 \}
 \nwindexdefn{\nwixident{queryMetricRequestDistanceBaseTotal}}{queryMetricRequestDistanceBaseTotal}{NW1Dx1yV-v7TDa-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricRequestDistanceBaseTotal}}{queryMetricRequestDistanceBaseTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestDistanceBaseTotal}}{DBQueryMetricRequestDistanceBaseTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestDistanceBaseTotal}}{DBQueryMetricRequestDistanceBaseTotal}{NW1Dx1yV-v7TDa-1}\nwendcode{}\nwbegindocs{260}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricRequestDistanceBaseTotal}}{queryMetricRequestDistanceBaseTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestDistanceBaseTotal}}{DBQueryMetricRequestDistanceBaseTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestDistanceBaseTotal}}{DBQueryMetricRequestDistanceBaseTotal}{NW1Dx1yV-v7TDa-1}\nwendcode{}\nwbegindocs{261}\nwdocspar
 \subsection{\texttt{DBQueryMetricRequestDistanceBaseUnassignedTotal}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -8321,7 +8326,7 @@ where $H$ is the time horizon.\\
 \textbf{Throws:} {\Tt{}SQLException\nwendquote} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{261}\sublabel{NW1Dx1yV-42edyi-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-42edyi-1}}}\moddef{Read: DBQueryMetricRequestDistanceBaseUnassignedTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-42edyi-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{262}\sublabel{NW1Dx1yV-42edyi-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-42edyi-1}}}\moddef{Read: DBQueryMetricRequestDistanceBaseUnassignedTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-42edyi-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricRequestDistanceBaseUnassignedTotal}{NW1Dx1yV-42edyi-1}(boolean flag_usecache) throws SQLException \{
   if (flag_usecache) \{
     return new int[] \{ this.sum_distance_unassigned \};
@@ -8334,7 +8339,7 @@ int[] \nwlinkedidentc{DBQueryMetricRequestDistanceBaseUnassignedTotal}{NW1Dx1yV-
   \}
 \}
 \nwindexdefn{\nwixident{DBQueryMetricRequestDistanceBaseUnassignedTotal}}{DBQueryMetricRequestDistanceBaseUnassignedTotal}{NW1Dx1yV-42edyi-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricRequestDistanceBaseUnassignedTotal}}{DBQueryMetricRequestDistanceBaseUnassignedTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S138}}{S138}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-42edyi-1}\nwindexuse{\nwixident{S138}}{S138}{NW1Dx1yV-42edyi-1}\nwendcode{}\nwbegindocs{262}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricRequestDistanceBaseUnassignedTotal}}{DBQueryMetricRequestDistanceBaseUnassignedTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S138}}{S138}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-42edyi-1}\nwindexuse{\nwixident{S138}}{S138}{NW1Dx1yV-42edyi-1}\nwendcode{}\nwbegindocs{263}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{DBQueryMetricRequestDistanceBaseUnassignedTotal}{NW1Dx1yV-42edyi-1}\nwendquote}}(0)
@@ -8342,11 +8347,11 @@ calls {\Tt{}\nwlinkedidentq{DBQueryMetricRequestDistanceBaseUnassignedTotal}{NW1
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{263}\sublabel{NW1Dx1yV-421s5A-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-421s5A-1}}}\moddef{Read: DBQueryMetricRequestDistanceBaseUnassignedTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-421s5A-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{264}\sublabel{NW1Dx1yV-421s5A-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-421s5A-1}}}\moddef{Read: DBQueryMetricRequestDistanceBaseUnassignedTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-421s5A-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricRequestDistanceBaseUnassignedTotal}{NW1Dx1yV-42edyi-1}() throws SQLException \{
   return \nwlinkedidentc{DBQueryMetricRequestDistanceBaseUnassignedTotal}{NW1Dx1yV-42edyi-1}(true);
 \}
-\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestDistanceBaseUnassignedTotal}}{DBQueryMetricRequestDistanceBaseUnassignedTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestDistanceBaseUnassignedTotal}}{DBQueryMetricRequestDistanceBaseUnassignedTotal}{NW1Dx1yV-421s5A-1}\nwendcode{}\nwbegindocs{264}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestDistanceBaseUnassignedTotal}}{DBQueryMetricRequestDistanceBaseUnassignedTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestDistanceBaseUnassignedTotal}}{DBQueryMetricRequestDistanceBaseUnassignedTotal}{NW1Dx1yV-421s5A-1}\nwendcode{}\nwbegindocs{265}\nwdocspar
 \noindent
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -8354,7 +8359,7 @@ int[] \nwlinkedidentc{DBQueryMetricRequestDistanceBaseUnassignedTotal}{NW1Dx1yV-
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricRequestDistanceBaseUnassignedTotal}{NW1Dx1yV-4H96yt-1}\nwendquote}}(1) wraps {\Tt{}\nwlinkedidentq{DBQueryMetricRequestDistanceBaseUnassignedTotal}{NW1Dx1yV-42edyi-1}\nwendquote}(1).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{265}\sublabel{NW1Dx1yV-4H96yt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-4H96yt-1}}}\moddef{Read: queryMetricRequestDistanceBaseUnassignedTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-4H96yt-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{266}\sublabel{NW1Dx1yV-4H96yt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-4H96yt-1}}}\moddef{Read: queryMetricRequestDistanceBaseUnassignedTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-4H96yt-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricRequestDistanceBaseUnassignedTotal}{NW1Dx1yV-4H96yt-1}(boolean flag_usecache) throws SQLException \{
   long A0 = System.currentTimeMillis();
   int[] output = storage.\nwlinkedidentc{DBQueryMetricRequestDistanceBaseUnassignedTotal}{NW1Dx1yV-42edyi-1}(flag_usecache);
@@ -8362,7 +8367,7 @@ int[] \nwlinkedidentc{queryMetricRequestDistanceBaseUnassignedTotal}{NW1Dx1yV-4H
   return output;
 \}
 \nwindexdefn{\nwixident{queryMetricRequestDistanceBaseUnassignedTotal}}{queryMetricRequestDistanceBaseUnassignedTotal}{NW1Dx1yV-4H96yt-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricRequestDistanceBaseUnassignedTotal}}{queryMetricRequestDistanceBaseUnassignedTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestDistanceBaseUnassignedTotal}}{DBQueryMetricRequestDistanceBaseUnassignedTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestDistanceBaseUnassignedTotal}}{DBQueryMetricRequestDistanceBaseUnassignedTotal}{NW1Dx1yV-4H96yt-1}\nwendcode{}\nwbegindocs{266}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricRequestDistanceBaseUnassignedTotal}}{queryMetricRequestDistanceBaseUnassignedTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestDistanceBaseUnassignedTotal}}{DBQueryMetricRequestDistanceBaseUnassignedTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestDistanceBaseUnassignedTotal}}{DBQueryMetricRequestDistanceBaseUnassignedTotal}{NW1Dx1yV-4H96yt-1}\nwendcode{}\nwbegindocs{267}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricRequestDistanceBaseUnassignedTotal}{NW1Dx1yV-4H96yt-1}\nwendquote}}(0)
@@ -8370,21 +8375,21 @@ calls {\Tt{}\nwlinkedidentq{queryMetricRequestDistanceBaseUnassignedTotal}{NW1Dx
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{267}\sublabel{NW1Dx1yV-4H3t3H-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-4H3t3H-1}}}\moddef{Read: queryMetricRequestDistanceBaseUnassignedTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-4H3t3H-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{268}\sublabel{NW1Dx1yV-4H3t3H-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-4H3t3H-1}}}\moddef{Read: queryMetricRequestDistanceBaseUnassignedTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-4H3t3H-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricRequestDistanceBaseUnassignedTotal}{NW1Dx1yV-4H96yt-1}() throws SQLException \{
   return \nwlinkedidentc{queryMetricRequestDistanceBaseUnassignedTotal}{NW1Dx1yV-4H96yt-1}(true);
 \}
-\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricRequestDistanceBaseUnassignedTotal}}{queryMetricRequestDistanceBaseUnassignedTotal}}}\nwindexuse{\nwixident{queryMetricRequestDistanceBaseUnassignedTotal}}{queryMetricRequestDistanceBaseUnassignedTotal}{NW1Dx1yV-4H3t3H-1}\nwendcode{}\nwbegindocs{268}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricRequestDistanceBaseUnassignedTotal}}{queryMetricRequestDistanceBaseUnassignedTotal}}}\nwindexuse{\nwixident{queryMetricRequestDistanceBaseUnassignedTotal}}{queryMetricRequestDistanceBaseUnassignedTotal}{NW1Dx1yV-4H3t3H-1}\nwendcode{}\nwbegindocs{269}\nwdocspar
 
 \subsection{\texttt{DBQueryMetricRequestDistanceBaseUnassignedRunning}(0)}
-\nwenddocs{}\nwbegincode{269}\sublabel{NW1Dx1yV-4UUzlW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-4UUzlW-1}}}\moddef{Read: DBQueryMetricRequestDistanceBaseUnassignedRunning(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-4UUzlW-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{270}\sublabel{NW1Dx1yV-4UUzlW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-4UUzlW-1}}}\moddef{Read: DBQueryMetricRequestDistanceBaseUnassignedRunning(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-4UUzlW-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricRequestDistanceBaseUnassignedRunning}{NW1Dx1yV-4UUzlW-1}() throws SQLException \{
   int[] output = new int[] \{ \};
   // ...
   return output;
 \}
 \nwindexdefn{\nwixident{DBQueryMetricRequestDistanceBaseUnassignedRunning}}{DBQueryMetricRequestDistanceBaseUnassignedRunning}{NW1Dx1yV-4UUzlW-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricRequestDistanceBaseUnassignedRunning}}{DBQueryMetricRequestDistanceBaseUnassignedRunning}}}\nwendcode{}\nwbegincode{270}\sublabel{NW1Dx1yV-2XxVoJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2XxVoJ-1}}}\moddef{Read: queryMetricRequestDistanceBaseUnassignedRunning(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2XxVoJ-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricRequestDistanceBaseUnassignedRunning}}{DBQueryMetricRequestDistanceBaseUnassignedRunning}}}\nwendcode{}\nwbegincode{271}\sublabel{NW1Dx1yV-2XxVoJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2XxVoJ-1}}}\moddef{Read: queryMetricRequestDistanceBaseUnassignedRunning(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2XxVoJ-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] queryMetricRequestDistanceBaseUnassignedRunning()
 throws SQLException, \nwlinkedidentc{UserNotFoundException}{NW1ODIS0-15irq2-1} \{
   int[] output = new int[] \{ 0 \};
@@ -8395,7 +8400,7 @@ throws SQLException, \nwlinkedidentc{UserNotFoundException}{NW1ODIS0-15irq2-1} \
   \}
   return output;
 \}
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentuses{\\{{\nwixident{DBQueryRequestIsAssigned}}{DBQueryRequestIsAssigned}}\\{{\nwixident{DBQueryUser}}{DBQueryUser}}\\{{\nwixident{UserNotFoundException}}{UserNotFoundException}}}\nwindexuse{\nwixident{DBQueryRequestIsAssigned}}{DBQueryRequestIsAssigned}{NW1Dx1yV-2XxVoJ-1}\nwindexuse{\nwixident{DBQueryUser}}{DBQueryUser}{NW1Dx1yV-2XxVoJ-1}\nwindexuse{\nwixident{UserNotFoundException}}{UserNotFoundException}{NW1Dx1yV-2XxVoJ-1}\nwendcode{}\nwbegindocs{271}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentuses{\\{{\nwixident{DBQueryRequestIsAssigned}}{DBQueryRequestIsAssigned}}\\{{\nwixident{DBQueryUser}}{DBQueryUser}}\\{{\nwixident{UserNotFoundException}}{UserNotFoundException}}}\nwindexuse{\nwixident{DBQueryRequestIsAssigned}}{DBQueryRequestIsAssigned}{NW1Dx1yV-2XxVoJ-1}\nwindexuse{\nwixident{DBQueryUser}}{DBQueryUser}{NW1Dx1yV-2XxVoJ-1}\nwindexuse{\nwixident{UserNotFoundException}}{UserNotFoundException}{NW1Dx1yV-2XxVoJ-1}\nwendcode{}\nwbegindocs{272}\nwdocspar
 
 \subsection{\texttt{DBQueryMetricRequestDistanceDetourTotal}(1)}
 \begin{tabular}{p{\textwidth}}
@@ -8419,7 +8424,7 @@ or {\Tt{}null\nwendquote} if no results.
 \textbf{Throws:} {\Tt{}SQLException\nwendquote} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{272}\sublabel{NW1Dx1yV-2z9Wsm-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2z9Wsm-1}}}\moddef{Read: DBQueryMetricRequestDistanceDetourTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2z9Wsm-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{273}\sublabel{NW1Dx1yV-2z9Wsm-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2z9Wsm-1}}}\moddef{Read: DBQueryMetricRequestDistanceDetourTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2z9Wsm-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricRequestDistanceDetourTotal}{NW1Dx1yV-2z9Wsm-1}(boolean flag_usecache) throws SQLException \{
   if (flag_usecache) \{
     final int[] output = new int[] \{ 0 \};
@@ -8436,18 +8441,18 @@ int[] \nwlinkedidentc{DBQueryMetricRequestDistanceDetourTotal}{NW1Dx1yV-2z9Wsm-1
   \}
 \}
 \nwindexdefn{\nwixident{DBQueryMetricRequestDistanceDetourTotal}}{DBQueryMetricRequestDistanceDetourTotal}{NW1Dx1yV-2z9Wsm-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricRequestDistanceDetourTotal}}{DBQueryMetricRequestDistanceDetourTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S113}}{S113}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-2z9Wsm-1}\nwindexuse{\nwixident{S113}}{S113}{NW1Dx1yV-2z9Wsm-1}\nwendcode{}\nwbegindocs{273}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricRequestDistanceDetourTotal}}{DBQueryMetricRequestDistanceDetourTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S113}}{S113}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-2z9Wsm-1}\nwindexuse{\nwixident{S113}}{S113}{NW1Dx1yV-2z9Wsm-1}\nwendcode{}\nwbegindocs{274}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{DBQueryMetricRequestDistanceDetourTotal}{NW1Dx1yV-2z9Wsm-1}\nwendquote}}(0) calls {\Tt{}\nwlinkedidentq{DBQueryMetricRequestDistanceDetourTotal}{NW1Dx1yV-2z9Wsm-1}\nwendquote}(1)
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{274}\sublabel{NW1Dx1yV-3066Ie-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3066Ie-1}}}\moddef{Read: DBQueryMetricRequestDistanceDetourTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3066Ie-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{275}\sublabel{NW1Dx1yV-3066Ie-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3066Ie-1}}}\moddef{Read: DBQueryMetricRequestDistanceDetourTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3066Ie-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricRequestDistanceDetourTotal}{NW1Dx1yV-2z9Wsm-1}() throws SQLException \{
   return \nwlinkedidentc{DBQueryMetricRequestDistanceDetourTotal}{NW1Dx1yV-2z9Wsm-1}(true);
 \}
-\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestDistanceDetourTotal}}{DBQueryMetricRequestDistanceDetourTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestDistanceDetourTotal}}{DBQueryMetricRequestDistanceDetourTotal}{NW1Dx1yV-3066Ie-1}\nwendcode{}\nwbegindocs{275}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestDistanceDetourTotal}}{DBQueryMetricRequestDistanceDetourTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestDistanceDetourTotal}}{DBQueryMetricRequestDistanceDetourTotal}{NW1Dx1yV-3066Ie-1}\nwendcode{}\nwbegindocs{276}\nwdocspar
 \noindent
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -8455,7 +8460,7 @@ int[] \nwlinkedidentc{DBQueryMetricRequestDistanceDetourTotal}{NW1Dx1yV-2z9Wsm-1
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricRequestDistanceDetourTotal}{NW1Dx1yV-1HM4JE-1}\nwendquote}}(1) wraps {\Tt{}\nwlinkedidentq{DBQueryMetricRequestDistanceDetourTotal}{NW1Dx1yV-2z9Wsm-1}\nwendquote}(1).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{276}\sublabel{NW1Dx1yV-1HM4JE-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-1HM4JE-1}}}\moddef{Read: queryMetricRequestDistanceDetourTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1HM4JE-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{277}\sublabel{NW1Dx1yV-1HM4JE-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-1HM4JE-1}}}\moddef{Read: queryMetricRequestDistanceDetourTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1HM4JE-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricRequestDistanceDetourTotal}{NW1Dx1yV-1HM4JE-1}(boolean flag_usecache) throws SQLException \{
   long A0 = System.currentTimeMillis();
   int[] output = storage.\nwlinkedidentc{DBQueryMetricRequestDistanceDetourTotal}{NW1Dx1yV-2z9Wsm-1}(flag_usecache);
@@ -8463,18 +8468,18 @@ int[] \nwlinkedidentc{queryMetricRequestDistanceDetourTotal}{NW1Dx1yV-1HM4JE-1}(
   return output;
 \}
 \nwindexdefn{\nwixident{queryMetricRequestDistanceDetourTotal}}{queryMetricRequestDistanceDetourTotal}{NW1Dx1yV-1HM4JE-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricRequestDistanceDetourTotal}}{queryMetricRequestDistanceDetourTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestDistanceDetourTotal}}{DBQueryMetricRequestDistanceDetourTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestDistanceDetourTotal}}{DBQueryMetricRequestDistanceDetourTotal}{NW1Dx1yV-1HM4JE-1}\nwendcode{}\nwbegindocs{277}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricRequestDistanceDetourTotal}}{queryMetricRequestDistanceDetourTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestDistanceDetourTotal}}{DBQueryMetricRequestDistanceDetourTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestDistanceDetourTotal}}{DBQueryMetricRequestDistanceDetourTotal}{NW1Dx1yV-1HM4JE-1}\nwendcode{}\nwbegindocs{278}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricRequestDistanceDetourTotal}{NW1Dx1yV-1HM4JE-1}\nwendquote}}(0) calls {\Tt{}\nwlinkedidentq{queryMetricRequestDistanceDetourTotal}{NW1Dx1yV-1HM4JE-1}\nwendquote}(1)
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{278}\sublabel{NW1Dx1yV-1GQ2zQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-1GQ2zQ-1}}}\moddef{Read: queryMetricRequestDistanceDetourTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1GQ2zQ-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{279}\sublabel{NW1Dx1yV-1GQ2zQ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-1GQ2zQ-1}}}\moddef{Read: queryMetricRequestDistanceDetourTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-1GQ2zQ-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricRequestDistanceDetourTotal}{NW1Dx1yV-1HM4JE-1}() throws SQLException \{
   return \nwlinkedidentc{queryMetricRequestDistanceDetourTotal}{NW1Dx1yV-1HM4JE-1}(true);
 \}
-\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricRequestDistanceDetourTotal}}{queryMetricRequestDistanceDetourTotal}}}\nwindexuse{\nwixident{queryMetricRequestDistanceDetourTotal}}{queryMetricRequestDistanceDetourTotal}{NW1Dx1yV-1GQ2zQ-1}\nwendcode{}\nwbegindocs{279}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricRequestDistanceDetourTotal}}{queryMetricRequestDistanceDetourTotal}}}\nwindexuse{\nwixident{queryMetricRequestDistanceDetourTotal}}{queryMetricRequestDistanceDetourTotal}{NW1Dx1yV-1GQ2zQ-1}\nwendcode{}\nwbegindocs{280}\nwdocspar
 
 \subsection{\texttt{DBQueryMetricRequestDistanceTransitTotal}(1)}
 \begin{tabular}{p{\textwidth}}
@@ -8498,7 +8503,7 @@ or {\Tt{}null\nwendquote} if no results.
 \textbf{Throws:} {\Tt{}SQLException\nwendquote} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{280}\sublabel{NW1Dx1yV-Y8OUv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-Y8OUv-1}}}\moddef{Read: DBQueryMetricRequestDistanceTransitTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-Y8OUv-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{281}\sublabel{NW1Dx1yV-Y8OUv-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-Y8OUv-1}}}\moddef{Read: DBQueryMetricRequestDistanceTransitTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-Y8OUv-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricRequestDistanceTransitTotal}{NW1Dx1yV-Y8OUv-1}(boolean flag_usecache) throws SQLException \{
   if (flag_usecache) \{
     final int[] output = new int[] \{ 0 \};
@@ -8513,18 +8518,18 @@ int[] \nwlinkedidentc{DBQueryMetricRequestDistanceTransitTotal}{NW1Dx1yV-Y8OUv-1
   \}
 \}
 \nwindexdefn{\nwixident{DBQueryMetricRequestDistanceTransitTotal}}{DBQueryMetricRequestDistanceTransitTotal}{NW1Dx1yV-Y8OUv-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricRequestDistanceTransitTotal}}{DBQueryMetricRequestDistanceTransitTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S115}}{S115}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-Y8OUv-1}\nwindexuse{\nwixident{S115}}{S115}{NW1Dx1yV-Y8OUv-1}\nwendcode{}\nwbegindocs{281}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricRequestDistanceTransitTotal}}{DBQueryMetricRequestDistanceTransitTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S115}}{S115}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-Y8OUv-1}\nwindexuse{\nwixident{S115}}{S115}{NW1Dx1yV-Y8OUv-1}\nwendcode{}\nwbegindocs{282}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{DBQueryMetricRequestDistanceTransitTotal}{NW1Dx1yV-Y8OUv-1}\nwendquote}}(0) calls {\Tt{}\nwlinkedidentq{DBQueryMetricRequestDistanceTransitTotal}{NW1Dx1yV-Y8OUv-1}\nwendquote}(1)
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{282}\sublabel{NW1Dx1yV-Z4xun-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-Z4xun-1}}}\moddef{Read: DBQueryMetricRequestDistanceTransitTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-Z4xun-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{283}\sublabel{NW1Dx1yV-Z4xun-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-Z4xun-1}}}\moddef{Read: DBQueryMetricRequestDistanceTransitTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-Z4xun-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricRequestDistanceTransitTotal}{NW1Dx1yV-Y8OUv-1}() throws SQLException \{
   return \nwlinkedidentc{DBQueryMetricRequestDistanceTransitTotal}{NW1Dx1yV-Y8OUv-1}(true);
 \}
-\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestDistanceTransitTotal}}{DBQueryMetricRequestDistanceTransitTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestDistanceTransitTotal}}{DBQueryMetricRequestDistanceTransitTotal}{NW1Dx1yV-Z4xun-1}\nwendcode{}\nwbegindocs{283}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestDistanceTransitTotal}}{DBQueryMetricRequestDistanceTransitTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestDistanceTransitTotal}}{DBQueryMetricRequestDistanceTransitTotal}{NW1Dx1yV-Z4xun-1}\nwendcode{}\nwbegindocs{284}\nwdocspar
 \noindent
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -8532,7 +8537,7 @@ int[] \nwlinkedidentc{DBQueryMetricRequestDistanceTransitTotal}{NW1Dx1yV-Y8OUv-1
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricRequestDistanceTransitTotal}{NW1Dx1yV-l3AND-1}\nwendquote}}(1) wraps {\Tt{}\nwlinkedidentq{DBQueryMetricRequestDistanceTransitTotal}{NW1Dx1yV-Y8OUv-1}\nwendquote}(1).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{284}\sublabel{NW1Dx1yV-l3AND-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-l3AND-1}}}\moddef{Read: queryMetricRequestDistanceTransitTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-l3AND-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{285}\sublabel{NW1Dx1yV-l3AND-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-l3AND-1}}}\moddef{Read: queryMetricRequestDistanceTransitTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-l3AND-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricRequestDistanceTransitTotal}{NW1Dx1yV-l3AND-1}(boolean flag_usecache) throws SQLException \{
   long A0 = System.currentTimeMillis();
   int[] output = storage.\nwlinkedidentc{DBQueryMetricRequestDistanceTransitTotal}{NW1Dx1yV-Y8OUv-1}(flag_usecache);
@@ -8540,18 +8545,18 @@ int[] \nwlinkedidentc{queryMetricRequestDistanceTransitTotal}{NW1Dx1yV-l3AND-1}(
   return output;
 \}
 \nwindexdefn{\nwixident{queryMetricRequestDistanceTransitTotal}}{queryMetricRequestDistanceTransitTotal}{NW1Dx1yV-l3AND-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricRequestDistanceTransitTotal}}{queryMetricRequestDistanceTransitTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestDistanceTransitTotal}}{DBQueryMetricRequestDistanceTransitTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestDistanceTransitTotal}}{DBQueryMetricRequestDistanceTransitTotal}{NW1Dx1yV-l3AND-1}\nwendcode{}\nwbegindocs{285}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricRequestDistanceTransitTotal}}{queryMetricRequestDistanceTransitTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestDistanceTransitTotal}}{DBQueryMetricRequestDistanceTransitTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestDistanceTransitTotal}}{DBQueryMetricRequestDistanceTransitTotal}{NW1Dx1yV-l3AND-1}\nwendcode{}\nwbegindocs{286}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricRequestDistanceTransitTotal}{NW1Dx1yV-l3AND-1}\nwendquote}}(0) calls {\Tt{}\nwlinkedidentq{queryMetricRequestDistanceTransitTotal}{NW1Dx1yV-l3AND-1}\nwendquote}(1)
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{286}\sublabel{NW1Dx1yV-l8wOt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-l8wOt-1}}}\moddef{Read: queryMetricRequestDistanceTransitTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-l8wOt-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{287}\sublabel{NW1Dx1yV-l8wOt-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-l8wOt-1}}}\moddef{Read: queryMetricRequestDistanceTransitTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-l8wOt-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricRequestDistanceTransitTotal}{NW1Dx1yV-l3AND-1}() throws SQLException \{
   return \nwlinkedidentc{queryMetricRequestDistanceTransitTotal}{NW1Dx1yV-l3AND-1}(true);
 \}
-\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricRequestDistanceTransitTotal}}{queryMetricRequestDistanceTransitTotal}}}\nwindexuse{\nwixident{queryMetricRequestDistanceTransitTotal}}{queryMetricRequestDistanceTransitTotal}{NW1Dx1yV-l8wOt-1}\nwendcode{}\nwbegindocs{287}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricRequestDistanceTransitTotal}}{queryMetricRequestDistanceTransitTotal}}}\nwindexuse{\nwixident{queryMetricRequestDistanceTransitTotal}}{queryMetricRequestDistanceTransitTotal}{NW1Dx1yV-l8wOt-1}\nwendcode{}\nwbegindocs{288}\nwdocspar
 
 \subsection{\texttt{DBQueryMetricRequestDurationPickupTotal}(1)}
 \begin{tabular}{p{\textwidth}}
@@ -8575,7 +8580,7 @@ or {\Tt{}null\nwendquote} if no results.
 \textbf{Throws:} {\Tt{}SQLException\nwendquote} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{288}\sublabel{NW1Dx1yV-29sr46-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-29sr46-1}}}\moddef{Read: DBQueryMetricRequestDurationPickupTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-29sr46-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{289}\sublabel{NW1Dx1yV-29sr46-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-29sr46-1}}}\moddef{Read: DBQueryMetricRequestDurationPickupTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-29sr46-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricRequestDurationPickupTotal}{NW1Dx1yV-29sr46-1}(boolean flag_usecache) throws SQLException \{
   if (flag_usecache) \{
     final int[] output = new int[] \{ 0 \};
@@ -8590,18 +8595,18 @@ int[] \nwlinkedidentc{DBQueryMetricRequestDurationPickupTotal}{NW1Dx1yV-29sr46-1
   \}
 \}
 \nwindexdefn{\nwixident{DBQueryMetricRequestDurationPickupTotal}}{DBQueryMetricRequestDurationPickupTotal}{NW1Dx1yV-29sr46-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricRequestDurationPickupTotal}}{DBQueryMetricRequestDurationPickupTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S119}}{S119}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-29sr46-1}\nwindexuse{\nwixident{S119}}{S119}{NW1Dx1yV-29sr46-1}\nwendcode{}\nwbegindocs{289}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricRequestDurationPickupTotal}}{DBQueryMetricRequestDurationPickupTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S119}}{S119}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-29sr46-1}\nwindexuse{\nwixident{S119}}{S119}{NW1Dx1yV-29sr46-1}\nwendcode{}\nwbegindocs{290}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{DBQueryMetricRequestDurationPickupTotal}{NW1Dx1yV-29sr46-1}\nwendquote}}(0) calls {\Tt{}\nwlinkedidentq{DBQueryMetricRequestDurationPickupTotal}{NW1Dx1yV-29sr46-1}\nwendquote}(1)
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{290}\sublabel{NW1Dx1yV-28z28Y-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-28z28Y-1}}}\moddef{Read: DBQueryMetricRequestDurationPickupTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-28z28Y-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{291}\sublabel{NW1Dx1yV-28z28Y-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-28z28Y-1}}}\moddef{Read: DBQueryMetricRequestDurationPickupTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-28z28Y-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricRequestDurationPickupTotal}{NW1Dx1yV-29sr46-1}() throws SQLException \{
   return \nwlinkedidentc{DBQueryMetricRequestDurationPickupTotal}{NW1Dx1yV-29sr46-1}(true);
 \}
-\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestDurationPickupTotal}}{DBQueryMetricRequestDurationPickupTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestDurationPickupTotal}}{DBQueryMetricRequestDurationPickupTotal}{NW1Dx1yV-28z28Y-1}\nwendcode{}\nwbegindocs{291}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestDurationPickupTotal}}{DBQueryMetricRequestDurationPickupTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestDurationPickupTotal}}{DBQueryMetricRequestDurationPickupTotal}{NW1Dx1yV-28z28Y-1}\nwendcode{}\nwbegindocs{292}\nwdocspar
 \noindent
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -8609,7 +8614,7 @@ int[] \nwlinkedidentc{DBQueryMetricRequestDurationPickupTotal}{NW1Dx1yV-29sr46-1
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricRequestDurationPickupTotal}{NW1Dx1yV-2h26ru-1}\nwendquote}}(1) wraps {\Tt{}\nwlinkedidentq{DBQueryMetricRequestDurationPickupTotal}{NW1Dx1yV-29sr46-1}\nwendquote}(1).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{292}\sublabel{NW1Dx1yV-2h26ru-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2h26ru-1}}}\moddef{Read: queryMetricRequestDurationPickupTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2h26ru-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{293}\sublabel{NW1Dx1yV-2h26ru-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2h26ru-1}}}\moddef{Read: queryMetricRequestDurationPickupTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2h26ru-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricRequestDurationPickupTotal}{NW1Dx1yV-2h26ru-1}(boolean flag_usecache) throws SQLException \{
   long A0 = System.currentTimeMillis();
   int[] output = storage.\nwlinkedidentc{DBQueryMetricRequestDurationPickupTotal}{NW1Dx1yV-29sr46-1}(flag_usecache);
@@ -8617,18 +8622,18 @@ int[] \nwlinkedidentc{queryMetricRequestDurationPickupTotal}{NW1Dx1yV-2h26ru-1}(
   return output;
 \}
 \nwindexdefn{\nwixident{queryMetricRequestDurationPickupTotal}}{queryMetricRequestDurationPickupTotal}{NW1Dx1yV-2h26ru-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricRequestDurationPickupTotal}}{queryMetricRequestDurationPickupTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestDurationPickupTotal}}{DBQueryMetricRequestDurationPickupTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestDurationPickupTotal}}{DBQueryMetricRequestDurationPickupTotal}{NW1Dx1yV-2h26ru-1}\nwendcode{}\nwbegindocs{293}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricRequestDurationPickupTotal}}{queryMetricRequestDurationPickupTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestDurationPickupTotal}}{DBQueryMetricRequestDurationPickupTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestDurationPickupTotal}}{DBQueryMetricRequestDurationPickupTotal}{NW1Dx1yV-2h26ru-1}\nwendcode{}\nwbegindocs{294}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricRequestDurationPickupTotal}{NW1Dx1yV-2h26ru-1}\nwendquote}}(0) calls {\Tt{}\nwlinkedidentq{queryMetricRequestDurationPickupTotal}{NW1Dx1yV-2h26ru-1}\nwendquote}(1)
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{294}\sublabel{NW1Dx1yV-2hwTtW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2hwTtW-1}}}\moddef{Read: queryMetricRequestDurationPickupTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2hwTtW-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{295}\sublabel{NW1Dx1yV-2hwTtW-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2hwTtW-1}}}\moddef{Read: queryMetricRequestDurationPickupTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2hwTtW-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricRequestDurationPickupTotal}{NW1Dx1yV-2h26ru-1}() throws SQLException \{
   return \nwlinkedidentc{queryMetricRequestDurationPickupTotal}{NW1Dx1yV-2h26ru-1}(true);
 \}
-\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricRequestDurationPickupTotal}}{queryMetricRequestDurationPickupTotal}}}\nwindexuse{\nwixident{queryMetricRequestDurationPickupTotal}}{queryMetricRequestDurationPickupTotal}{NW1Dx1yV-2hwTtW-1}\nwendcode{}\nwbegindocs{295}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricRequestDurationPickupTotal}}{queryMetricRequestDurationPickupTotal}}}\nwindexuse{\nwixident{queryMetricRequestDurationPickupTotal}}{queryMetricRequestDurationPickupTotal}{NW1Dx1yV-2hwTtW-1}\nwendcode{}\nwbegindocs{296}\nwdocspar
 
 \subsection{\texttt{DBQueryMetricRequestDurationTransitTotal}(1)}
 \begin{tabular}{p{\textwidth}}
@@ -8652,7 +8657,7 @@ or {\Tt{}null\nwendquote} if no results.
 \textbf{Throws:} {\Tt{}SQLException\nwendquote} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{296}\sublabel{NW1Dx1yV-2RzFB3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2RzFB3-1}}}\moddef{Read: DBQueryMetricRequestDurationTransitTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2RzFB3-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{297}\sublabel{NW1Dx1yV-2RzFB3-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2RzFB3-1}}}\moddef{Read: DBQueryMetricRequestDurationTransitTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2RzFB3-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricRequestDurationTransitTotal}{NW1Dx1yV-2RzFB3-1}(boolean flag_usecache) throws SQLException \{
   if (flag_usecache) \{
     final int[] output = new int[] \{ 0 \};
@@ -8667,18 +8672,18 @@ int[] \nwlinkedidentc{DBQueryMetricRequestDurationTransitTotal}{NW1Dx1yV-2RzFB3-
   \}
 \}
 \nwindexdefn{\nwixident{DBQueryMetricRequestDurationTransitTotal}}{DBQueryMetricRequestDurationTransitTotal}{NW1Dx1yV-2RzFB3-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricRequestDurationTransitTotal}}{DBQueryMetricRequestDurationTransitTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S121}}{S121}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-2RzFB3-1}\nwindexuse{\nwixident{S121}}{S121}{NW1Dx1yV-2RzFB3-1}\nwendcode{}\nwbegindocs{297}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricRequestDurationTransitTotal}}{DBQueryMetricRequestDurationTransitTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S121}}{S121}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-2RzFB3-1}\nwindexuse{\nwixident{S121}}{S121}{NW1Dx1yV-2RzFB3-1}\nwendcode{}\nwbegindocs{298}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{DBQueryMetricRequestDurationTransitTotal}{NW1Dx1yV-2RzFB3-1}\nwendquote}}(0) calls {\Tt{}\nwlinkedidentq{DBQueryMetricRequestDurationTransitTotal}{NW1Dx1yV-2RzFB3-1}\nwendquote}(1)
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{298}\sublabel{NW1Dx1yV-2RC1QH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2RC1QH-1}}}\moddef{Read: DBQueryMetricRequestDurationTransitTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2RC1QH-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{299}\sublabel{NW1Dx1yV-2RC1QH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-2RC1QH-1}}}\moddef{Read: DBQueryMetricRequestDurationTransitTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-2RC1QH-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricRequestDurationTransitTotal}{NW1Dx1yV-2RzFB3-1}() throws SQLException \{
   return \nwlinkedidentc{DBQueryMetricRequestDurationTransitTotal}{NW1Dx1yV-2RzFB3-1}(true);
 \}
-\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestDurationTransitTotal}}{DBQueryMetricRequestDurationTransitTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestDurationTransitTotal}}{DBQueryMetricRequestDurationTransitTotal}{NW1Dx1yV-2RC1QH-1}\nwendcode{}\nwbegindocs{299}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestDurationTransitTotal}}{DBQueryMetricRequestDurationTransitTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestDurationTransitTotal}}{DBQueryMetricRequestDurationTransitTotal}{NW1Dx1yV-2RC1QH-1}\nwendcode{}\nwbegindocs{300}\nwdocspar
 \noindent
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -8686,7 +8691,7 @@ int[] \nwlinkedidentc{DBQueryMetricRequestDurationTransitTotal}{NW1Dx1yV-2RzFB3-
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricRequestDurationTransitTotal}{NW1Dx1yV-3GwE5L-1}\nwendquote}}(1) wraps {\Tt{}\nwlinkedidentq{DBQueryMetricRequestDurationTransitTotal}{NW1Dx1yV-2RzFB3-1}\nwendquote}(1).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{300}\sublabel{NW1Dx1yV-3GwE5L-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3GwE5L-1}}}\moddef{Read: queryMetricRequestDurationTransitTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3GwE5L-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{301}\sublabel{NW1Dx1yV-3GwE5L-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3GwE5L-1}}}\moddef{Read: queryMetricRequestDurationTransitTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3GwE5L-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricRequestDurationTransitTotal}{NW1Dx1yV-3GwE5L-1}(boolean flag_usecache) throws SQLException \{
   long A0 = System.currentTimeMillis();
   int[] output = storage.\nwlinkedidentc{DBQueryMetricRequestDurationTransitTotal}{NW1Dx1yV-2RzFB3-1}(flag_usecache);
@@ -8694,18 +8699,18 @@ int[] \nwlinkedidentc{queryMetricRequestDurationTransitTotal}{NW1Dx1yV-3GwE5L-1}
   return output;
 \}
 \nwindexdefn{\nwixident{queryMetricRequestDurationTransitTotal}}{queryMetricRequestDurationTransitTotal}{NW1Dx1yV-3GwE5L-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricRequestDurationTransitTotal}}{queryMetricRequestDurationTransitTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestDurationTransitTotal}}{DBQueryMetricRequestDurationTransitTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestDurationTransitTotal}}{DBQueryMetricRequestDurationTransitTotal}{NW1Dx1yV-3GwE5L-1}\nwendcode{}\nwbegindocs{301}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricRequestDurationTransitTotal}}{queryMetricRequestDurationTransitTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestDurationTransitTotal}}{DBQueryMetricRequestDurationTransitTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestDurationTransitTotal}}{DBQueryMetricRequestDurationTransitTotal}{NW1Dx1yV-3GwE5L-1}\nwendcode{}\nwbegindocs{302}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricRequestDurationTransitTotal}{NW1Dx1yV-3GwE5L-1}\nwendquote}}(0) calls {\Tt{}\nwlinkedidentq{queryMetricRequestDurationTransitTotal}{NW1Dx1yV-3GwE5L-1}\nwendquote}(1)
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{302}\sublabel{NW1Dx1yV-3GQbSd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3GQbSd-1}}}\moddef{Read: queryMetricRequestDurationTransitTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3GQbSd-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{303}\sublabel{NW1Dx1yV-3GQbSd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3GQbSd-1}}}\moddef{Read: queryMetricRequestDurationTransitTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3GQbSd-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricRequestDurationTransitTotal}{NW1Dx1yV-3GwE5L-1}() throws SQLException \{
   return \nwlinkedidentc{queryMetricRequestDurationTransitTotal}{NW1Dx1yV-3GwE5L-1}(true);
 \}
-\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricRequestDurationTransitTotal}}{queryMetricRequestDurationTransitTotal}}}\nwindexuse{\nwixident{queryMetricRequestDurationTransitTotal}}{queryMetricRequestDurationTransitTotal}{NW1Dx1yV-3GQbSd-1}\nwendcode{}\nwbegindocs{303}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricRequestDurationTransitTotal}}{queryMetricRequestDurationTransitTotal}}}\nwindexuse{\nwixident{queryMetricRequestDurationTransitTotal}}{queryMetricRequestDurationTransitTotal}{NW1Dx1yV-3GQbSd-1}\nwendcode{}\nwbegindocs{304}\nwdocspar
 
 \subsection{\texttt{DBQueryMetricRequestDurationTravelTotal}(1)}
 \begin{tabular}{p{\textwidth}}
@@ -8729,7 +8734,7 @@ or {\Tt{}null\nwendquote} if no results.
 \textbf{Throws:} {\Tt{}SQLException\nwendquote} if database failure is encountered.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{304}\sublabel{NW1Dx1yV-3xamvG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3xamvG-1}}}\moddef{Read: DBQueryMetricRequestDurationTravelTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3xamvG-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{305}\sublabel{NW1Dx1yV-3xamvG-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3xamvG-1}}}\moddef{Read: DBQueryMetricRequestDurationTravelTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3xamvG-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricRequestDurationTravelTotal}{NW1Dx1yV-3xamvG-1}(boolean flag_usecache) throws SQLException \{
   if (flag_usecache) \{
     final int[] output = new int[] \{ 0 \};
@@ -8744,18 +8749,18 @@ int[] \nwlinkedidentc{DBQueryMetricRequestDurationTravelTotal}{NW1Dx1yV-3xamvG-1
   \}
 \}
 \nwindexdefn{\nwixident{DBQueryMetricRequestDurationTravelTotal}}{DBQueryMetricRequestDurationTravelTotal}{NW1Dx1yV-3xamvG-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricRequestDurationTravelTotal}}{DBQueryMetricRequestDurationTravelTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S123}}{S123}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-3xamvG-1}\nwindexuse{\nwixident{S123}}{S123}{NW1Dx1yV-3xamvG-1}\nwendcode{}\nwbegindocs{305}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricRequestDurationTravelTotal}}{DBQueryMetricRequestDurationTravelTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S123}}{S123}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-3xamvG-1}\nwindexuse{\nwixident{S123}}{S123}{NW1Dx1yV-3xamvG-1}\nwendcode{}\nwbegindocs{306}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{DBQueryMetricRequestDurationTravelTotal}{NW1Dx1yV-3xamvG-1}\nwendquote}}(0) calls {\Tt{}\nwlinkedidentq{DBQueryMetricRequestDurationTravelTotal}{NW1Dx1yV-3xamvG-1}\nwendquote}(1)
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{306}\sublabel{NW1Dx1yV-3y4D9i-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3y4D9i-1}}}\moddef{Read: DBQueryMetricRequestDurationTravelTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3y4D9i-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{307}\sublabel{NW1Dx1yV-3y4D9i-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-3y4D9i-1}}}\moddef{Read: DBQueryMetricRequestDurationTravelTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-3y4D9i-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricRequestDurationTravelTotal}{NW1Dx1yV-3xamvG-1}() throws SQLException \{
   return \nwlinkedidentc{DBQueryMetricRequestDurationTravelTotal}{NW1Dx1yV-3xamvG-1}(true);
 \}
-\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestDurationTravelTotal}}{DBQueryMetricRequestDurationTravelTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestDurationTravelTotal}}{DBQueryMetricRequestDurationTravelTotal}{NW1Dx1yV-3y4D9i-1}\nwendcode{}\nwbegindocs{307}\nwdocspar
+\nwused{\\{NW4QM9HE-Oyob-2}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestDurationTravelTotal}}{DBQueryMetricRequestDurationTravelTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestDurationTravelTotal}}{DBQueryMetricRequestDurationTravelTotal}{NW1Dx1yV-3y4D9i-1}\nwendcode{}\nwbegindocs{308}\nwdocspar
 \noindent
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -8763,7 +8768,7 @@ int[] \nwlinkedidentc{DBQueryMetricRequestDurationTravelTotal}{NW1Dx1yV-3xamvG-1
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricRequestDurationTravelTotal}{NW1Dx1yV-19E68o-1}\nwendquote}}(1) wraps {\Tt{}\nwlinkedidentq{DBQueryMetricRequestDurationTravelTotal}{NW1Dx1yV-3xamvG-1}\nwendquote}(1).\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{308}\sublabel{NW1Dx1yV-19E68o-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-19E68o-1}}}\moddef{Read: queryMetricRequestDurationTravelTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-19E68o-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{309}\sublabel{NW1Dx1yV-19E68o-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-19E68o-1}}}\moddef{Read: queryMetricRequestDurationTravelTotal(1)~{\nwtagstyle{}\subpageref{NW1Dx1yV-19E68o-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricRequestDurationTravelTotal}{NW1Dx1yV-19E68o-1}(boolean flag_usecache) throws SQLException \{
   long A0 = System.currentTimeMillis();
   int[] output = storage.\nwlinkedidentc{DBQueryMetricRequestDurationTravelTotal}{NW1Dx1yV-3xamvG-1}(flag_usecache);
@@ -8771,21 +8776,21 @@ int[] \nwlinkedidentc{queryMetricRequestDurationTravelTotal}{NW1Dx1yV-19E68o-1}(
   return output;
 \}
 \nwindexdefn{\nwixident{queryMetricRequestDurationTravelTotal}}{queryMetricRequestDurationTravelTotal}{NW1Dx1yV-19E68o-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricRequestDurationTravelTotal}}{queryMetricRequestDurationTravelTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestDurationTravelTotal}}{DBQueryMetricRequestDurationTravelTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestDurationTravelTotal}}{DBQueryMetricRequestDurationTravelTotal}{NW1Dx1yV-19E68o-1}\nwendcode{}\nwbegindocs{309}\begin{tabular}{p{\textwidth}}
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricRequestDurationTravelTotal}}{queryMetricRequestDurationTravelTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestDurationTravelTotal}}{DBQueryMetricRequestDurationTravelTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestDurationTravelTotal}}{DBQueryMetricRequestDurationTravelTotal}{NW1Dx1yV-19E68o-1}\nwendcode{}\nwbegindocs{310}\begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
 Method \textcolor{blue}{{\Tt{}\nwlinkedidentq{queryMetricRequestDurationTravelTotal}{NW1Dx1yV-19E68o-1}\nwendquote}}(0) calls {\Tt{}\nwlinkedidentq{queryMetricRequestDurationTravelTotal}{NW1Dx1yV-19E68o-1}\nwendquote}(1)
 with a default parameter.\\
 \bottomrule
 \end{tabular}
-\nwenddocs{}\nwbegincode{310}\sublabel{NW1Dx1yV-18k7oI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-18k7oI-1}}}\moddef{Read: queryMetricRequestDurationTravelTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-18k7oI-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{311}\sublabel{NW1Dx1yV-18k7oI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-18k7oI-1}}}\moddef{Read: queryMetricRequestDurationTravelTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-18k7oI-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-2}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricRequestDurationTravelTotal}{NW1Dx1yV-19E68o-1}() throws SQLException \{
   return \nwlinkedidentc{queryMetricRequestDurationTravelTotal}{NW1Dx1yV-19E68o-1}(true);
 \}
-\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricRequestDurationTravelTotal}}{queryMetricRequestDurationTravelTotal}}}\nwindexuse{\nwixident{queryMetricRequestDurationTravelTotal}}{queryMetricRequestDurationTravelTotal}{NW1Dx1yV-18k7oI-1}\nwendcode{}\nwbegindocs{311}\nwdocspar
+\nwused{\\{NW4QM9HE-2u8vSA-2}}\nwidentuses{\\{{\nwixident{queryMetricRequestDurationTravelTotal}}{queryMetricRequestDurationTravelTotal}}}\nwindexuse{\nwixident{queryMetricRequestDurationTravelTotal}}{queryMetricRequestDurationTravelTotal}{NW1Dx1yV-18k7oI-1}\nwendcode{}\nwbegindocs{312}\nwdocspar
 
 \subsection{\texttt{DBQueryMetricRequestTWViolationsTotal}(0)}
-\nwenddocs{}\nwbegincode{312}\sublabel{NW1Dx1yV-4Q7d2w-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-4Q7d2w-1}}}\moddef{Read: DBQueryMetricRequestTWViolationsTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-4Q7d2w-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{313}\sublabel{NW1Dx1yV-4Q7d2w-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-4Q7d2w-1}}}\moddef{Read: DBQueryMetricRequestTWViolationsTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-4Q7d2w-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-Oyob-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{DBQueryMetricRequestTWViolationsTotal}{NW1Dx1yV-4Q7d2w-1}() throws SQLException \{
   try (\LA{}Open \code{}conn\edoc{}~{\nwtagstyle{}\subpageref{NW1ODIS0-JT1v9-1}}\RA{}) \{
     return \nwlinkedidentc{PSQuery}{NW1ODIS0-yHOIP-1}(conn, "\nwlinkedidentc{S151}{NW1ODIS0-3WX0OJ-1}", 1);
@@ -8794,7 +8799,7 @@ int[] \nwlinkedidentc{DBQueryMetricRequestTWViolationsTotal}{NW1Dx1yV-4Q7d2w-1}(
   \}
 \}
 \nwindexdefn{\nwixident{DBQueryMetricRequestTWViolationsTotal}}{DBQueryMetricRequestTWViolationsTotal}{NW1Dx1yV-4Q7d2w-1}\eatline
-\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricRequestTWViolationsTotal}}{DBQueryMetricRequestTWViolationsTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S151}}{S151}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-4Q7d2w-1}\nwindexuse{\nwixident{S151}}{S151}{NW1Dx1yV-4Q7d2w-1}\nwendcode{}\nwbegincode{313}\sublabel{NW1Dx1yV-6MUNa-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-6MUNa-1}}}\moddef{Read: queryMetricRequestTWViolationsTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-6MUNa-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
+\nwused{\\{NW4QM9HE-Oyob-1}}\nwidentdefs{\\{{\nwixident{DBQueryMetricRequestTWViolationsTotal}}{DBQueryMetricRequestTWViolationsTotal}}}\nwidentuses{\\{{\nwixident{PSQuery}}{PSQuery}}\\{{\nwixident{S151}}{S151}}}\nwindexuse{\nwixident{PSQuery}}{PSQuery}{NW1Dx1yV-4Q7d2w-1}\nwindexuse{\nwixident{S151}}{S151}{NW1Dx1yV-4Q7d2w-1}\nwendcode{}\nwbegincode{314}\sublabel{NW1Dx1yV-6MUNa-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1Dx1yV-6MUNa-1}}}\moddef{Read: queryMetricRequestTWViolationsTotal(0)~{\nwtagstyle{}\subpageref{NW1Dx1yV-6MUNa-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW4QM9HE-2u8vSA-1}}\nwenddeflinemarkup
 int[] \nwlinkedidentc{queryMetricRequestTWViolationsTotal}{NW1Dx1yV-6MUNa-1}() throws SQLException \{
   long A0 = System.currentTimeMillis();
   int[] output = storage.\nwlinkedidentc{DBQueryMetricRequestTWViolationsTotal}{NW1Dx1yV-4Q7d2w-1}();
@@ -8802,7 +8807,8 @@ int[] \nwlinkedidentc{queryMetricRequestTWViolationsTotal}{NW1Dx1yV-6MUNa-1}() t
   return output;
 \}
 \nwindexdefn{\nwixident{queryMetricRequestTWViolationsTotal}}{queryMetricRequestTWViolationsTotal}{NW1Dx1yV-6MUNa-1}\eatline
-\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricRequestTWViolationsTotal}}{queryMetricRequestTWViolationsTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestTWViolationsTotal}}{DBQueryMetricRequestTWViolationsTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestTWViolationsTotal}}{DBQueryMetricRequestTWViolationsTotal}{NW1Dx1yV-6MUNa-1}\nwendcode{}\nwfilename{src/sim-writing.nw}\nwbegindocs{0}\chapter{Write Operations}
+\nwused{\\{NW4QM9HE-2u8vSA-1}}\nwidentdefs{\\{{\nwixident{queryMetricRequestTWViolationsTotal}}{queryMetricRequestTWViolationsTotal}}}\nwidentuses{\\{{\nwixident{DBQueryMetricRequestTWViolationsTotal}}{DBQueryMetricRequestTWViolationsTotal}}}\nwindexuse{\nwixident{DBQueryMetricRequestTWViolationsTotal}}{DBQueryMetricRequestTWViolationsTotal}{NW1Dx1yV-6MUNa-1}\nwendcode{}\nwbegindocs{315}\nwdocspar
+\nwenddocs{}\nwfilename{src/sim-writing.nw}\nwbegindocs{0}\chapter{Write Operations}
 \label{sim-writing}
 
 \section{Chunks}
@@ -15234,6 +15240,23 @@ This violation can unexpectedly occur if the first waypoint in a submitted
 route has existing schedule events, and those events are also found in the
 submitted schedule. To avoid this issue, do not include existing events on
 this waypoint in the submitted schedule.
+
+\item \textbf{The check constraint 'C102J' was violated while performing an
+INSERT or UPDATE on table '``APP''.``CQ'''.} occurs when submitting a schedule
+with multiple events on a waypoint and capacity is not violated.
+
+If the events on the waypoint are ordered in a way that capacity violation
+occurs, then this error will occur, even if other events on the waypoint
+``balance out'' the violation. For example, consider a server with 3-capacity
+that has two prior pick-up events and no drop-off events. As it approaches
+waypoint $w_i$, it has a load of $q=-3 + 2 = -1$. Now on this waypoint, there
+are two more pick-ups and one drop-off. The total load after the waypoint is
+$q=-1+2-1=0$, causing no violation. However, if the pick-ups both occur before
+the drop-off, Jargo will detect that a violation did occur and throw the error.
+Considering only the two pick-ups, the load becomes $q=-1+2=+1$, which is
+a violation. The way to avoid this violation is to order the drop-offs in
+front of the pick-ups.
+% I have found no good way to do that so far.
 
 \end{enumerate}
 
