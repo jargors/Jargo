@@ -1,4 +1,4 @@
-\chapter{Ridesharing Users}
+\section{Ridesharing Users}
 \label{mod-users}
 
 In Jargo, the basic entity representing a ridesharing participant is the user.
@@ -84,7 +84,7 @@ in-service or out-of-service.\\
 \end{tabular}
 \end{table}
 
-\section{User Relation}
+\subsection{User Relation}
 \label{mod-users: user-relation}
 
 A user $u$ is a 5-tuple defined by
@@ -109,7 +109,7 @@ shortest path from $u_\texttt{o}$ to $u_\texttt{d}$ on graph $\mathcal{G}$, and
 the notation $\delta_u$ is used to denote the shortest travel duration along
 $d_u$ using the speed limits $\nu^\textrm{max}$ along the shortest-path edges.
 
-\section{Requests}
+\subsection{Requests}
 \label{mod-users: requests}
 
 A request represents a Type 1 or Type 2 customer.  Relation
@@ -120,7 +120,7 @@ $\mathcal{R}_\texttt{o}=\pi_\texttt{o}(\mathcal{R})$ is the set of all request
 origins and $\mathcal{R}_\texttt{d}=\pi_\texttt{d}(\mathcal{R})$ is the set of
 all request destinations.
 
-\section{Servers}
+\subsection{Servers}
 \label{mod-users: servers}
 
 Likewise, a server represents a Type 3 or Type 4 vehicle.  Relation
@@ -131,7 +131,7 @@ set of all server origins and
 $\mathcal{S}_\texttt{d}=\pi_\texttt{d}(\mathcal{S})$ is the set of all server
 destinations.
 
-\section{Routes}
+\subsection{Routes}
 \label{mod-users: routes}
 
 To encode vehicle motions, Jargo associates each server $s\in\mathcal{S}$ with
@@ -153,7 +153,7 @@ server's origin and destination respectively, or
 $\pi_\texttt{v}(w_1)=s_\texttt{o}$ and $\pi_\texttt{v}(w_{|w|})=s_\texttt{d}$.
 \end{enumerate}
 
-\section{Schedules}
+\subsection{Schedules}
 \label{mod-users: schedules}
 
 A server's schedule describes the events along the route and not any new
@@ -181,7 +181,7 @@ is given by $\sigma_{\texttt{t}\leq t}(b)$. Likewise, the remaining schedule
 denoted $b_{>t}$ encodes the future entries and exits and is given by
 $\sigma_{\texttt{t}>t}(b)$.
 
-\section{Schedule Labels}
+\subsection{Schedule Labels}
 \label{mod-users: labels}
 
 Each waypoint in schedule $b$ has a set of labels in order to identify which
@@ -218,7 +218,7 @@ Rules R5--R9 express P5.  Rule R10 can be interpreted to mean that a vehicle
 must ``serve itself'' at its own origin and destination.  This last rule helps
 to define later concepts.
 
-\section{Server Relation}
+\subsection{Server Relation}
 \label{user-mod: server-relation}
 
 By combining the routes, schedules, and labels into a set of
@@ -238,7 +238,7 @@ $$B(\mathcal{X},s)=\textrm{sort}(\pi_{\texttt{t},\texttt{v}}(\sigma_{\texttt{s}=
 
 The server relation can be used to define the remaining physical concepts, P6 and P7.
 
-\section{Request Status}
+\subsection{Request Status}
 Given a request $r$, the function
 \begin{equation}
 \label{eq:status}
@@ -256,7 +256,7 @@ These requests can be found by
 $$\mathcal{Q}(\mathcal{X},s,t)=\{r\in\mathcal{R}\mid\textrm{status}(\mathcal{X},r,t)=1
 \land\pi_\texttt{s}(\sigma_{r\in\texttt{L}}(\mathcal{X}))=s\}.$$
 
-\section{Load Burden}
+\subsection{Load Burden}
 The load burden on $s$ can be computed using the in-transit requests by
 \begin{equation}
 \label{eq:load}

@@ -1,9 +1,9 @@
-\chapter{Write Operations}
+\section{Write Operations}
 \label{sim-writing}
 
-\section{Chunks}
+\subsection{Chunks}
 
-\subsection{Apply traffic to route, sched}
+\subsubsection{Apply traffic to route, sched}
 <<Apply traffic to route, sched>>=
 int[] mutroute = route.clone();
 int[] mutsched = sched.clone();
@@ -37,7 +37,7 @@ if (this.traffic != null) {
 }
 @
 
-\subsection{Check time window violation}
+\subsubsection{Check time window violation}
 <<Check time window violation>>=
 for (int k = 0; k < (sched.length - 2); k += 3) {
   final int tl = this.storage.DBQueryUser(sched[(k + 2)])[3];
@@ -48,14 +48,14 @@ for (int k = 0; k < (sched.length - 2); k += 3) {
 }
 @
 
-\subsection{Delete from W remaining route}
+\subsubsection{Delete from W remaining route}
 <<Delete from W remaining route>>=
 PreparedStatement pS76 = this.PSCreate(conn, "S76");
 this.PSAdd(pS76, sid, route[0]);
 this.PSSubmit(pS76);
 @
 
-\subsection{Delete from PD, CPD jobs}
+\subsubsection{Delete from PD, CPD jobs}
 <<Delete from PD, CPD jobs>>=
 PreparedStatement pS42 = this.PSCreate(conn, "S42");
 PreparedStatement pS43 = this.PSCreate(conn, "S43");
@@ -66,14 +66,14 @@ for (final int r : ridneg) {
 this.PSSubmit(pS42, pS43);
 @
 
-\subsection{Delete from CQ remaining schedule}
+\subsubsection{Delete from CQ remaining schedule}
 <<Delete from CQ remaining schedule>>=
 PreparedStatement pS80 = this.PSCreate(conn, "S80");
 this.PSAdd(pS80, sid, route[0]);
 this.PSSubmit(pS80);
 @
 
-\subsection{Insert into user tables new user}
+\subsubsection{Insert into user tables new user}
 <<Insert into user tables new user>>=
 PreparedStatement pS2 = this.PSCreate(conn, "S2");
 PreparedStatement pS3 = this.PSCreate(conn, "S3");
@@ -90,21 +90,21 @@ this.PSAdd(pS7, uid, u[6]);
 this.PSSubmit(pS2, pS3, pS4, pS5, pS6, pS7);
 @
 
-\subsection{Insert into R new request}
+\subsubsection{Insert into R new request}
 <<Insert into R new request>>=
 PreparedStatement pS9 = this.PSCreate(conn, "S9");
 this.PSAdd(pS9, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
 this.PSSubmit(pS9);
 @
 
-\subsection{Insert into S new server}
+\subsubsection{Insert into S new server}
 <<Insert into S new server>>=
 PreparedStatement pS8 = this.PSCreate(conn, "S8");
 this.PSAdd(pS8, uid, u[1], u[2], u[3], u[4], u[5], u[6]);
 this.PSSubmit(pS8);
 @
 
-\subsection{Insert into W new server route}
+\subsubsection{Insert into W new server route}
 <<Insert into W new server route>>=
 <<Procedure to insert route>>
 pS10 = this.PSCreate(conn, "S10");
@@ -112,13 +112,13 @@ this.PSAdd(pS10, uid, se, null, null, route[0], route[1], null, null);
 this.PSSubmit(pS10);
 @
 
-\subsection{Insert into W new remaining route}
+\subsubsection{Insert into W new remaining route}
 <<Insert into W new remaining route>>=
 final int uid = sid;
 <<Procedure to insert route>>
 @
 
-\subsection{Insert into CW new server route}
+\subsubsection{Insert into CW new server route}
 <<Insert into CW new server route>>=
 PreparedStatement pS11 = this.PSCreate(conn, "S11");
 final int te = route[(route.length - 2)];
@@ -126,7 +126,7 @@ this.PSAdd(pS11, uid, u[2], u[3], u[4], u[5], u[2], u[4], te, u[5]);
 this.PSSubmit(pS11);
 @
 
-\subsection{Insert into CQ new server}
+\subsubsection{Insert into CQ new server}
 <<Insert into CQ new server>>=
 PreparedStatement pS14 = this.PSCreate(conn, "S14");
 this.PSAdd(pS14, uid, u[1], u[2], null, u[2], u[4], null, u[1],
@@ -134,7 +134,7 @@ this.PSAdd(pS14, uid, u[1], u[2], null, u[2], u[4], null, u[1],
 this.PSSubmit(pS14);
 @
 
-\subsection{Insert into CQ new remaining schedule}
+\subsubsection{Insert into CQ new remaining schedule}
 <<Insert into CQ new remaining schedule>>=
 PreparedStatement pS14 = PSCreate(conn, "S14");
 for (int j = 0; j < (sched.length - 3); j += 4) {
@@ -161,7 +161,7 @@ for (int j = 0; j < (sched.length - 3); j += 4) {
 this.PSSubmit(pS14);
 @
 
-\subsection{Insert into PD, CPD new jobs}
+\subsubsection{Insert into PD, CPD new jobs}
 <<Insert into PD, CPD new jobs>>=
 PreparedStatement pS12 = this.PSCreate(conn, "S12");
 PreparedStatement pS13 = this.PSCreate(conn, "S13");
@@ -187,7 +187,7 @@ for (final int r : ridpos) {
 this.PSSubmit(pS12, pS13);
 @
 
-\subsection{Procedure to insert route}
+\subsubsection{Procedure to insert route}
 <<Procedure to insert route>>=
 PreparedStatement pS10 = this.PSCreate(conn, "S10");
 for (int i = 0; i < (route.length - 3); i += 2) {
@@ -206,14 +206,14 @@ for (int i = 0; i < (route.length - 3); i += 2) {
 this.PSSubmit(pS10);
 @
 
-\subsection{Procedure to update route}
+\subsubsection{Procedure to update route}
 <<Procedure to update route>>=
 <<Delete from W remaining route>>
 <<Insert into W new remaining route>>
 <<Update CW, CPD route endpoint>>
 @
 
-\subsection{Procedure to update and add to schedule}
+\subsubsection{Procedure to update and add to schedule}
 <<Procedure to update and add to schedule>>=
 <<Update PD, CPD arrival and departure times>>
 <<Populate the tp, td cache and vp, vd cache and update CQ>>
@@ -223,7 +223,7 @@ this.PSSubmit(pS10);
 <<Insert into PD, CPD new jobs>>
 @
 
-\subsection{Populate the tp, td cache and vp, vd cache and update CQ}
+\subsubsection{Populate the tp, td cache and vp, vd cache and update CQ}
 <<Populate the tp, td cache and vp, vd cache and update CQ>>=
 PreparedStatement pS140 = this.PSCreate(conn, "S140");
 for (int j = 0; j < (sched.length - 3); j += 4) {
@@ -280,7 +280,7 @@ for (int j = 0; j < (sched.length - 3); j += 4) {
 this.PSSubmit(pS140);
 @
 
-\subsection{Select from CQ latest order number}
+\subsubsection{Select from CQ latest order number}
 <<Select from CQ latest order number>>=
 final int[] output = (route[0] == 0 ? null : this.PSQuery(conn, "S87", 3, sid, route[0]));
 int t1 = (route[0] == 0 ?  0 : output[0]);
@@ -288,7 +288,7 @@ int q1 = (route[0] == 0 ? sq : output[1]);
 int o1 = (route[0] == 0 ?  1 : output[2]);
 @
 
-\subsection{Update CW, CPD route endpoint}
+\subsubsection{Update CW, CPD route endpoint}
 <<Update CW, CPD route endpoint>>=
 PreparedStatement pS77 = this.PSCreate(conn, "S77");
 PreparedStatement pS139 = this.PSCreate(conn, "S139");
@@ -299,7 +299,7 @@ this.PSAdd(pS139, te, sid);
 this.PSSubmit(pS77, pS139);
 @
 
-\subsection{Update PD, CPD arrival and departure times}
+\subsubsection{Update PD, CPD arrival and departure times}
 <<Update PD, CPD arrival and departure times>>=
 PreparedStatement pS82 = this.PSCreate(conn, "S82");
 PreparedStatement pS83 = this.PSCreate(conn, "S83");
@@ -317,9 +317,9 @@ for (int j = 0; j < (sched.length - 3); j += 4) {
 this.PSSubmit(pS83, pS82, pS84);
 @
 
-\section{Methods: Write Road Network}
+\subsection{Methods: Write Road Network}
 
-\subsection{\texttt{DBInsertVertex}(3)}
+\subsubsection{\texttt{DBInsertVertex}(3)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -381,7 +381,7 @@ will appear in other write methods. If all succeeds, we put the vertex into
 }
 @
 
-\subsection{\texttt{DBInsertEdge}(4)}
+\subsubsection{\texttt{DBInsertEdge}(4)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -430,7 +430,7 @@ throws DuplicateEdgeException, SQLException {
 }
 @ %def DBInsertEdge
 
-\subsection{\texttt{DBUpdateEdgeSpeed}(3)}
+\subsubsection{\texttt{DBUpdateEdgeSpeed}(3)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -479,9 +479,9 @@ throws EdgeNotFoundException, SQLException {
 }
 @ %def DBUpdateEdgeSpeed
 
-\section{Methods: Write Users}
+\subsection{Methods: Write Users}
 
-\subsection{\texttt{DBInsertRequest}(1)}
+\subsubsection{\texttt{DBInsertRequest}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -555,7 +555,7 @@ void insertRequest(final int[] u) throws DuplicateUserException, SQLException {
 }
 @ %def insertRequest
 
-\subsection{\texttt{DBInsertServer}(2)}
+\subsubsection{\texttt{DBInsertServer}(2)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -648,9 +648,9 @@ throws DuplicateUserException, EdgeNotFoundException, SQLException,
 }
 @ %def insertServer
 
-\section{Methods: Write Server Properties}
+\subsection{Methods: Write Server Properties}
 
-\subsection{\texttt{DBUpdateServerService}(5)}
+\subsubsection{\texttt{DBUpdateServerService}(5)}
 <<Write: DBUpdateServerService(5)>>=
 void DBUpdateServerService(final int sid, final int[] route, final int[] sched,
     final int[] ridpos, final int[] ridneg)
@@ -768,9 +768,9 @@ throws RouteIllegalOverwriteException, UserNotFoundException,
 }
 @ %def updateServerAddToSchedule
 
-\section{Debug}
+\subsection{Debug}
 
-\subsection{Debug: DBUpdateServerService Parameters}
+\subsubsection{Debug: DBUpdateServerService Parameters}
 
 <<Debug: DBUpdateServerService parameters>>=
 if (DEBUG) {
@@ -779,7 +779,7 @@ if (DEBUG) {
 }
 @
 
-\subsection{Debug: RouteIllegalOverwriteException, Missing Branch Point}
+\subsubsection{Debug: RouteIllegalOverwriteException, Missing Branch Point}
 
 <<Debug: RouteIllegalOverwriteException, missing branch point>>=
 if (DEBUG) {
@@ -794,7 +794,7 @@ if (DEBUG) {
 }
 @
 
-\subsection{Debug: RouteIllegalOverwriteException, Overwrite Occurred}
+\subsubsection{Debug: RouteIllegalOverwriteException, Overwrite Occurred}
 
 <<Debug: RouteIllegalOverwriteException, overwrite occurred>>=
 if (DEBUG) {
@@ -811,7 +811,7 @@ if (DEBUG) {
 }
 @
 
-\subsection{Debug: EdgeNotFoundException}
+\subsubsection{Debug: EdgeNotFoundException}
 
 <<Debug: EdgeNotFoundException>>=
 if (DEBUG) {

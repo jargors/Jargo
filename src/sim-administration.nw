@@ -1,7 +1,7 @@
-\chapter{Administration}
+\section{Administration}
 \label{sim-administration}
 
-\section{Packages}
+\subsection{Packages}
 
 <<Package: [[sim]]>>=
 package com.github.jargors.sim;
@@ -16,14 +16,14 @@ package com.github.jargors.jmx;
 @
 
 
-\section{Chunks}
+\subsection{Chunks}
 
-\subsection{Open \texttt{conn}}
+\subsubsection{Open \texttt{conn}}
 <<Open [[conn]]>>=
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
 @
 
-\subsection{Set statement values}
+\subsubsection{Set statement values}
 <<Set statement values>>=
 for (int i = 0; i < values.length; i++) {
   if (values[i] == null) {
@@ -34,7 +34,7 @@ for (int i = 0; i < values.length; i++) {
 }
 @
 
-\subsection{Cache server distance}
+\subsubsection{Cache server distance}
 <<Cache server distance>>=
 try (<<Open [[conn]]>>) {
   this.distance_servers.put(sid, this.PSQuery(conn, "S104", 1, sid)[0]);
@@ -43,7 +43,7 @@ try (<<Open [[conn]]>>) {
 }
 @
 
-\subsection{Cache cruising distance and duration}
+\subsubsection{Cache cruising distance and duration}
 <<Cache cruising distance and duration>>=
 try (<<Open [[conn]]>>) {
   int sum = 0;
@@ -77,7 +77,7 @@ try (<<Open [[conn]]>>) {
 }
 @
 
-\subsection{Cache request transit distance and duration}
+\subsubsection{Cache request transit distance and duration}
 <<Cache request transit distance and duration>>=
 try (<<Open [[conn]]>>) {
   this.distance_requests_transit.put(r, this.DBQueryRequestDistanceTransit(r, false)[0]);
@@ -89,7 +89,7 @@ try (<<Open [[conn]]>>) {
 }
 @
 
-\subsection{Construct exception}
+\subsubsection{Construct exception}
 <<Construct empty exception>>=
 () { }
 @
@@ -106,9 +106,9 @@ try (<<Open [[conn]]>>) {
 (String message, Throwable cause) { super(message, cause); }
 @
 
-\section{Methods: Administration}
+\subsection{Methods: Administration}
 
-\subsection{\texttt{JargoInstanceNew}(0)}
+\subsubsection{\texttt{JargoInstanceNew}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -154,7 +154,7 @@ void instanceNew() throws SQLException {
 }
 @ %def instanceNew
 
-\subsection{\texttt{JargoInstanceInitialize}(0)}
+\subsubsection{\texttt{JargoInstanceInitialize}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -256,7 +256,7 @@ void instanceInitialize() {
 @ %def instanceInitialize
 
 
-\subsection{\texttt{JargoInstanceLoad}(1)}
+\subsubsection{\texttt{JargoInstanceLoad}(1)}
 <<Admin: JargoInstanceLoad(1)>>=
 void JargoInstanceLoad(final String p) throws SQLException {
   this.CONNECTIONS_URL = "jdbc:derby:"+p;
@@ -275,7 +275,7 @@ void instanceLoad(final String p) throws SQLException {
 }
 @ %def instanceLoad
 
-\subsection{\texttt{JargoInstanceLoadInMem}(1)}
+\subsubsection{\texttt{JargoInstanceLoadInMem}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -321,7 +321,7 @@ void instanceLoadInMem(final String p) throws SQLException {
 }
 @ %def instanceLoadInMem
 
-\subsection{\texttt{JargoInstanceExport}(1)}
+\subsubsection{\texttt{JargoInstanceExport}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -359,7 +359,7 @@ void instanceExport(final String p) throws SQLException {
 }
 @ %def instanceExport
 
-\subsection{\texttt{JargoInstanceClose}(0)}
+\subsubsection{\texttt{JargoInstanceClose}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -421,7 +421,7 @@ void instanceClose() throws SQLException {
 }
 @ %def instanceClose
 
-\subsection{\texttt{JargoCacheRoadNetworkFromDB}(0)}
+\subsubsection{\texttt{JargoCacheRoadNetworkFromDB}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -503,7 +503,7 @@ void cacheRoadNetworkFromDB() throws SQLException {
 
 
 
-\subsection{\texttt{JargoCacheUsersFromDB}(0)}
+\subsubsection{\texttt{JargoCacheUsersFromDB}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -602,7 +602,7 @@ void cacheUsersFromDB() throws SQLException {
 }
 @ %def cacheUsersFromDB
 
-\subsection{\texttt{JargoSetupDriver}(0)}
+\subsubsection{\texttt{JargoSetupDriver}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -642,7 +642,7 @@ void JargoSetupDriver() throws SQLException, ClassNotFoundException {
 }
 @ %def JargoSetupDriver
 
-\subsection{\texttt{JargoSetupPreparedStatements}(0)}
+\subsubsection{\texttt{JargoSetupPreparedStatements}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -1114,7 +1114,7 @@ this.lu_pstr.put("S163", SEL+"COUNT (*) FROM CQ WHERE sid=? AND q1+? > 0"
     + "AND ( (t1 < ? AND t2 > ?) OR (? < t2 AND t2 <= ?) )");
 @ %def S163
 
-\subsection{\texttt{PSCreate}(2)}
+\subsubsection{\texttt{PSCreate}(2)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -1148,7 +1148,7 @@ PreparedStatement PSCreate(final Connection conn, final String k) throws SQLExce
 }
 @ %def PSCreate
 
-\subsection{\texttt{PSAdd}(2..)}
+\subsubsection{\texttt{PSAdd}(2..)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -1178,7 +1178,7 @@ void PSAdd(PreparedStatement p, final Integer... values) throws SQLException {
 }
 @ %def PSAdd
 
-\subsection{\texttt{PSSubmit}(1..)}
+\subsubsection{\texttt{PSSubmit}(1..)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -1207,7 +1207,7 @@ void PSSubmit(PreparedStatement... statements) throws SQLException {
 }
 @ %def PSSubmit
 
-\subsection{\texttt{PSQuery}(3..)}
+\subsubsection{\texttt{PSQuery}(3..)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -1260,44 +1260,44 @@ throws SQLException {
 }
 @ %def PSQuery
 
-\subsection{\texttt{init}(0)}
+\subsubsection{\texttt{init}(0)}
 <<init(0)>>=
 void init() {
   // Custom initialization procedures
 }
 @
 
-\section{Methods: Getters}
+\subsection{Methods: Getters}
 
-\subsection{\texttt{getClock}(0)}
+\subsubsection{\texttt{getClock}(0)}
 <<Admin: getClock(0)>>=
 int getClock() {
   return this.statControllerClock;
 }
 @ %def getClock
 
-\subsection{\texttt{getClockStart}(0)}
+\subsubsection{\texttt{getClockStart}(0)}
 <<Admin: getClockStart(0)>>=
 int getClockStart() {
   return this.CLOCK_START;
 }
 @ %def getClockStart
 
-\subsection{\texttt{getClockReference}(0)}
+\subsubsection{\texttt{getClockReference}(0)}
 <<Admin: getClockReference(0)>>=
 String getClockReference() {
   return this.refTimeStr;
 }
 @ %def getClockReference
 
-\subsection{\texttt{getClockReferenceMs}(0)}
+\subsubsection{\texttt{getClockReferenceMs}(0)}
 <<Admin: getClockReferenceMs(0)>>=
 long getClockReferenceMs() {
   return this.refTimeMs;
 }
 @ %def getClockReferenceMs
 
-\subsection{\texttt{getRefCacheEdges}(0)}
+\subsubsection{\texttt{getRefCacheEdges}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -1316,7 +1316,7 @@ final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> getRefCacheE
 }
 @ %def getRefCacheEdges
 
-\subsection{\texttt{getRefCacheUsers}(0)}
+\subsubsection{\texttt{getRefCacheUsers}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -1336,7 +1336,7 @@ final ConcurrentHashMap<Integer, int[]> getRefCacheUsers() {
 @ %def getRefCacheUsers
 
 
-\subsection{\texttt{getRefCacheVertices}(0)}
+\subsubsection{\texttt{getRefCacheVertices}(0)}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -1355,56 +1355,56 @@ final ConcurrentHashMap<Integer, int[]> getRefCacheVertices() {
 }
 @ %def getRefCacheVertices
 
-\subsection{\texttt{getRefCommunicator}(0)}
+\subsubsection{\texttt{getRefCommunicator}(0)}
 <<Admin: getRefCommunicator(0)>>=
 Communicator getRefCommunicator() {
   return this.communicator;
 }
 @ %def getRefCommunicator
 
-\subsection{\texttt{getRefStorage}(0)}
+\subsubsection{\texttt{getRefStorage}(0)}
 <<Admin: getRefStorage(0)>>=
 Storage getRefStorage() {
   return this.storage;
 }
 @ %def getRefStorage
 
-\subsection{\texttt{retrieveQueueSize}(0)}
+\subsubsection{\texttt{retrieveQueueSize}(0)}
 <<Admin: retrieveQueueSize(0)>>=
 int retrieveQueueSize() {
   return this.client.getStatClientQueueSize();
 }
 @ %def retrieveQueueSize
 
-\subsection{\texttt{retrieveHandleRequestDur}(0)}
+\subsubsection{\texttt{retrieveHandleRequestDur}(0)}
 <<Admin: retrieveHandleRequestDur(0)>>=
 long retrieveHandleRequestDur() {
   return this.client.getStatClientHandleRequestDur();
 }
 @ %def retrieveHandleRequestDur
 
-\subsection{\texttt{retrieveClock}(0)}
+\subsubsection{\texttt{retrieveClock}(0)}
 <<Admin: retrieveClock(0)>>=
 int retrieveClock() {
   return this.controller.getClock();
 }
 @ %def retrieveClock
 
-\subsection{\texttt{retrieveRefCacheVertices}(0)}
+\subsubsection{\texttt{retrieveRefCacheVertices}(0)}
 <<Admin: retrieveRefCacheVertices(0)>>=
 final ConcurrentHashMap<Integer, int[]> retrieveRefCacheVertices() {
   return this.storage.getRefCacheVertices();
 }
 @ %def retrieveRefCacheVertices
 
-\subsection{\texttt{retrieveRefCacheEdges}(0)}
+\subsubsection{\texttt{retrieveRefCacheEdges}(0)}
 <<Admin: retrieveRefCacheEdges(0)>>=
 final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> retrieveRefCacheEdges() {
   return this.storage.getRefCacheEdges();
 }
 @ %def retrieveRefCacheEdges
 
-\subsection{\texttt{retrieveRefCacheUsers}(0)}
+\subsubsection{\texttt{retrieveRefCacheUsers}(0)}
 <<Admin: retrieveRefCacheUsers(0)>>=
 final ConcurrentHashMap<Integer, int[]> retrieveRefCacheUsers() {
   return this.storage.getRefCacheUsers();
@@ -1412,9 +1412,9 @@ final ConcurrentHashMap<Integer, int[]> retrieveRefCacheUsers() {
 @ %def retrieveRefCacheUsers
 
 
-\section{Methods: Setters}
+\subsection{Methods: Setters}
 
-\subsection{\texttt{setClockReference}(1)}
+\subsubsection{\texttt{setClockReference}(1)}
 <<Admin: setClockReference(1)>>=
 void setClockReference(final String clock_reference) throws IllegalArgumentException {
   int hour = Integer.parseInt(clock_reference.substring(0, 2));
@@ -1440,7 +1440,7 @@ void setClockReference(final String clock_reference) throws IllegalArgumentExcep
 }
 @ %def setClockReference
 
-\subsection{\texttt{setClockStart}(1)}
+\subsubsection{\texttt{setClockStart}(1)}
 <<Admin: setClockStart(1)>>=
 void setClockStart(final int clock_start) {
   this.CLOCK_START = clock_start;
@@ -1462,21 +1462,21 @@ void setClockStart(final int clock_start) {
 }
 @ %def setClockStart
 
-\subsection{\texttt{setClockEnd}(1)}
+\subsubsection{\texttt{setClockEnd}(1)}
 <<Admin: setClockEnd(1)>>=
 void setClockEnd(final int clock_end) {
   this.CLOCK_END = clock_end;
 }
 @ %def setClockEnd
 
-\subsection{\texttt{setQueueTimeout}(1)}
+\subsubsection{\texttt{setQueueTimeout}(1)}
 <<Admin: setQueueTimeout(1)>>=
 void setQueueTimeout(final int queue_timeout) {
   this.QUEUE_TIMEOUT = queue_timeout;
 }
 @ %def setQueueTimeout
 
-\subsection{\texttt{setRequestTimeout}(1)}
+\subsubsection{\texttt{setRequestTimeout}(1)}
 <<Admin: setRequestTimeout(1)>>=
 void setRequestTimeout(final int request_timeout) {
   this.REQUEST_TIMEOUT = request_timeout;
@@ -1484,56 +1484,56 @@ void setRequestTimeout(final int request_timeout) {
 @ %def setRequestTimeout
 
 
-\subsection{\texttt{setRefCacheVertices}(1)}
+\subsubsection{\texttt{setRefCacheVertices}(1)}
 <<Admin: setRefCacheVertices(1)>>=
 void setRefCacheVertices(final ConcurrentHashMap<Integer, int[]> lu_vertices) {
   this.lu_vertices = lu_vertices;
 }
 @ %def setRefCacheVertices
 
-\subsection{\texttt{setRefCacheEdges}(1)}
+\subsubsection{\texttt{setRefCacheEdges}(1)}
 <<Admin: setRefCacheEdges(1)>>=
 void setRefCacheEdges(final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> lu_edges) {
   this.lu_edges = lu_edges;
 }
 @ %def setRefCacheEdges
 
-\subsection{\texttt{setRefCacheUsers}(1)}
+\subsubsection{\texttt{setRefCacheUsers}(1)}
 <<Admin: setRefCacheUsers(1)>>=
 void setRefCacheUsers(final ConcurrentHashMap<Integer, int[]> lu_users) {
   this.lu_users = lu_users;
 }
 @ %def setRefCacheUsers
 
-\subsection{\texttt{setRefClient}(1)}
+\subsubsection{\texttt{setRefClient}(1)}
 <<Admin: setRefClient(1)>>=
 void setRefClient(final Client client) {
   this.client = client;
 }
 @ %def setRefClient
 
-\subsection{\texttt{setRefCommunicator}(1)}
+\subsubsection{\texttt{setRefCommunicator}(1)}
 <<Admin: setRefCommunicator(1)>>=
 void setRefCommunicator(final Communicator communicator) {
   this.communicator = communicator;
 }
 @ %def setRefCommunicator
 
-\subsection{\texttt{setRefController}(1)}
+\subsubsection{\texttt{setRefController}(1)}
 <<Admin: setRefController(1)>>=
 void setRefController(final Controller controller) {
   this.controller = controller;
 }
 @ %def setRefController
 
-\subsection{\texttt{setRefStorage}(1)}
+\subsubsection{\texttt{setRefStorage}(1)}
 <<Admin: setRefStorage(1)>>=
 void setRefStorage(final Storage storage) {
   this.storage = storage;
 }
 @ %def setRefStorage
 
-\subsection{\texttt{setRefTraffic}(1)}
+\subsubsection{\texttt{setRefTraffic}(1)}
 <<Admin: setRefTraffic(1)>>=
 void setRefTraffic (final Traffic traffic) {
   this.traffic = traffic;
@@ -1542,44 +1542,44 @@ void setRefTraffic (final Traffic traffic) {
 }
 @ %def setRefTraffic
 
-\subsection{\texttt{forwardRefTraffic}(1)}
+\subsubsection{\texttt{forwardRefTraffic}(1)}
 <<Admin: forwardRefTraffic(1)>>=
 void forwardRefTraffic(final Traffic traffic) {
   this.communicator.setRefTraffic(traffic);
 }
 @ %def forwardRefTraffic
 
-\subsection{\texttt{forwardRefCommunicator}(1)}
+\subsubsection{\texttt{forwardRefCommunicator}(1)}
 <<Admin: forwardRefCommunicator(1)>>=
 void forwardRefCommunicator(final Communicator communicator) {
   this.client.setRefCommunicator(communicator);
 }
 @ %def forwardRefCommunicator
 
-\subsection{\texttt{forwardRefCacheEdges}(1)}
+\subsubsection{\texttt{forwardRefCacheEdges}(1)}
 <<Admin: forwardRefCacheEdges(1)>>=
 void forwardRefCacheEdges(final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> lu_edges) {
   this.tools.setRefCacheEdges(lu_edges);
 }
 @ %def forwardRefCacheEdges
 
-\subsection{\texttt{forwardRefCacheUsers}(1)}
+\subsubsection{\texttt{forwardRefCacheUsers}(1)}
 <<Admin: forwardRefCacheUsers(1)>>=
 void forwardRefCacheUsers(final ConcurrentHashMap<Integer, int[]> lu_users) {
   this.tools.setRefCacheUsers(lu_users);
 }
 @ %def forwardRefCacheUsers
 
-\subsection{\texttt{forwardRefCacheVertices}(1)}
+\subsubsection{\texttt{forwardRefCacheVertices}(1)}
 <<Admin: forwardRefCacheVertices(1)>>=
 void forwardRefCacheVertices(final ConcurrentHashMap<Integer, int[]> lu_vertices) {
   this.tools.setRefCacheVertices(lu_vertices);
 }
 @ %def forwardRefCacheVertices
 
-\section{Exceptions}
+\subsection{Exceptions}
 
-\subsection{\texttt{DuplicateEdgeException}}
+\subsubsection{\texttt{DuplicateEdgeException}}
 <<DuplicateEdgeException.java>>=
 <<Package: [[sim]]>>
 public class DuplicateEdgeException extends Exception {
@@ -1590,7 +1590,7 @@ public class DuplicateEdgeException extends Exception {
 }
 @ %def DuplicateEdgeException
 
-\subsection{\texttt{DuplicateUserException}}
+\subsubsection{\texttt{DuplicateUserException}}
 <<DuplicateUserException.java>>=
 <<Package: [[sim]]>>
 public class DuplicateUserException extends Exception {
@@ -1601,7 +1601,7 @@ public class DuplicateUserException extends Exception {
 }
 @ %def DuplicateUserException
 
-\subsection{\texttt{DuplicateVertexException}}
+\subsubsection{\texttt{DuplicateVertexException}}
 <<DuplicateVertexException.java>>=
 <<Package: [[sim]]>>
 public class DuplicateVertexException extends Exception {
@@ -1612,7 +1612,7 @@ public class DuplicateVertexException extends Exception {
 }
 @ %def DuplicateVertexException
 
-\subsection{\texttt{EdgeNotFoundException}}
+\subsubsection{\texttt{EdgeNotFoundException}}
 <<EdgeNotFoundException.java>>=
 <<Package: [[sim]]>>
 public class EdgeNotFoundException extends Exception {
@@ -1623,7 +1623,7 @@ public class EdgeNotFoundException extends Exception {
 }
 @ %def EdgeNotFoundException
 
-\subsection{\texttt{GtreeIllegalSourceException}}
+\subsubsection{\texttt{GtreeIllegalSourceException}}
 <<GtreeIllegalSourceException.java>>=
 <<Package: [[sim]]>>
 public class GtreeIllegalSourceException extends Exception {
@@ -1634,7 +1634,7 @@ public class GtreeIllegalSourceException extends Exception {
 }
 @ %def GtreeIllegalSourceException
 
-\subsection{\texttt{GtreeIllegalTargetException}}
+\subsubsection{\texttt{GtreeIllegalTargetException}}
 <<GtreeIllegalTargetException.java>>=
 <<Package: [[sim]]>>
 public class GtreeIllegalTargetException extends Exception {
@@ -1645,7 +1645,7 @@ public class GtreeIllegalTargetException extends Exception {
 }
 @ %def GtreeIllegalTargetException
 
-\subsection{\texttt{GtreeNotLoadedException}}
+\subsubsection{\texttt{GtreeNotLoadedException}}
 <<GtreeNotLoadedException.java>>=
 <<Package: [[sim]]>>
 public class GtreeNotLoadedException extends Exception {
@@ -1656,7 +1656,7 @@ public class GtreeNotLoadedException extends Exception {
 }
 @ %def GtreeNotLoadedException
 
-\subsection{\texttt{RouteIllegalOverwriteException}}
+\subsubsection{\texttt{RouteIllegalOverwriteException}}
 <<RouteIllegalOverwriteException.java>>=
 <<Package: [[sim]]>>
 public class RouteIllegalOverwriteException extends Exception {
@@ -1667,7 +1667,7 @@ public class RouteIllegalOverwriteException extends Exception {
 }
 @ %def RouteIllegalOverwriteException
 
-\subsection{\texttt{TimeWindowException}}
+\subsubsection{\texttt{TimeWindowException}}
 <<TimeWindowException.java>>=
 <<Package: [[sim]]>>
 public class TimeWindowException extends Exception {
@@ -1678,7 +1678,7 @@ public class TimeWindowException extends Exception {
 }
 @ %def TimeWindowException
 
-\subsection{\texttt{UserNotFoundException}}
+\subsubsection{\texttt{UserNotFoundException}}
 <<UserNotFoundException.java>>=
 <<Package: [[sim]]>>
 public class UserNotFoundException extends Exception {
@@ -1689,7 +1689,7 @@ public class UserNotFoundException extends Exception {
 }
 @ %def UserNotFoundException
 
-\subsection{\texttt{VertexNotFoundException}}
+\subsubsection{\texttt{VertexNotFoundException}}
 <<VertexNotFoundException.java>>=
 <<Package: [[sim]]>>
 public class VertexNotFoundException extends Exception {

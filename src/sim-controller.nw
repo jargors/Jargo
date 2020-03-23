@@ -1,4 +1,4 @@
-\chapter{Class: Controller}
+\section{Class: Controller}
 \label{sim-controller}
 
 <<Controller.java>>=
@@ -11,7 +11,7 @@ public class Controller {
 }
 @
 
-\section{Preamble}
+\subsection{Preamble}
 We import:
 \begin{itemize}
 \item all parts of the Jargo stack;
@@ -59,7 +59,7 @@ import java.sql.SQLException;
 @
 \end{itemize}
 
-\section{Member Variables}
+\subsection{Member Variables}
 Member variables are grouped into \emph{containers}, \emph{settings}, and
 \emph{loops}.
 <<[[Controller]] member variables>>=
@@ -135,7 +135,7 @@ here, running in parallel. They are executed using Java's
 <<Definition of server collection loop>>
 @
 
-\subsection{Clock Loop}
+\subsubsection{Clock Loop}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -188,7 +188,7 @@ private Runnable ClockLoop = () -> {
 };
 @
 
-\subsection{Request Collection Loop}
+\subsubsection{Request Collection Loop}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -263,7 +263,7 @@ private Runnable RequestCollectionLoop = () -> {
 };
 @
 
-\subsection{Request Handling Loop}
+\subsubsection{Request Handling Loop}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -305,7 +305,7 @@ private Runnable RequestHandlingLoop = () -> {
 };
 @
 
-\subsection{Server Loop}
+\subsubsection{Server Loop}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -360,7 +360,7 @@ private Runnable ServerLoop = () -> {
 };
 @
 
-\section{Constructor}
+\subsection{Constructor}
 \begin{tabular}{p{\textwidth}}
 \toprule
 \rowcolor{TableTitle}
@@ -386,7 +386,7 @@ public Controller() {
 }
 @
 
-\section{Chunks}
+\subsection{Chunks}
 <<Read header rows>>=
 System.out.println(sc.next());
 System.out.println(sc.next());
@@ -402,9 +402,9 @@ System.out.println(sc.next());
 System.out.println(sc.next());
 @
 
-\section{Methods}
+\subsection{Methods}
 
-\subsection{\texttt{loadRoadNetworkFromFile}(1)}
+\subsubsection{\texttt{loadRoadNetworkFromFile}(1)}
 <<Controller: loadRoadNetworkFromFile(1)>>=
 void loadRoadNetworkFromFile(final String f_rnet) throws FileNotFoundException, SQLException {
   if (DEBUG) {
@@ -474,7 +474,7 @@ try {
 }
 @
 
-\subsection{\texttt{loadProblem(1)}}
+\subsubsection{\texttt{loadProblem(1)}}
 <<Controller: loadProblem(1)>>=
 void loadProblem(String p)
 throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException, SQLException,
@@ -503,14 +503,14 @@ throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException, SQL
 }
 @ %def loadProblem
 
-\subsection{\texttt{isKilled}(0)}
+\subsubsection{\texttt{isKilled}(0)}
 <<Controller: isKilled(0)>>=
 final boolean isKilled() {
   return this.kill;
 }
 @ %def isKilled
 
-\subsection{\texttt{returnRequest}(1)}
+\subsubsection{\texttt{returnRequest}(1)}
 <<Controller: returnRequest(1)>>=
 void returnRequest(final int[] r) {
   if (this.statControllerClock - r[2] < QUEUE_TIMEOUT) {
@@ -519,7 +519,7 @@ void returnRequest(final int[] r) {
 }
 @ %def returnRequest
 
-\subsection{\texttt{startRealtime}(1)}
+\subsubsection{\texttt{startRealtime}(1)}
 <<Controller: startRealtime(1)>>=
 void startRealtime(final Consumer<Boolean> app_cb) {
   if (DEBUG) {
@@ -583,7 +583,7 @@ void startRealtime(final Consumer<Boolean> app_cb) {
 }
 @ %def startRealtime
 
-\subsection{\texttt{startSequential}(1)}
+\subsubsection{\texttt{startSequential}(1)}
 <<Controller: startSequential(1)>>=
 void startSequential(final Consumer<Boolean> app_cb) throws Exception {
   if (DEBUG) {
@@ -600,7 +600,7 @@ void startSequential(final Consumer<Boolean> app_cb) throws Exception {
 }
 @ %def startSequential
 
-\subsection{\texttt{step}(0)}
+\subsubsection{\texttt{step}(0)}
 <<Controller: step(0)>>=
 void step() {
   this.ClockLoop.run();
@@ -610,7 +610,7 @@ void step() {
 }
 @
 
-\subsection{\texttt{stop}(1)}
+\subsubsection{\texttt{stop}(1)}
 <<Controller: stop(1)>>=
 void stop(final Consumer<Boolean> app_cb) {
   if (DEBUG) {

@@ -1,4 +1,4 @@
-\chapter{Class: Client}
+\section{Class: Client}
 \label{sim-client}
 
 <<Client.java>>=
@@ -11,7 +11,7 @@ public abstract class Client {
 }
 @
 
-\section{Preamble}
+\subsection{Preamble}
 
 <<Client.java preamble>>=
 import com.github.jargors.sim.Communicator;
@@ -27,7 +27,7 @@ import java.io.FileNotFoundException;
 <<Import JMX dependencies>>
 @
 
-\section{Member Variables}
+\subsection{Member Variables}
 \label{sim-client: member-variables}
 
 <<[[Client]] member variables>>=
@@ -40,7 +40,7 @@ protected ConcurrentHashMap<Integer, Integer> lut = new ConcurrentHashMap<Intege
 protected ConcurrentHashMap<Integer, Integer> luv = new ConcurrentHashMap<Integer, Integer>();
 @
 
-\section{Constructor}
+\subsection{Constructor}
 \label{sim-client: constructor}
 
 <<[[Client]] constructor>>=
@@ -52,10 +52,10 @@ public Client() {
 }
 @
 
-\section{Methods}
+\subsection{Methods}
 \label{sim-client: methods}
 
-\subsection{\texttt{notifyNew}(0)}
+\subsubsection{\texttt{notifyNew}(0)}
 
 <<Client: notifyNew(0)>>=
 void notifyNew() throws ClientException, ClientFatalException {
@@ -70,14 +70,14 @@ void notifyNew() throws ClientException, ClientFatalException {
 }
 @ %def notifyNew
 
-\subsection{\texttt{addRequest}(1)}
+\subsubsection{\texttt{addRequest}(1)}
 <<Client: addRequest(1)>>=
 void addRequest(final int[] r) {
   this.queue.add(r);
 }
 @ %def addRequest
 
-\subsection{\texttt{dropRequests}(1)}
+\subsubsection{\texttt{dropRequests}(1)}
 <<Client: dropRequests(1)>>=
 int dropRequests(final int deadline) {
   final int temp = this.queue.size();
@@ -86,7 +86,7 @@ int dropRequests(final int deadline) {
 }
 @ %def dropRequests
 
-\subsection{\texttt{collectServerLocations}(1)}
+\subsubsection{\texttt{collectServerLocations}(1)}
 Array [[src]] =
 
 \noindent
@@ -111,12 +111,12 @@ void collectServerLocations(final int[] src) {
 }
 @ %def collectServerLocations
 
-\subsection{\texttt{end}(0)}
+\subsubsection{\texttt{end}(0)}
 <<Client: end(0)>>=
 void end() { }
 @ %def end
 
-\subsection{\texttt{handleRequest}(1)}
+\subsubsection{\texttt{handleRequest}(1)}
 Array [[r]] =
 
 \begin{tikzpicture}
@@ -132,7 +132,7 @@ Array [[r]] =
 void handleRequest(final int[] r) throws ClientException, ClientFatalException { }
 @ %def handleRequest
 
-\subsection{\texttt{handleServerLocation}(1)}
+\subsubsection{\texttt{handleServerLocation}(1)}
 Array [[loc]] =
 
 \begin{tikzpicture}
@@ -151,14 +151,14 @@ void handleServerLocation(final int[] loc) {
 }
 @ %def handleServerLocation
 
-\subsection{\texttt{init}(0)}
+\subsubsection{\texttt{init}(0)}
 <<Client: init(0)>>=
 void init() { }
 @
 
-\section{Exceptions}
+\subsection{Exceptions}
 
-\subsection{\texttt{ClientException}}
+\subsubsection{\texttt{ClientException}}
 <<ClientException.java>>=
 <<Package: [[sim]]>>
 public class ClientException extends Exception {
@@ -175,7 +175,7 @@ public class ClientException extends Exception {
 }
 @
 
-\subsection{\texttt{ClientFatalException}}
+\subsubsection{\texttt{ClientFatalException}}
 <<ClientFatalException.java>>=
 <<Package: [[sim]]>>
 public class ClientFatalException extends Exception {
@@ -192,5 +192,5 @@ public class ClientFatalException extends Exception {
 }
 @
 
-\section{Debug}
+\subsection{Debug}
 

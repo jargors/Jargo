@@ -1,4 +1,4 @@
-\chapter{Class: DesktopController}
+\section{Class: DesktopController}
 \label{ui-guicontroller}
 
 <<DesktopController.java>>=
@@ -19,7 +19,7 @@ public class DesktopController {
 }
 @
 
-\section{Preamble}
+\subsection{Preamble}
 <<DesktopController.java preamble>>=
 import com.github.jargors.sim.*;
 @
@@ -105,9 +105,9 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 @
 
-\section{Member Variables}
+\subsection{Member Variables}
 
-\subsection{Constants}
+\subsubsection{Constants}
 <<[[DesktopController]] member variables>>=
 private final Color C_ERROR   = Color.RED;
 private final Color C_SUCCESS = Color.GREEN;
@@ -117,7 +117,7 @@ private final boolean DEBUG =
     "true".equals(System.getProperty("jargors.desktop.debug"));
 @
 
-\subsection{Interface}
+\subsubsection{Interface}
 <<[[DesktopController]] member variables>>=
 @FXML private AnchorPane container_lc_counts;
 @FXML private AnchorPane container_lc_distances;
@@ -170,7 +170,7 @@ private Traffic traffic = null;
 private ImageView logo = null;
 @
 
-\subsection{Workspace}
+\subsubsection{Workspace}
 <<[[DesktopController]] member variables>>=
 private int access_path = 1;  // 1="New", 2="Load"
 private FetcherOfMapUnits muf = null;
@@ -198,7 +198,7 @@ private int ns = 0;
 private int nr = 0;
 @
 
-\subsection{Renderers}
+\subsubsection{Renderers}
 <<[[DesktopController]] member variables>>=
 private class RendererOfRequests extends AnimationTimer {
   private final Color BG = Color.web("0xD7FFFF");
@@ -532,7 +532,7 @@ private class RendererOfRoads extends AnimationTimer {
 }
 @
 
-\subsection{Fetchers}
+\subsubsection{Fetchers}
 <<[[DesktopController]] member variables>>=
 private class FetcherOfMapUnits {
   private double unit = 0;
@@ -826,7 +826,7 @@ private class FetcherOfMetrics implements Runnable {
 }
 @
 
-\subsection{Charts}
+\subsubsection{Charts}
 <<[[DesktopController]] member variables>>=
 private SimpleXYChartDescriptor lc_counts_descriptor = SimpleXYChartDescriptor.decimal(0, true, 3600);
 private SimpleXYChartDescriptor lc_distances_descriptor = SimpleXYChartDescriptor.decimal(0, true, 3600);
@@ -878,22 +878,22 @@ private ConcurrentHashMap<String, SimpleXYChartSupport> lu_series
   = new ConcurrentHashMap<String, SimpleXYChartSupport>();
 @
 
-\section{Chunks}
-\subsection{Set cursor wait}
+\subsection{Chunks}
+\subsubsection{Set cursor wait}
 <<Set cursor wait>>=
 Platform.runLater(() -> {
   this.stage.getScene().setCursor(Cursor.WAIT);
 });
 @
 
-\subsection{Set cursor default}
+\subsubsection{Set cursor default}
 <<Set cursor default>>=
 Platform.runLater(() -> {
   this.stage.getScene().setCursor(Cursor.DEFAULT);
 });
 @
 
-\subsection{Initialize chart series}
+\subsubsection{Initialize chart series}
 <<Initialize chart series>>=
 for (String metric : this.metric_rates) {
   this.lc_rates_descriptor.addLineItems(metric);
@@ -912,7 +912,7 @@ for (String metric : this.metric_times) {
 }
 @
 
-\subsection{Set default t0, t1}
+\subsubsection{Set default t0, t1}
 <<Set default t0, t1>>=
 if ("".equals(this.tf_t0.getText())) {
   this.tf_t0.setText("0");
@@ -922,7 +922,7 @@ if ("".equals(this.tf_t1.getText())) {
 }
 @
 
-\subsection{Draw identifier}
+\subsubsection{Draw identifier}
 <<Draw identifier>>=
 char[] digits = String.valueOf(uid).toCharArray();
 this.gc.drawImage(this.bufimg.get(10), x, y);
@@ -933,7 +933,7 @@ for (int j = 0; j < digits.length; j++) {
 }
 @
 
-\subsection{Add charts to chart containers}
+\subsubsection{Add charts to chart containers}
 <<Add charts to chart containers>>=
 <<Initialize chart series>>
 this.lc_counts_descriptor.setYAxisDescription("<html>Count (#)</html>");
@@ -988,13 +988,13 @@ this.container_lc_times.setBottomAnchor(this.lc_times, 0.0);
 this.container_lc_times.getChildren().add(this.lc_times);
 @
 
-\subsection{Retrieve serviceRate}
+\subsubsection{Retrieve serviceRate}
 <<Retrieve serviceRate>>=
 output = this.controller.queryMetricServiceRateRunning();
 val = (output.length > 0 ? output[0] : 0);
 @
 
-\subsection{Retrieve distanceSavings}
+\subsubsection{Retrieve distanceSavings}
 <<Retrieve distanceSavings>>=
 output = this.controller.queryMetricServerDistanceRunning();
 final int val1 = (output.length > 0 ? output[0] : 0);
@@ -1005,25 +1005,25 @@ final int val3 = (output.length > 0 ? output[0] : 0);
 val = (val3 == 0 ? 0 : (100.0*100*(1 - ((double) (val1 + val2)/val3))));
 @
 
-\subsection{Retrieve serverTravelDistance}
+\subsubsection{Retrieve serverTravelDistance}
 <<Retrieve serverTravelDistance>>=
 output = this.controller.queryMetricServerDistanceTotal();
 val = (output.length > 0 ? Math.round(output[0]/(double) this.ns) : 0);
 @
 
-\subsection{Retrieve serverServiceDistance}
+\subsubsection{Retrieve serverServiceDistance}
 <<Retrieve serverServiceDistance>>=
 output = this.controller.queryMetricServerDistanceServiceTotal();
 val = (output.length > 0 ? Math.round(output[0]/(double) this.ns) : 0);
 @
 
-\subsection{Retrieve serverCruisingDistance}
+\subsubsection{Retrieve serverCruisingDistance}
 <<Retrieve serverCruisingDistance>>=
 output = this.controller.queryMetricServerDistanceCruisingTotal();
 val = (output.length > 0 ? Math.round(output[0]/(double) this.ns) : 0);
 @
 
-\subsection{Retrieve serverTravelDuration}
+\subsubsection{Retrieve serverTravelDuration}
 HORRIBLE HACK WARNING. Sometimes output[0] is not empty but this.ns is 0. This
 happens in the beginning if all servers are taxis. Taxis have an initial
 duration of 1 sec to move to the dummy vertex, but they don't count has
@@ -1037,13 +1037,13 @@ val = (output.length > 0 && this.ns > 0
     ? Math.round(Math.max(0, output[0] - this.ns_total)/(double) this.ns) : 0);
 @
 
-\subsection{Retrieve serverServiceDuration}
+\subsubsection{Retrieve serverServiceDuration}
 <<Retrieve serverServiceDuration>>=
 output = this.controller.queryMetricServerDurationServiceTotal();
 val = (output.length > 0 ? Math.round(output[0]/(double) this.ns) : 0);
 @
 
-\subsection{Retrieve serverCruisingDuration}
+\subsubsection{Retrieve serverCruisingDuration}
 HORRIBLE HACK WARNING. Same horrible hack as serverTravelDuration chunk.
 <<Retrieve serverCruisingDuration>>=
 output = this.controller.queryMetricServerDurationCruisingTotal();
@@ -1051,96 +1051,96 @@ val = (output.length > 0 && this.ns > 0
     ? Math.round(Math.max(0, output[0] - this.ns_total)/(double) this.ns) : 0);
 @
 
-\subsection{Retrieve requestDistanceUnassigned}
+\subsubsection{Retrieve requestDistanceUnassigned}
 <<Retrieve requestDistanceUnassigned>>=
 output = this.controller.queryMetricRequestDistanceBaseUnassignedTotal();
 val = (output.length > 0 ? output[0] : 0);
 @
 
-\subsection{Retrieve requestTransitDistance}
+\subsubsection{Retrieve requestTransitDistance}
 <<Retrieve requestTransitDistance>>=
 output = this.controller.queryMetricRequestDistanceTransitTotal();
 val = (output.length > 0 ? Math.round(output[0]/(double) this.nr) : 0);
 @
 
-\subsection{Retrieve requestDetourDistance}
+\subsubsection{Retrieve requestDetourDistance}
 <<Retrieve requestDetourDistance>>=
 output = this.controller.queryMetricRequestDistanceDetourTotal();
 val = (output.length > 0 ? Math.round(output[0]/(double) this.nr) : 0);
 @
 
-\subsection{Retrieve requestTransitDuration}
+\subsubsection{Retrieve requestTransitDuration}
 <<Retrieve requestTransitDuration>>=
 output = this.controller.queryMetricRequestDurationTransitTotal();
 val = (output.length > 0 ? Math.round(output[0]/(double) this.nr) : 0);
 @
 
-\subsection{Retrieve requestDetourDuration}
+\subsubsection{Retrieve requestDetourDuration}
 <<Retrieve requestDetourDuration>>=
 @
 
-\subsection{Retrieve requestTravelDuration}
+\subsubsection{Retrieve requestTravelDuration}
 <<Retrieve requestTravelDuration>>=
 output = this.controller.queryMetricRequestDurationTravelTotal();
 val = (output.length > 0 ? Math.round(output[0]/(double) this.nr) : 0);
 @
 
-\subsection{Retrieve requestPickupDuration}
+\subsubsection{Retrieve requestPickupDuration}
 <<Retrieve requestPickupDuration>>=
 output = this.controller.queryMetricRequestDurationPickupTotal();
 val = (output.length > 0 ? Math.round(output[0]/(double) this.nr) : 0);
 @
 
-\subsection{Retrieve countRequestsQueue}
+\subsubsection{Retrieve countRequestsQueue}
 <<Retrieve countRequestsQueue>>=
 val = this.controller.retrieveQueueSize();
 @
 
-\subsection{Retrieve countRequestsActive}
+\subsubsection{Retrieve countRequestsActive}
 <<Retrieve countRequestsActive>>=
 output = this.controller.queryRequestsCountActive(t);
 val = (output.length > 0 ? output[0] : 0);
 @
 
-\subsection{Retrieve countRequestsCompleted}
+\subsubsection{Retrieve countRequestsCompleted}
 <<Retrieve countRequestsCompleted>>=
 output = this.controller.queryRequestsCountCompleted(t);
 val = (output.length > 0 ? output[0] : 0);
 @
 
-\subsection{Retrieve countRequestsFailed}
+\subsubsection{Retrieve countRequestsFailed}
 <<Retrieve countRequestsFailed>>=
 @
 
-\subsection{Retrieve countServersActive}
+\subsubsection{Retrieve countServersActive}
 <<Retrieve countServersActive>>=
 output = this.controller.queryServersCountActive(t);
 val = (output.length > 0 ? output[0] : 0);
 @
 
-\subsection{Retrieve countRequestsViolations}
+\subsubsection{Retrieve countRequestsViolations}
 <<Retrieve countRequestsViolations>>=
 output = this.controller.queryMetricRequestTWViolationsTotal();
 val = (output.length > 0 ? output[0] : 0);
 @
 
-\subsection{Retrieve countServersViolations}
+\subsubsection{Retrieve countServersViolations}
 <<Retrieve countServersViolations>>=
 output = this.controller.queryMetricServerTWViolationsTotal();
 val = (output.length > 0 ? output[0] : 0);
 @
 
-\subsection{Retrieve timeRequestHandling}
+\subsubsection{Retrieve timeRequestHandling}
 Retrieves the duration of the last call to handle request (suffers from aliasing).
 <<Retrieve timeRequestHandling>>=
 val = this.controller.retrieveHandleRequestDur();
 @
 
-\subsection{Retrieve timeServerHandling}
+\subsubsection{Retrieve timeServerHandling}
 <<Retrieve timeServerHandling>>=
 @
 
-\subsection{Load client}
+\subsubsection{Load client}
 <<Load client>>=
 this.clientclass = this.tf_client.getText();
 if ("".equals(this.clientclass)) {
@@ -1171,7 +1171,7 @@ try {
 }
 @
 
-\subsection{Load traffic}
+\subsubsection{Load traffic}
 <<Load traffic>>=
 this.trafficclass = this.tf_traffic.getText();
 try {
@@ -1199,7 +1199,7 @@ try {
 }
 @
 
-\subsection{Load Gtree}
+\subsubsection{Load Gtree}
 <<Load gtree>>=
 try {
   this.client.gtreeLoad(this.gtree_client);
@@ -1209,34 +1209,34 @@ try {
 }
 @
 
-\section{Methods}
+\subsection{Methods}
 
-\subsection{\texttt{actionQuit}(1)}
+\subsubsection{\texttt{actionQuit}(1)}
 <<actionQuit(1)>>=
 void actionQuit(final ActionEvent e) {
   System.exit(0);
 }
 @ %def actionQuit
 
-\subsection{\texttt{actionGitHub}(1)}
+\subsubsection{\texttt{actionGitHub}(1)}
 <<actionGitHub(1)>>=
 void actionGitHub(final ActionEvent e) {
   // ...
 }
 @ %def actionGitHub
 
-\subsection{\texttt{actionAbout}(1)}
+\subsubsection{\texttt{actionAbout}(1)}
 <<actionAbout(1)>>=
 void actionAbout(final ActionEvent e) {
   Alert alert = new Alert(AlertType.INFORMATION, "https:github.com/jargors");
   alert.setTitle("About");
-  alert.setHeaderText("Jargo Desktop v0.9.0");
+  alert.setHeaderText("Jargo Desktop");
   alert.setGraphic(this.logo);
   alert.showAndWait();
 }
 @ %def actionAbout
 
-\subsection{\texttt{actionNew}(1)}
+\subsubsection{\texttt{actionNew}(1)}
 <<actionNew(1)>>=
 void actionNew(final ActionEvent e) {
   <<Set cursor wait>>
@@ -1272,7 +1272,7 @@ void actionNew(final ActionEvent e) {
 }
 @ %def actionNew
 
-\subsection{\texttt{actionLoad}(1)}
+\subsubsection{\texttt{actionLoad}(1)}
 <<actionLoad(1)>>=
 void actionLoad(final ActionEvent e) {
   this.btn_new      .setDisable(true);
@@ -1343,7 +1343,7 @@ void actionLoad(final ActionEvent e) {
 }
 @ %def actionLoad
 
-\subsection{\texttt{actionRoad(1)}}
+\subsubsection{\texttt{actionRoad(1)}}
 <<actionRoad(1)>>=
 void actionRoad(final ActionEvent e) {
   this.btn_road     .setDisable(true);
@@ -1399,7 +1399,7 @@ void actionRoad(final ActionEvent e) {
 }
 @
 
-\subsection{\texttt{actionProb}(1)}
+\subsubsection{\texttt{actionProb}(1)}
 <<actionProb(1)>>=
 void actionProb(final ActionEvent e) {
   this.btn_prob     .setDisable(true);
@@ -1459,7 +1459,7 @@ void actionProb(final ActionEvent e) {
 }
 @
 
-\subsection{\texttt{actionGtree(1)}}
+\subsubsection{\texttt{actionGtree(1)}}
 <<actionGtree(1)>>=
 void actionGtree(final ActionEvent e) {
   this.btn_gtree    .setDisable(true);
@@ -1518,7 +1518,7 @@ void actionGtree(final ActionEvent e) {
 }
 @ %def actionGtree
 
-\subsection{\texttt{actionClient}(1)}
+\subsubsection{\texttt{actionClient}(1)}
 <<actionClient(1)>>=
 void actionClient(final ActionEvent e) {
   this.btn_client   .setDisable(true);
@@ -1601,7 +1601,7 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
 }
 @
 
-\subsection{\texttt{actionClientGtree(1)}}
+\subsubsection{\texttt{actionClientGtree(1)}}
 <<actionClientGtree(1)>>=
 void actionClientGtree(final ActionEvent e) {
   this.btn_client_gtree.setDisable(true);
@@ -1633,7 +1633,7 @@ void actionClientGtree(final ActionEvent e) {
 }
 @ %def actionClientGtree
 
-\subsection{\texttt{actionQuery}(1)}
+\subsubsection{\texttt{actionQuery}(1)}
 <<actionQuery(1)>>=
 void actionQuery(final ActionEvent e) {
   String qstr = this.txt_query.getText();
@@ -1680,7 +1680,7 @@ void actionQuery(final ActionEvent e) {
 }
 @ %def actionQuery
 
-\subsection{\texttt{actionQueryContinuous}(1)}
+\subsubsection{\texttt{actionQueryContinuous}(1)}
 <<actionQueryContinuous(1)>>=
 void actionQueryContinuous(final ActionEvent e) {
   if (this.chk_continuous.isSelected()) {
@@ -1693,7 +1693,7 @@ void actionQueryContinuous(final ActionEvent e) {
 }
 @ %def actionQueryContinuous(1)
 
-\subsection{\texttt{actionTraffic}(1)}
+\subsubsection{\texttt{actionTraffic}(1)}
 <<actionTraffic(1)>>=
 void actionTraffic(final ActionEvent e) {
   this.btn_traffic  .setDisable(true);
@@ -1794,7 +1794,7 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
 }
 @
 
-\subsection{\texttt{actionStartSequential}(1)}
+\subsubsection{\texttt{actionStartSequential}(1)}
 <<actionStartSequential(1)>>=
 void actionStartSequential(final ActionEvent e) {
   <<Load client>>
@@ -1850,7 +1850,7 @@ void actionStartSequential(final ActionEvent e) {
 }
 @ %def actionStartSequential
 
-\subsection{\texttt{actionStartRealtime}(1)}
+\subsubsection{\texttt{actionStartRealtime}(1)}
 <<actionStartRealtime(1)>>=
 void actionStartRealtime(final ActionEvent e) {
   <<Load client>>
@@ -1906,7 +1906,7 @@ void actionStartRealtime(final ActionEvent e) {
 }
 @ %def actionStartRealtime
 
-\subsection{\texttt{actionStop}(1)}
+\subsubsection{\texttt{actionStop}(1)}
 <<actionStop(1)>>=
 void actionStop(final ActionEvent e) {
   <<Set cursor wait>>
@@ -1982,13 +1982,13 @@ void actionStop(final ActionEvent e) {
 }
 @ %def actionStop
 
-\subsection{\texttt{toggleMetric}(1)}
+\subsubsection{\texttt{toggleMetric}(1)}
 <<toggleMetric(1)>>=
 void toggleMetric(final ActionEvent e) {
 }
 @ %def toggleMetric
 
-\subsection{\texttt{actionZoomCanvas}(1)}
+\subsubsection{\texttt{actionZoomCanvas}(1)}
 <<actionZoomCanvas(1)>>=
 void actionZoomCanvas(ScrollEvent e) {
   if (e.getDeltaY() > 0) {
@@ -2019,7 +2019,7 @@ void actionZoomCanvas(ScrollEvent e) {
 }
 @ %def actionZoomCanvas
 
-\subsection{\texttt{initializeCanvas}(0)}
+\subsubsection{\texttt{initializeCanvas}(0)}
 <<initializeCanvas(0)>>=
 void initializeCanvas() {
   try {
@@ -2058,21 +2058,21 @@ void initializeCanvas() {
 }
 @ %def initializeCanvas
 
-\subsection{\texttt{setWindowWidth}(1)}
+\subsubsection{\texttt{setWindowWidth}(1)}
 <<setWindowWidth(1)>>=
 void setWindowWidth(double w) {
   this.window_width = w;
 }
 @ %def setWindowWidth
 
-\subsection{\texttt{setWindowHeight}(1)}
+\subsubsection{\texttt{setWindowHeight}(1)}
 <<setWindowHeight(1)>>=
 void setWindowHeight(double h) {
   this.window_height = h;
 }
 @ %def setWindowHeight
 
-\subsection{\texttt{setStage}(1)}
+\subsubsection{\texttt{setStage}(1)}
 <<setStage(1)>>=
 void setStage(Stage s) {
   this.stage = s;

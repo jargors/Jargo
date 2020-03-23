@@ -1,4 +1,4 @@
-\chapter{SQL Schema}
+\section{SQL Schema}
 \label{mod-schema}
 
 The simple constraints allowed by the SQL standard\footnote{ISO/IEC 9075}
@@ -33,7 +33,7 @@ chunk name, used to refer to the chunk in other parts of the document.
 Anything after the equals sign and before the ``at'' sign is live code. Noweb
 is used to compile the code chunks into correct Java source code.
 
-\section{Road Network Tables (Tables V and E)}
+\subsection{Road Network Tables (Tables V and E)}
 \label{mod-schema: road}
 
 Each vertex $v\in\mathcal{V}$ is stored in Table V along with its coordinates
@@ -120,7 +120,7 @@ Here are the SQL statements to construct the tables.
   + ")"
 @
 
-\section{User Tables (Table UQ, UE, UL, UO, UD, and UB)}
+\subsection{User Tables (Table UQ, UE, UL, UO, UD, and UB)}
 \label{mod-schema: user}
 
 To allow other tables to reference specific user components, the user relation
@@ -212,7 +212,7 @@ UB & \textit{uid}, \textit{val} & User base cost $d_u$ \\
   + ")"
 @
 
-\section{Routes Table (Table W)}
+\subsection{Routes Table (Table W)}
 \label{mod-schema: routes}
 
 Table W has eight columns, \textsf{sid}, \textsf{se}, \textsf{t1}, \textsf{v1},
@@ -310,7 +310,7 @@ to UE to validate the early time ([[F18]]).
   + ")"
 @
 
-\section{Labels Table (Table PD)}
+\subsection{Labels Table (Table PD)}
 \label{mod-schema: labels}
 
 Table PD (for ``pick-ups and drop-offs'') contains four columns, \textsf{sid},
@@ -353,7 +353,7 @@ Col. & Parent & Description \\
   + ")"
 @
 
-\section{User Constraint Tables (Tables S and R)}
+\subsection{User Constraint Tables (Tables S and R)}
 \label{mod-schema: user-constraint}
 
 Table S and Table R enforce the remaining user constraints.  Both tables have
@@ -430,7 +430,7 @@ Table R & \textit{rid}, rq, re, rl, ro, rd, rb \\
   + ")"
 @
 
-\section{Route Endpoint Constraints Table (Table CW)}
+\subsection{Route Endpoint Constraints Table (Table CW)}
 \label{mod-schema: route-endpoint}
 
 Table CW stores the start and end waypoints of each server route.  The table
@@ -514,7 +514,7 @@ ve & & \\
   + ")"
 @
 
-\section{Label Constraints Table (Table CPD)}
+\subsection{Label Constraints Table (Table CPD)}
 \label{mod-schema: label-constraints}
 
 Table CPD enforces the pick-up and drop-off rules R5--R9. It contains twelve
@@ -639,7 +639,7 @@ rd & & \\
 % Deferring C89B is important for supporting job removal. We'll have to figure
 % out a workaround.
 
-\section{Load Constraints Table (Table CQ)}
+\subsection{Load Constraints Table (Table CQ)}
 \label{mod-schema: load-constraints}
 
 Table CQ enforces the load rule R11. It has fourteen columns, \textsf{sid},
@@ -763,7 +763,7 @@ rq & & \\
   + ")"
 @
 
-\section{Views}
+\subsection{Views}
 \label{mod-schema: views}
 
 The user relation $\mathcal{U}$ can be formed by a union of Table S and R.

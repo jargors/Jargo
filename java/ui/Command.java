@@ -19,7 +19,7 @@ public class Command {
                   String opt_e = "";  // end time in seconds, relative to problem time
 
                   String help1 = String.join("\n",
-                                   "Jargo 0.9.0, a real-time stochastic ridesharing simulator.",
+                                   "Jargo, a real-time stochastic ridesharing simulator.",
                                    "Usage: ./launch-cli [OPTION...] MODE ROAD GTREE PROB CLIENT CLASSNAME",
                                    "",
                                    "Mandatory arguments:",

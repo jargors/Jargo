@@ -1,4 +1,4 @@
-\chapter{JMX Monitoring}
+\section{JMX Monitoring}
 \label{sim-jmx}
 
 Whenever a new read or write method is added to a class, add the JMX statistics
@@ -8,13 +8,13 @@ call duration of the last invocation) and a \textit{Stats:} chunk that assigns
 values to the member variables. Each member variable must also have a
 corresponding \textit{get} method that returns the value of the variable.
 
-\section{Monitors and Beans}
+\subsection{Monitors and Beans}
 
 Clients (such as [[jconsole]] or VisualVM) call the ``Monitor'' methods to get
 and set variables during runtime via JMX. Each Monitor is its own class
 and implements an ``MBean'' that defines the interface.
 
-\subsection{\texttt{ClientMonitor} and \texttt{ClientMonitorMBean}}
+\subsubsection{\texttt{ClientMonitor} and \texttt{ClientMonitorMBean}}
 <<ClientMonitor.java>>=
 <<Package: [[jmx]]>>
 import com.github.jargors.sim.Client;
@@ -41,7 +41,7 @@ public interface ClientMonitorMBean {
 }
 @
 
-\subsection{\texttt{CommunicatorMonitor} and \texttt{CommunicatorMonitorMBean}}
+\subsubsection{\texttt{CommunicatorMonitor} and \texttt{CommunicatorMonitorMBean}}
 <<CommunicatorMonitor.java>>=
 <<Package: [[jmx]]>>
 import com.github.jargors.sim.Communicator;
@@ -96,7 +96,7 @@ public interface CommunicatorMonitorMBean {
 }
 @
 
-\subsection{\texttt{ControllerMonitor} and \texttt{ControllerMonitorMBean}}
+\subsubsection{\texttt{ControllerMonitor} and \texttt{ControllerMonitorMBean}}
 <<ControllerMonitor.java>>=
 <<Package: [[jmx]]>>
 import com.github.jargors.sim.Controller;
@@ -319,7 +319,7 @@ public interface ControllerMonitorMBean {
 }
 @
 
-\subsection{\texttt{StorageMonitor} and \texttt{StorageMonitorMBean}}
+\subsubsection{\texttt{StorageMonitor} and \texttt{StorageMonitorMBean}}
 <<StorageMonitor.java>>=
 <<Package: [[jmx]]>>
 import com.github.jargors.sim.Storage;
@@ -337,8 +337,8 @@ import com.github.jargors.sim.Storage;
 public interface StorageMonitorMBean { }
 @
 
-\section{Class Members}
-\subsection{Controller}
+\subsection{Class Members}
+\subsubsection{Controller}
 <<[[Controller]] member variables>>=
 <<Stats members: controllerClock>>
 <<Stats members: controllerClockReference>>
@@ -388,7 +388,7 @@ public interface StorageMonitorMBean { }
 <<Stats members: queryVerticesCount(0)>>
 @
 
-\subsection{Communicator}
+\subsubsection{Communicator}
 <<[[Communicator]] member variables>>=
 <<Stats members: queryEdge(2)>>
 <<Stats members: queryServerDistanceRemaining(2)>>
@@ -404,13 +404,13 @@ public interface StorageMonitorMBean { }
 <<Stats members: updateServerRoute(3)>>
 @
 
-\subsection{Client}
+\subsubsection{Client}
 <<[[Client]] member variables>>=
 <<Stats members: clientHandleRequest>>
 @
 
-\section{Class Methods}
-\subsection{Controller}
+\subsection{Class Methods}
+\subsubsection{Controller}
 <<[[Controller]] methods>>=
 public <<Get: getStatControllerClock(0)>>
 public <<Get: getStatControllerClockReferenceDay(0)>>
@@ -465,7 +465,7 @@ public <<Get: getStatQueryVerticesCountDur(0)>>
 public <<Get: getStatQueryVerticesDur(0)>>
 @
 
-\subsection{Communicator}
+\subsubsection{Communicator}
 <<[[Communicator]] methods>>=
 public <<Get: getStatQueryEdgeDur(0)>>
 public <<Get: getStatQueryServerDistanceRemainingDur(0)>>
@@ -478,14 +478,14 @@ public <<Get: getStatQueryUserDur(0)>>
 public <<Get: getStatQueryVertexDur(0)>>
 @
 
-\subsection{Client}
+\subsubsection{Client}
 <<[[Client]] methods>>=
 public <<Get: getStatClientHandleRequestDur(0)>>
 public <<Get: getStatClientQueueSize(0)>>
 @
 
-\section{Class Registers}
-\subsection{Storage}
+\subsection{Class Registers}
+\subsubsection{Storage}
 <<[[Storage]] register JMX monitor>>=
 try {
   MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
@@ -499,7 +499,7 @@ try {
 }
 @
 
-\subsection{Controller}
+\subsubsection{Controller}
 <<[[Controller]] register JMX monitor>>=
 try {
   MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
@@ -513,7 +513,7 @@ try {
 }
 @
 
-\subsection{Communicator}
+\subsubsection{Communicator}
 <<[[Communicator]] register JMX monitor>>=
 try {
   MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
@@ -527,7 +527,7 @@ try {
 }
 @
 
-\subsection{Client}
+\subsubsection{Client}
 <<[[Client]] register JMX monitor>>=
 try {
   MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
@@ -541,25 +541,25 @@ try {
 }
 @
 
-\section{Chunks}
-\subsection{Import JMX dependencies}
+\subsection{Chunks}
+\subsubsection{Import JMX dependencies}
 <<Import JMX dependencies>>=
 import com.github.jargors.jmx.*;
 import java.lang.management.*;
 import javax.management.*;
 @
 
-\subsection{Stats members: clientHandleRequest}
+\subsubsection{Stats members: clientHandleRequest}
 <<Stats members: clientHandleRequest>>=
 private long   statClientHandleRequestDur = 0;
 @
 
-\subsection{Stats members: controllerClock}
+\subsubsection{Stats members: controllerClock}
 <<Stats members: controllerClock>>=
 private int    statControllerClock;
 @
 
-\subsection{Stats members: controllerClockReference}
+\subsubsection{Stats members: controllerClockReference}
 <<Stats members: controllerClockReference>>=
 private int    statControllerClockReferenceDay;
 private int    statControllerClockReferenceHour;
@@ -567,920 +567,920 @@ private int    statControllerClockReferenceMinute;
 private int    statControllerClockReferenceSecond;
 @
 
-\subsection{Stats members: controllerRequestCollection}
+\subsubsection{Stats members: controllerRequestCollection}
 <<Stats members: controllerRequestCollection>>=
 private int    statControllerRequestCollectionSize = 0;
 private int    statControllerRequestCollectionDropped = 0;
 private long   statControllerRequestCollectionDur = 0;
 @
 
-\subsection{Stats members: query(2)}
+\subsubsection{Stats members: query(2)}
 <<Stats members: query(2)>>=
 private long statQueryDur = 0;
 @
 
-\subsection{Stats members: queryEdge(2)}
+\subsubsection{Stats members: queryEdge(2)}
 <<Stats members: queryEdge(2)>>=
 private long statQueryEdgeDur = 0;
 @
 
-\subsection{Stats members: queryEdgeStatistics(0)}
+\subsubsection{Stats members: queryEdgeStatistics(0)}
 <<Stats members: queryEdgeStatistics(0)>>=
 private long statQueryEdgeStatisticsDur = 0;
 @
 
-\subsection{Stats members: queryEdges(0)}
+\subsubsection{Stats members: queryEdges(0)}
 <<Stats members: queryEdges(0)>>=
 private long statQueryEdgesDur = 0;
 @
 
-\subsection{Stats members: queryEdgesCount(0)}
+\subsubsection{Stats members: queryEdgesCount(0)}
 <<Stats members: queryEdgesCount(0)>>=
 private long statQueryEdgesCountDur = 0;
 @
 
-\subsection{Stats members: queryMBR(0)}
+\subsubsection{Stats members: queryMBR(0)}
 <<Stats members: queryMBR(0)>>=
 private long statQueryMBRDur = 0;
 @
 
-\subsection{Stats members: queryMetricRequestDistanceBaseTotal(0)}
+\subsubsection{Stats members: queryMetricRequestDistanceBaseTotal(0)}
 <<Stats members: queryMetricRequestDistanceBaseTotal(0)>>=
 private long statQueryMetricRequestDistanceBaseTotalDur = 0;
 @
 
-\subsection{Stats members: queryMetricRequestDistanceBaseUnassignedTotal(1)}
+\subsubsection{Stats members: queryMetricRequestDistanceBaseUnassignedTotal(1)}
 <<Stats members: queryMetricRequestDistanceBaseUnassignedTotal(1)>>=
 private long statQueryMetricRequestDistanceBaseUnassignedTotalDur = 0;
 @
 
-\subsection{Stats members: queryMetricRequestDistanceDetourTotal(1)}
+\subsubsection{Stats members: queryMetricRequestDistanceDetourTotal(1)}
 <<Stats members: queryMetricRequestDistanceDetourTotal(1)>>=
 private long statQueryMetricRequestDistanceDetourTotalDur = 0;
 @
 
-\subsection{Stats members: queryMetricRequestDistanceTransitTotal(1)}
+\subsubsection{Stats members: queryMetricRequestDistanceTransitTotal(1)}
 <<Stats members: queryMetricRequestDistanceTransitTotal(1)>>=
 private long statQueryMetricRequestDistanceTransitTotalDur = 0;
 @
 
-\subsection{Stats members: queryMetricRequestDurationPickupTotal(1)}
+\subsubsection{Stats members: queryMetricRequestDurationPickupTotal(1)}
 <<Stats members: queryMetricRequestDurationPickupTotal(1)>>=
 private long statQueryMetricRequestDurationPickupTotalDur = 0;
 @
 
-\subsection{Stats members: queryMetricRequestDurationTransitTotal(1)}
+\subsubsection{Stats members: queryMetricRequestDurationTransitTotal(1)}
 <<Stats members: queryMetricRequestDurationTransitTotal(1)>>=
 private long statQueryMetricRequestDurationTransitTotalDur = 0;
 @
 
-\subsection{Stats members: queryMetricRequestDurationTravelTotal(1)}
+\subsubsection{Stats members: queryMetricRequestDurationTravelTotal(1)}
 <<Stats members: queryMetricRequestDurationTravelTotal(1)>>=
 private long statQueryMetricRequestDurationTravelTotalDur = 0;
 @
 
-\subsection{Stats members: queryMetricRequestTWViolationsTotal(0)}
+\subsubsection{Stats members: queryMetricRequestTWViolationsTotal(0)}
 <<Stats members: queryMetricRequestTWViolationsTotal(0)>>=
 private long statQueryMetricRequestTWViolationsTotalDur = 0;
 @
 
-\subsection{Stats members: queryMetricServerDistanceBaseTotal(0)}
+\subsubsection{Stats members: queryMetricServerDistanceBaseTotal(0)}
 <<Stats members: queryMetricServerDistanceBaseTotal(0)>>=
 private long statQueryMetricServerDistanceBaseTotalDur = 0;
 @
 
-\subsection{Stats members: queryMetricServerDistanceCruisingTotal(1)}
+\subsubsection{Stats members: queryMetricServerDistanceCruisingTotal(1)}
 <<Stats members: queryMetricServerDistanceCruisingTotal(1)>>=
 private long statQueryMetricServerDistanceCruisingTotalDur = 0;
 @
 
-\subsection{Stats members: queryMetricServerDistanceServiceTotal(1)}
+\subsubsection{Stats members: queryMetricServerDistanceServiceTotal(1)}
 <<Stats members: queryMetricServerDistanceServiceTotal(1)>>=
 private long statQueryMetricServerDistanceServiceTotalDur = 0;
 @
 
-\subsection{Stats members: queryMetricServerDistanceTotal(1)}
+\subsubsection{Stats members: queryMetricServerDistanceTotal(1)}
 <<Stats members: queryMetricServerDistanceTotal(1)>>=
 private long statQueryMetricServerDistanceTotalDur = 0;
 @
 
-\subsection{Stats members: queryMetricServerDurationCruisingTotal(1)}
+\subsubsection{Stats members: queryMetricServerDurationCruisingTotal(1)}
 <<Stats members: queryMetricServerDurationCruisingTotal(1)>>=
 private long statQueryMetricServerDurationCruisingTotalDur = 0;
 @
 
-\subsection{Stats members: queryMetricServerDurationServiceTotal(1)}
+\subsubsection{Stats members: queryMetricServerDurationServiceTotal(1)}
 <<Stats members: queryMetricServerDurationServiceTotal(1)>>=
 private long statQueryMetricServerDurationServiceTotalDur = 0;
 @
 
-\subsection{Stats members: queryMetricServerDurationTravelTotal(1)}
+\subsubsection{Stats members: queryMetricServerDurationTravelTotal(1)}
 <<Stats members: queryMetricServerDurationTravelTotal(1)>>=
 private long statQueryMetricServerDurationTravelTotalDur = 0;
 @
 
-\subsection{Stats members: queryMetricServerTWViolationsTotal(0)}
+\subsubsection{Stats members: queryMetricServerTWViolationsTotal(0)}
 <<Stats members: queryMetricServerTWViolationsTotal(0)>>=
 private long statQueryMetricServerTWViolationsTotalDur = 0;
 @
 
-\subsection{Stats members: queryMetricServiceRate(1)}
+\subsubsection{Stats members: queryMetricServiceRate(1)}
 <<Stats members: queryMetricServiceRate(1)>>=
 private long statQueryMetricServiceRateDur = 0;
 @
 
-\subsection{Stats members: queryMetricUserDistanceBaseTotal(1)}
+\subsubsection{Stats members: queryMetricUserDistanceBaseTotal(1)}
 <<Stats members: queryMetricUserDistanceBaseTotal(1)>>=
 private long statQueryMetricUserDistanceBaseTotalDur = 0;
 @
 
-\subsection{Stats members: queryRequestTimeOfArrival(1)}
+\subsubsection{Stats members: queryRequestTimeOfArrival(1)}
 <<Stats members: queryRequestTimeOfArrival(1)>>=
 private long statQueryRequestTimeOfArrivalDur = 0;
 @
 
-\subsection{Stats members: queryRequestTimeOfDeparture(1)}
+\subsubsection{Stats members: queryRequestTimeOfDeparture(1)}
 <<Stats members: queryRequestTimeOfDeparture(1)>>=
 private long statQueryRequestTimeOfDepartureDur = 0;
 @
 
-\subsection{Stats members: queryRequestsCount(0)}
+\subsubsection{Stats members: queryRequestsCount(0)}
 <<Stats members: queryRequestsCount(0)>>=
 private long statQueryRequestsCountDur = 0;
 @
 
-\subsection{Stats members: queryRequestsCountActive(1)}
+\subsubsection{Stats members: queryRequestsCountActive(1)}
 <<Stats members: queryRequestsCountActive(1)>>=
 private long statQueryRequestsCountActiveDur = 0;
 @
 
-\subsection{Stats members: queryRequestsCountCompleted(1)}
+\subsubsection{Stats members: queryRequestsCountCompleted(1)}
 <<Stats members: queryRequestsCountCompleted(1)>>=
 private long statQueryRequestsCountCompletedDur = 0;
 @
 
-\subsection{Stats members: queryRequestsQueued(1)}
+\subsubsection{Stats members: queryRequestsQueued(1)}
 <<Stats members: queryRequestsQueued(1)>>=
 private long statQueryRequestsQueuedDur = 0;
 @
 
-\subsection{Stats members: queryServerDistanceRemaining(2)}
+\subsubsection{Stats members: queryServerDistanceRemaining(2)}
 <<Stats members: queryServerDistanceRemaining(2)>>=
 private long statQueryServerDistanceRemainingDur = 0;
 @
 
-\subsection{Stats members: queryServerDurationRemaining(2)}
+\subsubsection{Stats members: queryServerDurationRemaining(2)}
 <<Stats members: queryServerDurationRemaining(2)>>=
 private long statQueryServerDurationRemainingDur = 0;
 @
 
-\subsection{Stats members: queryServerLoadMax(2)}
+\subsubsection{Stats members: queryServerLoadMax(2)}
 <<Stats members: queryServerLoadMax(2)>>=
 private long statQueryServerLoadMaxDur = 0;
 @
 
-\subsection{Stats members: queryServerRoute(1)}
+\subsubsection{Stats members: queryServerRoute(1)}
 <<Stats members: queryServerRoute(1)>>=
 private long statQueryServerRouteDur = 0;
 @
 
-\subsection{Stats members: queryServerRouteActive(1)}
+\subsubsection{Stats members: queryServerRouteActive(1)}
 <<Stats members: queryServerRouteActive(1)>>=
 private long statQueryServerRouteActiveDur = 0;
 @
 
-\subsection{Stats members: queryServerRouteRemaining(2)}
+\subsubsection{Stats members: queryServerRouteRemaining(2)}
 <<Stats members: queryServerRouteRemaining(2)>>=
 private long statQueryServerRouteRemainingDur = 0;
 @
 
-\subsection{Stats members: queryServerSchedule(1)}
+\subsubsection{Stats members: queryServerSchedule(1)}
 <<Stats members: queryServerSchedule(1)>>=
 private long statQueryServerScheduleDur = 0;
 @
 
-\subsection{Stats members: queryServerScheduleRemaining(2)}
+\subsubsection{Stats members: queryServerScheduleRemaining(2)}
 <<Stats members: queryServerScheduleRemaining(2)>>=
 private long statQueryServerScheduleRemainingDur = 0;
 @
 
-\subsection{Stats members: queryServerTimeOfDeparture(1)}
+\subsubsection{Stats members: queryServerTimeOfDeparture(1)}
 <<Stats members: queryServerTimeOfDeparture(1)>>=
 private long statQueryServerTimeOfDepartureDur = 0;
 @
 
-\subsection{Stats members: queryServersActive(1)}
+\subsubsection{Stats members: queryServersActive(1)}
 <<Stats members: queryServersActive(1)>>=
 private long statQueryServersActiveDur = 0;
 @
 
-\subsection{Stats members: queryServersCount(0)}
+\subsubsection{Stats members: queryServersCount(0)}
 <<Stats members: queryServersCount(0)>>=
 private long statQueryServersCountDur = 0;
 @
 
-\subsection{Stats members: queryServersCountActive(1)}
+\subsubsection{Stats members: queryServersCountActive(1)}
 <<Stats members: queryServersCountActive(1)>>=
 private long statQueryServersCountActiveDur = 0;
 @
 
-\subsection{Stats members: queryServersLocationsActive(1)}
+\subsubsection{Stats members: queryServersLocationsActive(1)}
 <<Stats members: queryServersLocationsActive(1)>>=
 private long statQueryServersLocationsActiveDur = 0;
 @
 
-\subsection{Stats members: queryUser(1)}
+\subsubsection{Stats members: queryUser(1)}
 <<Stats members: queryUser(1)>>=
 private long statQueryUserDur = 0;
 @
 
-\subsection{Stats members: queryVertex(1)}
+\subsubsection{Stats members: queryVertex(1)}
 <<Stats members: queryVertex(1)>>=
 private long statQueryVertexDur = 0;
 @
 
-\subsection{Stats members: queryVertices(0)}
+\subsubsection{Stats members: queryVertices(0)}
 <<Stats members: queryVertices(0)>>=
 private long statQueryVerticesDur = 0;
 @
 
-\subsection{Stats members: queryVerticesCount(0)}
+\subsubsection{Stats members: queryVerticesCount(0)}
 <<Stats members: queryVerticesCount(0)>>=
 private long statQueryVerticesCountDur = 0;
 @
 
-\subsection{Stats members: updateServerAddToSchedule(4)}
+\subsubsection{Stats members: updateServerAddToSchedule(4)}
 <<Stats members: updateServerAddToSchedule(4)>>=
 private long statUpdateServerAddToScheduleDur = 0;
 @
 
-\subsection{Stats members: updateServerRemoveFromSchedule(4)}
+\subsubsection{Stats members: updateServerRemoveFromSchedule(4)}
 <<Stats members: updateServerRemoveFromSchedule(4)>>=
 private long statUpdateServerRemoveFromScheduleDur = 0;
 @
 
-\subsection{Stats members: updateServerRoute(3)}
+\subsubsection{Stats members: updateServerRoute(3)}
 <<Stats members: updateServerRoute(3)>>=
 private long statUpdateServerRouteDur = 0;
 @
 
-\subsection{Stats: controllerRequestCollection}
+\subsubsection{Stats: controllerRequestCollection}
 <<Stats: controllerRequestCollection>>=
 this.statControllerRequestCollectionSize = A1;
 this.statControllerRequestCollectionDropped = A2;
 this.statControllerRequestCollectionDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: clientHandleRequest}
+\subsubsection{Stats: clientHandleRequest}
 <<Stats: clientHandleRequest>>=
 this.statClientHandleRequestDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: query(2)}
+\subsubsection{Stats: query(2)}
 <<Stats: query(2)>>=
 this.statQueryDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryEdge(2)}
+\subsubsection{Stats: queryEdge(2)}
 <<Stats: queryEdge(2)>>=
 this.statQueryEdgeDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryEdgeStatistics(0)}
+\subsubsection{Stats: queryEdgeStatistics(0)}
 <<Stats: queryEdgeStatistics(0)>>=
 this.statQueryEdgeStatisticsDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryEdges(0)}
+\subsubsection{Stats: queryEdges(0)}
 <<Stats: queryEdges(0)>>=
 this.statQueryEdgesDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryEdgesCount(0)}
+\subsubsection{Stats: queryEdgesCount(0)}
 <<Stats: queryEdgesCount(0)>>=
 this.statQueryEdgesCountDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryMBR(0)}
+\subsubsection{Stats: queryMBR(0)}
 <<Stats: queryMBR(0)>>=
 this.statQueryMBRDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryMetricRequestDistanceBaseTotal(0)}
+\subsubsection{Stats: queryMetricRequestDistanceBaseTotal(0)}
 <<Stats: queryMetricRequestDistanceBaseTotal(0)>>=
 this.statQueryMetricRequestDistanceBaseTotalDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryMetricRequestDistanceBaseUnassignedTotal(1)}
+\subsubsection{Stats: queryMetricRequestDistanceBaseUnassignedTotal(1)}
 <<Stats: queryMetricRequestDistanceBaseUnassignedTotal(1)>>=
 this.statQueryMetricRequestDistanceBaseUnassignedTotalDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryMetricRequestDistanceDetourTotal(1)}
+\subsubsection{Stats: queryMetricRequestDistanceDetourTotal(1)}
 <<Stats: queryMetricRequestDistanceDetourTotal(1)>>=
 this.statQueryMetricRequestDistanceDetourTotalDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryMetricRequestDistanceTransitTotal(1)}
+\subsubsection{Stats: queryMetricRequestDistanceTransitTotal(1)}
 <<Stats: queryMetricRequestDistanceTransitTotal(1)>>=
 this.statQueryMetricRequestDistanceTransitTotalDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryMetricRequestDurationPickupTotal(1)}
+\subsubsection{Stats: queryMetricRequestDurationPickupTotal(1)}
 <<Stats: queryMetricRequestDurationPickupTotal(1)>>=
 this.statQueryMetricRequestDurationPickupTotalDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryMetricRequestDurationTransitTotal(1)}
+\subsubsection{Stats: queryMetricRequestDurationTransitTotal(1)}
 <<Stats: queryMetricRequestDurationTransitTotal(1)>>=
 this.statQueryMetricRequestDurationTransitTotalDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryMetricRequestDurationTravelTotal(1)}
+\subsubsection{Stats: queryMetricRequestDurationTravelTotal(1)}
 <<Stats: queryMetricRequestDurationTravelTotal(1)>>=
 this.statQueryMetricRequestDurationTravelTotalDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryMetricRequestTWViolationsTotal(0)}
+\subsubsection{Stats: queryMetricRequestTWViolationsTotal(0)}
 <<Stats: queryMetricRequestTWViolationsTotal(0)>>=
 this.statQueryMetricRequestTWViolationsTotalDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryMetricServerDistanceBaseTotal(0)}
+\subsubsection{Stats: queryMetricServerDistanceBaseTotal(0)}
 <<Stats: queryMetricServerDistanceBaseTotal(0)>>=
 this.statQueryMetricServerDistanceBaseTotalDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryMetricServerDistanceCruisingTotal(1)}
+\subsubsection{Stats: queryMetricServerDistanceCruisingTotal(1)}
 <<Stats: queryMetricServerDistanceCruisingTotal(1)>>=
 this.statQueryMetricServerDistanceCruisingTotalDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryMetricServerDistanceServiceTotal(1)}
+\subsubsection{Stats: queryMetricServerDistanceServiceTotal(1)}
 <<Stats: queryMetricServerDistanceServiceTotal(1)>>=
 this.statQueryMetricServerDistanceServiceTotalDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryMetricServerDistanceTotal(1)}
+\subsubsection{Stats: queryMetricServerDistanceTotal(1)}
 <<Stats: queryMetricServerDistanceTotal(1)>>=
 this.statQueryMetricServerDistanceTotalDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryMetricServerDurationCruisingTotal(1)}
+\subsubsection{Stats: queryMetricServerDurationCruisingTotal(1)}
 <<Stats: queryMetricServerDurationCruisingTotal(1)>>=
 this.statQueryMetricServerDurationCruisingTotalDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryMetricServerDurationServiceTotal(1)}
+\subsubsection{Stats: queryMetricServerDurationServiceTotal(1)}
 <<Stats: queryMetricServerDurationServiceTotal(1)>>=
 this.statQueryMetricServerDurationServiceTotalDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryMetricServerDurationTravelTotal(1)}
+\subsubsection{Stats: queryMetricServerDurationTravelTotal(1)}
 <<Stats: queryMetricServerDurationTravelTotal(1)>>=
 this.statQueryMetricServerDurationTravelTotalDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryMetricServerTWViolationsTotal(0)}
+\subsubsection{Stats: queryMetricServerTWViolationsTotal(0)}
 <<Stats: queryMetricServerTWViolationsTotal(0)>>=
 this.statQueryMetricServerTWViolationsTotalDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryMetricServiceRate(1)}
+\subsubsection{Stats: queryMetricServiceRate(1)}
 <<Stats: queryMetricServiceRate(1)>>=
 this.statQueryMetricServiceRateDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryMetricUserDistanceBaseTotal(1)}
+\subsubsection{Stats: queryMetricUserDistanceBaseTotal(1)}
 <<Stats: queryMetricUserDistanceBaseTotal(1)>>=
 this.statQueryMetricUserDistanceBaseTotalDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryRequestTimeOfArrival(1)}
+\subsubsection{Stats: queryRequestTimeOfArrival(1)}
 <<Stats: queryRequestTimeOfArrival(1)>>=
 this.statQueryRequestTimeOfArrivalDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryRequestTimeOfDeparture(1)}
+\subsubsection{Stats: queryRequestTimeOfDeparture(1)}
 <<Stats: queryRequestTimeOfDeparture(1)>>=
 this.statQueryRequestTimeOfDepartureDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryRequestsCount(0)}
+\subsubsection{Stats: queryRequestsCount(0)}
 <<Stats: queryRequestsCount(0)>>=
 this.statQueryRequestsCountDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryRequestsCountActive(1)}
+\subsubsection{Stats: queryRequestsCountActive(1)}
 <<Stats: queryRequestsCountActive(1)>>=
 this.statQueryRequestsCountActiveDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryRequestsCountCompleted(1)}
+\subsubsection{Stats: queryRequestsCountCompleted(1)}
 <<Stats: queryRequestsCountCompleted(1)>>=
 this.statQueryRequestsCountCompletedDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryRequestsQueued(1)}
+\subsubsection{Stats: queryRequestsQueued(1)}
 <<Stats: queryRequestsQueued(1)>>=
 this.statQueryRequestsQueuedDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryServerDistanceRemaining(2)}
+\subsubsection{Stats: queryServerDistanceRemaining(2)}
 <<Stats: queryServerDistanceRemaining(2)>>=
 this.statQueryServerDistanceRemainingDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryServerDurationRemaining(2)}
+\subsubsection{Stats: queryServerDurationRemaining(2)}
 <<Stats: queryServerDurationRemaining(2)>>=
 this.statQueryServerDurationRemainingDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryServerLoadMax(2)}
+\subsubsection{Stats: queryServerLoadMax(2)}
 <<Stats: queryServerLoadMax(2)>>=
 this.statQueryServerLoadMaxDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryServerRoute(1)}
+\subsubsection{Stats: queryServerRoute(1)}
 <<Stats: queryServerRoute(1)>>=
 this.statQueryServerRouteDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryServerRouteActive(1)}
+\subsubsection{Stats: queryServerRouteActive(1)}
 <<Stats: queryServerRouteActive(1)>>=
 this.statQueryServerRouteActiveDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryServerRouteRemaining(2)}
+\subsubsection{Stats: queryServerRouteRemaining(2)}
 <<Stats: queryServerRouteRemaining(2)>>=
 this.statQueryServerRouteRemainingDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryServerSchedule(1)}
+\subsubsection{Stats: queryServerSchedule(1)}
 <<Stats: queryServerSchedule(1)>>=
 this.statQueryServerScheduleDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryServerScheduleRemaining(2)}
+\subsubsection{Stats: queryServerScheduleRemaining(2)}
 <<Stats: queryServerScheduleRemaining(2)>>=
 this.statQueryServerScheduleRemainingDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryServerTimeOfDeparture(1)}
+\subsubsection{Stats: queryServerTimeOfDeparture(1)}
 <<Stats: queryServerTimeOfDeparture(1)>>=
 this.statQueryServerTimeOfDepartureDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryServersActive(1)}
+\subsubsection{Stats: queryServersActive(1)}
 <<Stats: queryServersActive(1)>>=
 this.statQueryServersActiveDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryServersCount(0)}
+\subsubsection{Stats: queryServersCount(0)}
 <<Stats: queryServersCount(0)>>=
 this.statQueryServersCountDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryServersCountActive(1)}
+\subsubsection{Stats: queryServersCountActive(1)}
 <<Stats: queryServersCountActive(1)>>=
 this.statQueryServersCountActiveDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryServersLocationsActive(1)}
+\subsubsection{Stats: queryServersLocationsActive(1)}
 <<Stats: queryServersLocationsActive(1)>>=
 this.statQueryServersLocationsActiveDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryUser(1)}
+\subsubsection{Stats: queryUser(1)}
 <<Stats: queryUser(1)>>=
 this.statQueryUserDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryVertex(1)}
+\subsubsection{Stats: queryVertex(1)}
 <<Stats: queryVertex(1)>>=
 this.statQueryVertexDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryVertices(0)}
+\subsubsection{Stats: queryVertices(0)}
 <<Stats: queryVertices(0)>>=
 this.statQueryVerticesDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: queryVerticesCount(0)}
+\subsubsection{Stats: queryVerticesCount(0)}
 <<Stats: queryVerticesCount(0)>>=
 this.statQueryVerticesCountDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: updateServerAddToSchedule(4)}
+\subsubsection{Stats: updateServerAddToSchedule(4)}
 <<Stats: updateServerAddToSchedule(4)>>=
 this.statUpdateServerAddToScheduleDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: updateServerRemoveFromSchedule(4)}
+\subsubsection{Stats: updateServerRemoveFromSchedule(4)}
 <<Stats: updateServerRemoveFromSchedule(4)>>=
 this.statUpdateServerRemoveFromScheduleDur = (System.currentTimeMillis() - A0);
 @
 
-\subsection{Stats: updateServerRoute(3)}
+\subsubsection{Stats: updateServerRoute(3)}
 <<Stats: updateServerRoute(3)>>=
 this.statUpdateServerRouteDur = (System.currentTimeMillis() - A0);
 @
 
-\section{Methods}
+\subsection{Methods}
 
-\subsection{Get: getStatControllerClock(0)}
+\subsubsection{Get: getStatControllerClock(0)}
 <<Get: getStatControllerClock(0)>>=
 int    getStatControllerClock() {
   return this.statControllerClock;
 }
 @ %def getStatControllerClock
 
-\subsection{Get: getStatControllerClockReferenceDay(0)}
+\subsubsection{Get: getStatControllerClockReferenceDay(0)}
 <<Get: getStatControllerClockReferenceDay(0)>>=
 int    getStatControllerClockReferenceDay() {
   return this.statControllerClockReferenceDay;
 }
 @ %def getStatControllerClockReferenceDay
 
-\subsection{Get: getStatControllerClockReferenceHour(0)}
+\subsubsection{Get: getStatControllerClockReferenceHour(0)}
 <<Get: getStatControllerClockReferenceHour(0)>>=
 int    getStatControllerClockReferenceHour() {
   return this.statControllerClockReferenceHour;
 }
 @ %def getStatControllerClockReferenceHour
 
-\subsection{Get: getStatControllerClockReferenceMinute(0)}
+\subsubsection{Get: getStatControllerClockReferenceMinute(0)}
 <<Get: getStatControllerClockReferenceMinute(0)>>=
 int    getStatControllerClockReferenceMinute() {
   return this.statControllerClockReferenceMinute;
 }
 @ %def getStatControllerClockReferenceMinute
 
-\subsection{Get: getStatControllerClockReferenceSecond(0)}
+\subsubsection{Get: getStatControllerClockReferenceSecond(0)}
 <<Get: getStatControllerClockReferenceSecond(0)>>=
 int    getStatControllerClockReferenceSecond() {
   return this.statControllerClockReferenceSecond;
 }
 @ %def getStatControllerClockReferenceSecond
 
-\subsection{Get: getStatControllerRequestCollectionSize(0)}
+\subsubsection{Get: getStatControllerRequestCollectionSize(0)}
 <<Get: getStatControllerRequestCollectionSize(0)>>=
 int    getStatControllerRequestCollectionSize() {
   return this.statControllerRequestCollectionSize;
 }
 @ %def getStatControllerRequestCollectionSize
 
-\subsection{Get: getStatControllerRequestCollectionDropped(0)}
+\subsubsection{Get: getStatControllerRequestCollectionDropped(0)}
 <<Get: getStatControllerRequestCollectionDropped(0)>>=
 int    getStatControllerRequestCollectionDropped() {
   return this.statControllerRequestCollectionDropped;
 }
 @ %def getStatControllerRequestCollectionDropped
 
-\subsection{Get: getStatControllerRequestCollectionDur(0)}
+\subsubsection{Get: getStatControllerRequestCollectionDur(0)}
 <<Get: getStatControllerRequestCollectionDur(0)>>=
 long   getStatControllerRequestCollectionDur() {
   return this.statControllerRequestCollectionDur;
 }
 @ %def getStatControllerRequestCollectionDur
 
-\subsection{Get: getStatClientQueueSize(0)}
+\subsubsection{Get: getStatClientQueueSize(0)}
 <<Get: getStatClientQueueSize(0)>>=
 int getStatClientQueueSize() {
   return this.queue.size();
 }
 @ %def getStatClientQueueSize
 
-\subsection{Get: getStatClientHandleRequestDur(0)}
+\subsubsection{Get: getStatClientHandleRequestDur(0)}
 <<Get: getStatClientHandleRequestDur(0)>>=
 long getStatClientHandleRequestDur() {
   return this.statClientHandleRequestDur;
 }
 @ %def getStatClientHandleRequestDur
 
-\subsection{Get: getStatQueryDur(0)}
+\subsubsection{Get: getStatQueryDur(0)}
 <<Get: getStatQueryDur(0)>>=
 long getStatQueryDur() {
   return this.statQueryDur;
 }
 @ %def getStatQueryDur
 
-\subsection{Get: getStatQueryEdgeDur(0)}
+\subsubsection{Get: getStatQueryEdgeDur(0)}
 <<Get: getStatQueryEdgeDur(0)>>=
 long getStatQueryEdgeDur() {
   return this.statQueryEdgeDur;
 }
 @ %def getStatQueryEdgeDur
 
-\subsection{Get: getStatQueryEdgeStatisticsDur(0)}
+\subsubsection{Get: getStatQueryEdgeStatisticsDur(0)}
 <<Get: getStatQueryEdgeStatisticsDur(0)>>=
 long getStatQueryEdgeStatisticsDur() {
   return this.statQueryEdgeStatisticsDur;
 }
 @ %def getStatQueryEdgeStatisticsDur
 
-\subsection{Get: getStatQueryEdgesCountDur(0)}
+\subsubsection{Get: getStatQueryEdgesCountDur(0)}
 <<Get: getStatQueryEdgesCountDur(0)>>=
 long getStatQueryEdgesCountDur() {
   return this.statQueryEdgesCountDur;
 }
 @ %def getStatQueryEdgesCountDur
 
-\subsection{Get: getStatQueryEdgesDur(0)}
+\subsubsection{Get: getStatQueryEdgesDur(0)}
 <<Get: getStatQueryEdgesDur(0)>>=
 long getStatQueryEdgesDur() {
   return this.statQueryEdgesDur;
 }
 @ %def getStatQueryEdgesDur
 
-\subsection{Get: getStatQueryMBRDur(0)}
+\subsubsection{Get: getStatQueryMBRDur(0)}
 <<Get: getStatQueryMBRDur(0)>>=
 long getStatQueryMBRDur() {
   return this.statQueryMBRDur;
 }
 @ %def getStatQueryMBRDur
 
-\subsection{Get: getStatQueryMetricRequestDistanceBaseTotalDur(0)}
+\subsubsection{Get: getStatQueryMetricRequestDistanceBaseTotalDur(0)}
 <<Get: getStatQueryMetricRequestDistanceBaseTotalDur(0)>>=
 long getStatQueryMetricRequestDistanceBaseTotalDur() {
   return this.statQueryMetricRequestDistanceBaseTotalDur;
 }
 @ %def getStatQueryMetricRequestDistanceBaseTotalDur
 
-\subsection{Get: getStatQueryMetricRequestDistanceBaseUnassignedTotalDur(0)}
+\subsubsection{Get: getStatQueryMetricRequestDistanceBaseUnassignedTotalDur(0)}
 <<Get: getStatQueryMetricRequestDistanceBaseUnassignedTotalDur(0)>>=
 long getStatQueryMetricRequestDistanceBaseUnassignedTotalDur() {
   return this.statQueryMetricRequestDistanceBaseUnassignedTotalDur;
 }
 @ %def getStatQueryMetricRequestDistanceBaseUnassignedTotalDur
 
-\subsection{Get: getStatQueryMetricRequestDistanceDetourTotalDur(0)}
+\subsubsection{Get: getStatQueryMetricRequestDistanceDetourTotalDur(0)}
 <<Get: getStatQueryMetricRequestDistanceDetourTotalDur(0)>>=
 long getStatQueryMetricRequestDistanceDetourTotalDur() {
   return this.statQueryMetricRequestDistanceDetourTotalDur;
 }
 @ %def getStatQueryMetricRequestDistanceDetourTotalDur
 
-\subsection{Get: getStatQueryMetricRequestDistanceTransitTotalDur(0)}
+\subsubsection{Get: getStatQueryMetricRequestDistanceTransitTotalDur(0)}
 <<Get: getStatQueryMetricRequestDistanceTransitTotalDur(0)>>=
 long getStatQueryMetricRequestDistanceTransitTotalDur() {
   return this.statQueryMetricRequestDistanceTransitTotalDur;
 }
 @ %def getStatQueryMetricRequestDistanceTransitTotalDur
 
-\subsection{Get: getStatQueryMetricRequestDurationPickupTotalDur(0)}
+\subsubsection{Get: getStatQueryMetricRequestDurationPickupTotalDur(0)}
 <<Get: getStatQueryMetricRequestDurationPickupTotalDur(0)>>=
 long getStatQueryMetricRequestDurationPickupTotalDur() {
   return this.statQueryMetricRequestDurationPickupTotalDur;
 }
 @ %def getStatQueryMetricRequestDurationPickupTotalDur
 
-\subsection{Get: getStatQueryMetricRequestDurationTransitTotalDur(0)}
+\subsubsection{Get: getStatQueryMetricRequestDurationTransitTotalDur(0)}
 <<Get: getStatQueryMetricRequestDurationTransitTotalDur(0)>>=
 long getStatQueryMetricRequestDurationTransitTotalDur() {
   return this.statQueryMetricRequestDurationTransitTotalDur;
 }
 @ %def getStatQueryMetricRequestDurationTransitTotalDur
 
-\subsection{Get: getStatQueryMetricRequestDurationTravelTotalDur(0)}
+\subsubsection{Get: getStatQueryMetricRequestDurationTravelTotalDur(0)}
 <<Get: getStatQueryMetricRequestDurationTravelTotalDur(0)>>=
 long getStatQueryMetricRequestDurationTravelTotalDur() {
   return this.statQueryMetricRequestDurationTravelTotalDur;
 }
 @ %def getStatQueryMetricRequestDurationTravelTotalDur
 
-\subsection{Get: getStatQueryMetricRequestTWViolationsTotalDur(0)}
+\subsubsection{Get: getStatQueryMetricRequestTWViolationsTotalDur(0)}
 <<Get: getStatQueryMetricRequestTWViolationsTotalDur(0)>>=
 long getStatQueryMetricRequestTWViolationsTotalDur() {
   return this.statQueryMetricRequestTWViolationsTotalDur;
 }
 @ %def getStatQueryMetricRequestTWViolationsTotalDur
 
-\subsection{Get: getStatQueryMetricServerDistanceBaseTotalDur(0)}
+\subsubsection{Get: getStatQueryMetricServerDistanceBaseTotalDur(0)}
 <<Get: getStatQueryMetricServerDistanceBaseTotalDur(0)>>=
 long getStatQueryMetricServerDistanceBaseTotalDur() {
   return this.statQueryMetricServerDistanceBaseTotalDur;
 }
 @ %def getStatQueryMetricServerDistanceBaseTotalDur
 
-\subsection{Get: getStatQueryMetricServerDistanceCruisingTotalDur(0)}
+\subsubsection{Get: getStatQueryMetricServerDistanceCruisingTotalDur(0)}
 <<Get: getStatQueryMetricServerDistanceCruisingTotalDur(0)>>=
 long getStatQueryMetricServerDistanceCruisingTotalDur() {
   return this.statQueryMetricServerDistanceCruisingTotalDur;
 }
 @ %def getStatQueryMetricServerDistanceCruisingTotalDur
 
-\subsection{Get: getStatQueryMetricServerDistanceServiceTotalDur(0)}
+\subsubsection{Get: getStatQueryMetricServerDistanceServiceTotalDur(0)}
 <<Get: getStatQueryMetricServerDistanceServiceTotalDur(0)>>=
 long getStatQueryMetricServerDistanceServiceTotalDur() {
   return this.statQueryMetricServerDistanceServiceTotalDur;
 }
 @ %def getStatQueryMetricServerDistanceServiceTotalDur
 
-\subsection{Get: getStatQueryMetricServerDistanceTotalDur(0)}
+\subsubsection{Get: getStatQueryMetricServerDistanceTotalDur(0)}
 <<Get: getStatQueryMetricServerDistanceTotalDur(0)>>=
 long getStatQueryMetricServerDistanceTotalDur() {
   return this.statQueryMetricServerDistanceTotalDur;
 }
 @ %def getStatQueryMetricServerDistanceTotalDur
 
-\subsection{Get: getStatQueryMetricServerDurationCruisingTotalDur(0)}
+\subsubsection{Get: getStatQueryMetricServerDurationCruisingTotalDur(0)}
 <<Get: getStatQueryMetricServerDurationCruisingTotalDur(0)>>=
 long getStatQueryMetricServerDurationCruisingTotalDur() {
   return this.statQueryMetricServerDurationCruisingTotalDur;
 }
 @ %def getStatQueryMetricServerDurationCruisingTotalDur
 
-\subsection{Get: getStatQueryMetricServerDurationServiceTotalDur(0)}
+\subsubsection{Get: getStatQueryMetricServerDurationServiceTotalDur(0)}
 <<Get: getStatQueryMetricServerDurationServiceTotalDur(0)>>=
 long getStatQueryMetricServerDurationServiceTotalDur() {
   return this.statQueryMetricServerDurationServiceTotalDur;
 }
 @ %def getStatQueryMetricServerDurationServiceTotalDur
 
-\subsection{Get: getStatQueryMetricServerDurationTravelTotalDur(0)}
+\subsubsection{Get: getStatQueryMetricServerDurationTravelTotalDur(0)}
 <<Get: getStatQueryMetricServerDurationTravelTotalDur(0)>>=
 long getStatQueryMetricServerDurationTravelTotalDur() {
   return this.statQueryMetricServerDurationTravelTotalDur;
 }
 @ %def getStatQueryMetricServerDurationTravelTotalDur
 
-\subsection{Get: getStatQueryMetricServerTWViolationsTotalDur(0)}
+\subsubsection{Get: getStatQueryMetricServerTWViolationsTotalDur(0)}
 <<Get: getStatQueryMetricServerTWViolationsTotalDur(0)>>=
 long getStatQueryMetricServerTWViolationsTotalDur() {
   return this.statQueryMetricServerTWViolationsTotalDur;
 }
 @ %def getStatQueryMetricServerTWViolationsTotalDur
 
-\subsection{Get: getStatQueryMetricServiceRateDur(0)}
+\subsubsection{Get: getStatQueryMetricServiceRateDur(0)}
 <<Get: getStatQueryMetricServiceRateDur(0)>>=
 long getStatQueryMetricServiceRateDur() {
   return this.statQueryMetricServiceRateDur;
 }
 @ %def getStatQueryMetricServiceRateDur
 
-\subsection{Get: getStatQueryMetricUserDistanceBaseTotalDur(0)}
+\subsubsection{Get: getStatQueryMetricUserDistanceBaseTotalDur(0)}
 <<Get: getStatQueryMetricUserDistanceBaseTotalDur(0)>>=
 long getStatQueryMetricUserDistanceBaseTotalDur() {
   return this.statQueryMetricUserDistanceBaseTotalDur;
 }
 @ %def getStatQueryMetricUserDistanceBaseTotalDur
 
-\subsection{Get: getStatQueryRequestTimeOfArrivalDur(0)}
+\subsubsection{Get: getStatQueryRequestTimeOfArrivalDur(0)}
 <<Get: getStatQueryRequestTimeOfArrivalDur(0)>>=
 long getStatQueryRequestTimeOfArrivalDur() {
   return this.statQueryRequestTimeOfArrivalDur;
 }
 @ %def getStatQueryRequestTimeOfArrivalDur
 
-\subsection{Get: getStatQueryRequestTimeOfDepartureDur(0)}
+\subsubsection{Get: getStatQueryRequestTimeOfDepartureDur(0)}
 <<Get: getStatQueryRequestTimeOfDepartureDur(0)>>=
 long getStatQueryRequestTimeOfDepartureDur() {
   return this.statQueryRequestTimeOfDepartureDur;
 }
 @ %def getStatQueryRequestTimeOfDepartureDur
 
-\subsection{Get: getStatQueryRequestsCountDur(0)}
+\subsubsection{Get: getStatQueryRequestsCountDur(0)}
 <<Get: getStatQueryRequestsCountDur(0)>>=
 long getStatQueryRequestsCountDur() {
   return this.statQueryRequestsCountDur;
 }
 @ %def getStatQueryRequestsCountDur
 
-\subsection{Get: getStatQueryRequestsCountActiveDur(0)}
+\subsubsection{Get: getStatQueryRequestsCountActiveDur(0)}
 <<Get: getStatQueryRequestsCountActiveDur(0)>>=
 long getStatQueryRequestsCountActiveDur() {
   return this.statQueryRequestsCountActiveDur;
 }
 @ %def getStatQueryRequestsCountActiveDur
 
-\subsection{Get: getStatQueryRequestsCountCompletedDur(0)}
+\subsubsection{Get: getStatQueryRequestsCountCompletedDur(0)}
 <<Get: getStatQueryRequestsCountCompletedDur(0)>>=
 long getStatQueryRequestsCountCompletedDur() {
   return this.statQueryRequestsCountCompletedDur;
 }
 @ %def getStatQueryRequestsCountCompletedDur
 
-\subsection{Get: getStatQueryRequestsQueuedDur(0)}
+\subsubsection{Get: getStatQueryRequestsQueuedDur(0)}
 <<Get: getStatQueryRequestsQueuedDur(0)>>=
 long getStatQueryRequestsQueuedDur() {
   return this.statQueryRequestsQueuedDur;
 }
 @ %def getStatQueryRequestsQueuedDur
 
-\subsection{Get: getStatQueryServerDistanceRemainingDur(0)}
+\subsubsection{Get: getStatQueryServerDistanceRemainingDur(0)}
 <<Get: getStatQueryServerDistanceRemainingDur(0)>>=
 long getStatQueryServerDistanceRemainingDur() {
   return this.statQueryServerDistanceRemainingDur;
 }
 @ %def getStatQueryServerDistanceRemainingDur
 
-\subsection{Get: getStatQueryServerDurationRemainingDur(0)}
+\subsubsection{Get: getStatQueryServerDurationRemainingDur(0)}
 <<Get: getStatQueryServerDurationRemainingDur(0)>>=
 long getStatQueryServerDurationRemainingDur() {
   return this.statQueryServerDurationRemainingDur;
 }
 @ %def getStatQueryServerDurationRemainingDur
 
-\subsection{Get: getStatQueryServerLoadMaxDur(0)}
+\subsubsection{Get: getStatQueryServerLoadMaxDur(0)}
 <<Get: getStatQueryServerLoadMaxDur(0)>>=
 long getStatQueryServerLoadMaxDur() {
   return this.statQueryServerLoadMaxDur;
 }
 @ %def getStatQueryServerLoadMaxDur
 
-\subsection{Get: getStatQueryServerRouteActiveDur(0)}
+\subsubsection{Get: getStatQueryServerRouteActiveDur(0)}
 <<Get: getStatQueryServerRouteActiveDur(0)>>=
 long getStatQueryServerRouteActiveDur() {
   return this.statQueryServerRouteActiveDur;
 }
 @ %def getStatQueryServerRouteActiveDur
 
-\subsection{Get: getStatQueryServerRouteDur(0)}
+\subsubsection{Get: getStatQueryServerRouteDur(0)}
 <<Get: getStatQueryServerRouteDur(0)>>=
 long getStatQueryServerRouteDur() {
   return this.statQueryServerRouteDur;
 }
 @ %def getStatQueryServerRouteDur
 
-\subsection{Get: getStatQueryServerRouteRemainingDur(0)}
+\subsubsection{Get: getStatQueryServerRouteRemainingDur(0)}
 <<Get: getStatQueryServerRouteRemainingDur(0)>>=
 long getStatQueryServerRouteRemainingDur() {
   return this.statQueryServerRouteRemainingDur;
 }
 @ %def getStatQueryServerRouteRemainingDur
 
-\subsection{Get: getStatQueryServerScheduleDur(0)}
+\subsubsection{Get: getStatQueryServerScheduleDur(0)}
 <<Get: getStatQueryServerScheduleDur(0)>>=
 long getStatQueryServerScheduleDur() {
   return this.statQueryServerScheduleDur;
 }
 @ %def getStatQueryServerScheduleDur
 
-\subsection{Get: getStatQueryServerScheduleRemainingDur(0)}
+\subsubsection{Get: getStatQueryServerScheduleRemainingDur(0)}
 <<Get: getStatQueryServerScheduleRemainingDur(0)>>=
 long getStatQueryServerScheduleRemainingDur() {
   return this.statQueryServerScheduleRemainingDur;
 }
 @ %def getStatQueryServerScheduleRemainingDur
 
-\subsection{Get: getStatQueryServerTimeOfDepartureDur(0)}
+\subsubsection{Get: getStatQueryServerTimeOfDepartureDur(0)}
 <<Get: getStatQueryServerTimeOfDepartureDur(0)>>=
 long getStatQueryServerTimeOfDepartureDur() {
   return this.statQueryServerTimeOfDepartureDur;
 }
 @ %def getStatQueryServerTimeOfDepartureDur
 
-\subsection{Get: getStatQueryServersActiveDur(0)}
+\subsubsection{Get: getStatQueryServersActiveDur(0)}
 <<Get: getStatQueryServersActiveDur(0)>>=
 long getStatQueryServersActiveDur() {
   return this.statQueryServersActiveDur;
 }
 @ %def getStatQueryServersActiveDur
 
-\subsection{Get: getStatQueryServersCountDur(0)}
+\subsubsection{Get: getStatQueryServersCountDur(0)}
 <<Get: getStatQueryServersCountDur(0)>>=
 long getStatQueryServersCountDur() {
   return this.statQueryServersCountDur;
 }
 @ %def getStatQueryServersCountDur
 
-\subsection{Get: getStatQueryServersCountActiveDur(0)}
+\subsubsection{Get: getStatQueryServersCountActiveDur(0)}
 <<Get: getStatQueryServersCountActiveDur(0)>>=
 long getStatQueryServersCountActiveDur() {
   return this.statQueryServersCountActiveDur;
 }
 @ %def getStatQueryServersCountActiveDur
 
-\subsection{Get: getStatQueryServersLocationsActiveDur(0)}
+\subsubsection{Get: getStatQueryServersLocationsActiveDur(0)}
 <<Get: getStatQueryServersLocationsActiveDur(0)>>=
 long getStatQueryServersLocationsActiveDur() {
   return this.statQueryServersLocationsActiveDur;
 }
 @ %def getStatQueryServersLocationsActiveDur
 
-\subsection{Get: getStatQueryUserDur(0)}
+\subsubsection{Get: getStatQueryUserDur(0)}
 <<Get: getStatQueryUserDur(0)>>=
 long getStatQueryUserDur() {
   return this.statQueryUserDur;
 }
 @ %def getStatQueryUserDur
 
-\subsection{Get: getStatQueryVertexDur(0)}
+\subsubsection{Get: getStatQueryVertexDur(0)}
 <<Get: getStatQueryVertexDur(0)>>=
 long getStatQueryVertexDur() {
   return this.statQueryVertexDur;
 }
 @ %def getStatQueryVertexDur
 
-\subsection{Get: getStatQueryVerticesCountDur(0)}
+\subsubsection{Get: getStatQueryVerticesCountDur(0)}
 <<Get: getStatQueryVerticesCountDur(0)>>=
 long getStatQueryVerticesCountDur() {
   return this.statQueryVerticesCountDur;
 }
 @ %def getStatQueryVerticesCountDur
 
-\subsection{Get: getStatQueryVerticesDur(0)}
+\subsubsection{Get: getStatQueryVerticesDur(0)}
 <<Get: getStatQueryVerticesDur(0)>>=
 long getStatQueryVerticesDur() {
   return this.statQueryVerticesDur;

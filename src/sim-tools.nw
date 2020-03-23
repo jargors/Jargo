@@ -1,4 +1,4 @@
-\chapter{Class: Tools}
+\section{Class: Tools}
 \label{sim-tools}
 
 <<Tools.java>>=
@@ -11,7 +11,7 @@ public class Tools {
 }
 @
 
-\section{Preamble}
+\subsection{Preamble}
 The preamble declares the package and imports dependencies.
 <<Tools.java preamble>>=
 import com.github.jargors.sim.EdgeNotFoundException;
@@ -32,7 +32,7 @@ import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 @
 
-\section{Member Variables}
+\subsection{Member Variables}
 <<[[Tools]] member variables>>=
 private GTree gtree;
 private boolean flag_gtree_loaded = false;
@@ -45,7 +45,7 @@ private final double CSHIFT = Storage.CSHIFT;
 private final boolean DEBUG = "true".equals(System.getProperty("jargors.tools.debug"));
 @
 
-\section{Constructor}
+\subsection{Constructor}
 <<[[Tools]] constructor>>=
 public Tools() {
   if (DEBUG) {
@@ -54,9 +54,9 @@ public Tools() {
 }
 @
 
-\section{Methods}
+\subsection{Methods}
 
-\subsection{\texttt{computeBoundingBox}(0)}
+\subsubsection{\texttt{computeBoundingBox}(0)}
 Even though there is already DBQueryMBR(0), the Tools class doesn't have access
 to it. So computeBoundingBox(0) is kind of a filler method.
 <<Tools: computeBoundingBox(0)>>=
@@ -82,7 +82,7 @@ int[] computeBoundingBox() {
 }
 @ %def computeBoundingBox
 
-\subsection{\texttt{computeHaversine}(4)}
+\subsubsection{\texttt{computeHaversine}(4)}
 <<Tools: computeHaversine(4)>>=
 int computeHaversine(
     final double lng1, final double lat1, final double lng2, final double lat2) {
@@ -106,7 +106,7 @@ if (d == 0 && (lng1 != lng2 || lat1 != lat2)) {
 }
 @
 
-\subsection{\texttt{computeHaversine}(2)}
+\subsubsection{\texttt{computeHaversine}(2)}
 <<Tools: computeHaversine(2)>>=
 int computeHaversine(final int u, final int v) throws VertexNotFoundException {
   if (!this.lu_vertices.containsKey(u)) {
@@ -121,7 +121,7 @@ int computeHaversine(final int u, final int v) throws VertexNotFoundException {
 }
 @
 
-\subsection{\texttt{computeDuration}(2)}
+\subsubsection{\texttt{computeDuration}(2)}
 <<Tools: computeDuration(2)>>=
 int computeDuration(final int dd, final int nu) {
   int d = (int) Math.ceil(dd/(float) nu);
@@ -129,7 +129,7 @@ int computeDuration(final int dd, final int nu) {
 }
 @
 
-\subsection{\texttt{computeShortestPath}(2)}
+\subsubsection{\texttt{computeShortestPath}(2)}
 Beware, two important notes:
 \begin{itemize}
 \item The vertices in G-tree are 0-indexed while they are 1-indexed in Jargo.  To
@@ -166,7 +166,7 @@ throws GtreeNotLoadedException, GtreeIllegalSourceException {
 }
 @ %def computeShortestPath
 
-\subsection{\texttt{computeShortestPathDistance}(2)}
+\subsubsection{\texttt{computeShortestPathDistance}(2)}
 Beware, two important notes:
 \begin{itemize}
 \item The vertices in G-tree are 0-indexed while they are 1-indexed in Jargo.
@@ -190,7 +190,7 @@ throws GtreeNotLoadedException, GtreeIllegalSourceException {
 }
 @ %def computeShortestPathDistance
 
-\subsection{\texttt{computeRoute}(3)}
+\subsubsection{\texttt{computeRoute}(3)}
 <<Tools: computeRoute(3)>>=
 int[] computeRoute(final int source, final int target, final int starttime)
 throws GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException {
@@ -223,7 +223,7 @@ throws GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetE
 }
 @ %def computeRoute
 
-\subsection{\texttt{filterByHaversine}(3)}
+\subsubsection{\texttt{filterByHaversine}(3)}
 This function takes a request origin [[ro]], a locations array [[locs]], and
 a distance threshold [[threshold]] as input, and returns a copy of [[locs]]
 that keeps only those location triplets where the haversine distance between
@@ -265,7 +265,7 @@ throws VertexNotFoundException {
 }
 @ %def filterByHaversine
 
-\subsection{\texttt{parseClockReference}(1)}
+\subsubsection{\texttt{parseClockReference}(1)}
 Given a time string in "hhmm" format, returns milliseconds since Epoch.  We
 force the year to 1971 so the return is always positive value. Due to timezone,
 if left default 1970, the return value can be negative if timezone is China
@@ -280,7 +280,7 @@ long parseClockReference (final String refTimeStr) throws ParseException {
 }
 @
 
-\subsection{\texttt{printUser}(1)}
+\subsubsection{\texttt{printUser}(1)}
 <<Tools: printUser(1)>>=
 void printUser(final int[] u) {
   System.out.println("User {uid="+u[0]+", q="+u[1]+", e="+u[2]+", l="+u[3]
@@ -288,7 +288,7 @@ void printUser(final int[] u) {
 }
 @ %def printUser
 
-\subsection{\texttt{printPath}(1)}
+\subsubsection{\texttt{printPath}(1)}
 <<Tools: printPath(1)>>=
 void printPath(final int[] p) {
   for (Integer i : p) {
@@ -298,7 +298,7 @@ void printPath(final int[] p) {
 }
 @ %def printPath
 
-\subsection{\texttt{printRoute}(1)}
+\subsubsection{\texttt{printRoute}(1)}
 <<Tools: printRoute(1)>>=
 void printRoute(final int[] w) {
   for (int i = 0; i < (w.length - 1); i += 2) {
@@ -308,7 +308,7 @@ void printRoute(final int[] w) {
 }
 @ %def printRoute
 
-\subsection{\texttt{printSchedule}(1)}
+\subsubsection{\texttt{printSchedule}(1)}
 <<Tools: printSchedule(1)>>=
 void printSchedule(final int[] b) {
   for (int i = 0; i < (b.length - 3); i += 4) {
@@ -320,21 +320,21 @@ void printSchedule(final int[] b) {
 @ %def printSchedule
 
 
-\subsection{\texttt{Print}(2)}
+\subsubsection{\texttt{Print}(2)}
 <<Tools: Print(2)>>=
 void Print(final String a, final String b) {
   System.out.println(String.format("[%s][%s] %s", a, LocalDateTime.now(), b));
 }
 @ %def Print
 
-\subsection{\texttt{Print}(1)}
+\subsubsection{\texttt{Print}(1)}
 <<Tools: Print(1)>>=
 void Print(final String b) {
   System.out.println(String.format("[*][%s] %s", LocalDateTime.now(), b));
 }
 @
 
-\subsection{\texttt{PrintSQLException}(1)}
+\subsubsection{\texttt{PrintSQLException}(1)}
 <<Tools: PrintSQLException(1)>>=
 void PrintSQLException(SQLException e) {
   while (e != null) {
