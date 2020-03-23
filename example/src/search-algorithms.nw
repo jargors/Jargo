@@ -167,11 +167,13 @@ void handleRequest(int[] r) throws ClientException, ClientFatalException {
     <<Debug: map/filter: proximity>>
     <<Debug: print candidates>>
 
+    /*
     results.clear();
     <<Map/Filter: Schedule Length>>
     candidates = new HashMap<Integer, Integer>(results);
     <<Debug: map/filter: schedule length>>
     <<Debug: print candidates>>
+    */
 
     // Remember minimum schedule, route, cost, server
     int[] wmin = null;
@@ -190,6 +192,11 @@ void handleRequest(int[] r) throws ClientException, ClientFatalException {
 
       int[] brem = this.communicator.queryServerScheduleRemaining(sid, now);
       <<Debug: print brem>>
+
+      if (brem.length/4 > MAX_SCHEDULE_LENGTH) {
+        candidates.remove(sid);
+        continue;
+      }
 
       final int[] wact = this.communicator.queryServerRouteActive(sid);
       <<Debug: print wact>>
@@ -291,7 +298,195 @@ void handleRequest(int[] r) throws ClientException, ClientFatalException {
       <<Debug: print remove candidate>>
     }
 
-    <<Debug: echo empty candidates>>
+    <<Debug: print candidates>>
+
+    if (smin != 0) {
+      this.communicator.updateServerService(smin, wmin, bmin,
+          new int[] { rid }, new int[] { });
+    }
+
+  } catch (Exception e) {
+    throw new ClientException(e);
+  }
+}
+@
+
+\section{Greedy Insertion with Fallback}
+
+<<GreedyInsertionFallback.java>>=
+package com.github.jargors.client;
+<<GreedyInsertion: preamble>>
+public class GreedyInsertionFallback extends Client {
+  final int MAX_PROXIMITY = 600;
+  final int MAX_SCHEDULE_LENGTH = 8;
+  final int QUEUE_THRESHOLD = 30;
+  protected <<GreedyInsertionFallback: handleRequest(1)>>
+}
+@
+
+<<GreedyInsertionFallback: handleRequest(1)>>=
+void handleRequest(int[] r) throws ClientException, ClientFatalException {
+  <<Debug: print request>>
+  try {
+    final int rid = r[0];
+    final int rq  = r[1];
+    final int ro  = r[4];
+    final int rd  = r[5];
+
+    Map<Integer, Integer> candidates = new HashMap<Integer, Integer>(lut);
+    Map<Integer, Integer> results = new HashMap<Integer, Integer>();
+    <<Debug: print candidates>>
+
+    // Quite slow!
+    /*
+    <<Map/Filter: Schedule Length>>
+    candidates = new HashMap<Integer, Integer>(results);
+    <<Debug: map/filter: schedule length>>
+    <<Debug: print candidates>>
+    */
+
+    results.clear();
+    <<Map/Filter: Proximity>>
+    candidates = new HashMap<Integer, Integer>(results);
+    <<Debug: map/filter: proximity>>
+    <<Debug: print candidates>>
+
+    // Remember minimum schedule, route, cost, server
+    int[] wmin = null;
+    int[] bmin = null;
+    int cmin = Integer.MAX_VALUE;
+    int smin = 0;
+
+    boolean fallback = (this.queue.size() > QUEUE_THRESHOLD);
+    <<Debug: print queue size>>
+    <<Debug: echo fallback>>
+
+    while (!candidates.isEmpty()) {
+
+      Entry<Integer, Integer> cand = null;
+      if (fallback) {
+        <<Reduce: Minimum Value>>
+      } else {
+        <<Reduce: Random>>
+      }
+      <<Debug: print candidate>>
+
+      final int sid = cand.getKey();
+      final int now = this.communicator.retrieveClock();
+
+      int[] brem = this.communicator.queryServerScheduleRemaining(sid, now);
+      <<Debug: print brem>>
+
+      if (brem.length/4 > MAX_SCHEDULE_LENGTH) {
+        candidates.remove(sid);
+        continue;
+      }
+
+      final int[] wact = this.communicator.queryServerRouteActive(sid);
+      <<Debug: print wact>>
+
+      int[] wbeg = (wact[3] == 0
+          ? new int[] { now    , wact[1] }
+          : new int[] { wact[2], wact[3] });
+      <<Debug: print wbeg>>
+
+      // if next events occurs at next waypoint and is not server's own
+      // destination, then delete these events from schedule (limitation #4).
+      if (brem[2] != sid && brem[0] == wact[2]) {
+        <<Debug: echo limitation 4>>
+        while (brem[0] == wact[2]) {
+          brem = Arrays.copyOfRange(brem, 4, brem.length);
+          <<Debug: echo remove event>>
+          <<Debug: print brem>>
+        }
+      }
+
+      int imax = (brem.length/4);
+      int jmax = imax;
+      int cost = brem[(brem.length - 4)];
+      <<Debug: print imax, jmax, cost>>
+
+      final int[] bold = brem;
+
+      // Try all insertion positions
+      <<Debug: echo start insertion heuristic>>
+      for (int i = 0; i < imax; i++) {
+        int tbeg = (i == 0 ? now : brem[4*(i - 1)]);
+
+        for (int j = i; j < jmax; j++) {
+          int tend = bold[4*j];
+
+          <<Debug: print i, j>>
+          <<Debug: print tbeg, tend>>
+
+          boolean ok = false;
+
+          <<Debug: echo check capacity>>
+          <<Schedule Selection: Check Capacity>>
+          <<Debug: print ok>>
+
+          if (ok) {
+            brem = bold.clone();  // reset to original
+            int[] bnew = new int[] { };
+
+            int[] stop = new int[] { 0, ro, 0, rid };
+            int ipos = i;
+            <<Debug: print stop>>
+            <<Debug: print ipos>>
+            <<Schedule: Insert>>
+            <<Debug: print bnew>>
+
+            brem = bnew;
+
+            stop[1] = rd;
+            ipos = (j + 1);
+            <<Debug: print stop>>
+            <<Debug: print ipos>>
+            <<Schedule: Insert>>
+            <<Debug: print bnew>>
+
+            int[] wnew = null;
+
+            <<Route: Shortest Path>>
+
+            // if next waypoint is vehicle destination,
+            // reset route start time to last-visited time
+            if (wact[3] == 0) {
+              wnew[0] = lut.get(sid);
+            }
+
+            <<Debug: print wnew>>
+
+            <<Debug: echo check time window>>
+            <<Schedule Selection: Check Time Window>>
+            <<Debug: print ok>>
+
+            if (ok) {
+              int cdel = bnew[(bnew.length - 4)] - cost;
+              if (cdel < cmin) {
+                bmin = bnew;
+                wmin = wnew;
+                cmin = cdel;
+                smin = sid;
+                <<Debug: print bnew>>
+                <<Debug: print cmin>>
+              }
+            }
+
+          }
+        }
+      }
+      <<Debug: echo end insertion heuristic>>
+
+      candidates.remove(sid);
+      <<Debug: print remove candidate>>
+
+      if (fallback && smin != 0) {
+        break;
+      }
+    }
+
+    <<Debug: print candidates>>
 
     if (smin != 0) {
       this.communicator.updateServerService(smin, wmin, bmin,

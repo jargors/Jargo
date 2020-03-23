@@ -8,12 +8,6 @@ public class DesktopController {
   <<[[DesktopController]] member variables>>
   <<[[DesktopController]] methods>>
   public void initialize() {
-    this.tabpane.getSelectionModel().selectedIndexProperty().addListener(
-        (ov, oldTab, newTab) -> {
-      if (this.muf != null) {
-        this.muf.setMapVisible((newTab.intValue() == 0 ? true : false));
-      }
-    });
     Image image = new Image("res/icon.gif");
     this.logo = new ImageView();
     this.logo.setImage(image);
@@ -148,7 +142,6 @@ private final boolean DEBUG =
 @FXML private ScrollPane container_canvas;
 @FXML private Tab tab_map;
 @FXML private Tab tab_metrics;
-@FXML private TabPane tabpane;
 @FXML private TextArea txt_query;
 @FXML private TextArea txt_result;
 @FXML private TextField tf_client;
@@ -432,8 +425,7 @@ private class RendererOfRoads extends AnimationTimer {
   private FetcherOfMapUnits muf = null;
   private Traffic traffic = null;
   private int[] edges = null;
-  private final Color DEFAULT = Color.BLUE;
-  private final Color BG = Color.web("0xD7FFFF");
+  private final Color DEFAULT = Color.web("#BDBDBD");
   private final Color SPEED1 = Color.web("#FF0000");
   private final Color SPEED2 = Color.web("#FF2B00");
   private final Color SPEED3 = Color.web("#FF5600");
@@ -807,12 +799,12 @@ private class FetcherOfMetrics implements Runnable {
             y13,
             y14 });
          this.lu_series.get("lc_counts").addValues(tf, new long[] {
-            y15,
+            y15 });
 //            y16,
 //            y17,
 //            y18,
-            y19,
-            y20 });
+//            y19,
+//            y20 });
          this.lu_series.get("lc_times").addValues(tf, new long[] {
             y21 });
       });
@@ -876,8 +868,8 @@ private String[] metric_counts = new String[] {
 ///*y16*/      "R-Active",
 ///*y17*/      "R-Completed",
 ///*y18*/      "S-Active",
-/*y19*/      "R-Violations",
-/*y20*/      "S-Violations"
+///*y19*/      "R-Violations",
+///*y20*/      "S-Violations"
     };
 private String[] metric_times = new String[] {
 /*y21*/      "R-Handling",
@@ -1251,7 +1243,6 @@ void actionNew(final ActionEvent e) {
   this.btn_new      .setDisable(true);
   this.btn_load     .setDisable(true);
   this.btn_stop     .setDisable(true);
-  this.tabpane      .setDisable(true);
   this.circ_status.setFill(C_WARN);
   this.lbl_status.setText("Create new Jargo instance...");
   CompletableFuture.runAsync(() -> {
@@ -1269,7 +1260,6 @@ void actionNew(final ActionEvent e) {
       this.access_path = 1;
       this.btn_road     .setDisable(false);
       this.btn_stop     .setDisable(false);
-      this.tabpane      .setDisable(false);
       this.container_canvas.setContent(null);
       this.container_lc_rates.getChildren().clear();
       this.container_lc_distances.getChildren().clear();
@@ -1288,7 +1278,6 @@ void actionLoad(final ActionEvent e) {
   this.btn_new      .setDisable(true);
   this.btn_load     .setDisable(true);
   this.btn_stop     .setDisable(true);
-  this.tabpane      .setDisable(true);
   DirectoryChooser dc = new DirectoryChooser();
   File db = dc.showDialog(this.stage);
   if (db != null) {
@@ -1314,7 +1303,6 @@ void actionLoad(final ActionEvent e) {
           this.road = "*in-instance road network*";
           this.btn_gtree    .setDisable(false);
           this.btn_stop     .setDisable(false);
-          this.tabpane      .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
           this.lbl_status   .setText("Loaded Jargo instance (#vertices="+nv+"; #edges="+ne+") (#servers="+ns+"; #requests="+nr+")");
           this.container_canvas.setContent(null);
@@ -1338,7 +1326,6 @@ void actionLoad(final ActionEvent e) {
           this.btn_new      .setDisable(false);
           this.btn_load     .setDisable(false);
           this.btn_stop     .setDisable(false);
-          this.tabpane      .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
           this.lbl_status   .setText("Ready.");
         });
@@ -1350,7 +1337,6 @@ void actionLoad(final ActionEvent e) {
     this.btn_new      .setDisable(false);
     this.btn_load     .setDisable(false);
     this.btn_stop     .setDisable(false);
-    this.tabpane      .setDisable(false);
     this.circ_status  .setFill(C_SUCCESS);
     this.lbl_status   .setText("Ready.");
   }
@@ -1362,7 +1348,6 @@ void actionLoad(final ActionEvent e) {
 void actionRoad(final ActionEvent e) {
   this.btn_road     .setDisable(true);
   this.btn_stop     .setDisable(true);
-  this.tabpane      .setDisable(true);
   this.circ_status  .setFill(C_WARN);
   this.lbl_status   .setText("Select *.rnet...");
   FileChooser fc = new FileChooser();
@@ -1381,7 +1366,6 @@ void actionRoad(final ActionEvent e) {
           this.btn_road     .setText(road.getName());
           this.btn_stop     .setDisable(false);
           this.btn_gtree    .setDisable(false);
-          this.tabpane      .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
           this.lbl_status   .setText("Loaded "+road.getName()+" (#vertices="+nv+"; #edges="+ne+")");
           this.initializeCanvas();
@@ -1400,7 +1384,6 @@ void actionRoad(final ActionEvent e) {
         alert.showAndWait();
         this.btn_road     .setDisable(false);
         this.btn_stop     .setDisable(false);
-        this.tabpane      .setDisable(false);
         this.circ_status  .setFill(C_SUCCESS);
         this.lbl_status   .setText("Ready.");
         <<Set cursor default>>
@@ -1410,7 +1393,6 @@ void actionRoad(final ActionEvent e) {
     // FD cancelled
     this.btn_road     .setDisable(false);
     this.btn_stop     .setDisable(false);
-    this.tabpane      .setDisable(false);
     this.circ_status  .setFill(C_SUCCESS);
     this.lbl_status   .setText("Ready.");
   }
@@ -1422,7 +1404,6 @@ void actionRoad(final ActionEvent e) {
 void actionProb(final ActionEvent e) {
   this.btn_prob     .setDisable(true);
   this.btn_stop     .setDisable(true);
-  this.tabpane      .setDisable(true);
   this.circ_status  .setFill(C_WARN);
   this.lbl_status   .setText("Select *.instance...");
   FileChooser fc = new FileChooser();
@@ -1447,7 +1428,6 @@ void actionProb(final ActionEvent e) {
           this.tf_t0        .setText(Integer.toString(t0));
           this.tf_t1        .setText(Integer.toString(t1));
           this.btn_stop     .setDisable(false);
-          this.tabpane      .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
           this.lbl_status   .setText("Loaded "+pb.getName()+"(#servers="+ns+"; #requests="+nr+")");
         });
@@ -1463,7 +1443,6 @@ void actionProb(final ActionEvent e) {
           alert.showAndWait();
           this.btn_prob     .setDisable(false);
           this.btn_stop     .setDisable(false);
-          this.tabpane      .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
           this.lbl_status   .setText("Ready.");
         });
@@ -1474,7 +1453,6 @@ void actionProb(final ActionEvent e) {
     // FD cancelled
     this.btn_prob     .setDisable(false);
     this.btn_stop     .setDisable(false);
-    this.tabpane      .setDisable(false);
     this.circ_status  .setFill(C_SUCCESS);
     this.lbl_status   .setText("Ready.");
   }
@@ -1486,7 +1464,6 @@ void actionProb(final ActionEvent e) {
 void actionGtree(final ActionEvent e) {
   this.btn_gtree    .setDisable(true);
   this.btn_stop     .setDisable(true);
-  this.tabpane      .setDisable(true);
   this.circ_status  .setFill(C_WARN);
   this.lbl_status   .setText("Select *.gtree...");
   FileChooser fc = new FileChooser();
@@ -1510,7 +1487,6 @@ void actionGtree(final ActionEvent e) {
           }
           this.btn_gtree    .setText(gt.getName());
           this.btn_stop     .setDisable(false);
-          this.tabpane      .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
           this.lbl_status   .setText("Loaded "+gt.getName());
         });
@@ -1526,7 +1502,6 @@ void actionGtree(final ActionEvent e) {
           alert.showAndWait();
           this.btn_gtree    .setDisable(false);
           this.btn_stop     .setDisable(false);
-          this.tabpane      .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
           this.lbl_status   .setText("Ready.");
         });
@@ -1537,7 +1512,6 @@ void actionGtree(final ActionEvent e) {
     // FD cancelled
     this.btn_gtree    .setDisable(false);
     this.btn_stop     .setDisable(false);
-    this.tabpane      .setDisable(false);
     this.circ_status  .setFill(C_SUCCESS);
     this.lbl_status   .setText("Ready.");
   }
@@ -1550,7 +1524,6 @@ void actionClient(final ActionEvent e) {
   this.btn_client   .setDisable(true);
   this.tf_client    .setDisable(true);
   this.btn_stop     .setDisable(true);
-  this.tabpane      .setDisable(true);
   this.circ_status  .setFill(C_WARN);
   this.lbl_status   .setText("Select *.jar...");
   FileChooser fc = new FileChooser();
@@ -1580,7 +1553,6 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
           this.btn_client   .setDisable(false);
           this.tf_client    .setDisable(false);
           this.btn_stop     .setDisable(false);
-          this.tabpane      .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
           this.lbl_status   .setText("Ready.");
         });
@@ -1599,7 +1571,6 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
         this.btn_startseq .setDisable(false);
         this.btn_startreal.setDisable(false);
         this.btn_stop     .setDisable(false);
-        this.tabpane      .setDisable(false);
         this.circ_status  .setFill(C_SUCCESS);
         this.lbl_status   .setText("Loaded "+cj.getName());
       });
@@ -1614,7 +1585,6 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
         this.btn_client_gtree.setDisable(false);
         this.tf_client    .setDisable(false);
         this.btn_stop     .setDisable(false);
-        this.tabpane      .setDisable(false);
         this.circ_status  .setFill(C_SUCCESS);
         this.lbl_status   .setText("Ready.");
       });
@@ -1625,7 +1595,6 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
     this.btn_client   .setDisable(false);
     this.tf_client    .setDisable(false);
     this.btn_stop     .setDisable(false);
-    this.tabpane      .setDisable(false);
     this.circ_status  .setFill(C_SUCCESS);
     this.lbl_status   .setText("Ready.");
   }
@@ -1637,7 +1606,6 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
 void actionClientGtree(final ActionEvent e) {
   this.btn_client_gtree.setDisable(true);
   this.btn_stop     .setDisable(true);
-  this.tabpane      .setDisable(true);
   this.circ_status  .setFill(C_WARN);
   this.lbl_status   .setText("Select *.gtree...");
   FileChooser fc = new FileChooser();
@@ -1651,7 +1619,6 @@ void actionClientGtree(final ActionEvent e) {
     this.lbl_status.setText("Load '"+this.gtree_client+"'...");
     Platform.runLater(() -> {
       this.btn_stop     .setDisable(false);
-      this.tabpane      .setDisable(false);
       this.circ_status  .setFill(C_SUCCESS);
       this.lbl_status   .setText("Loaded "+gt.getName());
     });
@@ -1660,7 +1627,6 @@ void actionClientGtree(final ActionEvent e) {
     // FD cancelled
     this.btn_client_gtree.setDisable(false);
     this.btn_stop     .setDisable(false);
-    this.tabpane      .setDisable(false);
     this.circ_status  .setFill(C_SUCCESS);
     this.lbl_status   .setText("Ready.");
   }
@@ -1734,7 +1700,6 @@ void actionTraffic(final ActionEvent e) {
   this.tf_traffic   .setDisable(true);
   this.tf_client    .setDisable(true);
   this.btn_stop     .setDisable(true);
-  this.tabpane      .setDisable(true);
   this.tf_t0        .setDisable(true);
   this.tf_t1        .setDisable(true);
   this.btn_startseq .setDisable(true);
@@ -1769,7 +1734,6 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
           this.tf_traffic   .setDisable(false);
           this.tf_client    .setDisable(false);
           this.btn_stop     .setDisable(false);
-          this.tabpane      .setDisable(false);
           this.tf_t0        .setDisable(false);
           this.tf_t1        .setDisable(false);
           this.btn_startseq .setDisable(false);
@@ -1787,7 +1751,6 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
         this.tf_traffic   .setDisable(false);
         this.tf_client    .setDisable(false);
         this.btn_stop     .setDisable(false);
-        this.tabpane      .setDisable(false);
         this.tf_t0        .setDisable(false);
         this.tf_t1        .setDisable(false);
         this.btn_startseq .setDisable(false);
@@ -1806,7 +1769,6 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
         this.tf_traffic   .setDisable(false);
         this.tf_client    .setDisable(false);
         this.btn_stop     .setDisable(false);
-        this.tabpane      .setDisable(false);
         this.tf_t0        .setDisable(false);
         this.tf_t1        .setDisable(false);
         this.btn_startseq .setDisable(false);
@@ -1822,7 +1784,6 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
     this.tf_traffic   .setDisable(false);
     this.tf_client    .setDisable(false);
     this.btn_stop     .setDisable(false);
-    this.tabpane      .setDisable(false);
     this.tf_t0        .setDisable(false);
     this.tf_t1        .setDisable(false);
     this.btn_startseq .setDisable(false);
@@ -1862,6 +1823,12 @@ void actionStartSequential(final ActionEvent e) {
   this.cbSimulation = this.exe.schedule(() -> {
     try {
       this.controller.startSequential((status) -> {
+        try {
+          this.controller.instanceExport("seq-"+String.valueOf(System.currentTimeMillis()));
+        } catch (SQLException se) {
+          System.err.println("Could not export results");
+          se.printStackTrace();
+        }
         Platform.runLater(() -> {
           this.lbl_status.setText("Simulation "+(status ? "ended." : "failed."));
         });
@@ -1912,6 +1879,12 @@ void actionStartRealtime(final ActionEvent e) {
   this.cbSimulation = this.exe.schedule(() -> {
     try {
       this.controller.startRealtime((status) -> {
+        try {
+          this.controller.instanceExport("real-"+String.valueOf(System.currentTimeMillis()));
+        } catch (SQLException se) {
+          System.err.println("Could not export results");
+          se.printStackTrace();
+        }
         Platform.runLater(() -> {
           this.lbl_status.setText("Simulation "+(status ? "ended." : "failed."));
         });

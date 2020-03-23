@@ -1612,7 +1612,7 @@ public class Storage {
                              + "CONSTRAINT P11 PRIMARY KEY (sid, t2, v2),"
                              + "CONSTRAINT F17 FOREIGN KEY (sid) REFERENCES S,"
                              + "CONSTRAINT F18 FOREIGN KEY (sid, se) REFERENCES UE (uid, ue),"
-                             + "CONSTRAINT F19 FOREIGN KEY (v1, v2, dd, nu) REFERENCES E INITIALLY DEFERRED,"
+                             + "CONSTRAINT F19 FOREIGN KEY (v1, v2, dd, nu) REFERENCES E,"
                              + "CONSTRAINT F20 FOREIGN KEY (sid, t1, v1) REFERENCES W (sid, t2, v2) INITIALLY DEFERRED,"
                              + "CONSTRAINT C54 UNIQUE (sid, t1),"
                              + "CONSTRAINT C55 UNIQUE (sid, t2),"
@@ -1621,7 +1621,7 @@ public class Storage {
                              + "    THEN t2 = se AND v1 IS NULL AND dd IS NULL AND nu IS NULL"
                              + "    ELSE dd/(t2-t1) <= nu AND t1 < t2"
                              + "  END"
-                             + ") INITIALLY DEFERRED"
+                             + ")"
                              + ")");
              stmt.addBatch("CREATE TABLE PD ("
                              + "sid int  CONSTRAINT C57 NOT NULL,"
@@ -1686,7 +1686,7 @@ public class Storage {
                              + "CONSTRAINT F38 FOREIGN KEY (rid, ro) REFERENCES UO (uid, uo),"
                              + "CONSTRAINT F39 FOREIGN KEY (rid, rd) REFERENCES UD (uid, ud),"
                              + "CONSTRAINT C89a CHECK (tp >= ts),"
-                             + "CONSTRAINT C89b CHECK (td <= te) INITIALLY DEFERRED,"
+                           //  + "CONSTRAINT C89b CHECK (td <= te),"
                              + "CONSTRAINT C89c CHECK (tp < td),"
                              + "CONSTRAINT C91 CHECK (tp >= re),"
                              + "CONSTRAINT C92 CHECK (vp  = ro),"
@@ -1740,21 +1740,10 @@ public class Storage {
                              + "SELECT W.sid, W.t2, W.v2, CW.sid, PD.rid "
                              + "FROM W LEFT OUTER JOIN CW ON W.sid = CW.sid AND (W.t2 = CW.ts OR W.t2 = CW.te) "
                              + "  LEFT OUTER JOIN PD ON W.sid = PD.sid AND W.t2 = PD.t2");
-             stmt.addBatch("CREATE VIEW f_distance_blocks (sid, val, dtype) AS "
-                             + "SELECT d.sid, SUM (d.dd), d.dtype FROM ("
-                             + "  SELECT c.sid, c.dd, c.q2=c.sq as dtype FROM ("
-                             + "    SELECT b.sid, b.dd, b.q2, b.sq FROM ("
-                             + "      SELECT W.sid, W.t2, COALESCE (W.dd, 0) as dd, CQ.q2, CQ.sq, CQ.o2 "
-                             + "      FROM W LEFT OUTER JOIN CQ ON W.sid = CQ.sid AND W.t2 > CQ.t2"
-                             + "    ) AS b JOIN ("
-                             + "      SELECT W.sid, W.t2, MAX (CQ.o2) AS oprev "
-                             + "      FROM W LEFT OUTER JOIN CQ ON W.sid = CQ.sid AND W.t2 > CQ.t2 "
-                             + "      GROUP BY W.sid, W.t2"
-                             + "    ) AS a "
-                             + "    ON b.sid = a.sid AND b.t2 = a.t2 AND b.o2 = a.oprev"
-                             + "  ) AS c"
-                             + ") AS d "
-                             + "GROUP BY d.sid, d.dtype");
+             stmt.addBatch("CREATE VIEW f_distance_blocks (sid, wt1, wt2, wdd, cqsq, cqt1, cqt2, cqq1, cqq2) "
+                             + "AS SELECT W.sid, W.t1, W.t2, W.dd, CQ.sq, CQ.t1, CQ.t2, CQ.q1, CQ.q2 "
+                             + "FROM W LEFT OUTER JOIN CQ ON W.sid = CQ.sid and W.t2 > CQ.t1 and W.t2 <= CQ.t2 "
+                             + "WHERE W.dd IS NOT NULL");
              stmt.addBatch("CREATE VIEW f_status (t, sid, rid, val) AS "
                              + "SELECT a.t2, a.sid, a.rid, COUNT (b.rid) "
                              + "FROM CQ AS a INNER JOIN CQ AS b ON a.t2 >= b.t2 "
@@ -1778,9 +1767,11 @@ public class Storage {
                              + "FROM W JOIN CW ON w.sid = cw.sid AND (t2 BETWEEN ts AND te) "
                              + "GROUP BY W.sid");
              stmt.addBatch("CREATE VIEW dist_s_cruising (sid, val) AS "
-                             + "SELECT sid, val FROM f_distance_blocks WHERE dtype = true");
+                             + "SELECT sid, SUM (wdd) FROM f_distance_blocks "
+                             + "WHERE cqq1 = cqsq OR cqq1 IS NULL GROUP BY sid");
              stmt.addBatch("CREATE VIEW dist_s_service (sid, val) AS "
-                             + "SELECT sid, val FROM f_distance_blocks WHERE dtype = false");
+                             + "SELECT sid, SUM (wdd) FROM f_distance_blocks "
+                             + "WHERE cqq1 > cqsq GROUP BY sid");
              stmt.addBatch("CREATE VIEW dist_s_base (val) AS "
                              + "SELECT SUM (sb) FROM S");
              stmt.addBatch("CREATE VIEW dist_r_base (val) AS "

@@ -2414,7 +2414,7 @@ to UE to validate the early time ({\Tt{}F18\nwendquote}).
   + "CONSTRAINT P11 PRIMARY KEY (sid, t2, v2),"
   + "CONSTRAINT F17 FOREIGN KEY (sid) REFERENCES S,"
   + "CONSTRAINT F18 FOREIGN KEY (sid, se) REFERENCES UE (uid, ue),"
-  + "CONSTRAINT F19 FOREIGN KEY (v1, v2, dd, nu) REFERENCES E INITIALLY DEFERRED,"
+  + "CONSTRAINT F19 FOREIGN KEY (v1, v2, dd, nu) REFERENCES E,"
   + "CONSTRAINT F20 FOREIGN KEY (sid, t1, v1) REFERENCES W (sid, t2, v2) INITIALLY DEFERRED,"
   + "CONSTRAINT C54 UNIQUE (sid, t1),"
   + "CONSTRAINT C55 UNIQUE (sid, t2),"
@@ -2423,7 +2423,7 @@ to UE to validate the early time ({\Tt{}F18\nwendquote}).
   + "    THEN t2 = se AND v1 IS NULL AND dd IS NULL AND nu IS NULL"
   + "    ELSE dd/(t2-t1) <= nu AND t1 < t2"
   + "  END"
-  + ") INITIALLY DEFERRED"
+  + ")"
   + ")"
 \nwused{\\{NW1ODIS0-RmKLy-1}}\nwendcode{}\nwbegindocs{18}\nwdocspar
 
@@ -2729,7 +2729,7 @@ rd & & \\
   + "CONSTRAINT F38 FOREIGN KEY (rid, ro) REFERENCES UO (uid, uo),"
   + "CONSTRAINT F39 FOREIGN KEY (rid, rd) REFERENCES UD (uid, ud),"
   + "CONSTRAINT C89a CHECK (tp >= ts),"
-  + "CONSTRAINT C89b CHECK (td <= te) INITIALLY DEFERRED,"
+//  + "CONSTRAINT C89b CHECK (td <= te),"
   + "CONSTRAINT C89c CHECK (tp < td),"
   + "CONSTRAINT C91 CHECK (tp >= re),"
   + "CONSTRAINT C92 CHECK (vp  = ro),"
@@ -2738,13 +2738,23 @@ rd & & \\
   + ")"
 \nwused{\\{NW1ODIS0-RmKLy-1}}\nwendcode{}\nwbegindocs{28}\nwdocspar
 
-% Q: Why is C89B deferred?
-% A: During service update, the route is first to be updated and it's possible
-% for vehicle end time (te) to go down. Some events might get caught exceeding
-% the new end time, so we defer C89B to give the subsequent schedule update a
-% chance to correct.
-%   To avoid deferring, we may try to do the end time update last in the next
-% version.
+% BUG: See Bug #1
+% Q: Why is C89B commented out?
+% A: Due to Bug #1. During service update, the route is first to be updated and
+% it's possible for vehicle end time (te) to go down. Some events might get
+% caught exceeding the new end time, so we'd like to defer C89B to give the
+% subsequent schedule update a chance to correct. The route is updated first
+% because in the usual case, the end time goes up, and if we don't do the
+% update, then new events that occur after the old end time will get caught.
+%   Unfortunately when we defer C89B, we sometimes run into Bug #1. This bug
+% has appeared when using:
+%   Evaluator: graphical
+%   Algorithm: GreedyInsertion
+%   Problem: mny-4
+%   Traffic: Broadway
+%   Mode: real
+% Deferring C89B is important for supporting job removal. We'll have to figure
+% out a workaround.
 
 \section{Load Constraints Table (Table CQ)}
 \label{mod-schema: load-constraints}
@@ -2894,23 +2904,11 @@ CQ in such a way that the distances in column \textsf{dd} of W
 can be aggregated based on whether there is load burden at the time of the
 waypoint.
 \nwenddocs{}\nwbegincode{35}\sublabel{NW1ryIo2-2SQlWK-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1ryIo2-2SQlWK-1}}}\moddef{Create View f\_distance\_blocks statement~{\nwtagstyle{}\subpageref{NW1ryIo2-2SQlWK-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW1ODIS0-RmKLy-1}}\nwenddeflinemarkup
-"CREATE VIEW f_distance_blocks (sid, val, dtype) AS "
-  + "SELECT d.sid, SUM (d.dd), d.dtype FROM ("
-  + "  SELECT c.sid, c.dd, c.q2=c.sq as dtype FROM ("
-  + "    SELECT b.sid, b.dd, b.q2, b.sq FROM ("
-  + "      SELECT W.sid, W.t2, COALESCE (W.dd, 0) as dd, CQ.q2, CQ.sq, CQ.o2 "
-  + "      FROM W LEFT OUTER JOIN CQ ON W.sid = CQ.sid AND W.t2 > CQ.t2"
-  + "    ) AS b JOIN ("
-  + "      SELECT W.sid, W.t2, MAX (CQ.o2) AS oprev "
-  + "      FROM W LEFT OUTER JOIN CQ ON W.sid = CQ.sid AND W.t2 > CQ.t2 "
-  + "      GROUP BY W.sid, W.t2"
-  + "    ) AS a "
-  + "    ON b.sid = a.sid AND b.t2 = a.t2 AND b.o2 = a.oprev"
-  + "  ) AS c"
-  + ") AS d "
-  + "GROUP BY d.sid, d.dtype"
-\nwused{\\{NW1ODIS0-RmKLy-1}}\nwendcode{}\nwbegindocs{36}Cruising and service distances are obtained by querying
-f\_distance\_blocks where \textsf{dtype} is true or false, respectively.
+"CREATE VIEW f_distance_blocks (sid, wt1, wt2, wdd, cqsq, cqt1, cqt2, cqq1, cqq2) "
+  + "AS SELECT W.sid, W.t1, W.t2, W.dd, CQ.sq, CQ.t1, CQ.t2, CQ.q1, CQ.q2 "
+  + "FROM W LEFT OUTER JOIN CQ ON W.sid = CQ.sid and W.t2 > CQ.t1 and W.t2 <= CQ.t2 "
+  + "WHERE W.dd IS NOT NULL"
+\nwused{\\{NW1ODIS0-RmKLy-1}}\nwendcode{}\nwbegindocs{36}\nwdocspar
 
 Request status can also be obtained using an auxilliary view.  This view lists
 the count of occurrences of a request in column \textsf{rid} of CQ,
@@ -2960,12 +2958,14 @@ To list travel distances $D$ of all servers:
 To list cruising distances $D^\textrm{cruise}$ of all servers:
 \nwenddocs{}\nwbegincode{49}\sublabel{NW1ryIo2-sPBsa-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1ryIo2-sPBsa-1}}}\moddef{Create View dist\_s\_cruising statement (Eq.~\ref{eq:cruising-distance})~{\nwtagstyle{}\subpageref{NW1ryIo2-sPBsa-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW1ODIS0-RmKLy-1}}\nwenddeflinemarkup
 "CREATE VIEW dist_s_cruising (sid, val) AS "
-  + "SELECT sid, val FROM f_distance_blocks WHERE dtype = true"
+  + "SELECT sid, SUM (wdd) FROM f_distance_blocks "
+  + "WHERE cqq1 = cqsq OR cqq1 IS NULL GROUP BY sid"
 \nwused{\\{NW1ODIS0-RmKLy-1}}\nwendcode{}\nwbegindocs{50}\nwdocspar
 To list service distances $D^\textrm{service}$ of all servers:
 \nwenddocs{}\nwbegincode{51}\sublabel{NW1ryIo2-21lyOa-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1ryIo2-21lyOa-1}}}\moddef{Create View dist\_s\_service statement (Eq.~\ref{eq:service-distance})~{\nwtagstyle{}\subpageref{NW1ryIo2-21lyOa-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW1ODIS0-RmKLy-1}}\nwenddeflinemarkup
 "CREATE VIEW dist_s_service (sid, val) AS "
-  + "SELECT sid, val FROM f_distance_blocks WHERE dtype = false"
+  + "SELECT sid, SUM (wdd) FROM f_distance_blocks "
+  + "WHERE cqq1 > cqsq GROUP BY sid"
 \nwused{\\{NW1ODIS0-RmKLy-1}}\nwendcode{}\nwbegindocs{52}\nwdocspar
 To list base distances $d$ of all servers:
 \nwenddocs{}\nwbegincode{53}\sublabel{NW1ryIo2-15VZds-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW1ryIo2-15VZds-1}}}\moddef{Create View dist\_s\_base statement~{\nwtagstyle{}\subpageref{NW1ryIo2-15VZds-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW1ODIS0-RmKLy-1}}\nwenddeflinemarkup
@@ -12865,17 +12865,17 @@ void \nwlinkedidentc{main}{NW13QX3X-1WX0tT-1}(String[] args) throws Exception \{
     arg6 = args[(j + 5)];
 
     // Extract optional arguments
-    int i = 0;
-    while (++i < j) \{
-      if (args[i] == "-r") \{
+    int i = -1;
+    while (i++ < j) \{
+      if (args[i].equals("-r")) \{
         opt_r = args[(i + 1)];
-      \} else if (args[i] == "-x") \{
+      \} else if (args[i].equals("-x")) \{
         opt_x = args[(i + 1)];
-      \} else if (args[i] == "-y") \{
+      \} else if (args[i].equals("-y")) \{
         opt_y = args[(i + 1)];
-      \} else if (args[i] == "-s") \{
+      \} else if (args[i].equals("-s")) \{
         opt_s = args[(i + 1)];
-      \} else if (args[i] == "-e") \{
+      \} else if (args[i].equals("-e")) \{
         opt_e = args[(i + 1)];
       \}
     \}
@@ -12940,12 +12940,14 @@ void \nwlinkedidentc{main}{NW13QX3X-1WX0tT-1}(String[] args) throws Exception \{
     // Set start time
     opt_s = (opt_s.equals("") ? "0" : opt_s);
     System.out.printf("opt start '%s'\\n", opt_s);
+    ctrl.\nwlinkedidentc{setClockStart}{NW1ODIS0-1LQa6C-1}(Integer.parseInt(opt_s));
 
     // Set \nwlinkedidentc{end}{NW3VOC6-4D9GRo-1} time
     opt_e = (opt_e.equals("")
         ? Integer.toString(ctrl.\nwlinkedidentc{query}{NW1Dx1yV-47dtTX-1}("select max (re) from R", 1)[0])
         : opt_e);
     System.out.printf("opt \nwlinkedidentc{end}{NW3VOC6-4D9GRo-1} '%s'\\n", opt_e);
+    ctrl.\nwlinkedidentc{setClockEnd}{NW1ODIS0-4b9SrP-1}(Integer.parseInt(opt_e));
 
     // Start simulation
     System.out.printf("set mode '%s'\\n", arg1);
@@ -12960,7 +12962,7 @@ void \nwlinkedidentc{main}{NW13QX3X-1WX0tT-1}(String[] args) throws Exception \{
   \}
 \}
 \nwindexdefn{\nwixident{main}}{main}{NW13QX3X-1WX0tT-1}\eatline
-\nwused{\\{NW5nEMn-43PmsH-1}}\nwidentdefs{\\{{\nwixident{main}}{main}}}\nwidentuses{\\{{\nwixident{end}}{end}}\\{{\nwixident{forwardRefCacheEdges}}{forwardRefCacheEdges}}\\{{\nwixident{forwardRefCacheUsers}}{forwardRefCacheUsers}}\\{{\nwixident{forwardRefCacheVertices}}{forwardRefCacheVertices}}\\{{\nwixident{forwardRefCommunicator}}{forwardRefCommunicator}}\\{{\nwixident{forwardRefTraffic}}{forwardRefTraffic}}\\{{\nwixident{getRefCommunicator}}{getRefCommunicator}}\\{{\nwixident{gtreeLoad}}{gtreeLoad}}\\{{\nwixident{instanceInitialize}}{instanceInitialize}}\\{{\nwixident{instanceNew}}{instanceNew}}\\{{\nwixident{loadProblem}}{loadProblem}}\\{{\nwixident{loadRoadNetworkFromFile}}{loadRoadNetworkFromFile}}\\{{\nwixident{query}}{query}}\\{{\nwixident{retrieveRefCacheEdges}}{retrieveRefCacheEdges}}\\{{\nwixident{retrieveRefCacheUsers}}{retrieveRefCacheUsers}}\\{{\nwixident{retrieveRefCacheVertices}}{retrieveRefCacheVertices}}\\{{\nwixident{setRefClient}}{setRefClient}}\\{{\nwixident{startRealtime}}{startRealtime}}\\{{\nwixident{startSequential}}{startSequential}}}\nwindexuse{\nwixident{end}}{end}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{forwardRefCacheEdges}}{forwardRefCacheEdges}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{forwardRefCacheUsers}}{forwardRefCacheUsers}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{forwardRefCacheVertices}}{forwardRefCacheVertices}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{forwardRefCommunicator}}{forwardRefCommunicator}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{forwardRefTraffic}}{forwardRefTraffic}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{getRefCommunicator}}{getRefCommunicator}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{gtreeLoad}}{gtreeLoad}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{instanceInitialize}}{instanceInitialize}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{instanceNew}}{instanceNew}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{loadProblem}}{loadProblem}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{loadRoadNetworkFromFile}}{loadRoadNetworkFromFile}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{query}}{query}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{retrieveRefCacheEdges}}{retrieveRefCacheEdges}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{retrieveRefCacheUsers}}{retrieveRefCacheUsers}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{retrieveRefCacheVertices}}{retrieveRefCacheVertices}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{setRefClient}}{setRefClient}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{startRealtime}}{startRealtime}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{startSequential}}{startSequential}{NW13QX3X-1WX0tT-1}\nwendcode{}\nwbegindocs{14}\nwdocspar
+\nwused{\\{NW5nEMn-43PmsH-1}}\nwidentdefs{\\{{\nwixident{main}}{main}}}\nwidentuses{\\{{\nwixident{end}}{end}}\\{{\nwixident{forwardRefCacheEdges}}{forwardRefCacheEdges}}\\{{\nwixident{forwardRefCacheUsers}}{forwardRefCacheUsers}}\\{{\nwixident{forwardRefCacheVertices}}{forwardRefCacheVertices}}\\{{\nwixident{forwardRefCommunicator}}{forwardRefCommunicator}}\\{{\nwixident{forwardRefTraffic}}{forwardRefTraffic}}\\{{\nwixident{getRefCommunicator}}{getRefCommunicator}}\\{{\nwixident{gtreeLoad}}{gtreeLoad}}\\{{\nwixident{instanceInitialize}}{instanceInitialize}}\\{{\nwixident{instanceNew}}{instanceNew}}\\{{\nwixident{loadProblem}}{loadProblem}}\\{{\nwixident{loadRoadNetworkFromFile}}{loadRoadNetworkFromFile}}\\{{\nwixident{query}}{query}}\\{{\nwixident{retrieveRefCacheEdges}}{retrieveRefCacheEdges}}\\{{\nwixident{retrieveRefCacheUsers}}{retrieveRefCacheUsers}}\\{{\nwixident{retrieveRefCacheVertices}}{retrieveRefCacheVertices}}\\{{\nwixident{setClockEnd}}{setClockEnd}}\\{{\nwixident{setClockStart}}{setClockStart}}\\{{\nwixident{setRefClient}}{setRefClient}}\\{{\nwixident{startRealtime}}{startRealtime}}\\{{\nwixident{startSequential}}{startSequential}}}\nwindexuse{\nwixident{end}}{end}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{forwardRefCacheEdges}}{forwardRefCacheEdges}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{forwardRefCacheUsers}}{forwardRefCacheUsers}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{forwardRefCacheVertices}}{forwardRefCacheVertices}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{forwardRefCommunicator}}{forwardRefCommunicator}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{forwardRefTraffic}}{forwardRefTraffic}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{getRefCommunicator}}{getRefCommunicator}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{gtreeLoad}}{gtreeLoad}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{instanceInitialize}}{instanceInitialize}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{instanceNew}}{instanceNew}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{loadProblem}}{loadProblem}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{loadRoadNetworkFromFile}}{loadRoadNetworkFromFile}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{query}}{query}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{retrieveRefCacheEdges}}{retrieveRefCacheEdges}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{retrieveRefCacheUsers}}{retrieveRefCacheUsers}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{retrieveRefCacheVertices}}{retrieveRefCacheVertices}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{setClockEnd}}{setClockEnd}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{setClockStart}}{setClockStart}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{setRefClient}}{setRefClient}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{startRealtime}}{startRealtime}{NW13QX3X-1WX0tT-1}\nwindexuse{\nwixident{startSequential}}{startSequential}{NW13QX3X-1WX0tT-1}\nwendcode{}\nwbegindocs{14}\nwdocspar
 \nwenddocs{}\nwfilename{src/ui-guiapp.nw}\nwbegindocs{0}\chapter{Class: Desktop}
 \label{ui-guiapp}
 
@@ -13013,12 +13015,6 @@ public class DesktopController \{
   \LA{}\code{}DesktopController\edoc{} member variables~{\nwtagstyle{}\subpageref{NW4fhK2e-2iHsHO-1}}\RA{}
   \LA{}\code{}DesktopController\edoc{} methods~{\nwtagstyle{}\subpageref{NW5nEMn-14uWYi-1}}\RA{}
   public void initialize() \{
-    this.tabpane.getSelectionModel().selectedIndexProperty().addListener(
-        (ov, oldTab, newTab) -> \{
-      if (this.muf != null) \{
-        this.muf.setMapVisible((newTab.intValue() == 0 ? true : false));
-      \}
-    \});
     Image image = new Image("res/icon.gif");
     this.logo = new ImageView();
     this.logo.setImage(image);
@@ -13153,7 +13149,6 @@ private final boolean DEBUG =
 @FXML private ScrollPane container_canvas;
 @FXML private Tab tab_map;
 @FXML private Tab tab_metrics;
-@FXML private TabPane tabpane;
 @FXML private TextArea txt_query;
 @FXML private TextArea txt_result;
 @FXML private TextField tf_client;
@@ -13437,8 +13432,7 @@ private class RendererOfRoads extends AnimationTimer \{
   private FetcherOfMapUnits muf = null;
   private Traffic traffic = null;
   private int[] edges = null;
-  private final Color DEFAULT = Color.BLUE;
-  private final Color BG = Color.web("0xD7FFFF");
+  private final Color DEFAULT = Color.web("#BDBDBD");
   private final Color SPEED1 = Color.web("#FF0000");
   private final Color SPEED2 = Color.web("#FF2B00");
   private final Color SPEED3 = Color.web("#FF5600");
@@ -13812,12 +13806,12 @@ private class FetcherOfMetrics implements Runnable \{
             y13,
             y14 \});
          this.lu_series.get("lc_counts").addValues(tf, new long[] \{
-            y15,
+            y15 \});
 //            y16,
 //            y17,
 //            y18,
-            y19,
-            y20 \});
+//            y19,
+//            y20 \});
          this.lu_series.get("lc_times").addValues(tf, new long[] \{
             y21 \});
       \});
@@ -13881,8 +13875,8 @@ private String[] metric_counts = new String[] \{
 ///*y16*/      "R-Active",
 ///*y17*/      "R-Completed",
 ///*y18*/      "S-Active",
-/*y19*/      "R-Violations",
-/*y20*/      "S-Violations"
+///*y19*/      "R-Violations",
+///*y20*/      "S-Violations"
     \};
 private String[] metric_times = new String[] \{
 /*y21*/      "R-Handling",
@@ -14256,7 +14250,6 @@ void \nwlinkedidentc{actionNew}{NW4fhK2e-T7Xhs-1}(final ActionEvent e) \{
   this.btn_new      .setDisable(true);
   this.btn_load     .setDisable(true);
   this.btn_stop     .setDisable(true);
-  this.tabpane      .setDisable(true);
   this.circ_status.setFill(C_WARN);
   this.lbl_status.setText("Create new Jargo instance...");
   CompletableFuture.runAsync(() -> \{
@@ -14274,7 +14267,6 @@ void \nwlinkedidentc{actionNew}{NW4fhK2e-T7Xhs-1}(final ActionEvent e) \{
       this.access_path = 1;
       this.btn_road     .setDisable(false);
       this.btn_stop     .setDisable(false);
-      this.tabpane      .setDisable(false);
       this.container_canvas.setContent(null);
       this.container_lc_rates.getChildren().clear();
       this.container_lc_distances.getChildren().clear();
@@ -14293,7 +14285,6 @@ void \nwlinkedidentc{actionLoad}{NW4fhK2e-2dDAtx-1}(final ActionEvent e) \{
   this.btn_new      .setDisable(true);
   this.btn_load     .setDisable(true);
   this.btn_stop     .setDisable(true);
-  this.tabpane      .setDisable(true);
   DirectoryChooser dc = new DirectoryChooser();
   File db = dc.showDialog(this.stage);
   if (db != null) \{
@@ -14319,7 +14310,6 @@ void \nwlinkedidentc{actionLoad}{NW4fhK2e-2dDAtx-1}(final ActionEvent e) \{
           this.road = "*in-instance road network*";
           this.btn_gtree    .setDisable(false);
           this.btn_stop     .setDisable(false);
-          this.tabpane      .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
           this.lbl_status   .setText("Loaded Jargo instance (#vertices="+nv+"; #edges="+ne+") (#servers="+ns+"; #requests="+nr+")");
           this.container_canvas.setContent(null);
@@ -14343,7 +14333,6 @@ void \nwlinkedidentc{actionLoad}{NW4fhK2e-2dDAtx-1}(final ActionEvent e) \{
           this.btn_new      .setDisable(false);
           this.btn_load     .setDisable(false);
           this.btn_stop     .setDisable(false);
-          this.tabpane      .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
           this.lbl_status   .setText("Ready.");
         \});
@@ -14355,7 +14344,6 @@ void \nwlinkedidentc{actionLoad}{NW4fhK2e-2dDAtx-1}(final ActionEvent e) \{
     this.btn_new      .setDisable(false);
     this.btn_load     .setDisable(false);
     this.btn_stop     .setDisable(false);
-    this.tabpane      .setDisable(false);
     this.circ_status  .setFill(C_SUCCESS);
     this.lbl_status   .setText("Ready.");
   \}
@@ -14367,7 +14355,6 @@ void \nwlinkedidentc{actionLoad}{NW4fhK2e-2dDAtx-1}(final ActionEvent e) \{
 void actionRoad(final ActionEvent e) \{
   this.btn_road     .setDisable(true);
   this.btn_stop     .setDisable(true);
-  this.tabpane      .setDisable(true);
   this.circ_status  .setFill(C_WARN);
   this.lbl_status   .setText("Select *.rnet...");
   FileChooser fc = new FileChooser();
@@ -14386,7 +14373,6 @@ void actionRoad(final ActionEvent e) \{
           this.btn_road     .setText(road.getName());
           this.btn_stop     .setDisable(false);
           this.btn_gtree    .setDisable(false);
-          this.tabpane      .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
           this.lbl_status   .setText("Loaded "+road.getName()+" (#vertices="+nv+"; #edges="+ne+")");
           this.\nwlinkedidentc{initializeCanvas}{NW4fhK2e-4X9Oqe-1}();
@@ -14405,7 +14391,6 @@ void actionRoad(final ActionEvent e) \{
         alert.showAndWait();
         this.btn_road     .setDisable(false);
         this.btn_stop     .setDisable(false);
-        this.tabpane      .setDisable(false);
         this.circ_status  .setFill(C_SUCCESS);
         this.lbl_status   .setText("Ready.");
         \LA{}Set cursor default~{\nwtagstyle{}\subpageref{NW4fhK2e-48WpZf-1}}\RA{}
@@ -14415,7 +14400,6 @@ void actionRoad(final ActionEvent e) \{
     // FD cancelled
     this.btn_road     .setDisable(false);
     this.btn_stop     .setDisable(false);
-    this.tabpane      .setDisable(false);
     this.circ_status  .setFill(C_SUCCESS);
     this.lbl_status   .setText("Ready.");
   \}
@@ -14427,7 +14411,6 @@ void actionRoad(final ActionEvent e) \{
 void actionProb(final ActionEvent e) \{
   this.btn_prob     .setDisable(true);
   this.btn_stop     .setDisable(true);
-  this.tabpane      .setDisable(true);
   this.circ_status  .setFill(C_WARN);
   this.lbl_status   .setText("Select *.instance...");
   FileChooser fc = new FileChooser();
@@ -14452,7 +14435,6 @@ void actionProb(final ActionEvent e) \{
           this.tf_t0        .setText(Integer.toString(t0));
           this.tf_t1        .setText(Integer.toString(t1));
           this.btn_stop     .setDisable(false);
-          this.tabpane      .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
           this.lbl_status   .setText("Loaded "+pb.getName()+"(#servers="+ns+"; #requests="+nr+")");
         \});
@@ -14468,7 +14450,6 @@ void actionProb(final ActionEvent e) \{
           alert.showAndWait();
           this.btn_prob     .setDisable(false);
           this.btn_stop     .setDisable(false);
-          this.tabpane      .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
           this.lbl_status   .setText("Ready.");
         \});
@@ -14479,7 +14460,6 @@ void actionProb(final ActionEvent e) \{
     // FD cancelled
     this.btn_prob     .setDisable(false);
     this.btn_stop     .setDisable(false);
-    this.tabpane      .setDisable(false);
     this.circ_status  .setFill(C_SUCCESS);
     this.lbl_status   .setText("Ready.");
   \}
@@ -14491,7 +14471,6 @@ void actionProb(final ActionEvent e) \{
 void \nwlinkedidentc{actionGtree}{NW4fhK2e-18974H-1}(final ActionEvent e) \{
   this.btn_gtree    .setDisable(true);
   this.btn_stop     .setDisable(true);
-  this.tabpane      .setDisable(true);
   this.circ_status  .setFill(C_WARN);
   this.lbl_status   .setText("Select *.gtree...");
   FileChooser fc = new FileChooser();
@@ -14515,7 +14494,6 @@ void \nwlinkedidentc{actionGtree}{NW4fhK2e-18974H-1}(final ActionEvent e) \{
           \}
           this.btn_gtree    .setText(gt.getName());
           this.btn_stop     .setDisable(false);
-          this.tabpane      .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
           this.lbl_status   .setText("Loaded "+gt.getName());
         \});
@@ -14531,7 +14509,6 @@ void \nwlinkedidentc{actionGtree}{NW4fhK2e-18974H-1}(final ActionEvent e) \{
           alert.showAndWait();
           this.btn_gtree    .setDisable(false);
           this.btn_stop     .setDisable(false);
-          this.tabpane      .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
           this.lbl_status   .setText("Ready.");
         \});
@@ -14542,7 +14519,6 @@ void \nwlinkedidentc{actionGtree}{NW4fhK2e-18974H-1}(final ActionEvent e) \{
     // FD cancelled
     this.btn_gtree    .setDisable(false);
     this.btn_stop     .setDisable(false);
-    this.tabpane      .setDisable(false);
     this.circ_status  .setFill(C_SUCCESS);
     this.lbl_status   .setText("Ready.");
   \}
@@ -14555,7 +14531,6 @@ void actionClient(final ActionEvent e) \{
   this.btn_client   .setDisable(true);
   this.tf_client    .setDisable(true);
   this.btn_stop     .setDisable(true);
-  this.tabpane      .setDisable(true);
   this.circ_status  .setFill(C_WARN);
   this.lbl_status   .setText("Select *.jar...");
   FileChooser fc = new FileChooser();
@@ -14585,7 +14560,6 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
           this.btn_client   .setDisable(false);
           this.tf_client    .setDisable(false);
           this.btn_stop     .setDisable(false);
-          this.tabpane      .setDisable(false);
           this.circ_status  .setFill(C_SUCCESS);
           this.lbl_status   .setText("Ready.");
         \});
@@ -14604,7 +14578,6 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
         this.btn_startseq .setDisable(false);
         this.btn_startreal.setDisable(false);
         this.btn_stop     .setDisable(false);
-        this.tabpane      .setDisable(false);
         this.circ_status  .setFill(C_SUCCESS);
         this.lbl_status   .setText("Loaded "+cj.getName());
       \});
@@ -14619,7 +14592,6 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
         this.btn_client_gtree.setDisable(false);
         this.tf_client    .setDisable(false);
         this.btn_stop     .setDisable(false);
-        this.tabpane      .setDisable(false);
         this.circ_status  .setFill(C_SUCCESS);
         this.lbl_status   .setText("Ready.");
       \});
@@ -14630,7 +14602,6 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
     this.btn_client   .setDisable(false);
     this.tf_client    .setDisable(false);
     this.btn_stop     .setDisable(false);
-    this.tabpane      .setDisable(false);
     this.circ_status  .setFill(C_SUCCESS);
     this.lbl_status   .setText("Ready.");
   \}
@@ -14642,7 +14613,6 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
 void \nwlinkedidentc{actionClientGtree}{NW4fhK2e-2wfB3l-1}(final ActionEvent e) \{
   this.btn_client_gtree.setDisable(true);
   this.btn_stop     .setDisable(true);
-  this.tabpane      .setDisable(true);
   this.circ_status  .setFill(C_WARN);
   this.lbl_status   .setText("Select *.gtree...");
   FileChooser fc = new FileChooser();
@@ -14656,7 +14626,6 @@ void \nwlinkedidentc{actionClientGtree}{NW4fhK2e-2wfB3l-1}(final ActionEvent e) 
     this.lbl_status.setText("Load '"+this.gtree_client+"'...");
     Platform.runLater(() -> \{
       this.btn_stop     .setDisable(false);
-      this.tabpane      .setDisable(false);
       this.circ_status  .setFill(C_SUCCESS);
       this.lbl_status   .setText("Loaded "+gt.getName());
     \});
@@ -14665,7 +14634,6 @@ void \nwlinkedidentc{actionClientGtree}{NW4fhK2e-2wfB3l-1}(final ActionEvent e) 
     // FD cancelled
     this.btn_client_gtree.setDisable(false);
     this.btn_stop     .setDisable(false);
-    this.tabpane      .setDisable(false);
     this.circ_status  .setFill(C_SUCCESS);
     this.lbl_status   .setText("Ready.");
   \}
@@ -14739,7 +14707,6 @@ void actionTraffic(final ActionEvent e) \{
   this.tf_traffic   .setDisable(true);
   this.tf_client    .setDisable(true);
   this.btn_stop     .setDisable(true);
-  this.tabpane      .setDisable(true);
   this.tf_t0        .setDisable(true);
   this.tf_t1        .setDisable(true);
   this.btn_startseq .setDisable(true);
@@ -14774,7 +14741,6 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
           this.tf_traffic   .setDisable(false);
           this.tf_client    .setDisable(false);
           this.btn_stop     .setDisable(false);
-          this.tabpane      .setDisable(false);
           this.tf_t0        .setDisable(false);
           this.tf_t1        .setDisable(false);
           this.btn_startseq .setDisable(false);
@@ -14792,7 +14758,6 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
         this.tf_traffic   .setDisable(false);
         this.tf_client    .setDisable(false);
         this.btn_stop     .setDisable(false);
-        this.tabpane      .setDisable(false);
         this.tf_t0        .setDisable(false);
         this.tf_t1        .setDisable(false);
         this.btn_startseq .setDisable(false);
@@ -14811,7 +14776,6 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
         this.tf_traffic   .setDisable(false);
         this.tf_client    .setDisable(false);
         this.btn_stop     .setDisable(false);
-        this.tabpane      .setDisable(false);
         this.tf_t0        .setDisable(false);
         this.tf_t1        .setDisable(false);
         this.btn_startseq .setDisable(false);
@@ -14827,7 +14791,6 @@ for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntr
     this.tf_traffic   .setDisable(false);
     this.tf_client    .setDisable(false);
     this.btn_stop     .setDisable(false);
-    this.tabpane      .setDisable(false);
     this.tf_t0        .setDisable(false);
     this.tf_t1        .setDisable(false);
     this.btn_startseq .setDisable(false);
@@ -14867,6 +14830,12 @@ void \nwlinkedidentc{actionStartSequential}{NW4fhK2e-2DyoOl-1}(final ActionEvent
   this.cbSimulation = this.exe.schedule(() -> \{
     try \{
       this.controller.\nwlinkedidentc{startSequential}{NW3hMOhb-4UOroX-1}((status) -> \{
+        try \{
+          this.controller.\nwlinkedidentc{instanceExport}{NW1ODIS0-41pCsM-1}("seq-"+String.valueOf(System.currentTimeMillis()));
+        \} catch (SQLException se) \{
+          System.err.println("Could not export results");
+          se.printStackTrace();
+        \}
         Platform.runLater(() -> \{
           this.lbl_status.setText("Simulation "+(status ? "ended." : "failed."));
         \});
@@ -14887,7 +14856,7 @@ void \nwlinkedidentc{actionStartSequential}{NW4fhK2e-2DyoOl-1}(final ActionEvent
         this.controller, this.muf, this.ren_servers), 0, 1, TimeUnit.SECONDS);
 \}
 \nwindexdefn{\nwixident{actionStartSequential}}{actionStartSequential}{NW4fhK2e-2DyoOl-1}\eatline
-\nwused{\\{NW5nEMn-14uWYi-1}}\nwidentdefs{\\{{\nwixident{actionStartSequential}}{actionStartSequential}}}\nwidentuses{\\{{\nwixident{setClockEnd}}{setClockEnd}}\\{{\nwixident{setClockStart}}{setClockStart}}\\{{\nwixident{startSequential}}{startSequential}}}\nwindexuse{\nwixident{setClockEnd}}{setClockEnd}{NW4fhK2e-2DyoOl-1}\nwindexuse{\nwixident{setClockStart}}{setClockStart}{NW4fhK2e-2DyoOl-1}\nwindexuse{\nwixident{startSequential}}{startSequential}{NW4fhK2e-2DyoOl-1}\nwendcode{}\nwbegindocs{126}\nwdocspar
+\nwused{\\{NW5nEMn-14uWYi-1}}\nwidentdefs{\\{{\nwixident{actionStartSequential}}{actionStartSequential}}}\nwidentuses{\\{{\nwixident{instanceExport}}{instanceExport}}\\{{\nwixident{setClockEnd}}{setClockEnd}}\\{{\nwixident{setClockStart}}{setClockStart}}\\{{\nwixident{startSequential}}{startSequential}}}\nwindexuse{\nwixident{instanceExport}}{instanceExport}{NW4fhK2e-2DyoOl-1}\nwindexuse{\nwixident{setClockEnd}}{setClockEnd}{NW4fhK2e-2DyoOl-1}\nwindexuse{\nwixident{setClockStart}}{setClockStart}{NW4fhK2e-2DyoOl-1}\nwindexuse{\nwixident{startSequential}}{startSequential}{NW4fhK2e-2DyoOl-1}\nwendcode{}\nwbegindocs{126}\nwdocspar
 \subsection{\texttt{actionStartRealtime}(1)}
 \nwenddocs{}\nwbegincode{127}\sublabel{NW4fhK2e-1u3CLd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4fhK2e-1u3CLd-1}}}\moddef{actionStartRealtime(1)~{\nwtagstyle{}\subpageref{NW4fhK2e-1u3CLd-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW5nEMn-14uWYi-1}}\nwenddeflinemarkup
 void \nwlinkedidentc{actionStartRealtime}{NW4fhK2e-1u3CLd-1}(final ActionEvent e) \{
@@ -14917,6 +14886,12 @@ void \nwlinkedidentc{actionStartRealtime}{NW4fhK2e-1u3CLd-1}(final ActionEvent e
   this.cbSimulation = this.exe.schedule(() -> \{
     try \{
       this.controller.\nwlinkedidentc{startRealtime}{NW3hMOhb-1gjdL2-1}((status) -> \{
+        try \{
+          this.controller.\nwlinkedidentc{instanceExport}{NW1ODIS0-41pCsM-1}("real-"+String.valueOf(System.currentTimeMillis()));
+        \} catch (SQLException se) \{
+          System.err.println("Could not export results");
+          se.printStackTrace();
+        \}
         Platform.runLater(() -> \{
           this.lbl_status.setText("Simulation "+(status ? "ended." : "failed."));
         \});
@@ -14937,7 +14912,7 @@ void \nwlinkedidentc{actionStartRealtime}{NW4fhK2e-1u3CLd-1}(final ActionEvent e
         this.controller, this.muf, this.ren_servers), 0, 1, TimeUnit.SECONDS);
 \}
 \nwindexdefn{\nwixident{actionStartRealtime}}{actionStartRealtime}{NW4fhK2e-1u3CLd-1}\eatline
-\nwused{\\{NW5nEMn-14uWYi-1}}\nwidentdefs{\\{{\nwixident{actionStartRealtime}}{actionStartRealtime}}}\nwidentuses{\\{{\nwixident{setClockEnd}}{setClockEnd}}\\{{\nwixident{setClockStart}}{setClockStart}}\\{{\nwixident{startRealtime}}{startRealtime}}}\nwindexuse{\nwixident{setClockEnd}}{setClockEnd}{NW4fhK2e-1u3CLd-1}\nwindexuse{\nwixident{setClockStart}}{setClockStart}{NW4fhK2e-1u3CLd-1}\nwindexuse{\nwixident{startRealtime}}{startRealtime}{NW4fhK2e-1u3CLd-1}\nwendcode{}\nwbegindocs{128}\nwdocspar
+\nwused{\\{NW5nEMn-14uWYi-1}}\nwidentdefs{\\{{\nwixident{actionStartRealtime}}{actionStartRealtime}}}\nwidentuses{\\{{\nwixident{instanceExport}}{instanceExport}}\\{{\nwixident{setClockEnd}}{setClockEnd}}\\{{\nwixident{setClockStart}}{setClockStart}}\\{{\nwixident{startRealtime}}{startRealtime}}}\nwindexuse{\nwixident{instanceExport}}{instanceExport}{NW4fhK2e-1u3CLd-1}\nwindexuse{\nwixident{setClockEnd}}{setClockEnd}{NW4fhK2e-1u3CLd-1}\nwindexuse{\nwixident{setClockStart}}{setClockStart}{NW4fhK2e-1u3CLd-1}\nwindexuse{\nwixident{startRealtime}}{startRealtime}{NW4fhK2e-1u3CLd-1}\nwendcode{}\nwbegindocs{128}\nwdocspar
 \subsection{\texttt{actionStop}(1)}
 \nwenddocs{}\nwbegincode{129}\sublabel{NW4fhK2e-27hSI5-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW4fhK2e-27hSI5-1}}}\moddef{actionStop(1)~{\nwtagstyle{}\subpageref{NW4fhK2e-27hSI5-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW5nEMn-14uWYi-1}}\nwenddeflinemarkup
 void \nwlinkedidentc{actionStop}{NW4fhK2e-27hSI5-1}(final ActionEvent e) \{

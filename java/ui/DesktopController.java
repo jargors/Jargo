@@ -384,7 +384,6 @@ public class DesktopController {
     private Traffic traffic = null;
     private int[] edges = null;
     private final Color DEFAULT = Color.web("#BDBDBD");
-    private final Color BG = Color.web("0xD7FFFF");
     private final Color SPEED1 = Color.web("#FF0000");
     private final Color SPEED2 = Color.web("#FF2B00");
     private final Color SPEED3 = Color.web("#FF5600");
@@ -771,12 +770,12 @@ public class DesktopController {
               y13,
               y14 });
            this.lu_series.get("lc_counts").addValues(tf, new long[] {
-              y15,
+              y15 });
   //            y16,
   //            y17,
   //            y18,
-              y19,
-              y20 });
+  //            y19,
+  //            y20 });
            this.lu_series.get("lc_times").addValues(tf, new long[] {
               y21 });
         });
@@ -836,8 +835,8 @@ public class DesktopController {
   ///*y16*/      "R-Active",
   ///*y17*/      "R-Completed",
   ///*y18*/      "S-Active",
-  /*y19*/      "R-Violations",
-  /*y20*/      "S-Violations"
+  ///*y19*/      "R-Violations",
+  ///*y20*/      "S-Violations"
       };
   private String[] metric_times = new String[] {
   /*y21*/      "R-Handling",
@@ -1468,6 +1467,12 @@ public class DesktopController {
            this.cbSimulation = this.exe.schedule(() -> {
              try {
                this.controller.startRealtime((status) -> {
+                 try {
+                   this.controller.instanceExport("real-"+String.valueOf(System.currentTimeMillis()));
+                 } catch (SQLException se) {
+                   System.err.println("Could not export results");
+                   se.printStackTrace();
+                 }
                  Platform.runLater(() -> {
                    this.lbl_status.setText("Simulation "+(status ? "ended." : "failed."));
                  });
@@ -1637,6 +1642,12 @@ public class DesktopController {
            this.cbSimulation = this.exe.schedule(() -> {
              try {
                this.controller.startSequential((status) -> {
+                 try {
+                   this.controller.instanceExport("seq-"+String.valueOf(System.currentTimeMillis()));
+                 } catch (SQLException se) {
+                   System.err.println("Could not export results");
+                   se.printStackTrace();
+                 }
                  Platform.runLater(() -> {
                    this.lbl_status.setText("Simulation "+(status ? "ended." : "failed."));
                  });

@@ -297,7 +297,7 @@ to UE to validate the early time ([[F18]]).
   + "CONSTRAINT P11 PRIMARY KEY (sid, t2, v2),"
   + "CONSTRAINT F17 FOREIGN KEY (sid) REFERENCES S,"
   + "CONSTRAINT F18 FOREIGN KEY (sid, se) REFERENCES UE (uid, ue),"
-  + "CONSTRAINT F19 FOREIGN KEY (v1, v2, dd, nu) REFERENCES E INITIALLY DEFERRED,"
+  + "CONSTRAINT F19 FOREIGN KEY (v1, v2, dd, nu) REFERENCES E,"
   + "CONSTRAINT F20 FOREIGN KEY (sid, t1, v1) REFERENCES W (sid, t2, v2) INITIALLY DEFERRED,"
   + "CONSTRAINT C54 UNIQUE (sid, t1),"
   + "CONSTRAINT C55 UNIQUE (sid, t2),"
@@ -306,7 +306,7 @@ to UE to validate the early time ([[F18]]).
   + "    THEN t2 = se AND v1 IS NULL AND dd IS NULL AND nu IS NULL"
   + "    ELSE dd/(t2-t1) <= nu AND t1 < t2"
   + "  END"
-  + ") INITIALLY DEFERRED"
+  + ")"
   + ")"
 @
 
@@ -612,7 +612,7 @@ rd & & \\
   + "CONSTRAINT F38 FOREIGN KEY (rid, ro) REFERENCES UO (uid, uo),"
   + "CONSTRAINT F39 FOREIGN KEY (rid, rd) REFERENCES UD (uid, ud),"
   + "CONSTRAINT C89a CHECK (tp >= ts),"
-  + "CONSTRAINT C89b CHECK (td <= te) INITIALLY DEFERRED,"
+//  + "CONSTRAINT C89b CHECK (td <= te),"
   + "CONSTRAINT C89c CHECK (tp < td),"
   + "CONSTRAINT C91 CHECK (tp >= re),"
   + "CONSTRAINT C92 CHECK (vp  = ro),"
@@ -621,13 +621,23 @@ rd & & \\
   + ")"
 @
 
-% Q: Why is C89B deferred?
-% A: During service update, the route is first to be updated and it's possible
-% for vehicle end time (te) to go down. Some events might get caught exceeding
-% the new end time, so we defer C89B to give the subsequent schedule update a
-% chance to correct.
-%   To avoid deferring, we may try to do the end time update last in the next
-% version.
+% BUG: See Bug #1
+% Q: Why is C89B commented out?
+% A: Due to Bug #1. During service update, the route is first to be updated and
+% it's possible for vehicle end time (te) to go down. Some events might get
+% caught exceeding the new end time, so we'd like to defer C89B to give the
+% subsequent schedule update a chance to correct. The route is updated first
+% because in the usual case, the end time goes up, and if we don't do the
+% update, then new events that occur after the old end time will get caught.
+%   Unfortunately when we defer C89B, we sometimes run into Bug #1. This bug
+% has appeared when using:
+%   Evaluator: graphical
+%   Algorithm: GreedyInsertion
+%   Problem: mny-4
+%   Traffic: Broadway
+%   Mode: real
+% Deferring C89B is important for supporting job removal. We'll have to figure
+% out a workaround.
 
 \section{Load Constraints Table (Table CQ)}
 \label{mod-schema: load-constraints}
@@ -777,23 +787,11 @@ CQ in such a way that the distances in column \textsf{dd} of W
 can be aggregated based on whether there is load burden at the time of the
 waypoint.
 <<Create View f\_distance\_blocks statement>>=
-"CREATE VIEW f_distance_blocks (sid, val, dtype) AS "
-  + "SELECT d.sid, SUM (d.dd), d.dtype FROM ("
-  + "  SELECT c.sid, c.dd, c.q2=c.sq as dtype FROM ("
-  + "    SELECT b.sid, b.dd, b.q2, b.sq FROM ("
-  + "      SELECT W.sid, W.t2, COALESCE (W.dd, 0) as dd, CQ.q2, CQ.sq, CQ.o2 "
-  + "      FROM W LEFT OUTER JOIN CQ ON W.sid = CQ.sid AND W.t2 > CQ.t2"
-  + "    ) AS b JOIN ("
-  + "      SELECT W.sid, W.t2, MAX (CQ.o2) AS oprev "
-  + "      FROM W LEFT OUTER JOIN CQ ON W.sid = CQ.sid AND W.t2 > CQ.t2 "
-  + "      GROUP BY W.sid, W.t2"
-  + "    ) AS a "
-  + "    ON b.sid = a.sid AND b.t2 = a.t2 AND b.o2 = a.oprev"
-  + "  ) AS c"
-  + ") AS d "
-  + "GROUP BY d.sid, d.dtype"
-@ Cruising and service distances are obtained by querying
-f\_distance\_blocks where \textsf{dtype} is true or false, respectively.
+"CREATE VIEW f_distance_blocks (sid, wt1, wt2, wdd, cqsq, cqt1, cqt2, cqq1, cqq2) "
+  + "AS SELECT W.sid, W.t1, W.t2, W.dd, CQ.sq, CQ.t1, CQ.t2, CQ.q1, CQ.q2 "
+  + "FROM W LEFT OUTER JOIN CQ ON W.sid = CQ.sid and W.t2 > CQ.t1 and W.t2 <= CQ.t2 "
+  + "WHERE W.dd IS NOT NULL"
+@
 
 Request status can also be obtained using an auxilliary view.  This view lists
 the count of occurrences of a request in column \textsf{rid} of CQ,
@@ -843,12 +841,14 @@ To list travel distances $D$ of all servers:
 To list cruising distances $D^\textrm{cruise}$ of all servers:
 <<Create View dist\_s\_cruising statement (Eq.~\ref{eq:cruising-distance})>>=
 "CREATE VIEW dist_s_cruising (sid, val) AS "
-  + "SELECT sid, val FROM f_distance_blocks WHERE dtype = true"
+  + "SELECT sid, SUM (wdd) FROM f_distance_blocks "
+  + "WHERE cqq1 = cqsq OR cqq1 IS NULL GROUP BY sid"
 @
 To list service distances $D^\textrm{service}$ of all servers:
 <<Create View dist\_s\_service statement (Eq.~\ref{eq:service-distance})>>=
 "CREATE VIEW dist_s_service (sid, val) AS "
-  + "SELECT sid, val FROM f_distance_blocks WHERE dtype = false"
+  + "SELECT sid, SUM (wdd) FROM f_distance_blocks "
+  + "WHERE cqq1 > cqsq GROUP BY sid"
 @
 To list base distances $d$ of all servers:
 <<Create View dist\_s\_base statement>>=

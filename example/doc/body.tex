@@ -45,14 +45,14 @@ A server with a very long schedule can be difficult to evaluate because there
 will be more scheduling possibilities. Filtering these servers out may improve
 the speed performance.
 
-\nwenddocs{}\nwbegincode{1}\sublabel{NWEBrBs-3tu5Lh-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWEBrBs-3tu5Lh-1}}}\moddef{Map/Filter: Schedule Length~{\nwtagstyle{}\subpageref{NWEBrBs-3tu5Lh-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{1}\sublabel{NWEBrBs-3tu5Lh-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWEBrBs-3tu5Lh-1}}}\moddef{Map/Filter: Schedule Length~{\nwtagstyle{}\subpageref{NWEBrBs-3tu5Lh-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 for (final int sid : candidates.keySet()) \{
   final int val = this.communicator.queryServerScheduleRemaining(sid,
       this.communicator.retrieveClock()).length / 4;
   if (val <= MAX_SCHEDULE_LENGTH)
     results.put(sid, val);
 \}
-\nwused{\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{2}\nwdocspar
+\nwused{\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{2}\nwdocspar
 
 % \section{Total Travel Duration}
 % \section{Total Travel Distance}
@@ -66,13 +66,13 @@ for (final int sid : candidates.keySet()) \{
 Proximity is easy to compute and can be used to approximate actual pick-up
 distance. In the filter, we disregard zero proximities due to Limitation \#4.
 
-\nwenddocs{}\nwbegincode{3}\sublabel{NWEBrBs-4AhmPL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWEBrBs-4AhmPL-1}}}\moddef{Map/Filter: Proximity~{\nwtagstyle{}\subpageref{NWEBrBs-4AhmPL-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{3}\sublabel{NWEBrBs-4AhmPL-1}\nwmargintag{{\nwtagstyle{}\subpageref{NWEBrBs-4AhmPL-1}}}\moddef{Map/Filter: Proximity~{\nwtagstyle{}\subpageref{NWEBrBs-4AhmPL-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 for (final int sid : candidates.keySet()) \{
   final int val = this.tools.computeHaversine(luv.get(sid), ro);
   if (0 < val && val <= MAX_PROXIMITY)
     results.put(sid, val);
 \}
-\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{4}\nwdocspar
+\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{4}\nwdocspar
 
 % \section{Road Proximity}
 
@@ -86,24 +86,24 @@ for (final int sid : candidates.keySet()) \{
 
 \section{Random Reduction}
 
-\nwenddocs{}\nwbegincode{1}\sublabel{NW2D7mP3-4CvaEx-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2D7mP3-4CvaEx-1}}}\moddef{Reduce: Random~{\nwtagstyle{}\subpageref{NW2D7mP3-4CvaEx-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{1}\sublabel{NW2D7mP3-4CvaEx-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2D7mP3-4CvaEx-1}}}\moddef{Reduce: Random~{\nwtagstyle{}\subpageref{NW2D7mP3-4CvaEx-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 \{
   Random random = new Random();
   List<Integer> keys = new ArrayList<Integer>(candidates.keySet());
   int randomKey = keys.get(random.nextInt(keys.size()));
   cand = Map.entry(randomKey, candidates.get(randomKey));
 \}
-\nwused{\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{2}\nwdocspar
+\nwused{\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{2}\nwdocspar
 
 \section{Minimum Reduction}
 
-\nwenddocs{}\nwbegincode{3}\sublabel{NW2D7mP3-YFiQd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2D7mP3-YFiQd-1}}}\moddef{Reduce: Minimum Value~{\nwtagstyle{}\subpageref{NW2D7mP3-YFiQd-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{3}\sublabel{NW2D7mP3-YFiQd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2D7mP3-YFiQd-1}}}\moddef{Reduce: Minimum Value~{\nwtagstyle{}\subpageref{NW2D7mP3-YFiQd-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 for (final Entry<Integer, Integer> entry : candidates.entrySet()) \{
   if (cand == null || cand.getValue() > entry.getValue()) \{
     cand = entry;
   \}
 \}
-\nwused{\\{NW2W5UTV-16KpI3-1}}\nwendcode{}\nwbegindocs{4}\nwdocspar
+\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{4}\nwdocspar
 
 \section{Maximum Reduction}
 
@@ -129,12 +129,12 @@ stop is new event [ t, v, ls, lr ]
 
 Three arraycopy: put event, put before ipos, put after ipos
 
-\nwenddocs{}\nwbegincode{1}\sublabel{NW22SnOZ-4V87KO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW22SnOZ-4V87KO-1}}}\moddef{Schedule: Insert~{\nwtagstyle{}\subpageref{NW22SnOZ-4V87KO-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{1}\sublabel{NW22SnOZ-4V87KO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW22SnOZ-4V87KO-1}}}\moddef{Schedule: Insert~{\nwtagstyle{}\subpageref{NW22SnOZ-4V87KO-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 bnew = new int[(brem.length + 4)];
 System.arraycopy(stop, 0, bnew, 4*ipos, 4);
 System.arraycopy(brem, 0, bnew, 0, 4*ipos);
 System.arraycopy(brem, 4*ipos, bnew, 4*(ipos + 1), brem.length - 4*ipos);
-\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{2}\nwdocspar
+\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{2}\nwdocspar
 
 %\section{Rearrange Existing Events}
 
@@ -145,13 +145,13 @@ System.arraycopy(brem, 4*ipos, bnew, 4*(ipos + 1), brem.length - 4*ipos);
 
 tbeg is time to start applying pick-up load, tend is time to end the load.
 
-\nwenddocs{}\nwbegincode{1}\sublabel{NW9CtVI-2UeEeu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW9CtVI-2UeEeu-1}}}\moddef{Schedule Selection: Check Capacity~{\nwtagstyle{}\subpageref{NW9CtVI-2UeEeu-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{1}\sublabel{NW9CtVI-2UeEeu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW9CtVI-2UeEeu-1}}}\moddef{Schedule Selection: Check Capacity~{\nwtagstyle{}\subpageref{NW9CtVI-2UeEeu-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 ok = (this.communicator.queryServerCapacityViolations(sid, rq, tbeg, tend)[0] == 0);
-\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{2}\nwdocspar
+\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{2}\nwdocspar
 
 \section{Check Time Window}
 
-\nwenddocs{}\nwbegincode{3}\sublabel{NW9CtVI-fUjQA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW9CtVI-fUjQA-1}}}\moddef{Schedule Selection: Check Time Window~{\nwtagstyle{}\subpageref{NW9CtVI-fUjQA-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{3}\sublabel{NW9CtVI-fUjQA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW9CtVI-fUjQA-1}}}\moddef{Schedule Selection: Check Time Window~{\nwtagstyle{}\subpageref{NW9CtVI-fUjQA-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 for (int _i = 0; _i < (bnew.length - 3); _i += 4) \{
   int _rid = bnew[(_i + 3)];
   int _rt  = bnew[(_i)];
@@ -165,7 +165,7 @@ for (int _i = 0; _i < (bnew.length - 3); _i += 4) \{
     \}
   \}
 \}
-\nwused{\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{4}\nwdocspar
+\nwused{\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{4}\nwdocspar
 
 % \section{Cost-Based Selection}
 
@@ -174,14 +174,14 @@ for (int _i = 0; _i < (bnew.length - 3); _i += 4) \{
 
 \section{Shortest Path}
 
-\nwenddocs{}\nwbegincode{1}\sublabel{NW3gyy2C-1CU8MM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3gyy2C-1CU8MM-1}}}\moddef{Route: Shortest Path~{\nwtagstyle{}\subpageref{NW3gyy2C-1CU8MM-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{1}\sublabel{NW3gyy2C-1CU8MM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3gyy2C-1CU8MM-1}}}\moddef{Route: Shortest Path~{\nwtagstyle{}\subpageref{NW3gyy2C-1CU8MM-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 \{
   \LA{}Shortest: Step 1: Initialize~{\nwtagstyle{}\subpageref{NW3gyy2C-3lMPNM-1}}\RA{}
   \LA{}Shortest: Step 2: Compute~{\nwtagstyle{}\subpageref{NW3gyy2C-2EZ2CY-1}}\RA{}
   \LA{}Shortest: Step 3: Join~{\nwtagstyle{}\subpageref{NW3gyy2C-1OT4xQ-1}}\RA{}
   \LA{}Shortest: Step 4: Fill~{\nwtagstyle{}\subpageref{NW3gyy2C-1nl6rv-1}}\RA{}
 \}
-\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{2}\nwdocspar
+\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{2}\nwdocspar
 
 \nwenddocs{}\nwbegincode{3}\sublabel{NW3gyy2C-3lMPNM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3gyy2C-3lMPNM-1}}}\moddef{Shortest: Step 1: Initialize~{\nwtagstyle{}\subpageref{NW3gyy2C-3lMPNM-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW3gyy2C-1CU8MM-1}}\nwenddeflinemarkup
 final int _p = (bnew.length/4);
@@ -373,7 +373,7 @@ public class GreedyInsertion extends Client \{
 \}
 \nwnotused{GreedyInsertion.java}\nwendcode{}\nwbegindocs{8}\nwdocspar
 
-\nwenddocs{}\nwbegincode{9}\sublabel{NW2W5UTV-2erqlI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2W5UTV-2erqlI-1}}}\moddef{GreedyInsertion: preamble~{\nwtagstyle{}\subpageref{NW2W5UTV-2erqlI-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-1Tuf6f-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{9}\sublabel{NW2W5UTV-2erqlI-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2W5UTV-2erqlI-1}}}\moddef{GreedyInsertion: preamble~{\nwtagstyle{}\subpageref{NW2W5UTV-2erqlI-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-1Tuf6f-1}\\{NW2W5UTV-2phINB-1}}\nwenddeflinemarkup
 import com.github.jargors.sim.*;
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -382,7 +382,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
-\nwused{\\{NW2W5UTV-1Tuf6f-1}}\nwendcode{}\nwbegindocs{10}\nwdocspar
+\nwused{\\{NW2W5UTV-1Tuf6f-1}\\{NW2W5UTV-2phINB-1}}\nwendcode{}\nwbegindocs{10}\nwdocspar
 
 \nwenddocs{}\nwbegincode{11}\sublabel{NW2W5UTV-2OWvsM-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2W5UTV-2OWvsM-1}}}\moddef{GreedyInsertion: handleRequest(1)~{\nwtagstyle{}\subpageref{NW2W5UTV-2OWvsM-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-1Tuf6f-1}}\nwenddeflinemarkup
 void handleRequest(int[] r) throws ClientException, ClientFatalException \{
@@ -402,11 +402,13 @@ void handleRequest(int[] r) throws ClientException, ClientFatalException \{
     \LA{}Debug: map/filter: proximity~{\nwtagstyle{}\subpageref{NW3ZDnOU-1KKA0d-1}}\RA{}
     \LA{}Debug: print candidates~{\nwtagstyle{}\subpageref{NW3ZDnOU-3B7sph-1}}\RA{}
 
+    /*
     results.clear();
     \LA{}Map/Filter: Schedule Length~{\nwtagstyle{}\subpageref{NWEBrBs-3tu5Lh-1}}\RA{}
     candidates = new HashMap<Integer, Integer>(results);
     \LA{}Debug: map/filter: schedule length~{\nwtagstyle{}\subpageref{NW3ZDnOU-2WwrvE-1}}\RA{}
     \LA{}Debug: print candidates~{\nwtagstyle{}\subpageref{NW3ZDnOU-3B7sph-1}}\RA{}
+    */
 
     // Remember minimum schedule, route, cost, server
     int[] wmin = null;
@@ -425,6 +427,11 @@ void handleRequest(int[] r) throws ClientException, ClientFatalException \{
 
       int[] brem = this.communicator.queryServerScheduleRemaining(sid, now);
       \LA{}Debug: print brem~{\nwtagstyle{}\subpageref{NW3ZDnOU-JSCdp-1}}\RA{}
+
+      if (brem.length/4 > MAX_SCHEDULE_LENGTH) \{
+        candidates.remove(sid);
+        continue;
+      \}
 
       final int[] wact = this.communicator.queryServerRouteActive(sid);
       \LA{}Debug: print wact~{\nwtagstyle{}\subpageref{NW3ZDnOU-4aj6aA-1}}\RA{}
@@ -526,7 +533,7 @@ void handleRequest(int[] r) throws ClientException, ClientFatalException \{
       \LA{}Debug: print remove candidate~{\nwtagstyle{}\subpageref{NW3ZDnOU-1BQUqJ-1}}\RA{}
     \}
 
-    \LA{}Debug: echo empty candidates~{\nwtagstyle{}\subpageref{NW3ZDnOU-1Lylbo-1}}\RA{}
+    \LA{}Debug: print candidates~{\nwtagstyle{}\subpageref{NW3ZDnOU-3B7sph-1}}\RA{}
 
     if (smin != 0) \{
       this.communicator.updateServerService(smin, wmin, bmin,
@@ -538,6 +545,194 @@ void handleRequest(int[] r) throws ClientException, ClientFatalException \{
   \}
 \}
 \nwused{\\{NW2W5UTV-1Tuf6f-1}}\nwendcode{}\nwbegindocs{12}\nwdocspar
+
+\section{Greedy Insertion with Fallback}
+
+\nwenddocs{}\nwbegincode{13}\sublabel{NW2W5UTV-2phINB-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2W5UTV-2phINB-1}}}\moddef{GreedyInsertionFallback.java~{\nwtagstyle{}\subpageref{NW2W5UTV-2phINB-1}}}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
+package com.github.jargors.client;
+\LA{}GreedyInsertion: preamble~{\nwtagstyle{}\subpageref{NW2W5UTV-2erqlI-1}}\RA{}
+public class GreedyInsertionFallback extends Client \{
+  final int MAX_PROXIMITY = 600;
+  final int MAX_SCHEDULE_LENGTH = 8;
+  final int QUEUE_THRESHOLD = 30;
+  protected \LA{}GreedyInsertionFallback: handleRequest(1)~{\nwtagstyle{}\subpageref{NW2W5UTV-4ZdLuY-1}}\RA{}
+\}
+\nwnotused{GreedyInsertionFallback.java}\nwendcode{}\nwbegindocs{14}\nwdocspar
+
+\nwenddocs{}\nwbegincode{15}\sublabel{NW2W5UTV-4ZdLuY-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW2W5UTV-4ZdLuY-1}}}\moddef{GreedyInsertionFallback: handleRequest(1)~{\nwtagstyle{}\subpageref{NW2W5UTV-4ZdLuY-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-2phINB-1}}\nwenddeflinemarkup
+void handleRequest(int[] r) throws ClientException, ClientFatalException \{
+  \LA{}Debug: print request~{\nwtagstyle{}\subpageref{NW3ZDnOU-HVWtO-1}}\RA{}
+  try \{
+    final int rid = r[0];
+    final int rq  = r[1];
+    final int ro  = r[4];
+    final int rd  = r[5];
+
+    Map<Integer, Integer> candidates = new HashMap<Integer, Integer>(lut);
+    Map<Integer, Integer> results = new HashMap<Integer, Integer>();
+    \LA{}Debug: print candidates~{\nwtagstyle{}\subpageref{NW3ZDnOU-3B7sph-1}}\RA{}
+
+    // Quite slow!
+    /*
+    \LA{}Map/Filter: Schedule Length~{\nwtagstyle{}\subpageref{NWEBrBs-3tu5Lh-1}}\RA{}
+    candidates = new HashMap<Integer, Integer>(results);
+    \LA{}Debug: map/filter: schedule length~{\nwtagstyle{}\subpageref{NW3ZDnOU-2WwrvE-1}}\RA{}
+    \LA{}Debug: print candidates~{\nwtagstyle{}\subpageref{NW3ZDnOU-3B7sph-1}}\RA{}
+    */
+
+    results.clear();
+    \LA{}Map/Filter: Proximity~{\nwtagstyle{}\subpageref{NWEBrBs-4AhmPL-1}}\RA{}
+    candidates = new HashMap<Integer, Integer>(results);
+    \LA{}Debug: map/filter: proximity~{\nwtagstyle{}\subpageref{NW3ZDnOU-1KKA0d-1}}\RA{}
+    \LA{}Debug: print candidates~{\nwtagstyle{}\subpageref{NW3ZDnOU-3B7sph-1}}\RA{}
+
+    // Remember minimum schedule, route, cost, server
+    int[] wmin = null;
+    int[] bmin = null;
+    int cmin = Integer.MAX_VALUE;
+    int smin = 0;
+
+    boolean fallback = (this.queue.size() > QUEUE_THRESHOLD);
+    \LA{}Debug: print queue size~{\nwtagstyle{}\subpageref{NW3ZDnOU-8YBCE-1}}\RA{}
+    \LA{}Debug: echo fallback~{\nwtagstyle{}\subpageref{NW3ZDnOU-3IJWHX-1}}\RA{}
+
+    while (!candidates.isEmpty()) \{
+
+      Entry<Integer, Integer> cand = null;
+      if (fallback) \{
+        \LA{}Reduce: Minimum Value~{\nwtagstyle{}\subpageref{NW2D7mP3-YFiQd-1}}\RA{}
+      \} else \{
+        \LA{}Reduce: Random~{\nwtagstyle{}\subpageref{NW2D7mP3-4CvaEx-1}}\RA{}
+      \}
+      \LA{}Debug: print candidate~{\nwtagstyle{}\subpageref{NW3ZDnOU-MmR2q-1}}\RA{}
+
+      final int sid = cand.getKey();
+      final int now = this.communicator.retrieveClock();
+
+      int[] brem = this.communicator.queryServerScheduleRemaining(sid, now);
+      \LA{}Debug: print brem~{\nwtagstyle{}\subpageref{NW3ZDnOU-JSCdp-1}}\RA{}
+
+      if (brem.length/4 > MAX_SCHEDULE_LENGTH) \{
+        candidates.remove(sid);
+        continue;
+      \}
+
+      final int[] wact = this.communicator.queryServerRouteActive(sid);
+      \LA{}Debug: print wact~{\nwtagstyle{}\subpageref{NW3ZDnOU-4aj6aA-1}}\RA{}
+
+      int[] wbeg = (wact[3] == 0
+          ? new int[] \{ now    , wact[1] \}
+          : new int[] \{ wact[2], wact[3] \});
+      \LA{}Debug: print wbeg~{\nwtagstyle{}\subpageref{NW3ZDnOU-2EsvK6-1}}\RA{}
+
+      // if next events occurs at next waypoint and is not server's own
+      // destination, then delete these events from schedule (limitation #4).
+      if (brem[2] != sid && brem[0] == wact[2]) \{
+        \LA{}Debug: echo limitation 4~{\nwtagstyle{}\subpageref{NW3ZDnOU-4ZeXS0-1}}\RA{}
+        while (brem[0] == wact[2]) \{
+          brem = Arrays.copyOfRange(brem, 4, brem.length);
+          \LA{}Debug: echo remove event~{\nwtagstyle{}\subpageref{NW3ZDnOU-34iFF1-1}}\RA{}
+          \LA{}Debug: print brem~{\nwtagstyle{}\subpageref{NW3ZDnOU-JSCdp-1}}\RA{}
+        \}
+      \}
+
+      int imax = (brem.length/4);
+      int jmax = imax;
+      int cost = brem[(brem.length - 4)];
+      \LA{}Debug: print imax, jmax, cost~{\nwtagstyle{}\subpageref{NW3ZDnOU-40f0Up-1}}\RA{}
+
+      final int[] bold = brem;
+
+      // Try all insertion positions
+      \LA{}Debug: echo start insertion heuristic~{\nwtagstyle{}\subpageref{NW3ZDnOU-1piQ1l-1}}\RA{}
+      for (int i = 0; i < imax; i++) \{
+        int tbeg = (i == 0 ? now : brem[4*(i - 1)]);
+
+        for (int j = i; j < jmax; j++) \{
+          int tend = bold[4*j];
+
+          \LA{}Debug: print i, j~{\nwtagstyle{}\subpageref{NW3ZDnOU-30mX6u-1}}\RA{}
+          \LA{}Debug: print tbeg, tend~{\nwtagstyle{}\subpageref{NW3ZDnOU-1VOGcH-1}}\RA{}
+
+          boolean ok = false;
+
+          \LA{}Debug: echo check capacity~{\nwtagstyle{}\subpageref{NW3ZDnOU-2Coo86-1}}\RA{}
+          \LA{}Schedule Selection: Check Capacity~{\nwtagstyle{}\subpageref{NW9CtVI-2UeEeu-1}}\RA{}
+          \LA{}Debug: print ok~{\nwtagstyle{}\subpageref{NW3ZDnOU-2Hm6y-1}}\RA{}
+
+          if (ok) \{
+            brem = bold.clone();  // reset to original
+            int[] bnew = new int[] \{ \};
+
+            int[] stop = new int[] \{ 0, ro, 0, rid \};
+            int ipos = i;
+            \LA{}Debug: print stop~{\nwtagstyle{}\subpageref{NW3ZDnOU-3b2tUV-1}}\RA{}
+            \LA{}Debug: print ipos~{\nwtagstyle{}\subpageref{NW3ZDnOU-1BeOIe-1}}\RA{}
+            \LA{}Schedule: Insert~{\nwtagstyle{}\subpageref{NW22SnOZ-4V87KO-1}}\RA{}
+            \LA{}Debug: print bnew~{\nwtagstyle{}\subpageref{NW3ZDnOU-2EstFd-1}}\RA{}
+
+            brem = bnew;
+
+            stop[1] = rd;
+            ipos = (j + 1);
+            \LA{}Debug: print stop~{\nwtagstyle{}\subpageref{NW3ZDnOU-3b2tUV-1}}\RA{}
+            \LA{}Debug: print ipos~{\nwtagstyle{}\subpageref{NW3ZDnOU-1BeOIe-1}}\RA{}
+            \LA{}Schedule: Insert~{\nwtagstyle{}\subpageref{NW22SnOZ-4V87KO-1}}\RA{}
+            \LA{}Debug: print bnew~{\nwtagstyle{}\subpageref{NW3ZDnOU-2EstFd-1}}\RA{}
+
+            int[] wnew = null;
+
+            \LA{}Route: Shortest Path~{\nwtagstyle{}\subpageref{NW3gyy2C-1CU8MM-1}}\RA{}
+
+            // if next waypoint is vehicle destination,
+            // reset route start time to last-visited time
+            if (wact[3] == 0) \{
+              wnew[0] = lut.get(sid);
+            \}
+
+            \LA{}Debug: print wnew~{\nwtagstyle{}\subpageref{NW3ZDnOU-28quig-1}}\RA{}
+
+            \LA{}Debug: echo check time window~{\nwtagstyle{}\subpageref{NW3ZDnOU-IruGu-1}}\RA{}
+            \LA{}Schedule Selection: Check Time Window~{\nwtagstyle{}\subpageref{NW9CtVI-fUjQA-1}}\RA{}
+            \LA{}Debug: print ok~{\nwtagstyle{}\subpageref{NW3ZDnOU-2Hm6y-1}}\RA{}
+
+            if (ok) \{
+              int cdel = bnew[(bnew.length - 4)] - cost;
+              if (cdel < cmin) \{
+                bmin = bnew;
+                wmin = wnew;
+                cmin = cdel;
+                smin = sid;
+                \LA{}Debug: print bnew~{\nwtagstyle{}\subpageref{NW3ZDnOU-2EstFd-1}}\RA{}
+                \LA{}Debug: print cmin~{\nwtagstyle{}\subpageref{NW3ZDnOU-2ty1Mu-1}}\RA{}
+              \}
+            \}
+
+          \}
+        \}
+      \}
+      \LA{}Debug: echo end insertion heuristic~{\nwtagstyle{}\subpageref{NW3ZDnOU-kwxOS-1}}\RA{}
+
+      candidates.remove(sid);
+      \LA{}Debug: print remove candidate~{\nwtagstyle{}\subpageref{NW3ZDnOU-1BQUqJ-1}}\RA{}
+
+      if (fallback && smin != 0) \{
+        break;
+      \}
+    \}
+
+    \LA{}Debug: print candidates~{\nwtagstyle{}\subpageref{NW3ZDnOU-3B7sph-1}}\RA{}
+
+    if (smin != 0) \{
+      this.communicator.updateServerService(smin, wmin, bmin,
+          new int[] \{ rid \}, new int[] \{ \});
+    \}
+
+  \} catch (Exception e) \{
+    throw new ClientException(e);
+  \}
+\}
+\nwused{\\{NW2W5UTV-2phINB-1}}\nwendcode{}\nwbegindocs{16}\nwdocspar
 
 \nwenddocs{}\nwfilename{src/join-overview.nw}\nwbegindocs{0}\part{Join-Based Clients}
 \label{part-join}
@@ -905,18 +1100,18 @@ public class Broadway extends Traffic \{
 \nwenddocs{}\nwfilename{src/debug.nw}\nwbegindocs{0}\part{Debug}
 \label{part-debug}
 
-\nwenddocs{}\nwbegincode{1}\sublabel{NW3ZDnOU-HVWtO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-HVWtO-1}}}\moddef{Debug: print request~{\nwtagstyle{}\subpageref{NW3ZDnOU-HVWtO-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{1}\sublabel{NW3ZDnOU-HVWtO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-HVWtO-1}}}\moddef{Debug: print request~{\nwtagstyle{}\subpageref{NW3ZDnOU-HVWtO-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("got request=\{ %d, %d, %d, %d, %d, %d, %d \}\\n",
       r[0], r[1], r[2], r[3], r[4], r[5], r[6]);
 \}
-\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{2}\nwdocspar
+\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{2}\nwdocspar
 
-\nwenddocs{}\nwbegincode{3}\sublabel{NW3ZDnOU-3B7sph-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-3B7sph-1}}}\moddef{Debug: print candidates~{\nwtagstyle{}\subpageref{NW3ZDnOU-3B7sph-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{3}\sublabel{NW3ZDnOU-3B7sph-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-3B7sph-1}}}\moddef{Debug: print candidates~{\nwtagstyle{}\subpageref{NW3ZDnOU-3B7sph-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("got candidates=\{ #%d \}\\n", candidates.size());
 \}
-\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{4}\nwdocspar
+\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{4}\nwdocspar
 
 \nwenddocs{}\nwbegincode{5}\sublabel{NW3ZDnOU-2L4VdO-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-2L4VdO-1}}}\moddef{Debug: map/filter: last update time~{\nwtagstyle{}\subpageref{NW3ZDnOU-2L4VdO-1}}}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
 if (DEBUG) \{
@@ -924,25 +1119,25 @@ if (DEBUG) \{
 \}
 \nwnotused{Debug: map/filter: last update time}\nwendcode{}\nwbegindocs{6}\nwdocspar
 
-\nwenddocs{}\nwbegincode{7}\sublabel{NW3ZDnOU-1KKA0d-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-1KKA0d-1}}}\moddef{Debug: map/filter: proximity~{\nwtagstyle{}\subpageref{NW3ZDnOU-1KKA0d-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{7}\sublabel{NW3ZDnOU-1KKA0d-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-1KKA0d-1}}}\moddef{Debug: map/filter: proximity~{\nwtagstyle{}\subpageref{NW3ZDnOU-1KKA0d-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("do map/filter: proximity\\n");
 \}
-\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{8}\nwdocspar
+\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{8}\nwdocspar
 
-\nwenddocs{}\nwbegincode{9}\sublabel{NW3ZDnOU-2WwrvE-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-2WwrvE-1}}}\moddef{Debug: map/filter: schedule length~{\nwtagstyle{}\subpageref{NW3ZDnOU-2WwrvE-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{9}\sublabel{NW3ZDnOU-2WwrvE-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-2WwrvE-1}}}\moddef{Debug: map/filter: schedule length~{\nwtagstyle{}\subpageref{NW3ZDnOU-2WwrvE-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("do map/filter: schedule length\\n");
 \}
-\nwused{\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{10}\nwdocspar
+\nwused{\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{10}\nwdocspar
 
-\nwenddocs{}\nwbegincode{11}\sublabel{NW3ZDnOU-MmR2q-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-MmR2q-1}}}\moddef{Debug: print candidate~{\nwtagstyle{}\subpageref{NW3ZDnOU-MmR2q-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{11}\sublabel{NW3ZDnOU-MmR2q-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-MmR2q-1}}}\moddef{Debug: print candidate~{\nwtagstyle{}\subpageref{NW3ZDnOU-MmR2q-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("got cand=\{ %d, %d \}\\n", cand.getKey(), cand.getValue());
 \}
-\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{12}\nwdocspar
+\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{12}\nwdocspar
 
-\nwenddocs{}\nwbegincode{13}\sublabel{NW3ZDnOU-JSCdp-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-JSCdp-1}}}\moddef{Debug: print brem~{\nwtagstyle{}\subpageref{NW3ZDnOU-JSCdp-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{13}\sublabel{NW3ZDnOU-JSCdp-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-JSCdp-1}}}\moddef{Debug: print brem~{\nwtagstyle{}\subpageref{NW3ZDnOU-JSCdp-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("got brem=\\n");
   for (int __i = 0; __i < (brem.length - 3); __i += 4) \{
@@ -950,9 +1145,9 @@ if (DEBUG) \{
         brem[__i], brem[__i+1], brem[__i+2], brem[__i+3]);
   \}
 \}
-\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{14}\nwdocspar
+\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{14}\nwdocspar
 
-\nwenddocs{}\nwbegincode{15}\sublabel{NW3ZDnOU-2EstFd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-2EstFd-1}}}\moddef{Debug: print bnew~{\nwtagstyle{}\subpageref{NW3ZDnOU-2EstFd-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{15}\sublabel{NW3ZDnOU-2EstFd-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-2EstFd-1}}}\moddef{Debug: print bnew~{\nwtagstyle{}\subpageref{NW3ZDnOU-2EstFd-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("got bnew=\\n");
   for (int __i = 0; __i < (bnew.length - 3); __i += 4) \{
@@ -960,28 +1155,28 @@ if (DEBUG) \{
         bnew[__i], bnew[__i+1], bnew[__i+2], bnew[__i+3]);
   \}
 \}
-\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{16}\nwdocspar
+\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{16}\nwdocspar
 
-\nwenddocs{}\nwbegincode{17}\sublabel{NW3ZDnOU-3b2tUV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-3b2tUV-1}}}\moddef{Debug: print stop~{\nwtagstyle{}\subpageref{NW3ZDnOU-3b2tUV-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{17}\sublabel{NW3ZDnOU-3b2tUV-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-3b2tUV-1}}}\moddef{Debug: print stop~{\nwtagstyle{}\subpageref{NW3ZDnOU-3b2tUV-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("set stop=\{ %d, %d, %d, %d \}\\n",
       stop[0], stop[1], stop[2], stop[3]);
 \}
-\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{18}\nwdocspar
+\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{18}\nwdocspar
 
-\nwenddocs{}\nwbegincode{19}\sublabel{NW3ZDnOU-1BeOIe-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-1BeOIe-1}}}\moddef{Debug: print ipos~{\nwtagstyle{}\subpageref{NW3ZDnOU-1BeOIe-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{19}\sublabel{NW3ZDnOU-1BeOIe-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-1BeOIe-1}}}\moddef{Debug: print ipos~{\nwtagstyle{}\subpageref{NW3ZDnOU-1BeOIe-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("set ipos=%d\\n", ipos);
 \}
-\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{20}\nwdocspar
+\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{20}\nwdocspar
 
-\nwenddocs{}\nwbegincode{21}\sublabel{NW3ZDnOU-1VOGcH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-1VOGcH-1}}}\moddef{Debug: print tbeg, tend~{\nwtagstyle{}\subpageref{NW3ZDnOU-1VOGcH-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{21}\sublabel{NW3ZDnOU-1VOGcH-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-1VOGcH-1}}}\moddef{Debug: print tbeg, tend~{\nwtagstyle{}\subpageref{NW3ZDnOU-1VOGcH-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("set tbeg=%d, tend=%d\\n", tbeg, tend);
 \}
-\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{22}\nwdocspar
+\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{22}\nwdocspar
 
-\nwenddocs{}\nwbegincode{23}\sublabel{NW3ZDnOU-4aj6aA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-4aj6aA-1}}}\moddef{Debug: print wact~{\nwtagstyle{}\subpageref{NW3ZDnOU-4aj6aA-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{23}\sublabel{NW3ZDnOU-4aj6aA-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-4aj6aA-1}}}\moddef{Debug: print wact~{\nwtagstyle{}\subpageref{NW3ZDnOU-4aj6aA-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("got wact=\\n");
   for (int __i = 0; __i < (wact.length - 1); __i += 2) \{
@@ -989,45 +1184,45 @@ if (DEBUG) \{
         wact[__i], wact[(__i + 1)]);
   \}
 \}
-\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{24}\nwdocspar
+\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{24}\nwdocspar
 
-\nwenddocs{}\nwbegincode{25}\sublabel{NW3ZDnOU-4ZeXS0-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-4ZeXS0-1}}}\moddef{Debug: echo limitation 4~{\nwtagstyle{}\subpageref{NW3ZDnOU-4ZeXS0-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{25}\sublabel{NW3ZDnOU-4ZeXS0-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-4ZeXS0-1}}}\moddef{Debug: echo limitation 4~{\nwtagstyle{}\subpageref{NW3ZDnOU-4ZeXS0-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("detected limitation #4\\n");
 \}
-\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{26}\nwdocspar
+\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{26}\nwdocspar
 
-\nwenddocs{}\nwbegincode{27}\sublabel{NW3ZDnOU-34iFF1-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-34iFF1-1}}}\moddef{Debug: echo remove event~{\nwtagstyle{}\subpageref{NW3ZDnOU-34iFF1-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{27}\sublabel{NW3ZDnOU-34iFF1-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-34iFF1-1}}}\moddef{Debug: echo remove event~{\nwtagstyle{}\subpageref{NW3ZDnOU-34iFF1-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("remove event\\n");
 \}
-\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{28}\nwdocspar
+\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{28}\nwdocspar
 
-\nwenddocs{}\nwbegincode{29}\sublabel{NW3ZDnOU-2Coo86-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-2Coo86-1}}}\moddef{Debug: echo check capacity~{\nwtagstyle{}\subpageref{NW3ZDnOU-2Coo86-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{29}\sublabel{NW3ZDnOU-2Coo86-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-2Coo86-1}}}\moddef{Debug: echo check capacity~{\nwtagstyle{}\subpageref{NW3ZDnOU-2Coo86-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("check capacity\\n");
 \}
-\nwused{\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{30}\nwdocspar
+\nwused{\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{30}\nwdocspar
 
-\nwenddocs{}\nwbegincode{31}\sublabel{NW3ZDnOU-IruGu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-IruGu-1}}}\moddef{Debug: echo check time window~{\nwtagstyle{}\subpageref{NW3ZDnOU-IruGu-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{31}\sublabel{NW3ZDnOU-IruGu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-IruGu-1}}}\moddef{Debug: echo check time window~{\nwtagstyle{}\subpageref{NW3ZDnOU-IruGu-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("check time window\\n");
 \}
-\nwused{\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{32}\nwdocspar
+\nwused{\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{32}\nwdocspar
 
-\nwenddocs{}\nwbegincode{33}\sublabel{NW3ZDnOU-2Hm6y-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-2Hm6y-1}}}\moddef{Debug: print ok~{\nwtagstyle{}\subpageref{NW3ZDnOU-2Hm6y-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{33}\sublabel{NW3ZDnOU-2Hm6y-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-2Hm6y-1}}}\moddef{Debug: print ok~{\nwtagstyle{}\subpageref{NW3ZDnOU-2Hm6y-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("set ok=%s\\n", (ok ? "true" : "false"));
 \}
-\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{34}\nwdocspar
+\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{34}\nwdocspar
 
-\nwenddocs{}\nwbegincode{35}\sublabel{NW3ZDnOU-2EsvK6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-2EsvK6-1}}}\moddef{Debug: print wbeg~{\nwtagstyle{}\subpageref{NW3ZDnOU-2EsvK6-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{35}\sublabel{NW3ZDnOU-2EsvK6-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-2EsvK6-1}}}\moddef{Debug: print wbeg~{\nwtagstyle{}\subpageref{NW3ZDnOU-2EsvK6-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("set wbeg=\{ %d, %d \}\\n", wbeg[0], wbeg[1]);
 \}
-\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{36}\nwdocspar
+\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{36}\nwdocspar
 
-\nwenddocs{}\nwbegincode{37}\sublabel{NW3ZDnOU-28quig-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-28quig-1}}}\moddef{Debug: print wnew~{\nwtagstyle{}\subpageref{NW3ZDnOU-28quig-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{37}\sublabel{NW3ZDnOU-28quig-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-28quig-1}}}\moddef{Debug: print wnew~{\nwtagstyle{}\subpageref{NW3ZDnOU-28quig-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("set wnew=\\n");
   for (int __i = 0; __i < (wnew.length - 1); __i += 2) \{
@@ -1035,96 +1230,112 @@ if (DEBUG) \{
         wnew[__i], wnew[(__i + 1)]);
   \}
 \}
-\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{38}\nwdocspar
+\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{38}\nwdocspar
 
-\nwenddocs{}\nwbegincode{39}\sublabel{NW3ZDnOU-1BQUqJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-1BQUqJ-1}}}\moddef{Debug: print remove candidate~{\nwtagstyle{}\subpageref{NW3ZDnOU-1BQUqJ-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{39}\sublabel{NW3ZDnOU-1BQUqJ-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-1BQUqJ-1}}}\moddef{Debug: print remove candidate~{\nwtagstyle{}\subpageref{NW3ZDnOU-1BQUqJ-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("remove candidate %d\\n", sid);
 \}
-\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{40}\nwdocspar
+\nwused{\\{NW2W5UTV-16KpI3-1}\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{40}\nwdocspar
 
-\nwenddocs{}\nwbegincode{41}\sublabel{NW3ZDnOU-40f0Up-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-40f0Up-1}}}\moddef{Debug: print imax, jmax, cost~{\nwtagstyle{}\subpageref{NW3ZDnOU-40f0Up-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{41}\sublabel{NW3ZDnOU-40f0Up-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-40f0Up-1}}}\moddef{Debug: print imax, jmax, cost~{\nwtagstyle{}\subpageref{NW3ZDnOU-40f0Up-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("set imax=%d, jmax=%d, cost=%d\\n", imax, jmax, cost);
 \}
-\nwused{\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{42}\nwdocspar
+\nwused{\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{42}\nwdocspar
 
-\nwenddocs{}\nwbegincode{43}\sublabel{NW3ZDnOU-30mX6u-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-30mX6u-1}}}\moddef{Debug: print i, j~{\nwtagstyle{}\subpageref{NW3ZDnOU-30mX6u-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{43}\sublabel{NW3ZDnOU-30mX6u-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-30mX6u-1}}}\moddef{Debug: print i, j~{\nwtagstyle{}\subpageref{NW3ZDnOU-30mX6u-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("set i=%d, j=%d\\n", i, j);
 \}
-\nwused{\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{44}\nwdocspar
+\nwused{\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{44}\nwdocspar
 
-\nwenddocs{}\nwbegincode{45}\sublabel{NW3ZDnOU-2ty1Mu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-2ty1Mu-1}}}\moddef{Debug: print cmin~{\nwtagstyle{}\subpageref{NW3ZDnOU-2ty1Mu-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{45}\sublabel{NW3ZDnOU-2ty1Mu-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-2ty1Mu-1}}}\moddef{Debug: print cmin~{\nwtagstyle{}\subpageref{NW3ZDnOU-2ty1Mu-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("set cmin=%d\\n", cmin);
 \}
-\nwused{\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{46}\nwdocspar
+\nwused{\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{46}\nwdocspar
 
-\nwenddocs{}\nwbegincode{47}\sublabel{NW3ZDnOU-1piQ1l-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-1piQ1l-1}}}\moddef{Debug: echo start insertion heuristic~{\nwtagstyle{}\subpageref{NW3ZDnOU-1piQ1l-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{47}\sublabel{NW3ZDnOU-8YBCE-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-8YBCE-1}}}\moddef{Debug: print queue size~{\nwtagstyle{}\subpageref{NW3ZDnOU-8YBCE-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("got queue size=%d\\n", this.queue.size());
+\}
+\nwused{\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{48}\nwdocspar
+
+\nwenddocs{}\nwbegincode{49}\sublabel{NW3ZDnOU-1piQ1l-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-1piQ1l-1}}}\moddef{Debug: echo start insertion heuristic~{\nwtagstyle{}\subpageref{NW3ZDnOU-1piQ1l-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("start insertion heuristic\\n");
 \}
-\nwused{\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{48}\nwdocspar
+\nwused{\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{50}\nwdocspar
 
-\nwenddocs{}\nwbegincode{49}\sublabel{NW3ZDnOU-kwxOS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-kwxOS-1}}}\moddef{Debug: echo end insertion heuristic~{\nwtagstyle{}\subpageref{NW3ZDnOU-kwxOS-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{51}\sublabel{NW3ZDnOU-kwxOS-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-kwxOS-1}}}\moddef{Debug: echo end insertion heuristic~{\nwtagstyle{}\subpageref{NW3ZDnOU-kwxOS-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("end insertion heuristic\\n");
 \}
-\nwused{\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}\nwbegindocs{50}\nwdocspar
+\nwused{\\{NW2W5UTV-2OWvsM-1}\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}\nwbegindocs{52}\nwdocspar
 
-\nwenddocs{}\nwbegincode{51}\sublabel{NW3ZDnOU-1Lylbo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-1Lylbo-1}}}\moddef{Debug: echo empty candidates~{\nwtagstyle{}\subpageref{NW3ZDnOU-1Lylbo-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-2OWvsM-1}}\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{53}\sublabel{NW3ZDnOU-1Lylbo-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-1Lylbo-1}}}\moddef{Debug: echo empty candidates~{\nwtagstyle{}\subpageref{NW3ZDnOU-1Lylbo-1}}}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
 if (DEBUG) \{
   System.out.printf("empty candidates\\n");
 \}
-\nwused{\\{NW2W5UTV-2OWvsM-1}}\nwendcode{}
+\nwnotused{Debug: echo empty candidates}\nwendcode{}\nwbegindocs{54}\nwdocspar
+
+\nwenddocs{}\nwbegincode{55}\sublabel{NW3ZDnOU-3IJWHX-1}\nwmargintag{{\nwtagstyle{}\subpageref{NW3ZDnOU-3IJWHX-1}}}\moddef{Debug: echo fallback~{\nwtagstyle{}\subpageref{NW3ZDnOU-3IJWHX-1}}}\endmoddef\nwstartdeflinemarkup\nwusesondefline{\\{NW2W5UTV-4ZdLuY-1}}\nwenddeflinemarkup
+if (DEBUG) \{
+  System.out.printf("fallback\\n");
+\}
+\nwused{\\{NW2W5UTV-4ZdLuY-1}}\nwendcode{}
 
 \nwixlogsorted{c}{{Broadway.java}{NW1QgbvE-3asg0V-1}{\nwixd{NW1QgbvE-3asg0V-1}}}%
-\nwixlogsorted{c}{{Debug: echo check capacity}{NW3ZDnOU-2Coo86-1}{\nwixu{NW2W5UTV-2OWvsM-1}\nwixd{NW3ZDnOU-2Coo86-1}}}%
-\nwixlogsorted{c}{{Debug: echo check time window}{NW3ZDnOU-IruGu-1}{\nwixu{NW2W5UTV-2OWvsM-1}\nwixd{NW3ZDnOU-IruGu-1}}}%
-\nwixlogsorted{c}{{Debug: echo empty candidates}{NW3ZDnOU-1Lylbo-1}{\nwixu{NW2W5UTV-2OWvsM-1}\nwixd{NW3ZDnOU-1Lylbo-1}}}%
-\nwixlogsorted{c}{{Debug: echo end insertion heuristic}{NW3ZDnOU-kwxOS-1}{\nwixu{NW2W5UTV-2OWvsM-1}\nwixd{NW3ZDnOU-kwxOS-1}}}%
-\nwixlogsorted{c}{{Debug: echo limitation 4}{NW3ZDnOU-4ZeXS0-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixd{NW3ZDnOU-4ZeXS0-1}}}%
-\nwixlogsorted{c}{{Debug: echo remove event}{NW3ZDnOU-34iFF1-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixd{NW3ZDnOU-34iFF1-1}}}%
-\nwixlogsorted{c}{{Debug: echo start insertion heuristic}{NW3ZDnOU-1piQ1l-1}{\nwixu{NW2W5UTV-2OWvsM-1}\nwixd{NW3ZDnOU-1piQ1l-1}}}%
+\nwixlogsorted{c}{{Debug: echo check capacity}{NW3ZDnOU-2Coo86-1}{\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}\nwixd{NW3ZDnOU-2Coo86-1}}}%
+\nwixlogsorted{c}{{Debug: echo check time window}{NW3ZDnOU-IruGu-1}{\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}\nwixd{NW3ZDnOU-IruGu-1}}}%
+\nwixlogsorted{c}{{Debug: echo empty candidates}{NW3ZDnOU-1Lylbo-1}{\nwixd{NW3ZDnOU-1Lylbo-1}}}%
+\nwixlogsorted{c}{{Debug: echo end insertion heuristic}{NW3ZDnOU-kwxOS-1}{\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}\nwixd{NW3ZDnOU-kwxOS-1}}}%
+\nwixlogsorted{c}{{Debug: echo fallback}{NW3ZDnOU-3IJWHX-1}{\nwixu{NW2W5UTV-4ZdLuY-1}\nwixd{NW3ZDnOU-3IJWHX-1}}}%
+\nwixlogsorted{c}{{Debug: echo limitation 4}{NW3ZDnOU-4ZeXS0-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}\nwixd{NW3ZDnOU-4ZeXS0-1}}}%
+\nwixlogsorted{c}{{Debug: echo remove event}{NW3ZDnOU-34iFF1-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}\nwixd{NW3ZDnOU-34iFF1-1}}}%
+\nwixlogsorted{c}{{Debug: echo start insertion heuristic}{NW3ZDnOU-1piQ1l-1}{\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}\nwixd{NW3ZDnOU-1piQ1l-1}}}%
 \nwixlogsorted{c}{{Debug: map/filter: last update time}{NW3ZDnOU-2L4VdO-1}{\nwixd{NW3ZDnOU-2L4VdO-1}}}%
-\nwixlogsorted{c}{{Debug: map/filter: proximity}{NW3ZDnOU-1KKA0d-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixd{NW3ZDnOU-1KKA0d-1}}}%
-\nwixlogsorted{c}{{Debug: map/filter: schedule length}{NW3ZDnOU-2WwrvE-1}{\nwixu{NW2W5UTV-2OWvsM-1}\nwixd{NW3ZDnOU-2WwrvE-1}}}%
-\nwixlogsorted{c}{{Debug: print bnew}{NW3ZDnOU-2EstFd-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixd{NW3ZDnOU-2EstFd-1}}}%
-\nwixlogsorted{c}{{Debug: print brem}{NW3ZDnOU-JSCdp-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixd{NW3ZDnOU-JSCdp-1}}}%
-\nwixlogsorted{c}{{Debug: print candidate}{NW3ZDnOU-MmR2q-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixd{NW3ZDnOU-MmR2q-1}}}%
-\nwixlogsorted{c}{{Debug: print candidates}{NW3ZDnOU-3B7sph-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixd{NW3ZDnOU-3B7sph-1}}}%
-\nwixlogsorted{c}{{Debug: print cmin}{NW3ZDnOU-2ty1Mu-1}{\nwixu{NW2W5UTV-2OWvsM-1}\nwixd{NW3ZDnOU-2ty1Mu-1}}}%
-\nwixlogsorted{c}{{Debug: print i, j}{NW3ZDnOU-30mX6u-1}{\nwixu{NW2W5UTV-2OWvsM-1}\nwixd{NW3ZDnOU-30mX6u-1}}}%
-\nwixlogsorted{c}{{Debug: print imax, jmax, cost}{NW3ZDnOU-40f0Up-1}{\nwixu{NW2W5UTV-2OWvsM-1}\nwixd{NW3ZDnOU-40f0Up-1}}}%
-\nwixlogsorted{c}{{Debug: print ipos}{NW3ZDnOU-1BeOIe-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixd{NW3ZDnOU-1BeOIe-1}}}%
-\nwixlogsorted{c}{{Debug: print ok}{NW3ZDnOU-2Hm6y-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixd{NW3ZDnOU-2Hm6y-1}}}%
-\nwixlogsorted{c}{{Debug: print remove candidate}{NW3ZDnOU-1BQUqJ-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixd{NW3ZDnOU-1BQUqJ-1}}}%
-\nwixlogsorted{c}{{Debug: print request}{NW3ZDnOU-HVWtO-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixd{NW3ZDnOU-HVWtO-1}}}%
-\nwixlogsorted{c}{{Debug: print stop}{NW3ZDnOU-3b2tUV-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixd{NW3ZDnOU-3b2tUV-1}}}%
-\nwixlogsorted{c}{{Debug: print tbeg, tend}{NW3ZDnOU-1VOGcH-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixd{NW3ZDnOU-1VOGcH-1}}}%
-\nwixlogsorted{c}{{Debug: print wact}{NW3ZDnOU-4aj6aA-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixd{NW3ZDnOU-4aj6aA-1}}}%
-\nwixlogsorted{c}{{Debug: print wbeg}{NW3ZDnOU-2EsvK6-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixd{NW3ZDnOU-2EsvK6-1}}}%
-\nwixlogsorted{c}{{Debug: print wnew}{NW3ZDnOU-28quig-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixd{NW3ZDnOU-28quig-1}}}%
+\nwixlogsorted{c}{{Debug: map/filter: proximity}{NW3ZDnOU-1KKA0d-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}\nwixd{NW3ZDnOU-1KKA0d-1}}}%
+\nwixlogsorted{c}{{Debug: map/filter: schedule length}{NW3ZDnOU-2WwrvE-1}{\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}\nwixd{NW3ZDnOU-2WwrvE-1}}}%
+\nwixlogsorted{c}{{Debug: print bnew}{NW3ZDnOU-2EstFd-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}\nwixd{NW3ZDnOU-2EstFd-1}}}%
+\nwixlogsorted{c}{{Debug: print brem}{NW3ZDnOU-JSCdp-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}\nwixd{NW3ZDnOU-JSCdp-1}}}%
+\nwixlogsorted{c}{{Debug: print candidate}{NW3ZDnOU-MmR2q-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}\nwixd{NW3ZDnOU-MmR2q-1}}}%
+\nwixlogsorted{c}{{Debug: print candidates}{NW3ZDnOU-3B7sph-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}\nwixd{NW3ZDnOU-3B7sph-1}}}%
+\nwixlogsorted{c}{{Debug: print cmin}{NW3ZDnOU-2ty1Mu-1}{\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}\nwixd{NW3ZDnOU-2ty1Mu-1}}}%
+\nwixlogsorted{c}{{Debug: print i, j}{NW3ZDnOU-30mX6u-1}{\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}\nwixd{NW3ZDnOU-30mX6u-1}}}%
+\nwixlogsorted{c}{{Debug: print imax, jmax, cost}{NW3ZDnOU-40f0Up-1}{\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}\nwixd{NW3ZDnOU-40f0Up-1}}}%
+\nwixlogsorted{c}{{Debug: print ipos}{NW3ZDnOU-1BeOIe-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}\nwixd{NW3ZDnOU-1BeOIe-1}}}%
+\nwixlogsorted{c}{{Debug: print ok}{NW3ZDnOU-2Hm6y-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}\nwixd{NW3ZDnOU-2Hm6y-1}}}%
+\nwixlogsorted{c}{{Debug: print queue size}{NW3ZDnOU-8YBCE-1}{\nwixu{NW2W5UTV-4ZdLuY-1}\nwixd{NW3ZDnOU-8YBCE-1}}}%
+\nwixlogsorted{c}{{Debug: print remove candidate}{NW3ZDnOU-1BQUqJ-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}\nwixd{NW3ZDnOU-1BQUqJ-1}}}%
+\nwixlogsorted{c}{{Debug: print request}{NW3ZDnOU-HVWtO-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}\nwixd{NW3ZDnOU-HVWtO-1}}}%
+\nwixlogsorted{c}{{Debug: print stop}{NW3ZDnOU-3b2tUV-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}\nwixd{NW3ZDnOU-3b2tUV-1}}}%
+\nwixlogsorted{c}{{Debug: print tbeg, tend}{NW3ZDnOU-1VOGcH-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}\nwixd{NW3ZDnOU-1VOGcH-1}}}%
+\nwixlogsorted{c}{{Debug: print wact}{NW3ZDnOU-4aj6aA-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}\nwixd{NW3ZDnOU-4aj6aA-1}}}%
+\nwixlogsorted{c}{{Debug: print wbeg}{NW3ZDnOU-2EsvK6-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}\nwixd{NW3ZDnOU-2EsvK6-1}}}%
+\nwixlogsorted{c}{{Debug: print wnew}{NW3ZDnOU-28quig-1}{\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}\nwixd{NW3ZDnOU-28quig-1}}}%
 \nwixlogsorted{c}{{GreedyInsertion.java}{NW2W5UTV-1Tuf6f-1}{\nwixd{NW2W5UTV-1Tuf6f-1}}}%
 \nwixlogsorted{c}{{GreedyInsertion: handleRequest(1)}{NW2W5UTV-2OWvsM-1}{\nwixu{NW2W5UTV-1Tuf6f-1}\nwixd{NW2W5UTV-2OWvsM-1}}}%
-\nwixlogsorted{c}{{GreedyInsertion: preamble}{NW2W5UTV-2erqlI-1}{\nwixu{NW2W5UTV-1Tuf6f-1}\nwixd{NW2W5UTV-2erqlI-1}}}%
-\nwixlogsorted{c}{{Map/Filter: Proximity}{NWEBrBs-4AhmPL-1}{\nwixd{NWEBrBs-4AhmPL-1}\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}}}%
-\nwixlogsorted{c}{{Map/Filter: Schedule Length}{NWEBrBs-3tu5Lh-1}{\nwixd{NWEBrBs-3tu5Lh-1}\nwixu{NW2W5UTV-2OWvsM-1}}}%
+\nwixlogsorted{c}{{GreedyInsertion: preamble}{NW2W5UTV-2erqlI-1}{\nwixu{NW2W5UTV-1Tuf6f-1}\nwixd{NW2W5UTV-2erqlI-1}\nwixu{NW2W5UTV-2phINB-1}}}%
+\nwixlogsorted{c}{{GreedyInsertionFallback.java}{NW2W5UTV-2phINB-1}{\nwixd{NW2W5UTV-2phINB-1}}}%
+\nwixlogsorted{c}{{GreedyInsertionFallback: handleRequest(1)}{NW2W5UTV-4ZdLuY-1}{\nwixu{NW2W5UTV-2phINB-1}\nwixd{NW2W5UTV-4ZdLuY-1}}}%
+\nwixlogsorted{c}{{Map/Filter: Proximity}{NWEBrBs-4AhmPL-1}{\nwixd{NWEBrBs-4AhmPL-1}\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}}}%
+\nwixlogsorted{c}{{Map/Filter: Schedule Length}{NWEBrBs-3tu5Lh-1}{\nwixd{NWEBrBs-3tu5Lh-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}}}%
 \nwixlogsorted{c}{{NearestNeighbor.java}{NW2W5UTV-QNBZk-1}{\nwixd{NW2W5UTV-QNBZk-1}}}%
 \nwixlogsorted{c}{{NearestNeighbor: handleRequest(1)}{NW2W5UTV-16KpI3-1}{\nwixu{NW2W5UTV-QNBZk-1}\nwixd{NW2W5UTV-16KpI3-1}}}%
 \nwixlogsorted{c}{{NearestNeighbor: preamble}{NW2W5UTV-18lzwh-1}{\nwixu{NW2W5UTV-QNBZk-1}\nwixd{NW2W5UTV-18lzwh-1}}}%
 \nwixlogsorted{c}{{Reduce: Maximum Value}{NW2D7mP3-2K8kfr-1}{\nwixd{NW2D7mP3-2K8kfr-1}}}%
-\nwixlogsorted{c}{{Reduce: Minimum Value}{NW2D7mP3-YFiQd-1}{\nwixd{NW2D7mP3-YFiQd-1}\nwixu{NW2W5UTV-16KpI3-1}}}%
-\nwixlogsorted{c}{{Reduce: Random}{NW2D7mP3-4CvaEx-1}{\nwixd{NW2D7mP3-4CvaEx-1}\nwixu{NW2W5UTV-2OWvsM-1}}}%
-\nwixlogsorted{c}{{Route: Shortest Path}{NW3gyy2C-1CU8MM-1}{\nwixd{NW3gyy2C-1CU8MM-1}\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}}}%
-\nwixlogsorted{c}{{Schedule Selection: Check Capacity}{NW9CtVI-2UeEeu-1}{\nwixd{NW9CtVI-2UeEeu-1}\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}}}%
-\nwixlogsorted{c}{{Schedule Selection: Check Time Window}{NW9CtVI-fUjQA-1}{\nwixd{NW9CtVI-fUjQA-1}\nwixu{NW2W5UTV-2OWvsM-1}}}%
-\nwixlogsorted{c}{{Schedule: Insert}{NW22SnOZ-4V87KO-1}{\nwixd{NW22SnOZ-4V87KO-1}\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}}}%
+\nwixlogsorted{c}{{Reduce: Minimum Value}{NW2D7mP3-YFiQd-1}{\nwixd{NW2D7mP3-YFiQd-1}\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-4ZdLuY-1}}}%
+\nwixlogsorted{c}{{Reduce: Random}{NW2D7mP3-4CvaEx-1}{\nwixd{NW2D7mP3-4CvaEx-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}}}%
+\nwixlogsorted{c}{{Route: Shortest Path}{NW3gyy2C-1CU8MM-1}{\nwixd{NW3gyy2C-1CU8MM-1}\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}}}%
+\nwixlogsorted{c}{{Schedule Selection: Check Capacity}{NW9CtVI-2UeEeu-1}{\nwixd{NW9CtVI-2UeEeu-1}\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}}}%
+\nwixlogsorted{c}{{Schedule Selection: Check Time Window}{NW9CtVI-fUjQA-1}{\nwixd{NW9CtVI-fUjQA-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}}}%
+\nwixlogsorted{c}{{Schedule: Insert}{NW22SnOZ-4V87KO-1}{\nwixd{NW22SnOZ-4V87KO-1}\nwixu{NW2W5UTV-16KpI3-1}\nwixu{NW2W5UTV-2OWvsM-1}\nwixu{NW2W5UTV-4ZdLuY-1}}}%
 \nwixlogsorted{c}{{Shortest: Step 1: Initialize}{NW3gyy2C-3lMPNM-1}{\nwixu{NW3gyy2C-1CU8MM-1}\nwixd{NW3gyy2C-3lMPNM-1}}}%
 \nwixlogsorted{c}{{Shortest: Step 2: Compute}{NW3gyy2C-2EZ2CY-1}{\nwixu{NW3gyy2C-1CU8MM-1}\nwixd{NW3gyy2C-2EZ2CY-1}}}%
 \nwixlogsorted{c}{{Shortest: Step 3: Join}{NW3gyy2C-1OT4xQ-1}{\nwixu{NW3gyy2C-1CU8MM-1}\nwixd{NW3gyy2C-1OT4xQ-1}}}%
 \nwixlogsorted{c}{{Shortest: Step 4: Fill}{NW3gyy2C-1nl6rv-1}{\nwixu{NW3gyy2C-1CU8MM-1}\nwixd{NW3gyy2C-1nl6rv-1}}}%
-\nwbegindocs{52}\nwdocspar
+\nwbegindocs{56}\nwdocspar
 
 \nwenddocs{}

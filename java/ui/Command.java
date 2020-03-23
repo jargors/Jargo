@@ -130,17 +130,17 @@ public class Command {
                     arg6 = args[(j + 5)];
 
                     // Extract optional arguments
-                    int i = 0;
-                    while (++i < j) {
-                      if (args[i] == "-r") {
+                    int i = -1;
+                    while (i++ < j) {
+                      if (args[i].equals("-r")) {
                         opt_r = args[(i + 1)];
-                      } else if (args[i] == "-x") {
+                      } else if (args[i].equals("-x")) {
                         opt_x = args[(i + 1)];
-                      } else if (args[i] == "-y") {
+                      } else if (args[i].equals("-y")) {
                         opt_y = args[(i + 1)];
-                      } else if (args[i] == "-s") {
+                      } else if (args[i].equals("-s")) {
                         opt_s = args[(i + 1)];
-                      } else if (args[i] == "-e") {
+                      } else if (args[i].equals("-e")) {
                         opt_e = args[(i + 1)];
                       }
                     }
@@ -205,12 +205,14 @@ public class Command {
                     // Set start time
                     opt_s = (opt_s.equals("") ? "0" : opt_s);
                     System.out.printf("opt start '%s'\n", opt_s);
+                    ctrl.setClockStart(Integer.parseInt(opt_s));
 
                     // Set end time
                     opt_e = (opt_e.equals("")
                         ? Integer.toString(ctrl.query("select max (re) from R", 1)[0])
                         : opt_e);
                     System.out.printf("opt end '%s'\n", opt_e);
+                    ctrl.setClockEnd(Integer.parseInt(opt_e));
 
                     // Start simulation
                     System.out.printf("set mode '%s'\n", arg1);

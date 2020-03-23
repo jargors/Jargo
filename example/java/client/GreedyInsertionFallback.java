@@ -7,9 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
-public class GreedyInsertion extends Client {
+public class GreedyInsertionFallback extends Client {
   final int MAX_PROXIMITY = 600;
   final int MAX_SCHEDULE_LENGTH = 8;
+  final int QUEUE_THRESHOLD = 30;
   protected void handleRequest(int[] r) throws ClientException, ClientFatalException {
               if (DEBUG) {
                 System.out.printf("got request={ %d, %d, %d, %d, %d, %d, %d }\n",
@@ -27,21 +28,8 @@ public class GreedyInsertion extends Client {
                   System.out.printf("got candidates={ #%d }\n", candidates.size());
                 }
 
-                for (final int sid : candidates.keySet()) {
-                  final int val = this.tools.computeHaversine(luv.get(sid), ro);
-                  if (0 < val && val <= MAX_PROXIMITY)
-                    results.put(sid, val);
-                }
-                candidates = new HashMap<Integer, Integer>(results);
-                if (DEBUG) {
-                  System.out.printf("do map/filter: proximity\n");
-                }
-                if (DEBUG) {
-                  System.out.printf("got candidates={ #%d }\n", candidates.size());
-                }
-
+                // Quite slow!
                 /*
-                results.clear();
                 for (final int sid : candidates.keySet()) {
                   final int val = this.communicator.queryServerScheduleRemaining(sid,
                       this.communicator.retrieveClock()).length / 4;
@@ -57,20 +45,50 @@ public class GreedyInsertion extends Client {
                 }
                 */
 
+                results.clear();
+                for (final int sid : candidates.keySet()) {
+                  final int val = this.tools.computeHaversine(luv.get(sid), ro);
+                  if (0 < val && val <= MAX_PROXIMITY)
+                    results.put(sid, val);
+                }
+                candidates = new HashMap<Integer, Integer>(results);
+                if (DEBUG) {
+                  System.out.printf("do map/filter: proximity\n");
+                }
+                if (DEBUG) {
+                  System.out.printf("got candidates={ #%d }\n", candidates.size());
+                }
+
                 // Remember minimum schedule, route, cost, server
                 int[] wmin = null;
                 int[] bmin = null;
                 int cmin = Integer.MAX_VALUE;
                 int smin = 0;
 
+                boolean fallback = (this.queue.size() > QUEUE_THRESHOLD);
+                if (DEBUG) {
+                  System.out.printf("got queue size=%d\n", this.queue.size());
+                }
+                if (DEBUG) {
+                  System.out.printf("fallback\n");
+                }
+
                 while (!candidates.isEmpty()) {
 
                   Entry<Integer, Integer> cand = null;
-                  {
-                    Random random = new Random();
-                    List<Integer> keys = new ArrayList<Integer>(candidates.keySet());
-                    int randomKey = keys.get(random.nextInt(keys.size()));
-                    cand = Map.entry(randomKey, candidates.get(randomKey));
+                  if (fallback) {
+                    for (final Entry<Integer, Integer> entry : candidates.entrySet()) {
+                      if (cand == null || cand.getValue() > entry.getValue()) {
+                        cand = entry;
+                      }
+                    }
+                  } else {
+                    {
+                      Random random = new Random();
+                      List<Integer> keys = new ArrayList<Integer>(candidates.keySet());
+                      int randomKey = keys.get(random.nextInt(keys.size()));
+                      cand = Map.entry(randomKey, candidates.get(randomKey));
+                    }
                   }
                   if (DEBUG) {
                     System.out.printf("got cand={ %d, %d }\n", cand.getKey(), cand.getValue());
@@ -315,6 +333,10 @@ public class GreedyInsertion extends Client {
                   candidates.remove(sid);
                   if (DEBUG) {
                     System.out.printf("remove candidate %d\n", sid);
+                  }
+
+                  if (fallback && smin != 0) {
+                    break;
                   }
                 }
 

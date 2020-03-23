@@ -4,7 +4,8 @@
 # Here I am getting the names of all the *.java files to be tangled.
 JAVA1 = \
 	java/client/NearestNeighbor.java \
-	java/client/GreedyInsertion.java
+	java/client/GreedyInsertion.java \
+	java/client/GreedyInsertionFallback.java
 
 JAVA2 = \
 	java/traffic/Broadway.java
