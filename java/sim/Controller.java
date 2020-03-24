@@ -37,6 +37,12 @@ public class Controller {
   private Map<Integer, Boolean> lu_sseen = new HashMap<Integer, Boolean>();
   private String refTimeStr = "";
   private long refTimeMs = 0;
+  private int simClock = 0;
+  private int simClockReferenceDay = 0;
+  private int simClockReferenceMinute = 0;
+  private int simClockReferenceHour = 0;
+  private int simClockReferenceSecond = 0;
+  private long dur_query = 0;
   private int CLOCK_START =
       Integer.parseInt(System.getProperty("jargors.controller.clock_start", "0"));
   private int CLOCK_END =
@@ -76,33 +82,33 @@ public class Controller {
     // add that duration onto the clock. We can output a "clock rate" to show
     // the user the current simulation rate, i.e. clock_rate=1x means real-time,
     // clock_rate=0.5x means 1 simulated second takes 2 real seconds, etc.
-    this.statControllerClock++;
-    this.statControllerClockReferenceSecond++;
-    if (this.statControllerClockReferenceSecond > 59) {
-      this.statControllerClockReferenceSecond = 0;
-      this.statControllerClockReferenceMinute++;
-      if (this.statControllerClockReferenceMinute > 59) {
-        this.statControllerClockReferenceMinute = 0;
-        this.statControllerClockReferenceHour++;
-        if (this.statControllerClockReferenceHour > 23) {
-          this.statControllerClockReferenceHour = 0;
-          this.statControllerClockReferenceDay++;
+    this.simClock++;
+    this.simClockReferenceSecond++;
+    if (this.simClockReferenceSecond > 59) {
+      this.simClockReferenceSecond = 0;
+      this.simClockReferenceMinute++;
+      if (this.simClockReferenceMinute > 59) {
+        this.simClockReferenceMinute = 0;
+        this.simClockReferenceHour++;
+        if (this.simClockReferenceHour > 23) {
+          this.simClockReferenceHour = 0;
+          this.simClockReferenceDay++;
         }
       }
     }
     if (DEBUG) {
       System.out.printf("t=%d (day %d, %02d:%02d:%02d)\n",
-          this.statControllerClock,
-          this.statControllerClockReferenceDay,
-          this.statControllerClockReferenceHour,
-          this.statControllerClockReferenceMinute,
-          this.statControllerClockReferenceSecond);
+          this.simClock,
+          this.simClockReferenceDay,
+          this.simClockReferenceHour,
+          this.simClockReferenceMinute,
+          this.simClockReferenceSecond);
     }
   };
   private Runnable RequestCollectionLoop = () -> {
     int  A1 = 0;
     int  A2 = 0;
-    final int now = this.statControllerClock;
+    final int now = this.simClock;
     try {
       A2 = this.client.dropRequests(now - QUEUE_TIMEOUT);
       if (DEBUG) {
@@ -152,26 +158,26 @@ public class Controller {
       this.client.notifyNew();  // blocks this thread until queue is empty
     } catch (ClientException e) {
       System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientException: %s\n",
-          this.statControllerClock, e.toString());
+          this.simClock, e.toString());
       // try {
       //   instanceExport("debug-db");
       // } catch (Exception ee) { }
       e.printStackTrace();
     } catch (ClientFatalException e) {
       System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientFatalException: %s\n",
-          this.statControllerClock, e.toString());
+          this.simClock, e.toString());
       e.printStackTrace();
       System.exit(1);
     } catch (Exception e) {
       System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a unspecified Exception: %s\n",
-          this.statControllerClock, e.toString());
+          this.simClock, e.toString());
       e.printStackTrace();
       System.exit(1);
     }
   };
   private Runnable ServerLoop = () -> {
     try {
-      int[] output = this.storage.DBQueryServersLocationsActive(this.statControllerClock);
+      int[] output = this.storage.DBQueryServersLocationsActive(this.simClock);
       if (DEBUG) {
         System.out.printf("got %d servers\n", (output.length/3));
       }
@@ -193,7 +199,7 @@ public class Controller {
       }
     } catch (Exception e) {
       System.err.printf("[t=%d] Controller.ServerLoop caught a unspecified Exception: %s\n",
-          this.statControllerClock, e.toString());
+          this.simClock, e.toString());
       e.printStackTrace();
       System.exit(1);
     }
@@ -209,7 +215,9 @@ public class Controller {
            return output;
          }
   public int[] queryQuick(final String sql, int[] outcols, ArrayList<String> header) throws SQLException {
+           long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryQuick(sql, outcols, header);
+           this.dur_query = System.currentTimeMillis() - A0;
            return output;
          }
   public int[] queryEdge(final int v1, final int v2) throws EdgeNotFoundException, SQLException {
@@ -511,7 +519,7 @@ public class Controller {
            this.storage.JargoInstanceNew();
          }
   public int getClock() {
-           return this.statControllerClock;
+           return this.simClock;
          }
   public int getClockStart() {
            return this.CLOCK_START;
@@ -529,10 +537,10 @@ public class Controller {
            return this.storage;
          }
   public int retrieveQueueSize() {
-           return this.client.getStatClientQueueSize();
+           return this.client.getQueueSize();
          }
   public long retrieveHandleRequestDur() {
-           return this.client.getStatClientHandleRequestDur();
+           return this.client.getHandleRequestDur();
          }
   public final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> retrieveRefCacheEdges() {
            return this.storage.getRefCacheEdges();
@@ -567,8 +575,8 @@ public class Controller {
            } catch (Exception pe) {
              throw new IllegalArgumentException("Invalid clock reference (parse failed)");
            }
-           this.statControllerClockReferenceHour= hour;
-           this.statControllerClockReferenceMinute = minute;
+           this.simClockReferenceHour= hour;
+           this.simClockReferenceMinute = minute;
            if (DEBUG) {
              System.out.printf("refHr=%d, refMn=%d, refMs=%d\n",
                hour, minute, this.refTimeMs);
@@ -576,20 +584,20 @@ public class Controller {
          }
   public void setClockStart(final int clock_start) {
            this.CLOCK_START = clock_start;
-           this.statControllerClockReferenceSecond += clock_start;
-           this.statControllerClockReferenceSecond %= 60;
-           this.statControllerClockReferenceMinute += (clock_start / 60);
-           this.statControllerClockReferenceMinute %= 60;
-           this.statControllerClockReferenceHour += (clock_start / 3600);
-           this.statControllerClockReferenceHour %= 24;
-           this.statControllerClockReferenceDay += (clock_start / 86400);
+           this.simClockReferenceSecond += clock_start;
+           this.simClockReferenceSecond %= 60;
+           this.simClockReferenceMinute += (clock_start / 60);
+           this.simClockReferenceMinute %= 60;
+           this.simClockReferenceHour += (clock_start / 3600);
+           this.simClockReferenceHour %= 24;
+           this.simClockReferenceDay += (clock_start / 86400);
            if (DEBUG) {
              System.out.printf("clock_start=%d\n", clock_start);
              System.out.printf("clock day %d %02d:%02d:%02d\n",
-                 this.statControllerClockReferenceDay,
-                 this.statControllerClockReferenceHour,
-                 this.statControllerClockReferenceMinute,
-                 this.statControllerClockReferenceSecond);
+                 this.simClockReferenceDay,
+                 this.simClockReferenceHour,
+                 this.simClockReferenceMinute,
+                 this.simClockReferenceSecond);
            }
          }
   public void setQueueTimeout(final int queue_timeout) {
@@ -603,6 +611,21 @@ public class Controller {
          }
   public void gtreeLoad(String p) throws FileNotFoundException {
            this.tools.GTGtreeLoad(p);
+         }
+  public int getClockReferenceDay() {
+           return this.simClockReferenceDay;
+         }
+  public int getClockReferenceHour() {
+           return this.simClockReferenceHour;
+         }
+  public int getClockReferenceMinute() {
+           return this.simClockReferenceMinute;
+         }
+  public int getClockReferenceSecond() {
+           return this.simClockReferenceSecond;
+         }
+  public long getQueryDur() {
+           return this.dur_query;
          }
   public void loadProblem(String p)
          throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException, SQLException,
@@ -686,7 +709,7 @@ public class Controller {
            return this.kill;
          }
   public void returnRequest(final int[] r) {
-           if (this.statControllerClock - r[2] < QUEUE_TIMEOUT) {
+           if (this.simClock - r[2] < QUEUE_TIMEOUT) {
              this.lu_rseen.put(r[0], false);
            }
          }
@@ -700,9 +723,9 @@ public class Controller {
              System.out.printf("setRequestTimeout(1), arg1=%d\n", REQUEST_TIMEOUT);
            }
 
-           this.statControllerClock = CLOCK_START;
+           this.simClock = CLOCK_START;
            if (DEBUG) {
-             System.out.printf("statControllerClock=%d\n", CLOCK_START);
+             System.out.printf("simClock=%d\n", CLOCK_START);
            }
 
            int simulation_duration = (CLOCK_END - CLOCK_START);
@@ -755,8 +778,8 @@ public class Controller {
              System.out.printf("startSequuential(1)\n");
            }
            this.storage.setRequestTimeout(REQUEST_TIMEOUT);
-           this.statControllerClock = CLOCK_START;
-           while (!kill && this.statControllerClock < CLOCK_END) {
+           this.simClock = CLOCK_START;
+           while (!kill && this.simClock < CLOCK_END) {
              this.working = true;
              this.step();
              this.working = false;

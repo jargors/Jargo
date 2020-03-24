@@ -106,7 +106,9 @@ int[] query(final String sql, final int ncols) throws SQLException {
 @ %def query
 <<Read: queryQuick(3)>>=
 int[] queryQuick(final String sql, int[] outcols, ArrayList<String> header) throws SQLException {
+  long A0 = System.currentTimeMillis();
   int[] output = this.storage.DBQueryQuick(sql, outcols, header);
+  this.dur_query = System.currentTimeMillis() - A0;
   return output;
 }
 @ %def queryQuick

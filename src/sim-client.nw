@@ -37,6 +37,7 @@ protected final boolean DEBUG =
     "true".equals(System.getProperty("jargors.client.debug"));
 protected ConcurrentHashMap<Integer, Integer> lut = new ConcurrentHashMap<Integer, Integer>();
 protected ConcurrentHashMap<Integer, Integer> luv = new ConcurrentHashMap<Integer, Integer>();
+protected long dur_handle_request = 0;
 @
 
 \subsection{Constructor}
@@ -68,23 +69,25 @@ public <<Gtree: gtreeClose(0)>>
 \subsubsection{Special Methods}
 <<[[Client]] methods>>=
 public <<Client: addRequest(1)>>
-public <<Client: dropRequests(1)>>
 public <<Client: collectServerLocations(1)>>
-public <<Client: notifyNew(0)>>
+public <<Client: dropRequests(1)>>
+public <<Client: getQueueSize(0)>>
+public <<Client: getHandleRequestDur(0)>>
 public <<Client: init(0)>>
+public <<Client: notifyNew(0)>>
 protected <<Client: end(0)>>
 protected <<Client: handleRequest(1)>>
 protected <<Client: handleServerLocation(1)>>
 @
-
-
 
 \subsubsection{\texttt{notifyNew}(0)}
 
 <<Client: notifyNew(0)>>=
 void notifyNew() throws ClientException, ClientFatalException {
   while (!this.queue.isEmpty()) {
+    long A0 = System.currentTimeMillis();
     this.handleRequest(this.queue.remove());
+    this.dur_handle_request = System.currentTimeMillis() - A0;
     if (DEBUG) {
       System.out.printf("handleRequest(1), arg1=[#]\n");
     }
@@ -137,6 +140,20 @@ void collectServerLocations(final int[] src) {
 <<Client: end(0)>>=
 void end() { }
 @ %def end
+
+\subsubsection{\texttt{getHandleRequestDur}(0)}
+<<Client: getHandleRequestDur(0)>>=
+long getHandleRequestDur() {
+  return this.dur_handle_request;
+}
+@
+
+\subsubsection{\texttt{getQueueSize}(0)}
+<<Client: getQueueSize(0)>>=
+int getQueueSize() {
+  return this.queue.size();
+}
+@ %def getQueueSize
 
 \subsubsection{\texttt{handleRequest}(1)}
 Array [[r]] =

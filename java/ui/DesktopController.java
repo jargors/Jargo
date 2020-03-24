@@ -689,10 +689,10 @@ public class DesktopController {
         this.A0 = System.currentTimeMillis();
       }
       final int t = this.controller.getClock();
-      final int day = this.controller.getStatControllerClockReferenceDay();
-      final int hr = this.controller.getStatControllerClockReferenceHour();
-      final int min = this.controller.getStatControllerClockReferenceMinute();
-      final int sec = this.controller.getStatControllerClockReferenceSecond();
+      final int day = this.controller.getClockReferenceDay();
+      final int hr = this.controller.getClockReferenceHour();
+      final int min = this.controller.getClockReferenceMinute();
+      final int sec = this.controller.getClockReferenceSecond();
       Platform.runLater(() -> {
         this.lbl_status.setText(String.format("Collect metrics (t=%d) (day %d %02d:%02d:%02d)",
           t, day, hr, min, sec));
@@ -1237,7 +1237,7 @@ public class DesktopController {
                sb.append('\n');
              }
              sb.append('\n').append("Execution time: ");
-             sb.append(this.controller.getStatQueryDur()).append(" ms\n");
+             sb.append(this.controller.getQueryDur()).append(" ms\n");
              Platform.runLater(() -> {
                this.txt_result.setText(sb.toString());
              });

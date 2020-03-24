@@ -14,6 +14,7 @@ public abstract class Client {
       "true".equals(System.getProperty("jargors.client.debug"));
   protected ConcurrentHashMap<Integer, Integer> lut = new ConcurrentHashMap<Integer, Integer>();
   protected ConcurrentHashMap<Integer, Integer> luv = new ConcurrentHashMap<Integer, Integer>();
+  protected long dur_handle_request = 0;
   public Client() {
     if (DEBUG) {
       System.out.printf("create Client\n");
@@ -40,11 +41,6 @@ public abstract class Client {
   public void addRequest(final int[] r) {
            this.queue.add(r);
          }
-  public int dropRequests(final int deadline) {
-           final int temp = this.queue.size();
-           this.queue.removeIf((r) -> { return r[2] < deadline; });
-           return Math.max(0, temp - this.queue.size());
-         }
   public void collectServerLocations(final int[] src) {
            for (int i = 0; i < (src.length - 2); i += 3) {
              this.handleServerLocation(new int[] {
@@ -54,15 +50,28 @@ public abstract class Client {
              });
            }
          }
+  public int dropRequests(final int deadline) {
+           final int temp = this.queue.size();
+           this.queue.removeIf((r) -> { return r[2] < deadline; });
+           return Math.max(0, temp - this.queue.size());
+         }
+  public int getQueueSize() {
+           return this.queue.size();
+         }
+  public long getHandleRequestDur() {
+           return this.dur_handle_request;
+         }
+  public void init() { }
   public void notifyNew() throws ClientException, ClientFatalException {
            while (!this.queue.isEmpty()) {
+             long A0 = System.currentTimeMillis();
              this.handleRequest(this.queue.remove());
+             this.dur_handle_request = System.currentTimeMillis() - A0;
              if (DEBUG) {
                System.out.printf("handleRequest(1), arg1=[#]\n");
              }
            }
          }
-  public void init() { }
   protected void end() { }
   protected void handleRequest(final int[] r) throws ClientException, ClientFatalException { }
   protected void handleServerLocation(final int[] loc) {
