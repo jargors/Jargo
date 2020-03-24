@@ -1,6 +1,9 @@
 \section{Write Operations}
 \label{sim-writing}
 
+\etocsettocstyle{}{}
+\localtableofcontents
+
 \subsection{Chunks}
 
 \subsubsection{Apply traffic to route, sched}
@@ -733,7 +736,6 @@ void updateServerService(final int sid, final int[] route, final int[] sched,
     final int[] ridpos, final int[] ridneg)
 throws RouteIllegalOverwriteException, UserNotFoundException,
        EdgeNotFoundException, TimeWindowException, SQLException {
-  long A0 = System.currentTimeMillis();
   final int[] current = this.storage.DBQueryServerRoute(sid);
   int t_now  = this.retrieveClock();
   int t_next = t_now;
@@ -764,7 +766,6 @@ throws RouteIllegalOverwriteException, UserNotFoundException,
   /*<<Check time window violation>>*/
   <<Apply traffic to route, sched>>
   this.storage.DBUpdateServerService(sid, mutroute, mutsched, ridpos, ridneg);
-  /*<Stats: updateServerService(5)>*/
 }
 @ %def updateServerAddToSchedule
 

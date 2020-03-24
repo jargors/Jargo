@@ -7,31 +7,32 @@
 \renewcommand{\thepage}{\arabic{page}}
 \setcounter{page}{1}
 
-\begin{quote}
-\textit{
+Jargo exists as a single Java archive (\texttt{jar}) file called
+\texttt{jargors-{\jsVersion}.jar}. To ``install'' it means to compile the Java
+source files into the \texttt{jar}, and then place the \texttt{jar} file
+somewhere on your computer that is accessible by your Java runtime classpath
+(\texttt{-cp}) option. Jargo comes with its own Make-based build system. Type
+\texttt{make} in the Jargo root directory to see a list of build
+commands (Table~\ref{tab:tut-install-build.tex}).
+
 If you have an internet connection and are on Linux, Mac, or using
-Cygwin/MinGW, you might be able to get away with:}
+Cygwin/MinGW, you might be able to get away with:
 \begin{verbatim}
 > make all
 \end{verbatim}
-\textit{
-Otherwise, read on for details.}
-\end{quote}
-
-Jargo exists as a single Java archive (\texttt{jar}) file called
-\texttt{jargors-{\jsVersion}.jar}. To ``install'' it means to compile the Java source
-files into the \texttt{jar}, and then place the \texttt{jar} file somewhere on
-your computer that is accessible by your Java runtime classpath
-(\texttt{-cp}) option. Jargo comes with its own Make-based build system. Type
-\texttt{make} in the Jargo root directory to see a list of build commands.
+Otherwise, read on for details.
 
 \subsection{Prerequisites}
 \label{tut-install: prerequisites}
 
-Before you begin compiling Jargo, make sure you have the following
-prerequisites.
+Before you begin compiling, make sure you have the following prerequisites.
 
-\subsubsection*{For compiling Jargo:}
+\subsubsection{For compiling Jargo:}
+These prerequisites can be automatically obtained by typing \texttt{make dep}
+in the Jargo root directory. The files are downloaded into the \texttt{dep/}
+folder. For GTreeJNI and JavaFX native components, the command gets the x64
+Linux versions.  If you are on a different platform, you will need to get these
+native libraries by yourself.
 \begin{itemize}
 \item Java JDK 11.0.1 or above. Latest Java Development Kits licensed under the
 GPL are available at \url{https://jdk.java.net}.
@@ -45,19 +46,14 @@ GPL are available at \url{https://jdk.java.net}.
 \item VisualVM charting components, obtainable from \url{
 http://bits.netbeans.org/nexus/content/repositories/visualvm}.
 \end{itemize}
-These prerequisites can be automatically obtained by typing \texttt{make dep}
-in the Jargo root directory. The obtained files are placed in the \texttt{dep/}
-folder. For GTreeJNI and JavaFX native components, the x64 Linux versions are
-downloaded. If you are on a different platform, you will need to obtain these
-native libraries by yourself.
 
-\subsubsection*{(Optional) For compiling the documentation (this document):}
+\subsubsection{(Optional) For compiling the documentation (this document):}
 \begin{itemize}
 \item The \texttt{texfot} program, included in most distributions of LaTeX.
 \item The \texttt{pdflatex} program, included in most distributions of LaTeX.
 \end{itemize}
 
-\subsubsection*{(Optional) For compiling the Java and LaTeX sources:}
+\subsubsection{(Optional) For compiling the Java and LaTeX sources:}
 \begin{itemize}
 \item The \texttt{notangle} and \texttt{noweave} programs, obtainable from
 \url{https://www.cs.tufts.edu/~nr/noweb/}.
@@ -75,73 +71,20 @@ root directory.
 \subsection{For Users: Building the Library}
 \label{tut-install: library}
 
-\begin{table}
-\small
-\centering
-\caption{Prerequisites for building Jargo, including JavaFX native libraries.}
-\label{tab:prereqs}
-\begin{tabular}{|p{.8\textwidth}|}
-\hline
-\begin{itemize}
-\item \texttt{commons-dbcp2-2.7.0.jar}
-\item \texttt{commons-logging-1.2.jar}
-\item \texttt{commons-pool2-2.7.0.jar}
-\item \texttt{com-sun-tools-visualvm-charts-RELEASE139.jar}
-\item \texttt{com-sun-tools-visualvm-uisupport-RELEASE139.jar}
-\item \texttt{gtree-2.0.jar}
-\item \texttt{libgtree.so}
-\item \textit{\texttt{javafx.base.jar}}
-\item \textit{\texttt{javafx.controls.jar}}
-\item \textit{\texttt{javafx.fxml.jar}}
-\item \textit{\texttt{javafx.graphics.jar}}
-\item \textit{\texttt{javafx.media.jar}}
-\item \textit{\texttt{javafx.swing.jar}}
-\item \textit{\texttt{javafx-swt.jar}}
-\item \textit{\texttt{javafx.web.jar}}
-\item \textit{\texttt{libavplugin-54.so}}
-\item \textit{\texttt{libavplugin-56.so}}
-\item \textit{\texttt{libavplugin-57.so}}
-\item \textit{\texttt{libavplugin-ffmpeg-56.so}}
-\item \textit{\texttt{libavplugin-ffmpeg-57.so}}
-\item \textit{\texttt{libavplugin-ffmpeg-58.so}}
-\item \textit{\texttt{libdecora\_sse.so}}
-\item \textit{\texttt{libfxplugins.so}}
-\item \textit{\texttt{libglassgtk2.so}}
-\item \textit{\texttt{libglassgtk3.so}}
-\item \textit{\texttt{libglass.so}}
-\item \textit{\texttt{libgstreamer-lite.so}}
-\item \textit{\texttt{libjavafx\_font\_freetype.so}}
-\item \textit{\texttt{libjavafx\_font\_pango.so}}
-\item \textit{\texttt{libjavafx\_font.so}}
-\item \textit{\texttt{libjavafx\_iio.so}}
-\item \textit{\texttt{libjfxmedia.so}}
-\item \textit{\texttt{libjfxwebkit.so}}
-\item \textit{\texttt{libprism\_common.so}}
-\item \textit{\texttt{libprism\_es2.so}}
-\item \textit{\texttt{libprism\_sw.so}}
-\item \texttt{org-netbeans-lib-profiler-charts-RELEASE139.jar}
-\item \texttt{org-netbeans-lib-profiler-ui-RELEASE139.jar}
-\item \texttt{org-netbeans-modules-profiler-api-RELEASE139.jar}
-\item \texttt{org-openide-util-lookup-RELEASE139.jar}
-\end{itemize}\\
-\hline
-\end{tabular}
-\end{table}
-
 Follow these steps to build the \texttt{jargors-{\jsVersion}.jar} library from the
 Java sources in the \texttt{java/} directory.
 \begin{enumerate}
 \item Verify the \texttt{dep/} folder contains the prerequisites listed in
-Table~\ref{tab:prereqs}. Typing \texttt{make dep} will automatically download
-the prerequisites and place them in the \texttt{dep/} folder. Otherwise, the
-items in \textit{italics} are obtainable from the JavaFX SDK for your platform.
-The \texttt{libgtree.so} native library is obtainable from Jargo GTreeJNI and
-must be built for your platform beforehand.  The remaining \texttt{*.jar} files
-are obtainable from the websites listed above.
+Table~\ref{tab:tut-install-prerequisites}. Typing \texttt{make dep} will
+automatically download the prerequisites into the \texttt{dep/} folder.
+Otherwise, the items in \textit{italics} are obtainable from the JavaFX SDK for
+your platform.  The \texttt{libgtree.so} native library is obtainable from
+Jargo GTreeJNI and must be built for your platform beforehand.  The remaining
+\texttt{*.jar} files are obtainable from the websites listed above.
 \item Type \texttt{javac -version} to verify the Java compiler version is at
 least 11.0.1.
-\item Type \texttt{make jar}. The compiled library is outputted
-to \texttt{jar/jargors-{\jsVersion}.jar}.
+\item Type \texttt{make jar}. The compiled library is placed in
+\texttt{jar/jargors-{\jsVersion}.jar}.
 \end{enumerate}
 
 \subsection{For Developers: Building the Java and LaTeX Sources}
@@ -170,3 +113,18 @@ Java source files and \texttt{doc/body.tex}.
 \item \texttt{make purgedep}: delete the \texttt{dep/} folder.
 \end{itemize}
 
+\begin{table}
+\small
+\centering
+\input{res/doc-tab/tut-install-build}
+\caption{Jargo build commands.}
+\label{tab:tut-install-build.tex}
+\end{table}
+
+\begin{table}
+\small
+\centering
+\input{res/doc-tab/tut-install-prerequisites}
+\caption{Prerequisites for building Jargo, including JavaFX native libraries.}
+\label{tab:tut-install-prerequisites}
+\end{table}

@@ -23,9 +23,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
-import com.github.jargors.jmx.*;
-import java.lang.management.*;
-import javax.management.*;
 public class Storage {
   private Map<Integer, Boolean> lu_rstatus = new HashMap<>();  //*
   private ConcurrentHashMap<String, String> lu_pstr     = new ConcurrentHashMap<String, String>();
@@ -62,16 +59,6 @@ public class Storage {
   private PoolingDriver                   driver;
   public Storage() {
     this.JargoSetupPreparedStatements();
-    try {
-      MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-      StorageMonitor mon = new StorageMonitor(this);
-      mbs.registerMBean(mon, new ObjectName("com.github.jargors.jmx:type=StorageMonitor"));
-    } catch (InstanceAlreadyExistsException e) {
-      // ...
-    } catch (Exception e) {
-      System.err.printf("StorageMonitor failed; reason: %s\n", e.toString());
-      System.err.printf("Continuing with monitoring disabled\n");
-    }
   }
   public int[] DBQuery(final String sql, final int ncols) throws SQLException {
            int[] output = new int[] { };
@@ -1329,9 +1316,11 @@ public class Storage {
            }
          }
   public void JargoCacheRoadNetworkFromDB() throws SQLException {
-           ConcurrentHashMap<Integer, int[]>    lu1 = new ConcurrentHashMap<Integer, int[]>();
+           ConcurrentHashMap<Integer, int[]>    lu1 =
+               new ConcurrentHashMap<Integer, int[]>();
            ConcurrentHashMap<Integer,
-             ConcurrentHashMap<Integer, int[]>> lu2 = new ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>>();
+             ConcurrentHashMap<Integer, int[]>> lu2 =
+               new ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>>();
            try {
              final int[] output = this.DBQueryVertices();
              for (int i = 0; i < (output.length - 2); i += 3) {
@@ -1829,16 +1818,6 @@ public class Storage {
            }
          }
   public void JargoInstanceLoad(final String p) throws SQLException {
-           this.CONNECTIONS_URL = "jdbc:derby:"+p;
-           try {
-             this.JargoSetupDriver();
-           } catch (ClassNotFoundException e) {
-             System.out.println("Fatal error.");
-             e.printStackTrace();
-             System.exit(1);
-           }
-         }
-  public void JargoInstanceLoadInMem(final String p) throws SQLException {
            this.CONNECTIONS_URL = "jdbc:derby:memory:jargo;createFrom="+p;
            try {
              this.JargoSetupDriver();
@@ -1925,7 +1904,8 @@ public class Storage {
                   + "GROUP BY sid"
                   + ") as b ON a.sid=b.sid AND ABS(a.t2-?)=b.tdiff AND a.t2<=?");
             this.lu_pstr.put("S60", SEL+"DISTINCT t, v FROM r_server WHERE sid=? ORDER BY t ASC");
-            this.lu_pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server LEFT JOIN CQ ON t=t2 and lr=rid WHERE r_server.sid=?"
+            this.lu_pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server "
+                  + "LEFT JOIN CQ ON t=t2 and lr=rid WHERE r_server.sid=?"
                   + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t, o2 ASC");
             this.lu_pstr.put("S62", SEL+"COUNT (*) FROM V WHERE v<>0");
             this.lu_pstr.put("S63", SEL+"COUNT (*) FROM E WHERE v1<>0 AND v2<>0");
@@ -2002,7 +1982,8 @@ public class Storage {
             this.lu_pstr.put("S148", SEL+"sid FROM assignments WHERE rid=?");
             this.lu_pstr.put("S150", SEL+"COUNT (*) FROM violations_t_s");
             this.lu_pstr.put("S151", SEL+"COUNT (*) FROM violations_t_r");
-            this.lu_pstr.put("S152", SEL+"t2, v2 FROM W WHERE sid=? AND t2>=? ORDER BY t2 ASC FETCH FIRST ? ROWS ONLY");
+            this.lu_pstr.put("S152", SEL+"t2, v2 FROM W WHERE sid=? AND t2>=? "
+                + "ORDER BY t2 ASC FETCH FIRST ? ROWS ONLY");
             this.lu_pstr.put("S153", SEL+"t1, t2 FROM CQ WHERE sid=? AND q1=sq");
             this.lu_pstr.put("S154", SEL+"SUM (dd) FROM W WHERE sid=? AND t2 > ? AND t2 <= ?");
             this.lu_pstr.put("S155", SEL+"MAX (td) FROM CPD WHERE sid = ?");

@@ -1,18 +1,20 @@
 \section{Starting a Simulation}
 \label{tut-start}
 
-Jargo comes with a command-line interface and a graphical interface. If you
-like, you can create your own interface by using Jargo components. The steps
-are the same for running any of these interfaces.
+Start a simulation using an \emph{evaluator}. An evaluator is a standalone Java
+program that uses the Jargo library to setup and start a simulation. You can
+write your own or use one of the included evaluators. Jargo includes a
+command-line evaluator and a graphical evaluator.
 
 \subsection{Setting Up the Runtime Environment}
 \label{tut-start: runtime}
 
 The Java Virtual Machine (JVM) needs to know where to look for the relevant
 class files and native libraries. Usually these directory locations are passed
-to the JVM at runtime, as options to the \texttt{java} command. All programs
-that import from Jargo will need to use the dependencies listed in
-Table~\ref{tab:prereqs} in addition to the following dependencies:
+to the JVM at runtime, as options to the \texttt{java} command. All evaluators
+will need to use the dependencies listed in
+Table~\ref{tab:tut-install-prerequisites} in addition to the following
+dependencies:
 \begin{itemize}
 \item Apache Commons Logging package, needed by DBCP and obtainable from
 \url{http://commons.apache.org/proper/commons-logging/}.
@@ -20,70 +22,58 @@ Table~\ref{tab:prereqs} in addition to the following dependencies:
 \url{https://db.apache.org/derby/}.
 \end{itemize}
 
-\begin{table}
-\small
-\centering
-\caption{Additional prerequisites for running Jargo programs.}
-\label{tab:runtime}
-\begin{tabular}{|p{.8\textwidth}|}
-\hline
-\begin{itemize}
-\item jargors-{\jsVersion}.jar
-\item commons-logging-1.2.jar
-\item \textit{\texttt{derbyclient.jar}}
-\item \textit{\texttt{derby.jar}}
-\item \textit{\texttt{derbyLocale\_cs.jar}}
-\item \textit{\texttt{derbyLocale\_de\_DE.jar}}
-\item \textit{\texttt{derbyLocale\_es.jar}}
-\item \textit{\texttt{derbyLocale\_fr.jar}}
-\item \textit{\texttt{derbyLocale\_hu.jar}}
-\item \textit{\texttt{derbyLocale\_it.jar}}
-\item \textit{\texttt{derbyLocale\_ja\_JP.jar}}
-\item \textit{\texttt{derbyLocale\_ko\_KR.jar}}
-\item \textit{\texttt{derbyLocale\_pl.jar}}
-\item \textit{\texttt{derbyLocale\_pt\_BR.jar}}
-\item \textit{\texttt{derbyLocale\_ru.jar}}
-\item \textit{\texttt{derbyLocale\_zh\_CN.jar}}
-\item \textit{\texttt{derbyLocale\_zh\_TW.jar}}
-\item \textit{\texttt{derbynet.jar}}
-\item \textit{\texttt{derbyoptionaltools.jar}}
-\item \textit{\texttt{derbyrun.jar}}
-\item \textit{\texttt{derbyshared.jar}}
-\item \textit{\texttt{derbytools.jar}}
-\item \textit{\texttt{derby.war}}
-\end{itemize}\\
-\hline
-\end{tabular}
-\end{table}
+See Table~\ref{tab:tut-start-prerequisites} for a full list of files.
 
-\subsection{Running the Command-Line Interface}
+\subsection{Running the Command-Line Evaluator}
 \label{tut-start: command}
 
 If you are on Linux, Mac, or using Cygwin/MinGW, you can use the
-\texttt{launch-cli.sh} script to start the command-line interface. This script
-sets the classpath to include the \texttt{jar/} and \texttt{dep/} directories,
-and sets the native library path to \texttt{dep/}. If you used \texttt{make
-dep} to obtain the dependencies, then the classpath and library path are
-sufficient. Otherwise, you can modify the \texttt{\_CLASSPATH} variable and the
+\texttt{launch-cli.sh} script to start the command-line evaluator
+(Table~\ref{tab:tut-start-cli}). This script sets the classpath to include the
+\texttt{jar/} and \texttt{dep/} directories, and sets the native library path
+to \texttt{dep/}.  If your dependencies are not in these paths, you will need
+to modify the \texttt{\_CLASSPATH} variable and the
 \texttt{-Djava.library.path} flag in \texttt{launch-cli.sh} to point to
-locations on your computer containing the dependencies and native libraries.
-Make sure to export \texttt{DERBY\_HOME} to the location of the Derby root
-directory before running the script.
-
-\subsection{Running the Graphical Interface}
-\label{tut-start: graphical}
-
-Similar to the command-line interface, if you are on Linux, Max, or using
-Cygwin/MinGW, you can use the \texttt{launch-gui.sh} script to start the
-graphical interface. This script sets the classpath to include the
-\texttt{jar/} and \texttt{dep/} directories, sets the module path to
-\texttt{dep/}, and sets the native library path to \texttt{dep/}. You may need
-to configure these paths for your machine. Again, make sure to export
+locations on your computer containing the dependencies.  Make sure to export
 \texttt{DERBY\_HOME} to the location of the Derby root directory before running
 the script.
 
-\subsection{Writing Your Own Interface}
-\label{tut-start: own}
+\begin{table}[h]
+\small
+\centering
+\input{res/doc-tab/tut-start-cli}
+\caption{The command-line evaluator.}
+\label{tab:tut-start-cli}
+\end{table}
 
-TODO.
+\subsection{Running the Graphical Evaluator}
+\label{tut-start: graphical}
+
+Similar to the command-line evaluator, if you are on Linux, Max, or using
+Cygwin/MinGW, you can use the \texttt{launch-gui.sh} script to start the
+graphical interface (Figure~\ref{fig:tut-start-gui}). This script sets the
+classpath to include the \texttt{jar/} and \texttt{dep/} directories, sets the
+module path to \texttt{dep/}, and sets the native library path to
+\texttt{dep/}. You may need to configure these paths for your machine. Again,
+make sure to export \texttt{DERBY\_HOME} to the location of the Derby root
+directory before running the script.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{res/doc-fig/tut-start-gui}
+\caption{The graphical evaluator.}
+\label{fig:tut-start-gui}
+\end{figure}
+
+% \subsection{Writing Your Own Evaluator}
+% \label{tut-start: own}
+% \emph{Coming soon.}
+
+\begin{table}
+\small
+\centering
+\input{res/doc-tab/tut-start-prerequisites}
+\caption{Additional prerequisites for running Jargo programs.}
+\label{tab:tut-start-prerequisites}
+\end{table}
 

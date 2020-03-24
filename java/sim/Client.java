@@ -6,9 +6,6 @@ import com.github.jargors.sim.ClientFatalException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.io.FileNotFoundException;
-import com.github.jargors.jmx.*;
-import java.lang.management.*;
-import javax.management.*;
 public abstract class Client {
   protected ConcurrentLinkedQueue<int[]> queue = new ConcurrentLinkedQueue<int[]>();
   protected Communicator communicator;
@@ -17,28 +14,11 @@ public abstract class Client {
       "true".equals(System.getProperty("jargors.client.debug"));
   protected ConcurrentHashMap<Integer, Integer> lut = new ConcurrentHashMap<Integer, Integer>();
   protected ConcurrentHashMap<Integer, Integer> luv = new ConcurrentHashMap<Integer, Integer>();
-  private long   statClientHandleRequestDur = 0;
   public Client() {
-    try {
-      MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-      ClientMonitor mon = new ClientMonitor(this);
-      mbs.registerMBean(mon, new ObjectName("com.github.jargors.jmx:type=ClientMonitor"));
-    } catch (InstanceAlreadyExistsException e) {
-      // ...
-    } catch (Exception e) {
-      System.err.printf("ClientMonitor failed; reason: %s\n", e.toString());
-      System.err.printf("Continuing with monitoring disabled\n");
-    }
     if (DEBUG) {
       System.out.printf("create Client\n");
     }
   }
-  public long getStatClientHandleRequestDur() {
-           return this.statClientHandleRequestDur;
-         }
-  public int getStatClientQueueSize() {
-           return this.queue.size();
-         }
   public void forwardRefCacheEdges(final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> lu_edges) {
            this.tools.setRefCacheEdges(lu_edges);
          }
@@ -76,12 +56,10 @@ public abstract class Client {
          }
   public void notifyNew() throws ClientException, ClientFatalException {
            while (!this.queue.isEmpty()) {
-             long A0 = System.currentTimeMillis();
              this.handleRequest(this.queue.remove());
              if (DEBUG) {
                System.out.printf("handleRequest(1), arg1=[#]\n");
              }
-             this.statClientHandleRequestDur = (System.currentTimeMillis() - A0);
            }
          }
   public void init() { }

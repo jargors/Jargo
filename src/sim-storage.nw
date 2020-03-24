@@ -1,6 +1,12 @@
 \section{Class: Storage}
 \label{sim-storage}
 
+The [[Storage]] class is a data-access layer for the schema in the Derby
+database.
+
+\etocsettocstyle{}{}
+\localtableofcontents
+
 <<Storage.java>>=
 <<Package: [[sim]]>>
 <<Storage.java preamble>>
@@ -10,17 +16,6 @@ public class Storage {
   <<[[Storage]] methods>>
 }
 @
-
-Jargo's storage interface is a data access layer for Jargo to record the
-ground-truth state of ridesharing users (customers and vehicles) as they evolve
-over time, and to query analytical metrics about the state.  The storage engine
-is Apache Derby\footnote{\url{https://db.apache.org/derby}}, chosen for its
-ability to defer table and column constraints until the end of a transaction.
-This ability is needed during some write operations that may temporarily cause
-the simulation to be in an invalid state. At all other times, Jargo's data
-model guarantees the integrity of the simulation. The storage interface is
-written in Java so it can communicate with Derby using JDBC. A listing of the
-methods is shown in Figure~\ref{storage:fig:methods}.
 
 \subsection{Preamble}
 We import:
@@ -57,9 +52,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
-@ \item Management classes
-<<Storage.java preamble>>=
-<<Import JMX dependencies>>
 @
 \end{itemize}
 
@@ -154,7 +146,130 @@ prepared statement strings into [[lu_pstr]] by using [[JargoSetupPreparedStateme
 <<[[Storage]] constructor>>=
 public Storage() {
   this.JargoSetupPreparedStatements();
-  <<[[Storage]] register JMX monitor>>
 }
 @
+
+\subsection{Methods}
+\subsubsection{Read Methods}
+<<[[Storage]] methods>>=
+public <<Read: DBQuery(2)>>
+public <<Read: DBQueryQuick(3)>>
+public <<Read: DBQueryEdge(2)>>
+public <<Read: DBQueryEdgeStatistics(0)>>
+public <<Read: DBQueryEdges(0)>>
+public <<Read: DBQueryEdgesCount(0)>>
+public <<Read: DBQueryMBR(0)>>
+public <<Read: DBQueryMetricRequestDistanceBaseTotal(0)>>
+public <<Read: DBQueryMetricRequestDistanceBaseUnassignedTotal(1)>>
+public <<Read: DBQueryMetricRequestDistanceBaseUnassignedRunning(0)>>
+public <<Read: DBQueryMetricRequestDistanceDetourTotal(1)>>
+public <<Read: DBQueryMetricRequestDistanceTransitTotal(1)>>
+public <<Read: DBQueryMetricRequestDurationPickupTotal(1)>>
+public <<Read: DBQueryMetricRequestDurationTransitTotal(1)>>
+public <<Read: DBQueryMetricRequestDurationTravelTotal(1)>>
+public <<Read: DBQueryMetricRequestTWViolationsTotal(0)>>
+public <<Read: DBQueryMetricServerDistanceBaseTotal(0)>>
+public <<Read: DBQueryMetricServerDistanceCruisingTotal(1)>>
+public <<Read: DBQueryMetricServerDistanceRunning(0)>>
+public <<Read: DBQueryMetricServerDistanceServiceTotal(1)>>
+public <<Read: DBQueryMetricServerDistanceTotal(1)>>
+public <<Read: DBQueryMetricServerDurationCruisingTotal(1)>>
+public <<Read: DBQueryMetricServerDurationServiceTotal(1)>>
+public <<Read: DBQueryMetricServerDurationTravelTotal(1)>>
+public <<Read: DBQueryMetricServerTWViolationsTotal(0)>>
+public <<Read: DBQueryMetricServiceRate(1)>>
+public <<Read: DBQueryMetricUserDistanceBaseTotal(1)>>
+public <<Read: DBQueryMetricUserDistanceBaseRunning(0)>>
+public <<Read: DBQueryRequestDistanceDetour(2)>>
+public <<Read: DBQueryRequestDistanceTransit(2)>>
+public <<Read: DBQueryRequestDurationPickup(2)>>
+public <<Read: DBQueryRequestDurationTransit(2)>>
+public <<Read: DBQueryRequestDurationTravel(2)>>
+public <<Read: DBQueryRequestIsAssigned(2)>>
+public <<Read: DBQueryRequestStatus(2)>>
+public <<Read: DBQueryRequestTimeOfArrival(1)>>
+public <<Read: DBQueryRequestTimeOfDeparture(1)>>
+public <<Read: DBQueryRequestsCount(0)>>
+public <<Read: DBQueryRequestsCountActive(1)>>
+public <<Read: DBQueryRequestsCountAssigned(0)>>
+public <<Read: DBQueryRequestsCountCompleted(1)>>
+public <<Read: DBQueryRequestsQueued(1)>>
+public <<Read: DBQueryRequestsWaiting(1)>>
+public <<Read: DBQueryServerAssignmentsCompleted(2)>>
+public <<Read: DBQueryServerAssignmentsPending(2)>>
+public <<Read: DBQueryServerCapacityViolations(4)>>
+public <<Read: DBQueryServerDistance(2)>>
+public <<Read: DBQueryServerDistanceCruising(2)>>
+public <<Read: DBQueryServerDistanceRemaining(2)>>
+public <<Read: DBQueryServerDistanceService(2)>>
+public <<Read: DBQueryServerDurationCruising(2)>>
+public <<Read: DBQueryServerDurationService(2)>>
+public <<Read: DBQueryServerDurationRemaining(2)>>
+public <<Read: DBQueryServerDurationTravel(2)>>
+public <<Read: DBQueryServerLoadMax(2)>>
+public <<Read: DBQueryServerRoute(1)>>
+public <<Read: DBQueryServerRouteActive(1)>>
+public <<Read: DBQueryServerRouteRemaining(2)>>
+public <<Read: DBQueryServerSchedule(1)>>
+public <<Read: DBQueryServerScheduleRemaining(2)>>
+public <<Read: DBQueryServerTimeOfArrival(1)>>
+public <<Read: DBQueryServerTimeOfDeparture(1)>>
+public <<Read: DBQueryServersActive(1)>>
+public <<Read: DBQueryServersCount(0)>>
+public <<Read: DBQueryServersCountActive(1)>>
+public <<Read: DBQueryServersLocations(1)>>
+public <<Read: DBQueryServersLocationsActive(1)>>
+public <<Read: DBQueryUser(1)>>
+public <<Read: DBQueryUsers(0)>>
+public <<Read: DBQueryVertex(1)>>
+public <<Read: DBQueryVertices(0)>>
+public <<Read: DBQueryVerticesCount(0)>>
+@
+\subsubsection{Cached Read Methods}
+<<[[Storage]] methods>>=
+public <<Read: DBQueryMetricRequestDistanceBaseUnassignedTotal(0)>>
+public <<Read: DBQueryMetricRequestDistanceDetourTotal(0)>>
+public <<Read: DBQueryMetricRequestDistanceTransitTotal(0)>>
+public <<Read: DBQueryMetricRequestDurationPickupTotal(0)>>
+public <<Read: DBQueryMetricRequestDurationTransitTotal(0)>>
+public <<Read: DBQueryMetricRequestDurationTravelTotal(0)>>
+public <<Read: DBQueryMetricServerDistanceCruisingTotal(0)>>
+public <<Read: DBQueryMetricServerDistanceServiceTotal(0)>>
+public <<Read: DBQueryMetricServerDistanceTotal(0)>>
+public <<Read: DBQueryMetricServerDurationCruisingTotal(0)>>
+public <<Read: DBQueryMetricServerDurationServiceTotal(0)>>
+public <<Read: DBQueryMetricServerDurationTravelTotal(0)>>
+public <<Read: DBQueryMetricServiceRate(0)>>
+public <<Read: DBQueryMetricUserDistanceBaseTotal(0)>>
+@
+\subsubsection{Write Methods}
+<<[[Storage]] methods>>=
+public <<Write: DBInsertEdge(4)>>
+public <<Write: DBInsertRequest(1)>>
+public <<Write: DBInsertServer(2)>>
+public <<Write: DBInsertVertex(3)>>
+public <<Write: DBUpdateEdgeSpeed(3)>>
+public <<Write: DBUpdateServerService(5)>>
+@
+\subsubsection{Administration}
+<<[[Storage]] methods>>=
+public <<Admin: JargoCacheRoadNetworkFromDB(0)>>
+public <<Admin: JargoCacheUsersFromDB(0)>>
+public <<Admin: JargoInstanceClose(0)>>
+public <<Admin: JargoInstanceExport(1)>>
+public <<Admin: JargoInstanceInitialize(0)>>
+public <<Admin: JargoInstanceLoad(1)>>
+public <<Admin: JargoInstanceNew(0)>>
+public <<Admin: getRefCacheEdges(0)>>
+public <<Admin: getRefCacheUsers(0)>>
+public <<Admin: getRefCacheVertices(0)>>
+public <<Admin: setRequestTimeout(1)>>
+private <<Admin: JargoSetupDriver(0)>>
+private <<Admin: JargoSetupPreparedStatements(0)>>
+private <<Admin: PSAdd(2..)>>
+private <<Admin: PSCreate(2)>>
+private <<Admin: PSQuery(3..)>>
+private <<Admin: PSSubmit(1..)>>
+@
+
 

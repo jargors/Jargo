@@ -14,9 +14,6 @@ import com.github.jargors.sim.VertexNotFoundException;
 import com.github.jargors.sim.GtreeNotLoadedException;
 import com.github.jargors.sim.GtreeIllegalSourceException;
 import com.github.jargors.sim.GtreeIllegalTargetException;
-import com.github.jargors.jmx.*;
-import java.lang.management.*;
-import javax.management.*;
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
@@ -103,7 +100,6 @@ public class Controller {
     }
   };
   private Runnable RequestCollectionLoop = () -> {
-    long A0 = System.currentTimeMillis();
     int  A1 = 0;
     int  A2 = 0;
     final int now = this.statControllerClock;
@@ -150,9 +146,6 @@ public class Controller {
         }
       }
     }
-    this.statControllerRequestCollectionSize = A1;
-    this.statControllerRequestCollectionDropped = A2;
-    this.statControllerRequestCollectionDur = (System.currentTimeMillis() - A0);
   };
   private Runnable RequestHandlingLoop = () -> {
     try {
@@ -205,278 +198,46 @@ public class Controller {
       System.exit(1);
     }
   };
-  private int    statControllerClock;
-  private int    statControllerClockReferenceDay;
-  private int    statControllerClockReferenceHour;
-  private int    statControllerClockReferenceMinute;
-  private int    statControllerClockReferenceSecond;
-  private int    statControllerRequestCollectionSize = 0;
-  private int    statControllerRequestCollectionDropped = 0;
-  private long   statControllerRequestCollectionDur = 0;
-  private long statQueryDur = 0;
-  private long statQueryEdgeDur = 0;
-  private long statQueryEdgeStatisticsDur = 0;
-  private long statQueryEdgesDur = 0;
-  private long statQueryEdgesCountDur = 0;
-  private long statQueryMBRDur = 0;
-  private long statQueryMetricRequestDistanceBaseTotalDur = 0;
-  private long statQueryMetricRequestDistanceBaseUnassignedTotalDur = 0;
-  private long statQueryMetricRequestDistanceDetourTotalDur = 0;
-  private long statQueryMetricRequestDistanceTransitTotalDur = 0;
-  private long statQueryMetricRequestDurationPickupTotalDur = 0;
-  private long statQueryMetricRequestDurationTransitTotalDur = 0;
-  private long statQueryMetricRequestDurationTravelTotalDur = 0;
-  private long statQueryMetricRequestTWViolationsTotalDur = 0;
-  private long statQueryMetricServerDistanceBaseTotalDur = 0;
-  private long statQueryMetricServerDistanceCruisingTotalDur = 0;
-  private long statQueryMetricServerDistanceServiceTotalDur = 0;
-  private long statQueryMetricServerDistanceTotalDur = 0;
-  private long statQueryMetricServerDurationCruisingTotalDur = 0;
-  private long statQueryMetricServerDurationServiceTotalDur = 0;
-  private long statQueryMetricServerDurationTravelTotalDur = 0;
-  private long statQueryMetricServerTWViolationsTotalDur = 0;
-  private long statQueryMetricServiceRateDur = 0;
-  private long statQueryMetricUserDistanceBaseTotalDur = 0;
-  private long statQueryRequestTimeOfArrivalDur = 0;
-  private long statQueryRequestTimeOfDepartureDur = 0;
-  private long statQueryRequestsCountDur = 0;
-  private long statQueryRequestsCountActiveDur = 0;
-  private long statQueryRequestsCountCompletedDur = 0;
-  private long statQueryRequestsQueuedDur = 0;
-  private long statQueryServerRouteDur = 0;
-  private long statQueryServerRouteActiveDur = 0;
-  private long statQueryServerRouteRemainingDur = 0;
-  private long statQueryServerScheduleDur = 0;
-  private long statQueryServerTimeOfDepartureDur = 0;
-  private long statQueryServersActiveDur = 0;
-  private long statQueryServersCountDur = 0;
-  private long statQueryServersCountActiveDur = 0;
-  private long statQueryServersLocationsActiveDur = 0;
-  private long statQueryUserDur = 0;
-  private long statQueryVertexDur = 0;
-  private long statQueryVerticesDur = 0;
-  private long statQueryVerticesCountDur = 0;
   public Controller() {
     this.storage = new Storage();
     this.communicator = new Communicator();
     this.communicator.setRefStorage(this.storage);
     this.communicator.setRefController(this);
-    try {
-      MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-      ControllerMonitor mon = new ControllerMonitor(this);
-      mbs.registerMBean(mon, new ObjectName("com.github.jargors.jmx:type=ControllerMonitor"));
-    } catch (InstanceAlreadyExistsException e) {
-      // ...
-    } catch (Exception e) {
-      System.err.printf("ControllerMonitor failed; reason: %s\n", e.toString());
-      System.err.printf("Continuing with monitoring disabled\n");
-    }
   }
-  public int    getStatControllerClock() {
-           return this.statControllerClock;
-         }
-  public int    getStatControllerClockReferenceDay() {
-           return this.statControllerClockReferenceDay;
-         }
-  public int    getStatControllerClockReferenceHour() {
-           return this.statControllerClockReferenceHour;
-         }
-  public int    getStatControllerClockReferenceMinute() {
-           return this.statControllerClockReferenceMinute;
-         }
-  public int    getStatControllerClockReferenceSecond() {
-           return this.statControllerClockReferenceSecond;
-         }
-  public int    getStatControllerRequestCollectionSize() {
-           return this.statControllerRequestCollectionSize;
-         }
-  public int    getStatControllerRequestCollectionDropped() {
-           return this.statControllerRequestCollectionDropped;
-         }
-  public long   getStatControllerRequestCollectionDur() {
-           return this.statControllerRequestCollectionDur;
-         }
-  public long getStatQueryDur() {
-           return this.statQueryDur;
-         }
-  public long getStatQueryEdgeDur() {
-           return this.statQueryEdgeDur;
-         }
-  public long getStatQueryEdgeStatisticsDur() {
-           return this.statQueryEdgeStatisticsDur;
-         }
-  public long getStatQueryEdgesCountDur() {
-           return this.statQueryEdgesCountDur;
-         }
-  public long getStatQueryEdgesDur() {
-           return this.statQueryEdgesDur;
-         }
-  public long getStatQueryMBRDur() {
-           return this.statQueryMBRDur;
-         }
-  public long getStatQueryMetricRequestDistanceBaseTotalDur() {
-           return this.statQueryMetricRequestDistanceBaseTotalDur;
-         }
-  public long getStatQueryMetricRequestDistanceBaseUnassignedTotalDur() {
-           return this.statQueryMetricRequestDistanceBaseUnassignedTotalDur;
-         }
-  public long getStatQueryMetricRequestDistanceDetourTotalDur() {
-           return this.statQueryMetricRequestDistanceDetourTotalDur;
-         }
-  public long getStatQueryMetricRequestDistanceTransitTotalDur() {
-           return this.statQueryMetricRequestDistanceTransitTotalDur;
-         }
-  public long getStatQueryMetricRequestDurationPickupTotalDur() {
-           return this.statQueryMetricRequestDurationPickupTotalDur;
-         }
-  public long getStatQueryMetricRequestDurationTransitTotalDur() {
-           return this.statQueryMetricRequestDurationTransitTotalDur;
-         }
-  public long getStatQueryMetricRequestDurationTravelTotalDur() {
-           return this.statQueryMetricRequestDurationTravelTotalDur;
-         }
-  public long getStatQueryMetricRequestTWViolationsTotalDur() {
-           return this.statQueryMetricRequestTWViolationsTotalDur;
-         }
-  public long getStatQueryMetricServerDistanceBaseTotalDur() {
-           return this.statQueryMetricServerDistanceBaseTotalDur;
-         }
-  public long getStatQueryMetricServerDistanceCruisingTotalDur() {
-           return this.statQueryMetricServerDistanceCruisingTotalDur;
-         }
-  public long getStatQueryMetricServerDistanceServiceTotalDur() {
-           return this.statQueryMetricServerDistanceServiceTotalDur;
-         }
-  public long getStatQueryMetricServerDistanceTotalDur() {
-           return this.statQueryMetricServerDistanceTotalDur;
-         }
-  public long getStatQueryMetricServerDurationCruisingTotalDur() {
-           return this.statQueryMetricServerDurationCruisingTotalDur;
-         }
-  public long getStatQueryMetricServerDurationServiceTotalDur() {
-           return this.statQueryMetricServerDurationServiceTotalDur;
-         }
-  public long getStatQueryMetricServerDurationTravelTotalDur() {
-           return this.statQueryMetricServerDurationTravelTotalDur;
-         }
-  public long getStatQueryMetricServerTWViolationsTotalDur() {
-           return this.statQueryMetricServerTWViolationsTotalDur;
-         }
-  public long getStatQueryMetricServiceRateDur() {
-           return this.statQueryMetricServiceRateDur;
-         }
-  public long getStatQueryMetricUserDistanceBaseTotalDur() {
-           return this.statQueryMetricUserDistanceBaseTotalDur;
-         }
-  public long getStatQueryRequestTimeOfArrivalDur() {
-           return this.statQueryRequestTimeOfArrivalDur;
-         }
-  public long getStatQueryRequestTimeOfDepartureDur() {
-           return this.statQueryRequestTimeOfDepartureDur;
-         }
-  public long getStatQueryRequestsCountDur() {
-           return this.statQueryRequestsCountDur;
-         }
-  public long getStatQueryRequestsCountActiveDur() {
-           return this.statQueryRequestsCountActiveDur;
-         }
-  public long getStatQueryRequestsCountCompletedDur() {
-           return this.statQueryRequestsCountCompletedDur;
-         }
-  public long getStatQueryRequestsQueuedDur() {
-           return this.statQueryRequestsQueuedDur;
-         }
-  public long getStatQueryServerRouteActiveDur() {
-           return this.statQueryServerRouteActiveDur;
-         }
-  public long getStatQueryServerRouteDur() {
-           return this.statQueryServerRouteDur;
-         }
-  public long getStatQueryServerRouteRemainingDur() {
-           return this.statQueryServerRouteRemainingDur;
-         }
-  public long getStatQueryServerScheduleDur() {
-           return this.statQueryServerScheduleDur;
-         }
-  public long getStatQueryServerTimeOfDepartureDur() {
-           return this.statQueryServerTimeOfDepartureDur;
-         }
-  public long getStatQueryServersActiveDur() {
-           return this.statQueryServersActiveDur;
-         }
-  public long getStatQueryServersCountDur() {
-           return this.statQueryServersCountDur;
-         }
-  public long getStatQueryServersCountActiveDur() {
-           return this.statQueryServersCountActiveDur;
-         }
-  public long getStatQueryServersLocationsActiveDur() {
-           return this.statQueryServersLocationsActiveDur;
-         }
-  public long getStatQueryUserDur() {
-           return this.statQueryUserDur;
-         }
-  public long getStatQueryVertexDur() {
-           return this.statQueryVertexDur;
-         }
-  public long getStatQueryVerticesCountDur() {
-           return this.statQueryVerticesCountDur;
-         }
-  public long getStatQueryVerticesDur() {
-           return this.statQueryVerticesDur;
-         }
   public int[] query(final String sql, final int ncols) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQuery(sql, ncols);
-           this.statQueryDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryQuick(final String sql, int[] outcols, ArrayList<String> header) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryQuick(sql, outcols, header);
-           this.statQueryDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryEdge(final int v1, final int v2) throws EdgeNotFoundException, SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryEdge(v1, v2);
-           this.statQueryEdgeDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryEdgeStatistics() throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryEdgeStatistics();
-           this.statQueryEdgeStatisticsDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryEdges() throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryEdges();
-           this.statQueryEdgesDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryEdgesCount() throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryEdgesCount();
-           this.statQueryEdgesCountDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryMBR() throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryMBR();
-           this.statQueryMBRDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryMetricRequestDistanceBaseTotal() throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryMetricRequestDistanceBaseTotal();
-           this.statQueryMetricRequestDistanceBaseTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryMetricRequestDistanceBaseUnassignedTotal(boolean flag_usecache) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryMetricRequestDistanceBaseUnassignedTotal(flag_usecache);
-           this.statQueryMetricRequestDistanceBaseUnassignedTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryMetricRequestDistanceBaseUnassignedRunning()
@@ -490,51 +251,35 @@ public class Controller {
            return output;
          }
   public int[] queryMetricRequestDistanceDetourTotal(boolean flag_usecache) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryMetricRequestDistanceDetourTotal(flag_usecache);
-           this.statQueryMetricRequestDistanceDetourTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryMetricRequestDistanceTransitTotal(boolean flag_usecache) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryMetricRequestDistanceTransitTotal(flag_usecache);
-           this.statQueryMetricRequestDistanceTransitTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryMetricRequestDurationPickupTotal(boolean flag_usecache) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryMetricRequestDurationPickupTotal(flag_usecache);
-           this.statQueryMetricRequestDurationPickupTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryMetricRequestDurationTransitTotal(boolean flag_usecache) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryMetricRequestDurationTransitTotal(flag_usecache);
-           this.statQueryMetricRequestDurationTransitTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryMetricRequestDurationTravelTotal(boolean flag_usecache) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryMetricRequestDurationTravelTotal(flag_usecache);
-           this.statQueryMetricRequestDurationTravelTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryMetricRequestTWViolationsTotal() throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryMetricRequestTWViolationsTotal();
-           this.statQueryMetricRequestTWViolationsTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryMetricServerDistanceBaseTotal() throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryMetricServerDistanceBaseTotal();
-           this.statQueryMetricServerDistanceBaseTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryMetricServerDistanceCruisingTotal(boolean flag_usecache) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryMetricServerDistanceCruisingTotal(flag_usecache);
-           this.statQueryMetricServerDistanceCruisingTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryMetricServerDistanceRunning() throws SQLException {
@@ -545,45 +290,31 @@ public class Controller {
            return output;
          }
   public int[] queryMetricServerDistanceServiceTotal(boolean flag_usecache) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryMetricServerDistanceServiceTotal(flag_usecache);
-           this.statQueryMetricServerDistanceServiceTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryMetricServerDistanceTotal(boolean flag_usecache) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryMetricServerDistanceTotal(flag_usecache);
-           this.statQueryMetricServerDistanceTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryMetricServerDurationCruisingTotal(boolean flag_usecache) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryMetricServerDurationCruisingTotal(flag_usecache);
-           this.statQueryMetricServerDurationCruisingTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryMetricServerDurationServiceTotal(boolean flag_usecache) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryMetricServerDurationServiceTotal(flag_usecache);
-           this.statQueryMetricServerDurationServiceTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryMetricServerDurationTravelTotal(boolean flag_usecache) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryMetricServerDurationTravelTotal(flag_usecache);
-           this.statQueryMetricServerDurationTravelTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryMetricServerTWViolationsTotal() throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryMetricServerTWViolationsTotal();
-           this.statQueryMetricServerTWViolationsTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryMetricServiceRate(boolean flag_usecache) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryMetricServiceRate(flag_usecache);
-           this.statQueryMetricServiceRateDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryMetricServiceRateRunning() throws SQLException {
@@ -593,9 +324,7 @@ public class Controller {
            return output;
          }
   public int[] queryMetricUserDistanceBaseTotal(boolean flag_usecache) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryMetricUserDistanceBaseTotal(flag_usecache);
-           this.statQueryMetricUserDistanceBaseTotalDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryMetricUserDistanceBaseRunning()
@@ -610,27 +339,19 @@ public class Controller {
            return output;
          }
   public int[] queryRequestTimeOfArrival(final int rid) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryRequestTimeOfArrival(rid);
-           this.statQueryRequestTimeOfArrivalDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryRequestTimeOfDeparture(final int rid) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryRequestTimeOfDeparture(rid);
-           this.statQueryRequestTimeOfDepartureDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryRequestsCount() throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryRequestsCount();
-           this.statQueryRequestsCountDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryRequestsCountActive(final int t) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryRequestsCountActive(t);
-           this.statQueryRequestsCountActiveDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryRequestsCountAppeared() throws SQLException {
@@ -642,15 +363,11 @@ public class Controller {
            return output;
          }
   public int[] queryRequestsCountCompleted(final int t) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryRequestsCountCompleted(t);
-           this.statQueryRequestsCountCompletedDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryRequestsQueued(final int t) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryRequestsQueued(t);
-           this.statQueryRequestsQueuedDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryRequestsWaiting(final int t) throws SQLException {
@@ -662,51 +379,35 @@ public class Controller {
            return this.storage.DBQueryServerDistance(sid, flag_usecache);
          }
   public int[] queryServerRoute(final int sid) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryServerRoute(sid);
-           this.statQueryServerRouteDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryServerRouteActive(final int sid) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryServerRouteActive(sid);
-           /*this.statQueryServerRouteActiveDur = (System.currentTimeMillis() - A0);*/
            return output;
          }
   public int[] queryServerRouteRemaining(final int sid, final int t) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryServerRouteRemaining(sid, t);
-           this.statQueryServerRouteRemainingDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryServerSchedule(final int sid) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryServerSchedule(sid);
-           this.statQueryServerScheduleDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryServerTimeOfDeparture(final int sid) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryServerTimeOfDeparture(sid);
-           this.statQueryServerTimeOfDepartureDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryServersActive(final int t) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryServersActive(t);
-           this.statQueryServersActiveDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryServersCount() throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryServersCount();
-           this.statQueryServersCountDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryServersCountActive(final int t) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryServersCountActive(t);
-           this.statQueryServersCountActiveDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryServersCountAppeared() throws SQLException {
@@ -719,33 +420,23 @@ public class Controller {
            return output;
          }
   public int[] queryServersLocationsActive(final int t) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryServersLocationsActive(t);
-           this.statQueryServersLocationsActiveDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryUser(final int rid) throws UserNotFoundException, SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryUser(rid);
-           this.statQueryUserDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryVertex(final int v) throws VertexNotFoundException, SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryVertex(v);
-           this.statQueryVertexDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryVertices() throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryVertices();
-           this.statQueryVerticesDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryVerticesCount() throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryVerticesCount();
-           this.statQueryVerticesCountDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryMetricRequestDistanceBaseUnassignedTotal() throws SQLException {
@@ -815,9 +506,6 @@ public class Controller {
          }
   public void instanceLoad(final String p) throws SQLException {
            this.storage.JargoInstanceLoad(p);
-         }
-  public void instanceLoadInMem(final String p) throws SQLException {
-           this.storage.JargoInstanceLoadInMem(p);
          }
   public void instanceNew() throws SQLException {
            this.storage.JargoInstanceNew();

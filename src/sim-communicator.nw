@@ -1,6 +1,9 @@
 \section{Class: Communicator}
 \label{sim-communicator}
 
+\etocsettocstyle{}{}
+\localtableofcontents
+
 <<Communicator.java>>=
 <<Package: [[sim]]>>
 <<Communicator.java preamble>>
@@ -31,10 +34,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.sql.SQLException;
 @
 
-<<Communicator.java preamble>>=
-<<Import JMX dependencies>>
-@
-
 \subsection{Member Variables}
 <<[[Communicator]] member variables>>=
 private Storage storage;
@@ -45,12 +44,45 @@ private final boolean DEBUG = "true".equals(System.getProperty("jargors.communic
 
 \subsection{Constructor}
 <<[[Communicator]] constructor>>=
-public Communicator() {
-  <<[[Communicator]] register JMX monitor>>
-}
+public Communicator() { }
 @
 
 \subsection{Methods}
+\subsubsection{Read Methods}
+<<[[Communicator]] methods>>=
+public <<Read: queryEdge(2)>>
+public <<Read: queryServerCapacityViolations(4)>>
+public <<Read: queryServerDistanceRemaining(2)>>
+public <<Read: queryServerDurationRemaining(2)>>
+public <<Read: queryServerDurationTravel(2)>>
+public <<Read: queryServerLoadMax(2)>>
+public <<Read: queryServerRouteActive(1)>>
+public <<Read: queryServerRouteRemaining(2)>>
+public <<Read: queryServerScheduleRemaining(2)>>
+public <<Read: queryServersLocationsActive(1)>>
+public <<Read: queryUser(1)>>
+public <<Read: queryVertex(1)>>
+@
+\subsubsection{Write Methods}
+<<[[Communicator]] methods>>=
+public <<Write: updateServerService(5)>>
+@
+\subsubsection{Adminstration}
+<<[[Communicator]] methods>>=
+public <<Admin: retrieveClock(0)>>
+public <<Admin: retrieveRefCacheEdges(0)>>
+public <<Admin: retrieveRefCacheUsers(0)>>
+public <<Admin: retrieveRefCacheVertices(0)>>
+public <<Admin: setRefController(1)>>
+public <<Admin: setRefStorage(1)>>
+public <<Admin: setRefTraffic(1)>>
+@
+\subsubsection{Special Methods}
+<<[[Communicator]] methods>>=
+public <<Communicator: forwardReturnRequest(1)>>
+@
+
+
 \subsubsection{\texttt{forwardReturnRequest}(1)}
 <<Communicator: forwardReturnRequest(1)>>=
 void forwardReturnRequest(final int[] r) {

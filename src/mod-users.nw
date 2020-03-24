@@ -1,87 +1,30 @@
 \section{Ridesharing Users}
 \label{mod-users}
 
-In Jargo, the basic entity representing a ridesharing participant is the user.
-Table~\ref{tab:user-types} describes the types of users recognized by Jargo.
-Table~\ref{tab:user-properties} describes their properties. Finally,
-Table~\ref{tab:user-rules} describes rules governing their behavior.  A user is
-classified as a \emph{request} if it represents a Type~1 or Type~2 customer, or
-classified as a \emph{server} if it represents a Type~3 or Type~4 vehicle. As
-only vehicles can move about (P4), only servers are associated with routes in
-order to describe the motions. Later, schedules describing pick-up and drop-off
-events are defined on the routes.
+In Jargo, the basic entity representing a ridesharing participant is the
+\emph{user}.  Table~\ref{tab:mod-users-types} describes the types of users
+recognized by Jargo, and Table~\ref{tab:mod-users-properties} describes their
+properties.  Table~\ref{tab:mod-users-rules} describes rules governing their
+behavior.  A user is classified as a \emph{request} if it represents a Type~1
+or Type~2 customer, or classified as a \emph{server} if it represents a Type~3
+or Type~4 vehicle. As only vehicles can move about (P4), only servers are
+associated with routes in order to describe the motions. Later, schedules
+describing pick-up and drop-off events are defined on the routes.
 
 \begin{table}[h]
 \centering
 \small
+\input{res/doc-tab/mod-users-types}
 \caption{Types of ridesharing users.}
-\label{tab:user-types}
-\begin{tabular}{|l|l|}
-\hline Type   & Description \\
-\hline
-Type 1 & Single customer traveling alone \\
-Type 2 & Group of customers traveling together \\
-\hline
-Type 3 & Ridesharing vehicle with a predefined final
-    destination \\
-Type 4 & Taxi-like vehicle continually serving customers without an
-    explicit destination of its own \\
-\hline
-\end{tabular}
+\label{tab:mod-users-types}
+
+\input{res/doc-tab/mod-users-properties}
 \caption{Ridesharing user properties.}
-\label{tab:user-properties}
-\begin{tabular}{|c|p{140mm}|}
-\hline
-Prop. & Description \\
-\hline
-P1 & \hi{Load.} Each user has a non-zero load, indicating a
-number of needed seats. For Type 1 users the load is 1, indicating they only
-need a single seat. For Type 2 users the load exceeds 1. For Type 3 and Type 4
-users the load is negative, indicating they have an availability of seats. \\
-\hline
-P2 & \hi{Origin and Destination.} Each user has an origin and a
-destination, except for Type 4 users that only have an origin.  For Type
-1 and Type 2, the origin indicates the initial location of the customer
-and the destination indicates the desired final location.  For Type 3, the
-origin and destination indicate where the vehicle's ridesharing service begins
-and ends.\\
-\hline
-P3 & \hi{Time Window.} Each user has an early time and a
-late time, together forming the user's time window. For a Type 1
-or Type 2 customer, the time window gives the desired departure time from the
-origin and the desired arrival time at the destination.  For a Type 3 or Type 4
-vehicle, the time window gives the time when service begins and the latest time
-that service can end. The early time precedes the late time.\\
-\hline
-\end{tabular}
+\label{tab:mod-users-properties}
+
+\input{res/doc-tab/mod-users-rules}
 \caption{Rules governing user behavior.}
-\label{tab:user-rules}
-\begin{tabular}{|c|p{140mm}|}
-\hline
-Prop. & Description \\
-\hline
-P4 & \hi{Motion.} Users are bound to a network of roads, for
-example the streets of a city. Only vehicles may directly travel along the
-roads, whereas customers must be serviced by a vehicle. Both customers and
-vehicles may enter the system at any time and anywhere.\\
-\hline
-P5 & \hi{Pick-ups and Drop-offs.} For a vehicle to service a customer, it
-must first travel to the customer's origin to pick up the customer, and then to
-the customer's destination to drop off the customer, in that order. The
-customer enters the vehicle during the pick-up and exits the vehicle during the
-drop-off. These visits must occur within the customer's time window.\\
-\hline
-P6 & \hi{Vehicle Seats.} When a customer enters a vehicle, the customer
-occupies a number of seats equal to the customer's load. When it exits the
-vehicle, it relinquishes the seats. At no time can the number of occupied seats
-exceed the number of available seats in a vehicle.\\
-\hline
-P7 & \hi{User States.} A customer can be in one of three states at any
-time: waiting for pick-up; in-transit following a pick-up but
-before the drop-off; or arrived at destination. A vehicle can be either
-in-service or out-of-service.\\
-\hline
-\end{tabular}
+\label{tab:mod-users-rules}
 \end{table}
 
 \subsection{User Relation}

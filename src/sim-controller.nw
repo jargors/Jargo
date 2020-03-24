@@ -1,6 +1,9 @@
 \section{Class: Controller}
 \label{sim-controller}
 
+\etocsettocstyle{}{}
+\localtableofcontents
+
 <<Controller.java>>=
 <<Package: [[sim]]>>
 <<Controller.java preamble>>
@@ -31,9 +34,6 @@ import com.github.jargors.sim.VertexNotFoundException;
 import com.github.jargors.sim.GtreeNotLoadedException;
 import com.github.jargors.sim.GtreeIllegalSourceException;
 import com.github.jargors.sim.GtreeIllegalTargetException;
-@ \item jmx;
-<<Controller.java preamble>>=
-<<Import JMX dependencies>>
 @ \item standard utilities for concurrent execution;
 <<Controller.java preamble>>=
 import java.util.ArrayList;
@@ -212,7 +212,6 @@ failure occurs.\\
 \end{tabular}
 <<Definition of request collection loop>>=
 private Runnable RequestCollectionLoop = () -> {
-  long A0 = System.currentTimeMillis();
   int  A1 = 0;
   int  A2 = 0;
   final int now = this.statControllerClock;
@@ -259,7 +258,6 @@ private Runnable RequestCollectionLoop = () -> {
       }
     }
   }
-  <<Stats: controllerRequestCollection>>
 };
 @
 
@@ -382,7 +380,6 @@ public Controller() {
   this.communicator = new Communicator();
   this.communicator.setRefStorage(this.storage);
   this.communicator.setRefController(this);
-  <<[[Controller]] register JMX monitor>>
 }
 @
 
@@ -403,6 +400,129 @@ System.out.println(sc.next());
 @
 
 \subsection{Methods}
+\subsubsection{Read Methods}
+<<[[Controller]] methods>>=
+public <<Read: query(2)>>
+public <<Read: queryQuick(3)>>
+public <<Read: queryEdge(2)>>
+public <<Read: queryEdgeStatistics(0)>>
+public <<Read: queryEdges(0)>>
+public <<Read: queryEdgesCount(0)>>
+public <<Read: queryMBR(0)>>
+public <<Read: queryMetricRequestDistanceBaseTotal(0)>>
+public <<Read: queryMetricRequestDistanceBaseUnassignedTotal(1)>>
+public <<Read: queryMetricRequestDistanceBaseUnassignedRunning(0)>>
+public <<Read: queryMetricRequestDistanceDetourTotal(1)>>
+public <<Read: queryMetricRequestDistanceTransitTotal(1)>>
+public <<Read: queryMetricRequestDurationPickupTotal(1)>>
+public <<Read: queryMetricRequestDurationTransitTotal(1)>>
+public <<Read: queryMetricRequestDurationTravelTotal(1)>>
+public <<Read: queryMetricRequestTWViolationsTotal(0)>>
+public <<Read: queryMetricServerDistanceBaseTotal(0)>>
+public <<Read: queryMetricServerDistanceCruisingTotal(1)>>
+public <<Read: queryMetricServerDistanceRunning(0)>>
+public <<Read: queryMetricServerDistanceServiceTotal(1)>>
+public <<Read: queryMetricServerDistanceTotal(1)>>
+public <<Read: queryMetricServerDurationCruisingTotal(1)>>
+public <<Read: queryMetricServerDurationServiceTotal(1)>>
+public <<Read: queryMetricServerDurationTravelTotal(1)>>
+public <<Read: queryMetricServerTWViolationsTotal(0)>>
+public <<Read: queryMetricServiceRate(1)>>
+public <<Read: queryMetricServiceRateRunning(0)>>
+public <<Read: queryMetricUserDistanceBaseTotal(1)>>
+public <<Read: queryMetricUserDistanceBaseRunning(0)>>
+public <<Read: queryRequestTimeOfArrival(1)>>
+public <<Read: queryRequestTimeOfDeparture(1)>>
+public <<Read: queryRequestsCount(0)>>
+public <<Read: queryRequestsCountActive(1)>>
+public <<Read: queryRequestsCountAppeared(0)>>
+public <<Read: queryRequestsCountAssigned(0)>>
+public <<Read: queryRequestsCountCompleted(1)>>
+public <<Read: queryRequestsQueued(1)>>
+public <<Read: queryRequestsWaiting(1)>>
+public <<Read: queryServerDistance(2)>>
+public <<Read: queryServerRoute(1)>>
+public <<Read: queryServerRouteActive(1)>>
+public <<Read: queryServerRouteRemaining(2)>>
+public <<Read: queryServerSchedule(1)>>
+public <<Read: queryServerTimeOfDeparture(1)>>
+public <<Read: queryServersActive(1)>>
+public <<Read: queryServersCount(0)>>
+public <<Read: queryServersCountActive(1)>>
+public <<Read: queryServersCountAppeared(0)>>
+public <<Read: queryServersLocationsActive(1)>>
+public <<Read: queryUser(1)>>
+public <<Read: queryVertex(1)>>
+public <<Read: queryVertices(0)>>
+public <<Read: queryVerticesCount(0)>>
+@
+\subsubsection{Cached Read Methods}
+<<[[Controller]] methods>>=
+public <<Read: queryMetricRequestDistanceBaseUnassignedTotal(0)>>
+public <<Read: queryMetricRequestDistanceDetourTotal(0)>>
+public <<Read: queryMetricRequestDistanceTransitTotal(0)>>
+public <<Read: queryMetricRequestDurationPickupTotal(0)>>
+public <<Read: queryMetricRequestDurationTransitTotal(0)>>
+public <<Read: queryMetricRequestDurationTravelTotal(0)>>
+public <<Read: queryMetricServerDistanceCruisingTotal(0)>>
+public <<Read: queryMetricServerDistanceServiceTotal(0)>>
+public <<Read: queryMetricServerDistanceTotal(0)>>
+public <<Read: queryMetricServerDurationCruisingTotal(0)>>
+public <<Read: queryMetricServerDurationServiceTotal(0)>>
+public <<Read: queryMetricServerDurationTravelTotal(0)>>
+public <<Read: queryMetricServiceRate(0)>>
+public <<Read: queryMetricUserDistanceBaseTotal(0)>>
+@
+\subsubsection{Write Methods}
+<<[[Controller]] methods>>=
+public <<Write: insertRequest(1)>>
+public <<Write: insertServer(2)>>
+@
+\subsubsection{Administration}
+<<[[Controller]] methods>>=
+public <<Admin: cacheRoadNetworkFromDB(0)>>
+public <<Admin: cacheUsersFromDB(0)>>
+public <<Admin: instanceClose(0)>>
+public <<Admin: instanceExport(1)>>
+public <<Admin: instanceInitialize(0)>>
+public <<Admin: instanceLoad(1)>>
+public <<Admin: instanceNew(0)>>
+public <<Admin: getClock(0)>>
+public <<Admin: getClockStart(0)>>
+public <<Admin: getClockReference(0)>>
+public <<Admin: getClockReferenceMs(0)>>
+public <<Admin: getRefCommunicator(0)>>
+public <<Admin: getRefStorage(0)>>
+public <<Admin: retrieveQueueSize(0)>>
+public <<Admin: retrieveHandleRequestDur(0)>>
+public <<Admin: retrieveRefCacheEdges(0)>>
+public <<Admin: retrieveRefCacheUsers(0)>>
+public <<Admin: retrieveRefCacheVertices(0)>>
+public <<Admin: forwardRefCommunicator(1)>>
+public <<Admin: forwardRefTraffic(1)>>
+public <<Admin: setClockEnd(1)>>
+public <<Admin: setClockReference(1)>>
+public <<Admin: setClockStart(1)>>
+public <<Admin: setQueueTimeout(1)>>
+public <<Admin: setRefClient(1)>>
+@
+\subsubsection{G-tree Methods}
+<<[[Controller]] methods>>=
+public <<Gtree: gtreeClose(0)>>
+public <<Gtree: gtreeLoad(1)>>
+@
+\subsubsection{Special Methods}
+<<[[Controller]] methods>>=
+public <<Controller: loadProblem(1)>>
+public <<Controller: loadRoadNetworkFromFile(1)>>
+public <<Controller: isKilled(0)>>
+public <<Controller: returnRequest(1)>>
+public <<Controller: startRealtime(1)>>
+public <<Controller: startSequential(1)>>
+public <<Controller: step(0)>>
+public <<Controller: stop(1)>>
+@
+
 
 \subsubsection{\texttt{loadRoadNetworkFromFile}(1)}
 <<Controller: loadRoadNetworkFromFile(1)>>=

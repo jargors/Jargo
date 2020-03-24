@@ -1,6 +1,9 @@
 \section{Class: Client}
 \label{sim-client}
 
+\etocsettocstyle{}{}
+\localtableofcontents
+
 <<Client.java>>=
 <<Package: [[sim]]>>
 <<Client.java preamble>>
@@ -23,10 +26,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.io.FileNotFoundException;
 @
 
-<<Client.java preamble>>=
-<<Import JMX dependencies>>
-@
-
 \subsection{Member Variables}
 \label{sim-client: member-variables}
 
@@ -45,7 +44,6 @@ protected ConcurrentHashMap<Integer, Integer> luv = new ConcurrentHashMap<Intege
 
 <<[[Client]] constructor>>=
 public Client() {
-  <<[[Client]] register JMX monitor>>
   if (DEBUG) {
     System.out.printf("create Client\n");
   }
@@ -55,17 +53,41 @@ public Client() {
 \subsection{Methods}
 \label{sim-client: methods}
 
+\subsubsection{Administration}
+<<[[Client]] methods>>=
+public <<Admin: forwardRefCacheEdges(1)>>
+public <<Admin: forwardRefCacheUsers(1)>>
+public <<Admin: forwardRefCacheVertices(1)>>
+public <<Admin: setRefCommunicator(1)>>
+@
+\subsubsection{G-tree Methods}
+<<[[Client]] methods>>=
+public <<Gtree: gtreeLoad(1)>>
+public <<Gtree: gtreeClose(0)>>
+@
+\subsubsection{Special Methods}
+<<[[Client]] methods>>=
+public <<Client: addRequest(1)>>
+public <<Client: dropRequests(1)>>
+public <<Client: collectServerLocations(1)>>
+public <<Client: notifyNew(0)>>
+public <<Client: init(0)>>
+protected <<Client: end(0)>>
+protected <<Client: handleRequest(1)>>
+protected <<Client: handleServerLocation(1)>>
+@
+
+
+
 \subsubsection{\texttt{notifyNew}(0)}
 
 <<Client: notifyNew(0)>>=
 void notifyNew() throws ClientException, ClientFatalException {
   while (!this.queue.isEmpty()) {
-    long A0 = System.currentTimeMillis();
     this.handleRequest(this.queue.remove());
     if (DEBUG) {
       System.out.printf("handleRequest(1), arg1=[#]\n");
     }
-    <<Stats: clientHandleRequest>>
   }
 }
 @ %def notifyNew

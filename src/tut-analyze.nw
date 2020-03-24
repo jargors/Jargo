@@ -1,0 +1,237 @@
+\section{Analyzing Results}
+\label{tut-analyze}
+
+At the end of each simulation, the command-line and graphical evaluators will
+export simulation results to disk for offline analysis. The results are stored
+in Derby database format and can be accessed using any tool that supports the
+Derby JDBC driver, including the [[ij]] tool bundled with Derby.
+
+The easiest way to get started is to connect to the database and query Jargo's
+SQL views (Table~\ref{tab:tut-analyze-views}). You can use a JDBC connection
+string such as [['connect:jdbc:derby:memory:temp;createFrom=jargo']] to connect
+to the database, replacing [[jargo]] with the name of the export. This string
+creates a new in-memory Derby database called [[temp]] and loads the contents
+of [[jargo]] into this database. Use your tool to list the views. In [[ij]],
+the command is [[show views]].
+
+\begin{table}[h]
+\small
+\centering
+\input{res/doc-tab/tut-analyze-views}
+\caption{Listing the Jargo views using \texttt{ij}.}
+\label{tab:tut-analyze-views}
+\end{table}
+
+\subsection{Assignments}
+
+\subsubsection{\texttt{ASSIGNMENTS}}
+
+This view lists all assignments. Each row consists of the
+assigned vehicle and customer along with the time that the assignments was
+completed (the customer drop-off time). The [[sid]] column stores the
+vehicle identifier and the [[rid]] column stores the customer identifier.
+See Table~\ref{tab:tut-analyze-assignments} for an example.
+Here are some common queries:
+\begin{itemize}
+\item To get the total number of assignments, use \texttt{SELECT COUNT (rid) FROM ASSIGNMENTS}.
+\item To get assignments per vehicle, use \texttt{SELECT sid, COUNT (rid) FROM
+ASSIGNMENTS GROUP BY sid}.
+\item To get average number of assignments per vehicle, use \texttt{SELECT
+CAST(COUNT (rid) / COUNT(DISTINCT (sid)) AS FLOAT) FROM ASSIGNMENTS}.
+\end{itemize}
+
+\begin{table}[h]
+\small
+\centering
+\input{res/doc-tab/tut-analyze-assignments}
+\caption{The \texttt{ASSIGNMENTS} view.}
+\label{tab:tut-analyze-assignments}
+\end{table}
+
+\subsubsection{\texttt{SERVICE\_RATE}}
+
+This view gives the total ``service rate'' as a percentage multiplied by
+$10^4$ (\textit{e.g.} 1.0, or 100\%, is written as 10000). The service
+rate is found by dividing the number of assigned customers over the
+total number of customers. The total is listed in the \texttt{val} column.
+
+\subsection{Distances}
+
+\subsubsection{\texttt{DIST\_BASE}}
+
+This view lists the total ``base'' distance for all customers and vehicles, in
+meters. The base distance for a customer is the shortest travel distance from
+the customer's pick-up location to the drop-off location, and for a vehicle is
+the shortest travel distance from the vehicle's starting location to the ending
+location. The total is listed in the \texttt{val} column.
+
+\subsubsection{\texttt{DIST\_R\_BASE}}
+
+This view lists the total ``base'' distance for all customers only.
+
+\subsubsection{\texttt{DIST\_R\_DETOUR}}
+
+This view lists the ``detour'' distance for each customer, in meters. The
+detour distance is found by taking the customer's transit distance and then
+subtracting the customer's base distance. The \texttt{rid} column lists the
+customer identifier and the \texttt{val} column lists the detour distance. See
+Table~\ref{tab:tut-analyze-dist-r-detour} for an example.
+
+\begin{table}[h]
+\small
+\centering
+\input{res/doc-tab/tut-analyze-dist-r-detour}
+\caption{The \texttt{DIST\_R\_DETOUR} view.}
+\label{tab:tut-analyze-dist-r-detour}
+\end{table}
+
+\subsubsection{\texttt{DIST\_R\_TRANSIT}}
+
+This view lists the ``transit'' distance for each customer, in meters. The
+transit distance is the distance the customer actually traveled by taking a
+ridesharing vehicle. The \texttt{rid} column lists the customer identifier and
+the \texttt{val} column lists the detour distance.
+See Table~\ref{tab:tut-analyze-dist-r-transit} for an example.
+
+\begin{table}[h]
+\small
+\centering
+\input{res/doc-tab/tut-analyze-dist-r-transit}
+\caption{The \texttt{DIST\_R\_TRANSIT} view.}
+\label{tab:tut-analyze-dist-r-transit}
+\end{table}
+
+\subsubsection{\texttt{DIST\_R\_UNASSIGNED}}
+
+This view lists the total ``base'' distance for all \emph{unassigned} customers
+only.
+
+\subsubsection{\texttt{DIST\_S\_BASE}}
+
+This view lists the total ``base'' distance for all vehicles only.
+
+\subsubsection{\texttt{DIST\_S\_CRUISING}}
+
+This view lists the ``cruising'' distance for each vehicle, in meters. The
+cruising distance is the distance the vehicle traveled while empty (no
+customers onboard).
+
+\subsubsection{\texttt{DIST\_S\_SERVICE}}
+
+This view lists the ``service'' distance for each vehicle, in meters. The
+service distance is the distance the vehicle traveled while having
+customers onboard.
+
+\subsubsection{\texttt{DIST\_S\_TRAVEL}}
+
+This view lists the ``travel'' distance for each vehicle, in meters. The
+travel distance is the sum of the service and cruising distances.
+
+\subsection{Durations}
+
+\subsubsection{\texttt{DUR\_R\_PICKUP}}
+
+This view lists the ``pick-up'' duration for each customer, in seconds. The
+pick-up duration is the difference between the time a customer is picked up and
+the time the customer first appears on the road network.
+See Table~\ref{tab:tut-analyze-dur-r-pickup} for an example.
+
+\begin{table}[h]
+\small
+\centering
+\input{res/doc-tab/tut-analyze-dur-r-pickup}
+\caption{The \texttt{DUR\_R\_PICKUP} view.}
+\label{tab:tut-analyze-dur-r-pickup}
+\end{table}
+
+\subsubsection{\texttt{DUR\_R\_TRANSIT}}
+
+This view lists the ``transit'' duration for each customer, in seconds. The
+transit duration is the difference between the time a customer is dropped off
+and the time the customer is picked up, in other words the time a customer
+spends inside a vehicle.
+See Table~\ref{tab:tut-analyze-dur-r-transit} for an example.
+
+\begin{table}[h]
+\small
+\centering
+\input{res/doc-tab/tut-analyze-dur-r-transit}
+\caption{The \texttt{DUR\_R\_TRANSIT} view.}
+\label{tab:tut-analyze-dur-r-transit}
+\end{table}
+
+\subsubsection{\texttt{DUR\_R\_TRAVEL}}
+
+This view lists the ``travel'' duration for each customer, in seconds. The
+travel duration is the difference between the time a customer is dropped off
+and the time the customer appears on the road network, in other words the
+sum of the pick-up and transit durations.
+See Table~\ref{tab:tut-analyze-dur-r-travel} for an example.
+
+\begin{table}[h]
+\small
+\centering
+\input{res/doc-tab/tut-analyze-dur-r-travel}
+\caption{The \texttt{DUR\_R\_TRAVEL} view.}
+\label{tab:tut-analyze-dur-r-travel}
+\end{table}
+
+\subsubsection{\texttt{DUR\_S\_SERVICE}}
+
+This view lists the ``service'' duration for each vehicle, in seconds. The
+service duration is the time spent with customers onboard.
+
+\subsubsection{\texttt{DUR\_S\_TRAVEL}}
+
+This view lists the ``travel'' duration for each vehicle, in seconds. The
+travel duration is the total time spent traveling on the road network.
+
+\subsection{Other Views}
+
+\subsubsection{\texttt{F\_DISTANCE\_BLOCKS}}
+
+This view lists the departure load on each vehicle for each location the
+vehicle visits. It is used to determine service and cruising distances.
+
+\subsubsection{\texttt{F\_STATUS}}
+
+This view lists the ``status'' of each assigned customer after pick-up and
+after drop-off. It is used to determine the assignments.
+
+\subsubsection{\texttt{R\_SERVER}}
+
+This view lists each vehicle location and the ``events'' that took place on
+those locations. See Section~\ref{user-mod: server-relation} for more
+information.
+
+\subsubsection{\texttt{R\_USER}}
+
+This view lists each vehicle and customer along with their properties.
+See Section~\ref{user-mod: user-relation} for more information.
+
+\subsubsection{\texttt{T\_R\_ARRIVE}}
+
+This view lists drop-off times for each customer.
+
+\subsubsection{\texttt{T\_R\_DEPART}}
+
+This view lists pick-up times for each customer.
+
+\subsubsection{\texttt{T\_S\_ARRIVE}}
+
+This view lists arrival times for each vehicle.
+
+\subsubsection{\texttt{T\_S\_DEPART}}
+
+This view lists departure times for each vehicle.
+
+\subsubsection{\texttt{VIOLATIONS\_T\_R}}
+
+This view lists the amount of the ``time window violation'' for each customer.
+This amount is found by taking the drop-off time and subtracting the latest
+acceptable drop-off time for the customer.
+
+\subsubsection{\texttt{VIOLATIONS\_T\_S}}
+
+This view lists the amount of the ``time window violation'' for each vehicle.
+

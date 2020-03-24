@@ -1,22 +1,27 @@
 \section{Administration}
 \label{sim-administration}
 
+These methods manage the classes, the simulation, and the database connections.
+
+\etocsettocstyle{}{}
+\localtableofcontents
+
 \subsection{Packages}
 
+The Jargo library has two packages:
+\begin{itemize}
+\item The [[sim]] package is for core classes.
 <<Package: [[sim]]>>=
 package com.github.jargors.sim;
-@
-
+@ \item The [[ui]] package is for the evaluators.
 <<Package: [[ui]]>>=
 package com.github.jargors.ui;
 @
-
-<<Package: [[jmx]]>>=
-package com.github.jargors.jmx;
-@
-
+\end{itemize}
 
 \subsection{Chunks}
+
+These chunks perform some common ``atomic'' tasks used in multiple methods.
 
 \subsubsection{Open \texttt{conn}}
 <<Open [[conn]]>>=
@@ -108,27 +113,25 @@ try (<<Open [[conn]]>>) {
 
 \subsection{Methods: Administration}
 
-\subsubsection{\texttt{JargoInstanceNew}(0)}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[JargoInstanceNew]]}(0) creates a new database
-instance. It uses [[JargoSetupDriver]](0) to register the JDBC [[DriverManager]] to
-the new instance.  If the DBCP2 [[PoolingDriver]] cannot be found, a
-[[ClassNotFoundException]] is thrown. We consider this exception to be fatal
-and we exit immediately.  On the other hand if a [[SQLException]] occurs, we
-rethrow to let the caller handle it. This exception can occur if the driver
-cannot access the database for whatever reason.\\
-\midrule
-\textbf{Parameters:} none.\\
-\textbf{Returns:} nothing.\\
-\textbf{Side Effects:} initializes a new in-memory Derby instance,
-or exits the JVM if the DBCP2 driver
-cannot be loaded.\\
-\textbf{Throws:} [[SQLException]] if database cannot be accessed for whatever
-reason.\\
-\bottomrule
-\end{tabular}
+\subsubsection{\jsMethodName{JargoInstanceNew}{0}}
+\begin{jsMethod}{Creates a new database instance.}
+{None.}
+{Nothing.}
+{Assigns new objects to [[connection_factory]], [[poolableconnection_factory]],
+[[pool]], [[driver]].}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsErr{SQLException}{if database failure is encountered}
+    \jsErr{ClassNotFoundException}{if Derby driver cannot be loaded}
+  \end{itemize}
+}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsWrap{instanceNew}{0}
+  \end{itemize}
+}
+\end{jsMethod}
+
 <<Admin: JargoInstanceNew(0)>>=
 void JargoInstanceNew() throws SQLException {
   try {
@@ -142,39 +145,32 @@ void JargoInstanceNew() throws SQLException {
   }
 }
 @ %def JargoInstanceNew
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[instanceNew]]}(0) wraps [[JargoInstanceNew]](0).\\
-\bottomrule
-\end{tabular}
+
 <<Admin: instanceNew(0)>>=
 void instanceNew() throws SQLException {
   this.storage.JargoInstanceNew();
 }
 @ %def instanceNew
 
-\subsubsection{\texttt{JargoInstanceInitialize}(0)}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[JargoInstanceInitialize]]}(0) loads the data model in
-\S\ref{TODO} into the Jargo database instance. If the
-data model cannot be loaded, a [[SQLException]] is thrown. We consider this
-exception to be fatal and we exit immediately. Possible reasons for such an
-exception might be because the caller forgot to first call
-[[JargoInstanceNew]](0) resulting in ``No suitable driver found'' (error
-code 0), or because the caller previously called [[JargoInstanceLoad]](1) resulting
-in ``Table/View V already exists'' (error code 20000). In either case we print
-a hint to terminal to guide the debugging.\\
-\midrule
-\textbf{Parameters:} none.\\
-\textbf{Returns:} nothing.\\
-\textbf{Side Effects:} loads the data model in \S\ref{TODO}
-into the Jargo instance, or exits the JVM if failure occurs.\\
-\textbf{Throws:} nothing.\\
-\bottomrule
-\end{tabular}
+$\square$
+
+\subsubsection{\jsMethodName{JargoInstanceInitialize}{0}}
+\begin{jsMethod}{Creates the Jargo schema into the existing instance.}
+{None.}
+{Nothing.}
+{Modifies the database.}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsErr{SQLException}{if database failure is encountered}
+  \end{itemize}
+}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsWrap{instanceInitialize}{0}
+  \end{itemize}
+}
+\end{jsMethod}
+
 <<Admin: JargoInstanceInitialize(0)>>=
 void JargoInstanceInitialize() {
   try (<<Open [[conn]]>>) {
@@ -243,62 +239,39 @@ void JargoInstanceInitialize() {
   }
 }
 @ %def JargoInstanceInitialize
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[instanceInitialize]]}(0) wraps [[JargoInstanceInitialize]](0).\\
-\bottomrule
-\end{tabular}
+
 <<Admin: instanceInitialize(0)>>=
 void instanceInitialize() {
   this.storage.JargoInstanceInitialize();
 }
 @ %def instanceInitialize
 
+$\square$
 
-\subsubsection{\texttt{JargoInstanceLoad}(1)}
+\subsubsection{\jsMethodName{JargoInstanceLoad}{1}}
+\begin{jsMethod}{Loads an on-disk database into memory.}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsArg{String}{p}{Path to database.}
+  \end{itemize}
+}
+{Nothing.}
+{Modifies the in-memory database.}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsErr{SQLException}{if database failure is encountered}
+    \jsErr{ClassNotFoundException}{if Derby driver cannot be loaded}
+  \end{itemize}
+}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsWrap{instanceLoad}{1}
+  \end{itemize}
+}
+\end{jsMethod}
+
 <<Admin: JargoInstanceLoad(1)>>=
 void JargoInstanceLoad(final String p) throws SQLException {
-  this.CONNECTIONS_URL = "jdbc:derby:"+p;
-  try {
-    this.JargoSetupDriver();
-  } catch (ClassNotFoundException e) {
-    System.out.println("Fatal error.");
-    e.printStackTrace();
-    System.exit(1);
-  }
-}
-@ %def JargoInstanceLoad
-<<Admin: instanceLoad(1)>>=
-void instanceLoad(final String p) throws SQLException {
-  this.storage.JargoInstanceLoad(p);
-}
-@ %def instanceLoad
-
-\subsubsection{\texttt{JargoInstanceLoadInMem}(1)}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[JargoInstanceLoadInMem]]}(1) loads a previously saved Jargo
-database instance from disk into working memory. It uses [[JargoSetupDriver]](0) to
-register the JDBC [[DriverManager]] to the new instance.  If the DBCP2
-[[PoolingDriver]] cannot be found, a [[ClassNotFoundException]] is thrown. We
-consider this exception to be fatal and we exit immediately.  On the other hand
-if a [[SQLException]] occurs, we rethrow to let the caller handle it. This
-exception can occur if the driver cannot access the database for whatever
-reason.\\
-\midrule
-\textbf{Parameters:} \\
-\hspace{2mm} String [[p]] (param. 1): path to directory where backup is located.\\
-\textbf{Returns:} nothing.\\
-\textbf{Side Effects:} loads backup into Jargo database instance, or exits the
-JVM if failure occurs.\\
-\textbf{Throws:} [[SQLException]] if database cannot be accessed, or
-[[ClassNotFoundException]] if the DBCP2 driver cannot be found.\\
-\bottomrule
-\end{tabular}
-<<Admin: JargoInstanceLoadInMem(1)>>=
-void JargoInstanceLoadInMem(final String p) throws SQLException {
   this.CONNECTIONS_URL = "jdbc:derby:memory:jargo;createFrom="+p;
   try {
     this.JargoSetupDriver();
@@ -308,35 +281,35 @@ void JargoInstanceLoadInMem(final String p) throws SQLException {
     System.exit(1);
   }
 }
-@ %def JargoInstanceLoadInMem
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[instanceLoadInMem]]}(1) wraps [[JargoInstanceLoadInMem]](1).\\
-\bottomrule
-\end{tabular}
-<<Admin: instanceLoadInMem(1)>>=
-void instanceLoadInMem(final String p) throws SQLException {
-  this.storage.JargoInstanceLoadInMem(p);
-}
-@ %def instanceLoadInMem
+@ %def JargoInstanceLoad
 
-\subsubsection{\texttt{JargoInstanceExport}(1)}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[JargoInstanceExport]]}(1) exports the Jargo database
-instance to disk. If a [[SQLException]] occurs, we rethrow to let the caller
-handle it.\\
-\midrule
-\textbf{Parameters:} \\
-\hspace{2mm} String [[p]] (param. 1): path to directory where instance should
-be exported to.\\
-\textbf{Returns:} nothing.\\
-\textbf{Side Effects:} writes the database to disk.\\
-\textbf{Throws:} [[SQLException]] if failure is encountered.\\
-\bottomrule
-\end{tabular}
+<<Admin: instanceLoad(1)>>=
+void instanceLoad(final String p) throws SQLException {
+  this.storage.JargoInstanceLoad(p);
+}
+@ %def instanceLoad
+
+\subsubsection{\jsMethodName{JargoInstanceExport}{1}}
+\begin{jsMethod}{Exports the in-memory database to disk.}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsArg{String}{p}{path to the export.}
+  \end{itemize}
+}
+{Nothing.}
+{Modifies the disk.}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsErr{SQLException}{if database failure is encountered}
+  \end{itemize}
+}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsWrap{instanceExport}{1}
+  \end{itemize}
+}
+\end{jsMethod}
+
 <<Admin: JargoInstanceExport(1)>>=
 void JargoInstanceExport(final String p) throws SQLException {
   try (<<Open [[conn]]>>) {
@@ -347,34 +320,30 @@ void JargoInstanceExport(final String p) throws SQLException {
   }
 }
 @ %def JargoInstanceExport
-\noindent\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[instanceExport]]}(1) wraps [[JargoInstanceExport]](1).\\
-\bottomrule
-\end{tabular}
+
 <<Admin: instanceExport(1)>>=
 void instanceExport(final String p) throws SQLException {
   this.storage.JargoInstanceExport(p);
 }
 @ %def instanceExport
 
-\subsubsection{\texttt{JargoInstanceClose}(0)}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[JargoInstanceClose]]}(0) closes an existing Jargo
-database instance.  If the instance closes successfully, a [[SQLException]]
-with error code [[45000]] is thrown. Otherwise, some other error code is
-thrown. In this case we rethrow to let the caller handle it.\\
-\midrule
-\textbf{Parameters:} none.\\
-\textbf{Returns:} nothing.\\
-\textbf{Side Effects:} closes an existing Jargo database instance.\\
-\textbf{Throws:} [[SQLException]] if database cannot be closed for whatever
-reason.\\
-\bottomrule
-\end{tabular}
+\subsubsection{\jsMethodName{JargoInstanceClose}{0}}
+\begin{jsMethod}{Closes the database instance.}
+{None.}
+{Nothing.}
+{Drops the database connection and clears many data structures (see source).}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsErr{SQLException}{code 45000 on success, some other error code otherwise}
+  \end{itemize}
+}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsWrap{instanceClose}{0}
+  \end{itemize}
+}
+\end{jsMethod}
+
 <<Admin: JargoInstanceClose(0)>>=
 void JargoInstanceClose() throws SQLException {
   try {
@@ -409,34 +378,31 @@ void JargoInstanceClose() throws SQLException {
   }
 }
 @ %def JargoInstanceClose
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[instanceClose]]}(0) wraps [[JargoInstanceClose]](0).\\
-\bottomrule
-\end{tabular}
+
 <<Admin: instanceClose(0)>>=
 void instanceClose() throws SQLException {
   this.storage.JargoInstanceClose();
 }
 @ %def instanceClose
 
-\subsubsection{\texttt{JargoCacheRoadNetworkFromDB}(0)}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[JargoCacheRoadNetworkFromDB]]}(0) loads two caches
-[[lu_vertices]] and [[lu_edges]] using the vertices and edges data in Tables V
-and E in the database. If queries on Tables V and E fail, this method throws a
-[[SQLException]].\\
-\midrule
-\textbf{Parameters:} none.\\
-\textbf{Returns:} nothing.\\
-\textbf{Side Effects:} populates [[lu_vertices]] and [[lu_edges]].\\
-\textbf{Throws:} [[SQLException]] if Tables V and E cannot be queried or
-other database failure is encountered.\\
-\bottomrule
-\end{tabular}
+\subsubsection{\jsMethodName{JargoCacheRoadNetworkFromDB}{0}}
+\begin{jsMethod}{Loads in-memory vertex and edge caches from the V and E
+database tables.}
+{None.}
+{Nothing.}
+{Modifies [[lu_vertices]] and [[lu_edges]].}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsErr{SQLException}{if database failure is encountered}
+  \end{itemize}
+}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsWrap{cacheRoadNetworkFromDB}{0}
+  \end{itemize}
+}
+\end{jsMethod}
+
 <<Admin: JargoCacheRoadNetworkFromDB(0)>>=
 void JargoCacheRoadNetworkFromDB() throws SQLException {
 @ %def JargoCacheRoadNetworkFromDB
@@ -447,9 +413,11 @@ temporary maps if all succeeds. This way we don't corrupt [[lu_vertices]] and
 hard to imagine why this method would ever be called if the caches are already
 populated.)}
 <<Admin: JargoCacheRoadNetworkFromDB(0)>>=
-  ConcurrentHashMap<Integer, int[]>    lu1 = new ConcurrentHashMap<Integer, int[]>();
+  ConcurrentHashMap<Integer, int[]>    lu1 =
+      new ConcurrentHashMap<Integer, int[]>();
   ConcurrentHashMap<Integer,
-    ConcurrentHashMap<Integer, int[]>> lu2 = new ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>>();
+    ConcurrentHashMap<Integer, int[]>> lu2 =
+      new ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>>();
 @
 {\small We start by querying the vertices.}
 <<Admin: JargoCacheRoadNetworkFromDB(0)>>=
@@ -489,36 +457,30 @@ populated.)}
   this.lu_edges    = lu2;
 }
 @
-\noindent\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[cacheRoadNetworkFromDB]]}(0) wraps [[JargoCacheRoadNetworkFromDB]](0).\\
-\bottomrule
-\end{tabular}
+
 <<Admin: cacheRoadNetworkFromDB(0)>>=
 void cacheRoadNetworkFromDB() throws SQLException {
   this.storage.JargoCacheRoadNetworkFromDB();
 }
 @ %def cacheRoadNetworkFromDB
 
+\subsubsection{\jsMethodName{JargoCacheUsersFromDB}{0}}
+\begin{jsMethod}{Load in-memory user caches from the S and R database tables.}
+{None.}
+{Nothing.}
+{Modifies [[lu_users]] and [[lu_rstatus]].}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsErr{SQLException}{if database failure is encountered}
+  \end{itemize}
+}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsWrap{cacheUsersFromDB}{0}
+  \end{itemize}
+}
+\end{jsMethod}
 
-
-\subsubsection{\texttt{JargoCacheUsersFromDB}(0)}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[JargoCacheUsersFromDB]]}(0) loads the two caches
-[[lu_users]] and [[lu_rstatus]] using data in the user and assignment tables in
-the database. If queries on these tables fail, this method throws a
-[[SQLException]].\\
-\midrule
-\textbf{Parameters:} none.\\
-\textbf{Returns:} nothing.\\
-\textbf{Side Effects:} populates [[lu_users]] and [[lu_rstatus]].\\
-\textbf{Throws:} [[SQLException]] if user and assignment tables cannot be
-queried or other database failure is encountered.\\
-\bottomrule
-\end{tabular}
 <<Admin: JargoCacheUsersFromDB(0)>>=
 void JargoCacheUsersFromDB() throws SQLException {
 @ %def JargoCacheUsersFromDB
@@ -590,38 +552,28 @@ we query the request's assignment status. Else, we initialize the last-visitatio
   }
 }
 @
-\noindent\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[cacheUsersFromDB]]}(0) wraps [[JargoCacheUsersFromDB]](0).\\
-\bottomrule
-\end{tabular}
+
 <<Admin: cacheUsersFromDB(0)>>=
 void cacheUsersFromDB() throws SQLException {
   this.storage.JargoCacheUsersFromDB();
 }
 @ %def cacheUsersFromDB
 
-\subsubsection{\texttt{JargoSetupDriver}(0)}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[JargoSetupDriver]]}(0) registers a connection pool to the
-JDBC driver.
-The connection pool allows us to concurrently submit SQL
-commands against the database from different threads.
-A [[SQLException]] is thrown in case of database failure.
-A [[ClassNotFoundException]] is thrown if the DBCP2 [[PoolingDriver]]
-cannot be found.
-Portions of this code are licensed by the Apache Software Foundation.\\
-\midrule
-\textbf{Parameters:} none.\\
-\textbf{Returns:} nothing.\\
-\textbf{Side Effects:} registers a new connection pool to the JDBC driver manager.\\
-\textbf{Throws:} [[SQLException]] if database failure is encountered, or
-[[ClassNotFoundException]] if the DBCP2 driver cannot be found.\\
-\bottomrule
-\end{tabular}
+\subsubsection{\jsMethodName{JargoSetupDriver}{0}}
+\begin{jsMethod}{Sets up a new database connection.}
+{None.}
+{Nothing.}
+{Assigns new objects to [[connection_factory]], [[poolableconnection_factory]],
+[[pool]], [[driver]].}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsErr{SQLException}{if database failure is encountered}
+    \jsErr{ClassNotFoundException}{if Derby driver cannot be loaded}
+  \end{itemize}
+}
+{None.}
+\end{jsMethod}
+
 <<Admin: JargoSetupDriver(0)>>=
 void JargoSetupDriver() throws SQLException, ClassNotFoundException {
   connection_factory = new DriverManagerConnectionFactory(CONNECTIONS_URL);
@@ -642,19 +594,19 @@ void JargoSetupDriver() throws SQLException, ClassNotFoundException {
 }
 @ %def JargoSetupDriver
 
-\subsubsection{\texttt{JargoSetupPreparedStatements}(0)}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[JargoSetupPreparedStatements]]}(0) initializes the statement cache
-[[lu_pstr]].\\
-\midrule
-\textbf{Parameters:} none.\\
-\textbf{Returns:} nothing.\\
-\textbf{Side Effects:} populates [[lu_pstr]].\\
-\textbf{Throws:} nothing.\\
-\bottomrule
-\end{tabular}
+\subsubsection{\jsMethodName{JargoSetupPreparedStatements}{0}}
+\begin{jsMethod}{Initialize the statement cache.}
+{None.}
+{Nothing.}
+{Modifies [[lu_pstr]].}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsErr{SQLException}{if database failure is encountered}
+  \end{itemize}
+}
+{None.}
+\end{jsMethod}
+
 <<Admin: JargoSetupPreparedStatements(0)>>=
 void JargoSetupPreparedStatements() {
   final String INS = "INSERT INTO ";
@@ -901,7 +853,8 @@ this.lu_pstr.put("S60", SEL+"DISTINCT t, v FROM r_server WHERE sid=? ORDER BY t 
 this.lu_pstr.put("S129", SEL+"t, v FROM r_server WHERE sid=? AND t>? ORDER BY t ASC");
 @ %def S129
 <<S61>>=
-this.lu_pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server LEFT JOIN CQ ON t=t2 and lr=rid WHERE r_server.sid=?"
+this.lu_pstr.put("S61", SEL+"t, v, Ls, Lr FROM r_server "
+      + "LEFT JOIN CQ ON t=t2 and lr=rid WHERE r_server.sid=?"
       + "AND (Ls IS NOT NULL OR Lr IS NOT NULL) ORDER BY t, o2 ASC");
 @ %def S61
 Need to join CQ in order to sort by order number [[o2]]. This query has
@@ -1070,7 +1023,8 @@ this.lu_pstr.put("S150", SEL+"COUNT (*) FROM violations_t_s");
 this.lu_pstr.put("S151", SEL+"COUNT (*) FROM violations_t_r");
 @ %def S151
 <<S152>>=
-this.lu_pstr.put("S152", SEL+"t2, v2 FROM W WHERE sid=? AND t2>=? ORDER BY t2 ASC FETCH FIRST ? ROWS ONLY");
+this.lu_pstr.put("S152", SEL+"t2, v2 FROM W WHERE sid=? AND t2>=? "
+    + "ORDER BY t2 ASC FETCH FIRST ? ROWS ONLY");
 @ %def S152
 <<S153>>=
 this.lu_pstr.put("S153", SEL+"t1, t2 FROM CQ WHERE sid=? AND q1=sq");
@@ -1114,25 +1068,24 @@ this.lu_pstr.put("S163", SEL+"COUNT (*) FROM CQ WHERE sid=? AND q1+? > 0"
     + "AND ( (t1 < ? AND t2 > ?) OR (? < t2 AND t2 <= ?) )");
 @ %def S163
 
-\subsubsection{\texttt{PSCreate}(2)}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[PSCreate]]}(2) returns a JDBC [[PreparedStatement]] for the
-statement string identified by [[k]] (param. 2) on the connection given in
-param. 1.  A [[SQLException]] is thrown in case of database failure.\\
-\midrule
-\textbf{Parameters:} \\
-\begin{tabular}{lp{116mm}}
-Connection [[conn]] (param. 1):&a JDBC connection.\\
-String [[k]] (param. 2):&statement identifier.\\
-\end{tabular}\\
-\textbf{Returns:} a prepared statement on the connection in param. 1 of the
-statement string identified by param. 2.\\
-\textbf{Side Effects:} none.\\
-\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
-\bottomrule
-\end{tabular}
+\subsubsection{\jsMethodName{PSCreate}{2}}
+\begin{jsMethod}{Create a prepared statement for the given statement string.}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsArg{Connection}{conn}{the database connection for creating the prepared statement}
+    \jsArg{String}{k}{the statement identifier (see [[JargoSetupPreparedStatements]](0))}
+  \end{itemize}
+}
+{A [[PreparedStatement]].}
+{None.}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsErr{SQLException}{if database failure is encountered}
+  \end{itemize}
+}
+{None.}
+\end{jsMethod}
+
 <<Admin: PSCreate(2)>>=
 PreparedStatement PSCreate(final Connection conn, final String k) throws SQLException {
   PreparedStatement p = null;
@@ -1148,24 +1101,25 @@ PreparedStatement PSCreate(final Connection conn, final String k) throws SQLExce
 }
 @ %def PSCreate
 
-\subsubsection{\texttt{PSAdd}(2..)}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[PSAdd]]}(2..) adds a prepared statement to
-the execution batch.
-A [[SQLException]] is thrown in case of database failure.\\
-\midrule
-\textbf{Parameters:} \\
-\begin{tabular}{lp{116mm}}
-Prepared statement [[p]] (param. 1):&a prepared statement.\\
-Integer... [[values]] (param. 2..):&values to use in the statement, in order of appearance.\\
-\end{tabular}\\
-\textbf{Returns:} nothing.\\
-\textbf{Side Effects:} adds to the execution batch for the statement in param. 1.\\
-\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
-\bottomrule
-\end{tabular}
+\subsubsection{\jsMethodName{PSAdd}{2..}}
+\begin{jsMethod}{Add a prepared statement to the batch of statements to be
+executed.}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsArg{PreparedStatement}{p}{the prepared statement to add}
+    \jsArg{Integer..}{values}{the values to use in the statement, if any}
+  \end{itemize}
+}
+{Nothing.}
+{Modifies [[p]].}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsErr{SQLException}{if database failure is encountered}
+  \end{itemize}
+}
+{None.}
+\end{jsMethod}
+
 <<Admin: PSAdd(2..)>>=
 void PSAdd(PreparedStatement p, final Integer... values) throws SQLException {
   p.clearParameters();
@@ -1178,22 +1132,24 @@ void PSAdd(PreparedStatement p, final Integer... values) throws SQLException {
 }
 @ %def PSAdd
 
-\subsubsection{\texttt{PSSubmit}(1..)}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[PSSubmit]]}(1..) executes a prepared statement's batch.
-A [[SQLException]] is thrown in case of database failure.\\
-\midrule
-\textbf{Parameters:} \\
-\begin{tabular}{lp{116mm}}
-Prepared statement [[p]] (param. 1..):&prepared statements.
-\end{tabular}\\
-\textbf{Returns:} nothing.\\
-\textbf{Side Effects:} may modify tables in the Jargo database.\\
-\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
-\bottomrule
-\end{tabular}
+\subsubsection{\jsMethodName{PSSubmit}{1..}}
+\begin{jsMethod}{Executes a batch of prepared statements in the order that
+they are given.}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsArg{PreparedStatement..}{statements}{prepared statements to execute}
+  \end{itemize}
+}
+{Nothing.}
+{May modified the database.}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsErr{SQLException}{if database failure is encountered}
+  \end{itemize}
+}
+{None.}
+\end{jsMethod}
+
 <<Admin: PSSubmit(1..)>>=
 void PSSubmit(PreparedStatement... statements) throws SQLException {
   try {
@@ -1207,39 +1163,30 @@ void PSSubmit(PreparedStatement... statements) throws SQLException {
 }
 @ %def PSSubmit
 
-\subsubsection{\texttt{PSQuery}(3..)}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[PSQuery]]}(3..) executes a predefined [[SELECT]]
-query against the Jargo database instance and returns the results in a
-flattened array. A [[SQLException]] is thrown in case of database failure.\\
-\midrule
-\textbf{Parameters:} \\
-\begin{tabular}{lp{116mm}}
-Connection [[conn]] (param. 1):&a JDBC connection.\\
-String [[k]] (param. 2):&statement identifier.\\
-Integer [[ncols]] (param. 3):&number of columns in the selection.\\
-Integer... [[values]] (param. 4..):&values to use in the statement, in order
-of appearance.
-\end{tabular}\\
-\textbf{Returns:} results of the query flattened into an integer array,
-or [[null]] if no results.
+\subsubsection{\jsMethodName{PSQuery}{3..}}
+\begin{jsMethod}{Execute a predefined [[SELECT]] statement and return the
+results in a flattened array.}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsArg{Connection}{conn}{the database connection}
+    \jsArg{String}{k}{the statement identifier (see [[JargoSetupPreparedStatements]])}
+    \jsArg{Integer}{ncols}{the number of columns in the selection}
+  \end{itemize}
+}
+{
+  results of the query flattened into an integer array, or [[null]] if no
+  results. Element $in+j$ contains the value of column $j$ at row $i$ of the
+  result set, for $n$ columns.
+}
+{None.}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsErr{SQLException}{if database failure is encountered}
+  \end{itemize}
+}
+{None.}
+\end{jsMethod}
 
-\begin{tikzpicture}
-\small
-\matrix[nodes={minimum size=6mm}] {
-  \node {...};
- &\node[draw] {$in+j:\textrm{value at column $j$, row $i$ of the result set}$};
- &\node {...};\\
-};
-\end{tikzpicture}
-
-where $i$, $j$ start from 0.\\
-\textbf{Side Effects:} none.\\
-\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
-\bottomrule
-\end{tabular}
 <<Admin: PSQuery(3..)>>=
 int[] PSQuery(final Connection conn, final String k, final int ncols, final Integer... values)
 throws SQLException {
@@ -1260,12 +1207,6 @@ throws SQLException {
 }
 @ %def PSQuery
 
-\subsubsection{\texttt{init}(0)}
-<<init(0)>>=
-void init() {
-  // Custom initialization procedures
-}
-@
 
 \subsection{Methods: Getters}
 

@@ -1049,7 +1049,7 @@ public class DesktopController {
              CompletableFuture.runAsync(() -> {
                try {
                  this.controller = new Controller();
-                 this.controller.instanceLoadInMem(this.db);
+                 this.controller.instanceLoad(this.db);
                  this.controller.cacheRoadNetworkFromDB();
                  this.controller.cacheUsersFromDB();
                  int nv = this.controller.queryVerticesCount()[0];

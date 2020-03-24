@@ -1,6 +1,9 @@
 \section{Read Operations}
 \label{sim-reading}
 
+\etocsettocstyle{}{}
+\localtableofcontents
+
 \subsection{Chunks}
 
 \subsubsection{Flatten results}
@@ -97,17 +100,13 @@ Method \textcolor{blue}{[[query]]}(2) wraps [[DBQuery]](2).\\
 \end{tabular}
 <<Read: query(2)>>=
 int[] query(final String sql, final int ncols) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = this.storage.DBQuery(sql, ncols);
-  <<Stats: query(2)>>
   return output;
 }
 @ %def query
 <<Read: queryQuick(3)>>=
 int[] queryQuick(final String sql, int[] outcols, ArrayList<String> header) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = this.storage.DBQueryQuick(sql, outcols, header);
-  <<Stats: query(2)>>
   return output;
 }
 @ %def queryQuick
@@ -156,9 +155,7 @@ Method \textcolor{blue}{[[queryMBR]]}(0) wraps [[DBQueryMBR]](0).\\
 \end{tabular}
 <<Read: queryMBR(0)>>=
 int[] queryMBR() throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = this.storage.DBQueryMBR();
-  <<Stats: queryMBR(0)>>
   return output;
 }
 @ %def queryMBR
@@ -206,9 +203,7 @@ Method \textcolor{blue}{[[queryVertex]]}(1) wraps [[DBQueryVertex]](1).\\
 \end{tabular}
 <<Read: queryVertex(1)>>=
 int[] queryVertex(final int v) throws VertexNotFoundException, SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = this.storage.DBQueryVertex(v);
-  <<Stats: queryVertex(1)>>
   return output;
 }
 @ %def queryVertex
@@ -254,9 +249,7 @@ Method \textcolor{blue}{[[queryVertices]]}(2) wraps [[DBQueryVertices]](2).\\
 \end{tabular}
 <<Read: queryVertices(0)>>=
 int[] queryVertices() throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = this.storage.DBQueryVertices();
-  <<Stats: queryVertices(0)>>
   return output;
 }
 @ %def queryVertices
@@ -300,9 +293,7 @@ Method \textcolor{blue}{[[queryVerticesCount]]}(0) wraps [[DBQueryVerticesCount]
 \end{tabular}
 <<Read: queryVerticesCount(0)>>=
 int[] queryVerticesCount() throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = this.storage.DBQueryVerticesCount();
-  <<Stats: queryVerticesCount(0)>>
   return output;
 }
 @ %def queryVerticesCount
@@ -352,9 +343,7 @@ Method \textcolor{blue}{[[queryEdge]]}(2) wraps [[DBQueryEdge]](2).\\
 \end{tabular}
 <<Read: queryEdge(2)>>=
 int[] queryEdge(final int v1, final int v2) throws EdgeNotFoundException, SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = this.storage.DBQueryEdge(v1, v2);
-  <<Stats: queryEdge(2)>>
   return output;
 }
 @ %def queryEdge
@@ -401,9 +390,7 @@ Method \textcolor{blue}{[[queryEdges]]}(2) wraps [[DBQueryEdges]](2).\\
 \end{tabular}
 <<Read: queryEdges(0)>>=
 int[] queryEdges() throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = this.storage.DBQueryEdges();
-  <<Stats: queryEdges(0)>>
   return output;
 }
 @ %def queryEdges
@@ -447,9 +434,7 @@ Method \textcolor{blue}{[[queryEdgesCount]]}(0) wraps [[DBQueryEdgesCount]](0).\
 \end{tabular}
 <<Read: queryEdgesCount(0)>>=
 int[] queryEdgesCount() throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = this.storage.DBQueryEdgesCount();
-  <<Stats: queryEdgesCount(0)>>
   return output;
 }
 @ %def queryEdgesCount
@@ -497,9 +482,7 @@ Method \textcolor{blue}{[[queryEdgeStatistics]]}(0) wraps [[DBQueryEdgeStatistic
 \end{tabular}
 <<Read: queryEdgeStatistics(0)>>=
 int[] queryEdgeStatistics() throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryEdgeStatistics();
-  <<Stats: queryEdgeStatistics(0)>>
   return output;
 }
 @ %def queryEdgeStatistics
@@ -554,9 +537,7 @@ Method \textcolor{blue}{[[queryUser]]}(1) wraps [[DBQueryUser]](1).\\
 \end{tabular}
 <<Read: queryUser(1)>>=
 int[] queryUser(final int rid) throws UserNotFoundException, SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryUser(rid);
-  <<Stats: queryUser(1)>>
   return output;
 }
 @ %def queryUser
@@ -924,9 +905,7 @@ Method \textcolor{blue}{[[queryRequestTimeOfDeparture]]}(1) wraps [[DBQueryReque
 \end{tabular}
 <<Read: queryRequestTimeOfDeparture(1)>>=
 int[] queryRequestTimeOfDeparture(final int rid) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryRequestTimeOfDeparture(rid);
-  <<Stats: queryRequestTimeOfDeparture(1)>>
   return output;
 }
 @ %def queryRequestTimeOfDeparture
@@ -976,9 +955,7 @@ Method \textcolor{blue}{[[queryRequestTimeOfArrival]]}(1) wraps [[DBQueryRequest
 \end{tabular}
 <<Read: queryRequestTimeOfArrival(1)>>=
 int[] queryRequestTimeOfArrival(final int rid) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryRequestTimeOfArrival(rid);
-  <<Stats: queryRequestTimeOfArrival(1)>>
   return output;
 }
 @ %def queryRequestTimeOfArrival
@@ -1023,9 +1000,7 @@ Method \textcolor{blue}{[[queryRequestsCount]]}(0) wraps [[DBQueryRequestsCount]
 \end{tabular}
 <<Read: queryRequestsCount(0)>>=
 int[] queryRequestsCount() throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryRequestsCount();
-  <<Stats: queryRequestsCount(0)>>
   return output;
 }
 @ %def queryRequestsCount
@@ -1042,9 +1017,7 @@ int[] DBQueryRequestsCountActive(final int t) throws SQLException {
 @ %def DBQueryRequestsCountActive
 <<Read: queryRequestsCountActive(1)>>=
 int[] queryRequestsCountActive(final int t) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryRequestsCountActive(t);
-  <<Stats: queryRequestsCountActive(1)>>
   return output;
 }
 @ %def queryRequestsCountActive
@@ -1089,9 +1062,7 @@ int[] DBQueryRequestsCountCompleted(final int t) throws SQLException {
 @ %def DBQueryRequestsCountCompleted
 <<Read: queryRequestsCountCompleted(1)>>=
 int[] queryRequestsCountCompleted(final int t) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryRequestsCountCompleted(t);
-  <<Stats: queryRequestsCountCompleted(1)>>
   return output;
 }
 @ %def queryRequestsCountCompleted
@@ -1172,9 +1143,7 @@ Method \textcolor{blue}{[[queryRequestsQueued]]}(1) wraps [[DBQueryRequestsQueue
 \end{tabular}
 <<Read: queryRequestsQueued(1)>>=
 int[] queryRequestsQueued(final int t) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryRequestsQueued(t);
-  <<Stats: queryRequestsQueued(1)>>
   return output;
 }
 @ %def queryRequestsQueued
@@ -1245,9 +1214,7 @@ Method \textcolor{blue}{[[queryServerRoute]]}(1) wraps [[DBQueryServerRoute]](1)
 \end{tabular}
 <<Read: queryServerRoute(1)>>=
 int[] queryServerRoute(final int sid) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryServerRoute(sid);
-  <<Stats: queryServerRoute(1)>>
   return output;
 }
 @ %def queryServerRoute
@@ -1301,9 +1268,7 @@ Method \textcolor{blue}{[[queryServerRouteRemaining]]}(2) wraps [[DBQueryServerR
 \end{tabular}
 <<Read: queryServerRouteRemaining(2)>>=
 int[] queryServerRouteRemaining(final int sid, final int t) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = this.storage.DBQueryServerRouteRemaining(sid, t);
-  <<Stats: queryServerRouteRemaining(2)>>
   return output;
 }
 @ %def queryServerRouteRemaining
@@ -1324,9 +1289,7 @@ int[] DBQueryServerRouteActive(final int sid) throws SQLException {
 @ %def DBQueryServerRouteActive
 <<Read: queryServerRouteActive(1)>>=
 int[] queryServerRouteActive(final int sid) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = this.storage.DBQueryServerRouteActive(sid);
-  /*<<Stats: queryServerRouteActive(1)>>*/
   return output;
 }
 @ %def queryServerRouteActive
@@ -1388,9 +1351,7 @@ Method \textcolor{blue}{[[queryServerSchedule]]}(1) wraps [[DBQueryServerSchedul
 \end{tabular}
 <<Read: queryServerSchedule(1)>>=
 int[] queryServerSchedule(final int sid) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryServerSchedule(sid);
-  <<Stats: queryServerSchedule(1)>>
   return output;
 }
 @ %def queryServerSchedule
@@ -1468,9 +1429,7 @@ Method \textcolor{blue}{[[queryServerScheduleRemaining]]}(2) wraps [[DBQueryServ
 \end{tabular}
 <<Read: queryServerScheduleRemaining(2)>>=
 int[] queryServerScheduleRemaining(final int sid, final int t) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = this.storage.DBQueryServerScheduleRemaining(sid, t);
-  <<Stats: queryServerScheduleRemaining(2)>>
   return output;
 }
 @ %def queryServerScheduleRemaining
@@ -1521,9 +1480,7 @@ Method \textcolor{blue}{[[queryServerLoadMax]]}(2) wraps [[DBQueryServerLoadMax]
 \end{tabular}
 <<Read: queryServerLoadMax(2)>>=
 int[] queryServerLoadMax(final int sid, final int t) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = this.storage.DBQueryServerLoadMax(sid, t);
-  <<Stats: queryServerLoadMax(2)>>
   return output;
 }
 @ %def queryServerLoadMax
@@ -1669,9 +1626,7 @@ Method \textcolor{blue}{[[queryServerDistanceRemaining]]}(2) wraps [[DBQueryServ
 \end{tabular}
 <<Read: queryServerDistanceRemaining(2)>>=
 int[] queryServerDistanceRemaining(final int sid, final int t) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = this.storage.DBQueryServerDistanceRemaining(sid, t);
-  <<Stats: queryServerDistanceRemaining(2)>>
   return output;
 }
 @ %def queryServerDistanceRemaining
@@ -1810,9 +1765,7 @@ Method \textcolor{blue}{[[queryServerDurationRemaining]]}(2) wraps [[DBQueryServ
 \end{tabular}
 <<Read: queryServerDurationRemaining(2)>>=
 int[] queryServerDurationRemaining(final int sid, final int t) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = this.storage.DBQueryServerDurationRemaining(sid, t);
-  <<Stats: queryServerDurationRemaining(2)>>
   return output;
 }
 @ %def queryServerDurationRemaining
@@ -1942,9 +1895,7 @@ Method \textcolor{blue}{[[queryServerTimeOfDeparture]]}(1) wraps [[DBQueryServer
 \end{tabular}
 <<Read: queryServerTimeOfDeparture(1)>>=
 int[] queryServerTimeOfDeparture(final int sid) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryServerTimeOfDeparture(sid);
-  <<Stats: queryServerTimeOfDeparture(1)>>
   return output;
 }
 @ %def queryServerTimeOfDeparture
@@ -1995,9 +1946,7 @@ Method \textcolor{blue}{[[queryServerTimeOfArrival]]}(1) wraps [[DBQueryServerTi
 \end{tabular}
 <<Read: queryServerTimeOfArrival(1)>>=
 int[] queryServerTimeOfArrival(final int sid) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryServerTimeOfArrival(sid);
-  <<Stats: queryServerTimeOfArrival(1)>>
   return output;
 }
 @ %def queryServerTimeOfArrival
@@ -2128,9 +2077,7 @@ int[] DBQueryServersActive(final int t) throws SQLException {
 @ %def DBQueryServersActive
 <<Read: queryServersActive(1)>>=
 int[] queryServersActive(final int t) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = this.storage.DBQueryServersActive(t);
-  <<Stats: queryServersActive(1)>>
   return output;
 }
 @ %def queryServersActive
@@ -2174,9 +2121,7 @@ Method \textcolor{blue}{[[queryServersCount]]}(0) wraps [[DBQueryServersCount]](
 \end{tabular}
 <<Read: queryServersCount(0)>>=
 int[] queryServersCount() throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryServersCount();
-  <<Stats: queryServersCount(0)>>
   return output;
 }
 @ %def queryServersCount
@@ -2219,9 +2164,7 @@ int[] DBQueryServersCountActive(final int t) throws SQLException {
 @ %def DBQueryServersCountActive
 <<Read: queryServersCountActive(1)>>=
 int[] queryServersCountActive(final int t) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = this.storage.DBQueryServersCountActive(t);
-  <<Stats: queryServersCountActive(1)>>
   return output;
 }
 @ %def queryServersCountActive
@@ -2387,9 +2330,7 @@ Method \textcolor{blue}{[[queryServersLocationsActive]]}(1) wraps [[DBQueryServe
 \end{tabular}
 <<Read: queryServersLocationsActive(1)>>=
 int[] queryServersLocationsActive(final int t) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = this.storage.DBQueryServersLocationsActive(t);
-  <<Stats: queryServersLocationsActive(1)>>
   return output;
 }
 @ %def queryServersLocationsActive
@@ -2462,9 +2403,7 @@ Method \textcolor{blue}{[[queryMetricServiceRate]]}(1) wraps [[DBQueryMetricServ
 \end{tabular}
 <<Read: queryMetricServiceRate(1)>>=
 int[] queryMetricServiceRate(boolean flag_usecache) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryMetricServiceRate(flag_usecache);
-  <<Stats: queryMetricServiceRate(1)>>
   return output;
 }
 @ %def queryMetricServiceRate
@@ -2554,9 +2493,7 @@ Method \textcolor{blue}{[[queryMetricUserDistanceBaseTotal]]}(1) wraps [[DBQuery
 \end{tabular}
 <<Read: queryMetricUserDistanceBaseTotal(1)>>=
 int[] queryMetricUserDistanceBaseTotal(boolean flag_usecache) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryMetricUserDistanceBaseTotal(flag_usecache);
-  <<Stats: queryMetricUserDistanceBaseTotal(1)>>
   return output;
 }
 @ %def queryMetricUserDistanceBaseTotal
@@ -2653,9 +2590,7 @@ Method \textcolor{blue}{[[queryMetricServerDistanceTotal]]}(1) wraps [[DBQueryMe
 \end{tabular}
 <<Read: queryMetricServerDistanceTotal(1)>>=
 int[] queryMetricServerDistanceTotal(boolean flag_usecache) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryMetricServerDistanceTotal(flag_usecache);
-  <<Stats: queryMetricServerDistanceTotal(1)>>
   return output;
 }
 @ %def queryMetricServerDistanceTotal
@@ -2730,9 +2665,7 @@ Method \textcolor{blue}{[[queryMetricServerDistanceBaseTotal]]}(0) wraps [[DBQue
 \end{tabular}
 <<Read: queryMetricServerDistanceBaseTotal(0)>>=
 int[] queryMetricServerDistanceBaseTotal() throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryMetricServerDistanceBaseTotal();
-  <<Stats: queryMetricServerDistanceBaseTotal(0)>>
   return output;
 }
 @ %def queryMetricServerDistanceBaseTotal
@@ -2795,9 +2728,7 @@ Method \textcolor{blue}{[[queryMetricServerDistanceCruisingTotal]]}(1) wraps [[D
 \end{tabular}
 <<Read: queryMetricServerDistanceCruisingTotal(1)>>=
 int[] queryMetricServerDistanceCruisingTotal(boolean flag_usecache) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryMetricServerDistanceCruisingTotal(flag_usecache);
-  <<Stats: queryMetricServerDistanceCruisingTotal(1)>>
   return output;
 }
 @ %def queryMetricServerDistanceCruisingTotal
@@ -2872,9 +2803,7 @@ Method \textcolor{blue}{[[queryMetricServerDistanceServiceTotal]]}(1) wraps [[DB
 \end{tabular}
 <<Read: queryMetricServerDistanceServiceTotal(1)>>=
 int[] queryMetricServerDistanceServiceTotal(boolean flag_usecache) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryMetricServerDistanceServiceTotal(flag_usecache);
-  <<Stats: queryMetricServerDistanceServiceTotal(1)>>
   return output;
 }
 @ %def queryMetricServerDistanceServiceTotal
@@ -2949,9 +2878,7 @@ Method \textcolor{blue}{[[queryMetricServerDurationTravelTotal]]}(1) wraps [[DBQ
 \end{tabular}
 <<Read: queryMetricServerDurationTravelTotal(1)>>=
 int[] queryMetricServerDurationTravelTotal(boolean flag_usecache) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryMetricServerDurationTravelTotal(flag_usecache);
-  <<Stats: queryMetricServerDurationTravelTotal(1)>>
   return output;
 }
 @ %def queryMetricServerDurationTravelTotal
@@ -2999,9 +2926,7 @@ int[] DBQueryMetricServerDurationCruisingTotal() throws SQLException {
 \noindent
 <<Read: queryMetricServerDurationCruisingTotal(1)>>=
 int[] queryMetricServerDurationCruisingTotal(boolean flag_usecache) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryMetricServerDurationCruisingTotal(flag_usecache);
-  <<Stats: queryMetricServerDurationCruisingTotal(1)>>
   return output;
 }
 @ %def queryMetricServerDurationCruisingTotal
@@ -3051,9 +2976,7 @@ int[] DBQueryMetricServerDurationServiceTotal() throws SQLException {
 \noindent
 <<Read: queryMetricServerDurationServiceTotal(1)>>=
 int[] queryMetricServerDurationServiceTotal(boolean flag_usecache) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryMetricServerDurationServiceTotal(flag_usecache);
-  <<Stats: queryMetricServerDurationServiceTotal(1)>>
   return output;
 }
 @ %def queryMetricServerDurationServiceTotal
@@ -3082,9 +3005,7 @@ int[] DBQueryMetricServerTWViolationsTotal() throws SQLException {
 @ %def DBQueryMetricServerTWViolationsTotal
 <<Read: queryMetricServerTWViolationsTotal(0)>>=
 int[] queryMetricServerTWViolationsTotal() throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryMetricServerTWViolationsTotal();
-  <<Stats: queryMetricServerTWViolationsTotal(0)>>
   return output;
 }
 @ %def queryMetricServerTWViolationsTotal
@@ -3129,9 +3050,7 @@ Method \textcolor{blue}{[[queryMetricRequestDistanceBaseTotal]]}(0) wraps [[DBQu
 \end{tabular}
 <<Read: queryMetricRequestDistanceBaseTotal(0)>>=
 int[] queryMetricRequestDistanceBaseTotal() throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryMetricRequestDistanceBaseTotal();
-  <<Stats: queryMetricRequestDistanceBaseTotal(0)>>
   return output;
 }
 @ %def queryMetricRequestDistanceBaseTotal
@@ -3195,9 +3114,7 @@ Method \textcolor{blue}{[[queryMetricRequestDistanceBaseUnassignedTotal]]}(1) wr
 \end{tabular}
 <<Read: queryMetricRequestDistanceBaseUnassignedTotal(1)>>=
 int[] queryMetricRequestDistanceBaseUnassignedTotal(boolean flag_usecache) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryMetricRequestDistanceBaseUnassignedTotal(flag_usecache);
-  <<Stats: queryMetricRequestDistanceBaseUnassignedTotal(1)>>
   return output;
 }
 @ %def queryMetricRequestDistanceBaseUnassignedTotal
@@ -3296,9 +3213,7 @@ Method \textcolor{blue}{[[queryMetricRequestDistanceDetourTotal]]}(1) wraps [[DB
 \end{tabular}
 <<Read: queryMetricRequestDistanceDetourTotal(1)>>=
 int[] queryMetricRequestDistanceDetourTotal(boolean flag_usecache) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryMetricRequestDistanceDetourTotal(flag_usecache);
-  <<Stats: queryMetricRequestDistanceDetourTotal(1)>>
   return output;
 }
 @ %def queryMetricRequestDistanceDetourTotal
@@ -3373,9 +3288,7 @@ Method \textcolor{blue}{[[queryMetricRequestDistanceTransitTotal]]}(1) wraps [[D
 \end{tabular}
 <<Read: queryMetricRequestDistanceTransitTotal(1)>>=
 int[] queryMetricRequestDistanceTransitTotal(boolean flag_usecache) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryMetricRequestDistanceTransitTotal(flag_usecache);
-  <<Stats: queryMetricRequestDistanceTransitTotal(1)>>
   return output;
 }
 @ %def queryMetricRequestDistanceTransitTotal
@@ -3450,9 +3363,7 @@ Method \textcolor{blue}{[[queryMetricRequestDurationPickupTotal]]}(1) wraps [[DB
 \end{tabular}
 <<Read: queryMetricRequestDurationPickupTotal(1)>>=
 int[] queryMetricRequestDurationPickupTotal(boolean flag_usecache) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryMetricRequestDurationPickupTotal(flag_usecache);
-  <<Stats: queryMetricRequestDurationPickupTotal(1)>>
   return output;
 }
 @ %def queryMetricRequestDurationPickupTotal
@@ -3527,9 +3438,7 @@ Method \textcolor{blue}{[[queryMetricRequestDurationTransitTotal]]}(1) wraps [[D
 \end{tabular}
 <<Read: queryMetricRequestDurationTransitTotal(1)>>=
 int[] queryMetricRequestDurationTransitTotal(boolean flag_usecache) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryMetricRequestDurationTransitTotal(flag_usecache);
-  <<Stats: queryMetricRequestDurationTransitTotal(1)>>
   return output;
 }
 @ %def queryMetricRequestDurationTransitTotal
@@ -3604,9 +3513,7 @@ Method \textcolor{blue}{[[queryMetricRequestDurationTravelTotal]]}(1) wraps [[DB
 \end{tabular}
 <<Read: queryMetricRequestDurationTravelTotal(1)>>=
 int[] queryMetricRequestDurationTravelTotal(boolean flag_usecache) throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryMetricRequestDurationTravelTotal(flag_usecache);
-  <<Stats: queryMetricRequestDurationTravelTotal(1)>>
   return output;
 }
 @ %def queryMetricRequestDurationTravelTotal
@@ -3635,9 +3542,7 @@ int[] DBQueryMetricRequestTWViolationsTotal() throws SQLException {
 @ %def DBQueryMetricRequestTWViolationsTotal
 <<Read: queryMetricRequestTWViolationsTotal(0)>>=
 int[] queryMetricRequestTWViolationsTotal() throws SQLException {
-  long A0 = System.currentTimeMillis();
   int[] output = storage.DBQueryMetricRequestTWViolationsTotal();
-  <<Stats: queryMetricRequestTWViolationsTotal(0)>>
   return output;
 }
 @ %def queryMetricRequestTWViolationsTotal

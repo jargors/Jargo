@@ -15,69 +15,14 @@ import com.github.jargors.sim.TimeWindowException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.sql.SQLException;
-import com.github.jargors.jmx.*;
-import java.lang.management.*;
-import javax.management.*;
 public class Communicator {
   private Storage storage;
   private Controller controller;
   private Traffic traffic = null;
   private final boolean DEBUG = "true".equals(System.getProperty("jargors.communicator.debug"));
-  private long statQueryEdgeDur = 0;
-  private long statQueryServerDistanceRemainingDur = 0;
-  private long statQueryServerDurationRemainingDur = 0;
-  private long statQueryServerLoadMaxDur = 0;
-  private long statQueryServerRouteRemainingDur = 0;
-  private long statQueryServerScheduleRemainingDur = 0;
-  private long statQueryServersLocationsActiveDur = 0;
-  private long statQueryUserDur = 0;
-  private long statQueryVertexDur = 0;
-  private long statUpdateServerAddToScheduleDur = 0;
-  private long statUpdateServerRemoveFromScheduleDur = 0;
-  private long statUpdateServerRouteDur = 0;
-  public Communicator() {
-    try {
-      MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-      CommunicatorMonitor mon = new CommunicatorMonitor(this);
-      mbs.registerMBean(mon, new ObjectName("com.github.jargors.jmx:type=CommunicatorMonitor"));
-    } catch (InstanceAlreadyExistsException e) {
-      // ...
-    } catch (Exception e) {
-      System.err.printf("CommunicatorMonitor failed; reason: %s\n", e.toString());
-      System.err.printf("Continuing with monitoring disabled\n");
-    }
-  }
-  public long getStatQueryEdgeDur() {
-           return this.statQueryEdgeDur;
-         }
-  public long getStatQueryServerDistanceRemainingDur() {
-           return this.statQueryServerDistanceRemainingDur;
-         }
-  public long getStatQueryServerDurationRemainingDur() {
-           return this.statQueryServerDurationRemainingDur;
-         }
-  public long getStatQueryServerLoadMaxDur() {
-           return this.statQueryServerLoadMaxDur;
-         }
-  public long getStatQueryServerRouteRemainingDur() {
-           return this.statQueryServerRouteRemainingDur;
-         }
-  public long getStatQueryServerScheduleRemainingDur() {
-           return this.statQueryServerScheduleRemainingDur;
-         }
-  public long getStatQueryServersLocationsActiveDur() {
-           return this.statQueryServersLocationsActiveDur;
-         }
-  public long getStatQueryUserDur() {
-           return this.statQueryUserDur;
-         }
-  public long getStatQueryVertexDur() {
-           return this.statQueryVertexDur;
-         }
+  public Communicator() { }
   public int[] queryEdge(final int v1, final int v2) throws EdgeNotFoundException, SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryEdge(v1, v2);
-           this.statQueryEdgeDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryServerCapacityViolations(final int sid,
@@ -85,67 +30,48 @@ public class Communicator {
            return this.storage.DBQueryServerCapacityViolations(sid, rq, tp, td);
          }
   public int[] queryServerDistanceRemaining(final int sid, final int t) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryServerDistanceRemaining(sid, t);
-           this.statQueryServerDistanceRemainingDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryServerDurationRemaining(final int sid, final int t) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryServerDurationRemaining(sid, t);
-           this.statQueryServerDurationRemainingDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryServerDurationTravel(final int sid, boolean flag_usecache) throws SQLException {
            return storage.DBQueryServerDurationTravel(sid, flag_usecache);
          }
   public int[] queryServerLoadMax(final int sid, final int t) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryServerLoadMax(sid, t);
-           this.statQueryServerLoadMaxDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryServerRouteActive(final int sid) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryServerRouteActive(sid);
-           /*this.statQueryServerRouteActiveDur = (System.currentTimeMillis() - A0);*/
            return output;
          }
   public int[] queryServerRouteRemaining(final int sid, final int t) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryServerRouteRemaining(sid, t);
-           this.statQueryServerRouteRemainingDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryServerScheduleRemaining(final int sid, final int t) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryServerScheduleRemaining(sid, t);
-           this.statQueryServerScheduleRemainingDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryServersLocationsActive(final int t) throws SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryServersLocationsActive(t);
-           this.statQueryServersLocationsActiveDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryUser(final int rid) throws UserNotFoundException, SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = storage.DBQueryUser(rid);
-           this.statQueryUserDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public int[] queryVertex(final int v) throws VertexNotFoundException, SQLException {
-           long A0 = System.currentTimeMillis();
            int[] output = this.storage.DBQueryVertex(v);
-           this.statQueryVertexDur = (System.currentTimeMillis() - A0);
            return output;
          }
   public void updateServerService(final int sid, final int[] route, final int[] sched,
              final int[] ridpos, final int[] ridneg)
          throws RouteIllegalOverwriteException, UserNotFoundException,
                 EdgeNotFoundException, TimeWindowException, SQLException {
-           long A0 = System.currentTimeMillis();
            final int[] current = this.storage.DBQueryServerRoute(sid);
            int t_now  = this.retrieveClock();
            int t_next = t_now;
@@ -231,7 +157,6 @@ public class Communicator {
              }
            }
            this.storage.DBUpdateServerService(sid, mutroute, mutsched, ridpos, ridneg);
-           /*<Stats: updateServerService(5)>*/
          }
   public int retrieveClock() {
            return this.controller.getClock();

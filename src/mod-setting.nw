@@ -1,33 +1,21 @@
 \chapter{Ridesharing Model}
 \label{ch-model}
 
+Physical concepts, such as customers, vehicles, and ridesharing service-related
+metrics, are defined on Jargo's data tables using relational and set algebra.
+For a primer on relations and notes on notation used in this document, see
+Appendix~\ref{ap-primer}.
+
 \section{Ridesharing Setting}
 \label{mod-setting}
 
-\begin{quote}
-\textit{
-Feel free to skip this part if you are not interested in tinkering with
-Jargo's data model.}
-\end{quote}
-
-In Jargo, ridesharing customers and vehicles are described by rows of data,
-organized into tables. Constraints on the tables define the valid ranges for
-the data values. Table operations read and manipulate the ridesharing state by
-reading or updating these data in particular ways. Physical concepts, such as
-ridesharing service-related metrics, are defined on the rows and columns
-through relational and set algebra. For a primer on relations and notes on
-notation used in this document, see Appendix~\ref{ap-primer}.
-
-Ridesharing takes place through time and space. This chapter describes Jargo's
-model for these physical concepts.
+This section describes Jargo's model for the ridesharing setting.
 
 \subsection{Time}
 \label{mod-setting: time}
 
 Time is modeled as a positive integer $1\leq t\leq H$. A time horizon $H$
-bounds the system.
-
-Time is occasionally operated on. Times cannot be added, and only a later
+bounds the system. Time can be operated on. Times cannot be added, but a later
 (greater) time can subtract an earlier (lesser) time. The difference is called
 a duration, represented by the symbol $\delta$. Durations can add and subtract
 each other to get new durations, and times can also add and subtract durations
@@ -38,23 +26,22 @@ to get new times.
 
 The road network is modeled as a directed graph
 $\mathcal{G}(\mathcal{V},\mathcal{E})$. Vertices in $\mathcal{V}$ represent
-points along roads in the network.  Jargo assumes a function
-${V:\mathcal{V}\rightarrow \mathbb{R}^2}$ exists that maps vertices to
-$2$-dimensional latitude and longitude coordinates in the real world, and that
-an inverse function map-matches customers and vehicles to vertices.  Edges in
-$\mathcal{E}$ represent road segments. The pair $(a,b)\in \mathcal{V}^2, a\neq
-b$ exists in $\mathcal{E}$ only if physical traffic flows from $V(a)$ to
-$V(b)$, and for all $c\in \mathcal{V}\setminus\{a,b\}$ no traffic flows from
-$V(a)$ to $V(c)$ and from $V(c)$ to $V(b)$.  Jargo also assumes that a function
-${d:\mathcal{E}\rightarrow\mathbb{R}_{>0}}$ exists that maps edges to positive
-real weights corresponding to distance along the edge, and that the
-shortest-path distances between the pairs among any three vertices satisfies
-the triangle inequality. Figure~\ref{fig:road} shows an example road network,
-drawn in QGIS, that could be supported by Jargo's model.
+points along roads in the network.  A function ${V:\mathcal{V}\rightarrow
+\mathbb{R}^2}$ maps vertices to $2$-dimensional latitude and longitude
+coordinates in the real world, and an inverse function map-matches customers
+and vehicles to vertices. Edges in $\mathcal{E}$ represent road segments. The
+pair $(a,b)\in \mathcal{V}^2, a\neq b$ exists in $\mathcal{E}$ only if physical
+traffic flows from $V(a)$ to $V(b)$, and for all $c\in
+\mathcal{V}\setminus\{a,b\}$ no traffic flows from $V(a)$ to $V(c)$ and from
+$V(c)$ to $V(b)$. A function ${d:\mathcal{E}\rightarrow\mathbb{R}_{>0}}$ maps
+edges to positive real weights corresponding to distance along the edge, and
+the shortest-path distances between the pairs among any three vertices
+satisfies the triangle inequality. Figure~\ref{fig:road} shows an example road
+network, drawn in QGIS, that could be supported by Jargo's model.
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.8\textwidth]{res/road}
+\includegraphics[width=0.8\textwidth]{res/doc-fig/road}
 \caption{Portion of a road network graph showing edges (red lines) and vertices
 (blue circles) overlayed on top of Manhattan (QGIS 2.18.16, Bing Aerial).
 Vertices do not have to be at an intersection (orange circles, lower right).}
