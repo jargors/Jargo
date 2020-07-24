@@ -1,16 +1,16 @@
 package com.github.jargors.client;
 import com.github.jargors.sim.*;
 import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
+import java.util.HashMap;
 public class GreedyInsertionFallback extends Client {
-  final int MAX_PROXIMITY = 600;
+  final int MAX_PROXIMITY = 1800;
   final int MAX_SCHEDULE_LENGTH = 8;
   final int QUEUE_THRESHOLD = 30;
+  public void init() {
+    System.out.printf("Set MAX_PROXIMITY=%d\n", MAX_PROXIMITY);
+  }
   protected void handleRequest(int[] r) throws ClientException, ClientFatalException {
               if (DEBUG) {
                 System.out.printf("got request={ %d, %d, %d, %d, %d, %d, %d }\n",
@@ -76,18 +76,9 @@ public class GreedyInsertionFallback extends Client {
                 while (!candidates.isEmpty()) {
 
                   Entry<Integer, Integer> cand = null;
-                  if (fallback) {
-                    for (final Entry<Integer, Integer> entry : candidates.entrySet()) {
-                      if (cand == null || cand.getValue() > entry.getValue()) {
-                        cand = entry;
-                      }
-                    }
-                  } else {
-                    {
-                      Random random = new Random();
-                      List<Integer> keys = new ArrayList<Integer>(candidates.keySet());
-                      int randomKey = keys.get(random.nextInt(keys.size()));
-                      cand = Map.entry(randomKey, candidates.get(randomKey));
+                  for (final Entry<Integer, Integer> entry : candidates.entrySet()) {
+                    if (cand == null || cand.getValue() > entry.getValue()) {
+                      cand = entry;
                     }
                   }
                   if (DEBUG) {

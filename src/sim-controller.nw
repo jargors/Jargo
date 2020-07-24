@@ -44,6 +44,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.Random;
 @ \item standard classes for file operations;
 <<Controller.java preamble>>=
 import java.util.Scanner;
@@ -69,6 +70,7 @@ Member variables are grouped into \emph{containers}, \emph{settings}, and
 @
 \hi{Containers.}
 <<Container objects>>=
+private Random random = new Random();
 private Storage storage;
 private Communicator communicator;
 private Tools tools = new Tools();
@@ -87,6 +89,10 @@ private long dur_query = 0;
 
 \hi{Settings.} Settings objects configure various aspects of the simulation.
 <<Settings objects>>=
+private int MEAN_DELAY =  // in minutes
+    Integer.parseInt(System.getProperty("jargors.controller.mean_delay", "5"));
+private int STD_DELAY =   // in minutes
+    Integer.parseInt(System.getProperty("jargors.controller.std_delay", "2"));
 private int CLOCK_START =
     Integer.parseInt(System.getProperty("jargors.controller.clock_start", "0"));
 private int CLOCK_END =
@@ -129,6 +135,13 @@ Pass [[-Djargors.controller.debug=true]] to the [[java]] command to set
 <<Settings objects>>=
 private final boolean DEBUG =
     "true".equals(System.getProperty("jargors.controller.debug"));
+@
+Added v1.0.1: the [[SNAPSHOT]] setting controls whether or not to export
+snapshots of the server relation every minute. Pass
+[[-Djargors.controller.snapshot=true]] to set the flag.
+<<Settings objects>>=
+private final boolean SNAPSHOT =
+    "true".equals(System.getProperty("jargors.controller.snapshot"));
 @
 
 \hi{Loops.} Jargo's simulation environment comprises four ``loops'', defined
@@ -174,6 +187,20 @@ private Runnable ClockLoop = () -> {
   if (this.simClockReferenceSecond > 59) {
     this.simClockReferenceSecond = 0;
     this.simClockReferenceMinute++;
+    if (SNAPSHOT) {
+      try {
+        this.instanceExport(String.format("snapshot%06d", this.simClock));
+      } catch (SQLException e) {
+        if (e.getErrorCode() == 40000) {
+          System.err.println("Warning: database connection interrupted");
+        } else {
+          System.err.println("Encountered fatal error");
+            System.err.println(e.toString());
+            System.err.println(e.getErrorCode());
+            e.printStackTrace();
+        }
+      }
+    }
     if (this.simClockReferenceMinute > 59) {
       this.simClockReferenceMinute = 0;
       this.simClockReferenceHour++;
@@ -390,20 +417,6 @@ public Controller() {
 @
 
 \subsection{Chunks}
-<<Read header rows>>=
-System.out.println(sc.next());
-System.out.println(sc.next());
-System.out.println(sc.next());
-System.out.println(sc.next());
-System.out.println(sc.next());
-this.setClockReference(sc.next());
-System.out.println(sc.next());
-System.out.println(sc.next());
-System.out.println(sc.next());
-System.out.println(sc.next());
-System.out.println(sc.next());
-System.out.println(sc.next());
-@
 
 \subsection{Methods}
 \subsubsection{Read Methods}
@@ -571,94 +584,61 @@ long getQueryDur() {
 
 \subsubsection{\texttt{loadRoadNetworkFromFile}(1)}
 <<Controller: loadRoadNetworkFromFile(1)>>=
-void loadRoadNetworkFromFile(final String f_rnet) throws FileNotFoundException, SQLException {
-  if (DEBUG) {
-    System.out.printf("loadRoadNetworkFileFile(1), arg1=%s\n", f_rnet);
+void loadRoadNetworkFromFile(final String f_rnet)
+throws FileNotFoundException, SQLException {
+  try {
+    this.storage.DBInsertVertex(0, 0, 0);
+  } catch (DuplicateVertexException e) {
+    // ...
   }
   Scanner sc = new Scanner(new File(f_rnet));
   while (sc.hasNext()) {
-@ %def loadRoadNetworkFromFile
-{\small If a vertex identifier is $0$, then we store its coordinates as $(0,0)$. We
-still call [[Scanner.nextDouble]](0) because we need to advance to the next
-token.}
-<<Controller: loadRoadNetworkFromFile(1)>>=
-final int col0 = sc.nextInt();
-final int col1 = sc.nextInt();
-final int col2 = sc.nextInt();
-final int col3 = (col1 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
-final int col4 = (col1 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
-final int col5 = (col2 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
-final int col6 = (col2 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
-@
-{\small Now we insert the vertices into the database.}
-<<Controller: loadRoadNetworkFromFile(1)>>=
-try {
-  this.storage.DBInsertVertex(col1, col3, col4);
-} catch (DuplicateVertexException e) {
-  if (DEBUG) {
-    // System.err.println("Warning! Duplicate vertex ignored.");
-  }
-}
-try {
-  this.storage.DBInsertVertex(col2, col5, col6);
-} catch (DuplicateVertexException e) {
-  if (DEBUG) {
-    // System.err.println("Warning! Duplicate vertex ignored.");
-  }
-}
-@
-{\small We use haversine to compute edge weights\footnote{If the distance between two
-vertices is 0 due to rounding, then we round it up to 1.}.  If one of the
-vertices in the edge is a dummy vertex, we set the weight to 0\footnote{The
-dummy vertex should only terminate and never begin an edge in the road network,
-otherwise a shortest path could take a shortcut through the dummy vertex to
-reach any other vertex with 0 weight!}.}
-<<Controller: loadRoadNetworkFromFile(1)>>=
-final int dist = ((col1 != 0 && col2 != 0)
-  ? this.tools.computeHaversine(
-        col3/CSHIFT, col4/CSHIFT,
-        col5/CSHIFT, col6/CSHIFT) : 0);
-@
-{\small The fifth parameter is the \textit{initial speed} on all the edges
-\footnote{In the future, the speed on each edge may be recorded directly in the
-road network file instead of hardcoded here.}.}
-<<Controller: loadRoadNetworkFromFile(1)>>=
-try {
-  this.storage.DBInsertEdge(col1, col2, dist, 10);
-} catch (DuplicateEdgeException e) {
-  if (DEBUG) {
-    // System.err.println("Warning! Duplicate edge ignored.");
-  }
-}
-@
-{\small Now we close the [[while]] loop and register the caches to Tools.}
-<<Controller: loadRoadNetworkFromFile(1)>>=
+    final int col0 = sc.nextInt();
+    final int col1 = sc.nextInt();
+    final int col2 = sc.nextInt();
+    final int col3 = (int) Math.round(sc.nextDouble()*CSHIFT);
+    final int col4 = (int) Math.round(sc.nextDouble()*CSHIFT);
+    final int col5 = (int) Math.round(sc.nextDouble()*CSHIFT);
+    final int col6 = (int) Math.round(sc.nextDouble()*CSHIFT);
+    final int dist = this.tools.computeHaversine(
+          col3/CSHIFT, col4/CSHIFT, col5/CSHIFT, col6/CSHIFT);
+    try {
+      this.storage.DBInsertVertex(col1, col3, col4);
+    } catch (DuplicateVertexException e) { /*...*/ }
+    try {
+      this.storage.DBInsertVertex(col2, col5, col6);
+    } catch (DuplicateVertexException e) { /*...*/ }
+    try {
+      this.storage.DBInsertEdge(col1, col2, dist, 10);  // TODO: 10 speed
+    } catch (DuplicateEdgeException e) { /*...*/ }
+    try {
+      this.storage.DBInsertEdge(col1, 0, 0, 10);
+    } catch (DuplicateEdgeException e) { /*...*/ }
+    try {
+      this.storage.DBInsertEdge(col2, 0, 0, 10);
+    } catch (DuplicateEdgeException e) { /*...*/ }
   }
   this.tools.setRefCacheVertices(this.storage.getRefCacheVertices());
   this.tools.setRefCacheEdges(this.storage.getRefCacheEdges());
 }
-@
+@ %def loadRoadNetworkFromFile
 
 \subsubsection{\texttt{loadProblem(1)}}
 <<Controller: loadProblem(1)>>=
 void loadProblem(String p)
-throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException, SQLException,
-       GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException {
+throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException,
+SQLException, GtreeNotLoadedException, GtreeIllegalSourceException,
+GtreeIllegalTargetException {
   Scanner sc = new Scanner(new File(p));
-  <<Read header rows>>
-  if (DEBUG) {
-    System.out.printf("loadProblem(1), arg1=%s\n", p);
-    System.out.printf("Set reference string '%s'\n", this.refTimeStr);
-    System.out.printf("Set reference milliseconds from midnight '%d'\n", this.refTimeMs);
-  }
   while (sc.hasNext()) {
     final int uid = sc.nextInt();
     final int  uo = sc.nextInt();
     final int  ud = sc.nextInt();
     final int  uq = sc.nextInt();
     final int  ue = sc.nextInt();
-    final int  ul = sc.nextInt();
     final int  ub = this.tools.computeShortestPathDistance(uo, ud);
+    final int  ul = ue + (ub/10)  // TODO: 10 speed
+        + (int) Math.round(this.random.nextGaussian()*this.STD_DELAY + this.MEAN_DELAY);
     if (uq < 0) {
       this.insertServer(new int[] { uid, uq, ue, ul, uo, ud, ub });
     } else {
@@ -752,7 +732,7 @@ void startRealtime(final Consumer<Boolean> app_cb) {
 <<Controller: startSequential(1)>>=
 void startSequential(final Consumer<Boolean> app_cb) throws Exception {
   if (DEBUG) {
-    System.out.printf("startSequuential(1)\n");
+    System.out.printf("startSequential(1)\n");
   }
   this.storage.setRequestTimeout(REQUEST_TIMEOUT);
   this.simClock = CLOCK_START;

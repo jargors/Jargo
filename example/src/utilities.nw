@@ -1,0 +1,21 @@
+\part{Utilities}
+\label{part-utilities}
+
+<<Utilities: route cache>>=
+final Map<Integer, int[]> cache_routes = new HashMap<Integer, int[]>();
+@
+
+<<Utilities: put route cache>>=
+cache_routes.put(sid, wnew);
+@
+
+<<Utilities: get route cache>>=
+if (cache_routes.containsKey(sid)) {
+  route = cache_routes.get(sid);
+} else {
+  route = this.communicator.queryServerRouteRemaining(sid,
+    this.communicator.retrieveClock());
+  cache_routes.put(sid, route);
+}
+@
+

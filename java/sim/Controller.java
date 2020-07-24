@@ -22,6 +22,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.Random;
 import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.sql.SQLException;
 public class Controller {
+  private Random random = new Random();
   private Storage storage;
   private Communicator communicator;
   private Tools tools = new Tools();
@@ -43,6 +45,10 @@ public class Controller {
   private int simClockReferenceHour = 0;
   private int simClockReferenceSecond = 0;
   private long dur_query = 0;
+  private int MEAN_DELAY =  // in minutes
+      Integer.parseInt(System.getProperty("jargors.controller.mean_delay", "5"));
+  private int STD_DELAY =   // in minutes
+      Integer.parseInt(System.getProperty("jargors.controller.std_delay", "2"));
   private int CLOCK_START =
       Integer.parseInt(System.getProperty("jargors.controller.clock_start", "0"));
   private int CLOCK_END =
@@ -71,6 +77,8 @@ public class Controller {
   private ScheduledFuture<?> cb5 = null;
   private final boolean DEBUG =
       "true".equals(System.getProperty("jargors.controller.debug"));
+  private final boolean SNAPSHOT =
+      "true".equals(System.getProperty("jargors.controller.snapshot"));
   private Runnable ClockLoop = () -> {
     // TODO: The speed of the updateServer.. methods is about 50ms, meaning we
     // can do ~20 updates per second. If a problem instance has more than 20
@@ -87,6 +95,20 @@ public class Controller {
     if (this.simClockReferenceSecond > 59) {
       this.simClockReferenceSecond = 0;
       this.simClockReferenceMinute++;
+      if (SNAPSHOT) {
+        try {
+          this.instanceExport(String.format("snapshot%06d", this.simClock));
+        } catch (SQLException e) {
+          if (e.getErrorCode() == 40000) {
+            System.err.println("Warning: database connection interrupted");
+          } else {
+            System.err.println("Encountered fatal error");
+              System.err.println(e.toString());
+              System.err.println(e.getErrorCode());
+              e.printStackTrace();
+          }
+        }
+      }
       if (this.simClockReferenceMinute > 59) {
         this.simClockReferenceMinute = 0;
         this.simClockReferenceHour++;
@@ -628,34 +650,19 @@ public class Controller {
            return this.dur_query;
          }
   public void loadProblem(String p)
-         throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException, SQLException,
-                GtreeNotLoadedException, GtreeIllegalSourceException, GtreeIllegalTargetException {
+         throws FileNotFoundException, DuplicateUserException, EdgeNotFoundException,
+         SQLException, GtreeNotLoadedException, GtreeIllegalSourceException,
+         GtreeIllegalTargetException {
            Scanner sc = new Scanner(new File(p));
-           System.out.println(sc.next());
-           System.out.println(sc.next());
-           System.out.println(sc.next());
-           System.out.println(sc.next());
-           System.out.println(sc.next());
-           this.setClockReference(sc.next());
-           System.out.println(sc.next());
-           System.out.println(sc.next());
-           System.out.println(sc.next());
-           System.out.println(sc.next());
-           System.out.println(sc.next());
-           System.out.println(sc.next());
-           if (DEBUG) {
-             System.out.printf("loadProblem(1), arg1=%s\n", p);
-             System.out.printf("Set reference string '%s'\n", this.refTimeStr);
-             System.out.printf("Set reference milliseconds from midnight '%d'\n", this.refTimeMs);
-           }
            while (sc.hasNext()) {
              final int uid = sc.nextInt();
              final int  uo = sc.nextInt();
              final int  ud = sc.nextInt();
              final int  uq = sc.nextInt();
              final int  ue = sc.nextInt();
-             final int  ul = sc.nextInt();
              final int  ub = this.tools.computeShortestPathDistance(uo, ud);
+             final int  ul = ue + (ub/10)  // TODO: 10 speed
+                 + (int) Math.round(this.random.nextGaussian()*this.STD_DELAY + this.MEAN_DELAY);
              if (uq < 0) {
                this.insertServer(new int[] { uid, uq, ue, ul, uo, ud, ub });
              } else {
@@ -663,44 +670,39 @@ public class Controller {
              }
            }
          }
-  public void loadRoadNetworkFromFile(final String f_rnet) throws FileNotFoundException, SQLException {
-           if (DEBUG) {
-             System.out.printf("loadRoadNetworkFileFile(1), arg1=%s\n", f_rnet);
+  public void loadRoadNetworkFromFile(final String f_rnet)
+         throws FileNotFoundException, SQLException {
+           try {
+             this.storage.DBInsertVertex(0, 0, 0);
+           } catch (DuplicateVertexException e) {
+             // ...
            }
            Scanner sc = new Scanner(new File(f_rnet));
            while (sc.hasNext()) {
-         final int col0 = sc.nextInt();
-         final int col1 = sc.nextInt();
-         final int col2 = sc.nextInt();
-         final int col3 = (col1 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
-         final int col4 = (col1 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
-         final int col5 = (col2 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
-         final int col6 = (col2 == 0 ? (int) (0*sc.nextDouble()) : (int) Math.round(sc.nextDouble()*CSHIFT));
-         try {
-           this.storage.DBInsertVertex(col1, col3, col4);
-         } catch (DuplicateVertexException e) {
-           if (DEBUG) {
-             // System.err.println("Warning! Duplicate vertex ignored.");
-           }
-         }
-         try {
-           this.storage.DBInsertVertex(col2, col5, col6);
-         } catch (DuplicateVertexException e) {
-           if (DEBUG) {
-             // System.err.println("Warning! Duplicate vertex ignored.");
-           }
-         }
-         final int dist = ((col1 != 0 && col2 != 0)
-           ? this.tools.computeHaversine(
-                 col3/CSHIFT, col4/CSHIFT,
-                 col5/CSHIFT, col6/CSHIFT) : 0);
-         try {
-           this.storage.DBInsertEdge(col1, col2, dist, 10);
-         } catch (DuplicateEdgeException e) {
-           if (DEBUG) {
-             // System.err.println("Warning! Duplicate edge ignored.");
-           }
-         }
+             final int col0 = sc.nextInt();
+             final int col1 = sc.nextInt();
+             final int col2 = sc.nextInt();
+             final int col3 = (int) Math.round(sc.nextDouble()*CSHIFT);
+             final int col4 = (int) Math.round(sc.nextDouble()*CSHIFT);
+             final int col5 = (int) Math.round(sc.nextDouble()*CSHIFT);
+             final int col6 = (int) Math.round(sc.nextDouble()*CSHIFT);
+             final int dist = this.tools.computeHaversine(
+                   col3/CSHIFT, col4/CSHIFT, col5/CSHIFT, col6/CSHIFT);
+             try {
+               this.storage.DBInsertVertex(col1, col3, col4);
+             } catch (DuplicateVertexException e) { /*...*/ }
+             try {
+               this.storage.DBInsertVertex(col2, col5, col6);
+             } catch (DuplicateVertexException e) { /*...*/ }
+             try {
+               this.storage.DBInsertEdge(col1, col2, dist, 10);  // TODO: 10 speed
+             } catch (DuplicateEdgeException e) { /*...*/ }
+             try {
+               this.storage.DBInsertEdge(col1, 0, 0, 10);
+             } catch (DuplicateEdgeException e) { /*...*/ }
+             try {
+               this.storage.DBInsertEdge(col2, 0, 0, 10);
+             } catch (DuplicateEdgeException e) { /*...*/ }
            }
            this.tools.setRefCacheVertices(this.storage.getRefCacheVertices());
            this.tools.setRefCacheEdges(this.storage.getRefCacheEdges());
@@ -775,7 +777,7 @@ public class Controller {
          }
   public void startSequential(final Consumer<Boolean> app_cb) throws Exception {
            if (DEBUG) {
-             System.out.printf("startSequuential(1)\n");
+             System.out.printf("startSequential(1)\n");
            }
            this.storage.setRequestTimeout(REQUEST_TIMEOUT);
            this.simClock = CLOCK_START;

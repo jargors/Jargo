@@ -150,6 +150,12 @@ public class Storage {
              throw e;
            }
          }
+  public int[] DBQueryMetricCountAssigned() {
+           return new int[] { this.count_assigned };
+         }
+  public int[] DBQueryMetricRequestDistanceBaseAssigned() {
+           return new int[] { this.sum_distance_base_requests - this.sum_distance_unassigned };
+         }
   public int[] DBQueryMetricRequestDistanceBaseTotal() throws SQLException {
            // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
            //   return PSQuery(conn, "S111", 1);

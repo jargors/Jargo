@@ -7,10 +7,6 @@ immediately from further consideration. This chapter implements some example
 map and filter functions for determining fitness and whether or not to keep a
 server.
 
-% \section{Last Event Time}
-% \section{Upcoming Event Time}
-% \section{Upcoming Event Distance}
-
 \section{Schedule Length}
 
 A server with a very long schedule can be difficult to evaluate because there
@@ -26,13 +22,6 @@ for (final int sid : candidates.keySet()) {
 }
 @
 
-% \section{Total Travel Duration}
-% \section{Total Travel Distance}
-% \section{Total Cruising Duration}
-% \section{Total Cruising Distance}
-% \section{Total Service Duration}
-% \section{Total Service Distance}
-
 \section{Proximity}
 
 Proximity is easy to compute and can be used to approximate actual pick-up
@@ -46,10 +35,33 @@ for (final int sid : candidates.keySet()) {
 }
 @
 
-% \section{Road Proximity}
+\section{Perpendicular}
 
-\section{Routing Cost}
+<<Map/Filter: Perpendicular>>=
+int __now = this.communicator.retrieveClock();
+for (final int sid : candidates.keySet()) {
+  int[] route = { };
+  <<Utilities: get route cache>>
+  int min_to_o = Integer.MAX_VALUE;
+  int min_to_d = Integer.MAX_VALUE;
+  for (int __i = 0; __i < route.length - 1; __i += 2*ROUTE_SKIP_EVERY_N) {
+    if (route[__i] > __now) {
+      int val_to_o = this.tools.computeHaversine(route[(__i + 1)], ro);
+      int val_to_d = this.tools.computeHaversine(route[(__i + 1)], rd);
+      if (val_to_o < min_to_o) {
+          min_to_o = val_to_o;
+      }
+      if (val_to_d < min_to_d) {
+          min_to_d = val_to_d;
+      }
+    }
+  }
+  if (min_to_o == Integer.MAX_VALUE || min_to_d == Integer.MAX_VALUE) {
+    min_to_o = candidates.get(sid);  // carry over the existing value
+    min_to_d = 0;
+  }
+  results.put(sid, (min_to_o + min_to_d));
+}
+@
 
-% \section{Number of Assignments}
-% \section{Profit}
 

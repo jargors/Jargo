@@ -1,16 +1,5 @@
-.PHONY : all clean
-
-obj=\
-	DBUpdateServerServiceT1.class \
-	DBUpdateServerServiceT2.class \
-	DBUpdateServerServiceT3.class \
-	CacheT1.class \
-	CacheT2.class
-
-all : $(obj)
-
-$(obj) : %.class : src/%.java
-	javac -Xlint:deprecation -Xlint:unchecked -d . -cp .:algo/*:../jar/*:$(JUNIT)/* $<
+all :
+	javac -d . -cp ../jar/jargors-*.jar java/*.java
 
 clean :
-	rm *.class
+	rm -rf com/
