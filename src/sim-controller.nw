@@ -318,9 +318,6 @@ private Runnable RequestHandlingLoop = () -> {
   } catch (ClientException e) {
     System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientException: %s\n",
         this.simClock, e.toString());
-    // try {
-    //   instanceExport("debug-db");
-    // } catch (Exception ee) { }
     e.printStackTrace();
   } catch (ClientFatalException e) {
     System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientFatalException: %s\n",
@@ -506,6 +503,7 @@ public <<Admin: instanceExport(1)>>
 public <<Admin: instanceInitialize(0)>>
 public <<Admin: instanceLoad(1)>>
 public <<Admin: instanceNew(0)>>
+public <<Admin: instanceReset(0)>>
 public <<Admin: getClock(0)>>
 public <<Admin: getClockStart(0)>>
 public <<Admin: getClockReference(0)>>
@@ -539,6 +537,7 @@ public <<Controller: getClockReferenceSecond(0)>>
 public <<Controller: getQueryDur(0)>>
 public <<Controller: loadProblem(1)>>
 public <<Controller: loadRoadNetworkFromFile(1)>>
+public <<Controller: kill(0)>>
 public <<Controller: isKilled(0)>>
 public <<Controller: returnRequest(1)>>
 public <<Controller: startRealtime(1)>>
@@ -579,6 +578,13 @@ int getClockReferenceSecond() {
 <<Controller: getQueryDur(0)>>=
 long getQueryDur() {
   return this.dur_query;
+}
+@
+
+\subsubsection{\texttt{kill}(0)}
+<<Controller: kill(0)>>=
+void kill() {
+  this.kill = true;
 }
 @
 
@@ -637,12 +643,17 @@ GtreeIllegalTargetException {
     final int  uq = sc.nextInt();
     final int  ue = sc.nextInt();
     final int  ub = this.tools.computeShortestPathDistance(uo, ud);
-    final int  ul = ue + (ub/10)  // TODO: 10 speed
-        + (int) Math.round(this.random.nextGaussian()*this.STD_DELAY + this.MEAN_DELAY);
+    final int  ul = (ud == 0)
+        ? Integer.MAX_VALUE
+        : ue + (int) Math.round((float) ub/10)  // TODO: 10 speed
+          + ( (int) Math.round(Math.abs
+              ( this.random.nextGaussian()*this.STD_DELAY + this.MEAN_DELAY ))
+                * 60 );
+    final int[] user = new int[] { uid, uq, ue, ul, uo, ud, ub };
     if (uq < 0) {
-      this.insertServer(new int[] { uid, uq, ue, ul, uo, ud, ub });
+      this.insertServer(user);
     } else {
-      this.insertRequest(new int[] { uid, uq, ue, ul, uo, ud, ub });
+      this.insertRequest(user);
     }
   }
 }
@@ -667,6 +678,9 @@ void returnRequest(final int[] r) {
 \subsubsection{\texttt{startRealtime}(1)}
 <<Controller: startRealtime(1)>>=
 void startRealtime(final Consumer<Boolean> app_cb) {
+  this.kill = false;
+  this.lu_rseen.clear();
+  this.lu_sseen.clear();
   if (DEBUG) {
     System.out.printf("startRealtime(1)\n");
   }
@@ -731,11 +745,15 @@ void startRealtime(final Consumer<Boolean> app_cb) {
 \subsubsection{\texttt{startSequential}(1)}
 <<Controller: startSequential(1)>>=
 void startSequential(final Consumer<Boolean> app_cb) throws Exception {
-  if (DEBUG) {
-    System.out.printf("startSequential(1)\n");
-  }
   this.storage.setRequestTimeout(REQUEST_TIMEOUT);
   this.simClock = CLOCK_START;
+  this.kill = false;
+  this.lu_rseen.clear();
+  this.lu_sseen.clear();
+  if (DEBUG) {
+    System.out.printf("startSequential(1)\n");
+    System.out.printf("clock set to %d..%d\n", simClock, CLOCK_END);
+  }
   while (!kill && this.simClock < CLOCK_END) {
     this.working = true;
     this.step();

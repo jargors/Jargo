@@ -251,12 +251,12 @@ void notifyNew() throws ClientException, ClientFatalException {
 @ %def notifyNew
 
 \subsubsection{\texttt{routeMinDistMinDur}(2)}
-Important: the first waypoint in the new route depends on the location of
-the server at the world-time when this method is called. Another thing: the
-second parameter (bnew) gets modified, specifically the time components on
-all waypoints get updated.
+Important: a subroutine of this method queries the database to determine what
+should be the first waypoint in the constructed route.  Another thing: the
+second parameter (bnew) gets modified, specifically the time components on all
+waypoints get updated.
 <<Client: routeMinDistMinDur(2)>>=
-int[] routeMinDistMinDur(int sid, int[] bnew) throws ClientException {
+int[] routeMinDistMinDur(int sid, int[] bnew, boolean strict) throws ClientException {
   int[] wnew = null;
   boolean ok = true;
   try {
@@ -324,7 +324,7 @@ int[] routeMinDistMinDur(int sid, int[] bnew) throws ClientException {
   } catch (Exception e) {
     throw new ClientException(e);
   }
-  return (ok ? wnew : null);
+  return (ok || !strict ? wnew : null);
 }
 @ %def routeMinDistMinDur
 

@@ -110,7 +110,7 @@ public abstract class Client {
              }
            }
          }
-  public int[] routeMinDistMinDur(int sid, int[] bnew) throws ClientException {
+  public int[] routeMinDistMinDur(int sid, int[] bnew, boolean strict) throws ClientException {
            int[] wnew = null;
            boolean ok = true;
            try {
@@ -178,7 +178,7 @@ public abstract class Client {
            } catch (Exception e) {
              throw new ClientException(e);
            }
-           return (ok ? wnew : null);
+           return (ok || !strict ? wnew : null);
          }
   public int[] scheduleMinDistInsertion(int sid, int rid) throws ClientException {
            int[] bmin = null;

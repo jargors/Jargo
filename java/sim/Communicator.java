@@ -212,4 +212,7 @@ public class Communicator {
   public void forwardReturnRequest(final int[] r) {
            this.controller.returnRequest(r);
          }
+  public void kill() {
+           this.controller.kill();
+         }
 }

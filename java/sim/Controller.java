@@ -181,9 +181,6 @@ public class Controller {
     } catch (ClientException e) {
       System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientException: %s\n",
           this.simClock, e.toString());
-      // try {
-      //   instanceExport("debug-db");
-      // } catch (Exception ee) { }
       e.printStackTrace();
     } catch (ClientFatalException e) {
       System.err.printf("[t=%d] Controller.RequestHandlingLoop caught a ClientFatalException: %s\n",
@@ -540,6 +537,9 @@ public class Controller {
   public void instanceNew() throws SQLException {
            this.storage.JargoInstanceNew();
          }
+  public void instanceReset() throws SQLException {
+           this.storage.JargoInstanceReset();
+         }
   public int getClock() {
            return this.simClock;
          }
@@ -661,12 +661,17 @@ public class Controller {
              final int  uq = sc.nextInt();
              final int  ue = sc.nextInt();
              final int  ub = this.tools.computeShortestPathDistance(uo, ud);
-             final int  ul = ue + (ub/10)  // TODO: 10 speed
-                 + (int) Math.round(this.random.nextGaussian()*this.STD_DELAY + this.MEAN_DELAY);
+             final int  ul = (ud == 0)
+                 ? Integer.MAX_VALUE
+                 : ue + (int) Math.round((float) ub/10)  // TODO: 10 speed
+                   + ( (int) Math.round(Math.abs
+                       ( this.random.nextGaussian()*this.STD_DELAY + this.MEAN_DELAY ))
+                         * 60 );
+             final int[] user = new int[] { uid, uq, ue, ul, uo, ud, ub };
              if (uq < 0) {
-               this.insertServer(new int[] { uid, uq, ue, ul, uo, ud, ub });
+               this.insertServer(user);
              } else {
-               this.insertRequest(new int[] { uid, uq, ue, ul, uo, ud, ub });
+               this.insertRequest(user);
              }
            }
          }
@@ -707,6 +712,9 @@ public class Controller {
            this.tools.setRefCacheVertices(this.storage.getRefCacheVertices());
            this.tools.setRefCacheEdges(this.storage.getRefCacheEdges());
          }
+  public void kill() {
+           this.kill = true;
+         }
   public final boolean isKilled() {
            return this.kill;
          }
@@ -716,6 +724,9 @@ public class Controller {
            }
          }
   public void startRealtime(final Consumer<Boolean> app_cb) {
+           this.kill = false;
+           this.lu_rseen.clear();
+           this.lu_sseen.clear();
            if (DEBUG) {
              System.out.printf("startRealtime(1)\n");
            }
@@ -776,11 +787,15 @@ public class Controller {
            }
          }
   public void startSequential(final Consumer<Boolean> app_cb) throws Exception {
-           if (DEBUG) {
-             System.out.printf("startSequential(1)\n");
-           }
            this.storage.setRequestTimeout(REQUEST_TIMEOUT);
            this.simClock = CLOCK_START;
+           this.kill = false;
+           this.lu_rseen.clear();
+           this.lu_sseen.clear();
+           if (DEBUG) {
+             System.out.printf("startSequential(1)\n");
+             System.out.printf("clock set to %d..%d\n", simClock, CLOCK_END);
+           }
            while (!kill && this.simClock < CLOCK_END) {
              this.working = true;
              this.step();
