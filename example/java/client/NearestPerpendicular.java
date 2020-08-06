@@ -4,10 +4,10 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.HashMap;
-public class GreedyInsertionFallback extends Client {
+public class NearestPerpendicular extends Client {
   final int MAX_PROXIMITY = 1800;
-  final int MAX_SCHEDULE_LENGTH = 8;
-  final int QUEUE_THRESHOLD = 30;
+  final int ROUTE_SKIP_EVERY_N = 1;
+  final Map<Integer, int[]> cache_routes = new HashMap<Integer, int[]>();
   public void init() {
     System.out.printf("Set MAX_PROXIMITY=%d\n", MAX_PROXIMITY);
   }
@@ -28,24 +28,6 @@ public class GreedyInsertionFallback extends Client {
                   System.out.printf("got candidates={ #%d }\n", candidates.size());
                 }
 
-                // Quite slow!
-                /*
-                for (final int sid : candidates.keySet()) {
-                  final int val = this.communicator.queryServerScheduleRemaining(sid,
-                      this.communicator.retrieveClock()).length / 4;
-                  if (val <= MAX_SCHEDULE_LENGTH)
-                    results.put(sid, val);
-                }
-                candidates = new HashMap<Integer, Integer>(results);
-                if (DEBUG) {
-                  System.out.printf("do map/filter: schedule length\n");
-                }
-                if (DEBUG) {
-                  System.out.printf("got candidates={ #%d }\n", candidates.size());
-                }
-                */
-
-                results.clear();
                 for (final int sid : candidates.keySet()) {
                   final int val = this.tools.computeHaversine(luv.get(sid), ro);
                   if (0 < val && val <= MAX_PROXIMITY)
@@ -59,19 +41,50 @@ public class GreedyInsertionFallback extends Client {
                   System.out.printf("got candidates={ #%d }\n", candidates.size());
                 }
 
+                results.clear();
+                int __now = this.communicator.retrieveClock();
+                for (final int sid : candidates.keySet()) {
+                  int[] route = { };
+                  if (cache_routes.containsKey(sid)) {
+                    route = cache_routes.get(sid);
+                  } else {
+                    route = this.communicator.queryServerRouteRemaining(sid,
+                      this.communicator.retrieveClock());
+                    cache_routes.put(sid, route);
+                  }
+                  int min_to_o = Integer.MAX_VALUE;
+                  int min_to_d = Integer.MAX_VALUE;
+                  for (int __i = 0; __i < route.length - 1; __i += 2*ROUTE_SKIP_EVERY_N) {
+                    if (route[__i] > __now) {
+                      int val_to_o = this.tools.computeHaversine(route[(__i + 1)], ro);
+                      int val_to_d = this.tools.computeHaversine(route[(__i + 1)], rd);
+                      if (val_to_o < min_to_o) {
+                          min_to_o = val_to_o;
+                      }
+                      if (val_to_d < min_to_d) {
+                          min_to_d = val_to_d;
+                      }
+                    }
+                  }
+                  if (min_to_o == Integer.MAX_VALUE || min_to_d == Integer.MAX_VALUE) {
+                    min_to_o = candidates.get(sid);  // carry over the existing value
+                    min_to_d = 0;
+                  }
+                  results.put(sid, (min_to_o + min_to_d));
+                }
+                candidates = new HashMap<Integer, Integer>(results);
+                if (DEBUG) {
+                  System.out.printf("do map/filter: perpendicular\n");
+                }
+                if (DEBUG) {
+                  System.out.printf("got candidates={ #%d }\n", candidates.size());
+                }
+
                 // Remember minimum schedule, route, cost, server
                 int[] wmin = null;
                 int[] bmin = null;
                 int cmin = Integer.MAX_VALUE;
                 int smin = 0;
-
-                boolean fallback = (this.queue.size() > QUEUE_THRESHOLD);
-                if (DEBUG) {
-                  System.out.printf("got queue size=%d\n", this.queue.size());
-                }
-                if (DEBUG) {
-                  System.out.printf("fallback\n");
-                }
 
                 while (!candidates.isEmpty()) {
 
@@ -95,11 +108,6 @@ public class GreedyInsertionFallback extends Client {
                       System.out.printf("  { %d, %d, %d, %d }\n",
                           brem[__i], brem[__i+1], brem[__i+2], brem[__i+3]);
                     }
-                  }
-
-                  if (brem.length/4 > MAX_SCHEDULE_LENGTH) {
-                    candidates.remove(sid);
-                    continue;
                   }
 
                   final int[] wact = this.communicator.queryServerRouteActive(sid);
@@ -326,20 +334,12 @@ public class GreedyInsertionFallback extends Client {
                     System.out.printf("remove candidate %d\n", sid);
                   }
 
-                  if (fallback && smin != 0) {
+                  if (smin != 0) {
+                    this.communicator.updateServerService(smin, wmin, bmin,
+                        new int[] { rid }, new int[] { });
                     break;
                   }
                 }
-
-                if (DEBUG) {
-                  System.out.printf("got candidates={ #%d }\n", candidates.size());
-                }
-
-                if (smin != 0) {
-                  this.communicator.updateServerService(smin, wmin, bmin,
-                      new int[] { rid }, new int[] { });
-                }
-
               } catch (Exception e) {
                 throw new ClientException(e);
               }

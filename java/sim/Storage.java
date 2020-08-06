@@ -150,6 +150,12 @@ public class Storage {
              throw e;
            }
          }
+  public int[] DBQueryMetricCountAssigned() {
+           return new int[] { this.count_assigned };
+         }
+  public int[] DBQueryMetricRequestDistanceBaseAssigned() {
+           return new int[] { this.sum_distance_base_requests - this.sum_distance_unassigned };
+         }
   public int[] DBQueryMetricRequestDistanceBaseTotal() throws SQLException {
            // try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
            //   return PSQuery(conn, "S111", 1);
@@ -1523,7 +1529,7 @@ public class Storage {
              stmt.addBatch("CREATE TABLE UE ("
                              + "uid int  CONSTRAINT C16 NOT NULL,"
                              + "ue  int  CONSTRAINT C17 NOT NULL,"
-                             + "CONSTRAINT C18 CHECK (ue BETWEEN 0 AND 86400000),"
+                             + "CONSTRAINT C18 CHECK (ue >= 0),"
                              + "CONSTRAINT C19 UNIQUE (uid),"
                              + "CONSTRAINT P4 PRIMARY KEY (uid, ue)"
                              + ")");
@@ -1531,7 +1537,7 @@ public class Storage {
                              + "uid int  CONSTRAINT C20 NOT NULL,"
                              + "ul  int  CONSTRAINT C21 NOT NULL,"
                              + "CONSTRAINT C22 UNIQUE (uid),"
-                             + "CONSTRAINT C23 CHECK (ul BETWEEN 0 AND 86400000),"
+                             + "CONSTRAINT C23 CHECK (ul > 0),"
                              + "CONSTRAINT P5 PRIMARY KEY (uid, ul)"
                              + ")");
              stmt.addBatch("CREATE TABLE UO ("
@@ -1836,6 +1842,21 @@ public class Storage {
              System.err.println("Fatal exception");
              e.printStackTrace();
              System.exit(1);
+           }
+         }
+  public void JargoInstanceReset() throws SQLException {
+           try (Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)) {
+             Statement stmt = conn.createStatement();
+             stmt.clearBatch();
+             stmt.addBatch("DELETE FROM W");
+             stmt.addBatch("DELETE FROM PD");
+             stmt.addBatch("DELETE FROM CW");
+             stmt.addBatch("DELETE FROM CPD");
+             stmt.addBatch("DELETE FROM CQ");
+             stmt.executeBatch();
+             conn.commit();
+           } catch (SQLException e) {
+             throw e;
            }
          }
   public final ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, int[]>> getRefCacheEdges() {

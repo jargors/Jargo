@@ -7,7 +7,10 @@
 package com.github.jargors.client;
 <<NearestNeighbor: preamble>>
 public class NearestNeighbor extends Client {
-  final int MAX_PROXIMITY = 600;
+  final int MAX_PROXIMITY = 1800;
+  public void init() {
+    System.out.printf("Set MAX_PROXIMITY=%d\n", MAX_PROXIMITY);
+  }
   protected <<NearestNeighbor: handleRequest(1)>>
 }
 @
@@ -38,6 +41,12 @@ void handleRequest(int[] r) throws ClientException, ClientFatalException {
     <<Debug: map/filter: proximity>>
     <<Debug: print candidates>>
 
+    // Remember minimum schedule, route, cost, server
+    int[] wmin = null;
+    int[] bmin = null;
+    int cmin = Integer.MAX_VALUE;
+    int smin = 0;
+
     while (!candidates.isEmpty()) {
 
       Entry<Integer, Integer> cand = null;
@@ -47,24 +56,21 @@ void handleRequest(int[] r) throws ClientException, ClientFatalException {
       final int sid = cand.getKey();
       final int now = this.communicator.retrieveClock();
 
-      int[] bnew = new int[] { };
       int[] brem = this.communicator.queryServerScheduleRemaining(sid, now);
       <<Debug: print brem>>
 
-      int tbeg = now;
-      int tend = brem[0];
-      <<Debug: print tbeg, tend>>
-
       final int[] wact = this.communicator.queryServerRouteActive(sid);
       <<Debug: print wact>>
+
+      int[] wbeg = (wact[3] == 0
+          ? new int[] { now    , wact[1] }
+          : new int[] { wact[2], wact[3] });
+      <<Debug: print wbeg>>
 
       // if next events occurs at next waypoint and is not server's own
       // destination, then delete these events from schedule (limitation #4).
       if (brem[2] != sid && brem[0] == wact[2]) {
         <<Debug: echo limitation 4>>
-        tbeg = brem[0];
-        tend = brem[4];
-        <<Debug: print tbeg, tend>>
         while (brem[0] == wact[2]) {
           brem = Arrays.copyOfRange(brem, 4, brem.length);
           <<Debug: echo remove event>>
@@ -72,52 +78,90 @@ void handleRequest(int[] r) throws ClientException, ClientFatalException {
         }
       }
 
-      boolean ok = false;
+      int imax = (brem.length/4);
+      int jmax = imax;
+      int cost = brem[(brem.length - 4)];
+      <<Debug: print imax, jmax, cost>>
 
-      <<Schedule Selection: Check Capacity>>
-      <<Debug: print ok>>
+      final int[] bold = brem;
 
-      if (ok) {
-        int[] stop = new int[] { 0, ro, 0, rid };
-        int ipos = 0;
-        <<Debug: print stop>>
-        <<Debug: print ipos>>
-        <<Schedule: Insert>>
-        <<Debug: print bnew>>
+      // Try all insertion positions
+      <<Debug: echo start insertion heuristic>>
+      for (int i = 0; i < imax; i++) {
+        int tbeg = (i == 0 ? now : brem[4*(i - 1)]);
 
-        brem = bnew;
+        for (int j = i; j < jmax; j++) {
+          int tend = bold[4*j];
 
-        stop[1] = rd;
-        ipos = 1;
-        <<Debug: print stop>>
-        <<Debug: print ipos>>
-        <<Schedule: Insert>>
-        <<Debug: print bnew>>
+          <<Debug: print i, j>>
+          <<Debug: print tbeg, tend>>
 
-        int[] wnew = null;
-        int[] wbeg = (wact[3] == 0
-            ? new int[] { now    , wact[1] }
-            : new int[] { wact[2], wact[3] });
-        <<Debug: print wbeg>>
+          boolean ok = false;
 
-        <<Route: Shortest Path>>
+          <<Debug: echo check capacity>>
+          <<Schedule Selection: Check Capacity>>
+          <<Debug: print ok>>
 
-        // if next waypoint is vehicle destination,
-        // reset route start time to last-visited time
-        if (wact[3] == 0) {
-          wnew[0] = lut.get(sid);
+          if (ok) {
+            brem = bold.clone();  // reset to original
+            int[] bnew = new int[] { };
+
+            int[] stop = new int[] { 0, ro, 0, rid };
+            int ipos = i;
+            <<Debug: print stop>>
+            <<Debug: print ipos>>
+            <<Schedule: Insert>>
+            <<Debug: print bnew>>
+
+            brem = bnew;
+
+            stop[1] = rd;
+            ipos = (j + 1);
+            <<Debug: print stop>>
+            <<Debug: print ipos>>
+            <<Schedule: Insert>>
+            <<Debug: print bnew>>
+
+            int[] wnew = null;
+
+            <<Route: Shortest Path>>
+
+            // if next waypoint is vehicle destination,
+            // reset route start time to last-visited time
+            if (wact[3] == 0) {
+              wnew[0] = lut.get(sid);
+            }
+
+            <<Debug: print wnew>>
+
+            <<Debug: echo check time window>>
+            <<Schedule Selection: Check Time Window>>
+            <<Debug: print ok>>
+
+            if (ok) {
+              int cdel = bnew[(bnew.length - 4)] - cost;
+              if (cdel < cmin) {
+                bmin = bnew;
+                wmin = wnew;
+                cmin = cdel;
+                smin = sid;
+                <<Debug: print bnew>>
+                <<Debug: print cmin>>
+              }
+            }
+
+          }
         }
+      }
+      <<Debug: echo end insertion heuristic>>
 
-        <<Debug: print wnew>>
+      candidates.remove(sid);
+      <<Debug: print remove candidate>>
 
-        this.communicator.updateServerService(sid, wnew, bnew,
+      if (smin != 0) {
+        this.communicator.updateServerService(smin, wmin, bmin,
             new int[] { rid }, new int[] { });
-
         break;
-
-      } else {
-        candidates.remove(sid);
-        <<Debug: print remove candidate>>
       }
     }
   } catch (Exception e) {
@@ -132,8 +176,10 @@ void handleRequest(int[] r) throws ClientException, ClientFatalException {
 package com.github.jargors.client;
 <<GreedyInsertion: preamble>>
 public class GreedyInsertion extends Client {
-  final int MAX_PROXIMITY = 600;
-  final int MAX_SCHEDULE_LENGTH = 8;
+  final int MAX_PROXIMITY = 1800;
+  public void init() {
+    System.out.printf("Set MAX_PROXIMITY=%d\n", MAX_PROXIMITY);
+  }
   protected <<GreedyInsertion: handleRequest(1)>>
 }
 @
@@ -141,12 +187,9 @@ public class GreedyInsertion extends Client {
 <<GreedyInsertion: preamble>>=
 import com.github.jargors.sim.*;
 import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
+import java.util.HashMap;
 @
 
 <<GreedyInsertion: handleRequest(1)>>=
@@ -167,14 +210,6 @@ void handleRequest(int[] r) throws ClientException, ClientFatalException {
     <<Debug: map/filter: proximity>>
     <<Debug: print candidates>>
 
-    /*
-    results.clear();
-    <<Map/Filter: Schedule Length>>
-    candidates = new HashMap<Integer, Integer>(results);
-    <<Debug: map/filter: schedule length>>
-    <<Debug: print candidates>>
-    */
-
     // Remember minimum schedule, route, cost, server
     int[] wmin = null;
     int[] bmin = null;
@@ -184,7 +219,7 @@ void handleRequest(int[] r) throws ClientException, ClientFatalException {
     while (!candidates.isEmpty()) {
 
       Entry<Integer, Integer> cand = null;
-      <<Reduce: Random>>
+      <<Reduce: Minimum Value>>
       <<Debug: print candidate>>
 
       final int sid = cand.getKey();
@@ -192,11 +227,6 @@ void handleRequest(int[] r) throws ClientException, ClientFatalException {
 
       int[] brem = this.communicator.queryServerScheduleRemaining(sid, now);
       <<Debug: print brem>>
-
-      if (brem.length/4 > MAX_SCHEDULE_LENGTH) {
-        candidates.remove(sid);
-        continue;
-      }
 
       final int[] wact = this.communicator.queryServerRouteActive(sid);
       <<Debug: print wact>>
@@ -304,7 +334,6 @@ void handleRequest(int[] r) throws ClientException, ClientFatalException {
       this.communicator.updateServerService(smin, wmin, bmin,
           new int[] { rid }, new int[] { });
     }
-
   } catch (Exception e) {
     throw new ClientException(e);
   }
@@ -317,9 +346,12 @@ void handleRequest(int[] r) throws ClientException, ClientFatalException {
 package com.github.jargors.client;
 <<GreedyInsertion: preamble>>
 public class GreedyInsertionFallback extends Client {
-  final int MAX_PROXIMITY = 600;
+  final int MAX_PROXIMITY = 1800;
   final int MAX_SCHEDULE_LENGTH = 8;
   final int QUEUE_THRESHOLD = 30;
+  public void init() {
+    System.out.printf("Set MAX_PROXIMITY=%d\n", MAX_PROXIMITY);
+  }
   protected <<GreedyInsertionFallback: handleRequest(1)>>
 }
 @
@@ -364,11 +396,7 @@ void handleRequest(int[] r) throws ClientException, ClientFatalException {
     while (!candidates.isEmpty()) {
 
       Entry<Integer, Integer> cand = null;
-      if (fallback) {
-        <<Reduce: Minimum Value>>
-      } else {
-        <<Reduce: Random>>
-      }
+      <<Reduce: Minimum Value>>
       <<Debug: print candidate>>
 
       final int sid = cand.getKey();
@@ -499,3 +527,179 @@ void handleRequest(int[] r) throws ClientException, ClientFatalException {
 }
 @
 
+\section{Nearest Perpendicular}
+
+<<NearestPerpendicular.java>>=
+package com.github.jargors.client;
+<<NearestPerpendicular: preamble>>
+public class NearestPerpendicular extends Client {
+  final int MAX_PROXIMITY = 1800;
+  final int ROUTE_SKIP_EVERY_N = 1;
+  <<Utilities: route cache>>
+  public void init() {
+    System.out.printf("Set MAX_PROXIMITY=%d\n", MAX_PROXIMITY);
+  }
+  protected <<NearestPerpendicular: handleRequest(1)>>
+}
+@
+
+<<NearestPerpendicular: preamble>>=
+import com.github.jargors.sim.*;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.HashMap;
+@
+
+<<NearestPerpendicular: handleRequest(1)>>=
+void handleRequest(int[] r) throws ClientException, ClientFatalException {
+  <<Debug: print request>>
+  try {
+    final int rid = r[0];
+    final int rq  = r[1];
+    final int ro  = r[4];
+    final int rd  = r[5];
+
+    Map<Integer, Integer> candidates = new HashMap<Integer, Integer>(lut);
+    Map<Integer, Integer> results = new HashMap<Integer, Integer>();
+    <<Debug: print candidates>>
+
+    <<Map/Filter: Proximity>>
+    candidates = new HashMap<Integer, Integer>(results);
+    <<Debug: map/filter: proximity>>
+    <<Debug: print candidates>>
+
+    results.clear();
+    <<Map/Filter: Perpendicular>>
+    candidates = new HashMap<Integer, Integer>(results);
+    <<Debug: map/filter: perpendicular>>
+    <<Debug: print candidates>>
+
+    // Remember minimum schedule, route, cost, server
+    int[] wmin = null;
+    int[] bmin = null;
+    int cmin = Integer.MAX_VALUE;
+    int smin = 0;
+
+    while (!candidates.isEmpty()) {
+
+      Entry<Integer, Integer> cand = null;
+      <<Reduce: Minimum Value>>
+      <<Debug: print candidate>>
+
+      final int sid = cand.getKey();
+      final int now = this.communicator.retrieveClock();
+
+      int[] brem = this.communicator.queryServerScheduleRemaining(sid, now);
+      <<Debug: print brem>>
+
+      final int[] wact = this.communicator.queryServerRouteActive(sid);
+      <<Debug: print wact>>
+
+      int[] wbeg = (wact[3] == 0
+          ? new int[] { now    , wact[1] }
+          : new int[] { wact[2], wact[3] });
+      <<Debug: print wbeg>>
+
+      // if next events occurs at next waypoint and is not server's own
+      // destination, then delete these events from schedule (limitation #4).
+      if (brem[2] != sid && brem[0] == wact[2]) {
+        <<Debug: echo limitation 4>>
+        while (brem[0] == wact[2]) {
+          brem = Arrays.copyOfRange(brem, 4, brem.length);
+          <<Debug: echo remove event>>
+          <<Debug: print brem>>
+        }
+      }
+
+      int imax = (brem.length/4);
+      int jmax = imax;
+      int cost = brem[(brem.length - 4)];
+      <<Debug: print imax, jmax, cost>>
+
+      final int[] bold = brem;
+
+      // Try all insertion positions
+      <<Debug: echo start insertion heuristic>>
+      for (int i = 0; i < imax; i++) {
+        int tbeg = (i == 0 ? now : brem[4*(i - 1)]);
+
+        for (int j = i; j < jmax; j++) {
+          int tend = bold[4*j];
+
+          <<Debug: print i, j>>
+          <<Debug: print tbeg, tend>>
+
+          boolean ok = false;
+
+          <<Debug: echo check capacity>>
+          <<Schedule Selection: Check Capacity>>
+          <<Debug: print ok>>
+
+          if (ok) {
+            brem = bold.clone();  // reset to original
+            int[] bnew = new int[] { };
+
+            int[] stop = new int[] { 0, ro, 0, rid };
+            int ipos = i;
+            <<Debug: print stop>>
+            <<Debug: print ipos>>
+            <<Schedule: Insert>>
+            <<Debug: print bnew>>
+
+            brem = bnew;
+
+            stop[1] = rd;
+            ipos = (j + 1);
+            <<Debug: print stop>>
+            <<Debug: print ipos>>
+            <<Schedule: Insert>>
+            <<Debug: print bnew>>
+
+            int[] wnew = null;
+
+            <<Route: Shortest Path>>
+
+            // if next waypoint is vehicle destination,
+            // reset route start time to last-visited time
+            if (wact[3] == 0) {
+              wnew[0] = lut.get(sid);
+            }
+
+            <<Debug: print wnew>>
+
+            <<Debug: echo check time window>>
+            <<Schedule Selection: Check Time Window>>
+            <<Debug: print ok>>
+
+            if (ok) {
+              int cdel = bnew[(bnew.length - 4)] - cost;
+              if (cdel < cmin) {
+                bmin = bnew;
+                wmin = wnew;
+                cmin = cdel;
+                smin = sid;
+                <<Debug: print bnew>>
+                <<Debug: print cmin>>
+              }
+            }
+
+          }
+        }
+      }
+      <<Debug: echo end insertion heuristic>>
+
+      candidates.remove(sid);
+      <<Debug: print remove candidate>>
+
+      if (smin != 0) {
+        this.communicator.updateServerService(smin, wmin, bmin,
+            new int[] { rid }, new int[] { });
+        break;
+      }
+    }
+  } catch (Exception e) {
+    throw new ClientException(e);
+  }
+}
+@

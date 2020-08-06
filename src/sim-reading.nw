@@ -2339,293 +2339,18 @@ int[] queryServersLocationsActive(final int t) throws SQLException {
 
 \subsection{Methods: Read Metrics}
 
-\subsubsection{\texttt{DBQueryMetricServiceRate}(1)}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBQueryMetricServiceRate]]}(1) returns the
-service rate $\mu$ (Eq.~\ref{eq:service-rate}).
-A [[SQLException]] is thrown in case of database failure.\\
-\midrule
-\textbf{Parameters:} \\
-\begin{tabular}{lp{116mm}}
-Boolean [[flag_usecache]] (param. 1):&[[false]] to force retrieval from database.\\
-\end{tabular}
-\textbf{Returns:} results of the query flattened into an integer array,
-or [[null]] if no results.
+\subsubsection{\texttt{DBQueryMetricCountAssigned}(0)}
+<<Read: DBQueryMetricCountAssigned(0)>>=
+int[] DBQueryMetricCountAssigned() {
+  return new int[] { this.count_assigned };
+}
+@ %def DBQueryMetricCountAssigned
 
-\begin{tikzpicture}
-\small
-\matrix[nodes={minimum size=6mm}] {
-  \node[draw] {$0:\mu\times 10^4$};\\
-};
-\end{tikzpicture}
-
-Note that the service rate is \textbf{multiplied by $10^4$} so that it can be
-returned as an integer with 2 decimal points precision, for example if
-$\mu=.1234$, then [[DBQueryMetricServiceRate]](1) returns $1234$.\\
-\textbf{Side Effects:} none.\\
-\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
-\bottomrule
-\end{tabular}
-<<Read: DBQueryMetricServiceRate(1)>>=
-int[] DBQueryMetricServiceRate(boolean flag_usecache) throws SQLException {
-  int[] output = new int[] { };
-  if (flag_usecache) {
-    output = new int[] { (int) (10000*(this.count_assigned
-        / (double) this.count_requests)) };
-  } else {
-    try (<<Open [[conn]]>>) {
-      output = PSQuery(conn, "S102", 1);
-    } catch (SQLException e) {
-      throw e;
-    }
-  }
-  return output;
+<<Read: queryMetricCountAssigned(0)>>=
+int[] queryMetricCountAssigned() {
+  return this.storage.DBQueryMetricCountAssigned();
 }
-@ %def DBQueryMetricServiceRate
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBQueryMetricServiceRate]]}(0) calls [[DBQueryMetricServiceRate]](1)
-with a default parameter.\\
-\bottomrule
-\end{tabular}
-<<Read: DBQueryMetricServiceRate(0)>>=
-int[] DBQueryMetricServiceRate() throws SQLException {
-  return DBQueryMetricServiceRate(true);
-}
-@
-\noindent
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[queryMetricServiceRate]]}(1) wraps [[DBQueryMetricServiceRate]](1).\\
-\bottomrule
-\end{tabular}
-<<Read: queryMetricServiceRate(1)>>=
-int[] queryMetricServiceRate(boolean flag_usecache) throws SQLException {
-  int[] output = storage.DBQueryMetricServiceRate(flag_usecache);
-  return output;
-}
-@ %def queryMetricServiceRate
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[queryMetricServiceRate]]}(0) calls [[queryMetricServiceRate]](1)
-with a default parameter.\\
-\bottomrule
-\end{tabular}
-<<Read: queryMetricServiceRate(0)>>=
-int[] queryMetricServiceRate() throws SQLException {
-  return queryMetricServiceRate(true);
-}
-@
-
-\subsubsection{\texttt{DBQueryMetricServiceRateRunning}(0)}
-<<Read: DBQueryMetricServiceRateRunning(0)>>=
-int[] DBQueryMetricServiceRateRunning() throws SQLException {
-  int[] output = new int[] { };
-  // ...
-  return output;
-}
-@ %def DBQueryMetricServiceRateRunning
-<<Read: queryMetricServiceRateRunning(0)>>=
-int[] queryMetricServiceRateRunning() throws SQLException {
-  int[] output = new int[] {
-      Math.min((int) (10000*(this.storage.DBQueryRequestsCountAssigned()[0]
-        / (double) this.lu_rseen.size())), 10000) };
-  return output;
-}
-@ %def queryMetricServiceRateRunning
-
-\subsubsection{\texttt{DBQueryMetricUserDistanceBaseTotal}(1)}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBQueryMetricUserDistanceBaseTotal]]}(1) returns the
-base distance $D^\textrm{base}(\mathcal{U})$ (Eq.~\ref{eq:base-distance}).
-A [[SQLException]] is thrown in case of database failure.\\
-\midrule
-\textbf{Parameters:} none.\\
-\textbf{Returns:} results of the query flattened into an integer array,
-or [[null]] if no results.
-
-\begin{tikzpicture}
-\small
-\matrix[nodes={minimum size=6mm}] {
-  \node[draw] {$0:D^\textrm{base}(\mathcal{U})$};\\
-};
-\end{tikzpicture}\\
-\textbf{Side Effects:} none.\\
-\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
-\bottomrule
-\end{tabular}
-<<Read: DBQueryMetricUserDistanceBaseTotal(1)>>=
-int[] DBQueryMetricUserDistanceBaseTotal(boolean flag_usecache) throws SQLException {
-  if (flag_usecache) {
-    return new int[] { this.sum_distance_base_requests + this.sum_distance_base_servers };
-  } else {
-    try (<<Open [[conn]]>>) {
-      return PSQuery(conn, "S103", 1);
-    } catch (SQLException e) {
-      throw e;
-    }
-  }
-}
-@ %def DBQueryMetricUserDistanceBaseTotal
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBQueryMetricUserDistanceBaseTotal]]}(0) calls [[DBQueryMetricUserDistanceBaseTotal]](1)
-with a default parameter.\\
-\bottomrule
-\end{tabular}
-<<Read: DBQueryMetricUserDistanceBaseTotal(0)>>=
-int[] DBQueryMetricUserDistanceBaseTotal() throws SQLException {
-  return DBQueryMetricUserDistanceBaseTotal(true);
-}
-@
-\noindent
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[queryMetricUserDistanceBaseTotal]]}(1) wraps [[DBQueryMetricUserDistanceBaseTotal]](1).\\
-\bottomrule
-\end{tabular}
-<<Read: queryMetricUserDistanceBaseTotal(1)>>=
-int[] queryMetricUserDistanceBaseTotal(boolean flag_usecache) throws SQLException {
-  int[] output = storage.DBQueryMetricUserDistanceBaseTotal(flag_usecache);
-  return output;
-}
-@ %def queryMetricUserDistanceBaseTotal
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[queryMetricUserDistanceBaseTotal]]}(0) calls [[queryMetricUserDistanceBaseTotal]](1)
-with a default parameter.\\
-\bottomrule
-\end{tabular}
-<<Read: queryMetricUserDistanceBaseTotal(0)>>=
-int[] queryMetricUserDistanceBaseTotal() throws SQLException {
-  return queryMetricUserDistanceBaseTotal(true);
-}
-@
-
-\subsubsection{\texttt{DBQueryMetricUserDistanceBaseRunning}(0)}
-<<Read: DBQueryMetricUserDistanceBaseRunning(0)>>=
-int[] DBQueryMetricUserDistanceBaseRunning() throws SQLException {
-  int[] output = new int[] { };
-  // ...
-  return output;
-}
-@ %def DBQueryMetricUserDistanceBaseRunning
-<<Read: queryMetricUserDistanceBaseRunning(0)>>=
-int[] queryMetricUserDistanceBaseRunning()
-throws SQLException, UserNotFoundException {
-  int[] output = new int[] { 0 };
-  for (int sid : this.lu_sseen.keySet()) {
-    output[0] += this.storage.DBQueryUser(sid)[6];
-  }
-  for (int rid : this.lu_rseen.keySet()) {
-    output[0] += this.storage.DBQueryUser(rid)[6];
-  }
-  return output;
-}
-@ %def queryMetricUserDistanceBaseRunning
-
-\subsubsection{\texttt{DBQueryMetricServerDistanceTotal}(1)}
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBQueryMetricServerDistanceTotal]]}(1) returns the
-total travel distance of all the servers.
-A [[SQLException]] is thrown in case of database failure.\\
-\midrule
-\textbf{Parameters:} none.\\
-\textbf{Returns:} results of the query flattened into an integer array,
-or [[null]] if no results.
-
-\begin{tikzpicture}
-\small
-\matrix[nodes={minimum size=6mm}] {
-  \node[draw] {$0:\sum_{s\in\mathcal{S}}D(W(\mathcal{X},s))$};\\
-};
-\end{tikzpicture}\\
-\textbf{Side Effects:} none.\\
-\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
-\bottomrule
-\end{tabular}
-<<Read: DBQueryMetricServerDistanceTotal(1)>>=
-int[] DBQueryMetricServerDistanceTotal(boolean flag_usecache) throws SQLException {
-  if (flag_usecache) {
-    final int[] output = new int[] { 0 };
-    this.distance_servers.forEach((sid, val) -> output[0] += val);
-    return output;
-  } else {
-    try (<<Open [[conn]]>>) {
-      return PSQuery(conn, "S105", 1);
-    } catch (SQLException e) {
-      throw e;
-    }
-  }
-}
-@ %def DBQueryMetricServerDistanceTotal
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[DBQueryMetricServerDistanceTotal]]}(0) calls [[DBQueryMetricServerDistanceTotal]](1)
-with a default parameter.\\
-\bottomrule
-\end{tabular}
-<<Read: DBQueryMetricServerDistanceTotal(0)>>=
-int[] DBQueryMetricServerDistanceTotal() throws SQLException {
-  return DBQueryMetricServerDistanceTotal(true);
-}
-@
-\noindent
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[queryMetricServerDistanceTotal]]}(1) wraps [[DBQueryMetricServerDistanceTotal]](1).\\
-\bottomrule
-\end{tabular}
-<<Read: queryMetricServerDistanceTotal(1)>>=
-int[] queryMetricServerDistanceTotal(boolean flag_usecache) throws SQLException {
-  int[] output = storage.DBQueryMetricServerDistanceTotal(flag_usecache);
-  return output;
-}
-@ %def queryMetricServerDistanceTotal
-\begin{tabular}{p{\textwidth}}
-\toprule
-\rowcolor{TableTitle}
-Method \textcolor{blue}{[[queryMetricServerDistanceTotal]]}(0) calls [[queryMetricServerDistanceTotal]](1)
-with a default parameter.\\
-\bottomrule
-\end{tabular}
-<<Read: queryMetricServerDistanceTotal(0)>>=
-int[] queryMetricServerDistanceTotal() throws SQLException {
-  return queryMetricServerDistanceTotal(true);
-}
-@
-
-\subsubsection{\texttt{DBQueryMetricServerDistanceRunning}(0)}
-<<Read: DBQueryMetricServerDistanceRunning(0)>>=
-int[] DBQueryMetricServerDistanceRunning() throws SQLException {
-  int[] output = new int[] { };
-  // ...
-  return output;
-}
-@ %def DBQueryMetricServerDistanceRunning
-<<Read: queryMetricServerDistanceRunning(0)>>=
-int[] queryMetricServerDistanceRunning() throws SQLException {
-  int[] output = new int[] { 0 };
-  for (int sid : this.lu_sseen.keySet()) {
-    output[0] += this.storage.DBQueryServerDistance(sid, true)[0];
-  }
-  return output;
-}
-@ %def queryMetricServerDistanceRunning
+@ %def queryMetricCountAssigned
 
 \subsubsection{\texttt{DBQueryMetricServerDistanceBaseTotal}(0)}
 \begin{tabular}{p{\textwidth}}
@@ -2747,6 +2472,24 @@ int[] queryMetricServerDistanceCruisingTotal() throws SQLException {
 }
 @
 
+\subsubsection{\texttt{DBQueryMetricServerDistanceRunning}(0)}
+<<Read: DBQueryMetricServerDistanceRunning(0)>>=
+int[] DBQueryMetricServerDistanceRunning() throws SQLException {
+  int[] output = new int[] { };
+  // ...
+  return output;
+}
+@ %def DBQueryMetricServerDistanceRunning
+<<Read: queryMetricServerDistanceRunning(0)>>=
+int[] queryMetricServerDistanceRunning() throws SQLException {
+  int[] output = new int[] { 0 };
+  for (int sid : this.lu_sseen.keySet()) {
+    output[0] += this.storage.DBQueryServerDistance(sid, true)[0];
+  }
+  return output;
+}
+@ %def queryMetricServerDistanceRunning
+
 \subsubsection{\texttt{DBQueryMetricServerDistanceServiceTotal}(1)}
 \begin{tabular}{p{\textwidth}}
 \toprule
@@ -2819,6 +2562,81 @@ with a default parameter.\\
 <<Read: queryMetricServerDistanceServiceTotal(0)>>=
 int[] queryMetricServerDistanceServiceTotal() throws SQLException {
   return queryMetricServerDistanceServiceTotal(true);
+}
+@
+
+\subsubsection{\texttt{DBQueryMetricServerDistanceTotal}(1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryMetricServerDistanceTotal]]}(1) returns the
+total travel distance of all the servers.
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:\sum_{s\in\mathcal{S}}D(W(\mathcal{X},s))$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryMetricServerDistanceTotal(1)>>=
+int[] DBQueryMetricServerDistanceTotal(boolean flag_usecache) throws SQLException {
+  if (flag_usecache) {
+    final int[] output = new int[] { 0 };
+    this.distance_servers.forEach((sid, val) -> output[0] += val);
+    return output;
+  } else {
+    try (<<Open [[conn]]>>) {
+      return PSQuery(conn, "S105", 1);
+    } catch (SQLException e) {
+      throw e;
+    }
+  }
+}
+@ %def DBQueryMetricServerDistanceTotal
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryMetricServerDistanceTotal]]}(0) calls [[DBQueryMetricServerDistanceTotal]](1)
+with a default parameter.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryMetricServerDistanceTotal(0)>>=
+int[] DBQueryMetricServerDistanceTotal() throws SQLException {
+  return DBQueryMetricServerDistanceTotal(true);
+}
+@
+\noindent
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryMetricServerDistanceTotal]]}(1) wraps [[DBQueryMetricServerDistanceTotal]](1).\\
+\bottomrule
+\end{tabular}
+<<Read: queryMetricServerDistanceTotal(1)>>=
+int[] queryMetricServerDistanceTotal(boolean flag_usecache) throws SQLException {
+  int[] output = storage.DBQueryMetricServerDistanceTotal(flag_usecache);
+  return output;
+}
+@ %def queryMetricServerDistanceTotal
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryMetricServerDistanceTotal]]}(0) calls [[queryMetricServerDistanceTotal]](1)
+with a default parameter.\\
+\bottomrule
+\end{tabular}
+<<Read: queryMetricServerDistanceTotal(0)>>=
+int[] queryMetricServerDistanceTotal() throws SQLException {
+  return queryMetricServerDistanceTotal(true);
 }
 @
 
@@ -3011,6 +2829,119 @@ int[] queryMetricServerTWViolationsTotal() throws SQLException {
   return output;
 }
 @ %def queryMetricServerTWViolationsTotal
+
+\subsubsection{\texttt{DBQueryMetricServiceRate}(1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryMetricServiceRate]]}(1) returns the
+service rate $\mu$ (Eq.~\ref{eq:service-rate}).
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} \\
+\begin{tabular}{lp{116mm}}
+Boolean [[flag_usecache]] (param. 1):&[[false]] to force retrieval from database.\\
+\end{tabular}
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:\mu\times 10^4$};\\
+};
+\end{tikzpicture}
+
+Note that the service rate is \textbf{multiplied by $10^4$} so that it can be
+returned as an integer with 2 decimal points precision, for example if
+$\mu=.1234$, then [[DBQueryMetricServiceRate]](1) returns $1234$.\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryMetricServiceRate(1)>>=
+int[] DBQueryMetricServiceRate(boolean flag_usecache) throws SQLException {
+  int[] output = new int[] { };
+  if (flag_usecache) {
+    output = new int[] { (int) (10000*(this.count_assigned
+        / (double) this.count_requests)) };
+  } else {
+    try (<<Open [[conn]]>>) {
+      output = PSQuery(conn, "S102", 1);
+    } catch (SQLException e) {
+      throw e;
+    }
+  }
+  return output;
+}
+@ %def DBQueryMetricServiceRate
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryMetricServiceRate]]}(0) calls [[DBQueryMetricServiceRate]](1)
+with a default parameter.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryMetricServiceRate(0)>>=
+int[] DBQueryMetricServiceRate() throws SQLException {
+  return DBQueryMetricServiceRate(true);
+}
+@
+\noindent
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryMetricServiceRate]]}(1) wraps [[DBQueryMetricServiceRate]](1).\\
+\bottomrule
+\end{tabular}
+<<Read: queryMetricServiceRate(1)>>=
+int[] queryMetricServiceRate(boolean flag_usecache) throws SQLException {
+  int[] output = storage.DBQueryMetricServiceRate(flag_usecache);
+  return output;
+}
+@ %def queryMetricServiceRate
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryMetricServiceRate]]}(0) calls [[queryMetricServiceRate]](1)
+with a default parameter.\\
+\bottomrule
+\end{tabular}
+<<Read: queryMetricServiceRate(0)>>=
+int[] queryMetricServiceRate() throws SQLException {
+  return queryMetricServiceRate(true);
+}
+@
+
+\subsubsection{\texttt{DBQueryMetricServiceRateRunning}(0)}
+<<Read: DBQueryMetricServiceRateRunning(0)>>=
+int[] DBQueryMetricServiceRateRunning() throws SQLException {
+  int[] output = new int[] { };
+  // ...
+  return output;
+}
+@ %def DBQueryMetricServiceRateRunning
+<<Read: queryMetricServiceRateRunning(0)>>=
+int[] queryMetricServiceRateRunning() throws SQLException {
+  int[] output = new int[] {
+      Math.min((int) (10000*(this.storage.DBQueryRequestsCountAssigned()[0]
+        / (double) this.lu_rseen.size())), 10000) };
+  return output;
+}
+@ %def queryMetricServiceRateRunning
+
+\subsubsection{\texttt{DBQueryMetricRequestDistanceBaseAssigned}(0)}
+<<Read: DBQueryMetricRequestDistanceBaseAssigned(0)>>=
+int[] DBQueryMetricRequestDistanceBaseAssigned() {
+  return new int[] { this.sum_distance_base_requests - this.sum_distance_unassigned };
+}
+@ %def DBQueryMetricRequestDistanceBaseAssigned
+
+<<Read: queryMetricRequestDistanceBaseAssigned(0)>>=
+int[] queryMetricRequestDistanceBaseAssigned() {
+  return this.storage.DBQueryMetricRequestDistanceBaseAssigned();
+}
+@ %def queryMetricRequestDistanceBaseAssigned
 
 \subsubsection{\texttt{DBQueryMetricRequestDistanceBaseTotal}(0)}
 \begin{tabular}{p{\textwidth}}
@@ -3548,4 +3479,99 @@ int[] queryMetricRequestTWViolationsTotal() throws SQLException {
   return output;
 }
 @ %def queryMetricRequestTWViolationsTotal
+
+\subsubsection{\texttt{DBQueryMetricUserDistanceBaseRunning}(0)}
+<<Read: DBQueryMetricUserDistanceBaseRunning(0)>>=
+int[] DBQueryMetricUserDistanceBaseRunning() throws SQLException {
+  int[] output = new int[] { };
+  // ...
+  return output;
+}
+@ %def DBQueryMetricUserDistanceBaseRunning
+<<Read: queryMetricUserDistanceBaseRunning(0)>>=
+int[] queryMetricUserDistanceBaseRunning()
+throws SQLException, UserNotFoundException {
+  int[] output = new int[] { 0 };
+  for (int sid : this.lu_sseen.keySet()) {
+    output[0] += this.storage.DBQueryUser(sid)[6];
+  }
+  for (int rid : this.lu_rseen.keySet()) {
+    output[0] += this.storage.DBQueryUser(rid)[6];
+  }
+  return output;
+}
+@ %def queryMetricUserDistanceBaseRunning
+
+\subsubsection{\texttt{DBQueryMetricUserDistanceBaseTotal}(1)}
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryMetricUserDistanceBaseTotal]]}(1) returns the
+base distance $D^\textrm{base}(\mathcal{U})$ (Eq.~\ref{eq:base-distance}).
+A [[SQLException]] is thrown in case of database failure.\\
+\midrule
+\textbf{Parameters:} none.\\
+\textbf{Returns:} results of the query flattened into an integer array,
+or [[null]] if no results.
+
+\begin{tikzpicture}
+\small
+\matrix[nodes={minimum size=6mm}] {
+  \node[draw] {$0:D^\textrm{base}(\mathcal{U})$};\\
+};
+\end{tikzpicture}\\
+\textbf{Side Effects:} none.\\
+\textbf{Throws:} [[SQLException]] if database failure is encountered.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryMetricUserDistanceBaseTotal(1)>>=
+int[] DBQueryMetricUserDistanceBaseTotal(boolean flag_usecache) throws SQLException {
+  if (flag_usecache) {
+    return new int[] { this.sum_distance_base_requests + this.sum_distance_base_servers };
+  } else {
+    try (<<Open [[conn]]>>) {
+      return PSQuery(conn, "S103", 1);
+    } catch (SQLException e) {
+      throw e;
+    }
+  }
+}
+@ %def DBQueryMetricUserDistanceBaseTotal
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[DBQueryMetricUserDistanceBaseTotal]]}(0) calls [[DBQueryMetricUserDistanceBaseTotal]](1)
+with a default parameter.\\
+\bottomrule
+\end{tabular}
+<<Read: DBQueryMetricUserDistanceBaseTotal(0)>>=
+int[] DBQueryMetricUserDistanceBaseTotal() throws SQLException {
+  return DBQueryMetricUserDistanceBaseTotal(true);
+}
+@
+\noindent
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryMetricUserDistanceBaseTotal]]}(1) wraps [[DBQueryMetricUserDistanceBaseTotal]](1).\\
+\bottomrule
+\end{tabular}
+<<Read: queryMetricUserDistanceBaseTotal(1)>>=
+int[] queryMetricUserDistanceBaseTotal(boolean flag_usecache) throws SQLException {
+  int[] output = storage.DBQueryMetricUserDistanceBaseTotal(flag_usecache);
+  return output;
+}
+@ %def queryMetricUserDistanceBaseTotal
+\begin{tabular}{p{\textwidth}}
+\toprule
+\rowcolor{TableTitle}
+Method \textcolor{blue}{[[queryMetricUserDistanceBaseTotal]]}(0) calls [[queryMetricUserDistanceBaseTotal]](1)
+with a default parameter.\\
+\bottomrule
+\end{tabular}
+<<Read: queryMetricUserDistanceBaseTotal(0)>>=
+int[] queryMetricUserDistanceBaseTotal() throws SQLException {
+  return queryMetricUserDistanceBaseTotal(true);
+}
+@
 

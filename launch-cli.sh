@@ -9,7 +9,7 @@ java \
     -Dderby.storage.pageCacheSize=8000 \
     -Djargors.storage.debug=false \
     -Djargors.controller.debug=false \
-    -Djargors.client.debug=true \
+    -Djargors.client.debug=false \
     -Djargors.traffic.debug=false \
     -cp $_CLASSPATH:$DERBY_HOME/lib/derby.jar \
 com.github.jargors.ui.Command $@

@@ -4,7 +4,7 @@
 # library in the jar/ directory.
 
 # Make sure to update this variable for new releases.
-VERSION = 0.9.0
+VERSION = 1.0.0
 
 # Here I am getting the names of all the *.class files to be compiled.
 CLASS1=$(addsuffix .class, $(subst java/sim/,com/github/jargors/sim/,$(basename $(wildcard java/sim/*.java))))

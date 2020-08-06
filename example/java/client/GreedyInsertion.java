@@ -1,15 +1,14 @@
 package com.github.jargors.client;
 import com.github.jargors.sim.*;
 import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
+import java.util.HashMap;
 public class GreedyInsertion extends Client {
-  final int MAX_PROXIMITY = 600;
-  final int MAX_SCHEDULE_LENGTH = 8;
+  final int MAX_PROXIMITY = 1800;
+  public void init() {
+    System.out.printf("Set MAX_PROXIMITY=%d\n", MAX_PROXIMITY);
+  }
   protected void handleRequest(int[] r) throws ClientException, ClientFatalException {
               if (DEBUG) {
                 System.out.printf("got request={ %d, %d, %d, %d, %d, %d, %d }\n",
@@ -40,23 +39,6 @@ public class GreedyInsertion extends Client {
                   System.out.printf("got candidates={ #%d }\n", candidates.size());
                 }
 
-                /*
-                results.clear();
-                for (final int sid : candidates.keySet()) {
-                  final int val = this.communicator.queryServerScheduleRemaining(sid,
-                      this.communicator.retrieveClock()).length / 4;
-                  if (val <= MAX_SCHEDULE_LENGTH)
-                    results.put(sid, val);
-                }
-                candidates = new HashMap<Integer, Integer>(results);
-                if (DEBUG) {
-                  System.out.printf("do map/filter: schedule length\n");
-                }
-                if (DEBUG) {
-                  System.out.printf("got candidates={ #%d }\n", candidates.size());
-                }
-                */
-
                 // Remember minimum schedule, route, cost, server
                 int[] wmin = null;
                 int[] bmin = null;
@@ -66,11 +48,10 @@ public class GreedyInsertion extends Client {
                 while (!candidates.isEmpty()) {
 
                   Entry<Integer, Integer> cand = null;
-                  {
-                    Random random = new Random();
-                    List<Integer> keys = new ArrayList<Integer>(candidates.keySet());
-                    int randomKey = keys.get(random.nextInt(keys.size()));
-                    cand = Map.entry(randomKey, candidates.get(randomKey));
+                  for (final Entry<Integer, Integer> entry : candidates.entrySet()) {
+                    if (cand == null || cand.getValue() > entry.getValue()) {
+                      cand = entry;
+                    }
                   }
                   if (DEBUG) {
                     System.out.printf("got cand={ %d, %d }\n", cand.getKey(), cand.getValue());
@@ -86,11 +67,6 @@ public class GreedyInsertion extends Client {
                       System.out.printf("  { %d, %d, %d, %d }\n",
                           brem[__i], brem[__i+1], brem[__i+2], brem[__i+3]);
                     }
-                  }
-
-                  if (brem.length/4 > MAX_SCHEDULE_LENGTH) {
-                    candidates.remove(sid);
-                    continue;
                   }
 
                   final int[] wact = this.communicator.queryServerRouteActive(sid);
@@ -326,7 +302,6 @@ public class GreedyInsertion extends Client {
                   this.communicator.updateServerService(smin, wmin, bmin,
                       new int[] { rid }, new int[] { });
                 }
-
               } catch (Exception e) {
                 throw new ClientException(e);
               }

@@ -21,8 +21,6 @@ package com.github.jargors.ui;
 
 \subsection{Chunks}
 
-These chunks perform some common ``atomic'' tasks used in multiple methods.
-
 \subsubsection{Open \texttt{conn}}
 <<Open [[conn]]>>=
 Connection conn = DriverManager.getConnection(CONNECTIONS_POOL_URL)
@@ -113,46 +111,101 @@ try (<<Open [[conn]]>>) {
 
 \subsection{Methods: Administration}
 
-\subsubsection{\jsMethodName{JargoInstanceNew}{0}}
-\begin{jsMethod}{Creates a new database instance.}
+\subsubsection{\jsMethodName{JargoInstanceClose}{0}}
+\begin{jsMethod}{Closes the database instance.}
 {None.}
 {Nothing.}
-{Assigns new objects to [[connection_factory]], [[poolableconnection_factory]],
-[[pool]], [[driver]].}
+{Drops the database connection and clears many data structures (see source).}
 {
   \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
-    \jsErr{SQLException}{if database failure is encountered}
-    \jsErr{ClassNotFoundException}{if Derby driver cannot be loaded}
+    \jsErr{SQLException}{code 45000 on success, some other error code otherwise}
   \end{itemize}
 }
 {
   \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
-    \jsWrap{instanceNew}{0}
+    \jsWrap{instanceClose}{0}
   \end{itemize}
 }
 \end{jsMethod}
 
-<<Admin: JargoInstanceNew(0)>>=
-void JargoInstanceNew() throws SQLException {
+<<Admin: JargoInstanceClose(0)>>=
+void JargoInstanceClose() throws SQLException {
   try {
-    this.JargoSetupDriver();
+    DriverManager.getConnection("jdbc:derby:memory:jargo;drop=true");
   } catch (SQLException e) {
-    throw e;
-  } catch (ClassNotFoundException e) {
-    System.err.println("Fatal exception");
-    e.printStackTrace();
-    System.exit(1);
+    if (e.getErrorCode() != 45000) {
+      throw e;
+    } else {
+      this.lu_rstatus.clear();
+      this.lu_vertices.clear();
+      this.lu_edges.clear();
+      this.lu_users.clear();
+      this.lu_lvt.clear();
+      this.count_requests = 0;
+      this.count_assigned = 0;
+      this.sum_distance_unassigned = 0;
+      this.sum_distance_base_requests = 0;
+      this.sum_distance_base_servers = 0;
+      this.distance_servers.clear();
+      this.distance_servers_cruising.clear();
+      this.distance_requests_transit.clear();
+      this.duration_servers.clear();
+      this.duration_servers_cruising.clear();
+      this.duration_requests_transit.clear();
+      this.duration_requests_travel.clear();
+      this.duration_requests_pickup.clear();
+      this.connection_factory = null;
+      this.poolableconnection_factory = null;
+      this.pool = null;
+      this.driver = null;
+    }
   }
 }
-@ %def JargoInstanceNew
+@ %def JargoInstanceClose
 
-<<Admin: instanceNew(0)>>=
-void instanceNew() throws SQLException {
-  this.storage.JargoInstanceNew();
+<<Admin: instanceClose(0)>>=
+void instanceClose() throws SQLException {
+  this.storage.JargoInstanceClose();
 }
-@ %def instanceNew
+@ %def instanceClose
 
-$\square$
+\subsubsection{\jsMethodName{JargoInstanceExport}{1}}
+\begin{jsMethod}{Exports the in-memory database to disk.}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsArg{String}{p}{path to the export.}
+  \end{itemize}
+}
+{Nothing.}
+{Modifies the disk.}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsErr{SQLException}{if database failure is encountered}
+  \end{itemize}
+}
+{
+  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
+    \jsWrap{instanceExport}{1}
+  \end{itemize}
+}
+\end{jsMethod}
+
+<<Admin: JargoInstanceExport(1)>>=
+void JargoInstanceExport(final String p) throws SQLException {
+  try (<<Open [[conn]]>>) {
+    CallableStatement cs = conn.prepareCall("CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE('"+p+"')");
+    cs.execute();
+  } catch (SQLException e) {
+    throw e;
+  }
+}
+@ %def JargoInstanceExport
+
+<<Admin: instanceExport(1)>>=
+void instanceExport(final String p) throws SQLException {
+  this.storage.JargoInstanceExport(p);
+}
+@ %def instanceExport
 
 \subsubsection{\jsMethodName{JargoInstanceInitialize}{0}}
 \begin{jsMethod}{Creates the Jargo schema into the existing instance.}
@@ -289,101 +342,72 @@ void instanceLoad(final String p) throws SQLException {
 }
 @ %def instanceLoad
 
-\subsubsection{\jsMethodName{JargoInstanceExport}{1}}
-\begin{jsMethod}{Exports the in-memory database to disk.}
-{
-  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
-    \jsArg{String}{p}{path to the export.}
-  \end{itemize}
-}
+\subsubsection{\jsMethodName{JargoInstanceNew}{0}}
+\begin{jsMethod}{Creates a new database instance.}
+{None.}
 {Nothing.}
-{Modifies the disk.}
+{Assigns new objects to [[connection_factory]], [[poolableconnection_factory]],
+[[pool]], [[driver]].}
 {
   \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
     \jsErr{SQLException}{if database failure is encountered}
+    \jsErr{ClassNotFoundException}{if Derby driver cannot be loaded}
   \end{itemize}
 }
 {
   \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
-    \jsWrap{instanceExport}{1}
+    \jsWrap{instanceNew}{0}
   \end{itemize}
 }
 \end{jsMethod}
 
-<<Admin: JargoInstanceExport(1)>>=
-void JargoInstanceExport(final String p) throws SQLException {
+<<Admin: JargoInstanceNew(0)>>=
+void JargoInstanceNew() throws SQLException {
+  try {
+    this.JargoSetupDriver();
+  } catch (SQLException e) {
+    throw e;
+  } catch (ClassNotFoundException e) {
+    System.err.println("Fatal exception");
+    e.printStackTrace();
+    System.exit(1);
+  }
+}
+@ %def JargoInstanceNew
+
+<<Admin: instanceNew(0)>>=
+void instanceNew() throws SQLException {
+  this.storage.JargoInstanceNew();
+}
+@ %def instanceNew
+
+$\square$
+
+\subsubsection{\jsMethodName(JargoInstanceReset}{0}}
+DO NOT USE: need to bootstrap the deleted tables with initial server values.
+<<Admin: JargoInstanceReset(0)>>=
+void JargoInstanceReset() throws SQLException {
   try (<<Open [[conn]]>>) {
-    CallableStatement cs = conn.prepareCall("CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE('"+p+"')");
-    cs.execute();
+    Statement stmt = conn.createStatement();
+    stmt.clearBatch();
+    stmt.addBatch("DELETE FROM W");
+    stmt.addBatch("DELETE FROM PD");
+    stmt.addBatch("DELETE FROM CW");
+    stmt.addBatch("DELETE FROM CPD");
+    stmt.addBatch("DELETE FROM CQ");
+    stmt.executeBatch();
+    conn.commit();
   } catch (SQLException e) {
     throw e;
   }
 }
-@ %def JargoInstanceExport
+@
 
-<<Admin: instanceExport(1)>>=
-void instanceExport(final String p) throws SQLException {
-  this.storage.JargoInstanceExport(p);
+<<Admin: instanceReset(0)>>=
+void instanceReset() throws SQLException {
+  this.storage.JargoInstanceReset();
 }
-@ %def instanceExport
-
-\subsubsection{\jsMethodName{JargoInstanceClose}{0}}
-\begin{jsMethod}{Closes the database instance.}
-{None.}
-{Nothing.}
-{Drops the database connection and clears many data structures (see source).}
-{
-  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
-    \jsErr{SQLException}{code 45000 on success, some other error code otherwise}
-  \end{itemize}
-}
-{
-  \begin{itemize}[leftmargin=*,topsep=0pt,itemsep=0pt]
-    \jsWrap{instanceClose}{0}
-  \end{itemize}
-}
-\end{jsMethod}
-
-<<Admin: JargoInstanceClose(0)>>=
-void JargoInstanceClose() throws SQLException {
-  try {
-    DriverManager.getConnection("jdbc:derby:memory:jargo;drop=true");
-  } catch (SQLException e) {
-    if (e.getErrorCode() != 45000) {
-      throw e;
-    } else {
-      this.lu_rstatus.clear();
-      this.lu_vertices.clear();
-      this.lu_edges.clear();
-      this.lu_users.clear();
-      this.lu_lvt.clear();
-      this.count_requests = 0;
-      this.count_assigned = 0;
-      this.sum_distance_unassigned = 0;
-      this.sum_distance_base_requests = 0;
-      this.sum_distance_base_servers = 0;
-      this.distance_servers.clear();
-      this.distance_servers_cruising.clear();
-      this.distance_requests_transit.clear();
-      this.duration_servers.clear();
-      this.duration_servers_cruising.clear();
-      this.duration_requests_transit.clear();
-      this.duration_requests_travel.clear();
-      this.duration_requests_pickup.clear();
-      this.connection_factory = null;
-      this.poolableconnection_factory = null;
-      this.pool = null;
-      this.driver = null;
-    }
-  }
-}
-@ %def JargoInstanceClose
-
-<<Admin: instanceClose(0)>>=
-void instanceClose() throws SQLException {
-  this.storage.JargoInstanceClose();
-}
-@ %def instanceClose
+@ %def instanceReset
 
 \subsubsection{\jsMethodName{JargoCacheRoadNetworkFromDB}{0}}
 \begin{jsMethod}{Loads in-memory vertex and edge caches from the V and E

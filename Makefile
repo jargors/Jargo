@@ -2,8 +2,8 @@
 # 'makesrc.mk', 'makejar.mk', and 'makepdf.mk' for description of build outputs.
 
 # Make sure to update these variable for new releases.
-VERSION=0.9.0
-BUILD_DATE="February\ 20,\ 2020"
+VERSION=1.0.0
+BUILD_DATE="March\ 24,\ 2020"
 
 # Check if the user has the required build tools (poor man's autoconf). The
 # 'command' command should work on all POSIX systems.
@@ -18,7 +18,7 @@ bin_unzip:=$(shell command -v unzip 2> /dev/null)
 bin_noweave:=$(shell command -v noweave 2> /dev/null)
 bin_notangle:=$(shell command -v notangle 2> /dev/null)
 
-.PHONY : _mod all dep src jar pdf purge clean purgedep
+.PHONY : _mod all dep src jar pdf html release purge clean purgedep
 
 # Print the message of the day.
 _mod :
@@ -65,8 +65,10 @@ endif
 	@printf "  make all        build library, documentation, and fetch deps\n"
 	@printf "  make jar        build library only (jar/jargors-$(VERSION).jar)\n"
 	@printf "  make pdf        build documentation only (pdf/jargo.pdf)\n"
+	@printf "  make html       build online documentation only (www/jargo.html)\n"
 	@printf "  make src        build Java sources from Noweb files\n"
 	@printf "  make dep        fetch dependencies from the Internet (dep/)\n"
+	@printf "  make release    make release tar\n"
 	@printf "  make clean      delete jar/, com/, pdf/, build.log, wget.log\n"
 	@printf "  make purge      clean + delete Java sources, doc/body.tex\n"
 	@printf "  make purgedep   delete dependencies (dep/)\n"
@@ -104,11 +106,30 @@ pdf :
 	@make -s -f makepdf.mk
 	@printf "done pdf\n"
 
+# This target produces www/jargo.html
+html :
+	@printf "make html\n"
+	@make -s -f makehtml.mk
+	@printf "done htmt\n"
+
 # This target produces all the Java files in java/ and doc/body.tex.
 src :
 	@printf "make src\n"
 	@make -s -f makesrc.mk
 	@printf "done src\n"
+
+# This target produces the release tar
+release : jar pdf
+	@printf "make release\n"
+	@mkdir -p release
+	@tar cf release/jargors-${VERSION}-bin.tar \
+	 jar/jargors-${VERSION}.jar \
+	 pdf/jargo.pdf \
+	 fxml/Desktop.fxml \
+	 export-chi.sql \
+	 launch-cli.sh \
+	 launch-gui.sh
+	@printf "done release\n"
 
 # Remove jar/, pdf/, com/ (Java bytecode), build.log, and wget.log.
 clean :

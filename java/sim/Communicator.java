@@ -25,6 +25,30 @@ public class Communicator {
            int[] output = this.storage.DBQueryEdge(v1, v2);
            return output;
          }
+  public int[] queryMBR() throws SQLException {
+           int[] output = this.storage.DBQueryMBR();
+           return output;
+         }
+  public int[] queryMetricCountAssigned() {
+           return this.storage.DBQueryMetricCountAssigned();
+         }
+  public int[] queryMetricServerDistanceTotal() throws SQLException {
+           return queryMetricServerDistanceTotal(true);
+         }
+  public int[] queryMetricServerDistanceTotal(boolean flag_usecache) throws SQLException {
+           int[] output = storage.DBQueryMetricServerDistanceTotal(flag_usecache);
+           return output;
+         }
+  public int[] queryMetricServiceRate() throws SQLException {
+           return queryMetricServiceRate(true);
+         }
+  public int[] queryMetricServiceRate(boolean flag_usecache) throws SQLException {
+           int[] output = storage.DBQueryMetricServiceRate(flag_usecache);
+           return output;
+         }
+  public int[] queryMetricRequestDistanceBaseAssigned() {
+           return this.storage.DBQueryMetricRequestDistanceBaseAssigned();
+         }
   public int[] queryServerCapacityViolations(final int sid,
              final int rq, final int tp, final int td) throws SQLException {
            return this.storage.DBQueryServerCapacityViolations(sid, rq, tp, td);
@@ -54,6 +78,10 @@ public class Communicator {
          }
   public int[] queryServerScheduleRemaining(final int sid, final int t) throws SQLException {
            int[] output = this.storage.DBQueryServerScheduleRemaining(sid, t);
+           return output;
+         }
+  public int[] queryServersCount() throws SQLException {
+           int[] output = storage.DBQueryServersCount();
            return output;
          }
   public int[] queryServersLocationsActive(final int t) throws SQLException {
@@ -183,5 +211,8 @@ public class Communicator {
          }
   public void forwardReturnRequest(final int[] r) {
            this.controller.returnRequest(r);
+         }
+  public void kill() {
+           this.controller.kill();
          }
 }
